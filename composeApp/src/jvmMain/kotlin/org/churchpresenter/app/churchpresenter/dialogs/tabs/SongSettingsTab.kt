@@ -419,66 +419,67 @@ private fun LeftColumn(
         }
     }
 
-    SettingRow(stringResource(Res.string.color)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            // Fullscreen
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ColorPickerField(
-                    label = stringResource(Res.string.full_screen),
-                    modifier = Modifier.width(120.dp),
-                    color = settings.songSettings.titleColor,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleColor = it)) } }
-                )
-                TextStyleButtons(
-                    bold = settings.songSettings.titleBold,
-                    italic = settings.songSettings.titleItalic,
-                    underline = settings.songSettings.titleUnderline,
-                    shadow = settings.songSettings.titleShadow,
-                    onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleBold = it)) } },
-                    onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleItalic = it)) } },
-                    onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleUnderline = it)) } },
-                    onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadow = it)) } }
-                )
-            }
-            AnimatedVisibility(visible = settings.songSettings.titleShadow) {
-                ShadowDetailRow(
-                    shadowColor = settings.songSettings.titleShadowColor,
-                    shadowSize = settings.songSettings.titleShadowSize,
-                    shadowOpacity = settings.songSettings.titleShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowOpacity = it)) } }
-                )
-            }
-            // Lower Third
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ColorPickerField(
-                    label = stringResource(Res.string.lower_third_size),
-                    modifier = Modifier.width(120.dp),
-                    color = settings.songSettings.titleLowerThirdColor,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdColor = it)) } }
-                )
-                TextStyleButtons(
-                    bold = settings.songSettings.titleLowerThirdBold,
-                    italic = settings.songSettings.titleLowerThirdItalic,
-                    underline = settings.songSettings.titleLowerThirdUnderline,
-                    shadow = settings.songSettings.titleLowerThirdShadow,
-                    onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdBold = it)) } },
-                    onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdItalic = it)) } },
-                    onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdUnderline = it)) } },
-                    onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadow = it)) } }
-                )
-            }
-            AnimatedVisibility(visible = settings.songSettings.titleLowerThirdShadow) {
-                ShadowDetailRow(
-                    shadowColor = settings.songSettings.titleLowerThirdShadowColor,
-                    shadowSize = settings.songSettings.titleLowerThirdShadowSize,
-                    shadowOpacity = settings.songSettings.titleLowerThirdShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowOpacity = it)) } }
-                )
-            }
+    Column(modifier = Modifier.padding(vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = stringResource(Res.string.color),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ColorPickerField(
+                label = stringResource(Res.string.full_screen),
+                modifier = Modifier.width(120.dp),
+                color = settings.songSettings.titleColor,
+                onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleColor = it)) } }
+            )
+            TextStyleButtons(
+                bold = settings.songSettings.titleBold,
+                italic = settings.songSettings.titleItalic,
+                underline = settings.songSettings.titleUnderline,
+                shadow = settings.songSettings.titleShadow,
+                onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleBold = it)) } },
+                onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleItalic = it)) } },
+                onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleUnderline = it)) } },
+                onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadow = it)) } }
+            )
+        }
+        AnimatedVisibility(visible = settings.songSettings.titleShadow) {
+            ShadowDetailRow(
+                shadowColor = settings.songSettings.titleShadowColor,
+                shadowSize = settings.songSettings.titleShadowSize,
+                shadowOpacity = settings.songSettings.titleShadowOpacity,
+                onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowColor = it)) } },
+                onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowSize = it)) } },
+                onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowOpacity = it)) } }
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ColorPickerField(
+                label = stringResource(Res.string.lower_third_size),
+                modifier = Modifier.width(120.dp),
+                color = settings.songSettings.titleLowerThirdColor,
+                onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdColor = it)) } }
+            )
+            TextStyleButtons(
+                bold = settings.songSettings.titleLowerThirdBold,
+                italic = settings.songSettings.titleLowerThirdItalic,
+                underline = settings.songSettings.titleLowerThirdUnderline,
+                shadow = settings.songSettings.titleLowerThirdShadow,
+                onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdBold = it)) } },
+                onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdItalic = it)) } },
+                onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdUnderline = it)) } },
+                onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadow = it)) } }
+            )
+        }
+        AnimatedVisibility(visible = settings.songSettings.titleLowerThirdShadow) {
+            ShadowDetailRow(
+                shadowColor = settings.songSettings.titleLowerThirdShadowColor,
+                shadowSize = settings.songSettings.titleLowerThirdShadowSize,
+                shadowOpacity = settings.songSettings.titleLowerThirdShadowOpacity,
+                onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowColor = it)) } },
+                onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowSize = it)) } },
+                onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowOpacity = it)) } }
+            )
         }
     }
 
@@ -931,36 +932,33 @@ private fun RightColumn(
         )
     }
 
-    SettingRow(stringResource(Res.string.color)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ColorPickerField(
-                    modifier = Modifier.width(120.dp),
-                    color = settings.songSettings.lyricsColor,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsColor = it)) } }
-                )
-                TextStyleButtons(
-                    bold = settings.songSettings.lyricsBold,
-                    italic = settings.songSettings.lyricsItalic,
-                    underline = settings.songSettings.lyricsUnderline,
-                    shadow = settings.songSettings.lyricsShadow,
-                    onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsBold = it)) } },
-                    onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsItalic = it)) } },
-                    onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsUnderline = it)) } },
-                    onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadow = it)) } }
-                )
-            }
-            AnimatedVisibility(visible = settings.songSettings.lyricsShadow) {
-                ShadowDetailRow(
-                    shadowColor = settings.songSettings.lyricsShadowColor,
-                    shadowSize = settings.songSettings.lyricsShadowSize,
-                    shadowOpacity = settings.songSettings.lyricsShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowOpacity = it)) } }
-                )
-            }
-        }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        ColorPickerField(
+            label = stringResource(Res.string.color),
+            modifier = Modifier.width(120.dp),
+            color = settings.songSettings.lyricsColor,
+            onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsColor = it)) } }
+        )
+        TextStyleButtons(
+            bold = settings.songSettings.lyricsBold,
+            italic = settings.songSettings.lyricsItalic,
+            underline = settings.songSettings.lyricsUnderline,
+            shadow = settings.songSettings.lyricsShadow,
+            onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsBold = it)) } },
+            onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsItalic = it)) } },
+            onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsUnderline = it)) } },
+            onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadow = it)) } }
+        )
+    }
+    AnimatedVisibility(visible = settings.songSettings.lyricsShadow) {
+        ShadowDetailRow(
+            shadowColor = settings.songSettings.lyricsShadowColor,
+            shadowSize = settings.songSettings.lyricsShadowSize,
+            shadowOpacity = settings.songSettings.lyricsShadowOpacity,
+            onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowColor = it)) } },
+            onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowSize = it)) } },
+            onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowOpacity = it)) } }
+        )
     }
 
     } // end fullscreen_display SettingsSection
@@ -1094,36 +1092,33 @@ private fun RightColumn(
         )
     }
 
-    SettingRow(stringResource(Res.string.color)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ColorPickerField(
-                    modifier = Modifier.width(120.dp),
-                    color = settings.songSettings.lyricsLowerThirdColor,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdColor = it)) } }
-                )
-                TextStyleButtons(
-                    bold = settings.songSettings.lyricsLowerThirdBold,
-                    italic = settings.songSettings.lyricsLowerThirdItalic,
-                    underline = settings.songSettings.lyricsLowerThirdUnderline,
-                    shadow = settings.songSettings.lyricsLowerThirdShadow,
-                    onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdBold = it)) } },
-                    onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdItalic = it)) } },
-                    onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdUnderline = it)) } },
-                    onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadow = it)) } }
-                )
-            }
-            AnimatedVisibility(visible = settings.songSettings.lyricsLowerThirdShadow) {
-                ShadowDetailRow(
-                    shadowColor = settings.songSettings.lyricsLowerThirdShadowColor,
-                    shadowSize = settings.songSettings.lyricsLowerThirdShadowSize,
-                    shadowOpacity = settings.songSettings.lyricsLowerThirdShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowOpacity = it)) } }
-                )
-            }
-        }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        ColorPickerField(
+            label = stringResource(Res.string.color),
+            modifier = Modifier.width(120.dp),
+            color = settings.songSettings.lyricsLowerThirdColor,
+            onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdColor = it)) } }
+        )
+        TextStyleButtons(
+            bold = settings.songSettings.lyricsLowerThirdBold,
+            italic = settings.songSettings.lyricsLowerThirdItalic,
+            underline = settings.songSettings.lyricsLowerThirdUnderline,
+            shadow = settings.songSettings.lyricsLowerThirdShadow,
+            onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdBold = it)) } },
+            onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdItalic = it)) } },
+            onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdUnderline = it)) } },
+            onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadow = it)) } }
+        )
+    }
+    AnimatedVisibility(visible = settings.songSettings.lyricsLowerThirdShadow) {
+        ShadowDetailRow(
+            shadowColor = settings.songSettings.lyricsLowerThirdShadowColor,
+            shadowSize = settings.songSettings.lyricsLowerThirdShadowSize,
+            shadowOpacity = settings.songSettings.lyricsLowerThirdShadowOpacity,
+            onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowColor = it)) } },
+            onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowSize = it)) } },
+            onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowOpacity = it)) } }
+        )
     }
     } // end lower_third_display SettingsSection
 }
@@ -1209,44 +1204,40 @@ private fun LookAheadColumn(
             }
         }
     }
-    SettingRow(stringResource(Res.string.font_type)) {
-        FontSettingsDropdown(
-            modifier = Modifier.width(200.dp),
-            value = settings.songSettings.lookAheadFontType,
-            fonts = availableFonts,
-            onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadFontType = it)) } }
+    FontSettingsDropdown(
+        label = stringResource(Res.string.font_type),
+        modifier = Modifier.width(200.dp),
+        value = settings.songSettings.lookAheadFontType,
+        fonts = availableFonts,
+        onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadFontType = it)) } }
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        ColorPickerField(
+            label = stringResource(Res.string.color),
+            modifier = Modifier.width(120.dp),
+            color = settings.songSettings.lookAheadColor,
+            onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadColor = color)) } }
+        )
+        TextStyleButtons(
+            bold = settings.songSettings.lookAheadBold,
+            italic = settings.songSettings.lookAheadItalic,
+            underline = settings.songSettings.lookAheadUnderline,
+            shadow = settings.songSettings.lookAheadShadow,
+            onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadBold = it)) } },
+            onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadItalic = it)) } },
+            onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadUnderline = it)) } },
+            onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadShadow = it)) } }
         )
     }
-    SettingRow(stringResource(Res.string.color)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                ColorPickerField(
-                    modifier = Modifier.width(120.dp),
-                    color = settings.songSettings.lookAheadColor,
-                    onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadColor = color)) } }
-                )
-                TextStyleButtons(
-                    bold = settings.songSettings.lookAheadBold,
-                    italic = settings.songSettings.lookAheadItalic,
-                    underline = settings.songSettings.lookAheadUnderline,
-                    shadow = settings.songSettings.lookAheadShadow,
-                    onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadBold = it)) } },
-                    onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadItalic = it)) } },
-                    onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadUnderline = it)) } },
-                    onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadShadow = it)) } }
-                )
-            }
-            AnimatedVisibility(visible = settings.songSettings.lookAheadShadow) {
-                ShadowDetailRow(
-                    shadowColor = settings.songSettings.lookAheadShadowColor,
-                    shadowSize = settings.songSettings.lookAheadShadowSize,
-                    shadowOpacity = settings.songSettings.lookAheadShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadShadowOpacity = it)) } }
-                )
-            }
-        }
+    AnimatedVisibility(visible = settings.songSettings.lookAheadShadow) {
+        ShadowDetailRow(
+            shadowColor = settings.songSettings.lookAheadShadowColor,
+            shadowSize = settings.songSettings.lookAheadShadowSize,
+            shadowOpacity = settings.songSettings.lookAheadShadowOpacity,
+            onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadShadowColor = it)) } },
+            onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadShadowSize = it)) } },
+            onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadShadowOpacity = it)) } }
+        )
     }
 
     } // end look_ahead_fullscreen SettingsSection
@@ -1275,44 +1266,40 @@ private fun LookAheadColumn(
             }
         }
     }
-    SettingRow(stringResource(Res.string.font_type)) {
-        FontSettingsDropdown(
-            modifier = Modifier.width(200.dp),
-            value = settings.songSettings.lookAheadNextFontType,
-            fonts = availableFonts,
-            onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextFontType = it)) } }
+    FontSettingsDropdown(
+        label = stringResource(Res.string.font_type),
+        modifier = Modifier.width(200.dp),
+        value = settings.songSettings.lookAheadNextFontType,
+        fonts = availableFonts,
+        onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextFontType = it)) } }
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        ColorPickerField(
+            label = stringResource(Res.string.color),
+            modifier = Modifier.width(120.dp),
+            color = settings.songSettings.lookAheadNextColor,
+            onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextColor = color)) } }
+        )
+        TextStyleButtons(
+            bold = settings.songSettings.lookAheadNextBold,
+            italic = settings.songSettings.lookAheadNextItalic,
+            underline = settings.songSettings.lookAheadNextUnderline,
+            shadow = settings.songSettings.lookAheadNextShadow,
+            onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextBold = it)) } },
+            onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextItalic = it)) } },
+            onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextUnderline = it)) } },
+            onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextShadow = it)) } }
         )
     }
-    SettingRow(stringResource(Res.string.color)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                ColorPickerField(
-                    modifier = Modifier.width(120.dp),
-                    color = settings.songSettings.lookAheadNextColor,
-                    onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextColor = color)) } }
-                )
-                TextStyleButtons(
-                    bold = settings.songSettings.lookAheadNextBold,
-                    italic = settings.songSettings.lookAheadNextItalic,
-                    underline = settings.songSettings.lookAheadNextUnderline,
-                    shadow = settings.songSettings.lookAheadNextShadow,
-                    onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextBold = it)) } },
-                    onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextItalic = it)) } },
-                    onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextUnderline = it)) } },
-                    onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextShadow = it)) } }
-                )
-            }
-            AnimatedVisibility(visible = settings.songSettings.lookAheadNextShadow) {
-                ShadowDetailRow(
-                    shadowColor = settings.songSettings.lookAheadNextShadowColor,
-                    shadowSize = settings.songSettings.lookAheadNextShadowSize,
-                    shadowOpacity = settings.songSettings.lookAheadNextShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextShadowOpacity = it)) } }
-                )
-            }
-        }
+    AnimatedVisibility(visible = settings.songSettings.lookAheadNextShadow) {
+        ShadowDetailRow(
+            shadowColor = settings.songSettings.lookAheadNextShadowColor,
+            shadowSize = settings.songSettings.lookAheadNextShadowSize,
+            shadowOpacity = settings.songSettings.lookAheadNextShadowOpacity,
+            onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextShadowColor = it)) } },
+            onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextShadowSize = it)) } },
+            onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextShadowOpacity = it)) } }
+        )
     }
 
     } // end look_ahead_next_fullscreen SettingsSection
@@ -1391,44 +1378,40 @@ private fun LookAheadColumn(
             }
         }
     }
-    SettingRow(stringResource(Res.string.font_type)) {
-        FontSettingsDropdown(
-            modifier = Modifier.width(200.dp),
-            value = settings.songSettings.lowerThirdLookAheadFontType,
-            fonts = availableFonts,
-            onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadFontType = it)) } }
+    FontSettingsDropdown(
+        label = stringResource(Res.string.font_type),
+        modifier = Modifier.width(200.dp),
+        value = settings.songSettings.lowerThirdLookAheadFontType,
+        fonts = availableFonts,
+        onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadFontType = it)) } }
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        ColorPickerField(
+            label = stringResource(Res.string.color),
+            modifier = Modifier.width(120.dp),
+            color = settings.songSettings.lowerThirdLookAheadColor,
+            onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadColor = color)) } }
+        )
+        TextStyleButtons(
+            bold = settings.songSettings.lowerThirdLookAheadBold,
+            italic = settings.songSettings.lowerThirdLookAheadItalic,
+            underline = settings.songSettings.lowerThirdLookAheadUnderline,
+            shadow = settings.songSettings.lowerThirdLookAheadShadow,
+            onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadBold = it)) } },
+            onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadItalic = it)) } },
+            onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadUnderline = it)) } },
+            onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadShadow = it)) } }
         )
     }
-    SettingRow(stringResource(Res.string.color)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                ColorPickerField(
-                    modifier = Modifier.width(120.dp),
-                    color = settings.songSettings.lowerThirdLookAheadColor,
-                    onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadColor = color)) } }
-                )
-                TextStyleButtons(
-                    bold = settings.songSettings.lowerThirdLookAheadBold,
-                    italic = settings.songSettings.lowerThirdLookAheadItalic,
-                    underline = settings.songSettings.lowerThirdLookAheadUnderline,
-                    shadow = settings.songSettings.lowerThirdLookAheadShadow,
-                    onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadBold = it)) } },
-                    onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadItalic = it)) } },
-                    onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadUnderline = it)) } },
-                    onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadShadow = it)) } }
-                )
-            }
-            AnimatedVisibility(visible = settings.songSettings.lowerThirdLookAheadShadow) {
-                ShadowDetailRow(
-                    shadowColor = settings.songSettings.lowerThirdLookAheadShadowColor,
-                    shadowSize = settings.songSettings.lowerThirdLookAheadShadowSize,
-                    shadowOpacity = settings.songSettings.lowerThirdLookAheadShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadShadowOpacity = it)) } }
-                )
-            }
-        }
+    AnimatedVisibility(visible = settings.songSettings.lowerThirdLookAheadShadow) {
+        ShadowDetailRow(
+            shadowColor = settings.songSettings.lowerThirdLookAheadShadowColor,
+            shadowSize = settings.songSettings.lowerThirdLookAheadShadowSize,
+            shadowOpacity = settings.songSettings.lowerThirdLookAheadShadowOpacity,
+            onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadShadowColor = it)) } },
+            onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadShadowSize = it)) } },
+            onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadShadowOpacity = it)) } }
+        )
     }
 
     } // end look_ahead_lower_third SettingsSection
@@ -1457,44 +1440,40 @@ private fun LookAheadColumn(
             }
         }
     }
-    SettingRow(stringResource(Res.string.font_type)) {
-        FontSettingsDropdown(
-            modifier = Modifier.width(200.dp),
-            value = settings.songSettings.lowerThirdLookAheadNextFontType,
-            fonts = availableFonts,
-            onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextFontType = it)) } }
+    FontSettingsDropdown(
+        label = stringResource(Res.string.font_type),
+        modifier = Modifier.width(200.dp),
+        value = settings.songSettings.lowerThirdLookAheadNextFontType,
+        fonts = availableFonts,
+        onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextFontType = it)) } }
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        ColorPickerField(
+            label = stringResource(Res.string.color),
+            modifier = Modifier.width(120.dp),
+            color = settings.songSettings.lowerThirdLookAheadNextColor,
+            onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextColor = color)) } }
+        )
+        TextStyleButtons(
+            bold = settings.songSettings.lowerThirdLookAheadNextBold,
+            italic = settings.songSettings.lowerThirdLookAheadNextItalic,
+            underline = settings.songSettings.lowerThirdLookAheadNextUnderline,
+            shadow = settings.songSettings.lowerThirdLookAheadNextShadow,
+            onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextBold = it)) } },
+            onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextItalic = it)) } },
+            onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextUnderline = it)) } },
+            onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextShadow = it)) } }
         )
     }
-    SettingRow(stringResource(Res.string.color)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                ColorPickerField(
-                    modifier = Modifier.width(120.dp),
-                    color = settings.songSettings.lowerThirdLookAheadNextColor,
-                    onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextColor = color)) } }
-                )
-                TextStyleButtons(
-                    bold = settings.songSettings.lowerThirdLookAheadNextBold,
-                    italic = settings.songSettings.lowerThirdLookAheadNextItalic,
-                    underline = settings.songSettings.lowerThirdLookAheadNextUnderline,
-                    shadow = settings.songSettings.lowerThirdLookAheadNextShadow,
-                    onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextBold = it)) } },
-                    onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextItalic = it)) } },
-                    onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextUnderline = it)) } },
-                    onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextShadow = it)) } }
-                )
-            }
-            AnimatedVisibility(visible = settings.songSettings.lowerThirdLookAheadNextShadow) {
-                ShadowDetailRow(
-                    shadowColor = settings.songSettings.lowerThirdLookAheadNextShadowColor,
-                    shadowSize = settings.songSettings.lowerThirdLookAheadNextShadowSize,
-                    shadowOpacity = settings.songSettings.lowerThirdLookAheadNextShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextShadowOpacity = it)) } }
-                )
-            }
-        }
+    AnimatedVisibility(visible = settings.songSettings.lowerThirdLookAheadNextShadow) {
+        ShadowDetailRow(
+            shadowColor = settings.songSettings.lowerThirdLookAheadNextShadowColor,
+            shadowSize = settings.songSettings.lowerThirdLookAheadNextShadowSize,
+            shadowOpacity = settings.songSettings.lowerThirdLookAheadNextShadowOpacity,
+            onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextShadowColor = it)) } },
+            onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextShadowSize = it)) } },
+            onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextShadowOpacity = it)) } }
+        )
     }
     } // end look_ahead_next_lower_third SettingsSection
 }
