@@ -419,6 +419,8 @@ private fun LeftColumn(
         }
     }
 
+    Spacer(Modifier.height(4.dp))
+
     Column(modifier = Modifier.padding(vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = stringResource(Res.string.color),
@@ -913,7 +915,6 @@ private fun RightColumn(
 
     SettingRow(stringResource(Res.string.font_type)) {
         FontSettingsDropdown(
-            modifier = Modifier.width(200.dp),
             value = settings.songSettings.lyricsFontType,
             fonts = availableFonts,
             onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontType = it)) } }
@@ -1073,7 +1074,6 @@ private fun RightColumn(
 
     SettingRow(stringResource(Res.string.font_type)) {
         FontSettingsDropdown(
-            modifier = Modifier.width(200.dp),
             value = settings.songSettings.lyricsLowerThirdFontType,
             fonts = availableFonts,
             onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontType = it)) } }
@@ -1206,11 +1206,11 @@ private fun LookAheadColumn(
     }
     FontSettingsDropdown(
         label = stringResource(Res.string.font_type),
-        modifier = Modifier.width(200.dp),
         value = settings.songSettings.lookAheadFontType,
         fonts = availableFonts,
         onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadFontType = it)) } }
     )
+    Spacer(Modifier.height(4.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         ColorPickerField(
             label = stringResource(Res.string.color),
@@ -1268,11 +1268,11 @@ private fun LookAheadColumn(
     }
     FontSettingsDropdown(
         label = stringResource(Res.string.font_type),
-        modifier = Modifier.width(200.dp),
         value = settings.songSettings.lookAheadNextFontType,
         fonts = availableFonts,
         onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextFontType = it)) } }
     )
+    Spacer(Modifier.height(4.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         ColorPickerField(
             label = stringResource(Res.string.color),
@@ -1380,11 +1380,11 @@ private fun LookAheadColumn(
     }
     FontSettingsDropdown(
         label = stringResource(Res.string.font_type),
-        modifier = Modifier.width(200.dp),
         value = settings.songSettings.lowerThirdLookAheadFontType,
         fonts = availableFonts,
         onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadFontType = it)) } }
     )
+    Spacer(Modifier.height(4.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         ColorPickerField(
             label = stringResource(Res.string.color),
@@ -1442,11 +1442,11 @@ private fun LookAheadColumn(
     }
     FontSettingsDropdown(
         label = stringResource(Res.string.font_type),
-        modifier = Modifier.width(200.dp),
         value = settings.songSettings.lowerThirdLookAheadNextFontType,
         fonts = availableFonts,
         onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextFontType = it)) } }
     )
+    Spacer(Modifier.height(4.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         ColorPickerField(
             label = stringResource(Res.string.color),
