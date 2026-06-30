@@ -81,7 +81,7 @@ fun DictionarySettingsTab(
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -89,7 +89,7 @@ fun DictionarySettingsTab(
                         color = ds.wordColor,
                         onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordColor = it)) } },
                         label = stringResource(Res.string.color),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.widthIn(max = 150.dp)
                     )
                     TextStyleButtons(
                         bold = ds.wordBold,
@@ -113,12 +113,12 @@ fun DictionarySettingsTab(
                     )
                 }
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     FontSettingsDropdown(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier,
                         label = stringResource(Res.string.font_type),
                         value = ds.wordFontType,
                         fonts = availableFonts,
@@ -144,7 +144,7 @@ fun DictionarySettingsTab(
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -152,7 +152,7 @@ fun DictionarySettingsTab(
                         color = ds.definitionColor,
                         onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(definitionColor = it)) } },
                         label = stringResource(Res.string.color),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.widthIn(max = 150.dp)
                     )
                     NumberSettingsTextField(
                         label = stringResource(Res.string.font_size),
@@ -162,6 +162,35 @@ fun DictionarySettingsTab(
                     )
                 }
             } // end Definition SettingsSection
+
+            // Card Background
+            SettingsSection(title = stringResource(Res.string.dictionary_settings_card_background)) {
+                ColorPickerField(
+                    color = ds.cardBackgroundColor,
+                    onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundColor = it)) } },
+                    label = stringResource(Res.string.color),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                SettingRow(stringResource(Res.string.dictionary_settings_opacity)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Slider(
+                            value = ds.cardBackgroundOpacity,
+                            onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundOpacity = it)) } },
+                            valueRange = 0f..1f,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "${(ds.cardBackgroundOpacity * 100).toInt()}%",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(36.dp)
+                        )
+                    }
+                }
+            }
             } // end left column
 
             // Right column: Reference + KJV + Card Background + Transitions
@@ -179,7 +208,7 @@ fun DictionarySettingsTab(
                     }
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -187,7 +216,7 @@ fun DictionarySettingsTab(
                             color = ds.referenceColor,
                             onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceColor = it)) } },
                             label = stringResource(Res.string.color),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.widthIn(max = 150.dp)
                         )
                         TextStyleButtons(
                             bold = false,
@@ -211,12 +240,12 @@ fun DictionarySettingsTab(
                         )
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         FontSettingsDropdown(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier,
                             label = stringResource(Res.string.font_type),
                             value = ds.referenceFontType,
                             fonts = availableFonts,
@@ -241,7 +270,7 @@ fun DictionarySettingsTab(
                     }
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -249,7 +278,7 @@ fun DictionarySettingsTab(
                             color = ds.kjvUsageColor,
                             onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageColor = it)) } },
                             label = stringResource(Res.string.color),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.widthIn(max = 150.dp)
                         )
                         NumberSettingsTextField(
                             label = stringResource(Res.string.font_size),
@@ -257,35 +286,6 @@ fun DictionarySettingsTab(
                             range = 8..80,
                             onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageFontSize = it)) } }
                         )
-                    }
-                }
-
-                // Card Background
-                SettingsSection(title = stringResource(Res.string.dictionary_settings_card_background)) {
-                    ColorPickerField(
-                        color = ds.cardBackgroundColor,
-                        onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundColor = it)) } },
-                        label = stringResource(Res.string.color),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    SettingRow(stringResource(Res.string.dictionary_settings_opacity)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Slider(
-                                value = ds.cardBackgroundOpacity,
-                                onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundOpacity = it)) } },
-                                valueRange = 0f..1f,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                text = "${(ds.cardBackgroundOpacity * 100).toInt()}%",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.width(36.dp)
-                            )
-                        }
                     }
                 }
 
