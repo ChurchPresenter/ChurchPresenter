@@ -1,17 +1,23 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
@@ -31,12 +38,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +53,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -63,6 +73,10 @@ import churchpresenter.composeapp.generated.resources.lyrics_format_help
 import churchpresenter.composeapp.generated.resources.new_song
 import churchpresenter.composeapp.generated.resources.save
 import churchpresenter.composeapp.generated.resources.secondary_lyrics
+import churchpresenter.composeapp.generated.resources.secondary_title
+import churchpresenter.composeapp.generated.resources.song_book
+import churchpresenter.composeapp.generated.resources.song_number
+import churchpresenter.composeapp.generated.resources.song_title
 import churchpresenter.composeapp.generated.resources.tune
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
@@ -125,12 +139,41 @@ fun EditSongDialog(
                 Column(
                     modifier = Modifier.fillMaxSize().padding(16.dp)
                 ) {
-                    // Scrollable content area
+                    // Content area: fixed-height fields scroll if needed, lyrics fill the rest
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .verticalScroll(rememberScrollState())
                             .padding(bottom = 16.dp)
+                    ) {
+                    val separatorColor = MaterialTheme.colorScheme.primary
+                    val separatorBg = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                    val lyricsHighlightTransformation = remember(separatorColor, separatorBg) {
+                        VisualTransformation { text ->
+                            val annotated = buildAnnotatedString {
+                                val lines = text.text.split("\n")
+                                lines.forEachIndexed { i, line ->
+                                    val trimmed = line.trim()
+                                    if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+                                        pushStyle(
+                                            SpanStyle(
+                                                color = separatorColor,
+                                                background = separatorBg,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        )
+                                        append(line)
+                                        pop()
+                                    } else {
+                                        append(line)
+                                    }
+                                    if (i < lines.size - 1) append("\n")
+                                }
+                            }
+                            TransformedText(annotated, OffsetMapping.Identity)
+                        }
+                    }
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState())
                     ) {
                         // First row: Song Number, Songbook, Tune
                         Row(
@@ -146,6 +189,8 @@ fun EditSongDialog(
                                     }
                                 },
                                 modifier = Modifier.weight(0.2f),
+                                label = stringResource(Res.string.song_number),
+                                fillWidth = true,
                                 singleLine = true,
                             )
 
@@ -157,6 +202,8 @@ fun EditSongDialog(
                                     value = editedSongbook,
                                     onValueChange = { editedSongbook = it },
                                     modifier = Modifier.weight(0.5f),
+                                    label = stringResource(Res.string.song_book),
+                                    fillWidth = true,
                                     singleLine = true,
                                     trailingIcon = {
                                         IconButton(
@@ -182,6 +229,8 @@ fun EditSongDialog(
                                         readOnly = true,
                                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = songbookExpanded) },
                                         modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
+                                        label = stringResource(Res.string.song_book),
+                                        fillWidth = true,
                                         singleLine = true,
                                     )
                                     ExposedDropdownMenu(
@@ -214,6 +263,8 @@ fun EditSongDialog(
                                 value = editedTune,
                                 onValueChange = { editedTune = it },
                                 modifier = Modifier.weight(0.3f),
+                                label = stringResource(Res.string.tune),
+                                fillWidth = true,
                                 singleLine = true,
                             )
                         }
@@ -230,6 +281,8 @@ fun EditSongDialog(
                                     titleManuallyEdited = it.isNotBlank()
                                 },
                                 modifier = Modifier.weight(0.5f),
+                                label = stringResource(Res.string.song_title),
+                                fillWidth = true,
                                 singleLine = true,
                             )
 
@@ -237,6 +290,8 @@ fun EditSongDialog(
                                 value = editedSecondaryTitle,
                                 onValueChange = { editedSecondaryTitle = it },
                                 modifier = Modifier.weight(0.5f),
+                                label = stringResource(Res.string.secondary_title),
+                                fillWidth = true,
                                 singleLine = true,
                             )
                         }
@@ -259,6 +314,8 @@ fun EditSongDialog(
                                 value = editedAuthor,
                                 onValueChange = { editedAuthor = it },
                                 modifier = Modifier.weight(0.5f),
+                                label = stringResource(Res.string.author),
+                                fillWidth = true,
                                 singleLine = true,
                             )
 
@@ -266,38 +323,13 @@ fun EditSongDialog(
                                 value = editedComposer,
                                 onValueChange = { editedComposer = it },
                                 modifier = Modifier.weight(0.5f),
+                                label = stringResource(Res.string.composer),
+                                fillWidth = true,
                                 singleLine = true,
                             )
                         }
 
                         // Lyrics section - side by side
-                        val separatorColor = MaterialTheme.colorScheme.primary
-                        val separatorBg = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-                        val lyricsHighlightTransformation = remember(separatorColor, separatorBg) {
-                            VisualTransformation { text ->
-                                val annotated = buildAnnotatedString {
-                                    val lines = text.text.split("\n")
-                                    lines.forEachIndexed { i, line ->
-                                        val trimmed = line.trim()
-                                        if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
-                                            pushStyle(
-                                                SpanStyle(
-                                                    color = separatorColor,
-                                                    background = separatorBg,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            )
-                                            append(line)
-                                            pop()
-                                        } else {
-                                            append(line)
-                                        }
-                                        if (i < lines.size - 1) append("\n")
-                                    }
-                                }
-                                TransformedText(annotated, OffsetMapping.Identity)
-                            }
-                        }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -313,45 +345,46 @@ fun EditSongDialog(
                                 modifier = Modifier.weight(1f).padding(bottom = 4.dp)
                             )
                         }
-                        Row(
-                            modifier = Modifier.fillMaxWidth().weight(1f),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            SettingsTextField(
-                                value = editedLyrics,
-                                onValueChange = { newLyrics ->
-                                    editedLyrics = newLyrics
-                                    // Auto-fill title from first non-header, non-blank lyric line
-                                    if (isNewSong && !titleManuallyEdited) {
-                                        val firstContentLine = newLyrics.lines().firstOrNull { line ->
-                                            val trimmed = line.trim()
-                                            trimmed.isNotBlank() && !trimmed.startsWith("[")
-                                        }?.trim() ?: ""
-                                        editedTitle = firstContentLine
-                                    }
-                                },
-                                modifier = Modifier.weight(1f).heightIn(min = 400.dp),
-                                placeholder = { Text(stringResource(Res.string.enter_lyrics_here)) },
-                                maxLines = Int.MAX_VALUE,
-                                visualTransformation = lyricsHighlightTransformation
-                            )
-                            SettingsTextField(
-                                value = editedSecondaryLyrics,
-                                onValueChange = { editedSecondaryLyrics = it },
-                                modifier = Modifier.weight(1f).heightIn(min = 400.dp),
-                                placeholder = { Text(stringResource(Res.string.enter_secondary_lyrics_here)) },
-                                maxLines = Int.MAX_VALUE,
-                                visualTransformation = lyricsHighlightTransformation
-                            )
-                        }
+                    } // end top fields (scrollable if window is shrunk)
 
-        // Help text
-                        Text(
-                            text = stringResource(Res.string.lyrics_format_help),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 4.dp)
+                    // Lyrics fields fill the rest of the available height
+                    Row(
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        LyricsTextField(
+                            value = editedLyrics,
+                            onValueChange = { newLyrics ->
+                                editedLyrics = newLyrics
+                                // Auto-fill title from first non-header, non-blank lyric line
+                                if (isNewSong && !titleManuallyEdited) {
+                                    val firstContentLine = newLyrics.lines().firstOrNull { line ->
+                                        val trimmed = line.trim()
+                                        trimmed.isNotBlank() && !trimmed.startsWith("[")
+                                    }?.trim() ?: ""
+                                    editedTitle = firstContentLine
+                                }
+                            },
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                            placeholder = { Text(stringResource(Res.string.enter_lyrics_here)) },
+                            visualTransformation = lyricsHighlightTransformation
                         )
+                        LyricsTextField(
+                            value = editedSecondaryLyrics,
+                            onValueChange = { editedSecondaryLyrics = it },
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                            placeholder = { Text(stringResource(Res.string.enter_secondary_lyrics_here)) },
+                            visualTransformation = lyricsHighlightTransformation
+                        )
+                    }
+
+                    // Help text
+                    Text(
+                        text = stringResource(Res.string.lyrics_format_help),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                     }
 
                     // Action buttons
@@ -398,6 +431,66 @@ fun EditSongDialog(
                 }
             }
         }
+    }
+}
+
+private val LyricsFieldShape = RoundedCornerShape(6.dp)
+
+/**
+ * Dedicated multi-line, scrollable lyrics editor — kept separate from SettingsTextField
+ * (which is tuned for compact single-line settings rows) so it can grow to fill the
+ * available height with its own scrollbar and a larger, more readable font.
+ */
+@Composable
+private fun LyricsTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: @Composable (() -> Unit)? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+) {
+    val scrollState = rememberScrollState()
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Box(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh, LyricsFieldShape)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, LyricsFieldShape)
+    ) {
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(start = 9.dp, top = 8.dp, bottom = 8.dp, end = 16.dp),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            ),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            visualTransformation = visualTransformation,
+            interactionSource = interactionSource,
+            decorationBox = { innerTextField ->
+                Box {
+                    if (placeholder != null && value.isEmpty()) {
+                        CompositionLocalProvider(
+                            LocalContentColor provides MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        ) {
+                            placeholder()
+                        }
+                    }
+                    innerTextField()
+                }
+            }
+        )
+        VerticalScrollbar(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(vertical = 4.dp, horizontal = 2.dp),
+            adapter = rememberScrollbarAdapter(scrollState)
+        )
     }
 }
 

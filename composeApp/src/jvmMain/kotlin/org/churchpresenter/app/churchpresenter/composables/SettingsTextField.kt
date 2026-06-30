@@ -51,6 +51,7 @@ fun SettingsTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    fillWidth: Boolean = false,
 ) {
     val hasLabel = label.isNotEmpty()
     val borderColor = if (isError) MaterialTheme.colorScheme.error
@@ -61,12 +62,14 @@ fun SettingsTextField(
 
     Column(modifier = modifier) {
         if (hasLabel) {
-            // Labeled: inner Column self-sizes to label text width via IntrinsicSize.Max.
-            // This lets callers pass Modifier (no width) and get wrap-content behaviour.
+            // Labeled: by default the inner Column self-sizes to label text width via
+            // IntrinsicSize.Max, so callers passing a bare Modifier get wrap-content
+            // behaviour. Pass fillWidth = true when the caller's modifier (e.g. weight()
+            // inside a Row) should determine the width instead.
             Column(
                 modifier = Modifier
                     .widthIn(min = 60.dp)
-                    .width(IntrinsicSize.Max)
+                    .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(IntrinsicSize.Max))
                     .height(42.dp)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh, FieldShape)
                     .border(1.dp, borderColor, FieldShape)
