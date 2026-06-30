@@ -174,6 +174,7 @@ import churchpresenter.composeapp.generated.resources.swap_bibles_hint
 import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
+import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.composables.SelectionListWithIndex
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
@@ -875,7 +876,10 @@ fun BibleTab(
                     modifier = Modifier.fillMaxWidth()
                         .height(detRowHeight)
                         .padding(horizontal = 6.dp)
-                        .clickable { viewModel.applyDetectedReference(ref); focusRequester.requestFocus() }
+                        .initialPassCombinedClickable(
+                            onClick = { viewModel.applyDetectedReference(ref); focusRequester.requestFocus() },
+                            onDoubleClick = { viewModel.applyDetectedReference(ref); goLiveWithHistory(); focusRequester.requestFocus() }
+                        )
                 ) {
                     // Fixed-width icon column (source markers + transcription/translation markers) so
                     // every reference + verse text lines up vertically, regardless of marker count.
@@ -1575,10 +1579,17 @@ fun BibleTab(
                                                     if (idx % 2 == 0) MaterialTheme.colorScheme.surface
                                                     else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                                 )
-                                                .initialPassClickable {
-                                                    viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
-                                                    focusRequester.requestFocus()
-                                                }
+                                                .initialPassCombinedClickable(
+                                                    onClick = {
+                                                        viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
+                                                        focusRequester.requestFocus()
+                                                    },
+                                                    onDoubleClick = {
+                                                        viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
+                                                        goLiveWithHistory()
+                                                        focusRequester.requestFocus()
+                                                    }
+                                                )
                                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                                             overflow = TextOverflow.Ellipsis
                                         )
