@@ -36,8 +36,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bottom
@@ -131,42 +134,56 @@ fun LowerThirdSettingsTab(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
+            val listAccentColor = MaterialTheme.colorScheme.primary
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
+                    .height(250.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(8.dp)
                 ) {
                     if (lottieFilesInDirectory.isEmpty()) {
-                        Text(
-                            text = if (lottieFolder.isEmpty()) noDirectorySelectedStr else noLottieFilesStr,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Box(
+                            modifier = Modifier.fillMaxWidth().height(250.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (lottieFolder.isEmpty()) noDirectorySelectedStr else noLottieFilesStr,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     } else {
                         lottieFilesInDirectory.forEach { fileName ->
                             val isSelected = fileName == selectedFile
-                            Text(
-                                text = fileName,
-                                style = MaterialTheme.typography.bodySmall,
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(
-                                        if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                                        else Color.Transparent
+                                        if (isSelected) MaterialTheme.colorScheme.surfaceVariant
+                                        else MaterialTheme.colorScheme.surface
                                     )
+                                    .drawBehind {
+                                        if (isSelected) drawRect(color = listAccentColor, size = Size(4f, size.height))
+                                    }
                                     .clickable { viewModel.selectFile(fileName) }
-                                    .padding(vertical = 4.dp, horizontal = 8.dp),
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                        else MaterialTheme.colorScheme.onSurface
-                            )
+                                    .padding(vertical = 8.dp, horizontal = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = fileName,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
+                                            else MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }
                 }
