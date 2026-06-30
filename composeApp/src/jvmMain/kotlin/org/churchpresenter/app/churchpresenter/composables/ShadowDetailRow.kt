@@ -41,14 +41,12 @@ fun ShadowDetailRow(
         )
         NumberSettingsTextField(
             label = stringResource(Res.string.shadow_size),
-            wrapContent = true,
             initialText = shadowSize,
             onValueChange = onSizeChange,
             range = 10..500
         )
         NumberSettingsTextField(
             label = stringResource(Res.string.shadow_opacity),
-            wrapContent = true,
             initialText = shadowOpacity,
             onValueChange = onOpacityChange,
             range = 10..100

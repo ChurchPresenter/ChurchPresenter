@@ -121,25 +121,26 @@ fun DropdownSelector(
         Row(
             modifier = Modifier
                 .heightIn(min = 42.dp)
-                .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded.value = true }
                 .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-                Text(
-                    text = label.uppercase(),
-                    fontSize = 10.sp,
-                    lineHeight = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(1.dp))
+            Column(verticalArrangement = Arrangement.Center) {
+                if (label.isNotEmpty()) {
+                    Text(
+                        text = label.uppercase(),
+                        fontSize = 10.sp,
+                        lineHeight = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(1.dp))
+                }
                 Text(
                     text = selected,
                     style = MaterialTheme.typography.bodySmall.copy(
@@ -148,6 +149,7 @@ fun DropdownSelector(
                         fontWeight = FontWeight.Medium
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
                 )
             }
             Spacer(Modifier.width(4.dp))
@@ -165,7 +167,7 @@ fun DropdownSelector(
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(item, style = MaterialTheme.typography.bodyMedium) },
+                    text = { Text(item, style = MaterialTheme.typography.bodyMedium, maxLines = 1) },
                     onClick = {
                         onSelectedChange(item)
                         expanded.value = false

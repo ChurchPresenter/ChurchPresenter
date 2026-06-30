@@ -557,7 +557,6 @@ fun PresentationTab(
                 else -> crossfadeText
             }
             DropdownSelector(
-                modifier = Modifier.width(120.dp),
                 label = stringResource(Res.string.animation_type),
                 items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
                 selected = currentAnimationLabel,

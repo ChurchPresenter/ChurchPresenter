@@ -953,6 +953,10 @@ fun AnnouncementsTab(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                         DropdownSelector(
                             label = stringResource(Res.string.announcement_animation),
                             items = animItems,
@@ -968,8 +972,7 @@ fun AnnouncementsTab(
                                 }
                                 viewModel.setAnimationType(key)
                                 viewModel.saveToSettings(onSettingsChange)
-                            },
-                            modifier = Modifier.width(160.dp)
+                            }
                         )
                         TooltipArea(
                             tooltip = {
@@ -993,6 +996,7 @@ fun AnnouncementsTab(
                                 }
                             )
                         }
+                        } // end inner Row (animation + loop count)
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 "${"%.1f".format((sliderSum - durationMs) / 1000f)}s",

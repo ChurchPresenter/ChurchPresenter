@@ -46,9 +46,8 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun NumberSettingsTextField(
-    modifier: Modifier = Modifier.width(100.dp),
+    modifier: Modifier = Modifier.widthIn(min = 60.dp).width(IntrinsicSize.Max),
     label: String = "",
-    wrapContent: Boolean = false,
     initialText: Int = 8,
     range: IntRange,
     onValueChange: (Int) -> Unit,
@@ -57,7 +56,7 @@ fun NumberSettingsTextField(
     var isError by remember { mutableStateOf(false) }
 
     Row(
-        modifier = (if (wrapContent) Modifier.widthIn(min = 60.dp).width(IntrinsicSize.Max) else modifier)
+        modifier = modifier
             .height(42.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
             .border(
@@ -68,8 +67,7 @@ fun NumberSettingsTextField(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
-            modifier = (if (wrapContent) Modifier else Modifier.weight(1f))
-                .padding(start = 11.dp, top = 2.dp, bottom = 0.dp),
+            modifier = Modifier.padding(start = 11.dp, top = 2.dp, bottom = 0.dp),
             verticalArrangement = Arrangement.Center
         ) {
             if (label.isNotEmpty()) {

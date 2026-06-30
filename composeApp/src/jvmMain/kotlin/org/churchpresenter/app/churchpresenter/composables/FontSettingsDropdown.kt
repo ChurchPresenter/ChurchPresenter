@@ -63,8 +63,8 @@ fun FontSettingsDropdown(
             .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
         contentAlignment = Alignment.CenterStart
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(verticalArrangement = Arrangement.Center) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                 if (label.isNotEmpty()) {
                     Text(
                         text = label.uppercase(),
