@@ -22,7 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,11 +65,14 @@ import churchpresenter.composeapp.generated.resources.atem_status_connecting
 import churchpresenter.composeapp.generated.resources.atem_status_disconnected
 import churchpresenter.composeapp.generated.resources.atem_status_error
 import churchpresenter.composeapp.generated.resources.atem_test_connection
+import churchpresenter.composeapp.generated.resources.atem_section_connection
 import churchpresenter.composeapp.generated.resources.atem_section_upload_defaults
 import churchpresenter.composeapp.generated.resources.atem_test_connection_hint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.server.AtemClient
@@ -117,17 +120,11 @@ fun AtemSettingsTab(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val cardMod = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 600.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                .padding(horizontal = 16.dp, vertical = 16.dp)
-
             // ── Connection card ──────────────────────────────────────────────
-            Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                AtemSectionHeader("Blackmagic ATEM")
-                Spacer(Modifier.height(4.dp))
+            SettingsSection(
+                title = stringResource(Res.string.atem_section_connection),
+                modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
+            ) {
                 Text(
                     text = stringResource(Res.string.atem_description),
                     style = MaterialTheme.typography.bodySmall,
@@ -135,32 +132,32 @@ fun AtemSettingsTab(
                 )
                 Spacer(Modifier.height(12.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = hostText,
-                        onValueChange = {
-                            hostText = it
-                            update { copy(host = it) }
-                        },
-                        label = { Text(stringResource(Res.string.atem_host)) },
-                        placeholder = { Text(stringResource(Res.string.atem_host_hint)) },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f)
-                    )
-                    OutlinedTextField(
-                        value = portText,
-                        onValueChange = { v ->
-                            portText = v
-                            v.toIntOrNull()?.let { update { copy(port = it) } }
-                        },
-                        label = { Text(stringResource(Res.string.atem_port)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.width(100.dp)
-                    )
+                SettingRow(label = stringResource(Res.string.atem_host)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.widthIn(max = 350.dp)
+                    ) {
+                        SettingsTextField(
+                            value = hostText,
+                            onValueChange = {
+                                hostText = it
+                                update { copy(host = it) }
+                            },
+                            placeholder = { Text(stringResource(Res.string.atem_host_hint)) },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        SettingsTextField(
+                            value = portText,
+                            onValueChange = { v ->
+                                portText = v
+                                v.toIntOrNull()?.let { update { copy(port = it) } }
+                            },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.width(68.dp)
+                        )
+                    }
                 }
 
                 Spacer(Modifier.height(8.dp))
@@ -176,6 +173,7 @@ fun AtemSettingsTab(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Button(
+                        shape = RoundedCornerShape(6.dp),
                         onClick = {
                             if (isTesting) return@Button
                             isTesting = true
@@ -266,85 +264,76 @@ fun AtemSettingsTab(
             }
 
             // ── Defaults card ────────────────────────────────────────────────
-            Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                AtemSectionHeader(stringResource(Res.string.atem_section_upload_defaults))
-                Spacer(Modifier.height(12.dp))
-
+            SettingsSection(
+                title = stringResource(Res.string.atem_section_upload_defaults),
+                modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
+            ) {
                 // Everything on one line: width / height / fps / still slot / clip slot,
                 // labels (and detected ranges) directly underneath each field
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = renderWidthText,
                         onValueChange = { v ->
                             renderWidthText = v
                             v.toIntOrNull()?.let { update { copy(renderWidth = it) } }
                         },
-                        supportingText = { Text(stringResource(Res.string.atem_render_width)) },
+                        label = stringResource(Res.string.atem_render_width),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = renderHeightText,
                         onValueChange = { v ->
                             renderHeightText = v
                             v.toIntOrNull()?.let { update { copy(renderHeight = it) } }
                         },
-                        supportingText = { Text(stringResource(Res.string.atem_render_height)) },
+                        label = stringResource(Res.string.atem_render_height),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = clipFpsText,
                         onValueChange = { v ->
                             clipFpsText = v
                             v.toDoubleOrNull()?.let { update { copy(clipFps = it) } }
                         },
-                        supportingText = { Text(stringResource(Res.string.atem_clip_fps_unit)) },
+                        label = stringResource(Res.string.atem_clip_fps_unit),
                         placeholder = { Text(stringResource(Res.string.atem_clip_fps_hint)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = stillSlotText,
                         onValueChange = { v ->
                             stillSlotText = v
                             v.toIntOrNull()?.let { update { copy(defaultStillSlot = (it - 1).coerceAtLeast(0)) } }
                         },
-                        supportingText = {
-                            val label = stringResource(Res.string.atem_default_still_slot)
-                            Text(
-                                if (atem.detectedStillSlots > 0) "$label (1–${atem.detectedStillSlots})" else label
-                            )
+                        label = run {
+                            val l = stringResource(Res.string.atem_default_still_slot)
+                            if (atem.detectedStillSlots > 0) "$l (1–${atem.detectedStillSlots})" else l
                         },
                         isError = atem.detectedStillSlots > 0 &&
                             stillSlotText.toIntOrNull()?.let { it !in 1..atem.detectedStillSlots } != false,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = clipSlotText,
                         onValueChange = { v ->
                             clipSlotText = v
                             v.toIntOrNull()?.let { update { copy(defaultClipSlot = (it - 1).coerceAtLeast(0)) } }
                         },
-                        supportingText = {
-                            val label = stringResource(Res.string.atem_default_clip_slot)
-                            Text(
-                                if (atem.detectedClipSlots > 0) "$label (1–${atem.detectedClipSlots})" else label
-                            )
+                        label = run {
+                            val l = stringResource(Res.string.atem_default_clip_slot)
+                            if (atem.detectedClipSlots > 0) "$l (1–${atem.detectedClipSlots})" else l
                         },
                         isError = atem.detectedClipSlots > 0 &&
                             clipSlotText.toIntOrNull()?.let { it !in 1..atem.detectedClipSlots } != false,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
                     )
                 }
 
@@ -390,74 +379,63 @@ fun AtemSettingsTab(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     if (useDsk) {
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = dskText,
                             onValueChange = { v ->
                                 dskText = v
                                 v.toIntOrNull()?.let { update { copy(dskIndex = (it - 1).coerceAtLeast(0)) } }
                             },
-                            supportingText = {
-                                Text(if (atem.detectedDownstreamKeyers > 0) "DSK (1–${atem.detectedDownstreamKeyers})" else "DSK")
-                            },
+                            label = if (atem.detectedDownstreamKeyers > 0) "DSK (1–${atem.detectedDownstreamKeyers})" else "DSK",
                             isError = atem.detectedDownstreamKeyers > 0 &&
                                 dskText.toIntOrNull()?.let { it !in 1..atem.detectedDownstreamKeyers } != false,
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
                         )
                     } else {
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = meText,
                             onValueChange = { v ->
                                 meText = v
                                 v.toIntOrNull()?.let { update { copy(keyMixEffect = (it - 1).coerceAtLeast(0)) } }
                             },
-                            supportingText = {
-                                Text(if (atem.detectedMixEffects > 0) "M/E (1–${atem.detectedMixEffects})" else "M/E")
-                            },
+                            label = if (atem.detectedMixEffects > 0) "M/E (1–${atem.detectedMixEffects})" else "M/E",
                             isError = atem.detectedMixEffects > 0 &&
                                 meText.toIntOrNull()?.let { it !in 1..atem.detectedMixEffects } != false,
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
                         )
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = keyText,
                             onValueChange = { v ->
                                 keyText = v
                                 v.toIntOrNull()?.let { update { copy(keyIndex = (it - 1).coerceAtLeast(0)) } }
                             },
-                            supportingText = {
-                                Text(if (keyersOnMe > 0) "Key (1–$keyersOnMe)" else "Key")
-                            },
+                            label = if (keyersOnMe > 0) "Key (1–$keyersOnMe)" else "Key",
                             isError = keyersOnMe > 0 &&
                                 keyText.toIntOrNull()?.let { it !in 1..keyersOnMe } != false,
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
                         )
                     }
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = keyPreRollText,
                         onValueChange = { v ->
                             keyPreRollText = v
                             v.toIntOrNull()?.let { update { copy(keyPreRollMs = it.coerceAtLeast(0)) } }
                         },
-                        supportingText = { Text(stringResource(Res.string.atem_key_preroll)) },
+                        label = stringResource(Res.string.atem_key_preroll),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = keyPostRollText,
                         onValueChange = { v ->
                             keyPostRollText = v
                             v.toIntOrNull()?.let { update { copy(keyPostRollMs = it.coerceAtLeast(0)) } }
                         },
-                        supportingText = { Text(stringResource(Res.string.atem_key_postroll)) },
+                        label = stringResource(Res.string.atem_key_postroll),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
                     )
                 }
 
@@ -567,29 +545,3 @@ internal fun formatAtemFps(fps: Double): String =
     if (fps == kotlin.math.floor(fps)) fps.toInt().toString()
     else String.format(java.util.Locale.US, "%.2f", fps).trimEnd('0').trimEnd('.')
 
-@Composable
-private fun AtemSectionHeader(text: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(18.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}

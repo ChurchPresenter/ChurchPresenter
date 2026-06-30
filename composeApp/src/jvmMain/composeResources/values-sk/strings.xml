@@ -489,7 +489,7 @@
     <string name="supported_formats">Podporované: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="slide_number">Snímok %1$d</string>
     <string name="remove">Odstrániť</string>
-    <string name="select_presentation_file_button">📄 Vybrať súbor</string>
+    <string name="select_presentation_file_button">Vybrať súbor</string>
     <string name="select_presentation_file_dialog">Vybrať súbor prezentácie</string>
 
     <!-- Projection Settings Tab -->

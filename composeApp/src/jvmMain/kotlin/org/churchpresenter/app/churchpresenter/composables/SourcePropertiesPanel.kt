@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,7 +11,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -33,8 +35,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,9 +50,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.symbol_dropdown
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
 import org.jetbrains.compose.resources.stringResource
@@ -189,6 +190,7 @@ import churchpresenter.composeapp.generated.resources.canvas_reference_style
 import churchpresenter.composeapp.generated.resources.timer_start
 import churchpresenter.composeapp.generated.resources.timer_reset
 import churchpresenter.composeapp.generated.resources.pause
+import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_folder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -320,7 +322,8 @@ private fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSou
                     }
                 }
             },
-            modifier = Modifier.height(40.dp)
+            modifier = Modifier.height(40.dp),
+            shape = RoundedCornerShape(8.dp)
         ) {
             Icon(
                 painterResource(Res.drawable.ic_folder),
@@ -351,18 +354,17 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
     // Multiline text input — supports Enter for line breaks
     var textValue by remember(source.text) { mutableStateOf(source.text) }
     var showTextDialog by remember { mutableStateOf(false) }
-    OutlinedTextField(
+    StyledTextField(
         value = textValue,
         onValueChange = {
             textValue = it
             onUpdate(source.copy(text = it))
         },
-        label = { Text(stringResource(Res.string.canvas_text_content), style = MaterialTheme.typography.labelSmall) },
+        label = stringResource(Res.string.canvas_text_content),
         singleLine = false,
         minLines = 2,
         maxLines = 5,
-        modifier = Modifier.fillMaxWidth(),
-        textStyle = MaterialTheme.typography.bodySmall
+        modifier = Modifier.fillMaxWidth()
     )
     Text(
         text = stringResource(Res.string.canvas_expand_text_field),
@@ -384,20 +386,19 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
                 color = MaterialTheme.colorScheme.background
             ) {
                 Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                    OutlinedTextField(
+                    StyledTextField(
                         value = textValue,
                         onValueChange = {
                             textValue = it
                             onUpdate(source.copy(text = it))
                         },
-                        label = { Text(stringResource(Res.string.canvas_text_content)) },
+                        label = stringResource(Res.string.canvas_text_content),
                         singleLine = false,
-                        modifier = Modifier.fillMaxWidth().weight(1f),
-                        textStyle = MaterialTheme.typography.bodyMedium
+                        modifier = Modifier.fillMaxWidth().weight(1f)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        androidx.compose.material3.Button(onClick = { showTextDialog = false }) {
+                        Button(onClick = { showTextDialog = false }, shape = RoundedCornerShape(8.dp)) {
                             Text(stringResource(Res.string.close))
                         }
                     }
@@ -450,16 +451,11 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
             )
         }
     }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(stringResource(Res.string.canvas_font_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        ColorPickerField(
-            color = source.fontColor,
-            onColorChange = { onUpdate(source.copy(fontColor = it)) }
-        )
-    }
+    ColorPickerField(
+        color = source.fontColor,
+        onColorChange = { onUpdate(source.copy(fontColor = it)) },
+        label = stringResource(Res.string.canvas_font_color)
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -475,32 +471,22 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
         Text(stringResource(Res.string.canvas_transparent_bg), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     if (!isTransparentBg) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(stringResource(Res.string.canvas_bg_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            ColorPickerField(
-                color = source.backgroundColor,
-                onColorChange = { onUpdate(source.copy(backgroundColor = it)) }
-            )
-        }
+        ColorPickerField(
+            color = source.backgroundColor,
+            onColorChange = { onUpdate(source.copy(backgroundColor = it)) },
+            label = stringResource(Res.string.canvas_bg_color)
+        )
     }
 }
 
 @Composable
 private fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSource) -> Unit) {
     Text(stringResource(Res.string.canvas_source_color), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(stringResource(Res.string.canvas_color_1), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        ColorPickerField(
-            color = source.color,
-            onColorChange = { onUpdate(source.copy(color = it)) }
-        )
-    }
+    ColorPickerField(
+        color = source.color,
+        onColorChange = { onUpdate(source.copy(color = it)) },
+        label = stringResource(Res.string.canvas_color_1)
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -515,16 +501,11 @@ private fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSou
         onUpdate(source.copy(sourceOpacity = v))
     }
     if (source.isGradient) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(stringResource(Res.string.canvas_color_2), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            ColorPickerField(
-                color = source.gradientColor2,
-                onColorChange = { onUpdate(source.copy(gradientColor2 = it)) }
-            )
-        }
+        ColorPickerField(
+            color = source.gradientColor2,
+            onColorChange = { onUpdate(source.copy(gradientColor2 = it)) },
+            label = stringResource(Res.string.canvas_color_2)
+        )
         PropertySlider("${stringResource(Res.string.canvas_color_2)} ${stringResource(Res.string.canvas_opacity)}", source.gradientColor2Opacity, 0f, 1f) { v ->
             onUpdate(source.copy(gradientColor2Opacity = v))
         }
@@ -574,7 +555,8 @@ private fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSou
                     }
                 }
             },
-            modifier = Modifier.height(40.dp)
+            modifier = Modifier.height(40.dp),
+            shape = RoundedCornerShape(8.dp)
         ) {
             Icon(
                 painterResource(Res.drawable.ic_folder),
@@ -674,40 +656,22 @@ private fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSou
     }
 
     if (isStrokeOnly || source.showStroke) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                stringResource(Res.string.canvas_shape_stroke_color),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            ColorPickerField(
-                color = source.strokeColor,
-                onColorChange = { onUpdate(source.copy(strokeColor = it)) }
-            )
-        }
+        ColorPickerField(
+            color = source.strokeColor,
+            onColorChange = { onUpdate(source.copy(strokeColor = it)) },
+            label = stringResource(Res.string.canvas_shape_stroke_color)
+        )
         PropertySlider("${stringResource(Res.string.canvas_shape_stroke_color)} ${stringResource(Res.string.canvas_opacity)}", source.strokeOpacity, 0f, 1f) { v ->
             onUpdate(source.copy(strokeOpacity = v))
         }
     }
 
     if (!isStrokeOnly) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                stringResource(Res.string.canvas_shape_fill_color),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            ColorPickerField(
-                color = source.fillColor,
-                onColorChange = { onUpdate(source.copy(fillColor = it)) }
-            )
-        }
+        ColorPickerField(
+            color = source.fillColor,
+            onColorChange = { onUpdate(source.copy(fillColor = it)) },
+            label = stringResource(Res.string.canvas_shape_fill_color)
+        )
         PropertySlider("${stringResource(Res.string.canvas_shape_fill_color)} ${stringResource(Res.string.canvas_opacity)}", source.fillOpacity, 0f, 1f) { v ->
             onUpdate(source.copy(fillOpacity = v))
         }
@@ -740,20 +704,11 @@ private fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSou
             )
         }
         if (source.isGradient) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    stringResource(Res.string.canvas_color_2),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                ColorPickerField(
-                    color = source.gradientColor2,
-                    onColorChange = { onUpdate(source.copy(gradientColor2 = it)) }
-                )
-            }
+            ColorPickerField(
+                color = source.gradientColor2,
+                onColorChange = { onUpdate(source.copy(gradientColor2 = it)) },
+                label = stringResource(Res.string.canvas_color_2)
+            )
             PropertySlider("${stringResource(Res.string.canvas_color_2)} ${stringResource(Res.string.canvas_opacity)}", source.gradientColor2Opacity, 0f, 1f) { v ->
                 onUpdate(source.copy(gradientColor2Opacity = v))
             }
@@ -776,22 +731,22 @@ private fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSou
     )
     val clockLabel = stringResource(Res.string.canvas_clock_mode_clock)
     val countdownLabel = stringResource(Res.string.canvas_clock_mode_countdown)
-    DropdownSelector(
-        label = stringResource(Res.string.canvas_clock_mode),
-        items = listOf(clockLabel, countdownLabel),
-        selected = if (source.mode == "countdown") countdownLabel else clockLabel,
-        onSelectedChange = { onUpdate(source.copy(mode = if (it == countdownLabel) "countdown" else "clock")) },
-        modifier = Modifier.fillMaxWidth()
-    )
     val format24hLabel = stringResource(Res.string.canvas_clock_format_24h)
     val format12hLabel = stringResource(Res.string.canvas_clock_format_12h)
-    DropdownSelector(
-        label = stringResource(Res.string.canvas_clock_format),
-        items = listOf(format24hLabel, format12hLabel),
-        selected = if (source.timeFormat == "12h") format12hLabel else format24hLabel,
-        onSelectedChange = { onUpdate(source.copy(timeFormat = if (it == format12hLabel) "12h" else "24h")) },
-        modifier = Modifier.fillMaxWidth()
-    )
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        DropdownSelector(
+            label = stringResource(Res.string.canvas_clock_mode),
+            items = listOf(clockLabel, countdownLabel),
+            selected = if (source.mode == "countdown") countdownLabel else clockLabel,
+            onSelectedChange = { onUpdate(source.copy(mode = if (it == countdownLabel) "countdown" else "clock")) }
+        )
+        DropdownSelector(
+            label = stringResource(Res.string.canvas_clock_format),
+            items = listOf(format24hLabel, format12hLabel),
+            selected = if (source.timeFormat == "12h") format12hLabel else format24hLabel,
+            onSelectedChange = { onUpdate(source.copy(timeFormat = if (it == format12hLabel) "12h" else "24h")) }
+        )
+    }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         Checkbox(checked = source.showHours, onCheckedChange = { onUpdate(source.copy(showHours = it)) })
         Text(stringResource(Res.string.canvas_clock_show_hours), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -807,14 +762,16 @@ private fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSou
     PropertyTextField(stringResource(Res.string.canvas_clock_font_size), source.fontSize.toString()) { v ->
         v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it.coerceIn(8, 500))) }
     }
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(Res.string.canvas_text_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        ColorPickerField(color = source.fontColor, onColorChange = { onUpdate(source.copy(fontColor = it)) })
-    }
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(Res.string.canvas_text_bg_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        ColorPickerField(color = source.backgroundColor, onColorChange = { onUpdate(source.copy(backgroundColor = it)) })
-    }
+    ColorPickerField(
+        color = source.fontColor,
+        onColorChange = { onUpdate(source.copy(fontColor = it)) },
+        label = stringResource(Res.string.canvas_text_color)
+    )
+    ColorPickerField(
+        color = source.backgroundColor,
+        onColorChange = { onUpdate(source.copy(backgroundColor = it)) },
+        label = stringResource(Res.string.canvas_text_bg_color)
+    )
     if (source.mode == "countdown") {
         PropertyTextField(stringResource(Res.string.canvas_clock_target_hour), source.targetHour.toString()) { v ->
             v.toIntOrNull()?.let { onUpdate(source.copy(targetHour = it.coerceIn(0, 99))) }
@@ -854,6 +811,7 @@ private fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSou
                 onClick = { TimerStateManager.setRunning(source.id, totalSeconds, !isRunning) },
                 enabled = remaining > 0 || isRunning,
                 modifier = Modifier.weight(1f).height(32.dp),
+                shape = RoundedCornerShape(8.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
             ) {
                 Text(if (isRunning) stringResource(Res.string.pause) else stringResource(Res.string.timer_start), style = MaterialTheme.typography.labelSmall)
@@ -861,6 +819,7 @@ private fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSou
             Button(
                 onClick = { TimerStateManager.reset(source.id, totalSeconds) },
                 modifier = Modifier.weight(1f).height(32.dp),
+                shape = RoundedCornerShape(8.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
             ) {
                 Text(stringResource(Res.string.timer_reset), style = MaterialTheme.typography.labelSmall)
@@ -936,10 +895,11 @@ private fun QRCodeProperties(source: SceneSource.QRCodeSource, onUpdate: (SceneS
             onUpdate(source.copy(content = v))
         }
     }
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(Res.string.canvas_qr_foreground), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        ColorPickerField(color = source.foregroundColor, onColorChange = { onUpdate(source.copy(foregroundColor = it)) })
-    }
+    ColorPickerField(
+        color = source.foregroundColor,
+        onColorChange = { onUpdate(source.copy(foregroundColor = it)) },
+        label = stringResource(Res.string.canvas_qr_foreground)
+    )
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         Checkbox(
             checked = source.transparentBackground,
@@ -948,10 +908,11 @@ private fun QRCodeProperties(source: SceneSource.QRCodeSource, onUpdate: (SceneS
         Text(stringResource(Res.string.canvas_transparent_bg), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     if (!source.transparentBackground) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(Res.string.canvas_qr_background), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            ColorPickerField(color = source.backgroundColor, onColorChange = { onUpdate(source.copy(backgroundColor = it)) })
-        }
+        ColorPickerField(
+            color = source.backgroundColor,
+            onColorChange = { onUpdate(source.copy(backgroundColor = it)) },
+            label = stringResource(Res.string.canvas_qr_background)
+        )
     }
     DropdownSelector(
         label = stringResource(Res.string.canvas_qr_error_correction),
@@ -977,7 +938,8 @@ private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneS
 
     Button(
         onClick = { devices = listCameraDevicesWithDeckLink(deckLinkDeviceFormat) },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp)
     ) {
         Text(stringResource(Res.string.canvas_camera_refresh), style = MaterialTheme.typography.labelSmall)
     }
@@ -1520,7 +1482,8 @@ private fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, onU
 
         Button(
             onClick = { windows = listOpenWindows() },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp)
         ) {
             Text(stringResource(Res.string.canvas_capture_refresh_windows), style = MaterialTheme.typography.labelSmall)
         }
@@ -1653,16 +1616,14 @@ private fun listMacWindows(): List<WindowInfo> {
 @Composable
 private fun PropertyTextField(label: String, value: String, modifier: Modifier = Modifier, onValueChange: (String) -> Unit) {
     var text by remember(value) { mutableStateOf(value) }
-    OutlinedTextField(
+    StyledTextField(
         value = text,
         onValueChange = {
             text = it
             onValueChange(it)
         },
-        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
-        singleLine = true,
-        modifier = modifier.fillMaxWidth(),
-        textStyle = MaterialTheme.typography.bodySmall
+        label = label,
+        modifier = modifier.fillMaxWidth()
     )
 }
 
@@ -1670,11 +1631,10 @@ private fun PropertyTextField(label: String, value: String, modifier: Modifier =
 private fun PropertyFloatField(label: String, value: Float, modifier: Modifier = Modifier, onValueChange: (Float) -> Unit) {
     var text by remember(value) { mutableStateOf("%.3f".format(value)) }
     var hasFocus by remember { mutableStateOf(false) }
-    OutlinedTextField(
+    StyledTextField(
         value = text,
         onValueChange = { text = it },
-        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
-        singleLine = true,
+        label = label,
         modifier = modifier.onFocusChanged { state ->
             if (hasFocus && !state.isFocused) {
                 text.toFloatOrNull()?.let(onValueChange)
@@ -1682,7 +1642,6 @@ private fun PropertyFloatField(label: String, value: Float, modifier: Modifier =
             }
             hasFocus = state.isFocused
         },
-        textStyle = MaterialTheme.typography.bodySmall,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = {
             text.toFloatOrNull()?.let(onValueChange)
@@ -1735,16 +1694,16 @@ private fun PropertySliderWithInput(label: String, value: Float, min: Float, max
                 textValue.toFloatOrNull()?.let { onValueChange(it.coerceIn(min, max)) }
                     ?: run { textValue = value.toInt().toString() }
             }
-            OutlinedTextField(
+            StyledTextField(
                 value = textValue,
                 onValueChange = { textValue = it },
-                singleLine = true,
                 modifier = Modifier.width(60.dp).onFocusChanged { state ->
                     if (hasFocus && !state.isFocused) commitValue()
                     hasFocus = state.isFocused
                 },
-                textStyle = MaterialTheme.typography.bodySmall,
-                suffix = if (suffix.isNotEmpty()) { { Text(suffix, style = MaterialTheme.typography.bodySmall) } } else null,
+                trailingIcon = if (suffix.isNotEmpty()) { {
+                    Text(suffix, style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), modifier = Modifier.padding(end = 6.dp))
+                } } else null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { commitValue() })
             )
@@ -1802,89 +1761,38 @@ private fun BibleProperties(
 
     // Bible version selector
     if (bibleFiles.isNotEmpty()) {
-        var versionExpanded by remember { mutableStateOf(false) }
-        Box {
-            OutlinedTextField(
-                value = bibleDisplayNames[selectedBibleFile] ?: selectedBibleFile.removeSuffix(".spb"),
-                onValueChange = {},
-                readOnly = true,
-                label = { Text(stringResource(Res.string.canvas_bible_version), style = MaterialTheme.typography.labelSmall) },
-                modifier = Modifier.fillMaxWidth().clickable { versionExpanded = true },
-                textStyle = MaterialTheme.typography.bodySmall,
-                trailingIcon = {
-                    Text(stringResource(Res.string.symbol_dropdown), modifier = Modifier.clickable { versionExpanded = !versionExpanded })
-                }
-            )
-            DropdownMenu(expanded = versionExpanded, onDismissRequest = { versionExpanded = false }) {
-                bibleFiles.forEach { fileName ->
-                    DropdownMenuItem(
-                        text = { Text(bibleDisplayNames[fileName] ?: fileName, style = MaterialTheme.typography.bodySmall) },
-                        onClick = {
-                            versionExpanded = false
-                            selectedBibleFile = fileName
-                        }
-                    )
-                }
-            }
-        }
+        DropdownSelector(
+            label = stringResource(Res.string.canvas_bible_version),
+            value = selectedBibleFile,
+            options = bibleFiles.map { it to (bibleDisplayNames[it] ?: it.removeSuffix(".spb")) },
+            onValueChange = { selectedBibleFile = it },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 
     // Book selector
     if (books.isNotEmpty()) {
-        var bookExpanded by remember { mutableStateOf(false) }
-        Box {
-            OutlinedTextField(
-                value = books.getOrElse(selectedBookIndex) { "" },
-                onValueChange = {},
-                readOnly = true,
-                label = { Text(stringResource(Res.string.book), style = MaterialTheme.typography.labelSmall) },
-                modifier = Modifier.fillMaxWidth().clickable { bookExpanded = true },
-                textStyle = MaterialTheme.typography.bodySmall,
-                trailingIcon = {
-                    Text(stringResource(Res.string.symbol_dropdown), modifier = Modifier.clickable { bookExpanded = !bookExpanded })
-                }
-            )
-            DropdownMenu(expanded = bookExpanded, onDismissRequest = { bookExpanded = false }) {
-                books.forEachIndexed { index, bookName ->
-                    DropdownMenuItem(
-                        text = { Text(bookName, style = MaterialTheme.typography.bodySmall) },
-                        onClick = {
-                            bookExpanded = false
-                            bibleVm?.loadChapter(index, 1)
-                        }
-                    )
-                }
-            }
-        }
+        DropdownSelector(
+            label = stringResource(Res.string.book),
+            items = books,
+            selected = books.getOrElse(selectedBookIndex) { "" },
+            onSelectedChange = { bookName ->
+                val idx = books.indexOf(bookName)
+                if (idx >= 0) bibleVm?.loadChapter(idx, 1)
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         // Chapter selector
         val chapterCount = bible?.getChapterCount(bible.getBookId(selectedBookIndex)) ?: 0
         if (chapterCount > 0) {
-            var chapterExpanded by remember { mutableStateOf(false) }
-            Box {
-                OutlinedTextField(
-                    value = selectedChapter.toString(),
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(Res.string.chapter), style = MaterialTheme.typography.labelSmall) },
-                    modifier = Modifier.fillMaxWidth().clickable { chapterExpanded = true },
-                    textStyle = MaterialTheme.typography.bodySmall,
-                    trailingIcon = {
-                        Text(stringResource(Res.string.symbol_dropdown), modifier = Modifier.clickable { chapterExpanded = !chapterExpanded })
-                    }
-                )
-                DropdownMenu(expanded = chapterExpanded, onDismissRequest = { chapterExpanded = false }) {
-                    (1..chapterCount).forEach { ch ->
-                        DropdownMenuItem(
-                            text = { Text(ch.toString(), style = MaterialTheme.typography.bodySmall) },
-                            onClick = {
-                                chapterExpanded = false
-                                bibleVm?.loadChapter(selectedBookIndex, ch)
-                            }
-                        )
-                    }
-                }
-            }
+            DropdownSelector(
+                label = stringResource(Res.string.chapter),
+                items = (1..chapterCount).map { it.toString() },
+                selected = selectedChapter.toString(),
+                onSelectedChange = { bibleVm?.loadChapter(selectedBookIndex, it.toIntOrNull() ?: 1) },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         // Verse range selector
@@ -1893,7 +1801,7 @@ private fun BibleProperties(
             var endVerse by remember(selectedBookIndex, selectedChapter) { mutableStateOf(1) }
 
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                OutlinedTextField(
+                StyledTextField(
                     value = startVerse.toString(),
                     onValueChange = { v ->
                         v.toIntOrNull()?.let { sv ->
@@ -1901,22 +1809,20 @@ private fun BibleProperties(
                             if (endVerse < startVerse) endVerse = startVerse
                         }
                     },
-                    label = { Text(stringResource(Res.string.canvas_bible_start_verse), style = MaterialTheme.typography.labelSmall) },
+                    label = stringResource(Res.string.canvas_bible_start_verse),
                     modifier = Modifier.weight(1f),
-                    textStyle = MaterialTheme.typography.bodySmall,
-                    singleLine = true
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-                OutlinedTextField(
+                StyledTextField(
                     value = endVerse.toString(),
                     onValueChange = { v ->
                         v.toIntOrNull()?.let { ev ->
                             endVerse = ev.coerceIn(startVerse, verses.size)
                         }
                     },
-                    label = { Text(stringResource(Res.string.canvas_bible_end_verse), style = MaterialTheme.typography.labelSmall) },
+                    label = stringResource(Res.string.canvas_bible_end_verse),
                     modifier = Modifier.weight(1f),
-                    textStyle = MaterialTheme.typography.bodySmall,
-                    singleLine = true
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }
 
@@ -1936,7 +1842,8 @@ private fun BibleProperties(
                     }
                     onUpdate(source.copy(verseText = combinedText, referenceText = reference))
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(stringResource(Res.string.canvas_bible_insert))
             }
@@ -1955,32 +1862,29 @@ private fun BibleProperties(
 
     // Editable verse text field
     var verseTextValue by remember(source.verseText) { mutableStateOf(source.verseText) }
-    OutlinedTextField(
+    StyledTextField(
         value = verseTextValue,
         onValueChange = {
             verseTextValue = it
             onUpdate(source.copy(verseText = it))
         },
-        label = { Text(stringResource(Res.string.canvas_bible_verse_text), style = MaterialTheme.typography.labelSmall) },
+        label = stringResource(Res.string.canvas_bible_verse_text),
         singleLine = false,
         minLines = 2,
         maxLines = 6,
-        modifier = Modifier.fillMaxWidth(),
-        textStyle = MaterialTheme.typography.bodySmall
+        modifier = Modifier.fillMaxWidth()
     )
 
     // Editable reference field
     var refTextValue by remember(source.referenceText) { mutableStateOf(source.referenceText) }
-    OutlinedTextField(
+    StyledTextField(
         value = refTextValue,
         onValueChange = {
             refTextValue = it
             onUpdate(source.copy(referenceText = it))
         },
-        label = { Text(stringResource(Res.string.canvas_bible_reference), style = MaterialTheme.typography.labelSmall) },
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
-        textStyle = MaterialTheme.typography.bodySmall
+        label = stringResource(Res.string.canvas_bible_reference),
+        modifier = Modifier.fillMaxWidth()
     )
 
     Spacer(modifier = Modifier.height(8.dp))
@@ -2001,7 +1905,8 @@ private fun BibleProperties(
     }
     ColorPickerField(
         color = source.fontColor,
-        onColorChange = { onUpdate(source.copy(fontColor = it)) }
+        onColorChange = { onUpdate(source.copy(fontColor = it)) },
+        label = stringResource(Res.string.canvas_font_color)
     )
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Checkbox(checked = source.bold, onCheckedChange = { onUpdate(source.copy(bold = it)) })
@@ -2019,13 +1924,12 @@ private fun BibleProperties(
     }
     ColorPickerField(
         color = source.referenceFontColor,
-        onColorChange = { onUpdate(source.copy(referenceFontColor = it)) }
+        onColorChange = { onUpdate(source.copy(referenceFontColor = it)) },
+        label = stringResource(Res.string.canvas_bible_ref_color)
     )
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Checkbox(checked = source.referenceBold, onCheckedChange = { onUpdate(source.copy(referenceBold = it)) })
         Text(stringResource(Res.string.canvas_text_bold), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-    Row(verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked = source.referenceItalic, onCheckedChange = { onUpdate(source.copy(referenceItalic = it)) })
         Text(stringResource(Res.string.canvas_text_italic), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
@@ -2035,30 +1939,35 @@ private fun BibleProperties(
     // Background color
     ColorPickerField(
         color = source.backgroundColor,
-        onColorChange = { onUpdate(source.copy(backgroundColor = it)) }
+        onColorChange = { onUpdate(source.copy(backgroundColor = it)) },
+        label = stringResource(Res.string.canvas_text_bg_color)
     )
 
-    // Horizontal alignment
-    Text(stringResource(Res.string.canvas_align_horizontal), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    HorizontalAlignmentButtons(
-        selectedAlignment = source.horizontalAlignment,
-        onAlignmentChange = { onUpdate(source.copy(horizontalAlignment = it)) },
-        leftValue = "left",
-        centerValue = "center",
-        rightValue = "right"
-    )
-
-    Spacer(modifier = Modifier.height(4.dp))
-
-    // Vertical alignment
-    Text(stringResource(Res.string.canvas_align_vertical), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    VerticalAlignmentButtons(
-        selectedAlignment = source.verticalAlignment,
-        onAlignmentChange = { onUpdate(source.copy(verticalAlignment = it)) },
-        topValue = "top",
-        middleValue = "center",
-        bottomValue = "bottom"
-    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Column {
+            Text(stringResource(Res.string.canvas_align_horizontal), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            HorizontalAlignmentButtons(
+                selectedAlignment = source.horizontalAlignment,
+                onAlignmentChange = { onUpdate(source.copy(horizontalAlignment = it)) },
+                leftValue = "left",
+                centerValue = "center",
+                rightValue = "right"
+            )
+        }
+        Column {
+            Text(stringResource(Res.string.canvas_align_vertical), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            VerticalAlignmentButtons(
+                selectedAlignment = source.verticalAlignment,
+                onAlignmentChange = { onUpdate(source.copy(verticalAlignment = it)) },
+                topValue = "top",
+                middleValue = "center",
+                bottomValue = "bottom"
+            )
+        }
+    }
 
     Spacer(modifier = Modifier.height(4.dp))
 
@@ -2113,34 +2022,55 @@ private fun FontDropdown(
     onSelectedChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var expanded = rememberSaveable { mutableStateOf(false) }
+    val expanded = rememberSaveable { mutableStateOf(false) }
     val selectedFontFamily = remember(selected) { systemFontFamilyOrDefault(selected) }
 
-    Box {
-        OutlinedTextField(
-            modifier = modifier,
-            interactionSource = remember { MutableInteractionSource() }
-                .also { interactionSource ->
-                    LaunchedEffect(interactionSource) {
-                        interactionSource.interactions.collect {
-                            if (it is PressInteraction.Release) {
-                                expanded.value = true
-                            }
-                        }
-                    }
-                },
-            value = selected,
-            onValueChange = {},
-            readOnly = true,
-            textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = selectedFontFamily),
-            label = { Text(text = label, style = MaterialTheme.typography.bodyMedium) },
-            trailingIcon = { Text(stringResource(Res.string.symbol_dropdown)) },
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors().copy(
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-            )
-        )
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .height(42.dp)
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded.value = true }
+                .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (label.isNotEmpty()) {
+                Text(
+                    text = label.uppercase(),
+                    fontSize = 8.sp,
+                    lineHeight = 9.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = selected,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = selectedFontFamily
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(Modifier.width(4.dp))
+                Icon(
+                    painter = painterResource(Res.drawable.ic_arrow_down),
+                    contentDescription = null,
+                    modifier = Modifier.size(9.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                )
+            }
+        }
         DropdownMenu(
             containerColor = MaterialTheme.colorScheme.surface,
             expanded = expanded.value,

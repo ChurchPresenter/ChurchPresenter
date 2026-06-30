@@ -16,7 +16,8 @@ enum class ThemeMode {
     ROSE,
     MIDNIGHT,
     FOREST,
-    MOCHA
+    MOCHA,
+    STUDIO
 }
 
 class ThemeManager {

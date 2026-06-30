@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,9 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -46,14 +43,19 @@ import churchpresenter.composeapp.generated.resources.default_lower_third_backgr
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.gradient_bottom_color
+import churchpresenter.composeapp.generated.resources.background_opacity
+import churchpresenter.composeapp.generated.resources.gradient_bottom_opacity
 import churchpresenter.composeapp.generated.resources.gradient_enabled
 import churchpresenter.composeapp.generated.resources.gradient_opacity
 import churchpresenter.composeapp.generated.resources.gradient_position
 import churchpresenter.composeapp.generated.resources.gradient_top_color
+import churchpresenter.composeapp.generated.resources.gradient_top_opacity
 import churchpresenter.composeapp.generated.resources.songs
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
+import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundConfig
@@ -72,7 +74,7 @@ fun BackgroundSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(8.dp)
+            .padding(14.dp)
     ) {
         Column(
             modifier = Modifier
@@ -86,15 +88,10 @@ fun BackgroundSettingsTab(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Card 1: Default Full Screen Background
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                SettingsSection(
+                    title = stringResource(Res.string.default_background_color),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    GroupHeader(stringResource(Res.string.default_background_color))
                     Text(
                         text = stringResource(Res.string.default_background_color_help),
                         style = MaterialTheme.typography.bodySmall,
@@ -121,12 +118,12 @@ fun BackgroundSettingsTab(
                     )
                     when (settings.backgroundSettings.defaultBackgroundType) {
                         Constants.BACKGROUND_COLOR -> {
-                            SettingRow(stringResource(Res.string.color)) {
-                                ColorPickerField(
-                                    color = settings.backgroundSettings.defaultBackgroundColor,
-                                    onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
-                                )
-                            }
+                            ColorPickerField(
+                                label = stringResource(Res.string.color),
+                                modifier = Modifier.width(140.dp),
+                                color = settings.backgroundSettings.defaultBackgroundColor,
+                                onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
+                            )
                             OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
                                     s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
@@ -173,15 +170,10 @@ fun BackgroundSettingsTab(
                 }
 
                 // Card 2: Default Lower Third Background
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                SettingsSection(
+                    title = stringResource(Res.string.default_lower_third_background),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    GroupHeader(stringResource(Res.string.default_lower_third_background))
                     Text(
                         text = stringResource(Res.string.default_lower_third_background_help),
                         style = MaterialTheme.typography.bodySmall,
@@ -210,16 +202,16 @@ fun BackgroundSettingsTab(
                     )
                     when (settings.backgroundSettings.defaultLowerThirdBackgroundType) {
                         Constants.BACKGROUND_COLOR -> {
-                            SettingRow(stringResource(Res.string.color)) {
-                                ColorPickerField(
-                                    color = settings.backgroundSettings.defaultLowerThirdBackgroundColor,
-                                    onColorChange = { color ->
-                                        onSettingsChange { s ->
-                                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundColor = color))
-                                        }
+                            ColorPickerField(
+                                label = stringResource(Res.string.color),
+                                modifier = Modifier.width(140.dp),
+                                color = settings.backgroundSettings.defaultLowerThirdBackgroundColor,
+                                onColorChange = { color ->
+                                    onSettingsChange { s ->
+                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundColor = color))
                                     }
-                                )
-                            }
+                                }
+                            )
                             OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
                                     s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
@@ -272,15 +264,10 @@ fun BackgroundSettingsTab(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Card 3: Bible
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                SettingsSection(
+                    title = stringResource(Res.string.bible),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    GroupHeader(stringResource(Res.string.bible))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -305,15 +292,10 @@ fun BackgroundSettingsTab(
                 }
 
                 // Card 4: Songs
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                SettingsSection(
+                    title = stringResource(Res.string.songs),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    GroupHeader(stringResource(Res.string.songs))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -341,32 +323,6 @@ fun BackgroundSettingsTab(
     }
 }
 
-@Composable
-private fun GroupHeader(title: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(20.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
 
 @Composable
 private fun BackgroundColumn(
@@ -382,8 +338,12 @@ private fun BackgroundColumn(
     val backgroundTransparentStr  = stringResource(Res.string.background_transparent_option)
     val backgroundGradientStr     = stringResource(Res.string.gradient_enabled)
 
-    SectionHeader(subtitle)
-    Spacer(modifier = Modifier.height(10.dp))
+    Text(
+        text = subtitle,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary
+    )
+    Spacer(modifier = Modifier.height(6.dp))
 
     Text(
         text = stringResource(Res.string.background_type),
@@ -414,12 +374,12 @@ private fun BackgroundColumn(
 
     when (config.backgroundType) {
         Constants.BACKGROUND_COLOR -> {
-            SettingRow(stringResource(Res.string.background_color)) {
-                ColorPickerField(
-                    color = config.backgroundColor,
-                    onColorChange = { onConfigChange(config.copy(backgroundColor = it)) }
-                )
-            }
+            ColorPickerField(
+                label = stringResource(Res.string.background_color),
+                modifier = Modifier.width(140.dp),
+                color = config.backgroundColor,
+                onColorChange = { onConfigChange(config.copy(backgroundColor = it)) }
+            )
             OpacitySlider(config.backgroundOpacity) { onConfigChange(config.copy(backgroundOpacity = it)) }
         }
         Constants.BACKGROUND_IMAGE -> {
@@ -450,13 +410,26 @@ private fun BackgroundColumn(
     // Gradient controls — shown when Gradient type is selected (lower-third columns only)
     if (isLowerThird && config.backgroundType == Constants.BACKGROUND_GRADIENT) {
         Spacer(modifier = Modifier.height(6.dp))
-        SettingRow(stringResource(Res.string.gradient_top_color)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ColorPickerField(
+                label = stringResource(Res.string.gradient_top_color),
+                modifier = Modifier.width(140.dp),
                 color = config.gradientTopColor,
                 onColorChange = { onConfigChange(config.copy(gradientTopColor = it)) }
             )
+            ColorPickerField(
+                label = stringResource(Res.string.gradient_bottom_color),
+                modifier = Modifier.width(140.dp),
+                color = config.gradientBottomColor,
+                onColorChange = { onConfigChange(config.copy(gradientBottomColor = it)) }
+            )
         }
-        SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(config.gradientTopOpacity * 100).toInt()}%") {
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+            Text(
+                text = "${stringResource(Res.string.gradient_top_opacity)}: ${(config.gradientTopOpacity * 100).toInt()}%",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Slider(
                 value = config.gradientTopOpacity,
                 onValueChange = { onConfigChange(config.copy(gradientTopOpacity = it)) },
@@ -464,13 +437,12 @@ private fun BackgroundColumn(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        SettingRow(stringResource(Res.string.gradient_bottom_color)) {
-            ColorPickerField(
-                color = config.gradientBottomColor,
-                onColorChange = { onConfigChange(config.copy(gradientBottomColor = it)) }
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+            Text(
+                text = "${stringResource(Res.string.gradient_bottom_opacity)}: ${(config.gradientBottomOpacity * 100).toInt()}%",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
-        SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(config.gradientBottomOpacity * 100).toInt()}%") {
             Slider(
                 value = config.gradientBottomOpacity,
                 onValueChange = { onConfigChange(config.copy(gradientBottomOpacity = it)) },
@@ -478,7 +450,12 @@ private fun BackgroundColumn(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        SettingRow("${stringResource(Res.string.gradient_position)}: ${(config.gradientPosition * 100).toInt()}%") {
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+            Text(
+                text = "${stringResource(Res.string.gradient_position)}: ${(config.gradientPosition * 100).toInt()}%",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Slider(
                 value = config.gradientPosition,
                 onValueChange = { onConfigChange(config.copy(gradientPosition = it)) },
@@ -543,39 +520,18 @@ private fun BackgroundTypeRadioGroup(
     }
 }
 
-@Composable
-private fun SectionHeader(title: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(16.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
 
 @Composable
 private fun OpacitySlider(
     value: Float,
     onValueChange: (Float) -> Unit
 ) {
-    SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(value * 100).toInt()}%") {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+        Text(
+            text = "${stringResource(Res.string.background_opacity)}: ${(value * 100).toInt()}%",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Slider(
             value = value,
             onValueChange = onValueChange,
@@ -585,20 +541,3 @@ private fun OpacitySlider(
     }
 }
 
-@Composable
-private fun SettingRow(
-    label: String,
-    content: @Composable () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        content()
-    }
-}

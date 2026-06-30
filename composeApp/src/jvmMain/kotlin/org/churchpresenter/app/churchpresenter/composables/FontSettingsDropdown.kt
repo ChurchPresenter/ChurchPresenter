@@ -1,92 +1,110 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ic_arrow_down
+import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 
 @Composable
 fun FontSettingsDropdown(
     modifier: Modifier = Modifier,
+    label: String = "",
     value: String,
     fonts: List<String>,
     onValueChange: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    val borderColor = if (isFocused) {
-        MaterialTheme.colorScheme.onPrimaryContainer
-    } else {
-        MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-    }
-    val borderWidth = if (isFocused) {
-        2.dp
-    } else {
-        1.dp
-    }
-
     val selectedFontFamily = remember(value) { systemFontFamilyOrDefault(value) }
 
-    Box {
-        OutlinedButton(
-            interactionSource = interactionSource,
-            onClick = { expanded = true },
-            modifier = modifier
-                .fillMaxWidth()
-                .height(32.dp),
-            shape = RoundedCornerShape(2.dp),
-            contentPadding = PaddingValues(horizontal = 8.dp),
-            border = BorderStroke(borderWidth, borderColor),
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            )
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodySmall.copy(fontFamily = selectedFontFamily),
-                modifier = Modifier.weight(1f)
+    Box(
+        modifier = modifier
+            .heightIn(min = 42.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+            .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(verticalArrangement = Arrangement.Center) {
+                if (label.isNotEmpty()) {
+                    Text(
+                        text = label.uppercase(),
+                        fontSize = 10.sp,
+                        lineHeight = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(1.dp))
+                }
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = selectedFontFamily
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.width(4.dp))
+            Icon(
+                painter = painterResource(Res.drawable.ic_arrow_down),
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
+            containerColor = MaterialTheme.colorScheme.surface,
             modifier = Modifier.width(200.dp)
         ) {
             val scrollState = rememberScrollState()
-            // Fixed height Box — avoids Int.MAX_VALUE height crash from fillMaxHeight
-            // inside SubcomposeLayout (DropdownMenu)
             Box(modifier = Modifier.height(300.dp).width(200.dp)) {
                 Column(
                     modifier = Modifier
@@ -99,10 +117,7 @@ fun FontSettingsDropdown(
                         val fontFamily = remember(font) { systemFontFamilyOrDefault(font) }
                         DropdownMenuItem(
                             text = { Text(font, style = MaterialTheme.typography.bodySmall.copy(fontFamily = fontFamily)) },
-                            onClick = {
-                                onValueChange(font)
-                                expanded = false
-                            }
+                            onClick = { onValueChange(font); expanded = false }
                         )
                     }
                 }

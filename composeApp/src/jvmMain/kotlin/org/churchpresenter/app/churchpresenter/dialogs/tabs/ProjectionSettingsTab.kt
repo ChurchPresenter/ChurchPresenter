@@ -36,7 +36,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -101,6 +101,7 @@ import churchpresenter.composeapp.generated.resources.window_position
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.detectVlcInstallPath
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.listVlcAudioDevices
@@ -244,7 +245,7 @@ fun ProjectionSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(8.dp)
+            .padding(14.dp)
     ) {
     Column(
         modifier = Modifier
@@ -253,16 +254,7 @@ fun ProjectionSettingsTab(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
     // ── Card 1: Screen Assignment ───────────────────────────────────────────
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        SectionHeader(stringResource(Res.string.screen_assignment))
-        Spacer(modifier = Modifier.height(4.dp))
+    SettingsSection(title = stringResource(Res.string.screen_assignment)) {
 
         // Detected screens info + simulate stepper + Identify button
         Row(
@@ -283,7 +275,7 @@ fun ProjectionSettingsTab(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            Button(onClick = { onIdentifyScreen() }) {
+            Button(shape = RoundedCornerShape(6.dp), onClick = { onIdentifyScreen() }) {
                 Text(
                     text = stringResource(Res.string.identify_screen),
                     style = MaterialTheme.typography.labelSmall
@@ -465,6 +457,7 @@ fun ProjectionSettingsTab(
                             state = rememberTooltipState()
                         ) {
                             OutlinedButton(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = { dropdownExpanded = true },
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF8888)),
@@ -480,6 +473,7 @@ fun ProjectionSettingsTab(
                         }
                     } else {
                         OutlinedButton(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = { dropdownExpanded = true },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                         ) {
@@ -620,6 +614,7 @@ fun ProjectionSettingsTab(
                             state = rememberTooltipState()
                         ) {
                             OutlinedButton(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = { keyExpanded = true },
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF8888)),
@@ -635,6 +630,7 @@ fun ProjectionSettingsTab(
                         }
                     } else {
                         OutlinedButton(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = { keyExpanded = true },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                         ) {
@@ -733,6 +729,7 @@ fun ProjectionSettingsTab(
                     Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
                         var bibleModeExpanded by remember { mutableStateOf(false) }
                         OutlinedButton(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = { bibleModeExpanded = true },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                             modifier = Modifier.fillMaxWidth()
@@ -763,6 +760,7 @@ fun ProjectionSettingsTab(
                     Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
                         var songModeExpanded by remember { mutableStateOf(false) }
                         OutlinedButton(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = { songModeExpanded = true },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                             modifier = Modifier.fillMaxWidth()
@@ -896,16 +894,7 @@ fun ProjectionSettingsTab(
 
     }
     // ── Card 2: Audio Output ─────────────────────────────────────────────────
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        SectionHeader(stringResource(Res.string.audio_output))
-        Spacer(modifier = Modifier.height(4.dp))
+    SettingsSection(title = stringResource(Res.string.audio_output)) {
 
         var vlcDetected by remember { mutableStateOf(isVlcAvailable) }
         var vlcPathText by remember { mutableStateOf(proj.vlcPath.ifBlank { detectVlcInstallPath() }) }
@@ -930,7 +919,7 @@ fun ProjectionSettingsTab(
                     val currentDevice = audioDevices.find { it.id == proj.audioOutputDeviceId }
                     val currentLabel = currentDevice?.description ?: defaultLabel
 
-                    OutlinedButton(onClick = { expanded = true }) {
+                    OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = { expanded = true }) {
                         Text(
                             text = currentLabel,
                             style = MaterialTheme.typography.labelSmall,
@@ -1005,7 +994,7 @@ fun ProjectionSettingsTab(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            OutlinedTextField(
+            SettingsTextField(
                 value = vlcPathText,
                 onValueChange = {},
                 readOnly = true,
@@ -1013,10 +1002,11 @@ fun ProjectionSettingsTab(
                 isError = vlcPathError,
                 supportingText = if (vlcPathError) {{ Text(stringResource(Res.string.vlc_path_invalid)) }} else null,
                 singleLine = true,
-                textStyle = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.weight(1f)
             )
-            Button(onClick = {
+            Button(
+                shape = RoundedCornerShape(6.dp),
+                onClick = {
                 scope.launch {
                     val file = FileChooser.platformInstance.chooseSingle(
                         path = Path(vlcPathText),
@@ -1046,16 +1036,7 @@ fun ProjectionSettingsTab(
 
     }
     // ── Card 3: Window Position ──────────────────────────────────────────────
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        SectionHeader(stringResource(Res.string.window_position))
-        Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(title = stringResource(Res.string.window_position)) {
 
         // Visual representation box with position fields
         Box(
@@ -1187,30 +1168,5 @@ fun ProjectionSettingsTab(
     }
 }
 
-@Composable
-private fun SectionHeader(text: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(18.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
+
 

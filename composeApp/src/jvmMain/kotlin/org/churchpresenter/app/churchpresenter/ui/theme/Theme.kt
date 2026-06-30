@@ -6,6 +6,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -240,7 +241,7 @@ private val RoseColorScheme = lightColorScheme(
     inverseOnSurface = Color.White,
 )
 
-// Dark theme colors
+// Dark theme colors — classic neutral dark
 private val DarkColorScheme = darkColorScheme(
     primary = Color(0xFF90CAF9),
     onPrimary = Color(0xFF003258),
@@ -264,9 +265,38 @@ private val DarkColorScheme = darkColorScheme(
     onSurfaceVariant = Color(0xFFCAC4D0),
     outline = Color(0xFF938F99),
     outlineVariant = Color(0xFF49454F),
-    // Custom colors for buttons
-    inverseSurface = Color(0xFF66BB6A), // Success button background (lighter for dark theme)
-    inverseOnSurface = Color.Black, // Success button text (black on light green)
+    inverseSurface = Color(0xFF66BB6A),
+    inverseOnSurface = Color.Black,
+)
+
+// Studio dark theme — amber accent, deep navy panels
+private val StudioColorScheme = darkColorScheme(
+    primary = Color(0xFFC4972A),
+    onPrimary = Color(0xFF141820),
+    primaryContainer = Color(0xFF2A1E08),
+    onPrimaryContainer = Color(0xFFE8D49A),
+    secondary = Color(0xFF5ABCA8),
+    onSecondary = Color(0xFF003D36),
+    secondaryContainer = Color(0xFF004D40),
+    onSecondaryContainer = Color(0xFF9ADFD4),
+    tertiary = Color(0xFF4A6FCC),
+    onTertiary = Color(0xFF001A45),
+    tertiaryContainer = Color(0xFF002080),
+    onTertiaryContainer = Color(0xFFD6E3FF),
+    error = Color(0xFFF44336),
+    onError = Color.White,
+    errorContainer = Color(0xFFD32F2F),
+    onErrorContainer = Color.White,
+    background = Color(0xFF111520),
+    onBackground = Color(0xFFE8E4D8),
+    surface = Color(0xFF141820),
+    onSurface = Color(0xFFE8E4D8),
+    surfaceVariant = Color(0xFF182030),
+    onSurfaceVariant = Color(0xFFBFBCB0),
+    outline = Color(0xFF555868),
+    outlineVariant = Color(0xFF252830),
+    inverseSurface = Color(0xFF66BB6A),
+    inverseOnSurface = Color.Black,
 )
 
 // Midnight dark theme — deep navy blue
@@ -369,20 +399,28 @@ fun ChurchPresenterTheme(
         ThemeMode.MIDNIGHT -> MidnightColorScheme
         ThemeMode.FOREST -> ForestColorScheme
         ThemeMode.MOCHA -> MochaColorScheme
+        ThemeMode.STUDIO -> StudioColorScheme
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = AppTypography
+        typography = AppTypography,
+        shapes = Shapes(
+            extraSmall = RoundedCornerShape(4.dp),
+            small = RoundedCornerShape(6.dp),
+            medium = RoundedCornerShape(8.dp),
+            large = RoundedCornerShape(10.dp),
+            extraLarge = RoundedCornerShape(12.dp)
+        )
     ) {
         CompositionLocalProvider(
             LocalScrollbarStyle provides ScrollbarStyle(
                 minimalHeight = 16.dp,
-                thickness = 8.dp,
+                thickness = 5.dp,
                 shape = RoundedCornerShape(4.dp),
-                hoverDurationMillis = 300,
-                unhoverColor = colorScheme.onSurface.copy(alpha = 0.3f),
-                hoverColor = colorScheme.onSurface.copy(alpha = 0.5f)
+                hoverDurationMillis = 150,
+                unhoverColor = colorScheme.onSurface.copy(alpha = 0.25f),
+                hoverColor = colorScheme.onSurface.copy(alpha = 0.45f)
             )
         ) {
             content()

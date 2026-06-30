@@ -16,8 +16,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -27,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
@@ -42,15 +41,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
@@ -127,9 +122,11 @@ import churchpresenter.composeapp.generated.resources.stt_translation_label
 import churchpresenter.composeapp.generated.resources.stt_waiting_for_transcription
 import churchpresenter.composeapp.generated.resources.stt_word_highlighting
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.app.churchpresenter.composables.StyledTextField
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -138,7 +135,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun STTTab(
     modifier: Modifier = Modifier,
@@ -196,16 +192,16 @@ fun STTTab(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedTextField(
+                StyledTextField(
                     value = urlInput,
                     onValueChange = { urlInput = it },
-                    label = { Text(stringResource(Res.string.stt_server_url)) },
+                    label = stringResource(Res.string.stt_server_url),
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     enabled = !connected && !connecting,
                     trailingIcon = {
                         if (!connected && !connecting && urlInput.isNotEmpty()) {
-                            IconButton(onClick = { urlInput = "" }) {
+                            IconButton(onClick = { urlInput = "" }, colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
                                 Icon(
                                     imageVector = Icons.Filled.Clear,
                                     contentDescription = stringResource(Res.string.clear),
@@ -345,30 +341,29 @@ fun STTTab(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedTextField(
+                    StyledTextField(
                         value = engine.host,
                         onValueChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(host = it)) } },
-                        label = { Text(stringResource(Res.string.bible_engine_host)) },
+                        label = stringResource(Res.string.bible_engine_host),
                         singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    StyledTextField(
                         value = engine.port.toString(),
                         onValueChange = { v -> v.toIntOrNull()?.let { p -> onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(port = p)) } } },
-                        label = { Text(stringResource(Res.string.bible_engine_port)) },
+                        label = stringResource(Res.string.bible_engine_port),
                         singleLine = true,
                         modifier = Modifier.width(120.dp)
                     )
                 }
             }
 
-            // Display mode + Layout
+            // Display mode + Layout + numeric fields
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Display mode dropdown
                 DropdownSelector(
                     label = stringResource(Res.string.stt_display_mode),
                     value = sttSettings.displayMode,
@@ -378,10 +373,8 @@ fun STTTab(
                         "both" to stringResource(Res.string.stt_mode_both)
                     ),
                     onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(displayMode = it)) } },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.widthIn(min = 120.dp)
                 )
-
-                // Layout dropdown (only when both)
                 AnimatedVisibility(visible = sttSettings.displayMode == "both") {
                     DropdownSelector(
                         label = stringResource(Res.string.stt_layout),
@@ -393,44 +386,27 @@ fun STTTab(
                             "side_by_side_inverse" to stringResource(Res.string.stt_layout_side_by_side_inverse)
                         ),
                         onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(layout = it)) } },
-                        modifier = Modifier.width(200.dp)
+                        modifier = Modifier.widthIn(min = 120.dp)
                     )
                 }
-            }
-
-            // Max segments, max lines, line spacing row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(Res.string.stt_max_segments), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                    Spacer(Modifier.width(4.dp))
-                    NumberSettingsTextField(
-                        initialText = sttSettings.maxSegments,
-                        range = 0..100,
-                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(maxSegments = it)) } }
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(Res.string.stt_max_lines), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                    Spacer(Modifier.width(4.dp))
-                    NumberSettingsTextField(
-                        initialText = sttSettings.maxLines,
-                        range = 0..50,
-                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(maxLines = it)) } }
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(Res.string.stt_line_spacing), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                    Spacer(Modifier.width(4.dp))
-                    NumberSettingsTextField(
-                        initialText = sttSettings.lineSpacing,
-                        range = 80..300,
-                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(lineSpacing = it)) } }
-                    )
-                }
+                NumberSettingsTextField(
+                    label = stringResource(Res.string.stt_max_segments),
+                    initialText = sttSettings.maxSegments,
+                    range = 0..100,
+                    onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(maxSegments = it)) } }
+                )
+                NumberSettingsTextField(
+                    label = stringResource(Res.string.stt_max_lines),
+                    initialText = sttSettings.maxLines,
+                    range = 0..50,
+                    onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(maxLines = it)) } }
+                )
+                NumberSettingsTextField(
+                    label = stringResource(Res.string.stt_line_spacing),
+                    initialText = sttSettings.lineSpacing,
+                    range = 80..300,
+                    onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(lineSpacing = it)) } }
+                )
             }
 
             // Toggles row
@@ -475,15 +451,13 @@ fun STTTab(
                     )
                     Text(stringResource(Res.string.stt_drip_feed), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(Res.string.stt_drip_feed_speed), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                    Spacer(Modifier.width(4.dp))
-                    NumberSettingsTextField(
-                        initialText = sttSettings.dripFeedSpeed,
-                        range = 10..500,
-                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(dripFeedSpeed = it)) } }
-                    )
-                }
+                NumberSettingsTextField(
+                    label = stringResource(Res.string.stt_drip_feed_speed),
+                    initialText = sttSettings.dripFeedSpeed,
+                    range = 10..500,
+                    onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(dripFeedSpeed = it)) } },
+                    modifier = Modifier.width(130.dp)
+                )
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -630,9 +604,8 @@ fun STTTab(
             Spacer(Modifier.height(8.dp))
 
             // Text color
-            Text(stringResource(Res.string.stt_text_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ColorPickerField(color = sttSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(textColor = it)) } })
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ColorPickerField(label = stringResource(Res.string.stt_text_color), color = sttSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(textColor = it)) } }, modifier = Modifier.weight(1f))
                 TextStyleButtons(
                     bold = sttSettings.bold, italic = sttSettings.italic, underline = sttSettings.underline, shadow = sttSettings.shadow,
                     onBoldChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(bold = it)) } },
@@ -653,38 +626,28 @@ fun STTTab(
 
             // Translation text color
             Spacer(Modifier.height(8.dp))
-            Text(stringResource(Res.string.stt_translation_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-            ColorPickerField(color = sttSettings.translationTextColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(translationTextColor = it)) } })
+            ColorPickerField(label = stringResource(Res.string.stt_translation_color), color = sttSettings.translationTextColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(translationTextColor = it)) } }, modifier = Modifier.fillMaxWidth())
 
             // Font type + size
             Spacer(Modifier.height(8.dp))
-            FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Column(modifier = Modifier.width(140.dp)) {
-                    Text(stringResource(Res.string.stt_font), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                    FontSettingsDropdown(value = sttSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(fontType = it)) } }, modifier = Modifier.fillMaxWidth())
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(stringResource(Res.string.stt_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                    NumberSettingsTextField(initialText = sttSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(fontSize = it)) } })
-                }
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                FontSettingsDropdown(label = stringResource(Res.string.stt_font), value = sttSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(fontType = it)) } }, modifier = Modifier.weight(1f))
+                NumberSettingsTextField(label = stringResource(Res.string.stt_size), initialText = sttSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(fontSize = it)) } })
             }
 
             // Background color
             Spacer(Modifier.height(8.dp))
-            Column(horizontalAlignment = Alignment.Start) {
-                Text(stringResource(Res.string.stt_background_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                ColorPickerField(color = if (sttSettings.backgroundColor == "transparent") "#1E1E2E" else sttSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundColor = it)) } })
-                Spacer(Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(Res.string.stt_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                    Spacer(Modifier.width(4.dp))
-                    androidx.compose.material3.Slider(
-                        value = sttSettings.backgroundOpacity / 100f,
-                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundOpacity = (it * 100).toInt())) } },
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text("${sttSettings.backgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
-                }
+            ColorPickerField(label = stringResource(Res.string.stt_background_color), color = sttSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundColor = it)) } }, modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.stt_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(Modifier.width(4.dp))
+                androidx.compose.material3.Slider(
+                    value = sttSettings.backgroundOpacity / 100f,
+                    onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundOpacity = (it * 100).toInt())) } },
+                    modifier = Modifier.weight(1f)
+                )
+                Text("${sttSettings.backgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
             }
 
             // Position on screen
@@ -723,45 +686,6 @@ fun STTTab(
     }
 }
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-@Composable
-private fun DropdownSelector(
-    label: String,
-    value: String,
-    options: List<Pair<String, String>>,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val displayText = options.firstOrNull { it.first == value }?.second ?: value
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it },
-        modifier = modifier
-    ) {
-        OutlinedTextField(
-            value = displayText,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(label) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
-            singleLine = true
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { (key, display) ->
-                DropdownMenuItem(
-                    text = { Text(display) },
-                    onClick = {
-                        onValueChange(key)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
 
 private fun applyHighlighting(
     text: String,

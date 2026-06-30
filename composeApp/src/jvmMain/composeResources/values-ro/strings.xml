@@ -506,7 +506,7 @@
     <string name="supported_formats">Suportate: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="slide_number">Slide-ul %1$d</string>
     <string name="remove">Elimină</string>
-    <string name="select_presentation_file_button">📄 Selectează Fișier</string>
+    <string name="select_presentation_file_button">Selectează Fișier</string>
     <string name="select_presentation_file_dialog">Selectați Fișierul de Prezentare</string>
 
     <!-- Projection Settings Tab -->

@@ -12,7 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
@@ -91,7 +92,7 @@ fun AddWebsiteDialog(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(6.dp))
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = displayTitle,
                             onValueChange = { displayTitle = it },
                             placeholder = {
@@ -102,7 +103,6 @@ fun AddWebsiteDialog(
                             },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
-                            textStyle = MaterialTheme.typography.bodyMedium
                         )
                     }
 
@@ -114,7 +114,7 @@ fun AddWebsiteDialog(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(6.dp))
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = url,
                             onValueChange = { url = it },
                             placeholder = {
@@ -125,7 +125,6 @@ fun AddWebsiteDialog(
                             },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
-                            textStyle = MaterialTheme.typography.bodyMedium
                         )
                     }
 
@@ -146,7 +145,7 @@ fun AddWebsiteDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(onClick = onDismiss) {
+                    TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                         Text(
                             stringResource(Res.string.cancel),
                             style = MaterialTheme.typography.labelLarge
@@ -154,6 +153,7 @@ fun AddWebsiteDialog(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
+                        shape = RoundedCornerShape(6.dp),
                         onClick = {
                             val finalUrl = url.trim()
                             val finalTitle = displayTitle.trim().ifBlank { finalUrl }

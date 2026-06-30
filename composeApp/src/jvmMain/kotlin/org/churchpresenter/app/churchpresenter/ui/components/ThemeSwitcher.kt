@@ -28,6 +28,7 @@ import churchpresenter.composeapp.generated.resources.forest_theme
 import churchpresenter.composeapp.generated.resources.light_theme
 import churchpresenter.composeapp.generated.resources.midnight_theme
 import churchpresenter.composeapp.generated.resources.mocha_theme
+import churchpresenter.composeapp.generated.resources.studio_theme
 import churchpresenter.composeapp.generated.resources.ocean_theme
 import churchpresenter.composeapp.generated.resources.rose_theme
 import churchpresenter.composeapp.generated.resources.system_theme
@@ -99,6 +100,7 @@ fun ThemeSwitcher(
                                     ThemeMode.MIDNIGHT -> Res.string.midnight_theme
                                     ThemeMode.FOREST -> Res.string.forest_theme
                                     ThemeMode.MOCHA -> Res.string.mocha_theme
+                                    ThemeMode.STUDIO -> Res.string.studio_theme
                                 }),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -126,5 +128,6 @@ private fun themeIcon(mode: ThemeMode): String = when (mode) {
     ThemeMode.MIDNIGHT -> "🌃"
     ThemeMode.FOREST -> "🌲"
     ThemeMode.MOCHA -> "☕"
+    ThemeMode.STUDIO -> "🎬"
 }
 

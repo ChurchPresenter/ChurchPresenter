@@ -27,6 +27,7 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
@@ -102,6 +103,7 @@ fun AboutDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(
+                        shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f),
                         onClick = {
                             Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=bug_report.md"))
@@ -110,6 +112,7 @@ fun AboutDialog(
                         Text(stringResource(Res.string.report_bug), maxLines = 2, textAlign = TextAlign.Center)
                     }
                     OutlinedButton(
+                        shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f),
                         onClick = {
                             Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"))
@@ -124,6 +127,7 @@ fun AboutDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(
+                        shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f),
                         onClick = {
                             val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
@@ -134,6 +138,7 @@ fun AboutDialog(
                         Text(stringResource(Res.string.open_crash_logs), maxLines = 2, textAlign = TextAlign.Center)
                     }
                     Button(
+                        shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f),
                         onClick = onDismiss
                     ) {

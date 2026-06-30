@@ -1280,6 +1280,8 @@ fun MainDesktop(
                             Tabs.DICTIONARY -> DictionaryTab(
                                 modifier = Modifier.fillMaxSize(),
                                 viewModel = dictionaryViewModel,
+                                appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { number, word, transliteration, definition ->
                                     scheduleActions.addDictionary(number, word, transliteration, definition)
                                 },

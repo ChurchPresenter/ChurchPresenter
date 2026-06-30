@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -191,7 +190,7 @@ fun ColorPickerDialog(
                                 RoundedCornerShape(8.dp),
                             ),
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = hexText,
                         onValueChange = { text ->
                             hexText = text
@@ -204,10 +203,9 @@ fun ColorPickerDialog(
                                 hexError = text.isNotEmpty() && text != "#"
                             }
                         },
-                        label = { Text(stringResource(Res.string.label_hex)) },
+                        label = stringResource(Res.string.label_hex),
                         isError = hexError,
                         singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -247,9 +245,10 @@ fun ColorPickerDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+                    TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
                     Spacer(Modifier.width(8.dp))
                     Button(
+                        shape = RoundedCornerShape(6.dp),
                         onClick = {
                             val hex = cpColorToHex(currentColor)
                             RecentColors.add(hex)

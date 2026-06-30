@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.update_dialog_dismiss
 import churchpresenter.composeapp.generated.resources.update_dialog_download_install
@@ -235,12 +236,14 @@ fun UpdateAvailableDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
                 ) {
-                    OutlinedButton(onClick = onDismiss) {
+                    OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                         Text(stringResource(Res.string.update_dialog_dismiss))
                     }
                     when {
                         downloadState is DownloadState.Done -> {
-                            Button(onClick = {
+                            Button(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = {
                                 val file = (downloadState as DownloadState.Done).file
                                 try {
                                     launchInstaller(file)
@@ -255,12 +258,14 @@ fun UpdateAvailableDialog(
                             }
                         }
                         downloadState is DownloadState.Downloading -> {
-                            Button(onClick = {}, enabled = false) {
+                            Button(shape = RoundedCornerShape(6.dp), onClick = {}, enabled = false) {
                                 Text(stringResource(Res.string.update_dialog_downloading))
                             }
                         }
                         downloadState is DownloadState.Error || updateInfo.downloadUrl == null -> {
-                            Button(onClick = {
+                            Button(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = {
                                 Desktop.getDesktop().browse(URI(updateInfo.releaseUrl))
                                 onDismiss()
                             }) {
@@ -268,7 +273,7 @@ fun UpdateAvailableDialog(
                             }
                         }
                         else -> {
-                            Button(onClick = startDownload) {
+                            Button(shape = RoundedCornerShape(6.dp), onClick = startDownload) {
                                 Text(stringResource(Res.string.update_dialog_download_install))
                             }
                         }

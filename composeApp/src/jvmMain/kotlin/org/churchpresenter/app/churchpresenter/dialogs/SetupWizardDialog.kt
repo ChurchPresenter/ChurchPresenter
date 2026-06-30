@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import churchpresenter.composeapp.generated.resources.ic_settings
@@ -79,6 +80,7 @@ import churchpresenter.composeapp.generated.resources.forest_theme
 import churchpresenter.composeapp.generated.resources.light_theme
 import churchpresenter.composeapp.generated.resources.midnight_theme
 import churchpresenter.composeapp.generated.resources.mocha_theme
+import churchpresenter.composeapp.generated.resources.studio_theme
 import churchpresenter.composeapp.generated.resources.ocean_theme
 import churchpresenter.composeapp.generated.resources.rose_theme
 import churchpresenter.composeapp.generated.resources.setup_step0_subtitle
@@ -280,7 +282,7 @@ fun SetupWizardDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             if (step < TOTAL_STEPS - 1) {
-                                TextButton(onClick = onDismiss) {
+                                TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                                     Text(stringResource(Res.string.setup_wizard_skip))
                                 }
                             } else {
@@ -289,7 +291,9 @@ fun SetupWizardDialog(
 
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 if (step > 0) {
-                                    OutlinedButton(onClick = {
+                                    OutlinedButton(
+                                        shape = RoundedCornerShape(6.dp),
+                                        onClick = {
                                         goingForward = false
                                         step--
                                     }) {
@@ -297,14 +301,16 @@ fun SetupWizardDialog(
                                     }
                                 }
                                 if (step < TOTAL_STEPS - 1) {
-                                    Button(onClick = {
+                                    Button(
+                                        shape = RoundedCornerShape(6.dp),
+                                        onClick = {
                                         goingForward = true
                                         step++
                                     }) {
                                         Text(stringResource(Res.string.setup_wizard_next))
                                     }
                                 } else {
-                                    Button(onClick = onDismiss) {
+                                    Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                                         Text(stringResource(Res.string.setup_wizard_done))
                                     }
                                 }
@@ -413,6 +419,7 @@ private fun ThemeStep(
         ThemeMode.MIDNIGHT to stringResource(Res.string.midnight_theme),
         ThemeMode.FOREST to stringResource(Res.string.forest_theme),
         ThemeMode.MOCHA  to stringResource(Res.string.mocha_theme),
+        ThemeMode.STUDIO to stringResource(Res.string.studio_theme),
     )
 
     Column(
@@ -534,7 +541,7 @@ private fun BibleStep(onOpenSettings: () -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
                 )
-                OutlinedButton(onClick = onOpenSettings) {
+                OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onOpenSettings) {
                     Image(
                         painter = painterResource(Res.drawable.ic_settings),
                         contentDescription = null,
@@ -615,7 +622,7 @@ private fun SongsStep(onOpenSettings: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
             )
-            OutlinedButton(onClick = onOpenSettings) {
+            OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onOpenSettings) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_settings),
                     contentDescription = null,
@@ -693,7 +700,7 @@ private fun ProjectionStep(onOpenSettings: () -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
                 )
-                OutlinedButton(onClick = onOpenSettings) {
+                OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onOpenSettings) {
                     Image(
                         painter = painterResource(Res.drawable.ic_settings),
                         contentDescription = null,
@@ -842,7 +849,9 @@ private fun VlcStep() {
                             )
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = {
+                            Button(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = {
                                 runCatching { Desktop.getDesktop().browse(URI(downloadUrl)) }
                             }) {
                                 Text(stringResource(when {
@@ -852,6 +861,7 @@ private fun VlcStep() {
                                 }))
                             }
                             OutlinedButton(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = {
                                     scope.launch {
                                         rechecking = true

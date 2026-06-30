@@ -489,7 +489,7 @@
     <string name="supported_formats">Pris en charge : PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="slide_number">Diapositive %1$d</string>
     <string name="remove">Supprimer</string>
-    <string name="select_presentation_file_button">📄 Sélectionner un fichier</string>
+    <string name="select_presentation_file_button">Sélectionner un fichier</string>
     <string name="select_presentation_file_dialog">Sélectionner un fichier de présentation</string>
 
     <!-- Projection Settings Tab -->

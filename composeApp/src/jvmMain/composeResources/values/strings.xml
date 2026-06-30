@@ -27,6 +27,7 @@
     <string name="starts_with">Starts With</string>
     <string name="exact_match">Exact Match</string>
     <string name="all_song_categories">All Song Categories</string>
+    <string name="filter">Filter</string>
     <string name="filter_colon">Filter:</string>
     <string name="filter_type_colon">Filter Type:</string>
     <string name="service_schedule">Service Schedule:</string>
@@ -56,6 +57,7 @@
     <string name="none">None</string>
     <string name="first_page">First Page</string>
     <string name="every_page">Every Page</string>
+    <string name="show">Show</string>
     <string name="show_title">Show Title:</string>
     <string name="show_number">Show Number:</string>
     <string name="font_size">Font Size:</string>
@@ -259,6 +261,7 @@
     <string name="midnight_theme">Midnight Theme</string>
     <string name="forest_theme">Forest Theme</string>
     <string name="mocha_theme">Mocha Theme</string>
+    <string name="studio_theme">Studio Theme</string>
     <!-- Placeholder strings for other tabs -->
     <string name="bible_tab_content">Bible tab content will be implemented</string>
     <string name="text_settings_tab_content">Text Settings and Colors tab content will be implemented</string>
@@ -521,7 +524,7 @@
     <string name="supported_formats">Supported: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="slide_number">Slide %1$d</string>
     <string name="remove">Remove</string>
-    <string name="select_presentation_file_button">📄 Select File</string>
+    <string name="select_presentation_file_button">Select File</string>
     <string name="select_presentation_file_dialog">Select Presentation File</string>
 
     <!-- Projection Settings Tab -->
@@ -567,6 +570,9 @@
     <string name="gradient_top_color">Top Color:</string>
     <string name="gradient_bottom_color">Bottom Color:</string>
     <string name="gradient_opacity">Opacity</string>
+    <string name="background_opacity">Background Opacity</string>
+    <string name="gradient_top_opacity">Top Opacity</string>
+    <string name="gradient_bottom_opacity">Bottom Opacity</string>
     <string name="gradient_position">Transition Position</string>
 
     <!-- System Settings -->
@@ -1202,6 +1208,7 @@
     <string name="stage_monitor_show_timer">Show Countdown Timer</string>
     <string name="stage_monitor_show_section_label">Show Section Label</string>
     <string name="stage_monitor_show_notes">Show Presenter Notes</string>
+    <string name="general">General</string>
     <string name="stage_monitor_section_general">General</string>
     <string name="stage_monitor_section_current">Current Slide</string>
     <string name="stage_monitor_section_next">Next Slide Preview</string>
@@ -1316,6 +1323,8 @@
     <string name="qa_sort_oldest">Oldest First</string>
     <string name="qa_sort_most_votes">Most Votes</string>
     <string name="qa_sort_least_votes">Least Votes</string>
+    <string name="qa_filter_label">Filter</string>
+    <string name="qa_sort_label">Sort</string>
     <string name="qa_add">Add</string>
     <string name="qa_clear_all_confirm_message">Are you sure you want to clear all questions? This cannot be undone.</string>
     <string name="qa_clear">Clear</string>
@@ -1339,14 +1348,14 @@
     <string name="stt_layout_stacked_inverse">Stacked (Inverse)</string>
     <string name="stt_layout_side_by_side">Side by Side</string>
     <string name="stt_layout_side_by_side_inverse">Side by Side (Inverse)</string>
-    <string name="stt_max_segments">Max Segments:</string>
-    <string name="stt_max_lines">Max Lines:</string>
-    <string name="stt_line_spacing">Line Spacing %:</string>
+    <string name="stt_max_segments">Max Segments</string>
+    <string name="stt_max_lines">Max Lines</string>
+    <string name="stt_line_spacing">Line Spacing %</string>
     <string name="stt_word_highlighting">Word Highlighting</string>
     <string name="stt_in_progress_text">In-Progress Text</string>
     <string name="stt_translation_in_progress">Translation In-Progress</string>
     <string name="stt_drip_feed">Drip Feed</string>
-    <string name="stt_drip_feed_speed">Speed (ms/word):</string>
+    <string name="stt_drip_feed_speed">Speed (ms/word)</string>
     <string name="stt_live_preview">Live Preview</string>
     <string name="stt_not_connected">Not connected. Enter the STT server URL and click Connect.</string>
     <string name="stt_waiting_for_transcription">Waiting for transcription…</string>
@@ -1444,6 +1453,7 @@
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>
+    <string name="obs_section_connection">OBS WebSocket</string>
     <string name="obs_description">Automatically switch OBS Studio scenes when content changes.</string>
     <string name="obs_enable">Connect to OBS Studio</string>
     <string name="obs_host">Host</string>
@@ -1635,6 +1645,7 @@
     <string name="atem_loading_slots">Loading slots…</string>
     <string name="atem_slots_error">Could not load slots: %1$s</string>
     <string name="atem_not_configured">Configure ATEM in Settings to enable this button.</string>
+    <string name="atem_section_connection">Blackmagic ATEM</string>
     <string name="atem_section_upload_defaults">Upload Defaults</string>
     <string name="atem_slot_unnamed">Slot %1$d</string>
     <string name="atem_slot_named">Slot %1$d – %2$s</string>

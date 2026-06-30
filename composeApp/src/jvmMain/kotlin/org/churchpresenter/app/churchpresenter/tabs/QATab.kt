@@ -26,8 +26,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -41,10 +39,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -59,14 +57,13 @@ import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -87,9 +84,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -100,6 +96,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.qa_admin_panel
 import churchpresenter.composeapp.generated.resources.qa_add_question_hint
 import churchpresenter.composeapp.generated.resources.qa_admin_password
@@ -184,6 +181,8 @@ import churchpresenter.composeapp.generated.resources.qa_copy_url
 import churchpresenter.composeapp.generated.resources.qa_export_clear
 import churchpresenter.composeapp.generated.resources.qa_opacity
 import churchpresenter.composeapp.generated.resources.qa_sort
+import churchpresenter.composeapp.generated.resources.qa_filter_label
+import churchpresenter.composeapp.generated.resources.qa_sort_label
 import churchpresenter.composeapp.generated.resources.qa_sort_least_votes
 import churchpresenter.composeapp.generated.resources.qa_sort_most_votes
 import churchpresenter.composeapp.generated.resources.qa_sort_newest
@@ -197,6 +196,7 @@ import churchpresenter.composeapp.generated.resources.qa_done
 import churchpresenter.composeapp.generated.resources.qa_incoming_approved
 import churchpresenter.composeapp.generated.resources.qa_questions
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
@@ -216,7 +216,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun QATab(
     modifier: Modifier = Modifier,
@@ -283,7 +283,6 @@ fun QATab(
         stringResource(Res.string.qa_denied)
     )
     val filterCounts = listOf(allCount, pendingCount, approvedCount, incomingApprovedCount, doneCount, deniedCount)
-    var filterDropdownExpanded by remember { mutableStateOf(false) }
 
     fun <T> List<T>.applySortMode(sortMode: Int, timestamp: (T) -> Long, voteCount: (T) -> Int): List<T> {
         return when (sortMode) {
@@ -354,7 +353,7 @@ fun QATab(
                     Text(
                         stringResource(Res.string.qa_server_not_running),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFE53935)
+                        color = MaterialTheme.colorScheme.error
                     )
                 } else if (sessionActive) {
                     Button(
@@ -364,7 +363,11 @@ fun QATab(
                             presenterManager.setShowQRCodeOnDisplay(false)
                             presenting(Presenting.NONE)
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        ),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(4.dp))
@@ -373,14 +376,20 @@ fun QATab(
                 } else {
                     Button(
                         onClick = { qaManager.toggleSession() },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF43A047)),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.inverseSurface,
+                            contentColor = MaterialTheme.colorScheme.inverseOnSurface
+                        ),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(4.dp))
                         Text(stringResource(Res.string.qa_new_session))
                     }
                     if (qaManager.history.isNotEmpty()) {
-                        OutlinedButton(onClick = { qaManager.restoreFromHistory() }) {
+                        OutlinedButton(onClick = { qaManager.restoreFromHistory() },
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
                             Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(4.dp))
                             Text(stringResource(Res.string.qa_resume, qaManager.history.size))
@@ -390,9 +399,9 @@ fun QATab(
 
                 Spacer(Modifier.weight(1f))
 
-                StatBadge(stringResource(Res.string.qa_incoming), pendingCount, Color(0xFFFFA726))
+                StatBadge(stringResource(Res.string.qa_incoming), pendingCount, MaterialTheme.colorScheme.tertiary)
                 Spacer(Modifier.width(8.dp))
-                StatBadge(stringResource(Res.string.qa_finished), doneCount + deniedCount, Color(0xFF42A5F5))
+                StatBadge(stringResource(Res.string.qa_finished), doneCount + deniedCount, MaterialTheme.colorScheme.secondary)
 
                 Spacer(Modifier.width(16.dp))
 
@@ -400,7 +409,8 @@ fun QATab(
                 if (questions.isNotEmpty()) {
                     OutlinedButton(
                         onClick = { showClearConfirm = true },
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFE53935)),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp))
@@ -410,80 +420,43 @@ fun QATab(
             }
 
             // Filter: dropdown for question views + History tab
+            val sortLabels = listOf(
+                stringResource(Res.string.qa_sort_newest),
+                stringResource(Res.string.qa_sort_oldest),
+                stringResource(Res.string.qa_sort_most_votes),
+                stringResource(Res.string.qa_sort_least_votes)
+            )
+            val filterItemsWithCount = filterLabels.mapIndexed { i, label -> "$label (${filterCounts[i]})" }
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Dropdown filter button
-                Box {
-                    OutlinedButton(
-                        onClick = { filterDropdownExpanded = true },
-                        modifier = Modifier.height(32.dp),
-                        contentPadding = ButtonDefaults.TextButtonContentPadding,
-                        colors = if (selectedFilter < 6) ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                        ) else ButtonDefaults.outlinedButtonColors()
-                    ) {
-                        Text(
-                            if (selectedFilter < 6) filterLabels[selectedFilter] else stringResource(Res.string.qa_questions),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
-                    }
-                    androidx.compose.material3.DropdownMenu(
-                        expanded = filterDropdownExpanded,
-                        onDismissRequest = { filterDropdownExpanded = false }
-                    ) {
-                        filterLabels.forEachIndexed { index, label ->
-                            val count = filterCounts.getOrElse(index) { 0 }
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text("$label ($count)") },
-                                onClick = { selectedFilter = index; filterDropdownExpanded = false }
-                            )
-                        }
-                    }
-                }
-
-                // Sort dropdown
-                var sortDropdownExpanded by remember { mutableStateOf(false) }
-                val sortLabels = listOf(
-                    stringResource(Res.string.qa_sort_newest),
-                    stringResource(Res.string.qa_sort_oldest),
-                    stringResource(Res.string.qa_sort_most_votes),
-                    stringResource(Res.string.qa_sort_least_votes)
+                DropdownSelector(
+                    label = stringResource(Res.string.qa_filter_label),
+                    items = filterItemsWithCount,
+                    selected = if (selectedFilter < 6) filterItemsWithCount[selectedFilter] else filterItemsWithCount[0],
+                    onSelectedChange = { sel -> selectedFilter = filterItemsWithCount.indexOf(sel).coerceAtLeast(0) }
                 )
-                Box {
-                    OutlinedButton(
-                        onClick = { sortDropdownExpanded = true },
-                        modifier = Modifier.height(32.dp),
-                        contentPadding = ButtonDefaults.TextButtonContentPadding
-                    ) {
-                        Text(stringResource(Res.string.qa_sort, sortLabels[sortMode]), style = MaterialTheme.typography.labelMedium)
-                    }
-                    androidx.compose.material3.DropdownMenu(
-                        expanded = sortDropdownExpanded,
-                        onDismissRequest = { sortDropdownExpanded = false }
-                    ) {
-                        sortLabels.forEachIndexed { index, label ->
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text(label) },
-                                onClick = { sortMode = index; sortDropdownExpanded = false }
-                            )
-                        }
-                    }
-                }
+
+                DropdownSelector(
+                    label = stringResource(Res.string.qa_sort_label),
+                    items = sortLabels,
+                    selected = sortLabels[sortMode],
+                    onSelectedChange = { sel -> sortMode = sortLabels.indexOf(sel).coerceAtLeast(0) }
+                )
 
                 Spacer(Modifier.weight(1f))
 
                 // History button
                 OutlinedButton(
                     onClick = { selectedFilter = 6 },
-                    modifier = Modifier.height(32.dp),
+                    modifier = Modifier.height(42.dp),
                     contentPadding = ButtonDefaults.TextButtonContentPadding,
                     colors = if (selectedFilter == 6) ButtonDefaults.outlinedButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                    ) else ButtonDefaults.outlinedButtonColors()
+                    ) else ButtonDefaults.outlinedButtonColors(),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text("${stringResource(Res.string.qa_history)} ($historyCount)", style = MaterialTheme.typography.labelMedium)
                 }
@@ -496,19 +469,43 @@ fun QATab(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = addQuestionText,
-                        onValueChange = { addQuestionText = it },
-                        placeholder = { Text(stringResource(Res.string.qa_add_question_hint)) },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true
-                    )
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(42.dp)
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                            BasicTextField(
+                                value = addQuestionText,
+                                onValueChange = { addQuestionText = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                decorationBox = { innerTextField ->
+                                    if (addQuestionText.isEmpty()) {
+                                        Text(stringResource(Res.string.qa_add_question_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
+                                    }
+                                    innerTextField()
+                                }
+                            )
+                        }
+                        if (addQuestionText.isNotEmpty()) {
+                            FilledIconButton(onClick = { addQuestionText = "" }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = null, modifier = Modifier.size(14.dp))
+                            }
+                        }
+                    }
                     Button(
                         onClick = {
                             qaManager.addQuestion(addQuestionText)
                             addQuestionText = ""
                         },
-                        enabled = addQuestionText.isNotBlank()
+                        enabled = addQuestionText.isNotBlank(),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(stringResource(Res.string.qa_add))
                     }
@@ -520,7 +517,7 @@ fun QATab(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF43A047).copy(alpha = 0.15f))
+                        .background(MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.12f))
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -538,7 +535,8 @@ fun QATab(
                             presenterManager.setDisplayedQuestion(null)
                             presenterManager.setShowQRCodeOnDisplay(false)
                             presenting(Presenting.NONE)
-                        }
+                        },
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(stringResource(Res.string.tooltip_clear_display))
                     }
@@ -591,7 +589,9 @@ fun QATab(
                                     }
                                 }
                             }
-                        }) {
+                        },
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
                             Text(stringResource(Res.string.qa_export_to_file), color = MaterialTheme.colorScheme.onSurface)
                         }
                         OutlinedButton(onClick = {
@@ -615,12 +615,15 @@ fun QATab(
                                     }
                                 }
                             }
-                        }) {
+                        },
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
                             Text(stringResource(Res.string.qa_import_from_file), color = MaterialTheme.colorScheme.onSurface)
                         }
                         OutlinedButton(
                             onClick = { qaManager.clearHistory() },
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFE53935))
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                            shape = RoundedCornerShape(8.dp)
                         ) {
                             Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
@@ -679,17 +682,21 @@ fun QATab(
                 title = { Text(stringResource(Res.string.qa_clear_all_questions)) },
                 text = { Text(stringResource(Res.string.qa_clear_all_confirm_message)) },
                 confirmButton = {
-                    TextButton(onClick = {
+                    TextButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = {
                         qaManager.clearAll()
                         presenterManager.setDisplayedQuestion(null)
                         presenterManager.setShowQRCodeOnDisplay(false)
                         presenting(Presenting.NONE)
                         showClearConfirm = false
-                    }) { Text(stringResource(Res.string.qa_clear), color = Color(0xFFE53935)) }
+                    }) { Text(stringResource(Res.string.qa_clear), color = MaterialTheme.colorScheme.error) }
                 },
                 dismissButton = {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = {
+                        TextButton(
+                            shape = RoundedCornerShape(6.dp),
+                            onClick = {
                             // Close the confirm dialog before the save dialog opens and snapshot
                             // the questions so a concurrent clear cannot empty the export
                             showClearConfirm = false
@@ -722,7 +729,7 @@ fun QATab(
                                 }
                             }
                         }) { Text(stringResource(Res.string.qa_export_clear)) }
-                        TextButton(onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }
+                        TextButton(shape = RoundedCornerShape(6.dp), onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }
                     }
                 }
             )
@@ -765,7 +772,8 @@ fun QATab(
                 OutlinedButton(
                     onClick = { clipboardManager.setText(AnnotatedString(submissionUrl)) },
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                    contentPadding = ButtonDefaults.TextButtonContentPadding
+                    contentPadding = ButtonDefaults.TextButtonContentPadding,
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(stringResource(Res.string.qa_copy_url), fontSize = 11.sp)
                 }
@@ -779,7 +787,8 @@ fun QATab(
                         if (qaManager.showQRCodeOnDisplay) { presenterManager.setDisplayedQuestion(null); presenting(Presenting.QA) }
                         else if (qaManager.displayedQuestion == null) { presenting(Presenting.NONE) }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Icon(Icons.Default.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
@@ -812,7 +821,9 @@ fun QATab(
 
                 when (tunnelStatus) {
                     TunnelStatus.Idle -> {
-                        Button(onClick = onStartTunnel, modifier = Modifier.fillMaxWidth()) {
+                        Button(onClick = onStartTunnel, modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
                             Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
                             Text(stringResource(Res.string.qa_enable_public_access), fontSize = 12.sp)
@@ -838,8 +849,12 @@ fun QATab(
                                 onStopTunnel()
                                 onQaDisplayUrlChanged(serverUrl)
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                            modifier = Modifier.fillMaxWidth()
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp)
                         ) {
                             Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
@@ -858,7 +873,8 @@ fun QATab(
                                 colors = if (isLocal) ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                ) else ButtonDefaults.outlinedButtonColors()
+                                ) else ButtonDefaults.outlinedButtonColors(),
+                                shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(stringResource(Res.string.qa_local), fontSize = 11.sp)
                             }
@@ -868,7 +884,8 @@ fun QATab(
                                 colors = if (!isLocal) ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                ) else ButtonDefaults.outlinedButtonColors()
+                                ) else ButtonDefaults.outlinedButtonColors(),
+                                shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(stringResource(Res.string.qa_public), fontSize = 11.sp)
                             }
@@ -879,7 +896,7 @@ fun QATab(
                             Text(
                                 tunnelStatus.url,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFF43A047),
+                                color = MaterialTheme.colorScheme.inverseSurface,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -892,7 +909,9 @@ fun QATab(
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
-                        Button(onClick = onStartTunnel, modifier = Modifier.fillMaxWidth()) {
+                        Button(onClick = onStartTunnel, modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
                             Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
                             Text(stringResource(Res.string.qa_retry), fontSize = 12.sp)
@@ -918,7 +937,8 @@ fun QATab(
                             colors = if (!adminUseTunnel) ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ) else ButtonDefaults.outlinedButtonColors()
+                            ) else ButtonDefaults.outlinedButtonColors(),
+                            shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(stringResource(Res.string.qa_local), fontSize = 11.sp)
                         }
@@ -928,7 +948,8 @@ fun QATab(
                             colors = if (adminUseTunnel) ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ) else ButtonDefaults.outlinedButtonColors()
+                            ) else ButtonDefaults.outlinedButtonColors(),
+                            shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(stringResource(Res.string.qa_public), fontSize = 11.sp)
                         }
@@ -946,7 +967,8 @@ fun QATab(
                 OutlinedButton(
                     onClick = { clipboardManager.setText(AnnotatedString(adminQrUrl.ifEmpty { adminDisplayUrl })) },
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                    contentPadding = ButtonDefaults.TextButtonContentPadding
+                    contentPadding = ButtonDefaults.TextButtonContentPadding,
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(stringResource(Res.string.qa_copy_url), fontSize = 11.sp)
                 }
@@ -961,11 +983,13 @@ fun QATab(
                 onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(votingEnabled = !s.qaSettings.votingEnabled)) } },
                 modifier = Modifier.fillMaxWidth(),
                 colors = if (qaSettings.votingEnabled) ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF43A047),
-                    contentColor = Color.White
-                ) else ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                )
+                    containerColor = MaterialTheme.colorScheme.inverseSurface,
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface
+                ) else ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(if (qaSettings.votingEnabled) stringResource(Res.string.qa_voting_enabled) else stringResource(Res.string.qa_voting_disabled))
             }
@@ -977,37 +1001,45 @@ fun QATab(
             Text(stringResource(Res.string.qa_display_styling), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             Spacer(Modifier.height(8.dp))
 
-            OutlinedTextField(
-                value = qaSettings.qrCodeMessage,
-                onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } },
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = MaterialTheme.typography.bodyMedium,
-                singleLine = true,
-                label = { Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.bodySmall) },
-                placeholder = { Text(strQrMessageDefault, style = MaterialTheme.typography.bodySmall) },
-                trailingIcon = {
-                    IconButton(
-                        onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
-                        modifier = Modifier.size(28.dp),
-                    ) {
-                        Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))
-                    }
-                },
-                colors = OutlinedTextFieldDefaults.colors().copy(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                ),
-            )
+            Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+            Spacer(Modifier.height(4.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(42.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                    BasicTextField(
+                        value = qaSettings.qrCodeMessage,
+                        onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        decorationBox = { innerTextField ->
+                            if (qaSettings.qrCodeMessage.isEmpty()) {
+                                Text(strQrMessageDefault, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
+                            }
+                            innerTextField()
+                        }
+                    )
+                }
+                FilledIconButton(
+                    onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
+                    modifier = Modifier.size(30.dp),
+                    shape = RoundedCornerShape(5.dp),
+                    colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                ) {
+                    Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))
+                }
+            }
             Spacer(Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(stringResource(Res.string.qa_qr_fg_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                    ColorPickerField(color = qaSettings.qrForegroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrForegroundColor = it)) } }, modifier = Modifier.fillMaxWidth())
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(stringResource(Res.string.qa_qr_bg_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                    ColorPickerField(color = qaSettings.qrBackgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundColor = it)) } }, modifier = Modifier.fillMaxWidth())
-                }
+                ColorPickerField(label = stringResource(Res.string.qa_qr_fg_color), color = qaSettings.qrForegroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrForegroundColor = it)) } }, modifier = Modifier.weight(1f))
+                ColorPickerField(label = stringResource(Res.string.qa_qr_bg_color), color = qaSettings.qrBackgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundColor = it)) } }, modifier = Modifier.weight(1f))
             }
             Spacer(Modifier.height(4.dp))
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -1022,18 +1054,15 @@ fun QATab(
             }
 
             Spacer(Modifier.height(8.dp))
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
-                Text(stringResource(Res.string.qa_text_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ColorPickerField(color = qaSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textColor = it)) } })
-                    TextStyleButtons(
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ColorPickerField(label = stringResource(Res.string.qa_text_color), color = qaSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textColor = it)) } }, modifier = Modifier.weight(1f))
+                TextStyleButtons(
                         bold = qaSettings.bold, italic = qaSettings.italic, underline = qaSettings.underline, shadow = qaSettings.shadow,
                         onBoldChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(bold = it)) } },
                         onItalicChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(italic = it)) } },
                         onUnderlineChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(underline = it)) } },
                         onShadowChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadow = it)) } }
-                    )
-                }
+                )
             }
 
             AnimatedVisibility(visible = qaSettings.shadow) {
@@ -1046,21 +1075,14 @@ fun QATab(
             }
 
             Spacer(Modifier.height(8.dp))
-            FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Column(modifier = Modifier.width(140.dp)) {
-                    Text(stringResource(Res.string.qa_font), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                    FontSettingsDropdown(value = qaSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontType = it)) } }, modifier = Modifier.fillMaxWidth())
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(stringResource(Res.string.qa_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                    NumberSettingsTextField(initialText = qaSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontSize = it)) } })
-                }
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                FontSettingsDropdown(label = stringResource(Res.string.qa_font), value = qaSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontType = it)) } }, modifier = Modifier.weight(1f))
+                NumberSettingsTextField(label = stringResource(Res.string.qa_size), initialText = qaSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontSize = it)) } })
             }
 
             Spacer(Modifier.height(8.dp))
             Column(horizontalAlignment = Alignment.Start) {
-                Text(stringResource(Res.string.qa_background_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                ColorPickerField(color = if (qaSettings.backgroundColor == "transparent") "#1E1E2E" else qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } })
+                ColorPickerField(label = stringResource(Res.string.qa_background_color), color = qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } }, modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
@@ -1113,80 +1135,53 @@ fun QATab(
             Text(stringResource(Res.string.qa_settings_section), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             Spacer(Modifier.height(8.dp))
 
-            var cooldownText by remember(qaSettings.rateLimitCooldownSeconds) { mutableStateOf(qaSettings.rateLimitCooldownSeconds.toString()) }
-            OutlinedTextField(
-                value = cooldownText,
-                onValueChange = { raw ->
-                    val filtered = raw.filter { it.isDigit() }
-                    cooldownText = filtered
-                    val v = filtered.toIntOrNull()
-                    if (v != null && v in 0..600) {
-                        onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = v)) }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = MaterialTheme.typography.bodyMedium,
-                singleLine = true,
-                label = { Text(stringResource(Res.string.qa_cooldown_label), style = MaterialTheme.typography.bodySmall) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                trailingIcon = {
-                    Column(
-                        modifier = Modifier.padding(end = 4.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        IconButton(
-                            onClick = {
-                                val v = (cooldownText.toIntOrNull() ?: 0) + 1
-                                if (v in 0..600) { cooldownText = v.toString(); onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = v)) } }
-                            },
-                            modifier = Modifier.size(20.dp, 16.dp)
-                        ) {
-                            Image(painter = painterResource(Res.drawable.arrow_up), contentDescription = stringResource(Res.string.increment), colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface), modifier = Modifier.size(12.dp))
-                        }
-                        IconButton(
-                            onClick = {
-                                val v = (cooldownText.toIntOrNull() ?: 0) - 1
-                                if (v in 0..600) { cooldownText = v.toString(); onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = v)) } }
-                            },
-                            modifier = Modifier.size(20.dp, 16.dp)
-                        ) {
-                            Image(painter = painterResource(Res.drawable.arrow_down), contentDescription = stringResource(Res.string.decrement), colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface), modifier = Modifier.size(12.dp))
-                        }
-                    }
-                },
-                colors = OutlinedTextFieldDefaults.colors().copy(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                ),
+            NumberSettingsTextField(
+                label = stringResource(Res.string.qa_cooldown_label),
+                initialText = qaSettings.rateLimitCooldownSeconds,
+                range = 0..600,
+                onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = it)) } },
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(Modifier.height(12.dp))
 
             var passwordVisible by remember { mutableStateOf(false) }
-            OutlinedTextField(
-                value = qaSettings.adminPassword,
-                onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(adminPassword = it)) } },
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = MaterialTheme.typography.bodyMedium,
-                singleLine = true,
-                label = { Text(stringResource(Res.string.qa_admin_password), style = MaterialTheme.typography.bodySmall) },
-                placeholder = { Text(stringResource(Res.string.qa_no_password), style = MaterialTheme.typography.bodySmall) },
-                colors = OutlinedTextFieldDefaults.colors().copy(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                ),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                },
-            )
+            Text(stringResource(Res.string.qa_admin_password), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+            Spacer(Modifier.height(4.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(42.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                    BasicTextField(
+                        value = qaSettings.adminPassword,
+                        onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(adminPassword = it)) } },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        decorationBox = { innerTextField ->
+                            if (qaSettings.adminPassword.isEmpty()) {
+                                Text(stringResource(Res.string.qa_no_password), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
+                            }
+                            innerTextField()
+                        }
+                    )
+                }
+                FilledIconButton(onClick = { passwordVisible = !passwordVisible }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
@@ -1206,10 +1201,10 @@ private fun QuestionRow(
 ) {
     val bgColor = if (isDisplayed) Color(0xFF43A047).copy(alpha = 0.1f) else Color.Transparent
     val statusColor = when (question.status) {
-        QuestionStatus.PENDING -> Color(0xFFFFA726)
-        QuestionStatus.APPROVED -> Color(0xFF66BB6A)
-        QuestionStatus.DENIED -> Color(0xFFEF5350)
-        QuestionStatus.DONE -> Color(0xFF42A5F5)
+        QuestionStatus.PENDING -> MaterialTheme.colorScheme.tertiary
+        QuestionStatus.APPROVED -> MaterialTheme.colorScheme.inverseSurface
+        QuestionStatus.DENIED -> MaterialTheme.colorScheme.error
+        QuestionStatus.DONE -> MaterialTheme.colorScheme.secondary
     }
     val strDone = stringResource(Res.string.qa_done)
     val strDenied = stringResource(Res.string.qa_denied)
@@ -1258,21 +1253,21 @@ private fun QuestionRow(
                 if (question.upvotes > 0 || question.downvotes > 0) {
                     Row(modifier = Modifier.padding(end = 6.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                         if (question.upvotes > 0) {
-                            Surface(shape = RoundedCornerShape(4.dp), color = Color(0xFFE3F2FD)) {
+                            Surface(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
                                 Text(
                                     text = "\u25B2 ${question.upvotes}",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFF1565C0),
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                                 )
                             }
                         }
                         if (question.downvotes > 0) {
-                            Surface(shape = RoundedCornerShape(4.dp), color = Color(0xFFFFEBEE)) {
+                            Surface(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.errorContainer) {
                                 Text(
                                     text = "\u25BC ${question.downvotes}",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFFC62828),
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                                 )
                             }
@@ -1362,7 +1357,7 @@ private fun QuestionRow(
                     Icon(
                         imageVector = if (editing) Icons.Default.Check else Icons.Default.Edit,
                         contentDescription = if (editing) strSave else strEdit,
-                        tint = if (editing) Color(0xFF43A047) else Color(0xFFFF9800)
+                        tint = if (editing) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.tertiary
                     )
                 }
 
@@ -1376,71 +1371,71 @@ private fun QuestionRow(
                     when (question.status) {
                         QuestionStatus.PENDING -> {
                             QAIconButton(tooltip = strApprove, onClick = onApprove) {
-                                Icon(Icons.Default.Check, strApprove, tint = Color(0xFF43A047))
+                                Icon(Icons.Default.Check, strApprove, tint = MaterialTheme.colorScheme.inverseSurface)
                             }
                             QAIconButton(tooltip = strDeny, onClick = onDeny) {
-                                Icon(Icons.Default.Close, strDeny, tint = Color(0xFFE53935))
+                                Icon(Icons.Default.Close, strDeny, tint = MaterialTheme.colorScheme.error)
                             }
                         }
                         QuestionStatus.APPROVED -> {
                             if (!isDisplayed) {
                                 QAIconButton(tooltip = strGoLive, onClick = onDisplay) {
-                                    Icon(Icons.Default.Tv, strGoLive, tint = Color(0xFF1E88E5))
+                                    Icon(Icons.Default.Tv, strGoLive, tint = MaterialTheme.colorScheme.secondary)
                                 }
                             }
                             QAIconButton(tooltip = if (isDisplayed) strDoneClear else strMarkDone, onClick = onMarkDone) {
                                 Icon(
                                     Icons.Default.Done,
                                     contentDescription = if (isDisplayed) strDoneClear else strMarkDone,
-                                    tint = Color(0xFF42A5F5)
+                                    tint = MaterialTheme.colorScheme.secondary
                                 )
                             }
                             QAIconButton(tooltip = strDeny, onClick = onDeny) {
-                                Icon(Icons.Default.Close, strDeny, tint = Color(0xFFE53935))
+                                Icon(Icons.Default.Close, strDeny, tint = MaterialTheme.colorScheme.error)
                             }
                         }
                         QuestionStatus.DONE -> {
                             QAIconButton(tooltip = strBackToIncoming, onClick = onApprove) {
-                                Icon(Icons.Default.Refresh, strBackToIncoming, tint = Color(0xFFFFA726))
+                                Icon(Icons.Default.Refresh, strBackToIncoming, tint = MaterialTheme.colorScheme.tertiary)
                             }
                             if (confirmGoLive) {
-                                Text(stringResource(Res.string.qa_confirm_go_live_prompt), style = MaterialTheme.typography.labelSmall, color = Color(0xFF1E88E5), modifier = Modifier.padding(end = 4.dp))
+                                Text(stringResource(Res.string.qa_confirm_go_live_prompt), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(end = 4.dp))
                                 QAIconButton(tooltip = strConfirmGoLive, onClick = { confirmGoLive = false; onApprove(); onDisplay() }) {
-                                    Icon(Icons.Default.Tv, strConfirmGoLive, tint = Color(0xFF1E88E5))
+                                    Icon(Icons.Default.Tv, strConfirmGoLive, tint = MaterialTheme.colorScheme.secondary)
                                 }
                                 QAIconButton(tooltip = strCancel, onClick = { confirmGoLive = false }) {
                                     Icon(Icons.Default.Close, strCancel, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             } else {
                                 QAIconButton(tooltip = strGoLive, onClick = { confirmGoLive = true }) {
-                                    Icon(Icons.Default.Tv, strGoLive, tint = Color(0xFF1E88E5))
+                                    Icon(Icons.Default.Tv, strGoLive, tint = MaterialTheme.colorScheme.secondary)
                                 }
                             }
                         }
                         QuestionStatus.DENIED -> {
                             QAIconButton(tooltip = strApprove, onClick = onApprove) {
-                                Icon(Icons.Default.Check, strApprove, tint = Color(0xFF43A047))
+                                Icon(Icons.Default.Check, strApprove, tint = MaterialTheme.colorScheme.inverseSurface)
                             }
                             if (confirmGoLive) {
-                                Text(stringResource(Res.string.qa_confirm_go_live_prompt), style = MaterialTheme.typography.labelSmall, color = Color(0xFFFFA726), modifier = Modifier.padding(end = 4.dp))
+                                Text(stringResource(Res.string.qa_confirm_go_live_prompt), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary, modifier = Modifier.padding(end = 4.dp))
                                 QAIconButton(tooltip = strConfirmGoLive, onClick = { confirmGoLive = false; onApprove(); onDisplay() }) {
-                                    Icon(Icons.Default.Tv, strConfirmGoLive, tint = Color(0xFF1E88E5))
+                                    Icon(Icons.Default.Tv, strConfirmGoLive, tint = MaterialTheme.colorScheme.secondary)
                                 }
                                 QAIconButton(tooltip = strCancel, onClick = { confirmGoLive = false }) {
                                     Icon(Icons.Default.Close, strCancel, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             } else {
                                 QAIconButton(tooltip = strGoLive, onClick = { confirmGoLive = true }) {
-                                    Icon(Icons.Default.Tv, strGoLive, tint = Color(0xFF1E88E5).copy(alpha = 0.5f))
+                                    Icon(Icons.Default.Tv, strGoLive, tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
                                 }
                             }
                         }
                     }
 
                     if (confirmDelete) {
-                        Text(strConfirmDelete, style = MaterialTheme.typography.labelSmall, color = Color(0xFFE53935), modifier = Modifier.padding(end = 4.dp))
+                        Text(strConfirmDelete, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(end = 4.dp))
                         QAIconButton(tooltip = strDelete, onClick = { confirmDelete = false; onDelete() }) {
-                            Icon(Icons.Default.Delete, strDelete, tint = Color(0xFFE53935))
+                            Icon(Icons.Default.Delete, strDelete, tint = MaterialTheme.colorScheme.error)
                         }
                         QAIconButton(tooltip = strCancel, onClick = { confirmDelete = false }) {
                             Icon(Icons.Default.Close, strCancel, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -1456,15 +1451,29 @@ private fun QuestionRow(
 
         // Edit text field
         if (editing) {
-            OutlinedTextField(
-                value = editText,
-                onValueChange = { editText = it },
-                modifier = Modifier.fillMaxWidth().padding(start = 50.dp, top = 4.dp),
-                textStyle = MaterialTheme.typography.bodyMedium,
-                singleLine = false,
-                maxLines = 5,
-                placeholder = { Text(stringResource(Res.string.qa_edit_question_hint)) },
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 50.dp, top = 4.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                BasicTextField(
+                    value = editText,
+                    onValueChange = { editText = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    maxLines = 5,
+                    decorationBox = { innerTextField ->
+                        if (editText.isEmpty()) {
+                            Text(stringResource(Res.string.qa_edit_question_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                        }
+                        innerTextField()
+                    }
+                )
+            }
         }
     }
 }
@@ -1474,7 +1483,7 @@ private fun QuestionRow(
 private fun QAIconButton(
     tooltip: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.size(30.dp),
     enabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
@@ -1495,7 +1504,18 @@ private fun QAIconButton(
         },
         tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
     ) {
-        IconButton(onClick = onClick, enabled = enabled, modifier = modifier) {
+        FilledIconButton(
+            onClick = onClick,
+            enabled = enabled,
+            modifier = modifier,
+            shape = RoundedCornerShape(5.dp),
+            colors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                disabledContainerColor = androidx.compose.ui.graphics.Color.Transparent,
+                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            )
+        ) {
             content()
         }
     }

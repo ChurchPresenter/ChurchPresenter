@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,10 +61,13 @@ import churchpresenter.composeapp.generated.resources.obs_port
 import churchpresenter.composeapp.generated.resources.obs_scene_hint
 import churchpresenter.composeapp.generated.resources.obs_scene_mappings
 import churchpresenter.composeapp.generated.resources.obs_scene_mappings_desc
+import churchpresenter.composeapp.generated.resources.obs_section_connection
 import churchpresenter.composeapp.generated.resources.obs_status_connected
 import churchpresenter.composeapp.generated.resources.obs_status_connecting
 import churchpresenter.composeapp.generated.resources.obs_status_disconnected
 import churchpresenter.composeapp.generated.resources.obs_status_error
+import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.OBSSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -102,18 +104,11 @@ fun OBSSettingsTab(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val cardModifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 600.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                .padding(horizontal = 16.dp, vertical = 16.dp)
-
             // ── Connection card ────────────────────────────────────────────────
-            Column(modifier = cardModifier, verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                ObsSectionHeader("OBS WebSocket")
-                Spacer(Modifier.height(4.dp))
-
+            SettingsSection(
+                title = stringResource(Res.string.obs_section_connection),
+                modifier = Modifier.fillMaxWidth().widthIn(max = 460.dp)
+            ) {
                 Text(
                     text = stringResource(Res.string.obs_description),
                     style = MaterialTheme.typography.bodySmall,
@@ -121,16 +116,7 @@ fun OBSSettingsTab(
                 )
                 Spacer(Modifier.height(12.dp))
 
-                // Enable toggle
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        stringResource(Res.string.obs_enable),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                SettingRow(label = stringResource(Res.string.obs_enable)) {
                     Switch(
                         checked = obs.enabled,
                         onCheckedChange = { update { copy(enabled = it) } }
@@ -138,53 +124,53 @@ fun OBSSettingsTab(
                 }
 
                 if (obs.enabled) {
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(4.dp))
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    Spacer(Modifier.height(12.dp))
-
-                    // Host + Port row
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = hostText,
-                            onValueChange = {
-                                hostText = it
-                                update { copy(host = it) }
-                            },
-                            label = { Text(stringResource(Res.string.obs_host)) },
-                            placeholder = { Text(stringResource(Res.string.obs_host_hint)) },
-                            singleLine = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                        OutlinedTextField(
-                            value = portText,
-                            onValueChange = { v ->
-                                portText = v
-                                v.toIntOrNull()?.let { update { copy(port = it) } }
-                            },
-                            label = { Text(stringResource(Res.string.obs_port)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(100.dp)
-                        )
-                    }
-
                     Spacer(Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = passwordText,
-                        onValueChange = {
-                            passwordText = it
-                            update { copy(password = it) }
-                        },
-                        label = { Text(stringResource(Res.string.obs_password)) },
-                        placeholder = { Text(stringResource(Res.string.obs_password_hint)) },
-                        visualTransformation = PasswordVisualTransformation(),
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    SettingRow(label = stringResource(Res.string.obs_host)) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.widthIn(max = 350.dp)
+                        ) {
+                            SettingsTextField(
+                                value = hostText,
+                                onValueChange = {
+                                    hostText = it
+                                    update { copy(host = it) }
+                                },
+                                placeholder = { Text(stringResource(Res.string.obs_host_hint)) },
+                                singleLine = true,
+                                modifier = Modifier.weight(1f)
+                            )
+                            SettingsTextField(
+                                value = portText,
+                                onValueChange = { v ->
+                                    portText = v
+                                    v.toIntOrNull()?.let { update { copy(port = it) } }
+                                },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.width(68.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(4.dp))
+
+                    SettingRow(label = stringResource(Res.string.obs_password)) {
+                        SettingsTextField(
+                            value = passwordText,
+                            onValueChange = {
+                                passwordText = it
+                                update { copy(password = it) }
+                            },
+                            placeholder = { Text(stringResource(Res.string.obs_password_hint)) },
+                            visualTransformation = PasswordVisualTransformation(),
+                            singleLine = true,
+                            modifier = Modifier.widthIn(max = 350.dp)
+                        )
+                    }
 
                     Spacer(Modifier.height(12.dp))
 
@@ -195,6 +181,7 @@ fun OBSSettingsTab(
                     ) {
                         if (status == OBSWebSocketManager.ConnectionStatus.CONNECTED) {
                             Button(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = { obsManager.disconnect() },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.error
@@ -204,6 +191,7 @@ fun OBSSettingsTab(
                             }
                         } else {
                             Button(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = {
                                     val port = portText.toIntOrNull() ?: 4455
                                     obsManager.connect(hostText, port, passwordText)
@@ -231,9 +219,10 @@ fun OBSSettingsTab(
 
             // ── Scene Mappings card ────────────────────────────────────────────
             if (obs.enabled) {
-                Column(modifier = cardModifier, verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                    ObsSectionHeader(stringResource(Res.string.obs_scene_mappings))
-                    Spacer(Modifier.height(4.dp))
+                SettingsSection(
+                    title = stringResource(Res.string.obs_scene_mappings),
+                    modifier = Modifier.fillMaxWidth().widthIn(max = 460.dp)
+                ) {
                     Text(
                         text = stringResource(Res.string.obs_scene_mappings_desc),
                         style = MaterialTheme.typography.bodySmall,
@@ -242,20 +231,21 @@ fun OBSSettingsTab(
                     Spacer(Modifier.height(12.dp))
 
                     // Default scene
-                    OutlinedTextField(
-                        value = obs.defaultScene,
-                        onValueChange = { update { copy(defaultScene = it) } },
-                        label = { Text(stringResource(Res.string.obs_default_scene)) },
-                        placeholder = { Text(stringResource(Res.string.obs_default_scene_hint)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    SettingRow(label = stringResource(Res.string.obs_default_scene)) {
+                        SettingsTextField(
+                            value = obs.defaultScene,
+                            onValueChange = { update { copy(defaultScene = it) } },
+                            placeholder = { Text(stringResource(Res.string.obs_default_scene_hint)) },
+                            singleLine = true,
+                            modifier = Modifier.widthIn(max = 350.dp)
+                        )
+                    }
 
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(8.dp))
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     Spacer(Modifier.height(8.dp))
 
-                    // One row per Presenting mode
+                    // Two scene mappings per row
                     val modes = listOf(
                         Presenting.BIBLE to stringResource(Res.string.obs_mode_bible),
                         Presenting.LYRICS to stringResource(Res.string.obs_mode_songs),
@@ -270,69 +260,59 @@ fun OBSSettingsTab(
                         Presenting.STT to stringResource(Res.string.obs_mode_stt),
                         Presenting.NONE to stringResource(Res.string.obs_mode_none),
                     )
-                    modes.forEach { (mode, label) ->
-                        SceneMappingRow(
-                            label = label,
-                            value = obs.sceneMappings[mode.name] ?: "",
-                            onValueChange = { scene ->
-                                val updated = obs.sceneMappings.toMutableMap()
-                                if (scene.isBlank()) updated.remove(mode.name) else updated[mode.name] = scene
-                                update { copy(sceneMappings = updated) }
+                    modes.chunked(2).forEach { pair ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val (mode0, label0) = pair[0]
+                            Text(
+                                text = label0,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                modifier = Modifier.weight(1f)
+                            )
+                            SettingsTextField(
+                                value = obs.sceneMappings[mode0.name] ?: "",
+                                onValueChange = { scene ->
+                                    val updated = obs.sceneMappings.toMutableMap()
+                                    if (scene.isBlank()) updated.remove(mode0.name) else updated[mode0.name] = scene
+                                    update { copy(sceneMappings = updated) }
+                                },
+                                placeholder = { Text(stringResource(Res.string.obs_scene_hint)) },
+                                singleLine = true,
+                                modifier = Modifier.weight(2f)
+                            )
+                            if (pair.size == 2) {
+                                val (mode1, label1) = pair[1]
+                                Text(
+                                    text = label1,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                SettingsTextField(
+                                    value = obs.sceneMappings[mode1.name] ?: "",
+                                    onValueChange = { scene ->
+                                        val updated = obs.sceneMappings.toMutableMap()
+                                        if (scene.isBlank()) updated.remove(mode1.name) else updated[mode1.name] = scene
+                                        update { copy(sceneMappings = updated) }
+                                    },
+                                    placeholder = { Text(stringResource(Res.string.obs_scene_hint)) },
+                                    singleLine = true,
+                                    modifier = Modifier.weight(2f)
+                                )
+                            } else {
+                                Spacer(Modifier.weight(3f))
                             }
-                        )
+                        }
                         Spacer(Modifier.height(6.dp))
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun ObsSectionHeader(text: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(18.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-private fun SceneMappingRow(label: String, value: String, onValueChange: (String) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.width(130.dp)
-        )
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = { Text(stringResource(Res.string.obs_scene_hint), style = MaterialTheme.typography.bodySmall) },
-            singleLine = true,
-            modifier = Modifier.weight(1f)
-        )
     }
 }

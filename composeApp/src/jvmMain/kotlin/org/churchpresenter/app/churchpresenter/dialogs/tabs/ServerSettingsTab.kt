@@ -29,7 +29,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -127,6 +127,8 @@ import churchpresenter.composeapp.generated.resources.server_host_hint
 import churchpresenter.composeapp.generated.resources.server_host_label
 import churchpresenter.composeapp.generated.resources.server_host_note
 import churchpresenter.composeapp.generated.resources.server_url_label
+import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
@@ -172,7 +174,7 @@ fun ServerSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(8.dp)
+            .padding(14.dp)
     ) {
         Column(
             modifier = Modifier
@@ -181,15 +183,7 @@ fun ServerSettingsTab(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // ── Card 1: Server ────────────────────────────────────────────────
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                SectionHeader(stringResource(Res.string.companion_server))
+            SettingsSection(title = stringResource(Res.string.companion_server)) {
                 Text(
                     text = stringResource(Res.string.server_description),
                     style = MaterialTheme.typography.bodySmall,
@@ -243,7 +237,7 @@ fun ServerSettingsTab(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = portText,
                             onValueChange = { v ->
                                 if (v.length <= 5 && v.all(Char::isDigit)) {
@@ -258,11 +252,11 @@ fun ServerSettingsTab(
                             modifier = Modifier.width(100.dp),
                             singleLine = true,
                             enabled = !isRunning,
-                            textStyle = MaterialTheme.typography.bodyMedium,
                             placeholder = { Text(stringResource(Res.string.server_port_hint)) }
                         )
                         if (isRunning) {
                             Button(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = {
                                     val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
                                     companionServer.stop()
@@ -288,7 +282,7 @@ fun ServerSettingsTab(
                 // ── Host Override ─────────────────────────────────────────────
                 SettingRow(label = stringResource(Res.string.server_host_label)) {
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = hostText,
                             onValueChange = { v ->
                                 hostText = v
@@ -299,7 +293,6 @@ fun ServerSettingsTab(
                             modifier = Modifier.width(280.dp),
                             singleLine = true,
                             enabled = !isRunning,
-                            textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                             placeholder = {
                                 Text(
                                     stringResource(Res.string.server_host_hint),
@@ -323,19 +316,14 @@ fun ServerSettingsTab(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            SelectionContainer {
-                                Text(
-                                    text = serverUrl,
-                                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier
-                                        .widthIn(max = 280.dp)
-                                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
-                                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
-                            }
+                            SettingsTextField(
+                                value = serverUrl,
+                                onValueChange = {},
+                                readOnly = true,
+                                modifier = Modifier.widthIn(max = 280.dp),
+                            )
                             Button(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = { showConnectionQrDialog = true },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                 colors = ButtonDefaults.buttonColors(
@@ -377,7 +365,7 @@ fun ServerSettingsTab(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            OutlinedTextField(
+                            SettingsTextField(
                                 value = apiKeyText,
                                 onValueChange = { v ->
                                     apiKeyText = v
@@ -387,7 +375,6 @@ fun ServerSettingsTab(
                                 },
                                 modifier = Modifier.width(350.dp),
                                 singleLine = true,
-                                textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                                 placeholder = {
                                     Text(
                                         stringResource(Res.string.api_key_hint),
@@ -396,6 +383,7 @@ fun ServerSettingsTab(
                                 }
                             )
                             Button(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = {
                                     val newKey = UUID.randomUUID().toString().replace("-", "")
                                     apiKeyText = newKey
@@ -412,6 +400,7 @@ fun ServerSettingsTab(
                                 Text(stringResource(Res.string.generate_api_key), style = MaterialTheme.typography.labelSmall)
                             }
                             Button(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = { clipboardManager.setText(AnnotatedString(apiKeyText)) },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                 colors = ButtonDefaults.buttonColors(
@@ -444,15 +433,7 @@ fun ServerSettingsTab(
             }
 
             // ── Card 2: Remote Clients ────────────────────────────────────────
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                SectionHeader(stringResource(Res.string.remote_clients_title))
+            SettingsSection(title = stringResource(Res.string.remote_clients_title)) {
                 Text(
                     text = stringResource(Res.string.remote_clients_description),
                     style = MaterialTheme.typography.bodySmall,
@@ -592,15 +573,7 @@ fun ServerSettingsTab(
                 fun keyOnUrl()  = "$serverUrl/api/atem/key/on${apiQuery(keyTypeParam)}"
                 fun keyOffUrl() = "$serverUrl/api/atem/key/off${apiQuery(keyTypeParam)}"
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SectionHeader(stringResource(Res.string.companion_lt_triggers))
+                SettingsSection(title = stringResource(Res.string.companion_lt_triggers)) {
                     Text(
                         text = stringResource(Res.string.companion_lt_triggers_desc),
                         style = MaterialTheme.typography.bodySmall,
@@ -644,6 +617,7 @@ fun ServerSettingsTab(
                                 )
                                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Button(
+                                        shape = RoundedCornerShape(6.dp),
                                         onClick = { clipboardManager.setText(AnnotatedString(triggerUrl(name, withKey = true))) },
                                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                         colors = ButtonDefaults.buttonColors(
@@ -652,6 +626,7 @@ fun ServerSettingsTab(
                                         )
                                     ) { Text(stringResource(Res.string.companion_lt_copy_key), style = MaterialTheme.typography.labelSmall) }
                                     Button(
+                                        shape = RoundedCornerShape(6.dp),
                                         onClick = { clipboardManager.setText(AnnotatedString(triggerUrl(name, withKey = false))) },
                                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                         colors = ButtonDefaults.buttonColors(
@@ -661,6 +636,7 @@ fun ServerSettingsTab(
                                     ) { Text(stringResource(Res.string.companion_lt_copy_nokey), style = MaterialTheme.typography.labelSmall) }
                                     if (atemConfigured) {
                                         Button(
+                                            shape = RoundedCornerShape(6.dp),
                                             onClick = { clipboardManager.setText(AnnotatedString(stillUrl(name, withKey = true))) },
                                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                             colors = ButtonDefaults.buttonColors(
@@ -669,6 +645,7 @@ fun ServerSettingsTab(
                                             )
                                         ) { Text(stringResource(Res.string.companion_atem_still_key), style = MaterialTheme.typography.labelSmall) }
                                         Button(
+                                            shape = RoundedCornerShape(6.dp),
                                             onClick = { clipboardManager.setText(AnnotatedString(stillUrl(name, withKey = false))) },
                                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                             colors = ButtonDefaults.buttonColors(
@@ -677,6 +654,7 @@ fun ServerSettingsTab(
                                             )
                                         ) { Text(stringResource(Res.string.companion_atem_still_only), style = MaterialTheme.typography.labelSmall) }
                                         Button(
+                                            shape = RoundedCornerShape(6.dp),
                                             onClick = { clipboardManager.setText(AnnotatedString(clipUrl(name, withKey = true))) },
                                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                             colors = ButtonDefaults.buttonColors(
@@ -685,6 +663,7 @@ fun ServerSettingsTab(
                                             )
                                         ) { Text(stringResource(Res.string.companion_atem_clip_key), style = MaterialTheme.typography.labelSmall) }
                                         Button(
+                                            shape = RoundedCornerShape(6.dp),
                                             onClick = { clipboardManager.setText(AnnotatedString(clipUrl(name, withKey = false))) },
                                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                             colors = ButtonDefaults.buttonColors(
@@ -718,6 +697,7 @@ fun ServerSettingsTab(
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Button(
+                                    shape = RoundedCornerShape(6.dp),
                                     onClick = { clipboardManager.setText(AnnotatedString(keyOnUrl())) },
                                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                     colors = ButtonDefaults.buttonColors(
@@ -726,6 +706,7 @@ fun ServerSettingsTab(
                                     )
                                 ) { Text(stringResource(Res.string.companion_atem_key_on), style = MaterialTheme.typography.labelSmall) }
                                 Button(
+                                    shape = RoundedCornerShape(6.dp),
                                     onClick = { clipboardManager.setText(AnnotatedString(keyOffUrl())) },
                                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                     colors = ButtonDefaults.buttonColors(
@@ -747,6 +728,7 @@ fun ServerSettingsTab(
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = {
                                     clipboardManager.setText(AnnotatedString("$serverUrl/api/lowerthirds/hide${apiQuery()}"))
                                 },
@@ -757,6 +739,7 @@ fun ServerSettingsTab(
                                 )
                             ) { Text(stringResource(Res.string.companion_lt_copy_hide), style = MaterialTheme.typography.labelSmall) }
                             Button(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = {
                                     clipboardManager.setText(AnnotatedString("$serverUrl/api/clear${apiQuery()}"))
                                 },
@@ -842,6 +825,7 @@ private fun ClientRow(
             }
             Spacer(Modifier.width(4.dp))
             Button(
+                shape = RoundedCornerShape(6.dp),
                 onClick = onRemove,
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -860,12 +844,11 @@ private fun ClientRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                OutlinedTextField(
+                SettingsTextField(
                     value = editText,
                     onValueChange = { editText = it },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
-                    textStyle = MaterialTheme.typography.bodySmall,
                     placeholder = {
                         Text(
                             stringResource(Res.string.client_label_placeholder),
@@ -905,51 +888,6 @@ private fun ClientRow(
     }
 }
 
-@Composable
-private fun SectionHeader(text: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(18.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-private fun SettingRow(
-    label: String,
-    content: @Composable () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        content()
-    }
-}
 
 @Composable
 private fun ConnectionQrDialog(serverUrl: String, apiKey: String?, onDismiss: () -> Unit) {
@@ -1030,13 +968,15 @@ private fun ConnectionQrDialog(serverUrl: String, apiKey: String?, onDismiss: ()
                             .padding(horizontal = 10.dp, vertical = 6.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text(
-                            text = qrContent,
-                            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        SelectionContainer {
+                            Text(
+                                text = qrContent,
+                                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
-                    Button(onClick = onDismiss) {
+                    Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                         Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
                     }
                 }

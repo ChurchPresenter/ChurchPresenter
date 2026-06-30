@@ -1,12 +1,9 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,8 +15,8 @@ import churchpresenter.composeapp.generated.resources.shadow_opacity
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Shadow detail controls: color, size, and intensity — each with a label above.
- * Appears below the Color + TextStyleButtons row when shadow is enabled.
+ * Shadow detail controls: color, size, and opacity — labels inside each field.
+ * Appears below the shadow SettingRow when shadow is enabled.
  */
 @Composable
 fun ShadowDetailRow(
@@ -33,50 +30,26 @@ fun ShadowDetailRow(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.Top
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = stringResource(Res.string.color),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                ColorPickerField(
-                    color = shadowColor,
-                    onColorChange = onColorChange
-                )
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = stringResource(Res.string.shadow_size),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                NumberSettingsTextField(
-                    modifier = Modifier.width(60.dp),
-                    initialText = shadowSize,
-                    onValueChange = onSizeChange,
-                    range = 10..500
-                )
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = stringResource(Res.string.shadow_opacity),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                NumberSettingsTextField(
-                    modifier = Modifier.width(60.dp),
-                    initialText = shadowOpacity,
-                    onValueChange = onOpacityChange,
-                    range = 10..100
-                )
-            }
-        }
+        ColorPickerField(
+            color = shadowColor,
+            onColorChange = onColorChange,
+            label = stringResource(Res.string.color).removeSuffix(":"),
+            modifier = Modifier.widthIn(max = 150.dp)
+        )
+        NumberSettingsTextField(
+            label = stringResource(Res.string.shadow_size),
+            initialText = shadowSize,
+            onValueChange = onSizeChange,
+            range = 10..500
+        )
+        NumberSettingsTextField(
+            label = stringResource(Res.string.shadow_opacity),
+            initialText = shadowOpacity,
+            onValueChange = onOpacityChange,
+            range = 10..100
+        )
     }
 }

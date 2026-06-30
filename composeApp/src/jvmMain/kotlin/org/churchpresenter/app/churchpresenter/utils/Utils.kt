@@ -21,6 +21,7 @@ object Utils {
     }
 
     fun parseHexColor(hexColor: String): Color {
+        if (hexColor.equals("transparent", ignoreCase = true)) return Color.Transparent
         return try {
             val cleanHex = hexColor.removePrefix("#")
             when (cleanHex.length) {

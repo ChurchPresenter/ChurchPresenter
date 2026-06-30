@@ -174,6 +174,7 @@ fun StatisticsTab(
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
+                shape = RoundedCornerShape(6.dp),
                 onClick = {
                     statisticsManager.clearStatistics()
                     topSongsBySongbook = statisticsManager.getTopSongsBySongbook()

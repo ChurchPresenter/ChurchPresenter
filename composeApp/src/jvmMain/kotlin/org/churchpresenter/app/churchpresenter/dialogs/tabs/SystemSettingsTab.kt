@@ -20,6 +20,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -59,6 +61,7 @@ import churchpresenter.composeapp.generated.resources.folder_already_exists
 import churchpresenter.composeapp.generated.resources.folder_overwrite_confirm
 import churchpresenter.composeapp.generated.resources.import_settings
 import churchpresenter.composeapp.generated.resources.import_settings_confirm
+import churchpresenter.composeapp.generated.resources.general
 import churchpresenter.composeapp.generated.resources.launch_on_login
 import churchpresenter.composeapp.generated.resources.lower_third_storage_directory
 import churchpresenter.composeapp.generated.resources.media_storage_directory
@@ -146,17 +149,22 @@ fun SystemSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(8.dp)
+            .padding(14.dp)
     ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Bible Storage Directory
+        SettingsSection(title = stringResource(Res.string.bible_storage_directory)) {
+        var bibleFiles by remember(settings.bibleSettings.storageDirectory) { mutableStateOf(emptyList<String>()) }
+        LaunchedEffect(settings.bibleSettings.storageDirectory) {
+            bibleFiles = withContext(Dispatchers.IO) {
+                fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory)
+            }
+        }
         DirectoryPicker(
             label = stringResource(Res.string.bible_storage_directory),
             currentPath = settings.bibleSettings.storageDirectory,
@@ -171,22 +179,16 @@ fun SystemSettingsTab(
             },
             onSetAll = setAllDirectories
         )
-        var bibleFiles by remember(settings.bibleSettings.storageDirectory) { mutableStateOf(emptyList<String>()) }
-        LaunchedEffect(settings.bibleSettings.storageDirectory) {
-            bibleFiles = withContext(Dispatchers.IO) {
-                fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory)
-            }
-        }
         DetectedFilesList(
             files = bibleFiles,
             directorySet = settings.bibleSettings.storageDirectory.isNotEmpty(),
             detectedLabel = stringResource(Res.string.detected_files_label),
             noFilesText = stringResource(Res.string.no_files_detected)
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
+        } // end Bible SettingsSection
 
         // Songs Storage Directory
+        SettingsSection(title = stringResource(Res.string.songs_storage_directory)) {
         DirectoryPicker(
             label = stringResource(Res.string.songs_storage_directory),
             currentPath = settings.songSettings.storageDirectory,
@@ -234,6 +236,7 @@ fun SystemSettingsTab(
                     )
                 }
                     TextButton(
+                        shape = RoundedCornerShape(6.dp),
                         onClick = {
                             val samplesDir = java.io.File(settings.songSettings.storageDirectory, "Song Samples")
                             val proceed = if (samplesDir.exists()) {
@@ -288,6 +291,7 @@ fun SystemSettingsTab(
                         )
                     } else {
                         TextButton(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = {
                                 val converter = SpsConverter()
                                 val spsPath = java.io.File(settings.songSettings.storageDirectory, spsFile).absolutePath
@@ -345,97 +349,101 @@ fun SystemSettingsTab(
                 )
             }
         }
+        } // end Songs SettingsSection
 
-        Spacer(modifier = Modifier.height(16.dp))
+        // Pictures + Lower Third (2-column grid)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            SettingsSection(
+                title = stringResource(Res.string.pictures_storage_directory),
+                modifier = Modifier.weight(1f)
+            ) {
+                DirectoryPicker(
+                    label = stringResource(Res.string.pictures_storage_directory),
+                    currentPath = settings.pictureSettings.storageDirectory,
+                    noDirectoryText = stringResource(Res.string.no_directory_selected),
+                    browseText = stringResource(Res.string.browse_directory),
+                    setAllText = setAllText,
+                    fileManager = fileManager,
+                    onDirectorySelected = { dir ->
+                        onSettingsChange { s ->
+                            s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = dir))
+                        }
+                    },
+                    onSetAll = setAllDirectories
+                )
+            }
+            SettingsSection(
+                title = stringResource(Res.string.lower_third_storage_directory),
+                modifier = Modifier.weight(1f)
+            ) {
+                DirectoryPicker(
+                    label = stringResource(Res.string.lower_third_storage_directory),
+                    currentPath = settings.streamingSettings.lowerThirdFolder,
+                    noDirectoryText = stringResource(Res.string.no_directory_selected),
+                    browseText = stringResource(Res.string.browse_directory),
+                    setAllText = setAllText,
+                    fileManager = fileManager,
+                    onDirectorySelected = { dir ->
+                        onSettingsChange { s ->
+                            s.copy(streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir))
+                        }
+                    },
+                    onSetAll = setAllDirectories
+                )
+            }
+        }
 
-        // Pictures Storage Directory
-        DirectoryPicker(
-            label = stringResource(Res.string.pictures_storage_directory),
-            currentPath = settings.pictureSettings.storageDirectory,
-            noDirectoryText = stringResource(Res.string.no_directory_selected),
-            browseText = stringResource(Res.string.browse_directory),
-            setAllText = setAllText,
-            fileManager = fileManager,
-            onDirectorySelected = { dir ->
-                onSettingsChange { s ->
-                    s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = dir))
-                }
-            },
-            onSetAll = setAllDirectories
-        )
+        // Presentation + Media (2-column grid)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            SettingsSection(
+                title = stringResource(Res.string.presentation_storage_directory),
+                modifier = Modifier.weight(1f)
+            ) {
+                DirectoryPicker(
+                    label = stringResource(Res.string.presentation_storage_directory),
+                    currentPath = settings.presentationStorageDirectory,
+                    noDirectoryText = stringResource(Res.string.no_directory_selected),
+                    browseText = stringResource(Res.string.browse_directory),
+                    setAllText = setAllText,
+                    fileManager = fileManager,
+                    onDirectorySelected = { dir ->
+                        onSettingsChange { s ->
+                            s.copy(presentationStorageDirectory = dir)
+                        }
+                    },
+                    onSetAll = setAllDirectories
+                )
+            }
+            SettingsSection(
+                title = stringResource(Res.string.media_storage_directory),
+                modifier = Modifier.weight(1f)
+            ) {
+                DirectoryPicker(
+                    label = stringResource(Res.string.media_storage_directory),
+                    currentPath = settings.mediaStorageDirectory,
+                    noDirectoryText = stringResource(Res.string.no_directory_selected),
+                    browseText = stringResource(Res.string.browse_directory),
+                    setAllText = setAllText,
+                    fileManager = fileManager,
+                    onDirectorySelected = { dir ->
+                        onSettingsChange { s ->
+                            s.copy(mediaStorageDirectory = dir)
+                        }
+                    },
+                    onSetAll = setAllDirectories
+                )
+            }
+        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Lower Third Storage Directory
-        DirectoryPicker(
-            label = stringResource(Res.string.lower_third_storage_directory),
-            currentPath = settings.streamingSettings.lowerThirdFolder,
-            noDirectoryText = stringResource(Res.string.no_directory_selected),
-            browseText = stringResource(Res.string.browse_directory),
-            setAllText = setAllText,
-            fileManager = fileManager,
-            onDirectorySelected = { dir ->
-                onSettingsChange { s ->
-                    s.copy(streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir))
-                }
-            },
-            onSetAll = setAllDirectories
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Presentation Storage Directory
-        DirectoryPicker(
-            label = stringResource(Res.string.presentation_storage_directory),
-            currentPath = settings.presentationStorageDirectory,
-            noDirectoryText = stringResource(Res.string.no_directory_selected),
-            browseText = stringResource(Res.string.browse_directory),
-            setAllText = setAllText,
-            fileManager = fileManager,
-            onDirectorySelected = { dir ->
-                onSettingsChange { s ->
-                    s.copy(presentationStorageDirectory = dir)
-                }
-            },
-            onSetAll = setAllDirectories
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Media Storage Directory
-        DirectoryPicker(
-            label = stringResource(Res.string.media_storage_directory),
-            currentPath = settings.mediaStorageDirectory,
-            noDirectoryText = stringResource(Res.string.no_directory_selected),
-            browseText = stringResource(Res.string.browse_directory),
-            setAllText = setAllText,
-            fileManager = fileManager,
-            onDirectorySelected = { dir ->
-                onSettingsChange { s ->
-                    s.copy(mediaStorageDirectory = dir)
-                }
-            },
-            onSetAll = setAllDirectories
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
-        Spacer(modifier = Modifier.height(16.dp))
+        // General section
+        val generalLabel = stringResource(Res.string.general)
+        SettingsSection(title = generalLabel) {
 
         // Launch at login — the OS registration is the source of truth, not settings.json
         var autoStartEnabled by remember { mutableStateOf(AutoStartManager.isEnabled()) }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = stringResource(Res.string.launch_on_login),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+        SettingRow(label = stringResource(Res.string.launch_on_login)) {
             Switch(
                 checked = autoStartEnabled,
-                enabled = AutoStartManager.isSupported,
                 onCheckedChange = { enabled ->
                     scope.launch {
                         val ok = withContext(Dispatchers.IO) { AutoStartManager.setEnabled(enabled) }
@@ -445,9 +453,11 @@ fun SystemSettingsTab(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
-        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 8.dp),
+            color = MaterialTheme.colorScheme.outlineVariant,
+            thickness = 1.dp
+        )
 
         // Export / Import / Reset Settings
         val resetConfirmMsg = stringResource(Res.string.reset_settings_confirm)
@@ -506,7 +516,7 @@ fun SystemSettingsTab(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
-                shape = RoundedCornerShape(4.dp),
+                shape = RoundedCornerShape(6.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Text(text = exportTitle, style = MaterialTheme.typography.labelMedium)
@@ -514,6 +524,7 @@ fun SystemSettingsTab(
 
             // Import Settings
             Button(
+                shape = RoundedCornerShape(6.dp),
                 onClick = {
                     scope.launch {
                         val file = FileChooser.platformInstance.chooseSingle(
@@ -560,7 +571,6 @@ fun SystemSettingsTab(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
-                shape = RoundedCornerShape(4.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Text(text = importTitle, style = MaterialTheme.typography.labelMedium)
@@ -605,7 +615,7 @@ fun SystemSettingsTab(
                     containerColor = MaterialTheme.colorScheme.errorContainer,
                     contentColor = MaterialTheme.colorScheme.onErrorContainer
                 ),
-                shape = RoundedCornerShape(4.dp),
+                shape = RoundedCornerShape(6.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Text(text = resetTitle, style = MaterialTheme.typography.labelMedium)
@@ -638,12 +648,13 @@ fun SystemSettingsTab(
                     containerColor = MaterialTheme.colorScheme.errorContainer,
                     contentColor = MaterialTheme.colorScheme.onErrorContainer
                 ),
-                shape = RoundedCornerShape(4.dp),
+                shape = RoundedCornerShape(6.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Text(text = clearRemoteUploadsTitle, style = MaterialTheme.typography.labelMedium)
             }
         }
+        } // end General SettingsSection
     }
     }
 }
@@ -767,7 +778,7 @@ private fun DirectoryPicker(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             ),
-            shape = RoundedCornerShape(4.dp),
+            shape = RoundedCornerShape(6.dp),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Text(text = browseText, style = MaterialTheme.typography.labelMedium)
@@ -779,7 +790,7 @@ private fun DirectoryPicker(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             ),
-            shape = RoundedCornerShape(4.dp),
+            shape = RoundedCornerShape(6.dp),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Text(text = setAllText, style = MaterialTheme.typography.labelMedium)

@@ -28,7 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,6 +48,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
@@ -143,7 +144,7 @@ fun EditSongDialog(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            OutlinedTextField(
+                            SettingsTextField(
                                 value = editedNumber,
                                 onValueChange = { newValue ->
                                     // Only allow digits
@@ -151,23 +152,19 @@ fun EditSongDialog(
                                         editedNumber = newValue
                                     }
                                 },
-                                label = { Text(stringResource(Res.string.song_number), style = MaterialTheme.typography.bodySmall) },
                                 modifier = Modifier.weight(0.2f),
                                 singleLine = true,
-                                textStyle = MaterialTheme.typography.bodyMedium
                             )
 
                             var songbookExpanded by remember { mutableStateOf(false) }
                             var isAddingNew by remember(isVisible) { mutableStateOf(false) }
 
                             if (isAddingNew) {
-                                OutlinedTextField(
+                                SettingsTextField(
                                     value = editedSongbook,
                                     onValueChange = { editedSongbook = it },
-                                    label = { Text(stringResource(Res.string.new_songbook), style = MaterialTheme.typography.bodySmall) },
                                     modifier = Modifier.weight(0.5f),
                                     singleLine = true,
-                                    textStyle = MaterialTheme.typography.bodyMedium,
                                     trailingIcon = {
                                         IconButton(
                                             onClick = {
@@ -186,15 +183,13 @@ fun EditSongDialog(
                                     onExpandedChange = { songbookExpanded = it },
                                     modifier = Modifier.weight(0.5f)
                                 ) {
-                                    OutlinedTextField(
+                                    SettingsTextField(
                                         value = editedSongbook,
                                         onValueChange = {},
                                         readOnly = true,
-                                        label = { Text(stringResource(Res.string.song_book), style = MaterialTheme.typography.bodySmall) },
                                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = songbookExpanded) },
                                         modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
                                         singleLine = true,
-                                        textStyle = MaterialTheme.typography.bodyMedium
                                     )
                                     ExposedDropdownMenu(
                                         expanded = songbookExpanded,
@@ -222,13 +217,11 @@ fun EditSongDialog(
                                 }
                             }
 
-                            OutlinedTextField(
+                            SettingsTextField(
                                 value = editedTune,
                                 onValueChange = { editedTune = it },
-                                label = { Text(stringResource(Res.string.tune), style = MaterialTheme.typography.bodySmall) },
                                 modifier = Modifier.weight(0.3f),
                                 singleLine = true,
-                                textStyle = MaterialTheme.typography.bodyMedium
                             )
                         }
 
@@ -237,25 +230,21 @@ fun EditSongDialog(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            OutlinedTextField(
+                            SettingsTextField(
                                 value = editedTitle,
                                 onValueChange = {
                                     editedTitle = it
                                     titleManuallyEdited = it.isNotBlank()
                                 },
-                                label = { Text(stringResource(Res.string.song_title), style = MaterialTheme.typography.bodySmall) },
                                 modifier = Modifier.weight(0.5f),
                                 singleLine = true,
-                                textStyle = MaterialTheme.typography.bodyMedium
                             )
 
-                            OutlinedTextField(
+                            SettingsTextField(
                                 value = editedSecondaryTitle,
                                 onValueChange = { editedSecondaryTitle = it },
-                                label = { Text(stringResource(Res.string.secondary_title), style = MaterialTheme.typography.bodySmall) },
                                 modifier = Modifier.weight(0.5f),
                                 singleLine = true,
-                                textStyle = MaterialTheme.typography.bodyMedium
                             )
                         }
 
@@ -273,22 +262,18 @@ fun EditSongDialog(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            OutlinedTextField(
+                            SettingsTextField(
                                 value = editedAuthor,
                                 onValueChange = { editedAuthor = it },
-                                label = { Text(stringResource(Res.string.author), style = MaterialTheme.typography.bodySmall) },
                                 modifier = Modifier.weight(0.5f),
                                 singleLine = true,
-                                textStyle = MaterialTheme.typography.bodyMedium
                             )
 
-                            OutlinedTextField(
+                            SettingsTextField(
                                 value = editedComposer,
                                 onValueChange = { editedComposer = it },
-                                label = { Text(stringResource(Res.string.composer), style = MaterialTheme.typography.bodySmall) },
                                 modifier = Modifier.weight(0.5f),
                                 singleLine = true,
-                                textStyle = MaterialTheme.typography.bodyMedium
                             )
                         }
 
@@ -339,7 +324,7 @@ fun EditSongDialog(
                             modifier = Modifier.fillMaxWidth().weight(1f),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            OutlinedTextField(
+                            SettingsTextField(
                                 value = editedLyrics,
                                 onValueChange = { newLyrics ->
                                     editedLyrics = newLyrics
@@ -357,7 +342,7 @@ fun EditSongDialog(
                                 maxLines = Int.MAX_VALUE,
                                 visualTransformation = lyricsHighlightTransformation
                             )
-                            OutlinedTextField(
+                            SettingsTextField(
                                 value = editedSecondaryLyrics,
                                 onValueChange = { editedSecondaryLyrics = it },
                                 modifier = Modifier.weight(1f).heightIn(min = 400.dp),
@@ -383,6 +368,7 @@ fun EditSongDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextButton(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = onDismiss,
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
@@ -390,6 +376,7 @@ fun EditSongDialog(
                         }
 
                         Button(
+                            shape = RoundedCornerShape(6.dp),
                             enabled = !isDuplicate && (!isNewSong || (editedSongbook.isNotBlank() && editedTitle.isNotBlank())),
                             onClick = {
                                 val updatedSong = SongItem(

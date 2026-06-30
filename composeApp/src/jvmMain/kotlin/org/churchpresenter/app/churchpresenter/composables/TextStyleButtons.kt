@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,7 +52,8 @@ fun TextStyleButtons(
     onItalicChange: (Boolean) -> Unit,
     onUnderlineChange: (Boolean) -> Unit,
     onShadowChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    buttonSize: Dp = 28.dp
 ) {
     Row(
         modifier = modifier,
@@ -63,6 +65,7 @@ fun TextStyleButtons(
             tooltip = stringResource(Res.string.tooltip_bold),
             isActive = bold,
             fontWeight = FontWeight.Bold,
+            buttonSize = buttonSize,
             onClick = { onBoldChange(!bold) }
         )
         TextStyleToggleButton(
@@ -70,6 +73,7 @@ fun TextStyleButtons(
             tooltip = stringResource(Res.string.tooltip_italic),
             isActive = italic,
             fontStyle = FontStyle.Italic,
+            buttonSize = buttonSize,
             onClick = { onItalicChange(!italic) }
         )
         TextStyleToggleButton(
@@ -77,12 +81,14 @@ fun TextStyleButtons(
             tooltip = stringResource(Res.string.tooltip_underline),
             isActive = underline,
             textDecoration = TextDecoration.Underline,
+            buttonSize = buttonSize,
             onClick = { onUnderlineChange(!underline) }
         )
         TextStyleToggleButton(
             label = stringResource(Res.string.text_style_shadow),
             tooltip = stringResource(Res.string.tooltip_shadow),
             isActive = shadow,
+            buttonSize = buttonSize,
             onClick = { onShadowChange(!shadow) }
         )
     }
@@ -97,6 +103,7 @@ private fun TextStyleToggleButton(
     fontWeight: FontWeight = FontWeight.Normal,
     fontStyle: FontStyle = FontStyle.Normal,
     textDecoration: TextDecoration? = null,
+    buttonSize: Dp = 28.dp,
     onClick: () -> Unit
 ) {
     val activeBackground = MaterialTheme.colorScheme.primary
@@ -126,16 +133,16 @@ private fun TextStyleToggleButton(
     ) {
         Surface(
             modifier = Modifier
-                .size(28.dp)
-                .clip(RoundedCornerShape(4.dp))
+                .size(buttonSize)
+                .clip(RoundedCornerShape(8.dp))
                 .border(
                     width = 1.dp,
                     color = if (isActive) activeBackground else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(8.dp)
                 )
                 .clickable { onClick() },
             color = if (isActive) activeBackground else inactiveBackground,
-            shape = RoundedCornerShape(4.dp)
+            shape = RoundedCornerShape(8.dp)
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -143,7 +150,7 @@ private fun TextStyleToggleButton(
             ) {
                 Text(
                     text = label,
-                    fontSize = 13.sp,
+                    fontSize = (buttonSize.value * 0.36f).sp,
                     fontWeight = fontWeight,
                     fontStyle = fontStyle,
                     textDecoration = textDecoration,
