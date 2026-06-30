@@ -570,6 +570,9 @@
     <string name="gradient_top_color">Top Color:</string>
     <string name="gradient_bottom_color">Bottom Color:</string>
     <string name="gradient_opacity">Opacity</string>
+    <string name="background_opacity">Background Opacity</string>
+    <string name="gradient_top_opacity">Top Opacity</string>
+    <string name="gradient_bottom_opacity">Bottom Opacity</string>
     <string name="gradient_position">Transition Position</string>
 
     <!-- System Settings -->

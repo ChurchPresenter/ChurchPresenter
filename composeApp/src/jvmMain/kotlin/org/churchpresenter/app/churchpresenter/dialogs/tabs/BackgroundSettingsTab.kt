@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -42,10 +43,13 @@ import churchpresenter.composeapp.generated.resources.default_lower_third_backgr
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.gradient_bottom_color
+import churchpresenter.composeapp.generated.resources.background_opacity
+import churchpresenter.composeapp.generated.resources.gradient_bottom_opacity
 import churchpresenter.composeapp.generated.resources.gradient_enabled
 import churchpresenter.composeapp.generated.resources.gradient_opacity
 import churchpresenter.composeapp.generated.resources.gradient_position
 import churchpresenter.composeapp.generated.resources.gradient_top_color
+import churchpresenter.composeapp.generated.resources.gradient_top_opacity
 import churchpresenter.composeapp.generated.resources.songs
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
@@ -114,12 +118,12 @@ fun BackgroundSettingsTab(
                     )
                     when (settings.backgroundSettings.defaultBackgroundType) {
                         Constants.BACKGROUND_COLOR -> {
-                            SettingRow(stringResource(Res.string.color)) {
-                                ColorPickerField(
-                                    color = settings.backgroundSettings.defaultBackgroundColor,
-                                    onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
-                                )
-                            }
+                            ColorPickerField(
+                                label = stringResource(Res.string.color),
+                                modifier = Modifier.width(140.dp),
+                                color = settings.backgroundSettings.defaultBackgroundColor,
+                                onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
+                            )
                             OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
                                     s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
@@ -198,16 +202,16 @@ fun BackgroundSettingsTab(
                     )
                     when (settings.backgroundSettings.defaultLowerThirdBackgroundType) {
                         Constants.BACKGROUND_COLOR -> {
-                            SettingRow(stringResource(Res.string.color)) {
-                                ColorPickerField(
-                                    color = settings.backgroundSettings.defaultLowerThirdBackgroundColor,
-                                    onColorChange = { color ->
-                                        onSettingsChange { s ->
-                                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundColor = color))
-                                        }
+                            ColorPickerField(
+                                label = stringResource(Res.string.color),
+                                modifier = Modifier.width(140.dp),
+                                color = settings.backgroundSettings.defaultLowerThirdBackgroundColor,
+                                onColorChange = { color ->
+                                    onSettingsChange { s ->
+                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundColor = color))
                                     }
-                                )
-                            }
+                                }
+                            )
                             OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
                                     s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
@@ -370,12 +374,12 @@ private fun BackgroundColumn(
 
     when (config.backgroundType) {
         Constants.BACKGROUND_COLOR -> {
-            SettingRow(stringResource(Res.string.background_color)) {
-                ColorPickerField(
-                    color = config.backgroundColor,
-                    onColorChange = { onConfigChange(config.copy(backgroundColor = it)) }
-                )
-            }
+            ColorPickerField(
+                label = stringResource(Res.string.background_color),
+                modifier = Modifier.width(140.dp),
+                color = config.backgroundColor,
+                onColorChange = { onConfigChange(config.copy(backgroundColor = it)) }
+            )
             OpacitySlider(config.backgroundOpacity) { onConfigChange(config.copy(backgroundOpacity = it)) }
         }
         Constants.BACKGROUND_IMAGE -> {
@@ -406,13 +410,26 @@ private fun BackgroundColumn(
     // Gradient controls — shown when Gradient type is selected (lower-third columns only)
     if (isLowerThird && config.backgroundType == Constants.BACKGROUND_GRADIENT) {
         Spacer(modifier = Modifier.height(6.dp))
-        SettingRow(stringResource(Res.string.gradient_top_color)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ColorPickerField(
+                label = stringResource(Res.string.gradient_top_color),
+                modifier = Modifier.width(140.dp),
                 color = config.gradientTopColor,
                 onColorChange = { onConfigChange(config.copy(gradientTopColor = it)) }
             )
+            ColorPickerField(
+                label = stringResource(Res.string.gradient_bottom_color),
+                modifier = Modifier.width(140.dp),
+                color = config.gradientBottomColor,
+                onColorChange = { onConfigChange(config.copy(gradientBottomColor = it)) }
+            )
         }
-        SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(config.gradientTopOpacity * 100).toInt()}%") {
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+            Text(
+                text = "${stringResource(Res.string.gradient_top_opacity)}: ${(config.gradientTopOpacity * 100).toInt()}%",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Slider(
                 value = config.gradientTopOpacity,
                 onValueChange = { onConfigChange(config.copy(gradientTopOpacity = it)) },
@@ -420,13 +437,12 @@ private fun BackgroundColumn(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        SettingRow(stringResource(Res.string.gradient_bottom_color)) {
-            ColorPickerField(
-                color = config.gradientBottomColor,
-                onColorChange = { onConfigChange(config.copy(gradientBottomColor = it)) }
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+            Text(
+                text = "${stringResource(Res.string.gradient_bottom_opacity)}: ${(config.gradientBottomOpacity * 100).toInt()}%",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
-        SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(config.gradientBottomOpacity * 100).toInt()}%") {
             Slider(
                 value = config.gradientBottomOpacity,
                 onValueChange = { onConfigChange(config.copy(gradientBottomOpacity = it)) },
@@ -434,7 +450,12 @@ private fun BackgroundColumn(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        SettingRow("${stringResource(Res.string.gradient_position)}: ${(config.gradientPosition * 100).toInt()}%") {
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+            Text(
+                text = "${stringResource(Res.string.gradient_position)}: ${(config.gradientPosition * 100).toInt()}%",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Slider(
                 value = config.gradientPosition,
                 onValueChange = { onConfigChange(config.copy(gradientPosition = it)) },
@@ -505,7 +526,12 @@ private fun OpacitySlider(
     value: Float,
     onValueChange: (Float) -> Unit
 ) {
-    SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(value * 100).toInt()}%") {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+        Text(
+            text = "${stringResource(Res.string.background_opacity)}: ${(value * 100).toInt()}%",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Slider(
             value = value,
             onValueChange = onValueChange,
