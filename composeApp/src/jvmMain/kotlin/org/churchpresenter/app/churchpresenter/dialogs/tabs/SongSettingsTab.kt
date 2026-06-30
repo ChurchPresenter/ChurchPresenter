@@ -19,7 +19,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -190,7 +195,7 @@ private fun TitleSlideColumn(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun LeftColumn(
     settings: AppSettings,
@@ -224,7 +229,7 @@ private fun LeftColumn(
     }
 
     SettingRow(stringResource(Res.string.show_number)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
             DropdownSettingsField(
                 label = stringResource(Res.string.full_screen),
                 value = when (settings.songSettings.showNumber) {
@@ -338,7 +343,7 @@ private fun LeftColumn(
     // Title Section
     SettingsSection(title = stringResource(Res.string.title)) {
     SettingRow(stringResource(Res.string.show_title)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
             DropdownSettingsField(
                 label = stringResource(Res.string.full_screen),
                 value = when (settings.songSettings.titleDisplay) {
@@ -604,47 +609,40 @@ private fun LeftColumn(
 
     // ── Bilingual Layout ──
     Spacer(modifier = Modifier.height(12.dp))
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = stringResource(Res.string.bilingual_layout),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.width(160.dp)
+            color = MaterialTheme.colorScheme.onSurface
         )
         val isSideBySide = settings.songSettings.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = isSideBySide,
-                onCheckedChange = {
-                    onSettingsChange { s ->
-                        s.copy(songSettings = s.songSettings.copy(bilingualLayout = Constants.BILINGUAL_SIDE_BY_SIDE))
-                    }
-                },
-                modifier = Modifier.size(24.dp)
-            )
-            Text(
-                text = stringResource(Res.string.bilingual_left_right),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 4.dp)
-            )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = !isSideBySide,
-                onCheckedChange = {
-                    onSettingsChange { s ->
-                        s.copy(songSettings = s.songSettings.copy(bilingualLayout = Constants.BILINGUAL_TOP_BOTTOM))
-                    }
-                },
-                modifier = Modifier.size(24.dp)
-            )
-            Text(
-                text = stringResource(Res.string.bilingual_top_bottom),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 4.dp)
-            )
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
+            SegmentedButton(
+                selected = isSideBySide,
+                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(bilingualLayout = Constants.BILINGUAL_SIDE_BY_SIDE)) } },
+                shape = segmentedItemShape(index = 0, count = 2),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = MaterialTheme.colorScheme.primary,
+                    activeContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                icon = {}
+            ) {
+                Text(text = stringResource(Res.string.bilingual_left_right), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            }
+            SegmentedButton(
+                selected = !isSideBySide,
+                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(bilingualLayout = Constants.BILINGUAL_TOP_BOTTOM)) } },
+                shape = segmentedItemShape(index = 1, count = 2),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = MaterialTheme.colorScheme.primary,
+                    activeContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                icon = {}
+            ) {
+                Text(text = stringResource(Res.string.bilingual_top_bottom), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            }
         }
     }
 
@@ -744,7 +742,7 @@ private fun LeftColumn(
     } // end text_margins SettingsSection
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun RightColumn(
     settings: AppSettings,
@@ -807,26 +805,42 @@ private fun RightColumn(
 
     // ── Fullscreen Display ──
     SettingsSection(title = stringResource(Res.string.fullscreen_display)) {
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.width(120.dp))
-            val fsDisplayMode = settings.songSettings.fullscreenDisplayMode
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = fsDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = fsDisplayMode == Constants.SONG_DISPLAY_MODE_LINE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-            }
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        val fsDisplayMode = settings.songSettings.fullscreenDisplayMode
+        Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
+            SegmentedButton(
+                selected = fsDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE,
+                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } },
+                shape = segmentedItemShape(index = 0, count = 2),
+                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                icon = {}
+            ) { Text(stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
+            SegmentedButton(
+                selected = fsDisplayMode == Constants.SONG_DISPLAY_MODE_LINE,
+                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } },
+                shape = segmentedItemShape(index = 1, count = 2),
+                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                icon = {}
+            ) { Text(stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 2.dp)) {
-            Spacer(modifier = Modifier.width(120.dp))
-            listOf(Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both), Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary), Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)).forEach { (mode, label) ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = settings.songSettings.fullscreenLanguageDisplay == mode, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenLanguageDisplay = mode)) } }, modifier = Modifier.size(24.dp))
-                    Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-                }
+        val fsModes = listOf(
+            Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both),
+            Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary),
+            Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)
+        )
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
+            fsModes.forEachIndexed { index, (mode, label) ->
+                SegmentedButton(
+                    selected = settings.songSettings.fullscreenLanguageDisplay == mode,
+                    onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenLanguageDisplay = mode)) } },
+                    shape = segmentedItemShape(index = index, count = fsModes.size),
+                    colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    icon = {}
+                ) { Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1) }
             }
         }
     }
@@ -953,26 +967,42 @@ private fun RightColumn(
 
     // ── Lower Third Display ──
     SettingsSection(title = stringResource(Res.string.lower_third_display)) {
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.width(120.dp))
-            val ltDisplayMode = settings.songSettings.lowerThirdDisplayMode
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = ltDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = ltDisplayMode == Constants.SONG_DISPLAY_MODE_LINE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-            }
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        val ltDisplayMode = settings.songSettings.lowerThirdDisplayMode
+        Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
+            SegmentedButton(
+                selected = ltDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE,
+                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } },
+                shape = segmentedItemShape(index = 0, count = 2),
+                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                icon = {}
+            ) { Text(stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
+            SegmentedButton(
+                selected = ltDisplayMode == Constants.SONG_DISPLAY_MODE_LINE,
+                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } },
+                shape = segmentedItemShape(index = 1, count = 2),
+                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                icon = {}
+            ) { Text(stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 2.dp)) {
-            Spacer(modifier = Modifier.width(120.dp))
-            listOf(Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both), Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary), Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)).forEach { (mode, label) ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = settings.songSettings.lowerThirdLanguageDisplay == mode, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLanguageDisplay = mode)) } }, modifier = Modifier.size(24.dp))
-                    Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-                }
+        val ltModes = listOf(
+            Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both),
+            Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary),
+            Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)
+        )
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
+            ltModes.forEachIndexed { index, (mode, label) ->
+                SegmentedButton(
+                    selected = settings.songSettings.lowerThirdLanguageDisplay == mode,
+                    onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLanguageDisplay = mode)) } },
+                    shape = segmentedItemShape(index = index, count = ltModes.size),
+                    colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    icon = {}
+                ) { Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1) }
             }
         }
     }
@@ -1098,7 +1128,7 @@ private fun RightColumn(
     } // end lower_third_display SettingsSection
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun LookAheadColumn(
     settings: AppSettings,
@@ -1108,25 +1138,41 @@ private fun LookAheadColumn(
     // ── Look Ahead — Fullscreen ──
     SettingsSection(title = stringResource(Res.string.look_ahead_fullscreen)) {
     val laFsDisplayMode = settings.songSettings.lookAheadDisplayMode
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Spacer(modifier = Modifier.width(160.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = laFsDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = laFsDisplayMode == Constants.SONG_DISPLAY_MODE_LINE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-            }
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
+            SegmentedButton(
+                selected = laFsDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE,
+                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } },
+                shape = segmentedItemShape(index = 0, count = 2),
+                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                icon = {}
+            ) { Text(stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
+            SegmentedButton(
+                selected = laFsDisplayMode == Constants.SONG_DISPLAY_MODE_LINE,
+                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } },
+                shape = segmentedItemShape(index = 1, count = 2),
+                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                icon = {}
+            ) { Text(stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 2.dp)) {
-            Spacer(modifier = Modifier.width(160.dp))
-            listOf(Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both), Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary), Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)).forEach { (mode, label) ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = settings.songSettings.lookAheadLanguageDisplay == mode, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadLanguageDisplay = mode)) } }, modifier = Modifier.size(24.dp))
-                    Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-                }
+        val laFsModes = listOf(
+            Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both),
+            Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary),
+            Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)
+        )
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
+            laFsModes.forEachIndexed { index, (mode, label) ->
+                SegmentedButton(
+                    selected = settings.songSettings.lookAheadLanguageDisplay == mode,
+                    onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadLanguageDisplay = mode)) } },
+                    shape = segmentedItemShape(index = index, count = laFsModes.size),
+                    colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    icon = {}
+                ) { Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1) }
             }
         }
     }
@@ -1274,25 +1320,41 @@ private fun LookAheadColumn(
     // ── Look Ahead — Lower Third ──
     SettingsSection(title = stringResource(Res.string.look_ahead_lower_third)) {
     val laLtDisplayMode = settings.songSettings.lowerThirdLookAheadDisplayMode
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Spacer(modifier = Modifier.width(160.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = laLtDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = laLtDisplayMode == Constants.SONG_DISPLAY_MODE_LINE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-            }
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
+            SegmentedButton(
+                selected = laLtDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE,
+                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } },
+                shape = segmentedItemShape(index = 0, count = 2),
+                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                icon = {}
+            ) { Text(stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
+            SegmentedButton(
+                selected = laLtDisplayMode == Constants.SONG_DISPLAY_MODE_LINE,
+                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } },
+                shape = segmentedItemShape(index = 1, count = 2),
+                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                icon = {}
+            ) { Text(stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 2.dp)) {
-            Spacer(modifier = Modifier.width(160.dp))
-            listOf(Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both), Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary), Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)).forEach { (mode, label) ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = settings.songSettings.lowerThirdLookAheadLanguageDisplay == mode, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadLanguageDisplay = mode)) } }, modifier = Modifier.size(24.dp))
-                    Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
-                }
+        val laLtModes = listOf(
+            Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both),
+            Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary),
+            Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)
+        )
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
+            laLtModes.forEachIndexed { index, (mode, label) ->
+                SegmentedButton(
+                    selected = settings.songSettings.lowerThirdLookAheadLanguageDisplay == mode,
+                    onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadLanguageDisplay = mode)) } },
+                    shape = segmentedItemShape(index = index, count = laLtModes.size),
+                    colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    icon = {}
+                ) { Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1) }
             }
         }
     }
@@ -1435,5 +1497,15 @@ private fun LookAheadColumn(
         }
     }
     } // end look_ahead_next_lower_third SettingsSection
+}
+
+private fun segmentedItemShape(index: Int, count: Int): Shape {
+    val r = 4.dp
+    return when {
+        count == 1 -> RoundedCornerShape(r)
+        index == 0 -> RoundedCornerShape(topStart = r, bottomStart = r, topEnd = 0.dp, bottomEnd = 0.dp)
+        index == count - 1 -> RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = r, bottomEnd = r)
+        else -> RoundedCornerShape(0.dp)
+    }
 }
 
