@@ -364,6 +364,24 @@ fun MainDesktop(
     DisposableEffect(Unit) { onDispose { scheduleViewModel.dispose() } }
 
     val presentingMode by presenterManager.presentingMode
+
+    // When Bible is live and the user is on a different tab, keep the presenter in sync with
+    // new auto-follow detections. BibleTab is inside AnimatedContent and leaves the composition
+    // on tab switch, so its own LaunchedEffect can't fire while the user is away.
+    val autoFollowLiveToken by bibleViewModel.autoFollowLiveToken
+    val lastMainAutoFollowToken = remember { mutableStateOf(autoFollowLiveToken) }
+    LaunchedEffect(autoFollowLiveToken) {
+        if (autoFollowLiveToken == 0) return@LaunchedEffect
+        if (autoFollowLiveToken == lastMainAutoFollowToken.value) return@LaunchedEffect
+        lastMainAutoFollowToken.value = autoFollowLiveToken
+        // Defer to BibleTab's own handler (history, stats, training log) when it's active.
+        if (effectiveTabIndex == visibleTabs.indexOf(Tabs.BIBLE)) return@LaunchedEffect
+        // Don't steal the screen — only update verse content when Bible is already presenting.
+        if (presentingMode != Presenting.BIBLE) return@LaunchedEffect
+        val verses = bibleViewModel.getSelectedVerses()
+        if (verses.isNotEmpty()) onVerseSelected(verses)
+    }
+
     val mainFocusRequester = remember { FocusRequester() }
 
     val konamiSequence = remember {

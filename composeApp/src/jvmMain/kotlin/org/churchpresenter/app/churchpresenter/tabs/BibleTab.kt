@@ -393,8 +393,13 @@ fun BibleTab(
     // switch the presenter to BIBLE), not just select it. Reuses the manual go-live path so history,
     // stats and training logging happen too.
     val autoFollowLiveToken by viewModel.autoFollowLiveToken
+    // Seed with the token value at composition time so detections that happened while the tab was
+    // inactive (AnimatedContent destroys BibleTab on switch) don't re-fire go-live on re-entry.
+    val lastHandledAutoFollowToken = remember { mutableStateOf(autoFollowLiveToken) }
     LaunchedEffect(autoFollowLiveToken) {
         if (autoFollowLiveToken == 0) return@LaunchedEffect
+        if (autoFollowLiveToken == lastHandledAutoFollowToken.value) return@LaunchedEffect
+        lastHandledAutoFollowToken.value = autoFollowLiveToken
         goLiveWithHistory(source = "auto")
     }
 
