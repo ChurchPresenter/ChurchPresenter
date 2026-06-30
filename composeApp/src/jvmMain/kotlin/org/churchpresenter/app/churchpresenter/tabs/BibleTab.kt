@@ -323,6 +323,15 @@ fun BibleTab(
             onVerseSelected(verses)
             presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
             onPresenting(Presenting.BIBLE)
+            TrainingDataLogger.logLiveReference(
+                book       = viewModel.canonicalBookIdForDisplayIndex(viewModel.selectedBookIndex.value),
+                chapter    = primary.chapter,
+                verseStart = primary.verseNumber,
+                verseEnd   = null,
+                source     = "manual",
+                segmentId  = viewModel.lastDetectionSegmentId,
+                autoFollow = viewModel.autoFollowEnabled.value,
+            )
         }
     }
 
@@ -414,7 +423,24 @@ fun BibleTab(
         if (splitBrowseMode) return@LaunchedEffect
         if (verses.isNotEmpty() && selectedVerseIndex >= 0 && selectedVerseIndex < verses.size) {
             val selectedVerses = viewModel.getSelectedVerses()
-            if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
+            if (selectedVerses.isNotEmpty()) {
+                onVerseSelected(selectedVerses)
+                // Log manual navigation while live. Skip when auto-follow also incremented the
+                // token this frame — goLiveWithHistory already logs that case with source="auto".
+                if (currentIsPresenting && autoFollowLiveToken == lastHandledAutoFollowToken.value) {
+                    val primary = selectedVerses.first()
+                    val bookNum = viewModel.canonicalBookIdForDisplayIndex(viewModel.selectedBookIndex.value)
+                    TrainingDataLogger.logLiveReference(
+                        book       = bookNum,
+                        chapter    = primary.chapter,
+                        verseStart = primary.verseNumber,
+                        verseEnd   = null,
+                        source     = "manual",
+                        segmentId  = viewModel.lastDetectionSegmentId,
+                        autoFollow = viewModel.autoFollowEnabled.value,
+                    )
+                }
+            }
         }
     }
 
@@ -878,7 +904,7 @@ fun BibleTab(
                         .padding(horizontal = 6.dp)
                         .initialPassCombinedClickable(
                             onClick = { viewModel.applyDetectedReference(ref); focusRequester.requestFocus() },
-                            onDoubleClick = { viewModel.applyDetectedReference(ref); goLiveWithHistory(); focusRequester.requestFocus() }
+                            onDoubleClick = { viewModel.applyDetectedReference(ref); goLiveWithHistory(source = "detection"); focusRequester.requestFocus() }
                         )
                 ) {
                     // Fixed-width icon column (source markers + transcription/translation markers) so
@@ -1503,6 +1529,15 @@ fun BibleTab(
                                                 onVerseSelected(verses)
                                                 presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
                                                 onPresenting(Presenting.BIBLE)
+                                                TrainingDataLogger.logLiveReference(
+                                                    book       = viewModel.canonicalBookIdForDisplayIndex(viewModel.selectedBookIndex.value),
+                                                    chapter    = primary.chapter,
+                                                    verseStart = primary.verseNumber,
+                                                    verseEnd   = null,
+                                                    source     = "manual",
+                                                    segmentId  = viewModel.lastDetectionSegmentId,
+                                                    autoFollow = viewModel.autoFollowEnabled.value,
+                                                )
                                             }
                                         }
                                     },
@@ -1586,7 +1621,7 @@ fun BibleTab(
                                                     },
                                                     onDoubleClick = {
                                                         viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
-                                                        goLiveWithHistory()
+                                                        goLiveWithHistory(source = "history")
                                                         focusRequester.requestFocus()
                                                     }
                                                 )

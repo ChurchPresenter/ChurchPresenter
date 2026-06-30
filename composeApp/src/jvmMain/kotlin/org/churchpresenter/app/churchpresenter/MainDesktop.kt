@@ -379,7 +379,20 @@ fun MainDesktop(
         // Don't steal the screen — only update verse content when Bible is already presenting.
         if (presentingMode != Presenting.BIBLE) return@LaunchedEffect
         val verses = bibleViewModel.getSelectedVerses()
-        if (verses.isNotEmpty()) onVerseSelected(verses)
+        if (verses.isNotEmpty()) {
+            onVerseSelected(verses)
+            val primary = verses.first()
+            val bookNum = bibleViewModel.canonicalBookIdForDisplayIndex(bibleViewModel.selectedBookIndex.value)
+            TrainingDataLogger.logLiveReference(
+                book       = bookNum,
+                chapter    = primary.chapter,
+                verseStart = primary.verseNumber,
+                verseEnd   = null,
+                source     = "auto",
+                segmentId  = bibleViewModel.lastDetectionSegmentId,
+                autoFollow = true,
+            )
+        }
     }
 
     val mainFocusRequester = remember { FocusRequester() }
