@@ -283,8 +283,7 @@ private fun DictionaryListPane(
                         label = stringResource(Res.string.dictionary_bible_select),
                         value = viewModel.dictBibleFile,
                         options = bibleOptions,
-                        onValueChange = { viewModel.setDictBible(it) },
-                        modifier = Modifier.weight(1f)
+                        onValueChange = { viewModel.setDictBible(it) }
                     )
                     if (viewModel.isDictBibleLoading) {
                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
