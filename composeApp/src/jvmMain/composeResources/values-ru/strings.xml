@@ -93,7 +93,6 @@
     <string name="menu_getting_started">Начало работы…</string>
     <string name="menu_about">О программе</string>
     <string name="about_title">О Church Presenter</string>
-    <string name="about_copyright">© 2025 Church Presenter</string>
     <string name="converter_window_title">ChurchPresenter Converter</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="clear_recents">Очистить недавние</string>

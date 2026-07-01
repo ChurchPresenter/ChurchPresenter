@@ -89,7 +89,7 @@ fun AboutDialog(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = stringResource(Res.string.about_copyright),
+                    text = stringResource(Res.string.about_copyright, "2026"),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

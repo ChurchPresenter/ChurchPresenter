@@ -112,13 +112,13 @@
     <string name="menu_getting_started">Getting Started…</string>
     <string name="menu_about">About</string>
     <string name="about_title">About Church Presenter</string>
-    <string name="about_copyright">© 2025 Church Presenter</string>
+    <string name="about_copyright">© %s Church Presenter</string>
     <string name="converter_window_title">ChurchPresenter Converter</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="open_crash_logs">Open Crash Logs</string>
     <string name="open_converter">Converter</string>
     <string name="report_bug">Report a Bug</string>
-    <string name="submit_feature_request">Submit Feature Request</string>
+    <string name="submit_feature_request">Feature Request</string>
     <string name="action_ok">OK</string>
     <string name="menu_help_item">Help</string>
     <string name="menu_how_to_blog">How To Blog</string>
