@@ -1624,6 +1624,27 @@ private fun LiveChapterPanel(
         if (firstLiveIndex >= 0) listState.scrollToItem(firstLiveIndex)
     }
 
+    LaunchedEffect(liveVerseNumbers) {
+        val firstLiveIndex = verses.indexOfFirst { verse ->
+            verse.substringBefore(". ").toIntOrNull()?.let { it in liveVerseNumbers } == true
+        }
+        if (firstLiveIndex < 0 || firstLiveIndex + 1 >= verses.size) return@LaunchedEffect
+        val layoutInfo = listState.layoutInfo
+        val visibleItems = layoutInfo.visibleItemsInfo
+        val lastVisible = visibleItems.lastOrNull() ?: return@LaunchedEffect
+        if (firstLiveIndex < lastVisible.index - 1) return@LaunchedEffect
+        val viewportEnd = layoutInfo.viewportEndOffset
+        val itemHeight = lastVisible.size.toFloat()
+        val target2 = visibleItems.firstOrNull { it.index == firstLiveIndex + 2 }
+        val target1 = visibleItems.firstOrNull { it.index == firstLiveIndex + 1 }
+        val scrollAmount = when {
+            target2 != null -> ((target2.offset + target2.size) - viewportEnd).toFloat().coerceAtLeast(0f)
+            target1 != null -> ((target1.offset + target1.size) - viewportEnd + itemHeight).toFloat().coerceAtLeast(0f)
+            else -> itemHeight * 2
+        }
+        if (scrollAmount > 0f) listState.scroll { scrollBy(scrollAmount) }
+    }
+
     Box(modifier = modifier.fillMaxWidth().padding(top = 8.dp).fillMaxHeight()) {
         LazyColumn(
             state = listState,
@@ -1790,6 +1811,23 @@ private fun BibleVerseColumn(
         if (selectedIndex >= 0 && selectedIndex < verses.size) {
             listState.scrollToItem(selectedIndex.coerceAtMost(verses.size - 1))
         }
+    }
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex < 0 || selectedIndex + 1 >= verses.size) return@LaunchedEffect
+        val layoutInfo = listState.layoutInfo
+        val visibleItems = layoutInfo.visibleItemsInfo
+        val lastVisible = visibleItems.lastOrNull() ?: return@LaunchedEffect
+        if (selectedIndex < lastVisible.index - 1) return@LaunchedEffect
+        val viewportEnd = layoutInfo.viewportEndOffset
+        val itemHeight = lastVisible.size.toFloat()
+        val target2 = visibleItems.firstOrNull { it.index == selectedIndex + 2 }
+        val target1 = visibleItems.firstOrNull { it.index == selectedIndex + 1 }
+        val scrollAmount = when {
+            target2 != null -> ((target2.offset + target2.size) - viewportEnd).toFloat().coerceAtLeast(0f)
+            target1 != null -> ((target1.offset + target1.size) - viewportEnd + itemHeight).toFloat().coerceAtLeast(0f)
+            else -> itemHeight * 2
+        }
+        if (scrollAmount > 0f) listState.scroll { scrollBy(scrollAmount) }
     }
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize().padding(end = 8.dp)) {
