@@ -1658,7 +1658,10 @@ private fun LiveChapterPanel(
                 val isLive = verseNum != null && verseNum in liveVerseNumbers
                 Text(
                     text = verseStr,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 13.5.sp,
+                        lineHeight = 13.5.sp * 1.6f
+                    ),
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1830,18 +1833,28 @@ private fun BibleVerseColumn(
         if (scrollAmount > 0f) listState.scroll { scrollBy(scrollAmount) }
     }
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(state = listState, modifier = Modifier.fillMaxSize().padding(end = 8.dp)) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(start = 4.dp, top = 4.dp, bottom = 4.dp, end = 12.dp)
+        ) {
             itemsIndexed(verses) { index, verseStr ->
                 val isSelected = index == selectedIndex || (selectedIndices != null && index in selectedIndices)
-                val dotIdx = verseStr.indexOf(". ")
-                val verseNum = if (dotIdx > 0) verseStr.substring(0, dotIdx) else ""
-                val verseText = if (dotIdx > 0) verseStr.substring(dotIdx + 2) else verseStr
-                Row(
+                Text(
+                    text = verseStr,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 13.5.sp,
+                        lineHeight = 13.5.sp * 1.6f,
+                        fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
+                    ),
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
                             if (isSelected) MaterialTheme.colorScheme.surfaceVariant
-                            else Color.Transparent
+                            else MaterialTheme.colorScheme.surface
                         )
                         .pointerInput(index) {
                             awaitPointerEventScope {
@@ -1862,33 +1875,8 @@ private fun BibleVerseColumn(
                                 }
                             }
                         }
-                        .padding(start = 18.dp, end = 18.dp, top = 8.dp, bottom = 8.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    if (verseNum.isNotEmpty()) {
-                        Text(
-                            text = verseNum,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                letterSpacing = 0.2.sp
-                            ),
-                            color = if (isSelected) accentColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            modifier = Modifier.widthIn(min = 16.dp).padding(top = 1.dp),
-                            textAlign = TextAlign.End
-                        )
-                        Spacer(Modifier.width(11.dp))
-                    }
-                    Text(
-                        text = verseText,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 13.5.sp,
-                            lineHeight = 13.5.sp * 1.6f,
-                            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
-                        ),
-                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                        .padding(6.dp)
+                )
             }
         }
         VerticalScrollbar(
