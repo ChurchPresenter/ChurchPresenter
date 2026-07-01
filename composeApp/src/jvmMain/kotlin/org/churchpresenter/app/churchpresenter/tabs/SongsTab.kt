@@ -706,7 +706,7 @@ fun SongsTab(
                 modifier = Modifier
                     .width(contentMinWidthDp)
                     .fillMaxHeight()
-                    .padding(horizontal = 8.dp),
+                    .padding(end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 visibleCols.forEach { colId ->
@@ -932,7 +932,7 @@ fun SongsTab(
                         .width(contentMinWidthDp)
                         .fillMaxHeight()
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(horizontal = 8.dp)
+                        .padding(end = 8.dp)
                 ) {
                     itemsIndexed(filteredSongs) { index, song ->
                         var showContextMenu by remember { mutableStateOf(false) }
