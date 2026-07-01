@@ -71,8 +71,6 @@ import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.input.key.Key
@@ -949,11 +947,6 @@ fun SongsTab(
                                     if (isRowSelected) MaterialTheme.colorScheme.surfaceVariant
                                     else MaterialTheme.colorScheme.surface
                                 )
-                                .drawBehind {
-                                    if (isRowSelected) {
-                                        drawRect(color = rowAccentColor, size = Size(4f, size.height))
-                                    }
-                                }
                                 .finalPassClickable {
                                     viewModel.selectSong(index)
                                     if (isPresenting && liveSongIndex >= 0) {
