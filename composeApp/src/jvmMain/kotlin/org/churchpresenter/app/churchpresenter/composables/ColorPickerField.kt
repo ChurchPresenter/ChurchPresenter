@@ -59,8 +59,8 @@ fun ColorPickerField(
     Column(
         modifier = modifier
             .heightIn(min = 42.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(6.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { showDialog = true }
             .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 0.dp),
         verticalArrangement = Arrangement.Center
@@ -72,7 +72,7 @@ fun ColorPickerField(
                 lineHeight = 11.sp,
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 0.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
