@@ -279,7 +279,12 @@ fun MainDesktop(
     ) {
         SoftwareVideoPlayer(
             viewModel = mediaViewModel,
-            modifier = Modifier.size(0.dp)
+            modifier = Modifier.size(0.dp),
+            // This decoder only exists to keep rendering a frame while off the Media tab.
+            // The only control that can set isPlaying = true lives on the Media tab itself,
+            // so if this mounts paused it stays paused for its whole lifetime here — safe to
+            // disable its audio track outright rather than rely on a volume of 0.
+            audioEnabled = mediaViewModel.isPlaying
         )
     }
 

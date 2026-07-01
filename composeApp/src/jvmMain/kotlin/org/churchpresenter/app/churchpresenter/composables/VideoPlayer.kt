@@ -339,10 +339,19 @@ fun VideoPlayer(
             if (f.exists()) f.absolutePath else url
         } catch (_: Exception) { url }
 
-        if (!audioEnabled) mp.audio().setVolume(0)
+        // Stay muted until playback is actually requested. Loading always briefly starts the
+        // VLC pipeline to capture a first frame (see playing() below), and without this guard
+        // that grace window would be audible even though the file is meant to load paused.
+        if (!audioEnabled || !viewModel.isPlaying) mp.audio().setVolume(0)
         else mp.audio().setVolume((viewModel.effectiveVolume * 100).toInt())
 
-        mp.media().play(mrl)  // VideoPlayer is audio-only; no codec override needed
+        // When the caller has determined this instance must never produce audio (e.g. a
+        // background decoder mounted only to keep rendering a paused frame), disable the
+        // audio track outright with :no-audio. Volume-0 alone can still leak a brief pop
+        // because libvlc's audio output is created asynchronously as playback starts, so
+        // the gain isn't guaranteed to apply before the very first samples flow.
+        if (!audioEnabled) mp.media().play(mrl, ":no-audio")
+        else mp.media().play(mrl)  // VideoPlayer is audio-only; no codec override needed
         // Auto-pause is handled by the playing() event listener above.
     }
 
@@ -354,6 +363,9 @@ fun VideoPlayer(
     LaunchedEffect(viewModel.isPlaying) {
         SwingUtilities.invokeLater {
             if (viewModel.isPlaying) {
+                // Restore real volume now that playback is genuinely resuming — the load
+                // above may have muted the player to silence the first-frame grace window.
+                if (audioEnabled) mp.audio().setVolume((viewModel.effectiveVolume * 100).toInt())
                 mp.controls().play()
             } else {
                 mp.controls().pause()
@@ -538,14 +550,24 @@ fun SoftwareVideoPlayer(
             if (f.exists()) f.absolutePath else url
         } catch (_: Exception) { url }
 
-        if (!audioEnabled) mp.audio().setVolume(0)
+        // Stay muted until playback is actually requested. Loading always briefly starts the
+        // VLC pipeline to capture a first frame (see playing() below), and without this guard
+        // that grace window would be audible even though the video is meant to load paused.
+        if (!audioEnabled || !viewModel.isPlaying) mp.audio().setVolume(0)
         else mp.audio().setVolume((viewModel.effectiveVolume * 100).toInt())
 
         // :codec=avcodec forces FFmpeg software decoding, bypassing VideoToolbox.
         // Required for Dolby Vision HEVC / 10-bit files where VideoToolbox outputs zero-copy
         // GPU CVPX buffers that the callback video surface cannot read (black frame).
         // :avcodec-fast reduces per-frame overhead; :clock-jitter=0 tightens frame scheduling.
-        mp.media().play(mrl, ":codec=avcodec", ":avcodec-fast", ":clock-jitter=0")
+        // When the caller has determined this instance must never produce audio (e.g. a
+        // background decoder mounted only to keep rendering a paused frame), :no-audio
+        // disables the audio track outright — volume-0 alone can still leak a brief pop
+        // because libvlc's audio output is created asynchronously as playback starts, so
+        // the gain isn't guaranteed to apply before the very first samples flow.
+        val codecOptions = arrayOf(":codec=avcodec", ":avcodec-fast", ":clock-jitter=0")
+        if (!audioEnabled) mp.media().play(mrl, *codecOptions, ":no-audio")
+        else mp.media().play(mrl, *codecOptions)
         // Auto-pause is handled by the playing() event listener above.
     }
 
@@ -557,6 +579,9 @@ fun SoftwareVideoPlayer(
     LaunchedEffect(viewModel.isPlaying) {
         SwingUtilities.invokeLater {
             if (viewModel.isPlaying) {
+                // Restore real volume now that playback is genuinely resuming — the load
+                // above may have muted the player to silence the first-frame grace window.
+                if (audioEnabled) mp.audio().setVolume((viewModel.effectiveVolume * 100).toInt())
                 mp.controls().play()
             } else {
                 mp.controls().pause()
