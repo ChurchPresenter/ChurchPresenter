@@ -130,6 +130,8 @@ import churchpresenter.composeapp.generated.resources.stt_status_reconnecting
 import churchpresenter.composeapp.generated.resources.stt_status_unreachable
 import churchpresenter.composeapp.generated.resources.stt_status_connecting
 import churchpresenter.composeapp.generated.resources.stt_status_not_connected
+import churchpresenter.composeapp.generated.resources.stt_connect
+import churchpresenter.composeapp.generated.resources.stt_disconnect
 import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow
 import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow_hint
 import churchpresenter.composeapp.generated.resources.bible_stt_clear
@@ -467,6 +469,15 @@ fun BibleTab(
     }
 
     var historyExpanded by remember { mutableStateOf(true) }
+
+    LaunchedEffect(sttConnected) {
+        if (sttConnected) {
+            val url = appSettings.sttSettings.serverUrl
+            if (appSettings.sttSettings.lastConnectedUrl != url) {
+                onSettingsChange { it.copy(sttSettings = it.sttSettings.copy(lastConnectedUrl = url)) }
+            }
+        }
+    }
 
     var searchFieldFocused by remember { mutableStateOf(false) }
 
@@ -1304,6 +1315,34 @@ fun BibleTab(
                             Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
                         }
                     }
+                    // STT mic button — visible once a successful connection has been made to the current URL
+                    val sttEverConnectedToCurrentUrl = appSettings.sttSettings.lastConnectedUrl.isNotBlank() &&
+                        appSettings.sttSettings.lastConnectedUrl == appSettings.sttSettings.serverUrl
+                    if (sttEverConnectedToCurrentUrl && sttManager != null) {
+                        val sttActionStr = if (sttConnected) stringResource(Res.string.stt_disconnect) else stringResource(Res.string.stt_connect)
+                        TooltipArea(
+                            tooltip = {
+                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
+                                    Text(sttActionStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    if (sttConnected) sttManager.disconnect()
+                                    else sttManager.connect(appSettings.sttSettings.serverUrl)
+                                    focusRequester.requestFocus()
+                                },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = if (sttConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor = if (sttConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            ) {
+                                Icon(Icons.Filled.Mic, contentDescription = sttActionStr, modifier = Modifier.size(20.dp))
+                            }
+                        }
+                    }
                     // Swap Bibles (blue)
                     TooltipArea(
                         tooltip = {
@@ -1570,7 +1609,7 @@ fun BibleTab(
                                         Text(
                                             text = buildAnnotatedString {
                                                 withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)) { append(entry.displayText) }
-                                                append("  \${entry.verseText}")
+                                                append("  ${entry.verseText}")
                                             },
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurface,
@@ -1857,6 +1896,7 @@ private fun BibleVerseColumn(
                             else MaterialTheme.colorScheme.surface
                         )
                         .pointerInput(index) {
+                            var lastClickTime = 0L
                             awaitPointerEventScope {
                                 while (true) {
                                     val event = awaitPointerEvent(PointerEventPass.Main)
@@ -1869,7 +1909,12 @@ private fun BibleVerseColumn(
                                             isRight -> onRightClicked(index)
                                             isCtrl -> onItemCtrlClicked(index)
                                             isShift -> onItemShiftClicked(index)
-                                            else -> onItemSelected(index)
+                                            else -> {
+                                                val now = System.currentTimeMillis()
+                                                val isDouble = now - lastClickTime < 300L
+                                                lastClickTime = now
+                                                if (isDouble) onItemDoubleClicked(index) else onItemSelected(index)
+                                            }
                                         }
                                     }
                                 }

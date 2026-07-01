@@ -1502,9 +1502,7 @@ class CompanionServer {
     fun start(port: Int = Constants.SERVER_DEFAULT_PORT, hostOverride: String = "") {
         if (_isRunning.value) return
 
-        // Find the first pair of consecutive free ports starting from the requested one.
-        // The server needs port N (plain-HTTP) and port N+1 (plain-HTTP localhost connector).
-        val actualPort = findFreePortPair(port)
+        val actualPort = findFreePort(port)
         currentPort = actualPort
 
         val displayHost = hostOverride.trim().ifEmpty { localIpAddress() }
@@ -1514,18 +1512,12 @@ class CompanionServer {
         startPlainHttp(actualPort, displayHost)
     }
 
-    /** Fallback plain-HTTP start used only if SSL cert generation fails. */
     private fun startPlainHttp(port: Int, displayHost: String = localIpAddress()) {
         try {
             server = embeddedServer(Netty, configure = {
                 connector {
                     host = "0.0.0.0"
                     this.port = port
-                }
-                // Plain HTTP on localhost for embedded WebView (mirrors the SSL dual-connector setup)
-                connector {
-                    host = "127.0.0.1"
-                    this.port = port + 1
                 }
             }) { configurePipeline() }
             server?.start(wait = false)
@@ -1539,16 +1531,11 @@ class CompanionServer {
         }
     }
 
-    /**
-     * Finds the first port >= [startPort] where BOTH [port] and [port]+1 are free.
-     * The server requires two consecutive free ports (HTTPS + plain-HTTP localhost connector).
-     * Scans up to 20 candidates before giving up and returning [startPort] as-is.
-     */
-    private fun findFreePortPair(startPort: Int): Int {
-        for (candidate in startPort until startPort + 40 step 2) {
-            if (isPortFree(candidate) && isPortFree(candidate + 1)) return candidate
+    private fun findFreePort(startPort: Int): Int {
+        for (candidate in startPort until startPort + 40) {
+            if (isPortFree(candidate)) return candidate
         }
-        return startPort  // give up — let Netty surface the real error
+        return startPort
     }
 
     private fun isPortFree(port: Int): Boolean = try {

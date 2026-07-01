@@ -14,9 +14,11 @@ data class BibleEngineSettings(
     val enabled: Boolean = true,
     val runLocal: Boolean = true,
     val host: String = "localhost",
-    // Must differ from Constants.SERVER_DEFAULT_PORT (8765, the Companion server) — sharing a port
-    // made the engine's WS server fail to bind silently while the STT client kept detecting, so no
-    // detections ever reached the Bible tab.
+    // Must not conflict with the Companion server's port (8765) or any port it may bind on startup.
+    // The Companion server previously also bound port+1 (8766) as a localhost connector, which caused
+    // the BLE server to silently fail to bind on Mac (kqueue async failure not caught by runCatching),
+    // leaving the BLE client connecting to the Companion server on 8766 and getting 404. That
+    // localhost connector has been removed; 8766 is now safe to use for the BLE.
     val port: Int = 8766,
     val textMatchLevel: String = "off",
     val autoFollow: Boolean = false,
