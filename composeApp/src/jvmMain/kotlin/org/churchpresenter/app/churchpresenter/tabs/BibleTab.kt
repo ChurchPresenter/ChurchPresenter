@@ -1617,11 +1617,11 @@ private fun LiveChapterPanel(
 ) {
     val listState = rememberLazyListState()
 
-    LaunchedEffect(liveVerseNumbers) {
+    LaunchedEffect(verses) {
         val firstLiveIndex = verses.indexOfFirst { verse ->
             verse.substringBefore(". ").toIntOrNull()?.let { it in liveVerseNumbers } == true
         }
-        if (firstLiveIndex >= 0) listState.animateScrollToItem(firstLiveIndex)
+        if (firstLiveIndex >= 0) listState.scrollToItem(firstLiveIndex)
     }
 
     Box(modifier = modifier.fillMaxWidth().padding(top = 8.dp).fillMaxHeight()) {

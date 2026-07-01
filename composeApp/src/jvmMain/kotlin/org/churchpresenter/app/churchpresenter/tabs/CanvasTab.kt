@@ -721,7 +721,7 @@ fun CanvasTab(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
