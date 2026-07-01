@@ -723,13 +723,12 @@ fun BibleTab(
             // ── Controls row: status + auto-follow + reverse-lookup level + clear ──
             val engineStartFailed = bibleEngineClient?.startFailed?.value == true
             val engineConnected = bibleEngineClient?.connected?.value == true
-            val sttConnecting = sttManager?.connecting?.value == true
-            val sttConnectError = sttManager?.connectError?.value == true
-            val sttReconnecting = sttManager?.reconnecting?.value == true
+            val sttConnecting = sttManager.connecting.value == true
+            val sttConnectError = sttManager.connectError.value == true
+            val sttReconnecting = sttManager.reconnecting.value == true
             val noBibleSelected = appSettings.bibleSettings.primaryBible.isBlank() &&
                 appSettings.bibleSettings.secondaryBible.isBlank()
-            val sttReceiving = sttManager != null &&
-                (sttManager.inProgressText.value.isNotBlank() || sttManager.segments.isNotEmpty())
+            val sttReceiving = sttManager.inProgressText.value.isNotBlank() || sttManager.segments.isNotEmpty()
             val statusIsError = engineStartFailed || noBibleSelected || sttConnectError
             val statusText = when {
                 engineStartFailed -> stringResource(Res.string.bible_stt_engine_unavailable)
@@ -1228,7 +1227,7 @@ fun BibleTab(
                                             indication = null,
                                             interactionSource = remember { MutableInteractionSource() }
                                         ) {
-                                            presenterManager!!.setBibleHold(!holdLiveState)
+                                            presenterManager.setBibleHold(!holdLiveState)
                                             focusRequester.requestFocus()
                                         }
                                     else Modifier
@@ -1640,7 +1639,7 @@ private fun LiveChapterPanel(
         val target1 = visibleItems.firstOrNull { it.index == firstLiveIndex + 1 }
         val scrollAmount = when {
             target2 != null -> ((target2.offset + target2.size) - viewportEnd).toFloat().coerceAtLeast(0f)
-            target1 != null -> ((target1.offset + target1.size) - viewportEnd + itemHeight).toFloat().coerceAtLeast(0f)
+            target1 != null -> ((target1.offset + target1.size) - viewportEnd + itemHeight).coerceAtLeast(0f)
             else -> itemHeight * 2
         }
         if (scrollAmount > 0f) listState.scroll { scrollBy(scrollAmount) }
@@ -1828,7 +1827,7 @@ private fun BibleVerseColumn(
         val target1 = visibleItems.firstOrNull { it.index == selectedIndex + 1 }
         val scrollAmount = when {
             target2 != null -> ((target2.offset + target2.size) - viewportEnd).toFloat().coerceAtLeast(0f)
-            target1 != null -> ((target1.offset + target1.size) - viewportEnd + itemHeight).toFloat().coerceAtLeast(0f)
+            target1 != null -> ((target1.offset + target1.size) - viewportEnd + itemHeight).coerceAtLeast(0f)
             else -> itemHeight * 2
         }
         if (scrollAmount > 0f) listState.scroll { scrollBy(scrollAmount) }
