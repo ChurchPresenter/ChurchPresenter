@@ -122,6 +122,8 @@ import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.go_live
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_refresh
@@ -1054,7 +1056,7 @@ private fun TimerColumn(
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         ) {
-            Text("+", style = MaterialTheme.typography.titleLarge)
+            Icon(Icons.Default.Add, contentDescription = null)
         }
         BasicTextField(
             value = value,
@@ -1083,7 +1085,7 @@ private fun TimerColumn(
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         ) {
-            Text("−", style = MaterialTheme.typography.titleLarge)
+            Icon(Icons.Default.Remove, contentDescription = null)
         }
         Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
     }

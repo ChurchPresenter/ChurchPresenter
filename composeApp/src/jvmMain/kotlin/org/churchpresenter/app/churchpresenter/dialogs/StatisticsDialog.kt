@@ -46,6 +46,7 @@ import churchpresenter.composeapp.generated.resources.statistics
 import churchpresenter.composeapp.generated.resources.statistics_exported_error
 import churchpresenter.composeapp.generated.resources.statistics_exported_success
 import churchpresenter.composeapp.generated.resources.top_songs
+import churchpresenter.composeapp.generated.resources.em_dash
 import churchpresenter.composeapp.generated.resources.top_verses
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -159,7 +160,7 @@ fun StatisticsDialog(
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.primary
                                 )
-                                Text("—", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(stringResource(Res.string.em_dash), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             } else {
                                 for ((songbook, songs) in topSongsBySongbook) {
                                     val header = if (songbook.isNotEmpty())
@@ -205,7 +206,7 @@ fun StatisticsDialog(
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.primary
                                 )
-                                Text("—", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(stringResource(Res.string.em_dash), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             } else {
                                 for ((bibleName, verses) in topVersesByBible) {
                                     val header = if (bibleName.isNotEmpty())

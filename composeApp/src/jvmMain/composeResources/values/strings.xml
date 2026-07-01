@@ -1711,4 +1711,5 @@
     <string name="dictionary_bible_primary">Primary Bible</string>
     <string name="dictionary_bible_select">Select Bible translation</string>
     <string name="dictionary_go_to_verse">Go to verse in Bible tab</string>
+    <string name="em_dash">—</string>
 </resources>
