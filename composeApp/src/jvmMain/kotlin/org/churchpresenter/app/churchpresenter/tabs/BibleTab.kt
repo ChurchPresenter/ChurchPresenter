@@ -1794,9 +1794,9 @@ private fun BibleVerseColumn(
     onRightClicked: (Int) -> Unit = {}
 ) {
     val listState = rememberLazyListState()
-    LaunchedEffect(selectedIndex) {
+    LaunchedEffect(verses) {
         if (selectedIndex >= 0 && selectedIndex < verses.size) {
-            listState.animateScrollToItem(selectedIndex.coerceAtMost(verses.size - 1))
+            listState.scrollToItem(selectedIndex.coerceAtMost(verses.size - 1))
         }
     }
     Box(modifier = Modifier.fillMaxSize()) {
