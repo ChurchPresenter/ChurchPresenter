@@ -12,7 +12,9 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -597,18 +599,18 @@ fun BibleTab(
     }
 
     @Composable
-    fun DragHandle(onDrag: (Float) -> Unit) {
+    fun DragHandle(onDragEnd: () -> Unit = ::saveColWidths, onDrag: (Float) -> Unit) {
         Box(
             modifier = Modifier
                 .width(4.dp)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant)
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(onDragEnd = ::saveColWidths) { _, amount ->
-                        onDrag(amount)
-                    }
-                }
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = rememberDraggableState { delta -> onDrag(delta) },
+                    onDragStopped = { onDragEnd() }
+                )
         )
     }
 
@@ -1499,9 +1501,8 @@ fun BibleTab(
 
                         // Live panel (split mode)
                         if (isSplitActive) {
-                            DragHandle { amount ->
+                            DragHandle(onDragEnd = ::saveColWSplit) { amount ->
                                 colWSplit = (colWSplit - amount).coerceIn(with(density) { 150.dp.toPx() }, with(density) { 600.dp.toPx() })
-                                saveColWSplit()
                             }
                             Column(modifier = Modifier.width(with(density) { effectiveSplitWidth.toDp() }).fillMaxHeight()) {
                                 LiveChapterPanel(

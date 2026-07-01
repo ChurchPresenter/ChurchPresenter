@@ -7,7 +7,9 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -157,22 +159,22 @@ fun DictionaryTab(
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant)
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(
-                        onDragEnd = {
-                            val newWidthDp = with(density) { listWidthPx.toDp().value.toInt() }
-                            onSettingsChangeState.value { s ->
-                                s.copy(windowedLayout = s.windowedLayout.copy(dictionaryListWidthDp = newWidthDp))
-                            }
-                        }
-                    ) { _, dragAmount ->
-                        listWidthPx = (listWidthPx + dragAmount)
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = rememberDraggableState { delta ->
+                        listWidthPx = (listWidthPx + delta)
                             .coerceIn(
                                 with(density) { 180.dp.toPx() },
                                 with(density) { 600.dp.toPx() }
                             )
+                    },
+                    onDragStopped = {
+                        val newWidthDp = with(density) { listWidthPx.toDp().value.toInt() }
+                        onSettingsChangeState.value { s ->
+                            s.copy(windowedLayout = s.windowedLayout.copy(dictionaryListWidthDp = newWidthDp))
+                        }
                     }
-                }
+                )
         )
         DictionaryDetailPane(
             modifier = Modifier.weight(1f).fillMaxHeight(),

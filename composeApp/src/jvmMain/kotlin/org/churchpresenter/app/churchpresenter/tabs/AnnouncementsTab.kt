@@ -2,7 +2,9 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import java.awt.Cursor
@@ -741,14 +743,16 @@ fun AnnouncementsTab(
                         .fillMaxHeight()
                         .background(MaterialTheme.colorScheme.outlineVariant)
                         .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                        .pointerInput(Unit) {
-                            detectHorizontalDragGestures(onDragEnd = { saveLeftPanel() }) { _, amount ->
-                                leftPanelPx = (leftPanelPx + amount).coerceIn(
+                        .draggable(
+                            orientation = Orientation.Horizontal,
+                            state = rememberDraggableState { delta ->
+                                leftPanelPx = (leftPanelPx + delta).coerceIn(
                                     with(density) { 150.dp.toPx() },
                                     (twoColWidthPx - with(density) { 100.dp.toPx() }).coerceAtLeast(with(density) { 150.dp.toPx() })
                                 )
-                            }
-                        }
+                            },
+                            onDragStopped = { saveLeftPanel() }
+                        )
                 )
 
                 // ── RIGHT COLUMN: preview + animation/loop/speed ──────────

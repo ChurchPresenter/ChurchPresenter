@@ -12,7 +12,9 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -800,23 +802,23 @@ fun LowerThirdTab(
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant)
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(
-                        onDragEnd = {
-                            val newWidthDp = with(density) { listWidthPx.toDp().value.toInt() }
-                            onSettingsChangeState.value { s ->
-                                if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(lowerThirdListWidthDp = newWidthDp))
-                                else s.copy(windowedLayout = s.windowedLayout.copy(lowerThirdListWidthDp = newWidthDp))
-                            }
-                        }
-                    ) { _, dragAmount ->
-                        listWidthPx = (listWidthPx + dragAmount)
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = rememberDraggableState { delta ->
+                        listWidthPx = (listWidthPx + delta)
                             .coerceIn(
                                 with(density) { 100.dp.toPx() },
                                 with(density) { 600.dp.toPx() }
                             )
+                    },
+                    onDragStopped = {
+                        val newWidthDp = with(density) { listWidthPx.toDp().value.toInt() }
+                        onSettingsChangeState.value { s ->
+                            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(lowerThirdListWidthDp = newWidthDp))
+                            else s.copy(windowedLayout = s.windowedLayout.copy(lowerThirdListWidthDp = newWidthDp))
+                        }
                     }
-                }
+                )
         )
 
         Column(

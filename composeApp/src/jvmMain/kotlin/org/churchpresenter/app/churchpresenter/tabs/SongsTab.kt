@@ -17,7 +17,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -1251,21 +1253,21 @@ fun SongsTab(
                                 .height(6.dp)
                                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
                                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.N_RESIZE_CURSOR)))
-                                .pointerInput(Unit) {
-                                    detectVerticalDragGestures(
-                                        onDragEnd = {
-                                            onSettingsChangeState.value { s ->
-                                                s.copy(songFavoritesPanelHeightDp = with(density) { favPanelHeightPx.toDp().value.toInt() })
-                                            }
-                                        }
-                                    ) { _, amount ->
-                                        favPanelHeightPx = (favPanelHeightPx - amount)
+                                .draggable(
+                                    orientation = Orientation.Vertical,
+                                    state = rememberDraggableState { delta ->
+                                        favPanelHeightPx = (favPanelHeightPx - delta)
                                             .coerceIn(
                                                 with(density) { 60.dp.toPx() },
                                                 with(density) { 400.dp.toPx() }
                                             )
+                                    },
+                                    onDragStopped = {
+                                        onSettingsChangeState.value { s ->
+                                            s.copy(songFavoritesPanelHeightDp = with(density) { favPanelHeightPx.toDp().value.toInt() })
+                                        }
                                     }
-                                }
+                                )
                         )
                         val favGridState = rememberLazyGridState()
                         Box(modifier = Modifier.fillMaxWidth().height(with(density) { favPanelHeightPx.toDp() })) {
@@ -1333,17 +1335,17 @@ fun SongsTab(
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(
-                        onDragEnd = { saveLyricsPanelWidth() }
-                    ) { _, amount ->
-                        lyricsPanelPx = (lyricsPanelPx - amount)
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = rememberDraggableState { delta ->
+                        lyricsPanelPx = (lyricsPanelPx - delta)
                             .coerceIn(
                                 with(density) { 150.dp.toPx() },
                                 with(density) { 800.dp.toPx() }
                             )
-                    }
-                }
+                    },
+                    onDragStopped = { saveLyricsPanelWidth() }
+                )
         )
 
         // Right panel — Lyrics display (fixed width, resizable via drag handle)

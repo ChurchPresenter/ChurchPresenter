@@ -1,7 +1,9 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -709,11 +711,13 @@ fun CanvasTab(
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(onDragEnd = ::saveLeftPanel) { _, amount ->
-                        leftPanelPx = (leftPanelPx + amount).coerceAtLeast(with(density) { 120.dp.toPx() })
-                    }
-                }
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = rememberDraggableState { delta ->
+                        leftPanelPx = (leftPanelPx + delta).coerceAtLeast(with(density) { 120.dp.toPx() })
+                    },
+                    onDragStopped = { saveLeftPanel() }
+                )
         )
 
         // Center panel: Toolbar + Canvas
@@ -961,11 +965,13 @@ fun CanvasTab(
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(onDragEnd = ::saveRightPanel) { _, amount ->
-                        rightPanelPx = (rightPanelPx - amount).coerceAtLeast(with(density) { 120.dp.toPx() })
-                    }
-                }
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = rememberDraggableState { delta ->
+                        rightPanelPx = (rightPanelPx - delta).coerceAtLeast(with(density) { 120.dp.toPx() })
+                    },
+                    onDragStopped = { saveRightPanel() }
+                )
         )
 
         // Right panel: Properties
