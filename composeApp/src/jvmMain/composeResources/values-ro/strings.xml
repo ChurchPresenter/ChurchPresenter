@@ -503,6 +503,7 @@
     <string name="loading_slides">Se încarcă slide-urile...</string>
     <string name="select_presentation_file">Selectați un fișier de prezentare pentru a vedea slide-urile</string>
     <string name="supported_formats">Suportate: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="presentation_static_note">Slide-urile sunt redate ca imagini statice — animațiile, tranzițiile, videoclipurile și sunetul nu sunt acceptate.</string>
     <string name="slide_number">Slide-ul %1$d</string>
     <string name="remove">Elimină</string>
     <string name="select_presentation_file_button">Selectează Fișier</string>

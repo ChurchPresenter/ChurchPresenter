@@ -371,6 +371,7 @@
     <string name="loading_slides">Ładowanie slajdów...</string>
     <string name="select_presentation_file">Wybierz plik prezentacji, aby wyświetlić slajdy</string>
     <string name="supported_formats">Obsługiwane: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="presentation_static_note">Slajdy są renderowane jako obrazy statyczne — animacje, przejścia, wideo i dźwięk nie są obsługiwane.</string>
     <string name="slide_number">Slajd %1$d</string>
     <string name="remove">Usuń</string>
     <string name="select_presentation_file_button">Wybierz plik</string>

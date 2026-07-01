@@ -487,6 +487,7 @@
     <string name="loading_slides">Dia's laden...</string>
     <string name="select_presentation_file">Selecteer een presentatiebestand om dia's te bekijken</string>
     <string name="supported_formats">Ondersteund: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="presentation_static_note">Dia\'s worden weergegeven als statische afbeeldingen — animaties, overgangen, video\'s en audio worden niet ondersteund.</string>
     <string name="slide_number">Dia %1$d</string>
     <string name="remove">Verwijderen</string>
     <string name="select_presentation_file_button">Bestand selecteren</string>

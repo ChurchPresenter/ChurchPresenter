@@ -487,6 +487,7 @@
     <string name="loading_slides">Chargement des diapositives...</string>
     <string name="select_presentation_file">Sélectionnez un fichier de présentation pour afficher les diapositives</string>
     <string name="supported_formats">Pris en charge : PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="presentation_static_note">Les diapositives sont affichées comme des images statiques — les animations, transitions, vidéos et l\'audio ne sont pas pris en charge.</string>
     <string name="slide_number">Diapositive %1$d</string>
     <string name="remove">Supprimer</string>
     <string name="select_presentation_file_button">Sélectionner un fichier</string>

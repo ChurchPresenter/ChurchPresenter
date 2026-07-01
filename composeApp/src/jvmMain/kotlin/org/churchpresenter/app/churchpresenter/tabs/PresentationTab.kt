@@ -106,6 +106,7 @@ import churchpresenter.composeapp.generated.resources.select_presentation_file_b
 import churchpresenter.composeapp.generated.resources.slide_count
 import churchpresenter.composeapp.generated.resources.slide_counter
 import churchpresenter.composeapp.generated.resources.slide_number
+import churchpresenter.composeapp.generated.resources.presentation_static_note
 import churchpresenter.composeapp.generated.resources.supported_formats
 import churchpresenter.composeapp.generated.resources.transition_duration
 import churchpresenter.composeapp.generated.resources.unit_ms
@@ -694,6 +695,13 @@ fun PresentationTab(
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(stringResource(Res.string.select_presentation_file), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                     Text(stringResource(Res.string.supported_formats), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+                    Text(
+                        stringResource(Res.string.presentation_static_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 32.dp)
+                    )
                 }
             }
         }

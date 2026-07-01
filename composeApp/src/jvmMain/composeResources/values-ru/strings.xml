@@ -387,6 +387,7 @@
     <string name="loading_slides">Загрузка слайдов...</string>
     <string name="select_presentation_file">Выберите файл презентации для просмотра слайдов</string>
     <string name="supported_formats">Поддерживается: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="presentation_static_note">Слайды отображаются как статические изображения — анимации, переходы, видео и аудио не поддерживаются.</string>
     <string name="slide_number">Слайд %1$d</string>
     <string name="remove">Удалить</string>
     <string name="select_presentation_file_button">Выбрать файл</string>

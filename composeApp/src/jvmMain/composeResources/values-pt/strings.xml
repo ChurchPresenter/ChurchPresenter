@@ -487,6 +487,7 @@
     <string name="loading_slides">Carregando slides...</string>
     <string name="select_presentation_file">Selecione um arquivo de apresentação para ver os slides</string>
     <string name="supported_formats">Suportados: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="presentation_static_note">Os slides são exibidos como imagens estáticas — animações, transições, vídeos e áudio não são suportados.</string>
     <string name="slide_number">Slide %1$d</string>
     <string name="remove">Remover</string>
     <string name="select_presentation_file_button">Selecionar Arquivo</string>

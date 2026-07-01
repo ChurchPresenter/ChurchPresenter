@@ -472,6 +472,7 @@
     <string name="loading_slides">Načítání snímků...</string>
     <string name="select_presentation_file">Vyberte soubor prezentace pro zobrazení snímků</string>
     <string name="supported_formats">Podporováno: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="presentation_static_note">Snímky jsou vykresleny jako statické obrázky — animace, přechody, videa a zvuk nejsou podporovány.</string>
     <string name="slide_number">Snímek %1$d</string>
     <string name="remove">Odstranit</string>
     <string name="select_presentation_file_button">Vybrat soubor</string>

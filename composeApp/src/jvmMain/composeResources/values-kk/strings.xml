@@ -371,6 +371,7 @@
     <string name="loading_slides">Слайдтар жүктелуде...</string>
     <string name="select_presentation_file">Слайдтарды көру үшін презентация файлын таңдаңыз</string>
     <string name="supported_formats">Қолдау көрсетілетін форматтар: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="presentation_static_note">Слайдтар статикалық суреттер ретінде көрсетіледі — анимациялар, өтулер, бейнелер мен аудио қолдау көрсетілмейді.</string>
     <string name="slide_number">Слайд %1$d</string>
     <string name="remove">Жою</string>
     <string name="select_presentation_file_button">Файл таңдау</string>

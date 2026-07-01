@@ -371,6 +371,7 @@
     <string name="loading_slides">Folien werden geladen...</string>
     <string name="select_presentation_file">Wählen Sie eine Präsentationsdatei aus, um Folien anzuzeigen</string>
     <string name="supported_formats">Unterstützt: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="presentation_static_note">Folien werden als statische Bilder dargestellt — Animationen, Übergänge, Videos und Audio werden nicht unterstützt.</string>
     <string name="slide_number">Folie %1$d</string>
     <string name="remove">Entfernen</string>
     <string name="select_presentation_file_button">Datei auswählen</string>
