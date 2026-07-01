@@ -84,6 +84,10 @@ object Constants {
 
     const val TIMER_MODE_DURATION = "duration"
     const val TIMER_MODE_CLOCK    = "clock"
+    /** Open-ended stopwatch: counts up from zero, no h:m:s configuration. */
+    const val TIMER_MODE_COUNT_UP = "count_up"
+    /** Just displays the current wall-clock time, continuously, in a user-selectable format. */
+    const val TIMER_MODE_CLOCK_DISPLAY = "clock_display"
 
     const val NONE = "None"
     const val FIRST_PAGE = "First Page"

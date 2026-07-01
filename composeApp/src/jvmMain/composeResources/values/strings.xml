@@ -707,6 +707,9 @@
     <string name="timer_hours">hr</string>
     <string name="timer_minutes">min</string>
     <string name="timer_seconds">sec</string>
+    <string name="timer_am">AM</string>
+    <string name="timer_pm">PM</string>
+    <string name="timer_clock_format">Format</string>
     <string name="timer_start">Start</string>
     <string name="timer_pause">Pause</string>
     <string name="timer_resume">Resume</string>

@@ -898,7 +898,11 @@ fun MainDesktop(
                                                 timerMinutes        = item.timerMinutes,
                                                 timerSeconds        = item.timerSeconds,
                                                 timerTextColor      = item.timerTextColor,
-                                                timerExpiredText    = item.timerExpiredText
+                                                timerExpiredText    = item.timerExpiredText,
+                                                timerMode           = item.timerMode,
+                                                targetHour          = item.targetHour,
+                                                targetMinute        = item.targetMinute,
+                                                targetSecond        = item.targetSecond
                                             )
                                         )
                                     }

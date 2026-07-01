@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.data.settings
 
 import kotlinx.serialization.Serializable
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.Utils
 
 @Serializable
 data class AnnouncementsSettings(
@@ -30,5 +31,7 @@ data class AnnouncementsSettings(
     val timerMode: String = Constants.TIMER_MODE_DURATION,
     val targetHour: Int = 0,
     val targetMinute: Int = 0,
-    val targetSecond: Int = 0
+    val targetSecond: Int = 0,
+    /** Java DateTimeFormatter pattern used for TIMER_MODE_CLOCK_DISPLAY, e.g. "h:mm:ss a" or "HH:mm". */
+    val liveClockFormat: String = if (Utils.isSystemUsing24HourFormat()) "HH:mm:ss" else "h:mm:ss a"
 )

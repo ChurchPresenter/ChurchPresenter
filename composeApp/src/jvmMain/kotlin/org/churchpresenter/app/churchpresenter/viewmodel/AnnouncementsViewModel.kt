@@ -12,6 +12,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettin
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.Utils
 
 class AnnouncementsViewModel {
 
@@ -106,10 +107,31 @@ class AnnouncementsViewModel {
     private val _targetSecond = mutableStateOf(0)
     val targetSecond: Int get() = _targetSecond.value
 
+    /** Elapsed seconds for TIMER_MODE_COUNT_UP (a plain stopwatch, no configured duration). */
+    private val _countUpElapsed = mutableStateOf(0)
+    val countUpElapsed: Int get() = _countUpElapsed.value
+
+    /** Java DateTimeFormatter pattern for TIMER_MODE_CLOCK_DISPLAY, e.g. "h:mm:ss a" or "HH:mm". */
+    private val _liveClockFormat = mutableStateOf(
+        if (Utils.isSystemUsing24HourFormat()) "HH:mm:ss" else "h:mm:ss a"
+    )
+    val liveClockFormat: String get() = _liveClockFormat.value
+
+    /** The current wall-clock time formatted with [liveClockFormat], updated every second. */
+    private val _liveClockText = mutableStateOf("")
+    val liveClockText: String get() = _liveClockText.value
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var timerJob: Job? = null
     /** Ticks every second in clock mode while the timer is not running, keeping the display current. */
     private var clockPreviewJob: Job? = null
+    /** Ticks every second while TIMER_MODE_CLOCK_DISPLAY is active, keeping [liveClockText] current. */
+    private var liveClockJob: Job? = null
+    /** Absolute epoch-second the running timer reaches 0 at. Remaining time is always derived from
+     *  this minus "now" rather than decremented, so it can't drift and self-corrects after any gap. */
+    private var timerEndEpochSecond: Long = 0L
+    /** Absolute epoch-second the count-up stopwatch started at (adjusted on resume). */
+    private var countUpStartEpochSecond: Long = 0L
 
     // ── Sync from settings ───────────────────────────────────────────
     fun syncFromSettings(settings: AnnouncementsSettings) {
@@ -139,9 +161,12 @@ class AnnouncementsViewModel {
         _targetHour.value = settings.targetHour
         _targetMinute.value = settings.targetMinute
         _targetSecond.value = settings.targetSecond
+        _liveClockFormat.value = settings.liveClockFormat
         if (!_timerRunning.value) {
+            _countUpElapsed.value = 0
             _timerRemaining.value = if (settings.timerMode == Constants.TIMER_MODE_CLOCK) secondsUntilTarget() else totalSeconds()
             if (settings.timerMode == Constants.TIMER_MODE_CLOCK) startClockPreview()
+            if (settings.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) startLiveClockPreview()
         }
     }
 
@@ -164,71 +189,74 @@ class AnnouncementsViewModel {
     private fun totalSeconds(): Int =
         _timerHours.value * 3600 + _timerMinutes.value * 60 + _timerSeconds.value
 
-    fun setTimerHours(value: Int) {
-        _timerHours.value = value.coerceAtLeast(0)
-        if (!_timerRunning.value) {
-            _timerRemaining.value = totalSeconds()
+    /**
+     * Applies a change to the configured H/M/S duration fields and carries the *delta* over to
+     * the live remaining time (and the running end time), instead of recomputing remaining from
+     * the raw fields. That way, editing hours/minutes/seconds while paused or running extends or
+     * shortens the countdown instead of snapping it back to the full configured duration.
+     */
+    private inline fun applyDurationDelta(mutate: () -> Unit) {
+        val oldTotal = totalSeconds()
+        mutate()
+        val delta = totalSeconds() - oldTotal
+        if (delta == 0) return
+        if (_timerMode.value != Constants.TIMER_MODE_DURATION) return
+        _timerRemaining.value = (_timerRemaining.value + delta).coerceAtLeast(0)
+        if (_timerRunning.value) {
+            timerEndEpochSecond += delta
         }
     }
 
-    fun stepTimerHours(delta: Int) {
-        setTimerHours((_timerHours.value + delta).coerceAtLeast(0))
-    }
+    fun setTimerHours(value: Int) = applyDurationDelta { _timerHours.value = value.coerceAtLeast(0) }
 
-    fun setTimerMinutes(value: Int) {
-        _timerMinutes.value = value.coerceIn(0, 59)
-        if (!_timerRunning.value) {
-            _timerRemaining.value = totalSeconds()
-        }
-    }
+    fun stepTimerHours(delta: Int) = applyDurationDelta { _timerHours.value = (_timerHours.value + delta).coerceAtLeast(0) }
 
-    fun setTimerSeconds(value: Int) {
-        _timerSeconds.value = value.coerceIn(0, 59)
-        if (!_timerRunning.value) {
-            _timerRemaining.value = totalSeconds()
-        }
-    }
+    fun setTimerMinutes(value: Int) = applyDurationDelta { _timerMinutes.value = value.coerceIn(0, 59) }
 
-    fun stepTimerMinutes(delta: Int) {
+    fun setTimerSeconds(value: Int) = applyDurationDelta { _timerSeconds.value = value.coerceIn(0, 59) }
+
+    fun stepTimerMinutes(delta: Int) = applyDurationDelta {
         val cur = _timerMinutes.value
         if (delta > 0) {
             if (cur >= 59) {
                 _timerMinutes.value = 0
-                setTimerHours(_timerHours.value + 1)
+                _timerHours.value += 1
             } else {
-                setTimerMinutes(cur + 1)
+                _timerMinutes.value = cur + 1
             }
         } else {
             if (cur <= 0) {
                 if (_timerHours.value > 0) {
                     _timerMinutes.value = 59
-                    setTimerHours(_timerHours.value - 1)
+                    _timerHours.value -= 1
                 }
             } else {
-                setTimerMinutes(cur - 1)
+                _timerMinutes.value = cur - 1
             }
         }
     }
 
-    fun stepTimerSeconds(delta: Int) {
+    fun stepTimerSeconds(delta: Int) = applyDurationDelta {
         val cur = _timerSeconds.value
         if (delta > 0) {
             val next = if (cur >= 55) 0 else ((cur / 5) + 1) * 5
             if (next == 0) {
                 _timerSeconds.value = 0
-                stepTimerMinutes(1)
+                val curMin = _timerMinutes.value
+                if (curMin >= 59) { _timerMinutes.value = 0; _timerHours.value += 1 } else { _timerMinutes.value = curMin + 1 }
             } else {
-                setTimerSeconds(next)
+                _timerSeconds.value = next
             }
         } else {
             val next = if (cur <= 0) 55 else ((cur - 1) / 5) * 5
             if (cur <= 0) {
                 if (_timerHours.value > 0 || _timerMinutes.value > 0) {
                     _timerSeconds.value = 55
-                    stepTimerMinutes(-1)
+                    val curMin = _timerMinutes.value
+                    if (curMin <= 0) { _timerMinutes.value = 59; _timerHours.value -= 1 } else { _timerMinutes.value = curMin - 1 }
                 }
             } else {
-                setTimerSeconds(next)
+                _timerSeconds.value = next
             }
         }
     }
@@ -253,12 +281,78 @@ class AnnouncementsViewModel {
         clockPreviewJob = null
     }
 
-    fun setTimerMode(value: String) {
-        _timerMode.value = value
-        if (!_timerRunning.value) {
-            _timerRemaining.value = if (value == Constants.TIMER_MODE_CLOCK) secondsUntilTarget() else totalSeconds()
+    private fun startLiveClockPreview() {
+        liveClockJob?.cancel()
+        liveClockJob = scope.launch {
+            while (true) {
+                _liveClockText.value = java.time.LocalTime.now()
+                    .format(java.time.format.DateTimeFormatter.ofPattern(_liveClockFormat.value))
+                delay(1000L)
+            }
         }
-        if (value == Constants.TIMER_MODE_CLOCK) startClockPreview() else stopClockPreview()
+    }
+
+    private fun stopLiveClockPreview() {
+        liveClockJob?.cancel()
+        liveClockJob = null
+    }
+
+    fun setLiveClockFormat(value: String) {
+        _liveClockFormat.value = value
+        if (_timerMode.value == Constants.TIMER_MODE_CLOCK_DISPLAY) {
+            _liveClockText.value = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern(value))
+        }
+    }
+
+    fun setTimerMode(value: String) {
+        val previousMode = _timerMode.value
+        if (previousMode == value) return
+        val enteringClockMode = value == Constants.TIMER_MODE_CLOCK
+        // Count-up and the live clock display are different paradigms (open-ended stopwatch /
+        // always-on clock, vs. a countdown to zero), so switching to/from either while running
+        // just stops the timer instead of carrying state over.
+        val stopsActiveTimer = value == Constants.TIMER_MODE_COUNT_UP || previousMode == Constants.TIMER_MODE_COUNT_UP ||
+            value == Constants.TIMER_MODE_CLOCK_DISPLAY || previousMode == Constants.TIMER_MODE_CLOCK_DISPLAY
+
+        if (stopsActiveTimer && _timerRunning.value) {
+            timerJob?.cancel()
+            timerJob = null
+            _timerRunning.value = false
+        }
+        // A stale "expired" flag from a previous mode must not leak into the new mode — otherwise
+        // the next Start press just silently resets it instead of actually starting anything.
+        _timerExpired.value = false
+
+        _timerMode.value = value
+        stopClockPreview()
+        stopLiveClockPreview()
+
+        when (value) {
+            Constants.TIMER_MODE_COUNT_UP -> {
+                // Nothing else to precompute — _countUpElapsed already holds the right value.
+            }
+            Constants.TIMER_MODE_CLOCK_DISPLAY -> {
+                startLiveClockPreview()
+            }
+            Constants.TIMER_MODE_CLOCK -> {
+                if (enteringClockMode) {
+                    // Default the target to "now" instead of leaving a stale time from a previous session.
+                    val now = java.time.LocalTime.now()
+                    _targetHour.value = now.hour
+                    _targetMinute.value = now.minute
+                    _targetSecond.value = now.second
+                }
+                val remaining = secondsUntilTarget()
+                _timerRemaining.value = remaining
+                if (_timerRunning.value) timerEndEpochSecond = java.time.Instant.now().epochSecond + remaining
+                startClockPreview()
+            }
+            else -> {
+                val remaining = totalSeconds()
+                _timerRemaining.value = remaining
+                if (_timerRunning.value) timerEndEpochSecond = java.time.Instant.now().epochSecond + remaining
+            }
+        }
     }
 
     private fun secondsUntilTarget(): Int {
@@ -269,21 +363,25 @@ class AnnouncementsViewModel {
         return if (diff > 0) diff else diff + 86400
     }
 
-    fun setTargetHour(value: Int) {
-        _targetHour.value = value.coerceIn(0, 23)
-        if (!_timerRunning.value && _timerMode.value == Constants.TIMER_MODE_CLOCK) {
-            _timerRemaining.value = secondsUntilTarget()
+    /** Applies a change to the target clock time and keeps the live countdown (running or not) in sync. */
+    private inline fun applyTargetChange(mutate: () -> Unit) {
+        mutate()
+        if (_timerMode.value != Constants.TIMER_MODE_CLOCK) return
+        val remaining = secondsUntilTarget()
+        _timerRemaining.value = remaining
+        if (_timerRunning.value) {
+            timerEndEpochSecond = java.time.Instant.now().epochSecond + remaining
         }
     }
 
-    fun stepTargetHour(delta: Int) { setTargetHour(_targetHour.value + delta) }
+    fun setTargetHour(value: Int) = applyTargetChange { _targetHour.value = value.coerceIn(0, 23) }
 
-    fun setTargetMinute(value: Int) {
-        _targetMinute.value = value.coerceIn(0, 59)
-        if (!_timerRunning.value && _timerMode.value == Constants.TIMER_MODE_CLOCK) {
-            _timerRemaining.value = secondsUntilTarget()
-        }
+    fun stepTargetHour(delta: Int) {
+        // Wrap around midnight/noon instead of clamping, so continuing to step past 11 PM/AM flips correctly.
+        setTargetHour(((_targetHour.value + delta) % 24 + 24) % 24)
     }
+
+    fun setTargetMinute(value: Int) = applyTargetChange { _targetMinute.value = value.coerceIn(0, 59) }
 
     fun stepTargetMinute(delta: Int) {
         val cur = _targetMinute.value
@@ -296,12 +394,7 @@ class AnnouncementsViewModel {
         }
     }
 
-    fun setTargetSecond(value: Int) {
-        _targetSecond.value = value.coerceIn(0, 59)
-        if (!_timerRunning.value && _timerMode.value == Constants.TIMER_MODE_CLOCK) {
-            _timerRemaining.value = secondsUntilTarget()
-        }
-    }
+    fun setTargetSecond(value: Int) = applyTargetChange { _targetSecond.value = value.coerceIn(0, 59) }
 
     fun stepTargetSecond(delta: Int) {
         val cur = _targetSecond.value
@@ -321,6 +414,29 @@ class AnnouncementsViewModel {
         onTick: ((remaining: Int) -> Unit)? = null,
         onExpired: (String) -> Unit
     ) {
+        // The live clock display is always on — nothing to start, pause, or resume.
+        if (_timerMode.value == Constants.TIMER_MODE_CLOCK_DISPLAY) return
+
+        if (_timerMode.value == Constants.TIMER_MODE_COUNT_UP) {
+            if (_timerRunning.value) {
+                timerJob?.cancel()
+                timerJob = null
+                _timerRunning.value = false
+            } else {
+                countUpStartEpochSecond = java.time.Instant.now().epochSecond - _countUpElapsed.value
+                _timerRunning.value = true
+                timerJob = scope.launch {
+                    while (true) {
+                        val elapsed = (java.time.Instant.now().epochSecond - countUpStartEpochSecond).toInt().coerceAtLeast(0)
+                        _countUpElapsed.value = elapsed
+                        onTick?.invoke(elapsed)
+                        delay(1000L)
+                    }
+                }
+            }
+            return
+        }
+
         if (_timerExpired.value) {
             resetTimer()
             return
@@ -339,14 +455,18 @@ class AnnouncementsViewModel {
                 if (total <= 0) return
                 _timerRemaining.value = total
             }
+            timerEndEpochSecond = java.time.Instant.now().epochSecond + _timerRemaining.value
             _timerRunning.value = true
             _timerExpired.value = false
             timerJob = scope.launch {
-                while (_timerRemaining.value > 0) {
+                while (true) {
+                    val remaining = (timerEndEpochSecond - java.time.Instant.now().epochSecond).toInt()
+                    if (remaining <= 0) break
+                    _timerRemaining.value = remaining
+                    onTick?.invoke(remaining)
                     delay(1000L)
-                    _timerRemaining.value--
-                    onTick?.invoke(_timerRemaining.value)
                 }
+                _timerRemaining.value = 0
                 _timerRunning.value = false
                 _timerExpired.value = true
                 if (_timerMode.value == Constants.TIMER_MODE_CLOCK) startClockPreview()
@@ -368,6 +488,10 @@ class AnnouncementsViewModel {
         timerJob?.cancel()
         timerJob = null
         _timerRunning.value = false
+        if (_timerMode.value == Constants.TIMER_MODE_COUNT_UP) {
+            _countUpElapsed.value = 0
+            return
+        }
         _timerExpired.value = false
         _timerRemaining.value = if (_timerMode.value == Constants.TIMER_MODE_CLOCK) secondsUntilTarget() else totalSeconds()
         if (_timerMode.value == Constants.TIMER_MODE_CLOCK) startClockPreview()
@@ -375,6 +499,7 @@ class AnnouncementsViewModel {
 
     fun dispose() {
         stopClockPreview()
+        stopLiveClockPreview()
         scope.cancel()
     }
 
@@ -410,7 +535,8 @@ class AnnouncementsViewModel {
         timerMode = _timerMode.value,
         targetHour = _targetHour.value,
         targetMinute = _targetMinute.value,
-        targetSecond = _targetSecond.value
+        targetSecond = _targetSecond.value,
+        liveClockFormat = _liveClockFormat.value
     )
 
     companion object {

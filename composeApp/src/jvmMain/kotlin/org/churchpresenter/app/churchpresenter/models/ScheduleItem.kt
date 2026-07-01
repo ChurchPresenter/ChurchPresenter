@@ -110,12 +110,15 @@ sealed class ScheduleItem {
         val targetMinute: Int = 0,
         val targetSecond: Int = 0,
         override val displayText: String = if (isTimer) {
-            if (timerMode == Constants.TIMER_MODE_CLOCK) {
-                "Until %02d:%02d:%02d".format(targetHour, targetMinute, targetSecond)
-            } else if (timerHours > 0) {
-                "Timer %d:%02d:%02d".format(timerHours, timerMinutes, timerSeconds)
-            } else {
-                "Timer %02d:%02d".format(timerMinutes, timerSeconds)
+            when (timerMode) {
+                Constants.TIMER_MODE_CLOCK -> "Until %02d:%02d:%02d".format(targetHour, targetMinute, targetSecond)
+                Constants.TIMER_MODE_COUNT_UP -> "Duration Timer"
+                Constants.TIMER_MODE_CLOCK_DISPLAY -> "Clock"
+                else -> if (timerHours > 0) {
+                    "Timer %d:%02d:%02d".format(timerHours, timerMinutes, timerSeconds)
+                } else {
+                    "Timer %02d:%02d".format(timerMinutes, timerSeconds)
+                }
             }
         } else {
             "${text.take(50)}${if (text.length > 50) "…" else ""}"

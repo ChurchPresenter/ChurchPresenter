@@ -130,6 +130,10 @@ import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.position_on_screen
+import churchpresenter.composeapp.generated.resources.canvas_source_clock
+import churchpresenter.composeapp.generated.resources.timer_am
+import churchpresenter.composeapp.generated.resources.timer_clock_format
+import churchpresenter.composeapp.generated.resources.timer_pm
 import churchpresenter.composeapp.generated.resources.timer_expired
 import churchpresenter.composeapp.generated.resources.timer_expired_text_hint
 import churchpresenter.composeapp.generated.resources.timer_expired_text_label
@@ -147,6 +151,7 @@ import churchpresenter.composeapp.generated.resources.top_center
 import churchpresenter.composeapp.generated.resources.top_left
 import churchpresenter.composeapp.generated.resources.top_right
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
@@ -204,12 +209,13 @@ fun AnnouncementsTab(
         if (scheduleTimerVersion == 0) return@LaunchedEffect
         viewModel.syncFromSettings(appSettings.announcementsSettings)
         viewModel.resetTimer()
+        val startDisplayValue = if (viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP) viewModel.countUpElapsed else viewModel.timerRemaining
         val anyScreenOnAnnouncements = presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS
             || presenterManager?.screenLocks?.value?.values?.any { it == Presenting.ANNOUNCEMENTS } == true
         if (presenterManager != null && anyScreenOnAnnouncements) {
-            presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(viewModel.timerRemaining))
+            presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(startDisplayValue))
         }
-        presenterManager?.setTimerState(viewModel.timerRemaining, true)
+        presenterManager?.setTimerState(startDisplayValue, true)
         viewModel.startPauseTimer(
             onTick = { remaining ->
                 val anyScreen = presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS
@@ -226,6 +232,17 @@ fun AnnouncementsTab(
                 }
             }
         )
+    }
+
+    // The live clock has no Start/tick callback of its own, so keep the output screen in sync
+    // with it directly whenever it ticks (every second) while it's the mode being shown live.
+    LaunchedEffect(viewModel.liveClockText) {
+        if (viewModel.timerMode != Constants.TIMER_MODE_CLOCK_DISPLAY) return@LaunchedEffect
+        val anyScreenOnAnnouncements = presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS
+            || presenterManager?.screenLocks?.value?.values?.any { it == Presenting.ANNOUNCEMENTS } == true
+        if (presenterManager != null && anyScreenOnAnnouncements) {
+            presenterManager.setAnnouncementText(viewModel.liveClockText)
+        }
     }
 
     val density = LocalDensity.current
@@ -520,39 +537,49 @@ fun AnnouncementsTab(
                             .padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        val timerLabel = stringResource(Res.string.timer_title)
                         val timerModeDurationLabel = stringResource(Res.string.timer_mode_duration)
                         val timerModeClockLabel = stringResource(Res.string.timer_mode_clock)
+                        val timerModeClockDisplayLabel = stringResource(Res.string.canvas_source_clock)
                         val timerTargetTimeLabel = stringResource(Res.string.timer_target_time)
+                        // Not `remember`ed: re-checked every recomposition so a live OS format change
+                        // (12h <-> 24h) takes effect immediately without requiring an app restart.
+                        val use24Hour = Utils.isSystemUsing24HourFormat()
+                        val targetIsPm = viewModel.targetHour >= 12
+                        fun displayHour(hour24: Int): Int =
+                            if (use24Hour) hour24 else ((hour24 + 11) % 12) + 1
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.Center
                         ) {
-                            Text(
-                                text = stringResource(Res.string.timer_title),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
                             SegmentedButton(
                                 items = listOf(
-                                    SegmentedButtonItem(Constants.TIMER_MODE_DURATION, timerModeDurationLabel),
-                                    SegmentedButtonItem(Constants.TIMER_MODE_CLOCK, timerModeClockLabel)
+                                    SegmentedButtonItem(Constants.TIMER_MODE_DURATION, timerLabel),
+                                    SegmentedButtonItem(Constants.TIMER_MODE_COUNT_UP, timerModeDurationLabel),
+                                    SegmentedButtonItem(Constants.TIMER_MODE_CLOCK, timerModeClockLabel),
+                                    SegmentedButtonItem(Constants.TIMER_MODE_CLOCK_DISPLAY, timerModeClockDisplayLabel)
                                 ),
                                 selectedValue = viewModel.timerMode,
                                 onValueChange = { mode ->
                                     viewModel.setTimerMode(mode)
                                     viewModel.saveToSettings(onSettingsChange)
                                 },
-                                buttonWidth = 120.dp,
+                                buttonWidth = 76.dp,
                                 buttonHeight = 28.dp,
-                                fontSize = 11.sp
+                                fontSize = 9.sp
                             )
                         }
 
-                        // Countdown display
+                        // Countdown / count-up / live clock display
                         Text(
-                            text = AnnouncementsViewModel.formatTimer(viewModel.timerRemaining),
+                            text = when {
+                                viewModel.timerExpired -> viewModel.timerExpiredText.ifBlank { timerExpiredLabel }
+                                viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP -> AnnouncementsViewModel.formatTimer(viewModel.countUpElapsed)
+                                viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY -> viewModel.liveClockText
+                                else -> AnnouncementsViewModel.formatTimer(viewModel.timerRemaining)
+                            },
                             style = MaterialTheme.typography.displayMedium,
                             color = if (viewModel.timerExpired) MaterialTheme.colorScheme.error
                                     else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -560,9 +587,10 @@ fun AnnouncementsTab(
                             textAlign = TextAlign.Center
                         )
 
+                        val amPmSuffix = if (use24Hour) "" else " " + stringResource(if (targetIsPm) Res.string.timer_pm else Res.string.timer_am)
                         Text(
-                            text = "$timerTargetTimeLabel %02d:%02d:%02d".format(
-                                viewModel.targetHour, viewModel.targetMinute, viewModel.targetSecond
+                            text = "$timerTargetTimeLabel %02d:%02d:%02d%s".format(
+                                displayHour(viewModel.targetHour), viewModel.targetMinute, viewModel.targetSecond, amPmSuffix
                             ),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary,
@@ -614,11 +642,11 @@ fun AnnouncementsTab(
                                     onValueChange = { v -> val d = v.filter { it.isDigit() }.take(2); secText = d; d.toIntOrNull()?.let { viewModel.setTimerSeconds(it.coerceIn(0, 59)); viewModel.saveToSettings(onSettingsChange) } }
                                 )
                             }
-                        } else {
-                            var tHrText by remember { mutableStateOf("%02d".format(viewModel.targetHour)) }
+                        } else if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
+                            var tHrText by remember { mutableStateOf("%02d".format(displayHour(viewModel.targetHour))) }
                             var tMinText by remember { mutableStateOf("%02d".format(viewModel.targetMinute)) }
                             var tSecText by remember { mutableStateOf("%02d".format(viewModel.targetSecond)) }
-                            LaunchedEffect(viewModel.targetHour) { tHrText = "%02d".format(viewModel.targetHour) }
+                            LaunchedEffect(viewModel.targetHour) { tHrText = "%02d".format(displayHour(viewModel.targetHour)) }
                             LaunchedEffect(viewModel.targetMinute) { tMinText = "%02d".format(viewModel.targetMinute) }
                             LaunchedEffect(viewModel.targetSecond) { tSecText = "%02d".format(viewModel.targetSecond) }
                             Row(
@@ -629,7 +657,25 @@ fun AnnouncementsTab(
                                 TimerColumn(tHrText, hrLabel,
                                     onIncrement = { viewModel.stepTargetHour(1); viewModel.saveToSettings(onSettingsChange) },
                                     onDecrement = { viewModel.stepTargetHour(-1); viewModel.saveToSettings(onSettingsChange) },
-                                    onValueChange = { v -> val d = v.filter { it.isDigit() }.take(2); tHrText = d; d.toIntOrNull()?.let { viewModel.setTargetHour(it); viewModel.saveToSettings(onSettingsChange) } }
+                                    onValueChange = { v ->
+                                        val d = v.filter { it.isDigit() }.take(2)
+                                        tHrText = d
+                                        d.toIntOrNull()?.let { entered ->
+                                            val hour24 = if (use24Hour) {
+                                                entered
+                                            } else {
+                                                val clamped = entered.coerceIn(1, 12)
+                                                when {
+                                                    targetIsPm && clamped == 12 -> 12
+                                                    targetIsPm -> clamped + 12
+                                                    !targetIsPm && clamped == 12 -> 0
+                                                    else -> clamped
+                                                }
+                                            }
+                                            viewModel.setTargetHour(hour24)
+                                            viewModel.saveToSettings(onSettingsChange)
+                                        }
+                                    }
                                 )
                                 sepBox()
                                 TimerColumn(tMinText, minLabel,
@@ -643,7 +689,25 @@ fun AnnouncementsTab(
                                     onDecrement = { viewModel.stepTargetSecond(-1); viewModel.saveToSettings(onSettingsChange) },
                                     onValueChange = { v -> val d = v.filter { it.isDigit() }.take(2); tSecText = d; d.toIntOrNull()?.let { viewModel.setTargetSecond(it.coerceIn(0, 59)); viewModel.saveToSettings(onSettingsChange) } }
                                 )
+                                if (!use24Hour) {
+                                    sepBox()
+                                    AmPmToggle(
+                                        isPm = targetIsPm,
+                                        onToggle = {
+                                            viewModel.setTargetHour((viewModel.targetHour + 12) % 24)
+                                            viewModel.saveToSettings(onSettingsChange)
+                                        }
+                                    )
+                                }
                             }
+                        } else if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) {
+                            DropdownSettingsField(
+                                value = viewModel.liveClockFormat,
+                                options = listOf("h:mm:ss a", "h:mm a", "HH:mm:ss", "HH:mm"),
+                                onValueChange = { viewModel.setLiveClockFormat(it); viewModel.saveToSettings(onSettingsChange) },
+                                label = stringResource(Res.string.timer_clock_format),
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
 
                         // Controls row
@@ -655,84 +719,105 @@ fun AnnouncementsTab(
                             itemVerticalAlignment = Alignment.CenterVertically
                         ) {
                             val total = viewModel.timerHours * 3600 + viewModel.timerMinutes * 60 + viewModel.timerSeconds
-                            ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(if (viewModel.timerRunning) pauseLabel else startLabel, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
-                                IconButton(
-                                    onClick = {
-                                        viewModel.saveToSettings(onSettingsChange)
-                                        val anyScreenOnAnnouncements = presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS || presenterManager?.screenLocks?.value?.values?.any { it == Presenting.ANNOUNCEMENTS } == true
-                                        if (!viewModel.timerRunning && presenterManager != null && anyScreenOnAnnouncements) {
-                                            presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(viewModel.timerRemaining))
-                                        }
-                                        presenterManager?.setTimerState(viewModel.timerRemaining, !viewModel.timerRunning)
-                                        viewModel.startPauseTimer(
-                                            onTick = { remaining ->
-                                                val anyScreenOnAnnouncements = presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS || presenterManager?.screenLocks?.value?.values?.any { it == Presenting.ANNOUNCEMENTS } == true
-                                                if (presenterManager != null && anyScreenOnAnnouncements) presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(remaining))
-                                                presenterManager?.setTimerState(remaining, true)
-                                            },
-                                            onExpired = { expiredMsg ->
-                                                if (presenterManager != null) {
-                                                    presenterManager.setAnnouncementText(expiredMsg.ifBlank { timerExpiredLabel })
-                                                    presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
-                                                    presenterManager.setTimerState(0, false)
-                                                }
+                            val isClockDisplay = viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY
+                            val displayValue = if (viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP) viewModel.countUpElapsed else viewModel.timerRemaining
+                            val displayText = if (isClockDisplay) viewModel.liveClockText else AnnouncementsViewModel.formatTimer(displayValue)
+                            // Only Timer/Duration have a real play/pause concept. Specific Time and the
+                            // live Clock always track automatically — "Go Live" is enough to push them.
+                            val hasPlayPause = viewModel.timerMode == Constants.TIMER_MODE_DURATION || viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP
+                            if (hasPlayPause) {
+                                ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(if (viewModel.timerRunning) pauseLabel else startLabel, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
+                                    IconButton(
+                                        onClick = {
+                                            viewModel.saveToSettings(onSettingsChange)
+                                            val anyScreenOnAnnouncements = presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS || presenterManager?.screenLocks?.value?.values?.any { it == Presenting.ANNOUNCEMENTS } == true
+                                            if (!viewModel.timerRunning && presenterManager != null && anyScreenOnAnnouncements) {
+                                                presenterManager.setAnnouncementText(displayText)
                                             }
+                                            presenterManager?.setTimerState(displayValue, !viewModel.timerRunning)
+                                            viewModel.startPauseTimer(
+                                                onTick = { remaining ->
+                                                    val anyScreenOnAnnouncements = presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS || presenterManager?.screenLocks?.value?.values?.any { it == Presenting.ANNOUNCEMENTS } == true
+                                                    if (presenterManager != null && anyScreenOnAnnouncements) presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(remaining))
+                                                    presenterManager?.setTimerState(remaining, true)
+                                                },
+                                                onExpired = { expiredMsg ->
+                                                    if (presenterManager != null) {
+                                                        presenterManager.setAnnouncementText(expiredMsg.ifBlank { timerExpiredLabel })
+                                                        presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+                                                        presenterManager.setTimerState(0, false)
+                                                    }
+                                                }
+                                            )
+                                        },
+                                        enabled = viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || viewModel.timerRunning,
+                                        colors = IconButtonDefaults.iconButtonColors(
+                                            containerColor = if (viewModel.timerRunning) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
+                                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                         )
-                                    },
-                                    enabled = viewModel.timerMode == Constants.TIMER_MODE_CLOCK || total > 0 || viewModel.timerRunning,
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = if (viewModel.timerRunning) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
-                                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                    )
-                                ) {
-                                    Icon(painter = painterResource(if (viewModel.timerRunning) Res.drawable.ic_pause else Res.drawable.ic_play), contentDescription = if (viewModel.timerRunning) pauseLabel else startLabel, tint = if (viewModel.timerRunning) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer)
+                                    ) {
+                                        Icon(painter = painterResource(if (viewModel.timerRunning) Res.drawable.ic_pause else Res.drawable.ic_play), contentDescription = if (viewModel.timerRunning) pauseLabel else startLabel, tint = if (viewModel.timerRunning) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer)
+                                    }
                                 }
                             }
-                            ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(resetLabel, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
-                                IconButton(onClick = { viewModel.resetTimer(); val total = viewModel.timerHours * 3600 + viewModel.timerMinutes * 60 + viewModel.timerSeconds; presenterManager?.setTimerState(total, false) }, colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                                    Icon(painter = painterResource(Res.drawable.ic_refresh), contentDescription = resetLabel, modifier = Modifier.size(20.dp))
+                            // Reset only makes sense for Timer/Duration, which count down/up from a
+                            // starting point. Specific Time and the live Clock always track the wall
+                            // clock automatically — there's nothing to reset back to.
+                            if (hasPlayPause) {
+                                ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(resetLabel, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
+                                    IconButton(onClick = { viewModel.resetTimer(); val resetValue = if (viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP) viewModel.countUpElapsed else viewModel.timerRemaining; presenterManager?.setTimerState(resetValue, false) }, colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                                        Icon(painter = painterResource(Res.drawable.ic_refresh), contentDescription = resetLabel, modifier = Modifier.size(20.dp))
+                                    }
                                 }
                             }
                             if (onAddToSchedule != null) {
                                 ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
-                                    IconButton(onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) }, enabled = viewModel.text.isNotBlank() || viewModel.timerMode == Constants.TIMER_MODE_CLOCK || viewModel.timerHours > 0 || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0, colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.secondary, contentColor = MaterialTheme.colorScheme.onSecondary, disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant, disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))) {
+                                    IconButton(onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) }, enabled = viewModel.text.isNotBlank() || viewModel.timerMode != Constants.TIMER_MODE_DURATION || viewModel.timerHours > 0 || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0, colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.secondary, contentColor = MaterialTheme.colorScheme.onSecondary, disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant, disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))) {
                                         Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
                                     }
                                 }
                             }
                             if (presenterManager != null) {
                                 ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
-                                    IconButton(onClick = { presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(viewModel.timerRemaining)); presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS) }, colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant, disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))) {
+                                    IconButton(onClick = {
+                                        val liveText = if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) viewModel.liveClockText else AnnouncementsViewModel.formatTimer(displayValue)
+                                        presenterManager.setAnnouncementText(liveText)
+                                        presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+                                    }, colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant, disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))) {
                                         Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
                                     }
                                 }
                             }
                         }
 
-                        // Expired text field
-                        SectionLabel(stringResource(Res.string.timer_expired_text_label))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                                .padding(horizontal = 12.dp, vertical = 10.dp)
-                        ) {
-                            BasicTextField(
-                                value = viewModel.timerExpiredText,
-                                onValueChange = { viewModel.setTimerExpiredText(it); viewModel.saveToSettings(onSettingsChange) },
-                                textStyle = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface),
-                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                maxLines = 4,
-                                modifier = Modifier.fillMaxWidth(),
-                                decorationBox = { inner ->
-                                    if (viewModel.timerExpiredText.isEmpty()) {
-                                        Text(stringResource(Res.string.timer_expired_text_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                        // Expired text field — only meaningful for modes that actually reach an
+                        // endpoint (Timer countdown, Specific Time). Duration (count-up) and the
+                        // live Clock display never "expire".
+                        if (viewModel.timerMode == Constants.TIMER_MODE_DURATION || viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
+                            SectionLabel(stringResource(Res.string.timer_expired_text_label))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                            ) {
+                                BasicTextField(
+                                    value = viewModel.timerExpiredText,
+                                    onValueChange = { viewModel.setTimerExpiredText(it); viewModel.saveToSettings(onSettingsChange) },
+                                    textStyle = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface),
+                                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                    maxLines = 4,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    decorationBox = { inner ->
+                                        if (viewModel.timerExpiredText.isEmpty()) {
+                                            Text(stringResource(Res.string.timer_expired_text_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                                        }
+                                        inner()
                                     }
-                                    inner()
-                                }
-                            )
+                                )
+                            }
                         }
                     } // end timer section
 
@@ -763,13 +848,26 @@ fun AnnouncementsTab(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Show timer countdown in preview while running, expired message when done,
-                    // and fall back to announcement text otherwise.
+                    // Specific Time and the live Clock always preview automatically (they tick even
+                    // before Start is pressed, or don't have a Start at all). Timer/Duration only
+                    // preview the counter while actively running, and otherwise fall back to the
+                    // expired message or plain announcement text.
                     val previewText = when {
-                        viewModel.timerRunning -> AnnouncementsViewModel.formatTimer(viewModel.timerRemaining)
                         viewModel.timerExpired -> viewModel.timerExpiredText.ifBlank { timerExpiredLabel }
+                        viewModel.timerMode == Constants.TIMER_MODE_CLOCK -> AnnouncementsViewModel.formatTimer(viewModel.timerRemaining)
+                        viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY -> viewModel.liveClockText
+                        viewModel.timerRunning -> AnnouncementsViewModel.formatTimer(
+                            if (viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP) viewModel.countUpElapsed else viewModel.timerRemaining
+                        )
                         else -> viewModel.text
                     }
+                    // A live timer/clock value changes every second and must stay legible, so skip the
+                    // configured entrance animation in the preview (it would otherwise cycle the value
+                    // fully off-screen on every animation loop, looking like it froze or went dark).
+                    val isShowingLiveTimerValue = viewModel.timerExpired ||
+                        viewModel.timerMode == Constants.TIMER_MODE_CLOCK ||
+                        viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY ||
+                        viewModel.timerRunning
                     var previewWidthPx by remember { mutableStateOf(0) }
                     var previewHeightPx by remember { mutableStateOf(0) }
                     val scaleFactor = if (previewWidthPx > 0)
@@ -787,7 +885,7 @@ fun AnnouncementsTab(
                         fontStyle = if (viewModel.italic) FontStyle.Italic else FontStyle.Normal,
                         textDecoration = if (viewModel.underline) TextDecoration.Underline else TextDecoration.None,
                     )
-                    val isDirectional = viewModel.animationType in listOf(
+                    val isDirectional = !isShowingLiveTimerValue && viewModel.animationType in listOf(
                         Constants.ANIMATION_SLIDE_FROM_LEFT,
                         Constants.ANIMATION_SLIDE_FROM_RIGHT,
                         Constants.ANIMATION_SLIDE_FROM_TOP,
@@ -904,7 +1002,7 @@ fun AnnouncementsTab(
                                 AnimatedContent(
                                     targetState = previewKey,
                                     transitionSpec = {
-                                        if (viewModel.animationType == Constants.ANIMATION_FADE)
+                                        if (!isShowingLiveTimerValue && viewModel.animationType == Constants.ANIMATION_FADE)
                                             fadeIn(tween(previewDuration)) togetherWith fadeOut(tween(previewDuration))
                                         else
                                             EnterTransition.None togetherWith ExitTransition.None
@@ -1088,5 +1186,31 @@ private fun TimerColumn(
             Icon(Icons.Default.Remove, contentDescription = null)
         }
         Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+    }
+}
+
+@Composable
+private fun AmPmToggle(isPm: Boolean, onToggle: () -> Unit) {
+    val buttonColor = MaterialTheme.colorScheme.surfaceVariant
+    val buttonShape = RoundedCornerShape(10.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Spacer(Modifier.height(28.dp))
+        Box(
+            modifier = Modifier
+                .size(52.dp, 64.dp)
+                .background(buttonColor, buttonShape)
+                .clickable(onClick = onToggle),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(if (isPm) Res.string.timer_pm else Res.string.timer_am),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        Spacer(Modifier.height(28.dp))
     }
 }

@@ -844,11 +844,14 @@ private fun ScheduleItemRow(
                     )
                     is ScheduleItem.LabelItem -> { /* no secondary text */ }
                     is ScheduleItem.AnnouncementItem -> {
-                        if (item.isTimer) {
-                            val timerSubtext = if (item.timerMode == "clock")
-                                "%02d:%02d:%02d".format(item.targetHour, item.targetMinute, item.targetSecond)
-                            else
-                                "%02d:%02d".format(item.timerMinutes, item.timerSeconds)
+                        // Duration (count-up) and the live Clock have no fixed h:m:s to preview here —
+                        // their live value only exists once the item is triggered, so show nothing.
+                        val timerSubtext = when (item.timerMode) {
+                            "clock" -> "%02d:%02d:%02d".format(item.targetHour, item.targetMinute, item.targetSecond)
+                            "count_up", "clock_display" -> null
+                            else -> "%02d:%02d".format(item.timerMinutes, item.timerSeconds)
+                        }
+                        if (item.isTimer && timerSubtext != null) {
                             Text(
                                 maxLines = 1,
                                 text = timerSubtext,
