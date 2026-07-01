@@ -1342,7 +1342,6 @@ fun BibleTab(
                         items = filteredBooks,
                         selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
                         singleLine = true,
-                        accentColor = accentColor,
                         onItemSelected = { index ->
                             val bookName = filteredBooks.getOrNull(index)
                             bookName?.let {
@@ -1367,7 +1366,6 @@ fun BibleTab(
                         selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),
                         centerText = true,
                         rowHeight = 31.dp,
-                        accentColor = accentColor,
                         onItemSelected = { index ->
                             val chapterStr = filteredChapters.getOrNull(index)
                             chapterStr?.toIntOrNull()?.let { chapter -> viewModel.selectChapter(chapter) }
@@ -1732,7 +1730,6 @@ private fun BibleSearchField(
 private fun BibleBrowserColumn(
     items: List<String>,
     selectedIndex: Int,
-    accentColor: Color,
     singleLine: Boolean = false,
     centerText: Boolean = false,
     rowHeight: Dp = 28.dp,
@@ -1753,11 +1750,6 @@ private fun BibleBrowserColumn(
                         .fillMaxWidth()
                         .height(rowHeight)
                         .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
-                        .drawBehind {
-                            if (isSelected) {
-                                drawRect(color = accentColor, size = Size(4f, size.height))
-                            }
-                        }
                         .clickable { onItemSelected(index) }
                         .padding(start = 12.dp, end = 4.dp),
                     contentAlignment = if (centerText) Alignment.Center else Alignment.CenterStart
@@ -1813,11 +1805,6 @@ private fun BibleVerseColumn(
                             if (isSelected) MaterialTheme.colorScheme.surfaceVariant
                             else Color.Transparent
                         )
-                        .drawBehind {
-                            if (isSelected) {
-                                drawRect(color = accentColor, size = Size(4f, size.height))
-                            }
-                        }
                         .pointerInput(index) {
                             awaitPointerEventScope {
                                 while (true) {
