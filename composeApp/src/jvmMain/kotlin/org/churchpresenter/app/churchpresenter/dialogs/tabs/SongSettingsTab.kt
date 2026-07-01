@@ -111,6 +111,7 @@ import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -667,79 +668,57 @@ private fun LeftColumn(
 
     // ── Text Margins ──
     SettingsSection(title = stringResource(Res.string.text_margins)) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth(0.75f)
-            .height(200.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
-            .padding(12.dp),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+        // Top
+        NumberSettingsTextField(
+            modifier = Modifier.width(100.dp),
+            label = stringResource(Res.string.top),
+            initialText = settings.songSettings.marginTop,
+            onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginTop = value)) } },
+            range = 0..500
+        )
+        // Left | TV | Right
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Top
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = stringResource(Res.string.top), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(modifier = Modifier.height(2.dp))
-                NumberSettingsTextField(
-                    modifier = Modifier.width(100.dp),
-                    initialText = settings.songSettings.marginTop,
-                    onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginTop = value)) } },
-                    range = 0..500
-                )
-            }
-            // Left | Screen | Right
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
+            NumberSettingsTextField(
+                modifier = Modifier.width(100.dp),
+                label = stringResource(Res.string.left),
+                initialText = settings.songSettings.marginLeft,
+                onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginLeft = value)) } },
+                range = 0..500
+            )
+            TvScreenBox(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)
+                    .height(180.dp)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = stringResource(Res.string.left), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.height(2.dp))
-                    NumberSettingsTextField(
-                        modifier = Modifier.width(100.dp),
-                        initialText = settings.songSettings.marginLeft,
-                        onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginLeft = value)) } },
-                        range = 0..500
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(4.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = stringResource(Res.string.screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = stringResource(Res.string.right), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.height(2.dp))
-                    NumberSettingsTextField(
-                        modifier = Modifier.width(100.dp),
-                        initialText = settings.songSettings.marginRight,
-                        onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginRight = value)) } },
-                        range = 0..500
-                    )
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = stringResource(Res.string.screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            // Bottom
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = stringResource(Res.string.bottom), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(modifier = Modifier.height(2.dp))
-                NumberSettingsTextField(
-                    modifier = Modifier.width(100.dp),
-                    initialText = settings.songSettings.marginBottom,
-                    onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginBottom = value)) } },
-                    range = 0..500
-                )
-            }
+            NumberSettingsTextField(
+                modifier = Modifier.width(100.dp),
+                label = stringResource(Res.string.right),
+                initialText = settings.songSettings.marginRight,
+                onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginRight = value)) } },
+                range = 0..500
+            )
         }
+        // Bottom
+        NumberSettingsTextField(
+            modifier = Modifier.width(100.dp),
+            label = stringResource(Res.string.bottom),
+            initialText = settings.songSettings.marginBottom,
+            onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginBottom = value)) } },
+            range = 0..500
+        )
     }
     } // end text_margins SettingsSection
 }

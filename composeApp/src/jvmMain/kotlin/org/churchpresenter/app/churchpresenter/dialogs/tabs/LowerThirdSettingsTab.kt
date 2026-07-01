@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,7 +17,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -60,6 +63,7 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -267,68 +271,70 @@ fun LowerThirdSettingsTab(
 
             val streaming = settings.streamingSettings
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(Res.string.top), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.height(2.dp))
-                NumberSettingsTextField(
-                    initialText = streaming.windowTop,
-                    onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowTop = v)) } },
-                    range = 0..10000
-                )
-            }
-
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(stringResource(Res.string.left), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     NumberSettingsTextField(
+                        modifier = Modifier.width(100.dp).offset(y = 42.dp),
+                        label = stringResource(Res.string.left),
                         initialText = streaming.windowLeft,
                         onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowLeft = v)) } },
                         range = 0..10000
                     )
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
-                        .height(80.dp)
-                        .background(Color(0xFF1A1A1A), RoundedCornerShape(4.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
-                ) {
-                    Box(
+                    TvScreenBox(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight(settings.projectionSettings.lowerThirdHeightPercent / 100f)
-                            .align(Alignment.BottomCenter)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                            .weight(1f)
+                            .padding(horizontal = 8.dp)
+                            .height(180.dp)
                     ) {
-                        Text(
-                            text = stringResource(Res.string.display_lower_third),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                            val bandHeight = maxHeight * (settings.projectionSettings.lowerThirdHeightPercent / 100f)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(bandHeight)
+                                    .align(Alignment.BottomCenter)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.display_lower_third),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                            // Top field sits just above the lower-third band, centered on the screen.
+                            NumberSettingsTextField(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .offset(y = -bandHeight)
+                                    .width(100.dp),
+                                label = stringResource(Res.string.top),
+                                initialText = streaming.windowTop,
+                                onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowTop = v)) } },
+                                range = 0..10000
+                            )
+                        }
                     }
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(stringResource(Res.string.right), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.height(2.dp))
                     NumberSettingsTextField(
+                        modifier = Modifier.width(100.dp).offset(y = 42.dp),
+                        label = stringResource(Res.string.right),
                         initialText = streaming.windowRight,
                         onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowRight = v)) } },
                         range = 0..10000
                     )
                 }
-            }
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(Res.string.bottom), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.height(2.dp))
                 NumberSettingsTextField(
+                    modifier = Modifier.width(100.dp),
+                    label = stringResource(Res.string.bottom),
                     initialText = streaming.windowBottom,
                     onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowBottom = v)) } },
                     range = 0..10000

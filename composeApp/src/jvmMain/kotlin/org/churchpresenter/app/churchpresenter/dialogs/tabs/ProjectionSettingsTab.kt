@@ -102,6 +102,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.detectVlcInstallPath
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.listVlcAudioDevices
@@ -1039,118 +1040,79 @@ fun ProjectionSettingsTab(
     SettingsSection(title = stringResource(Res.string.window_position)) {
 
         // Visual representation box with position fields
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .height(180.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
-                .padding(8.dp),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier.fillMaxWidth(0.5f),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Top position
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(Res.string.top),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    NumberSettingsTextField(
-                        initialText = proj.windowTop,
-                        onValueChange = { value ->
-                            onSettingsChange { s ->
-                                s.copy(projectionSettings = s.projectionSettings.copy(windowTop = value))
-                            }
-                        },
-                        range = 0..10000
-                    )
-                }
-
-                // Middle row - Left and Right
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Left position
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = stringResource(Res.string.left),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        NumberSettingsTextField(
-                            initialText = proj.windowLeft,
-                            onValueChange = { value ->
-                                onSettingsChange { s ->
-                                    s.copy(projectionSettings = s.projectionSettings.copy(windowLeft = value))
-                                }
-                            },
-                            range = 0..10000
-                        )
+            // Top position
+            NumberSettingsTextField(
+                label = stringResource(Res.string.top),
+                initialText = proj.windowTop,
+                onValueChange = { value ->
+                    onSettingsChange { s ->
+                        s.copy(projectionSettings = s.projectionSettings.copy(windowTop = value))
                     }
+                },
+                range = 0..10000
+            )
 
-                    // Center indicator
-                    Box(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(4.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
+            // Middle row - Left, TV, Right
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Left position
+                NumberSettingsTextField(
+                    label = stringResource(Res.string.left),
+                    initialText = proj.windowLeft,
+                    onValueChange = { value ->
+                        onSettingsChange { s ->
+                            s.copy(projectionSettings = s.projectionSettings.copy(windowLeft = value))
+                        }
+                    },
+                    range = 0..10000
+                )
+
+                TvScreenBox(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
+                        .height(180.dp)
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             text = stringResource(Res.string.screen),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-
-                    // Right position
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = stringResource(Res.string.right),
-                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        NumberSettingsTextField(
-                            initialText = proj.windowRight,
-                            onValueChange = { value ->
-                                onSettingsChange { s ->
-                                    s.copy(projectionSettings = s.projectionSettings.copy(windowRight = value))
-                                }
-                            },
-                            range = 0..10000
-                        )
                     }
                 }
 
-                // Bottom position
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(Res.string.bottom),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    NumberSettingsTextField(
-                        initialText = proj.windowBottom,
-                        onValueChange = { value ->
-                            onSettingsChange { s ->
-                                s.copy(projectionSettings = s.projectionSettings.copy(windowBottom = value))
-                            }
-                        },
-                        range = 0..10000
-                    )
-                }
+                // Right position
+                NumberSettingsTextField(
+                    label = stringResource(Res.string.right),
+                    initialText = proj.windowRight,
+                    onValueChange = { value ->
+                        onSettingsChange { s ->
+                            s.copy(projectionSettings = s.projectionSettings.copy(windowRight = value))
+                        }
+                    },
+                    range = 0..10000
+                )
             }
+
+            // Bottom position
+            NumberSettingsTextField(
+                label = stringResource(Res.string.bottom),
+                initialText = proj.windowBottom,
+                onValueChange = { value ->
+                    onSettingsChange { s ->
+                        s.copy(projectionSettings = s.projectionSettings.copy(windowBottom = value))
+                    }
+                },
+                range = 0..10000
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
