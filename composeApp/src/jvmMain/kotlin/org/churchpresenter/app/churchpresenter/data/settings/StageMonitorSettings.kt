@@ -3,8 +3,21 @@ package org.churchpresenter.app.churchpresenter.data.settings
 import kotlinx.serialization.Serializable
 import org.churchpresenter.app.churchpresenter.utils.Constants
 
+/** What content is displayed in a given stage monitor screen zone. */
+@Serializable
+enum class StageMonitorContent {
+    CLOCK, TIMER, NOTES, CURRENT_SLIDE, NEXT_SLIDE
+}
+
 @Serializable
 data class StageMonitorSettings(
+    // Which content type appears in each screen zone
+    val topLeftContent: StageMonitorContent = StageMonitorContent.CURRENT_SLIDE,
+    val topRightContent: StageMonitorContent = StageMonitorContent.TIMER,
+    val bottomLeftContent: StageMonitorContent = StageMonitorContent.NEXT_SLIDE,
+    val bottomCenterContent: StageMonitorContent = StageMonitorContent.CLOCK,
+    val bottomRightContent: StageMonitorContent = StageMonitorContent.NOTES,
+
     // Top-Left: Current slide
     val currentFontSize: Int = 60,
     val currentFontType: String = "Arial",

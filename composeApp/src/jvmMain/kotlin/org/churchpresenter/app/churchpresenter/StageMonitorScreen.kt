@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContent
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSettings
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
@@ -56,13 +57,12 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Full-screen stage monitor layout:
+ * Full-screen stage monitor layout — a fixed 5-zone grid whose content is assigned per zone via
+ * settings (sm.topLeftContent, etc.), rather than hardcoded to a specific content type:
  *   ┌───────────────────┬───────────────────┐
  *   │  Top-Left         │  Top-Right        │
- *   │  Current Slide    │  Countdown Timer  │
  *   ├─────────┬─────────┴───────────────────┤
  *   │ Bot-Left│   Bot-Center  │  Bot-Right  │
- *   │ Next    │   Clock       │  Notes      │
  *   └─────────┴───────────────┴─────────────┘
  */
 @Composable
@@ -143,252 +143,96 @@ fun StageMonitorScreen(
 
     val mediaViewModel = LocalMediaViewModel.current
 
+    val renderData = ZoneRenderData(
+        presentingMode = presentingMode,
+        currentText = currentText,
+        currentLabel = currentLabel,
+        currentImageBitmap = currentImageBitmap,
+        displayedSlide = displayedSlide,
+        nextText = nextText,
+        nextImageBitmap = nextImageBitmap,
+        nextSlide = nextSlide,
+        timerText = timerText,
+        timerRunning = timerRunning,
+        timerRemainingSeconds = timerRemainingSeconds,
+        clockText = clockText,
+        presenterNotes = presenterNotes
+    )
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // ── TOP ROW: current slide (left) + timer (right) ───────────────────
+            // ── TOP ROW ───────────────────────────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                // Top-Left: Current Slide
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .background(parseHexColor(sm.currentBgColor))
+                        .background(zoneBackgroundColor(sm.topLeftContent, sm))
                         .padding(12.dp),
-                    contentAlignment = Alignment.TopStart
+                    contentAlignment = zoneContentAlignment(sm.topLeftContent)
                 ) {
-                    when (presentingMode) {
-                        Presenting.PICTURES -> {
-                            val bmp = currentImageBitmap
-                            if (bmp != null) {
-                                Image(
-                                    bitmap = bmp,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
-                        }
-                        Presenting.PRESENTATION -> {
-                            val bmp = displayedSlide
-                            if (bmp != null) {
-                                Image(
-                                    bitmap = bmp,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
-                        }
-                        else -> {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = resolveColumnVerticalArrangement(sm.currentVerticalAlignment),
-                                horizontalAlignment = resolveColumnHorizontalAlignment(sm.currentHorizontalAlignment)
-                            ) {
-                                if (sm.showSongBibleLabel && currentLabel.isNotBlank()) {
-                                    Text(
-                                        text = currentLabel,
-                                        style = buildTextStyle(
-                                            fontType = sm.labelFontType,
-                                            fontSize = sm.labelFontSize,
-                                            color = parseHexColor(sm.labelColor),
-                                            bold = sm.labelBold,
-                                            italic = sm.labelItalic
-                                        ),
-                                        maxLines = 1
-                                    )
-                                    Spacer(Modifier.height(6.dp))
-                                }
-                                Text(
-                                    text = currentText,
-                                    style = buildTextStyle(
-                                        fontType = sm.currentFontType,
-                                        fontSize = sm.currentFontSize,
-                                        color = parseHexColor(sm.currentColor),
-                                        bold = sm.currentBold,
-                                        italic = sm.currentItalic,
-                                        underline = sm.currentUnderline,
-                                        shadow = sm.currentShadow,
-                                        shadowColor = parseHexColor(sm.currentShadowColor),
-                                        shadowSize = sm.currentShadowSize,
-                                        shadowOpacity = sm.currentShadowOpacity
-                                    ),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = resolveTextAlign(sm.currentHorizontalAlignment)
-                                )
-                            }
-                        }
-                    }
+                    ZoneContent(sm.topLeftContent, sm, renderData)
                 }
-
                 VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-
-                // Top-Right: Countdown Timer
-                if (sm.showTimer) {
-                    Box(
-                        modifier = Modifier
-                            .weight(0.45f)
-                            .fillMaxHeight()
-                            .background(parseHexColor(sm.timerBgColor))
-                            .padding(12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = if (timerRunning || timerRemainingSeconds > 0) timerText else "--:--",
-                            style = buildTextStyle(
-                                fontType = sm.timerFontType,
-                                fontSize = sm.timerFontSize,
-                                color = parseHexColor(sm.timerColor),
-                                bold = sm.timerBold,
-                                italic = sm.timerItalic,
-                                underline = sm.timerUnderline,
-                                shadow = sm.timerShadow,
-                                shadowColor = parseHexColor(sm.timerShadowColor),
-                                shadowSize = sm.timerShadowSize,
-                                shadowOpacity = sm.timerShadowOpacity
-                            ),
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                Box(
+                    modifier = Modifier
+                        .weight(0.45f)
+                        .fillMaxHeight()
+                        .background(zoneBackgroundColor(sm.topRightContent, sm))
+                        .padding(12.dp),
+                    contentAlignment = zoneContentAlignment(sm.topRightContent)
+                ) {
+                    ZoneContent(sm.topRightContent, sm, renderData)
                 }
             }
 
             HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
 
-            // ── BOTTOM ROW: next slide (left) + clock (center) + notes (right) ──
+            // ── BOTTOM ROW ────────────────────────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(0.6f)
             ) {
-                // Bottom-Left: Next Slide
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .background(parseHexColor(sm.nextBgColor))
+                        .background(zoneBackgroundColor(sm.bottomLeftContent, sm))
                         .padding(12.dp),
-                    contentAlignment = Alignment.TopStart
+                    contentAlignment = zoneContentAlignment(sm.bottomLeftContent)
                 ) {
-                    when (presentingMode) {
-                        Presenting.PICTURES -> {
-                            val bmp = nextImageBitmap
-                            if (bmp != null) {
-                                Image(
-                                    bitmap = bmp,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
-                        }
-                        Presenting.PRESENTATION -> {
-                            val bmp = nextSlide
-                            if (bmp != null) {
-                                Image(
-                                    bitmap = bmp,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
-                        }
-                        else -> {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = resolveColumnVerticalArrangement(sm.nextVerticalAlignment),
-                                horizontalAlignment = resolveColumnHorizontalAlignment(sm.nextHorizontalAlignment)
-                            ) {
-                                Text(
-                                    text = nextText,
-                                    style = buildTextStyle(
-                                        fontType = sm.nextFontType,
-                                        fontSize = sm.nextFontSize,
-                                        color = parseHexColor(sm.nextColor),
-                                        bold = sm.nextBold,
-                                        italic = sm.nextItalic,
-                                        underline = sm.nextUnderline,
-                                        shadow = sm.nextShadow,
-                                        shadowColor = parseHexColor(sm.nextShadowColor),
-                                        shadowSize = sm.nextShadowSize,
-                                        shadowOpacity = sm.nextShadowOpacity
-                                    ),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = resolveTextAlign(sm.nextHorizontalAlignment)
-                                )
-                            }
-                        }
-                    }
+                    ZoneContent(sm.bottomLeftContent, sm, renderData)
                 }
-
                 VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-
-                // Bottom-Center: Clock
-                if (sm.showClock) {
-                    Box(
-                        modifier = Modifier
-                            .weight(0.8f)
-                            .fillMaxHeight()
-                            .background(parseHexColor(sm.clockBgColor))
-                            .padding(12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = clockText,
-                            style = buildTextStyle(
-                                fontType = sm.clockFontType,
-                                fontSize = sm.clockFontSize,
-                                color = parseHexColor(sm.clockColor),
-                                bold = sm.clockBold,
-                                italic = sm.clockItalic,
-                                underline = sm.clockUnderline,
-                                shadow = sm.clockShadow,
-                                shadowColor = parseHexColor(sm.clockShadowColor),
-                                shadowSize = sm.clockShadowSize,
-                                shadowOpacity = sm.clockShadowOpacity
-                            ),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
+                Box(
+                    modifier = Modifier
+                        .weight(0.8f)
+                        .fillMaxHeight()
+                        .background(zoneBackgroundColor(sm.bottomCenterContent, sm))
+                        .padding(12.dp),
+                    contentAlignment = zoneContentAlignment(sm.bottomCenterContent)
+                ) {
+                    ZoneContent(sm.bottomCenterContent, sm, renderData)
                 }
-
-                // Bottom-Right: Presenter Notes (from PowerPoint/Keynote)
+                VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .background(parseHexColor(sm.notesBgColor))
+                        .background(zoneBackgroundColor(sm.bottomRightContent, sm))
                         .padding(12.dp),
-                    contentAlignment = Alignment.TopStart
+                    contentAlignment = zoneContentAlignment(sm.bottomRightContent)
                 ) {
-                    val scrollState = rememberScrollState()
-                    Text(
-                        text = presenterNotes,
-                        style = buildTextStyle(
-                            fontType = sm.notesFontType,
-                            fontSize = sm.notesFontSize,
-                            color = parseHexColor(sm.notesColor),
-                            bold = sm.notesBold,
-                            italic = sm.notesItalic,
-                            underline = sm.notesUnderline,
-                            shadow = sm.notesShadow,
-                            shadowColor = parseHexColor(sm.notesShadowColor),
-                            shadowSize = sm.notesShadowSize,
-                            shadowOpacity = sm.notesShadowOpacity
-                        ),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(scrollState)
-                    )
+                    ZoneContent(sm.bottomRightContent, sm, renderData)
                 }
             }
         }
@@ -411,6 +255,230 @@ fun StageMonitorScreen(
             }
         }
     }
+}
+
+/** Bundles the derived per-frame state so it can be passed to whichever zone needs it. */
+private data class ZoneRenderData(
+    val presentingMode: Presenting,
+    val currentText: String,
+    val currentLabel: String,
+    val currentImageBitmap: ImageBitmap?,
+    val displayedSlide: ImageBitmap?,
+    val nextText: String,
+    val nextImageBitmap: ImageBitmap?,
+    val nextSlide: ImageBitmap?,
+    val timerText: String,
+    val timerRunning: Boolean,
+    val timerRemainingSeconds: Int,
+    val clockText: String,
+    val presenterNotes: String
+)
+
+private fun zoneBackgroundColor(content: StageMonitorContent, sm: StageMonitorSettings): Color = when (content) {
+    StageMonitorContent.CURRENT_SLIDE -> parseHexColor(sm.currentBgColor)
+    StageMonitorContent.NEXT_SLIDE -> parseHexColor(sm.nextBgColor)
+    StageMonitorContent.TIMER -> parseHexColor(sm.timerBgColor)
+    StageMonitorContent.CLOCK -> parseHexColor(sm.clockBgColor)
+    StageMonitorContent.NOTES -> parseHexColor(sm.notesBgColor)
+}
+
+private fun zoneContentAlignment(content: StageMonitorContent): Alignment = when (content) {
+    StageMonitorContent.TIMER, StageMonitorContent.CLOCK -> Alignment.Center
+    else -> Alignment.TopStart
+}
+
+@Composable
+private fun ZoneContent(content: StageMonitorContent, sm: StageMonitorSettings, data: ZoneRenderData) {
+    when (content) {
+        StageMonitorContent.CURRENT_SLIDE -> CurrentSlideContent(sm, data)
+        StageMonitorContent.NEXT_SLIDE -> NextSlideContent(sm, data)
+        StageMonitorContent.TIMER -> TimerContent(sm, data)
+        StageMonitorContent.CLOCK -> ClockContent(sm, data)
+        StageMonitorContent.NOTES -> NotesContent(sm, data)
+    }
+}
+
+@Composable
+private fun CurrentSlideContent(sm: StageMonitorSettings, data: ZoneRenderData) {
+    when (data.presentingMode) {
+        Presenting.PICTURES -> {
+            val bmp = data.currentImageBitmap
+            if (bmp != null) {
+                Image(
+                    bitmap = bmp,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+        Presenting.PRESENTATION -> {
+            val bmp = data.displayedSlide
+            if (bmp != null) {
+                Image(
+                    bitmap = bmp,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+        else -> {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = resolveColumnVerticalArrangement(sm.currentVerticalAlignment),
+                horizontalAlignment = resolveColumnHorizontalAlignment(sm.currentHorizontalAlignment)
+            ) {
+                if (sm.showSongBibleLabel && data.currentLabel.isNotBlank()) {
+                    Text(
+                        text = data.currentLabel,
+                        style = buildTextStyle(
+                            fontType = sm.labelFontType,
+                            fontSize = sm.labelFontSize,
+                            color = parseHexColor(sm.labelColor),
+                            bold = sm.labelBold,
+                            italic = sm.labelItalic
+                        ),
+                        maxLines = 1
+                    )
+                    Spacer(Modifier.height(6.dp))
+                }
+                Text(
+                    text = data.currentText,
+                    style = buildTextStyle(
+                        fontType = sm.currentFontType,
+                        fontSize = sm.currentFontSize,
+                        color = parseHexColor(sm.currentColor),
+                        bold = sm.currentBold,
+                        italic = sm.currentItalic,
+                        underline = sm.currentUnderline,
+                        shadow = sm.currentShadow,
+                        shadowColor = parseHexColor(sm.currentShadowColor),
+                        shadowSize = sm.currentShadowSize,
+                        shadowOpacity = sm.currentShadowOpacity
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = resolveTextAlign(sm.currentHorizontalAlignment)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NextSlideContent(sm: StageMonitorSettings, data: ZoneRenderData) {
+    when (data.presentingMode) {
+        Presenting.PICTURES -> {
+            val bmp = data.nextImageBitmap
+            if (bmp != null) {
+                Image(
+                    bitmap = bmp,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+        Presenting.PRESENTATION -> {
+            val bmp = data.nextSlide
+            if (bmp != null) {
+                Image(
+                    bitmap = bmp,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+        else -> {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = resolveColumnVerticalArrangement(sm.nextVerticalAlignment),
+                horizontalAlignment = resolveColumnHorizontalAlignment(sm.nextHorizontalAlignment)
+            ) {
+                Text(
+                    text = data.nextText,
+                    style = buildTextStyle(
+                        fontType = sm.nextFontType,
+                        fontSize = sm.nextFontSize,
+                        color = parseHexColor(sm.nextColor),
+                        bold = sm.nextBold,
+                        italic = sm.nextItalic,
+                        underline = sm.nextUnderline,
+                        shadow = sm.nextShadow,
+                        shadowColor = parseHexColor(sm.nextShadowColor),
+                        shadowSize = sm.nextShadowSize,
+                        shadowOpacity = sm.nextShadowOpacity
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = resolveTextAlign(sm.nextHorizontalAlignment)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimerContent(sm: StageMonitorSettings, data: ZoneRenderData) {
+    Text(
+        text = if (data.timerRunning || data.timerRemainingSeconds > 0) data.timerText else "--:--",
+        style = buildTextStyle(
+            fontType = sm.timerFontType,
+            fontSize = sm.timerFontSize,
+            color = parseHexColor(sm.timerColor),
+            bold = sm.timerBold,
+            italic = sm.timerItalic,
+            underline = sm.timerUnderline,
+            shadow = sm.timerShadow,
+            shadowColor = parseHexColor(sm.timerShadowColor),
+            shadowSize = sm.timerShadowSize,
+            shadowOpacity = sm.timerShadowOpacity
+        ),
+        textAlign = TextAlign.Center
+    )
+}
+
+@Composable
+private fun ClockContent(sm: StageMonitorSettings, data: ZoneRenderData) {
+    Text(
+        text = data.clockText,
+        style = buildTextStyle(
+            fontType = sm.clockFontType,
+            fontSize = sm.clockFontSize,
+            color = parseHexColor(sm.clockColor),
+            bold = sm.clockBold,
+            italic = sm.clockItalic,
+            underline = sm.clockUnderline,
+            shadow = sm.clockShadow,
+            shadowColor = parseHexColor(sm.clockShadowColor),
+            shadowSize = sm.clockShadowSize,
+            shadowOpacity = sm.clockShadowOpacity
+        ),
+        textAlign = TextAlign.Center
+    )
+}
+
+@Composable
+private fun NotesContent(sm: StageMonitorSettings, data: ZoneRenderData) {
+    val scrollState = rememberScrollState()
+    Text(
+        text = data.presenterNotes,
+        style = buildTextStyle(
+            fontType = sm.notesFontType,
+            fontSize = sm.notesFontSize,
+            color = parseHexColor(sm.notesColor),
+            bold = sm.notesBold,
+            italic = sm.notesItalic,
+            underline = sm.notesUnderline,
+            shadow = sm.notesShadow,
+            shadowColor = parseHexColor(sm.notesShadowColor),
+            shadowSize = sm.notesShadowSize,
+            shadowOpacity = sm.notesShadowOpacity
+        ),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+    )
 }
 
 private fun formatClock(sm: StageMonitorSettings): String {
@@ -495,4 +563,3 @@ private fun resolveColumnHorizontalAlignment(horizontal: String): Alignment.Hori
         else -> Alignment.Start
     }
 }
-

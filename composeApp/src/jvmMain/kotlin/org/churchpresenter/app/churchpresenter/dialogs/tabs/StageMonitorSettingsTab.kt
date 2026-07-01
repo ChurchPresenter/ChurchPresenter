@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Switch
@@ -22,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_color
@@ -40,11 +43,11 @@ import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_cur
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_next
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_notes
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_timer
-import churchpresenter.composeapp.generated.resources.stage_monitor_show_clock
 import churchpresenter.composeapp.generated.resources.stage_monitor_show_label
 import churchpresenter.composeapp.generated.resources.shadow_settings
-import churchpresenter.composeapp.generated.resources.stage_monitor_show_timer
+import churchpresenter.composeapp.generated.resources.stage_monitor_layout_section
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
@@ -52,9 +55,11 @@ import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContent
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSettings
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
@@ -79,10 +84,14 @@ fun StageMonitorSettingsTab(
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(14.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
             // ── Left column: Current + Next ──────────────────────────────────────
             Column(
                 modifier = Modifier.weight(1f).widthIn(min = 320.dp, max = 480.dp),
@@ -199,9 +208,6 @@ fun StageMonitorSettingsTab(
             ) {
                 // Timer card
                 SettingsSection(title = stringResource(Res.string.stage_monitor_quadrant_timer)) {
-                    SettingRow(stringResource(Res.string.stage_monitor_show_timer)) {
-                        Switch(checked = sm.showTimer, onCheckedChange = { update { copy(showTimer = it) } })
-                    }
                     QuadrantFontSettings(
                         fontType = sm.timerFontType, fontSize = sm.timerFontSize,
                         color = sm.timerColor, bgColor = sm.timerBgColor,
@@ -225,9 +231,6 @@ fun StageMonitorSettingsTab(
 
                 // Clock card
                 SettingsSection(title = stringResource(Res.string.stage_monitor_quadrant_clock)) {
-                    SettingRow(stringResource(Res.string.stage_monitor_show_clock)) {
-                        Switch(checked = sm.showClock, onCheckedChange = { update { copy(showClock = it) } })
-                    }
                     QuadrantFontSettings(
                         fontType = sm.clockFontType, fontSize = sm.clockFontSize,
                         color = sm.clockColor, bgColor = sm.clockBgColor,
@@ -308,6 +311,8 @@ fun StageMonitorSettingsTab(
                     )
                 }
 
+                StageMonitorLayoutSection(sm = sm, update = ::update)
+            }
             }
         }
     }
@@ -376,6 +381,97 @@ private fun QuadrantFontSettings(
                 onColorChange = onShadowColorChange, onSizeChange = onShadowSizeChange, onOpacityChange = onShadowOpacityChange
             )
         }
+    }
+}
+
+@Composable
+private fun StageMonitorLayoutSection(
+    sm: StageMonitorSettings,
+    update: (StageMonitorSettings.() -> StageMonitorSettings) -> Unit
+) {
+    val clockLabel = stringResource(Res.string.stage_monitor_quadrant_clock)
+    val timerLabel = stringResource(Res.string.stage_monitor_quadrant_timer)
+    val notesLabel = stringResource(Res.string.stage_monitor_quadrant_notes)
+    val currentLabel = stringResource(Res.string.stage_monitor_quadrant_current)
+    val nextLabel = stringResource(Res.string.stage_monitor_quadrant_next)
+
+    fun labelFor(content: StageMonitorContent): String = when (content) {
+        StageMonitorContent.CLOCK -> clockLabel
+        StageMonitorContent.TIMER -> timerLabel
+        StageMonitorContent.NOTES -> notesLabel
+        StageMonitorContent.CURRENT_SLIDE -> currentLabel
+        StageMonitorContent.NEXT_SLIDE -> nextLabel
+    }
+
+    val contentOptions = StageMonitorContent.entries.map { labelFor(it) }
+    val contentByLabel = StageMonitorContent.entries.associateBy { labelFor(it) }
+
+    SettingsSection(title = stringResource(Res.string.stage_monitor_layout_section)) {
+        TvScreenBox(
+            modifier = Modifier.fillMaxWidth(0.9f).height(240.dp)
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    ZoneDropdownCell(
+                        value = labelFor(sm.topLeftContent),
+                        options = contentOptions,
+                        onValueChange = { picked -> contentByLabel[picked]?.let { update { copy(topLeftContent = it) } } },
+                        modifier = Modifier.weight(1f)
+                    )
+                    ZoneDropdownCell(
+                        value = labelFor(sm.topRightContent),
+                        options = contentOptions,
+                        onValueChange = { picked -> contentByLabel[picked]?.let { update { copy(topRightContent = it) } } },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    ZoneDropdownCell(
+                        value = labelFor(sm.bottomLeftContent),
+                        options = contentOptions,
+                        onValueChange = { picked -> contentByLabel[picked]?.let { update { copy(bottomLeftContent = it) } } },
+                        modifier = Modifier.weight(1f)
+                    )
+                    ZoneDropdownCell(
+                        value = labelFor(sm.bottomCenterContent),
+                        options = contentOptions,
+                        onValueChange = { picked -> contentByLabel[picked]?.let { update { copy(bottomCenterContent = it) } } },
+                        modifier = Modifier.weight(0.8f)
+                    )
+                    ZoneDropdownCell(
+                        value = labelFor(sm.bottomRightContent),
+                        options = contentOptions,
+                        onValueChange = { picked -> contentByLabel[picked]?.let { update { copy(bottomRightContent = it) } } },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ZoneDropdownCell(
+    value: String,
+    options: List<String>,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    cellColor: Color = MaterialTheme.colorScheme.surfaceVariant
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(2.dp)
+            .background(cellColor, RoundedCornerShape(4.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+            .padding(4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        DropdownSettingsField(
+            value = value,
+            options = options,
+            onValueChange = onValueChange
+        )
     }
 }
 
