@@ -3,8 +3,6 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,7 +23,27 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 import javax.imageio.ImageIO
 
-class PresentationViewModel(appSettings: AppSettings? = null) {
+class PresentationViewModel(private val appSettings: AppSettings? = null) {
+
+    companion object {
+        private val APP_SLIDES_DIR = File(System.getProperty("user.home"), ".churchpresenter/slides")
+
+        /**
+         * Called on startup: deletes any slide cache folders whose source file is not in
+         * [keepPaths] (the union of recent and pinned presentation paths).
+         */
+        fun cleanupOrphanedCaches(keepPaths: Collection<String>) {
+            if (!APP_SLIDES_DIR.exists()) return
+            val keepIds = keepPaths.map { presentationIdFor(it) }.toSet()
+            APP_SLIDES_DIR.listFiles()?.forEach { dir ->
+                if (dir.isDirectory && dir.name !in keepIds) dir.deleteRecursively()
+            }
+        }
+
+        private fun presentationIdFor(absolutePath: String): String =
+            absolutePath.hashCode().toUInt().toString(16)
+    }
+
     private val _presentations = mutableStateListOf<File>()
     val presentations: List<File> = _presentations
 
@@ -33,14 +51,16 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
     val selectedPresentation: File?
         get() = _selectedPresentation.value
 
-    private val _slides = mutableStateListOf<ImageBitmap>()
-    val slides: SnapshotStateList<ImageBitmap> = _slides
+    private val _slideFiles = mutableStateListOf<File>()
+    val slideFiles: SnapshotStateList<File> = _slideFiles
 
-    /** Raw BufferedImages kept in parallel with [slides] for server-side JPEG encoding. */
-    private val _bufferedSlides = mutableListOf<BufferedImage>()
-    val bufferedSlides: List<BufferedImage> get() = _bufferedSlides.toList()
+    private val _totalSlides = mutableStateOf(0)
+    val totalSlides: Int get() = _totalSlides.value
 
-    /** Presenter notes extracted from each slide (parallel to [slides]). Empty string if no notes. */
+    /** Incremented each time slides finish loading (fresh render or cache hit). Use as LaunchedEffect key. */
+    private val _loadGeneration = mutableStateOf(0)
+    val loadGeneration: Int get() = _loadGeneration.value
+
     private val _slideNotes = mutableStateListOf<String>()
     val slideNotes: List<String> get() = _slideNotes
 
@@ -85,15 +105,49 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         set(value) { _animationType.value = value }
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private var activeLoadJob: Job? = null  // Track current load job to cancel on switch
+    private var activeLoadJob: Job? = null
+
+    // ── Cache helpers ─────────────────────────────────────────────────────────
+
+    private fun presentationId(file: File): String =
+        presentationIdFor(file.absolutePath)
+
+    private fun slidesCacheDir(file: File): File =
+        File(APP_SLIDES_DIR, presentationId(file))
+
+    /** Returns true if the cache dir exists, has slides, and its mtime matches the source file. */
+    private fun isCacheValid(file: File): Boolean {
+        val dir = slidesCacheDir(file)
+        if (!dir.exists()) return false
+        val mtime = File(dir, "mtime.txt").takeIf { it.exists() }?.readText()?.trim()?.toLongOrNull()
+        return mtime == file.lastModified() &&
+            dir.listFiles()?.any { it.name.startsWith("slide_") && it.extension == "jpg" } == true
+    }
+
+    private fun loadSlidesFromCache(file: File): List<File>? {
+        if (!isCacheValid(file)) return null
+        val dir = slidesCacheDir(file)
+        return dir.listFiles()
+            ?.filter { it.name.startsWith("slide_") && it.extension == "jpg" }
+            ?.sortedBy { it.name }
+            ?.takeIf { it.isNotEmpty() }
+    }
+
+    private fun clearCurrentSlideState() {
+        _slideFiles.clear()
+        _slideNotes.clear()
+    }
+
+    private fun renderWidth(): Int =
+        appSettings?.projectionSettings?.getAssignment(0)?.targetBoundsW?.takeIf { it > 0 } ?: 1920
+
+    // ── Public API ────────────────────────────────────────────────────────────
 
     fun loadPresentationByPath(filePath: String) {
         val file = File(filePath)
         if (file.exists() && isValidPresentationFile(file)) {
             val existingFile = _presentations.find { it.absolutePath == file.absolutePath }
-            if (existingFile == null) {
-                _presentations.add(file)
-            }
+            if (existingFile == null) _presentations.add(file)
             selectPresentation(file)
         }
     }
@@ -101,19 +155,22 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
     fun addPresentation(file: File) {
         if (file.exists() && isValidPresentationFile(file)) {
             val existingFile = _presentations.find { it.absolutePath == file.absolutePath }
-            if (existingFile == null) {
-                _presentations.add(file)
-            }
+            if (existingFile == null) _presentations.add(file)
             selectPresentation(file)
         }
     }
 
-    fun removePresentation(file: File) {
+    /**
+     * Removes a presentation from the open list.
+     * [isInRecentsOrPinned] — when false the disk cache for that file is also deleted.
+     */
+    fun removePresentation(file: File, isInRecentsOrPinned: Boolean = true) {
         _presentations.removeAll { it.absolutePath == file.absolutePath }
+        if (!isInRecentsOrPinned) slidesCacheDir(file).deleteRecursively()
         if (_selectedPresentation.value?.absolutePath == file.absolutePath) {
             _selectedPresentation.value = _presentations.firstOrNull()
             _selectedPresentation.value?.let { selectPresentation(it) } ?: run {
-                _slides.clear()
+                clearCurrentSlideState()
                 _selectedSlideIndex.value = 0
             }
         }
@@ -125,15 +182,14 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             _selectedPresentation.value = existingFile
             _selectedSlideIndex.value = 0
             activeLoadJob?.cancel()
-            loadSlides(existingFile)
+            activeLoadJob = scope.launch { loadOrCacheSlides(existingFile) }
         }
     }
 
     fun nextSlide() {
-        if (_selectedSlideIndex.value < _slides.size - 1) {
+        if (_selectedSlideIndex.value < _slideFiles.size - 1) {
             _selectedSlideIndex.value++
-        } else if (_isLooping.value && _slides.isNotEmpty()) {
-            // Loop back to first slide if looping is enabled
+        } else if (_isLooping.value && _slideFiles.isNotEmpty()) {
             _selectedSlideIndex.value = 0
         }
     }
@@ -141,14 +197,13 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
     fun previousSlide() {
         if (_selectedSlideIndex.value > 0) {
             _selectedSlideIndex.value--
-        } else if (_isLooping.value && _slides.isNotEmpty()) {
-            // Loop to last slide if looping is enabled
-            _selectedSlideIndex.value = _slides.size - 1
+        } else if (_isLooping.value && _slideFiles.isNotEmpty()) {
+            _selectedSlideIndex.value = _slideFiles.size - 1
         }
     }
 
     fun selectSlide(index: Int) {
-        if (index in _slides.indices) {
+        if (index in _slideFiles.indices) {
             _selectedSlideIndex.value = index
         }
     }
@@ -161,61 +216,86 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         activeLoadJob?.cancel()
         _presentations.clear()
         _selectedPresentation.value = null
-        _slides.clear()
-        _bufferedSlides.clear()
-        _slideNotes.clear()
+        clearCurrentSlideState()
+        _totalSlides.value = 0
         _selectedSlideIndex.value = 0
         _isLoading.value = false
     }
 
-    private fun isValidPresentationFile(file: File): Boolean {
-        val extension = file.extension.lowercase()
-        return extension in listOf("ppt", "pptx", "key", "pdf")
+    fun dispose() {
+        activeLoadJob?.cancel()
+        scope.cancel()
     }
 
-    private fun loadSlides(file: File) {
-        activeLoadJob = scope.launch {
-            try {
-                withContext(Dispatchers.Main) {
-                    _slides.clear()
-                    _bufferedSlides.clear()
-                    _slideNotes.clear()
-                    _isLoading.value = true
-                }
-                when (file.extension.lowercase()) {
-                    "pdf" -> loadPdfSlides(file)
-                    "pptx", "ppt" -> loadPowerPointSlides(file)
-                    "key" -> loadKeynoteSlides(file)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                withContext(Dispatchers.Main) {
-                    _isLoading.value = false
-                }
+    // ── Load / cache orchestration ────────────────────────────────────────────
+
+    private suspend fun loadOrCacheSlides(file: File) {
+        val cached = loadSlidesFromCache(file)
+        if (cached != null) {
+            val dir = slidesCacheDir(file)
+            val notes = cached.indices.map { i ->
+                File(dir, "note_%04d.txt".format(i)).takeIf { it.exists() }?.readText() ?: ""
             }
+            withContext(Dispatchers.Main) {
+                clearCurrentSlideState()
+                _totalSlides.value = cached.size
+                _slideFiles.addAll(cached)
+                _slideNotes.addAll(notes)
+                _loadGeneration.value++
+            }
+        } else {
+            renderSlides(file)
         }
     }
 
-    private suspend fun loadPdfSlides(file: File, notesPerSlide: List<String> = emptyList()) {
+    private suspend fun renderSlides(file: File) {
+        val cacheDir = slidesCacheDir(file).also { it.deleteRecursively(); it.mkdirs() }
+        var success = false
+        try {
+            withContext(Dispatchers.Main) {
+                clearCurrentSlideState()
+                _totalSlides.value = 0
+                _isLoading.value = true
+            }
+            when (file.extension.lowercase()) {
+                "pdf" -> loadPdfSlides(file, cacheDir)
+                "pptx", "ppt" -> loadPowerPointSlides(file, cacheDir)
+                "key" -> loadKeynoteSlides(file, cacheDir)
+            }
+            if (_slideFiles.isNotEmpty()) {
+                File(cacheDir, "mtime.txt").writeText(file.lastModified().toString())
+                withContext(Dispatchers.Main) { _loadGeneration.value++ }
+                success = true
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            if (!success) cacheDir.deleteRecursively()
+            withContext(Dispatchers.Main) { _isLoading.value = false }
+        }
+    }
+
+    // ── Format-specific renderers ─────────────────────────────────────────────
+
+    private suspend fun loadPdfSlides(file: File, cacheDir: File, notesPerSlide: List<String> = emptyList()) {
         try {
             val pdDocumentClass = Class.forName("org.apache.pdfbox.pdmodel.PDDocument")
             val pdfRendererClass = Class.forName("org.apache.pdfbox.rendering.PDFRenderer")
             val loadMethod = pdDocumentClass.getMethod("load", File::class.java)
             val document = loadMethod.invoke(null, file)
             val numberOfPages = pdDocumentClass.getMethod("getNumberOfPages").invoke(document) as Int
+            withContext(Dispatchers.Main) { _totalSlides.value = numberOfPages }
             val renderer = pdfRendererClass.getConstructor(pdDocumentClass).newInstance(document)
             val renderMethod = pdfRendererClass.getMethod("renderImageWithDPI", Int::class.java, Float::class.java)
-            // 288 DPI → ~4× the standard 72 DPI PDF unit → 3840px wide for a typical 13.3" wide slide.
-            // Use 300 DPI for a round number that is also standard print quality.
-            val targetDpi = 300f
+            val targetDpi = 150f
             for (page in 0 until numberOfPages) {
                 val image = renderMethod.invoke(renderer, page, targetDpi) as BufferedImage
-                val imageBitmap = bufferedImageToImageBitmap(image)
+                val slideFile = File(cacheDir, "slide_%04d.jpg".format(page))
+                ImageIO.write(image, "jpg", slideFile)
                 val notes = notesPerSlide.getOrElse(page) { "" }
+                if (notes.isNotBlank()) File(cacheDir, "note_%04d.txt".format(page)).writeText(notes)
                 withContext(Dispatchers.Main) {
-                    _bufferedSlides.add(image)
-                    _slides.add(imageBitmap)
+                    _slideFiles.add(slideFile)
                     _slideNotes.add(notes)
                 }
             }
@@ -227,9 +307,10 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         }
     }
 
-    private suspend fun loadPowerPointSlides(file: File) {
+    private suspend fun loadPowerPointSlides(file: File, cacheDir: File) {
         try {
             val extension = file.extension.lowercase()
+            val displayWidth = renderWidth()
             if (extension == "pptx") {
                 try {
                     val xmlSlideShowClass = Class.forName("org.apache.poi.xslf.usermodel.XMLSlideShow")
@@ -237,11 +318,10 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     val ppt = xmlSlideShowClass.getConstructor(java.io.InputStream::class.java).newInstance(fileInputStream)
                     val slides = xmlSlideShowClass.getMethod("getSlides").invoke(ppt) as List<*>
                     val pageSize = xmlSlideShowClass.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
-                    // Scale to a fixed 3840-wide target so the bitmap is always 4K-ready.
-                    // This covers Retina/HiDPI screens (logical 1920×1080 = 3840×2160 physical).
-                    val renderScale = 3840.0 / pageSize.width
-                    slides.forEach { slide ->
-                        val s = slide ?: return@forEach
+                    withContext(Dispatchers.Main) { _totalSlides.value = slides.size }
+                    val renderScale = displayWidth.toDouble() / pageSize.width
+                    slides.forEachIndexed { slideIndex, slide ->
+                        val s = slide ?: return@forEachIndexed
                         try {
                             val imgW = (pageSize.width * renderScale).toInt()
                             val imgH = (pageSize.height * renderScale).toInt()
@@ -257,11 +337,12 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                             graphics.fillRect(0, 0, pageSize.width, pageSize.height)
                             s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, graphics)
                             graphics.dispose()
-                            val imageBitmap = bufferedImageToImageBitmap(img)
                             val notes = extractPoiSlideNotes(s)
+                            val slideFile = File(cacheDir, "slide_%04d.jpg".format(slideIndex))
+                            ImageIO.write(img, "jpg", slideFile)
+                            if (notes.isNotBlank()) File(cacheDir, "note_%04d.txt".format(slideIndex)).writeText(notes)
                             withContext(Dispatchers.Main) {
-                                _bufferedSlides.add(img)
-                                _slides.add(imageBitmap)
+                                _slideFiles.add(slideFile)
                                 _slideNotes.add(notes)
                             }
                         } catch (e: Exception) {
@@ -280,10 +361,10 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     val ppt = hslfSlideShowClass.getConstructor(java.io.InputStream::class.java).newInstance(fileInputStream)
                     val slides = hslfSlideShowClass.getMethod("getSlides").invoke(ppt) as List<*>
                     val pageSize = hslfSlideShowClass.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
-                    // Scale to a fixed 3840-wide target so the bitmap is always 4K-ready.
-                    val renderScale = 3840.0 / pageSize.width
-                    slides.forEach { slide ->
-                        val s = slide ?: return@forEach
+                    withContext(Dispatchers.Main) { _totalSlides.value = slides.size }
+                    val renderScale = displayWidth.toDouble() / pageSize.width
+                    slides.forEachIndexed { slideIndex, slide ->
+                        val s = slide ?: return@forEachIndexed
                         try {
                             val imgW = (pageSize.width * renderScale).toInt()
                             val imgH = (pageSize.height * renderScale).toInt()
@@ -298,12 +379,12 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                             graphics.fillRect(0, 0, pageSize.width, pageSize.height)
                             s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, graphics)
                             graphics.dispose()
-                            val imageBitmap = bufferedImageToImageBitmap(img)
-                            // Extract presenter notes for this slide
                             val notes = extractPoiSlideNotes(s)
+                            val slideFile = File(cacheDir, "slide_%04d.jpg".format(slideIndex))
+                            ImageIO.write(img, "jpg", slideFile)
+                            if (notes.isNotBlank()) File(cacheDir, "note_%04d.txt".format(slideIndex)).writeText(notes)
                             withContext(Dispatchers.Main) {
-                                _bufferedSlides.add(img)
-                                _slides.add(imageBitmap)
+                                _slideFiles.add(slideFile)
                                 _slideNotes.add(notes)
                             }
                         } catch (e: Exception) {
@@ -321,58 +402,45 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         }
     }
 
-
-    private suspend fun loadKeynoteSlides(file: File) {
-
-        // Step 1: Use the Keynote app via osascript to export a full-quality PDF.
-        // This is the highest-quality path on macOS and preserves all slide fidelity.
+    private suspend fun loadKeynoteSlides(file: File, cacheDir: File) {
         val nativePdf = tryExportKeynoteViaApp(file)
         if (nativePdf != null) {
             try {
                 val n = extractKeynoteNotes(file)
-                loadPdfSlides(nativePdf, notesPerSlide = n)
+                loadPdfSlides(nativePdf, cacheDir, notesPerSlide = n)
             } finally {
                 nativePdf.delete()
             }
-            if (_slides.isNotEmpty()) return
+            if (_slideFiles.isNotEmpty()) return
         }
 
-        // Step 2: Extract QuickLook/Preview.pdf from the .key zip (medium quality, no external tools).
         val quickLookPdf = extractKeynoteQuickLookPdf(file)
         if (quickLookPdf != null) {
             try {
                 val n = extractKeynoteNotes(file)
-                loadPdfSlides(quickLookPdf, notesPerSlide = n)
+                loadPdfSlides(quickLookPdf, cacheDir, notesPerSlide = n)
             } finally {
                 quickLookPdf.delete()
             }
-            if (_slides.isNotEmpty()) return
+            if (_slideFiles.isNotEmpty()) return
         }
 
-        // Step 3: Try qlmanage PDF export (macOS only, may not be available)
         val pdfFile = tryExportKeynoteToPdf(file)
         if (pdfFile != null) {
             try {
                 val n = extractKeynoteNotes(file)
-                loadPdfSlides(pdfFile, notesPerSlide = n)
+                loadPdfSlides(pdfFile, cacheDir, notesPerSlide = n)
             } finally {
                 pdfFile.delete()
             }
-            if (_slides.isNotEmpty()) return
+            if (_slideFiles.isNotEmpty()) return
         }
 
-        // Step 4: Fallback: extract embedded thumbnails (low quality)
         System.err.println("[Keynote] Falling back to embedded thumbnails for ${file.name}")
-        loadKeynoteViaUnzip(file)
+        loadKeynoteViaUnzip(file, cacheDir)
     }
 
-    /**
-     * Exports a Keynote file to a high-quality PDF using the macOS Keynote app via osascript.
-     * This produces the best possible slide quality — pixel-perfect, full resolution.
-     * Returns the PDF file on success, null if Keynote is not installed or export fails.
-     */
     private suspend fun tryExportKeynoteViaApp(file: File): File? = withContext(Dispatchers.IO) {
-        // Only available on macOS
         if (!System.getProperty("os.name", "").lowercase().contains("mac")) return@withContext null
         try {
             val dest = File(System.getProperty("java.io.tmpdir"), "keynote_export_${System.currentTimeMillis()}.pdf")
@@ -396,9 +464,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                 dest.delete()
                 return@withContext null
             }
-            if (dest.exists() && dest.length() > 0) {
-                return@withContext dest
-            }
+            if (dest.exists() && dest.length() > 0) return@withContext dest
             System.err.println("[Keynote] osascript finished but no PDF produced. Output: $output")
             dest.delete()
             null
@@ -407,11 +473,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             null
         }
     }
-    /**
-     * Extracts the QuickLook/Preview.pdf embedded inside a .key (zip) file.
-     * Keynote always writes a full-quality PDF preview of all slides here.
-     * Returns the temporary PDF file on success, null if not found or not a zip.
-     */
+
     private suspend fun extractKeynoteQuickLookPdf(file: File): File? = withContext(Dispatchers.IO) {
         if (!file.isFile || !file.name.endsWith(".key", ignoreCase = true)) return@withContext null
         try {
@@ -423,9 +485,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     if (!entry.isDirectory && name.equals("QuickLook/Preview.pdf", ignoreCase = true)) {
                         BufferedOutputStream(FileOutputStream(dest)).use { out -> zip.copyTo(out) }
                         zip.closeEntry()
-                        if (dest.length() > 0) {
-                            return@withContext dest
-                        }
+                        if (dest.length() > 0) return@withContext dest
                     }
                     zip.closeEntry()
                     entry = zip.nextEntry
@@ -439,38 +499,24 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         }
     }
 
-    /**
-     * Extracts speaker notes from a Keynote .key file.
-     * Tries multiple strategies:
-     * 1. Parse index.apxl XML (older Keynote format)
-     * 2. Scan Slide-*.iwa binary files for plain-text note strings (newer format)
-     * Returns a list of note strings, one per slide (empty string if no notes).
-     */
     private suspend fun extractKeynoteNotes(file: File): List<String> = withContext(Dispatchers.IO) {
         if (!file.isFile || !file.name.endsWith(".key", ignoreCase = true)) return@withContext emptyList()
         try {
-            // Map: slideIndex (0-based) -> notes text
             val apxlNotes = mutableListOf<String>()
-            val iwaNotesMap = mutableMapOf<Long, String>() // sortKey -> notes text
-
+            val iwaNotesMap = mutableMapOf<Long, String>()
             ZipInputStream(BufferedInputStream(FileInputStream(file))).use { zip ->
                 var entry = zip.nextEntry
                 while (entry != null) {
                     val name = entry.name
                     val base = name.substringAfterLast("/")
                     when {
-                        // Strategy 1: index.apxl (older Keynote XML format)
                         base.equals("index.apxl", ignoreCase = true) && apxlNotes.isEmpty() -> {
                             val bytes = zip.readBytes()
-                            val xml = String(bytes, Charsets.UTF_8)
-                            apxlNotes.addAll(parseApxlNotes(xml))
+                            apxlNotes.addAll(parseApxlNotes(String(bytes, Charsets.UTF_8)))
                         }
-                        // Strategy 2: Slide-*.iwa binary protobuf — scan for note text.
-                        // Include Slide.iwa (slide 1) AND Slide-XXXX-2.iwa (slides 2+).
                         base.startsWith("Slide") && base.endsWith(".iwa") -> {
                             val bytes = zip.readBytes()
                             val noteText = scanIwaForNoteText(bytes)
-                            // Use -1 as the sort key for "Slide.iwa" so it always comes first
                             val sortKey = if (base == "Slide.iwa") -1L
                             else base.removePrefix("Slide-").removeSuffix(".iwa").split("-")[0].toLongOrNull() ?: Long.MAX_VALUE
                             iwaNotesMap[sortKey] = noteText
@@ -480,25 +526,14 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     entry = zip.nextEntry
                 }
             }
-
-            if (apxlNotes.isNotEmpty()) {
-                return@withContext apxlNotes
-            }
-
-            if (iwaNotesMap.isNotEmpty()) {
-                // Sort by the numeric key (Slide.iwa = -1 comes first, then ascending slide ID)
-                return@withContext iwaNotesMap.entries.sortedBy { it.key }.map { it.value }
-            }
+            if (apxlNotes.isNotEmpty()) return@withContext apxlNotes
+            if (iwaNotesMap.isNotEmpty()) return@withContext iwaNotesMap.entries.sortedBy { it.key }.map { it.value }
         } catch (e: Exception) {
             System.err.println("[Keynote] extractKeynoteNotes failed: ${e.message}")
         }
         emptyList()
     }
 
-    /**
-     * Parses presenter notes from an index.apxl XML (older Keynote format).
-     * Notes are stored under <sl:notes> -> <sf:text-storage> -> <sf:p> elements.
-     */
     private fun parseApxlNotes(xml: String): List<String> {
         val result = mutableListOf<String>()
         try {
@@ -506,18 +541,14 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             factory.isNamespaceAware = true
             val builder = factory.newDocumentBuilder()
             val doc = builder.parse(org.xml.sax.InputSource(java.io.StringReader(xml)))
-            // Find all <sl:slide> elements in order
             val slides = doc.getElementsByTagNameNS("*", "slide")
             for (i in 0 until slides.length) {
                 val slide = slides.item(i)
                 val notesSb = StringBuilder()
-                // Find <sl:notes> within this slide
                 val children = slide.childNodes
                 for (j in 0 until children.length) {
                     val child = children.item(j)
-                    if (child.localName == "notes") {
-                        extractTextFromNode(child, notesSb)
-                    }
+                    if (child.localName == "notes") extractTextFromNode(child, notesSb)
                 }
                 result.add(notesSb.toString().trim())
             }
@@ -536,25 +567,14 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             }
         }
         val children = node.childNodes
-        for (i in 0 until children.length) {
-            extractTextFromNode(children.item(i), sb)
-        }
+        for (i in 0 until children.length) extractTextFromNode(children.item(i), sb)
     }
 
-    /**
-     * Scans a Keynote .iwa protobuf binary for speaker note text.
-     *
-     * Keynote stores the notes plain-text string at protobuf field 902 (wire type 2 = length-delimited).
-     * Field 902, wire type 2 encodes as a 2-byte varint tag: 0xB2 0x38.
-     * This is reliable across Keynote versions tested.
-     */
     private fun scanIwaForNoteText(bytes: ByteArray): String {
         val sb = StringBuilder()
         var i = 0
         while (i < bytes.size - 3) {
-            // Look for the 2-byte field tag: 0xB2 0x38 (field 902, wire type 2)
             if ((bytes[i].toInt() and 0xFF) == 0xB2 && (bytes[i + 1].toInt() and 0xFF) == 0x38) {
-                // Read varint length starting at i+2
                 var length = 0
                 var shift = 0
                 var j = i + 2
@@ -578,24 +598,16 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         return sb.toString().trim()
     }
 
-    /**
-     * Uses macOS qlmanage to export a Keynote file to a full-quality PDF.
-     * Returns the PDF file on success, null on failure.
-     */
     private suspend fun tryExportKeynoteToPdf(file: File): File? = withContext(Dispatchers.IO) {
         try {
             val outDir = File(System.getProperty("java.io.tmpdir"), "keynote_ql_${System.currentTimeMillis()}")
             outDir.mkdirs()
-            // qlmanage -p generates a Quick Look preview; for Keynote this is a multi-page PDF
             val process = ProcessBuilder("qlmanage", "-p", file.absolutePath, "-o", outDir.absolutePath)
-                .redirectErrorStream(true)
-                .start()
+                .redirectErrorStream(true).start()
             val exited = process.waitFor(60, java.util.concurrent.TimeUnit.SECONDS)
             if (!exited) { process.destroyForcibly(); outDir.deleteRecursively(); return@withContext null }
-            // qlmanage outputs a file named "<originalname>.pdf" inside outDir
             val pdfOut = outDir.listFiles()?.firstOrNull { it.extension.equals("pdf", ignoreCase = true) }
             if (pdfOut != null && pdfOut.length() > 0) {
-                // Move to a stable temp path so outDir can be cleaned up
                 val dest = File(System.getProperty("java.io.tmpdir"), "keynote_preview_${System.currentTimeMillis()}.pdf")
                 pdfOut.copyTo(dest, overwrite = true)
                 outDir.deleteRecursively()
@@ -610,15 +622,9 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         }
     }
 
-    private suspend fun loadKeynoteViaUnzip(file: File) {
+    private suspend fun loadKeynoteViaUnzip(file: File, cacheDir: File) {
         try {
-            // Step 1: Read the zip entry order BEFORE extracting — this is the slide order
-            val slideIwaOrder: List<Long> = if (!file.isDirectory) {
-                readSlideOrderFromZip(file)
-            } else {
-                emptyList()
-            }
-
+            val slideIwaOrder: List<Long> = if (!file.isDirectory) readSlideOrderFromZip(file) else emptyList()
             val keynoteDir: File
             var tempDir: File? = null
 
@@ -635,17 +641,12 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                             val outFile = File(tempDir, entry.name)
                             if (!outFile.canonicalPath.startsWith(tempCanonical + File.separator) &&
                                 outFile.canonicalPath != tempCanonical) {
-                                zip.closeEntry()
-                                entry = zip.nextEntry
-                                continue
+                                zip.closeEntry(); entry = zip.nextEntry; continue
                             }
-                            if (entry.isDirectory) {
-                                outFile.mkdirs()
-                            } else {
+                            if (entry.isDirectory) outFile.mkdirs()
+                            else {
                                 outFile.parentFile?.mkdirs()
-                                BufferedOutputStream(FileOutputStream(outFile)).use { out ->
-                                    zip.copyTo(out)
-                                }
+                                BufferedOutputStream(FileOutputStream(outFile)).use { out -> zip.copyTo(out) }
                             }
                             zip.closeEntry()
                             entry = zip.nextEntry
@@ -656,37 +657,29 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     tempDir.deleteRecursively()
                     return
                 }
-            } else {
-                return
-            }
+            } else return
 
             try {
                 val dataDir = File(keynoteDir, "Data")
                 if (!dataDir.exists()) return
-
                 val allImageFiles = dataDir.listFiles()?.filter { f ->
                     f.isFile && f.extension.lowercase() in listOf("jpg", "jpeg", "png", "tiff", "tif")
                 } ?: emptyList()
-
-                // st- files are exactly one-per-slide thumbnails generated by Keynote
                 val stFiles = allImageFiles.filter { it.name.lowercase().startsWith("st-") }
-
                 val orderedSlides = sortByZipOrder(stFiles, slideIwaOrder)
-
-                // Extract notes for fallback path
                 val keynoteNotes = extractKeynoteNotes(file)
+                withContext(Dispatchers.Main) { _totalSlides.value = orderedSlides.size }
 
                 orderedSlides.forEachIndexed { index, slideFile ->
                     try {
-                        val bufferedImage = ImageIO.read(slideFile)
-                        if (bufferedImage != null) {
-                            val imageBitmap = bufferedImageToImageBitmap(bufferedImage)
-                            val notes = keynoteNotes.getOrElse(index) { "" }
-                            withContext(Dispatchers.Main) {
-                                _bufferedSlides.add(bufferedImage)
-                                _slides.add(imageBitmap)
-                                _slideNotes.add(notes)
-                            }
+                        // st- files are already JPEGs — copy directly without decode/re-encode
+                        val destFile = File(cacheDir, "slide_%04d.jpg".format(index))
+                        slideFile.copyTo(destFile, overwrite = true)
+                        val notes = keynoteNotes.getOrElse(index) { "" }
+                        if (notes.isNotBlank()) File(cacheDir, "note_%04d.txt".format(index)).writeText(notes)
+                        withContext(Dispatchers.Main) {
+                            _slideFiles.add(destFile)
+                            _slideNotes.add(notes)
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -700,11 +693,6 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         }
     }
 
-    /**
-     * Reads the zip entries to get Slide-*.iwa order. The order entries appear in the zip
-     * IS the presentation order — Keynote writes them sequentially slide 1, 2, 3...
-     * Returns list of slide numeric IDs in presentation order.
-     */
     private fun readSlideOrderFromZip(file: File): List<Long> {
         val ordered = mutableListOf<Long>()
         try {
@@ -717,7 +705,6 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     }
                     .forEach { name ->
                         val base = name.substringAfterLast("/")
-                        // "Slide-2652855-2.iwa" -> "2652855-2" -> split[0] -> "2652855"
                         val idStr = base.removePrefix("Slide-").removeSuffix(".iwa").split("-")[0]
                         idStr.toLongOrNull()?.let { ordered.add(it) }
                     }
@@ -728,52 +715,24 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         return ordered
     }
 
-    /**
-     * Sort st- thumbnail files by matching each to its Slide-*.iwa positionally.
-     *
-     * Key insight: Keynote assigns both SLIDEID (in Slide-NNNN.iwa filename) and
-     * STID (trailing number in st-UUID-STID.jpg) sequentially at slide creation time.
-     * So sorting Slide-*.iwa by SLIDEID and st- files by STID produces matching orders —
-     * the Nth slide IWA corresponds to the Nth st- file. No binary parsing needed.
-     *
-     * The zip entry order gives us the PRESENTATION order of Slide-*.iwa files.
-     */
     private fun sortByZipOrder(stFiles: List<File>, slideIwaOrder: List<Long>): List<File> {
         if (stFiles.isEmpty()) return stFiles
-
-        // Sort st- files by their trailing STID number (creation order)
         val stFilesSortedByStId = stFiles.sortedBy { file ->
             file.nameWithoutExtension.split("-").lastOrNull()?.toLongOrNull() ?: Long.MAX_VALUE
         }
-
-        // If we have zip entry order for Slide-*.iwa files, use it directly
         if (slideIwaOrder.isNotEmpty()) {
-            // Sort the same st- files by matching: slideIwaOrder[i] pairs with stFilesSortedByStId[i]
-            // slideIwaOrder is already in presentation order from zip entries
-            // stFilesSortedByStId is in creation order (same as slideIwaOrder sorted numerically)
             val slideIwaOrderSorted = slideIwaOrder.sorted()
-
-            // Build mapping: slideId rank (0,1,2...) in numeric order -> st- file
             val rankToStFile = stFilesSortedByStId.mapIndexed { rank, stFile -> rank to stFile }.toMap()
-
-            // For each slideId in presentation order, find its rank in numeric order
             val result = slideIwaOrder.mapIndexed { _, slideId ->
                 val rank = slideIwaOrderSorted.indexOf(slideId)
                 rankToStFile[rank]
             }.filterNotNull().distinct()
-
             val missing = stFiles.filter { it !in result }
             return result + missing
         }
-
-        // Fallback: return st- files sorted by STID (creation order ≈ presentation order)
         return stFilesSortedByStId
     }
 
-    /**
-     * Extracts presenter notes from an Apache POI slide object (works for both XSLF and HSLF).
-     * Calls getNotes() then iterates shapes via reflection, collecting getText() results.
-     */
     private fun extractPoiSlideNotes(slide: Any): String {
         return try {
             val notesSlide = slide::class.java.getMethod("getNotes").invoke(slide) ?: return ""
@@ -788,7 +747,6 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                         sb.append(text.trim())
                     }
                 } catch (_: NoSuchMethodException) {
-                    // Shape has no getText() — not a text shape, skip
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -800,16 +758,8 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         }
     }
 
-    private fun bufferedImageToImageBitmap(bufferedImage: BufferedImage): ImageBitmap {
-        val byteArray = java.io.ByteArrayOutputStream().use { baos ->
-            ImageIO.write(bufferedImage, "PNG", baos)
-            baos.toByteArray()
-        }
-        return org.jetbrains.skia.Image.makeFromEncoded(byteArray).toComposeImageBitmap()
-    }
-
-    fun dispose() {
-        activeLoadJob?.cancel()
-        scope.cancel()
+    private fun isValidPresentationFile(file: File): Boolean {
+        val extension = file.extension.lowercase()
+        return extension in listOf("ppt", "pptx", "key", "pdf")
     }
 }

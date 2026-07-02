@@ -77,7 +77,10 @@ import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.tooltip_settings
 import churchpresenter.composeapp.generated.resources.tab_visibility
 import churchpresenter.composeapp.generated.resources.ic_close
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
+import androidx.compose.ui.graphics.toComposeImageBitmap
 
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
@@ -131,7 +134,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
-import java.awt.image.BufferedImage
+
 import java.io.File
 
 // Kept for NavigationTopBar / menu — wraps ScheduleTabActions
@@ -174,7 +177,7 @@ fun MainDesktop(
     onSongsLoaded: ((List<SongItem>) -> Unit)? = null,
     onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null,
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
-    onPresentationSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slides: List<BufferedImage>) -> Unit)? = null,
+    onPresentationSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>) -> Unit)? = null,
     onPicturesLoaded: ((folderId: String, folderName: String, folderPath: String, imageFiles: List<File>) -> Unit)? = null,
     selectPictureImageFlow: Flow<Pair<String, Int>>? = null,
     /**
@@ -501,11 +504,20 @@ fun MainDesktop(
     // No approval required — navigates the live presentation instantly.
     LaunchedEffect(selectSlideFlow) {
         selectSlideFlow?.collect { (_, index) ->
-            if (index in presentationViewModel.slides.indices) {
+            if (index in presentationViewModel.slideFiles.indices) {
                 presentationViewModel.selectSlide(index)
-                val slide = presentationViewModel.slides.getOrNull(index)
-                presenterManager.setSelectedSlide(slide)
-                presenterManager.setNextSlide(presentationViewModel.slides.getOrNull(index + 1))
+                val bitmap = presentationViewModel.slideFiles.getOrNull(index)?.let { f ->
+                    withContext(Dispatchers.IO) {
+                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                    }
+                }
+                val nextBitmap = presentationViewModel.slideFiles.getOrNull(index + 1)?.let { f ->
+                    withContext(Dispatchers.IO) {
+                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                    }
+                }
+                presenterManager.setSelectedSlide(bitmap)
+                presenterManager.setNextSlide(nextBitmap)
                 presenterManager.setPresenterNotes(presentationViewModel.slideNotes.getOrElse(index) { "" })
                 if (presenterManager.presentingMode.value != Presenting.PRESENTATION) {
                     presenterManager.setPresentingMode(Presenting.PRESENTATION)

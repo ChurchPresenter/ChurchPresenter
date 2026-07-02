@@ -28,6 +28,7 @@ import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import java.security.MessageDigest
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
@@ -768,6 +769,8 @@ class CompanionServer {
     private val _scheduleItemToPresentationId = ConcurrentHashMap<String, String>()
     /** Set of presentation IDs currently being background-rendered (avoids duplicate renders) */
     private val _renderingPresentations = ConcurrentHashMap<String, Unit>()
+    /** Cancels previous updatePresentation encode job when a new presentation is loaded */
+    private var _activeUpdateJob: Job? = null
 
     private fun cacheSlideBytes(id: String, slides: List<ByteArray>) {
         _slideBytes[id] = slides
@@ -1030,33 +1033,25 @@ class CompanionServer {
     }
 
     /**
-     * Feed a loaded presentation (id, fileName, fileType and rendered slide bitmaps).
-     * Slides are encoded to JPEG on the IO thread and stored in memory so clients
-     * can fetch them individually via GET /api/presentations/{id}/slides/{index}.
-     *
-     * [slides] is a list of AWT [BufferedImage] objects produced by PresentationViewModel.
-     * To avoid a hard dependency on Compose runtime here we accept [Any] and downcast.
+     * Feed a loaded presentation (id, fileName, fileType and already-encoded JPEG slide files).
+     * Reads bytes from disk on the IO thread; no re-encoding needed since files are already JPEG.
      */
     fun updatePresentation(
         id: String,
         filePath: String,
         fileName: String,
         fileType: String,
-        slides: List<BufferedImage>
+        slideFiles: List<File>
     ) {
         if (filePath.isNotBlank()) {
             _presentationFilePaths[id] = filePath
         }
-        scope.launch {
-            val jpegSlides = slides.map { img ->
-                val baos = ByteArrayOutputStream()
-                ImageIO.write(img, "jpg", baos)
-                baos.toByteArray()
-            }
+        _activeUpdateJob?.cancel()
+        _activeUpdateJob = scope.launch {
+            val jpegSlides = slideFiles.map { it.readBytes() }
             cacheSlideBytes(id, jpegSlides)
 
             val catalog = buildPresentationCatalog(id, fileName, fileType, jpegSlides.size)
-            // Cache the dto so GET /api/presentations/{id} works for tab-loaded presentations
             _presentationCatalogs[id] = catalog.presentations.first()
             _presentationCatalog.value = catalog
             broadcast(WebSocketMessage(

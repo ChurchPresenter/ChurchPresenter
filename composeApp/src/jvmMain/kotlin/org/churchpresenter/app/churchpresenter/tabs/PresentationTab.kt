@@ -54,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -105,6 +106,7 @@ import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.select_presentation_file
 import churchpresenter.composeapp.generated.resources.select_presentation_file_button
 import churchpresenter.composeapp.generated.resources.slide_count
+import churchpresenter.composeapp.generated.resources.loading_slides_progress
 import churchpresenter.composeapp.generated.resources.slide_counter
 import churchpresenter.composeapp.generated.resources.slide_number
 import churchpresenter.composeapp.generated.resources.presentation_static_note
@@ -125,12 +127,13 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.awt.image.BufferedImage
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private object RecentPresentationFiles {
     private const val MAX = 10
@@ -209,7 +212,7 @@ fun PresentationTab(
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
     selectedPresentationItem: ScheduleItem.PresentationItem? = null,
     presenterManager: PresenterManager? = null,
-    onSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slides: List<BufferedImage>) -> Unit)? = null,
+    onSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>) -> Unit)? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     viewModel: PresentationViewModel = remember { PresentationViewModel(appSettings) }
 ) {
@@ -221,29 +224,50 @@ fun PresentationTab(
 
     val presentationFileDialogTitle = stringResource(Res.string.select_presentation_file)
 
-    LaunchedEffect(viewModel.slides.size) {
-        val f = viewModel.selectedPresentation
-        if (f != null && viewModel.slides.isNotEmpty()) {
-            val id = f.absolutePath.hashCode().toUInt().toString(16)
-            onSlidesLoaded?.invoke(id, f.absolutePath, f.nameWithoutExtension, f.extension.lowercase(), viewModel.bufferedSlides)
+    // Startup: remove slide caches for presentations not in recents or pinned
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            val keepPaths = (RecentPresentationFiles.files + RecentPresentationFiles.pinned).toSet()
+            PresentationViewModel.cleanupOrphanedCaches(keepPaths)
+        }
+    }
+
+    // Fires on every load completion (fresh render or cache hit) — never fires O(N) times per slide
+    LaunchedEffect(viewModel.loadGeneration) {
+        if (viewModel.loadGeneration > 0) {
+            val f = viewModel.selectedPresentation
+            if (f != null && viewModel.slideFiles.isNotEmpty()) {
+                val id = f.absolutePath.hashCode().toUInt().toString(16)
+                onSlidesLoaded?.invoke(id, f.absolutePath, f.nameWithoutExtension, f.extension.lowercase(), viewModel.slideFiles.toList())
+            }
         }
     }
 
     LaunchedEffect(viewModel.isPlaying, viewModel.selectedSlideIndex, viewModel.autoScrollInterval) {
-        if (viewModel.isPlaying && viewModel.slides.isNotEmpty()) {
+        if (viewModel.isPlaying && viewModel.slideFiles.isNotEmpty()) {
             delay((viewModel.autoScrollInterval * 1000).toLong())
             viewModel.nextSlide()
         }
     }
 
-    LaunchedEffect(viewModel.selectedSlideIndex, viewModel.slides.size) {
+    LaunchedEffect(viewModel.selectedSlideIndex, viewModel.slideFiles.size) {
         val mode = presenterManager?.presentingMode?.value
         val idx = viewModel.selectedSlideIndex
         val anyScreenOnPresentation = mode == Presenting.PRESENTATION ||
             presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
-        if (anyScreenOnPresentation && viewModel.slides.isNotEmpty()) {
-            presenterManager.setSelectedSlide(viewModel.slides.getOrNull(idx))
-            presenterManager.setNextSlide(viewModel.slides.getOrNull(idx + 1))
+        if (anyScreenOnPresentation && viewModel.slideFiles.isNotEmpty()) {
+            val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
+                withContext(Dispatchers.IO) {
+                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                }
+            }
+            val nextBitmap = viewModel.slideFiles.getOrNull(idx + 1)?.let { f ->
+                withContext(Dispatchers.IO) {
+                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                }
+            }
+            presenterManager.setSelectedSlide(bitmap)
+            presenterManager.setNextSlide(nextBitmap)
             presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
         }
     }
@@ -257,7 +281,7 @@ fun PresentationTab(
         modifier = modifier
             .fillMaxSize()
             .onKeyEvent { keyEvent ->
-                if (keyEvent.type == KeyEventType.KeyDown && viewModel.slides.isNotEmpty()) {
+                if (keyEvent.type == KeyEventType.KeyDown && viewModel.slideFiles.isNotEmpty()) {
                     when (keyEvent.key) {
                         Key.DirectionLeft, Key.DirectionUp -> { viewModel.previousSlide(); true }
                         Key.DirectionRight, Key.DirectionDown -> { viewModel.nextSlide(); true }
@@ -325,9 +349,13 @@ fun PresentationTab(
             if (viewModel.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
             }
-            if (viewModel.slides.isNotEmpty()) {
+            if (viewModel.slideFiles.isNotEmpty()) {
+                val slideCountText = if (viewModel.isLoading && viewModel.totalSlides > 0)
+                    stringResource(Res.string.loading_slides_progress, viewModel.slideFiles.size, viewModel.totalSlides)
+                else
+                    stringResource(Res.string.slide_count, viewModel.slideFiles.size)
                 Text(
-                    text = stringResource(Res.string.slide_count, viewModel.slides.size),
+                    text = slideCountText,
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -435,7 +463,7 @@ fun PresentationTab(
                 ) {
                     FilledIconButton(
                         onClick = { viewModel.togglePlayPause() },
-                        enabled = viewModel.slides.isNotEmpty(),
+                        enabled = viewModel.slideFiles.isNotEmpty(),
                         modifier = Modifier.size(38.dp),
                         shape = CircleShape,
                         colors = IconButtonDefaults.filledIconButtonColors(
@@ -456,9 +484,9 @@ fun PresentationTab(
                 }
             }
 
-            if (viewModel.slides.isNotEmpty()) {
+            if (viewModel.slideFiles.isNotEmpty()) {
                 Text(
-                    text = stringResource(Res.string.slide_counter, viewModel.selectedSlideIndex + 1, viewModel.slides.size),
+                    text = stringResource(Res.string.slide_counter, viewModel.selectedSlideIndex + 1, viewModel.slideFiles.size),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                     modifier = Modifier.widthIn(min = 60.dp)
@@ -593,7 +621,7 @@ fun PresentationTab(
                         IconButton(
                             onClick = {
                                 val f = viewModel.selectedPresentation ?: return@IconButton
-                                onAddToSchedule(f.absolutePath, f.nameWithoutExtension, viewModel.slides.size, f.extension.lowercase())
+                                onAddToSchedule(f.absolutePath, f.nameWithoutExtension, viewModel.slideFiles.size, f.extension.lowercase())
                             },
                             enabled = viewModel.selectedPresentation != null,
                             colors = IconButtonDefaults.iconButtonColors(
@@ -616,13 +644,25 @@ fun PresentationTab(
                         IconButton(
                             onClick = {
                                 val idx = viewModel.selectedSlideIndex
-                                presenterManager.setSelectedSlide(viewModel.slides.getOrNull(idx))
-                                presenterManager.setNextSlide(viewModel.slides.getOrNull(idx + 1))
-                                presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
+                                scope.launch {
+                                    val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
+                                        withContext(Dispatchers.IO) {
+                                            org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                        }
+                                    }
+                                    val nextBitmap = viewModel.slideFiles.getOrNull(idx + 1)?.let { f ->
+                                        withContext(Dispatchers.IO) {
+                                            org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                        }
+                                    }
+                                    presenterManager.setSelectedSlide(bitmap)
+                                    presenterManager.setNextSlide(nextBitmap)
+                                    presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
+                                }
                                 presenterManager.setPresentingMode(Presenting.PRESENTATION)
                                 presenterManager.setShowPresenterWindow(true)
                             },
-                            enabled = viewModel.slides.isNotEmpty(),
+                            enabled = viewModel.slideFiles.isNotEmpty(),
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -657,7 +697,7 @@ fun PresentationTab(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         // ── Slide grid / states ───────────────────────────────────────
-        if (viewModel.slides.isNotEmpty()) {
+        if (viewModel.slideFiles.isNotEmpty()) {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 200.dp),
                 modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
@@ -665,18 +705,33 @@ fun PresentationTab(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 18.dp)
             ) {
-                itemsIndexed(viewModel.slides) { index, slide ->
+                itemsIndexed(viewModel.slideFiles) { index, slideFile ->
+                    val bitmap = remember(slideFile) {
+                        org.jetbrains.skia.Image.makeFromEncoded(slideFile.readBytes()).toComposeImageBitmap()
+                    }
                     SlideThumbnail(
-                        slide = slide,
+                        slide = bitmap,
                         slideNumber = index + 1,
                         isSelected = viewModel.selectedSlideIndex == index,
                         onClick = { viewModel.selectSlide(index) },
                         onDoubleClick = {
                             viewModel.selectSlide(index)
                             if (presenterManager != null) {
-                                presenterManager.setSelectedSlide(viewModel.slides.getOrNull(index))
-                                presenterManager.setNextSlide(viewModel.slides.getOrNull(index + 1))
-                                presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(index) { "" })
+                                scope.launch {
+                                    val cur = viewModel.slideFiles.getOrNull(index)?.let { f ->
+                                        withContext(Dispatchers.IO) {
+                                            org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                        }
+                                    }
+                                    val next = viewModel.slideFiles.getOrNull(index + 1)?.let { f ->
+                                        withContext(Dispatchers.IO) {
+                                            org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                        }
+                                    }
+                                    presenterManager.setSelectedSlide(cur)
+                                    presenterManager.setNextSlide(next)
+                                    presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(index) { "" })
+                                }
                                 presenterManager.setPresentingMode(Presenting.PRESENTATION)
                                 presenterManager.setShowPresenterWindow(true)
                             }
@@ -731,7 +786,11 @@ fun PresentationTab(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(f.nameWithoutExtension, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
-                        IconButton(onClick = { viewModel.removePresentation(f) }, modifier = Modifier.size(16.dp)) {
+                        IconButton(onClick = {
+                            val inRecents = f.absolutePath in RecentPresentationFiles.files
+                            val inPinned = f.absolutePath in RecentPresentationFiles.pinned
+                            viewModel.removePresentation(f, isInRecentsOrPinned = inRecents || inPinned)
+                        }, modifier = Modifier.size(16.dp)) {
                             Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.remove), modifier = Modifier.size(10.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                         }
                     }
