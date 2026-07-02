@@ -469,6 +469,9 @@ fun BibleTab(
     }
 
     var historyExpanded by remember { mutableStateOf(true) }
+    var selectedHistoryIdx by remember { mutableStateOf(-1) }
+    var selectedDetectionIdx by remember { mutableStateOf(0) }
+    LaunchedEffect(detectedReferences.size) { selectedDetectionIdx = 0 }
 
     LaunchedEffect(sttConnected) {
         if (sttConnected) {
@@ -912,21 +915,21 @@ fun BibleTab(
                         .padding(end = 10.dp)
                 ) {
                 detectedReferences.forEachIndexed { idx, ref ->
-                val isBestMatch = idx == 0
+                val isSelected = idx == selectedDetectionIdx
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                         .height(detRowHeight)
                         .background(
-                            if (isBestMatch) MaterialTheme.colorScheme.surfaceVariant
+                            if (isSelected) MaterialTheme.colorScheme.surfaceVariant
                             else MaterialTheme.colorScheme.surface
                         )
                         .drawBehind {
-                            if (isBestMatch) drawRect(color = Color(0xFFC4972A), size = Size(4f, size.height))
+                            if (isSelected) drawRect(color = Color(0xFFC4972A), size = Size(4f, size.height))
                         }
                         .initialPassCombinedClickable(
-                            onClick = { viewModel.applyDetectedReference(ref); focusRequester.requestFocus() },
-                            onDoubleClick = { viewModel.applyDetectedReference(ref); goLiveWithHistory(source = "detection"); focusRequester.requestFocus() }
+                            onClick = { selectedDetectionIdx = idx; viewModel.applyDetectedReference(ref); focusRequester.requestFocus() },
+                            onDoubleClick = { selectedDetectionIdx = idx; viewModel.applyDetectedReference(ref); goLiveWithHistory(source = "detection"); focusRequester.requestFocus() }
                         )
                         .padding(start = 12.dp, end = 6.dp)
                 ) {
@@ -1616,15 +1619,21 @@ fun BibleTab(
                                             maxLines = 1,
                                             modifier = Modifier.fillMaxWidth()
                                                 .background(
-                                                    if (idx % 2 == 0) MaterialTheme.colorScheme.surface
+                                                    if (idx == selectedHistoryIdx) MaterialTheme.colorScheme.surfaceVariant
+                                                    else if (idx % 2 == 0) MaterialTheme.colorScheme.surface
                                                     else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                                 )
+                                                .drawBehind {
+                                                    if (idx == selectedHistoryIdx) drawRect(color = Color(0xFFC4972A), size = Size(4f, size.height))
+                                                }
                                                 .initialPassCombinedClickable(
                                                     onClick = {
+                                                        selectedHistoryIdx = idx
                                                         viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
                                                         focusRequester.requestFocus()
                                                     },
                                                     onDoubleClick = {
+                                                        selectedHistoryIdx = idx
                                                         viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
                                                         goLiveWithHistory(source = "history")
                                                         focusRequester.requestFocus()
