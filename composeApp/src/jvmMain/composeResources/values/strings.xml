@@ -466,6 +466,7 @@
     <string name="tooltip_edit_label">Edit Label</string>
     <string name="tooltip_go_live">Go Live</string>
     <string name="tooltip_send_to_stage_monitor">Send to Stage Monitor</string>
+    <string name="tooltip_hide_from_stage_monitor">Hide Announcement</string>
     <string name="tooltip_add_label">Add Label</string>
     <string name="tooltip_collapse_schedule">Collapse Schedule</string>
     <string name="tooltip_expand_schedule">Expand Schedule</string>
@@ -711,6 +712,10 @@
     <string name="timer_am">AM</string>
     <string name="timer_pm">PM</string>
     <string name="timer_clock_format">Format</string>
+    <string name="timer_clock_format_12h_sec">12-Hour (h:mm:ss AM/PM)</string>
+    <string name="timer_clock_format_12h">12-Hour (h:mm AM/PM)</string>
+    <string name="timer_clock_format_24h_sec">24-Hour (HH:mm:ss)</string>
+    <string name="timer_clock_format_24h">24-Hour (HH:mm)</string>
     <string name="timer_start">Start</string>
     <string name="timer_pause">Pause</string>
     <string name="timer_resume">Resume</string>

@@ -36,8 +36,6 @@ import churchpresenter.composeapp.generated.resources.obs_mode_lower_third
 import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.presentation
 import churchpresenter.composeapp.generated.resources.songs
-import churchpresenter.composeapp.generated.resources.horizontal_alignment
-import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.stage_monitor_content_section
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_clock
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_next
@@ -320,18 +318,12 @@ private fun ZoneStyleSection(
         QuadrantFontSettings(
             fontType = style.fontType, fontSize = style.fontSize,
             color = style.color, bgColor = style.bgColor,
-            bold = style.bold, italic = style.italic,
-            underline = style.underline, shadow = style.shadow,
             shadowColor = style.shadowColor, shadowSize = style.shadowSize, shadowOpacity = style.shadowOpacity,
             availableFonts = availableFonts,
             onFontTypeChange = { v -> onStyleChange { copy(fontType = v) } },
             onFontSizeChange = { v -> onStyleChange { copy(fontSize = v) } },
             onColorChange = { v -> onStyleChange { copy(color = v) } },
             onBgColorChange = { v -> onStyleChange { copy(bgColor = v) } },
-            onBoldChange = { v -> onStyleChange { copy(bold = v) } },
-            onItalicChange = { v -> onStyleChange { copy(italic = v) } },
-            onUnderlineChange = { v -> onStyleChange { copy(underline = v) } },
-            onShadowChange = { v -> onStyleChange { copy(shadow = v) } },
             onShadowColorChange = { v -> onStyleChange { copy(shadowColor = v) } },
             onShadowSizeChange = { v -> onStyleChange { copy(shadowSize = v) } },
             onShadowOpacityChange = { v -> onStyleChange { copy(shadowOpacity = v) } }
@@ -339,24 +331,28 @@ private fun ZoneStyleSection(
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.vertical_alignment), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                VerticalAlignmentButtons(
-                    selectedAlignment = style.verticalAlignment,
-                    onAlignmentChange = { v -> onStyleChange { copy(verticalAlignment = v) } },
-                    topValue = Constants.TOP, middleValue = Constants.MIDDLE, bottomValue = Constants.BOTTOM
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.horizontal_alignment), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                HorizontalAlignmentButtons(
-                    selectedAlignment = style.horizontalAlignment,
-                    onAlignmentChange = { v -> onStyleChange { copy(horizontalAlignment = v) } },
-                    leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
-                )
-            }
+            // Bold/Italic/Underline/Shadow moved here from the font settings row above, which was
+            // getting squeezed for room with the font/size/color pickers already in it. Alignment
+            // labels dropped too — each button already has its own tooltip.
+            TextStyleButtons(
+                bold = style.bold, italic = style.italic, underline = style.underline, shadow = style.shadow,
+                onBoldChange = { v -> onStyleChange { copy(bold = v) } },
+                onItalicChange = { v -> onStyleChange { copy(italic = v) } },
+                onUnderlineChange = { v -> onStyleChange { copy(underline = v) } },
+                onShadowChange = { v -> onStyleChange { copy(shadow = v) } }
+            )
+            VerticalAlignmentButtons(
+                selectedAlignment = style.verticalAlignment,
+                onAlignmentChange = { v -> onStyleChange { copy(verticalAlignment = v) } },
+                topValue = Constants.TOP, middleValue = Constants.MIDDLE, bottomValue = Constants.BOTTOM
+            )
+            HorizontalAlignmentButtons(
+                selectedAlignment = style.horizontalAlignment,
+                onAlignmentChange = { v -> onStyleChange { copy(horizontalAlignment = v) } },
+                leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+            )
         }
     }
 }
@@ -365,17 +361,12 @@ private fun ZoneStyleSection(
 private fun QuadrantFontSettings(
     fontType: String, fontSize: Int,
     color: String, bgColor: String,
-    bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean,
     shadowColor: String, shadowSize: Int, shadowOpacity: Int,
     availableFonts: List<String>,
     onFontTypeChange: (String) -> Unit,
     onFontSizeChange: (Int) -> Unit,
     onColorChange: (String) -> Unit,
     onBgColorChange: (String) -> Unit,
-    onBoldChange: (Boolean) -> Unit,
-    onItalicChange: (Boolean) -> Unit,
-    onUnderlineChange: (Boolean) -> Unit,
-    onShadowChange: (Boolean) -> Unit,
     onShadowColorChange: (String) -> Unit,
     onShadowSizeChange: (Int) -> Unit,
     onShadowOpacityChange: (Int) -> Unit
@@ -408,11 +399,6 @@ private fun QuadrantFontSettings(
             onColorChange = onBgColorChange,
             label = stringResource(Res.string.background_color).removeSuffix(":"),
             modifier = Modifier.widthIn(max = 150.dp)
-        )
-        TextStyleButtons(
-            bold = bold, italic = italic, underline = underline, shadow = shadow,
-            onBoldChange = onBoldChange, onItalicChange = onItalicChange,
-            onUnderlineChange = onUnderlineChange, onShadowChange = onShadowChange
         )
     }
     SettingRow(stringResource(Res.string.shadow_settings)) {

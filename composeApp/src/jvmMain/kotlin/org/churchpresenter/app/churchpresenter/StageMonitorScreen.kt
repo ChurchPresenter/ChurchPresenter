@@ -83,6 +83,12 @@ import java.time.format.DateTimeFormatter
 fun StageMonitorScreen(
     sm: StageMonitorSettings,
     presentingMode: Presenting,
+    // True when an announcement has been routed to this stage monitor — either because it's what's
+    // actually live everywhere (presentingMode == ANNOUNCEMENTS), or because Announcements was sent
+    // here specifically via its own "Send to Stage Monitor" toggle. Kept independent of
+    // [presentingMode] so the Bible/Song/etc. zones below keep tracking whatever is really live on
+    // the main output instead of being blanked out by an announcement overlay.
+    announcementActive: Boolean = presentingMode == Presenting.ANNOUNCEMENTS,
     currentLyricSection: LyricSection,
     allLyricSections: List<LyricSection> = emptyList(),
     songDisplaySectionIndex: Int = 0,
@@ -169,20 +175,24 @@ fun StageMonitorScreen(
 
     // Which content type is "active" for the current presenting mode. Clock is always available
     // as a fallback so a zone assigned both a live type and Clock shows the clock when idle.
-    val activeTypes: Set<StageMonitorContentType> = when (presentingMode) {
-        Presenting.BIBLE -> setOf(StageMonitorContentType.BIBLE, StageMonitorContentType.NEXT)
-        Presenting.LYRICS -> setOf(StageMonitorContentType.SONGS, StageMonitorContentType.NEXT)
-        Presenting.PRESENTATION -> setOf(StageMonitorContentType.PRESENTATION, StageMonitorContentType.PRESENTATION_NOTES)
-        Presenting.PICTURES -> setOf(StageMonitorContentType.PICTURES)
-        Presenting.MEDIA -> setOf(StageMonitorContentType.MEDIA)
-        Presenting.LOWER_THIRD -> setOf(StageMonitorContentType.LOWER_THIRD)
-        Presenting.WEBSITE -> setOf(StageMonitorContentType.WEB)
-        Presenting.STT -> setOf(StageMonitorContentType.STT)
-        Presenting.CANVAS -> setOf(StageMonitorContentType.CANVAS)
-        Presenting.QA -> setOf(StageMonitorContentType.QA)
-        Presenting.DICTIONARY -> setOf(StageMonitorContentType.DICTIONARY)
-        Presenting.ANNOUNCEMENTS -> setOf(StageMonitorContentType.ANNOUNCEMENT_TEXT)
-        Presenting.NONE -> emptySet()
+    // The announcement zone is additive (see [announcementActive]) rather than exclusive, so it
+    // can be shown alongside whatever else is actually live on the main output.
+    val activeTypes: Set<StageMonitorContentType> = buildSet {
+        when (presentingMode) {
+            Presenting.BIBLE -> { add(StageMonitorContentType.BIBLE); add(StageMonitorContentType.NEXT) }
+            Presenting.LYRICS -> { add(StageMonitorContentType.SONGS); add(StageMonitorContentType.NEXT) }
+            Presenting.PRESENTATION -> { add(StageMonitorContentType.PRESENTATION); add(StageMonitorContentType.PRESENTATION_NOTES) }
+            Presenting.PICTURES -> add(StageMonitorContentType.PICTURES)
+            Presenting.MEDIA -> add(StageMonitorContentType.MEDIA)
+            Presenting.LOWER_THIRD -> add(StageMonitorContentType.LOWER_THIRD)
+            Presenting.WEBSITE -> add(StageMonitorContentType.WEB)
+            Presenting.STT -> add(StageMonitorContentType.STT)
+            Presenting.CANVAS -> add(StageMonitorContentType.CANVAS)
+            Presenting.QA -> add(StageMonitorContentType.QA)
+            Presenting.DICTIONARY -> add(StageMonitorContentType.DICTIONARY)
+            Presenting.ANNOUNCEMENTS, Presenting.NONE -> {}
+        }
+        if (announcementActive) add(StageMonitorContentType.ANNOUNCEMENT_TEXT)
     }
 
     fun contentFor(zone: StageMonitorZone): StageMonitorContentType? {

@@ -2507,6 +2507,7 @@ private fun PresenterWindows(
                     StageMonitorScreen(
                         sm = appSettings.stageMonitorSettings,
                         presentingMode = presentingMode,
+                        announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
                         currentLyricSection = displayedLyricSection,
                         allLyricSections = allLyricSections,
                         songDisplaySectionIndex = songDisplaySectionIndex,

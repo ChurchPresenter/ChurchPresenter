@@ -964,34 +964,65 @@ class BibleViewModel(
     }
 
     fun navigateNextVerse(): Boolean {
-        if (_verses.value.isNotEmpty() && _selectedVerseIndex.value < _verses.value.size - 1) {
+        if (_verses.value.isEmpty()) return false
+        if (_selectedVerseIndex.value < _verses.value.size - 1) {
             _selectedVerseIndices.clear()
             _multiVerseEnabled.value = false
             _selectedVerseIndex.value++
             _verseSelectionToken.value++
             return true
         }
-        return false
+        // At the last verse of the chapter — roll into the next chapter, and into the next book
+        // if this was the book's last chapter, instead of silently doing nothing (mirrors the
+        // rollover getNextVerses() already does for the Stage Monitor lookahead).
+        val bible = _primaryBible.value ?: return false
+        var nextBookIndex = _selectedBookIndex.value
+        var nextChapter = _selectedChapter.value + 1
+        if (nextChapter > bible.getChapterCount(nextBookIndex)) {
+            nextBookIndex += 1
+            nextChapter = 1
+            if (nextBookIndex >= _books.value.size) return false // past the last book
+        }
+        _sequentialChapterAdvance = true
+        _selectedVerseIndices.clear()
+        _multiVerseEnabled.value = false
+        loadChapter(nextBookIndex, nextChapter)
+        return true
     }
 
     fun navigatePreviousChapter(): Boolean {
         if (_selectedChapter.value > 1) {
+            _sequentialChapterAdvance = true
             selectChapter(_selectedChapter.value - 1)
             return true
         }
         return false
     }
 
+    // Set right before a sequential chapter advance (next or previous) and consumed by
+    // BibleTab's auto-hold check, so stepping through the Bible via the </> chapter arrows
+    // doesn't get treated as browsing away from what's live (unlike jumping to an arbitrary
+    // chapter/book, which should still engage Hold).
+    private var _sequentialChapterAdvance = false
+
     fun navigateNextChapter(): Boolean {
         _primaryBible.value?.let { bible ->
             // getChapterCount expects 0-based book index
             val maxChapter = bible.getChapterCount(_selectedBookIndex.value)
             if (_selectedChapter.value < maxChapter) {
+                _sequentialChapterAdvance = true
                 selectChapter(_selectedChapter.value + 1)
                 return true
             }
         }
         return false
+    }
+
+    /** Returns true if the most recent chapter change was a sequential "next chapter" advance, clearing the flag. */
+    fun consumeSequentialChapterAdvance(): Boolean {
+        val wasSequentialAdvance = _sequentialChapterAdvance
+        _sequentialChapterAdvance = false
+        return wasSequentialAdvance
     }
 
     private fun refreshFilteredLists() {

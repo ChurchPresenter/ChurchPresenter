@@ -232,13 +232,36 @@ private fun SingleDisplayPreview(
         label = "border_color"
     )
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(presenterAspectRatio())
-            .clip(RoundedCornerShape(6.dp))
-            .border(1.dp, borderColor, RoundedCornerShape(6.dp))
-    ) {
+    val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
+    val displayModeChipLabel = when (screenAssignment.displayMode) {
+        Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
+        Constants.DISPLAY_MODE_LOWER_THIRD -> stringResource(Res.string.display_lower_third)
+        else -> null
+    }
+
+    Column(modifier = modifier) {
+        // Display mode chip (e.g. "Stage Monitor", "Lower Third") — sits above the preview so it
+        // never covers the content.
+        if (displayModeChipLabel != null) {
+            Text(
+                text = displayModeChipLabel,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 9.sp,
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(3.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(3.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(presenterAspectRatio())
+                .clip(RoundedCornerShape(6.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(6.dp))
+        ) {
         val primaryRole = screenAssignment.primaryOutputRole
 
         // ── Stage Monitor: dedicated presenter-confidence layout, not the normal presenter ──
@@ -246,7 +269,8 @@ private fun SingleDisplayPreview(
             ScaledPresenterContent {
                 StageMonitorScreen(
                     sm = appSettings.stageMonitorSettings,
-                    presentingMode = effectiveMode,
+                    presentingMode = presentingMode,
+                    announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
                     currentLyricSection = displayedLyricSection,
                     allLyricSections = allLyricSections,
                     songDisplaySectionIndex = songDisplaySectionIndex,
@@ -431,75 +455,59 @@ private fun SingleDisplayPreview(
             )
         }
 
-        // LOCKED badge — shown when screen is locked to a specific tab
+        // LOCKED badge + lock toggle — not applicable to Stage Monitor screens, which route
+        // their own content dynamically and are never locked to a single tab.
         val lockedMode = screenLocks[screenIndex]
-        if (lockedMode != null) {
-            Text(
-                text = stringResource(Res.string.screen_locked_badge),
-                color = Color.White,
-                fontSize = 9.sp,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(start = 4.dp, bottom = if (screenAssignment.hasKeyOutput) 24.dp else 4.dp)
-                    .background(Color(0xFFFFC107), RoundedCornerShape(3.dp))
-                    .padding(horizontal = 5.dp, vertical = 2.dp)
-            )
-        }
-
-        // Lock toggle button — bottom-right corner
-        IconButton(
-            onClick = {
-                if (lockedMode != null) {
-                    presenterManager.setScreenLock(screenIndex, null)
-                } else {
-                    presenterManager.setScreenLock(screenIndex, effectiveMode)
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(2.dp)
-                .size(24.dp),
-            colors = IconButtonDefaults.iconButtonColors(
-                contentColor = if (lockedMode != null) Color(0xFFFFC107) else Color.White.copy(alpha = 0.5f)
-            )
-        ) {
-            Icon(
-                imageVector = if (lockedMode != null) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                contentDescription = if (lockedMode != null) stringResource(Res.string.unlock_screen) else stringResource(Res.string.lock_screen_to_tab),
-                modifier = Modifier.size(13.dp)
-            )
-        }
-
-        // Screen number label (+ display mode, when not the default fullscreen)
-        Column(
-            horizontalAlignment = Alignment.End,
-            modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
-        ) {
-            Text(
-                text = stringResource(Res.string.screen_number, screenIndex + 1),
-                color = Color.White.copy(alpha = 0.6f),
-                fontSize = 9.sp,
-                modifier = Modifier
-                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
-                    .padding(horizontal = 5.dp, vertical = 2.dp)
-            )
-            val modeLabel = when (screenAssignment.displayMode) {
-                Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
-                Constants.DISPLAY_MODE_LOWER_THIRD -> stringResource(Res.string.display_lower_third)
-                else -> null
-            }
-            if (modeLabel != null) {
+        if (!isStageMonitor) {
+            if (lockedMode != null) {
                 Text(
-                    text = modeLabel,
-                    color = Color.White.copy(alpha = 0.6f),
+                    text = stringResource(Res.string.screen_locked_badge),
+                    color = Color.White,
                     fontSize = 9.sp,
                     modifier = Modifier
-                        .padding(top = 2.dp)
-                        .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
+                        .align(Alignment.BottomStart)
+                        .padding(start = 4.dp, bottom = if (screenAssignment.hasKeyOutput) 24.dp else 4.dp)
+                        .background(Color(0xFFFFC107), RoundedCornerShape(3.dp))
                         .padding(horizontal = 5.dp, vertical = 2.dp)
                 )
             }
+
+            // Lock toggle button — bottom-right corner
+            IconButton(
+                onClick = {
+                    if (lockedMode != null) {
+                        presenterManager.setScreenLock(screenIndex, null)
+                    } else {
+                        presenterManager.setScreenLock(screenIndex, effectiveMode)
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(2.dp)
+                    .size(24.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = if (lockedMode != null) Color(0xFFFFC107) else Color.White.copy(alpha = 0.5f)
+                )
+            ) {
+                Icon(
+                    imageVector = if (lockedMode != null) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                    contentDescription = if (lockedMode != null) stringResource(Res.string.unlock_screen) else stringResource(Res.string.lock_screen_to_tab),
+                    modifier = Modifier.size(13.dp)
+                )
+            }
         }
+
+        // Screen number label
+        Text(
+            text = stringResource(Res.string.screen_number, screenIndex + 1),
+            color = Color.White.copy(alpha = 0.6f),
+            fontSize = 9.sp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(4.dp)
+                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
+                .padding(horizontal = 5.dp, vertical = 2.dp)
+        )
 
         // Animated audio indicator — only when presenting and media is playing
         if (effectiveMode != Presenting.NONE
@@ -514,6 +522,7 @@ private fun SingleDisplayPreview(
             ) {
                 AnimatedEqualizer()
             }
+        }
         }
     }
 }
