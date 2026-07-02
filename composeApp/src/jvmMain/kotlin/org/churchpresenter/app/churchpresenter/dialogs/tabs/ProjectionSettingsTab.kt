@@ -894,6 +894,7 @@ fun ProjectionSettingsTab(
         }
 
     }
+
     // ── Card 2: Audio Output ─────────────────────────────────────────────────
     SettingsSection(title = stringResource(Res.string.audio_output)) {
 

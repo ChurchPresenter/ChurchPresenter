@@ -213,6 +213,10 @@ object Constants {
     const val DISPLAY_MODE_LOWER_THIRD = "lower_third"
     const val DISPLAY_MODE_STAGE_MONITOR = "stage_monitor"
 
+    // Screen assignment target types
+    const val TARGET_TYPE_SCREEN = "screen"
+    const val TARGET_TYPE_DECKLINK = "decklink"
+
     // Output Role (fill+key for video mixers)
     const val OUTPUT_ROLE_NORMAL = "normal"
     const val OUTPUT_ROLE_FILL = "fill"

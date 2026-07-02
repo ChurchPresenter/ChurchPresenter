@@ -465,6 +465,7 @@
     <string name="tooltip_edit">Edit</string>
     <string name="tooltip_edit_label">Edit Label</string>
     <string name="tooltip_go_live">Go Live</string>
+    <string name="tooltip_send_to_stage_monitor">Send to Stage Monitor</string>
     <string name="tooltip_add_label">Add Label</string>
     <string name="tooltip_collapse_schedule">Collapse Schedule</string>
     <string name="tooltip_expand_schedule">Expand Schedule</string>
@@ -1229,8 +1230,7 @@
     <string name="display_stage_monitor">Stage Monitor</string>
     <string name="stage_monitor_layout_quadrants">4-Quadrant Layout</string>
     <string name="stage_monitor_quadrant_current">Current Slide</string>
-    <string name="stage_monitor_quadrant_next">Next Slide</string>
-    <string name="stage_monitor_quadrant_timer">Countdown Timer</string>
+    <string name="stage_monitor_quadrant_next">Next</string>
     <string name="stage_monitor_quadrant_clock">Clock</string>
     <string name="stage_monitor_quadrant_notes">Presenter Notes</string>
     <string name="stage_monitor_layout_section">Screen Layout</string>
@@ -1239,11 +1239,10 @@
     <string name="stage_monitor_zone_bottom_left">Bottom-Left</string>
     <string name="stage_monitor_zone_bottom_center">Bottom-Center</string>
     <string name="stage_monitor_zone_bottom_right">Bottom-Right</string>
-    <string name="stage_monitor_show_label">Show Song/Bible Label</string>
-    <string name="stage_monitor_label_style_section">Label Style</string>
-    <string name="stage_monitor_clock_show_seconds">Show Seconds</string>
-    <string name="stage_monitor_clock_24h">24-Hour Format</string>
+    <string name="stage_monitor_zone_full_screen">Full Screen</string>
+    <string name="stage_monitor_zone_none">None</string>
     <string name="stage_monitor_notes_from_presentation">Notes are automatically shown from the active PowerPoint or Keynote slide.</string>
+    <string name="stage_monitor_content_section">Screen Content</string>
 
     <!-- Q&A Tab -->
     <string name="qa_server_not_running">Server not running — start the companion server in Settings to enable Q&amp;A</string>
