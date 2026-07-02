@@ -233,9 +233,6 @@ compose.desktop {
         }
 
         jvmArgs(
-            // Dev-only flag — deliberately NOT added to commonJvmArgs below, so packaged
-            // installers never get it. Gates dev-only testing features like simulated screens.
-            "-Dchurchpresenter.devMode=true",
             // Memory
             "-Xms512m",
             "-Xmx1536m",

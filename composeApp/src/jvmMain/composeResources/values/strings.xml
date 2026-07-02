@@ -544,10 +544,6 @@
     <string name="screen_col_label">Screen %1$d</string>
     <string name="detected_screens">Detected screens: %1$d</string>
     <string name="presenter_windows_count">Presenter windows: %1$d</string>
-    <string name="simulate_screens_section">Simulate Screens (Dev Only)</string>
-    <string name="simulate_screens_count">Simulated Screens</string>
-    <string name="simulate_screens_help">Opens real test windows tiled next to your primary display, without needing extra physical monitors. Only available in development builds.</string>
-    <string name="simulated_screen_label">Simulated Screen %1$d</string>
     <string name="content_bible">Bible</string>
     <string name="content_songs">Songs</string>
     <string name="content_pictures">Pictures/Presentation</string>

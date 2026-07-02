@@ -176,17 +176,17 @@ fun StageMonitorScreen(
             }
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
-                // ── TOP ROW ───────────────────────────────────────────────────
-                Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                // ── TOP ROW (fixed 2:1 against bottom = 67%; left/right split evenly 50/50) ──
+                Row(modifier = Modifier.fillMaxWidth().weight(2f)) {
                     StageZoneBox(sm, StageMonitorZone.TOP_LEFT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
                     VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-                    StageZoneBox(sm, StageMonitorZone.TOP_RIGHT, renderData, mediaViewModel, ::contentFor, Modifier.weight(0.45f))
+                    StageZoneBox(sm, StageMonitorZone.TOP_RIGHT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
                 }
 
                 HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
 
-                // ── BOTTOM ROW ────────────────────────────────────────────────
-                Row(modifier = Modifier.fillMaxWidth().weight(0.6f)) {
+                // ── BOTTOM ROW (fixed at 33% of total height, regardless of content) ──
+                Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
                     StageZoneBox(sm, StageMonitorZone.BOTTOM_LEFT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
                     VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
                     StageZoneBox(sm, StageMonitorZone.BOTTOM_MIDDLE, renderData, mediaViewModel, ::contentFor, Modifier.weight(0.8f))

@@ -1926,8 +1926,7 @@ private fun PresenterWindows(
     val availableScreens = screens.indices.filter { screens[it] != defaultDevice }
 
     val deckLinkDeviceCount = if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0
-    val simulatedScreenCount = if (Constants.isDevMode) proj.simulatedScreenCount else 0
-    val windowCount = availableScreens.size + deckLinkDeviceCount + simulatedScreenCount
+    val windowCount = availableScreens.size + deckLinkDeviceCount
     for (i in 0 until windowCount) {
         val screenAssignment = proj.getAssignment(i)
         val effectiveMode = screenLocks[i] ?: presentingMode
@@ -2453,26 +2452,21 @@ private fun PresenterWindows(
 
         if (screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
 
-        val isSimulated = screenAssignment.targetType == Constants.TARGET_TYPE_SIMULATED
+        // Resolve target display
+        val targetScreenIndex = findScreenIndexByBounds(
+            screens,
+            screenAssignment.targetBoundsX,
+            screenAssignment.targetBoundsY,
+            screenAssignment.targetBoundsW,
+            screenAssignment.targetBoundsH
+        ) ?: if (screenAssignment.targetDisplay >= 0 && screenAssignment.targetDisplay < screens.size) {
+            screenAssignment.targetDisplay
+        } else {
+            availableScreens.getOrNull(i) ?: continue
+        }
 
-        // Resolve target display — skipped for simulated screens, which carry their own
-        // synthetic bounds directly on the assignment rather than pointing at a real device.
-        val targetScreenIndex = if (!isSimulated) {
-            findScreenIndexByBounds(
-                screens,
-                screenAssignment.targetBoundsX,
-                screenAssignment.targetBoundsY,
-                screenAssignment.targetBoundsW,
-                screenAssignment.targetBoundsH
-            ) ?: if (screenAssignment.targetDisplay >= 0 && screenAssignment.targetDisplay < screens.size) {
-                screenAssignment.targetDisplay
-            } else {
-                availableScreens.getOrNull(i) ?: continue
-            }
-        } else -1
-
-        // Skip if the target screen doesn't exist (not applicable to simulated screens)
-        if (!isSimulated && (targetScreenIndex < 0 || targetScreenIndex >= screens.size)) continue
+        // Skip if the target screen doesn't exist
+        if (targetScreenIndex < 0 || targetScreenIndex >= screens.size) continue
 
         // Per-output background toggle
         val showBg = if (screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
@@ -2481,30 +2475,19 @@ private fun PresenterWindows(
         val primaryRole = screenAssignment.primaryOutputRole
 
         val windowState = remember(i) {
-            if (isSimulated) {
-                WindowState(
-                    placement = WindowPlacement.Floating,
-                    position = WindowPosition(screenAssignment.targetBoundsX.dp, screenAssignment.targetBoundsY.dp),
-                    width = screenAssignment.targetBoundsW.dp,
-                    height = screenAssignment.targetBoundsH.dp
-                )
-            } else {
-                val b = screens[targetScreenIndex].defaultConfiguration.bounds
-                WindowState(
-                    placement = WindowPlacement.Floating,
-                    position = WindowPosition(b.x.dp, b.y.dp),
-                    width = b.width.dp,
-                    height = b.height.dp
-                )
-            }
+            val b = screens[targetScreenIndex].defaultConfiguration.bounds
+            WindowState(
+                placement = WindowPlacement.Floating,
+                position = WindowPosition(b.x.dp, b.y.dp),
+                width = b.width.dp,
+                height = b.height.dp
+            )
         }
 
-        if (!isSimulated) {
-            LaunchedEffect(targetScreenIndex) {
-                val b = screens[targetScreenIndex].defaultConfiguration.bounds
-                windowState.position = WindowPosition(b.x.dp, b.y.dp)
-                windowState.size = DpSize(b.width.dp, b.height.dp)
-            }
+        LaunchedEffect(targetScreenIndex) {
+            val b = screens[targetScreenIndex].defaultConfiguration.bounds
+            windowState.position = WindowPosition(b.x.dp, b.y.dp)
+            windowState.size = DpSize(b.width.dp, b.height.dp)
         }
 
         // Primary window (fill or normal)
@@ -2731,7 +2714,7 @@ private fun PresenterWindows(
             }
         }
 
-        // Key output window — spawned when a key target is configured (not for simulated slots)
+        // Key output window — spawned when a key target is configured
         if (screenAssignment.hasKeyOutput && screenAssignment.keyTargetType != "decklink") {
             val keyScreenIndex = findScreenIndexByBounds(
                 screens,
@@ -2937,7 +2920,7 @@ private fun PresenterWindows(
             }
         }
 
-        // Key output on DeckLink when primary is a regular screen (not for simulated slots)
+        // Key output on DeckLink when primary is a regular screen
         if (screenAssignment.targetType != "decklink" && screenAssignment.hasKeyOutput && screenAssignment.keyTargetType == "decklink" && screenAssignment.keyTargetDisplay >= 0) {
             if (showPresenterWindow) {
                 DeckLinkComposeOutput(
