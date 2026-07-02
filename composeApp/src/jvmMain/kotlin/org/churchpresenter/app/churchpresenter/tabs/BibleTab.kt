@@ -413,7 +413,7 @@ fun BibleTab(
         if (autoFollowLiveToken == 0) return@LaunchedEffect
         if (autoFollowLiveToken == lastHandledAutoFollowToken.value) return@LaunchedEffect
         lastHandledAutoFollowToken.value = autoFollowLiveToken
-        goLiveWithHistory(source = "auto")
+        goLiveWithHistory(source = viewModel.autoFollowLiveSource.value)
     }
 
     // Only push to presenter when:
@@ -933,7 +933,7 @@ fun BibleTab(
                         }
                         .initialPassCombinedClickable(
                             onClick = { selectedDetectionIdx = idx; viewModel.applyDetectedReference(ref); focusRequester.requestFocus() },
-                            onDoubleClick = { selectedDetectionIdx = idx; viewModel.applyDetectedReference(ref); goLiveWithHistory(source = "detection"); focusRequester.requestFocus() }
+                            onDoubleClick = { selectedDetectionIdx = idx; viewModel.applyDetectedReference(ref, goLiveSource = "detection"); focusRequester.requestFocus() }
                         )
                         .padding(start = 12.dp, end = 6.dp)
                 ) {
@@ -1633,13 +1633,12 @@ fun BibleTab(
                                                 .initialPassCombinedClickable(
                                                     onClick = {
                                                         selectedHistoryIdx = idx
-                                                        viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
+                                                        viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber, entry.verseRange)
                                                         focusRequester.requestFocus()
                                                     },
                                                     onDoubleClick = {
                                                         selectedHistoryIdx = idx
-                                                        viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
-                                                        goLiveWithHistory(source = "history")
+                                                        viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber, entry.verseRange, goLiveSource = "history")
                                                         focusRequester.requestFocus()
                                                     }
                                                 )

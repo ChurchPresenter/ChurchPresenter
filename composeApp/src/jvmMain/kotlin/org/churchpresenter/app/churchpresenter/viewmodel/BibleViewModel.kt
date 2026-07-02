@@ -174,6 +174,12 @@ class BibleViewModel(
     private val _autoFollowLiveToken = mutableStateOf(0)
     val autoFollowLiveToken: State<Int> = _autoFollowLiveToken
 
+    // Carries the go-live [source] label (e.g. "auto", "history", "detection") alongside the token
+    // above, so the tab logs the correct origin when firing a deferred go-live. Set together with the
+    // token on the same coroutine frame.
+    private val _autoFollowLiveSource = mutableStateOf("auto")
+    val autoFollowLiveSource: State<String> get() = _autoFollowLiveSource
+
     fun setAutoFollow(enabled: Boolean) {
         _autoFollowEnabled.value = enabled
         // Turning it on jumps to the latest detection's start verse immediately and puts it live
@@ -578,7 +584,7 @@ class BibleViewModel(
         return result
     }
 
-    fun selectVerseByDetails(bookName: String, chapter: Int, verseNumber: Int, verseRange: String = ""): Boolean {
+    fun selectVerseByDetails(bookName: String, chapter: Int, verseNumber: Int, verseRange: String = "", goLiveSource: String? = null): Boolean {
         val bookIndex = _books.value.indexOfFirst { it.equals(bookName, ignoreCase = true) }
         if (bookIndex < 0) return false
 
@@ -629,6 +635,13 @@ class BibleViewModel(
             _verseSelectionToken.value++
 
             refreshFilteredLists()
+
+            // Fire the deferred go-live only now that the correct verse index is set — a synchronous
+            // go-live by the caller would race this coroutine and read the stale index 0 (verse 1).
+            if (goLiveSource != null) {
+                _autoFollowLiveSource.value = goLiveSource
+                _autoFollowLiveToken.value++
+            }
         }
         return true
     }
@@ -1271,7 +1284,7 @@ class BibleViewModel(
      * Navigates the browse columns to [bookIndex], [chapter] and optional verse range without the
      * click debounce, so it stays responsive while the user types a reference.
      */
-    private fun navigateToReference(ref: SmartReference, goLive: Boolean = false) {
+    private fun navigateToReference(ref: SmartReference, goLive: Boolean = false, goLiveSource: String = "auto") {
         val bible = _primaryBible.value ?: return
         val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)
         if (bookCount == 0) return
@@ -1312,7 +1325,10 @@ class BibleViewModel(
             }
             _verseSelectionToken.value++
             // After the verses are loaded + selected, signal the tab to go live (auto-follow only).
-            if (goLive) _autoFollowLiveToken.value++
+            if (goLive) {
+                _autoFollowLiveSource.value = goLiveSource
+                _autoFollowLiveToken.value++
+            }
             refreshFilteredLists()
         }
     }
@@ -1526,7 +1542,7 @@ class BibleViewModel(
     }
 
     /** Navigates the Bible tab to a row the operator tapped. */
-    fun applyDetectedReference(ref: DetectedReference) {
+    fun applyDetectedReference(ref: DetectedReference, goLiveSource: String? = null) {
         TrainingDataLogger.logSuggestionOutcome(
             suggestedBook    = ref.bookIndex + 1,
             suggestedChapter = ref.chapter,
@@ -1535,7 +1551,11 @@ class BibleViewModel(
         )
         // One verse at a time: clicking a range chip presents the start verse; the operator (or the
         // engine, when auto-follow is on) steps through the rest from there.
-        navigateToReference(SmartReference(ref.bookIndex, ref.chapter, ref.verseStart, verseEnd = null))
+        navigateToReference(
+            SmartReference(ref.bookIndex, ref.chapter, ref.verseStart, verseEnd = null),
+            goLive = goLiveSource != null,
+            goLiveSource = goLiveSource ?: "auto"
+        )
     }
 
     /**
