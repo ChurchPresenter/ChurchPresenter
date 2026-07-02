@@ -6,7 +6,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 @Serializable
 data class ScreenAssignment(
     val targetDisplay: Int = -1,  // -1 = auto (resolved at runtime), -2 = none, 0+ = specific display (legacy)
-    val targetType: String = "screen",  // "screen", "decklink", or "simulated" (dev-mode testing screen)
+    val targetType: String = "screen",  // "screen" or "decklink"
     val targetBoundsX: Int = Int.MIN_VALUE,  // screen bounds for reliable mapping (MIN_VALUE = unset)
     val targetBoundsY: Int = Int.MIN_VALUE,
     val targetBoundsW: Int = 0,

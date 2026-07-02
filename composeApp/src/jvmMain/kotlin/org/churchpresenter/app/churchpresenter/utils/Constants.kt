@@ -82,13 +82,6 @@ object Constants {
     /** Localhost port used to enforce single-instance via ServerSocket lock. */
     const val SINGLE_INSTANCE_PORT = 47632
 
-    /**
-     * True only when launched via `./gradlew :composeApp:run` (see build.gradle.kts'
-     * `application.jvmArgs`) — never set for packaged installers. Gates dev-only testing
-     * features (e.g. simulated screens) out of production builds entirely.
-     */
-    val isDevMode: Boolean by lazy { System.getProperty("churchpresenter.devMode") == "true" }
-
     const val TIMER_MODE_DURATION = "duration"
     const val TIMER_MODE_CLOCK    = "clock"
     /** Open-ended stopwatch: counts up from zero, no h:m:s configuration. */
@@ -223,8 +216,6 @@ object Constants {
     // Screen assignment target types
     const val TARGET_TYPE_SCREEN = "screen"
     const val TARGET_TYPE_DECKLINK = "decklink"
-    /** Dev-mode-only synthetic screen — not backed by a real GraphicsDevice. */
-    const val TARGET_TYPE_SIMULATED = "simulated"
 
     // Output Role (fill+key for video mixers)
     const val OUTPUT_ROLE_NORMAL = "normal"

@@ -2243,7 +2243,7 @@ private fun PresenterWindows(
                             }
                         Presenting.DICTIONARY ->
                             if (screenAssignment.showDictionary)
-                                DictionaryPresenter(
+                                DictzionaryPresenter(
                                     dictionarySettings = appSettings.dictionarySettings,
                                     entry = displayedDictionaryEntry,
                                     outputRole = Constants.OUTPUT_ROLE_KEY,

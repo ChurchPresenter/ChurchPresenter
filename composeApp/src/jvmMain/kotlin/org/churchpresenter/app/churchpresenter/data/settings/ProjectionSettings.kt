@@ -12,8 +12,6 @@ data class ProjectionSettings(
     val audioOutputDeviceId: String = "", // empty = system default
     val vlcPath: String = "", // custom VLC installation directory (empty = auto-detect)
     val lowerThirdHeightPercent: Int = 33, // 10-60, used by Bible & Song presenters
-    /** Dev-mode-only testing aid: number of synthetic (non-physical) screens to simulate. */
-    val simulatedScreenCount: Int = 0,
 ) {
     fun getAssignment(index: Int): ScreenAssignment =
         screenAssignments.getOrElse(index) { ScreenAssignment() }
