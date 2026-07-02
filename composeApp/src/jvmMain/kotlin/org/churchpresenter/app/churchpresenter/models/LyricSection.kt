@@ -10,4 +10,5 @@ data class LyricSection(
     val lines: List<String> = emptyList(),
     val secondaryLines: List<String> = emptyList(),
     val isLastSection: Boolean = false,
+    val bpm: Int = 0, // metronome tempo for this song (0 = off)
 )

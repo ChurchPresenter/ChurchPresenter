@@ -1150,6 +1150,13 @@
     <string name="stage_monitor_zone_none">Нет</string>
     <string name="stage_monitor_notes_from_presentation">Заметки автоматически отображаются из активного слайда PowerPoint или Keynote.</string>
     <string name="stage_monitor_content_section">Содержимое экрана</string>
+    <string name="stage_monitor_metronome_position">Позиция метронома</string>
+    <string name="stage_monitor_position_top_center">Вверху по центру</string>
+    <string name="stage_monitor_position_middle_left">Посередине слева</string>
+    <string name="stage_monitor_position_center">Центр</string>
+    <string name="stage_monitor_position_middle_right">Посередине справа</string>
+    <string name="metronome_bpm_label">Темп метронома</string>
+    <string name="unit_bpm">уд/мин</string>
 
     <!-- Q&A Tab -->
     <string name="tab_qa">Вопросы и ответы</string>

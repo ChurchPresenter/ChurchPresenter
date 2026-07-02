@@ -56,7 +56,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -104,6 +107,9 @@ import churchpresenter.composeapp.generated.resources.songs_no_db_hint
 import churchpresenter.composeapp.generated.resources.songs_no_db_step
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import kotlinx.coroutines.delay
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_favorites
@@ -116,6 +122,9 @@ import churchpresenter.composeapp.generated.resources.back_to_live
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.line_navigation_hint
+import churchpresenter.composeapp.generated.resources.metronome_bpm_label
+import churchpresenter.composeapp.generated.resources.unit_bpm
+import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.new_song
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
@@ -240,12 +249,13 @@ fun SongsTab(
         onAllSectionsChanged(viewModel.getLyricSections())
         onSectionIndexChanged(viewModel.selectedSectionIndex.value)
         onLineIndexChanged(viewModel.selectedLineIndex.value)
-        viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
+        val idx = viewModel.selectedSongIndex.value
+        val items = viewModel.filteredSongItems.value
+        val bpm = items.getOrNull(idx)?.let { appSettings.songBpm[it.songId] } ?: 0
+        viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it.copy(bpm = bpm)) }
         // Record song display for statistics — only when the song is actually live
         // (or being sent live), and only when a different song is presented.
-        val idx = viewModel.selectedSongIndex.value
         if ((goLive || isPresenting) && idx != liveSongIndex) {
-            val items = viewModel.filteredSongItems.value
             if (idx in items.indices) {
                 val song = items[idx]
                 statisticsManager?.recordSongDisplay(
@@ -1360,12 +1370,80 @@ fun SongsTab(
             val addScheduleStr = stringResource(Res.string.add_to_schedule)
 
             val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && selectedSectionIndex >= 0
+            val hasStageMonitorScreen = appSettings.projectionSettings.screenAssignments.any {
+                it.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
+            }
             @OptIn(ExperimentalLayoutApi::class)
             FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.End,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                if (hasStageMonitorScreen && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                    val selectedSong = filteredSongs[selectedSongIndex]
+                    val metronomeBpmStr = stringResource(Res.string.metronome_bpm_label)
+                    val bpmUnitStr = stringResource(Res.string.unit_bpm)
+                    val currentBpm = appSettings.songBpm[selectedSong.songId] ?: 0
+                    var editingBpm by remember { mutableStateOf(false) }
+                    var bpmInput by remember(selectedSong.songId) { mutableStateOf(currentBpm.toString()) }
+
+                    Column(
+                        modifier = Modifier
+                            .height(42.dp)
+                            .width(90.dp)
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                            .clickable { bpmInput = currentBpm.toString(); editingBpm = true }
+                            .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = metronomeBpmStr.uppercase(),
+                            fontSize = TextUnit(8f, TextUnitType.Sp),
+                            lineHeight = TextUnit(9f, TextUnitType.Sp),
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.9.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            maxLines = 1
+                        )
+                        Text(
+                            text = "$currentBpm $bpmUnitStr",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
+                    }
+
+                    if (editingBpm) {
+                        AlertDialog(
+                            onDismissRequest = { editingBpm = false },
+                            title = { Text(metronomeBpmStr) },
+                            text = {
+                                OutlinedTextField(
+                                    value = bpmInput,
+                                    onValueChange = { bpmInput = it.filter { c -> c.isDigit() }.take(3) },
+                                    suffix = { Text(bpmUnitStr) },
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                )
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    shape = RoundedCornerShape(6.dp),
+                                    onClick = {
+                                        val bpmValue = bpmInput.toIntOrNull()?.coerceIn(0, 300) ?: 0
+                                        onSettingsChangeState.value { s -> s.copy(songBpm = s.songBpm + (selectedSong.songId to bpmValue)) }
+                                        editingBpm = false
+                                    }
+                                ) { Text(stringResource(Res.string.ok)) }
+                            },
+                            dismissButton = {
+                                TextButton(shape = RoundedCornerShape(6.dp), onClick = { editingBpm = false }) { Text(stringResource(Res.string.cancel)) }
+                            }
+                        )
+                    }
+                }
+
                 if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
                     TooltipArea(
                         tooltip = {
@@ -1578,7 +1656,8 @@ fun SongsTab(
                                 lines = buildList {
                                     add(titleLine)
                                     if (creditLine.isNotBlank()) add(creditLine)
-                                }
+                                },
+                                bpm = appSettings.songBpm[currentSong.songId] ?: 0
                             )
 
                             fun sendTitleSlide() {

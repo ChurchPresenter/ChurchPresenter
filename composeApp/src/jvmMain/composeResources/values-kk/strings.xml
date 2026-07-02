@@ -1122,6 +1122,13 @@
     <string name="stage_monitor_zone_none">Жоқ</string>
     <string name="stage_monitor_notes_from_presentation">Жазбалар белсенді PowerPoint немесе Keynote слайдынан автоматты түрде көрсетіледі.</string>
     <string name="stage_monitor_content_section">Экран мазмұны</string>
+    <string name="stage_monitor_metronome_position">Метроном орны</string>
+    <string name="stage_monitor_position_top_center">Жоғарғы орта</string>
+    <string name="stage_monitor_position_middle_left">Ортаңғы сол жақ</string>
+    <string name="stage_monitor_position_center">Орта</string>
+    <string name="stage_monitor_position_middle_right">Ортаңғы оң жақ</string>
+    <string name="metronome_bpm_label">Метроном қарқыны</string>
+    <string name="unit_bpm">соққы/мин</string>
 
     <!-- Q&A Tab -->
     <string name="tab_qa">Сұрақтар мен жауаптар</string>

@@ -60,7 +60,9 @@ import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.composables.MetronomeDot
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
+import org.churchpresenter.app.churchpresenter.composables.toAlignment
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.jetbrains.skia.Image as SkiaImage
@@ -238,6 +240,17 @@ fun StageMonitorScreen(
                     StageZoneBox(sm, StageMonitorZone.BOTTOM_RIGHT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
                 }
             }
+        }
+
+        // Metronome — a silent flash dot, only while a song is actually projected.
+        val metronomeAlignment = sm.metronomePosition.toAlignment()
+        if (metronomeAlignment != null && presentingMode == Presenting.LYRICS && currentLyricSection.bpm > 0) {
+            MetronomeDot(
+                bpm = currentLyricSection.bpm,
+                active = true,
+                size = 36.dp,
+                modifier = Modifier.align(metronomeAlignment).padding(24.dp)
+            )
         }
     }
 }

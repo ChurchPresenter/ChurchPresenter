@@ -1198,6 +1198,13 @@
     <string name="stage_monitor_zone_none">Žiadne</string>
     <string name="stage_monitor_notes_from_presentation">Poznámky sa automaticky zobrazujú z aktívneho snímku PowerPoint alebo Keynote.</string>
     <string name="stage_monitor_content_section">Obsah obrazovky</string>
+    <string name="stage_monitor_metronome_position">Pozícia metronómu</string>
+    <string name="stage_monitor_position_top_center">Hore v strede</string>
+    <string name="stage_monitor_position_middle_left">V strede vľavo</string>
+    <string name="stage_monitor_position_center">V strede</string>
+    <string name="stage_monitor_position_middle_right">V strede vpravo</string>
+    <string name="metronome_bpm_label">Tempo metronómu</string>
+    <string name="unit_bpm">úd/min</string>
 
     <!-- Q&A Tab -->
     <string name="qa_server_not_running">Server nebeží — spustite sprievodný server v Nastaveniach na povolenie Q&amp;A</string>

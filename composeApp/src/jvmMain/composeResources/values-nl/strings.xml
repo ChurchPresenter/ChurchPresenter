@@ -1198,6 +1198,13 @@
     <string name="stage_monitor_zone_none">Geen</string>
     <string name="stage_monitor_notes_from_presentation">Notities worden automatisch getoond vanuit de actieve PowerPoint- of Keynote-dia.</string>
     <string name="stage_monitor_content_section">Scherminhoud</string>
+    <string name="stage_monitor_metronome_position">Metronoompositie</string>
+    <string name="stage_monitor_position_top_center">Boven midden</string>
+    <string name="stage_monitor_position_middle_left">Midden links</string>
+    <string name="stage_monitor_position_center">Midden</string>
+    <string name="stage_monitor_position_middle_right">Midden rechts</string>
+    <string name="metronome_bpm_label">Metronoomtempo</string>
+    <string name="unit_bpm">sl/min</string>
 
     <!-- Q&amp;A Tab -->
     <string name="qa_server_not_running">Server niet actief — start de companion server in Instellingen om V&amp;A in te schakelen</string>

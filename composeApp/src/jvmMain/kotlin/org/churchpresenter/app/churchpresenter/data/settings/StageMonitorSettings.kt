@@ -30,6 +30,15 @@ enum class StageMonitorStyleZone {
     TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_MIDDLE, BOTTOM_RIGHT, FULL_SCREEN
 }
 
+/** Where the metronome flash dot is anchored on the stage monitor screen — a free 3x3 grid, independent of the content zones above (no full-screen option since it's a small overlay). */
+@Serializable
+enum class MetronomePosition {
+    NONE,
+    TOP_LEFT, TOP_CENTER, TOP_RIGHT,
+    MIDDLE_LEFT, CENTER, MIDDLE_RIGHT,
+    BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
+}
+
 fun StageMonitorZone.toStyleZone(): StageMonitorStyleZone? = when (this) {
     StageMonitorZone.TOP_LEFT -> StageMonitorStyleZone.TOP_LEFT
     StageMonitorZone.TOP_RIGHT -> StageMonitorStyleZone.TOP_RIGHT
@@ -63,7 +72,10 @@ data class StageMonitorSettings(
     val contentZones: Map<StageMonitorContentType, StageMonitorZone> = defaultContentZones(),
 
     // Font/color/style/alignment for each of the 6 drawable zones.
-    val zoneStyles: Map<StageMonitorStyleZone, StageMonitorZoneStyle> = defaultZoneStyles()
+    val zoneStyles: Map<StageMonitorStyleZone, StageMonitorZoneStyle> = defaultZoneStyles(),
+
+    // Where the metronome flash dot is anchored; NONE = disabled (default).
+    val metronomePosition: MetronomePosition = MetronomePosition.NONE
 ) {
     /** Safe lookup that falls back to the built-in default zone for content types missing from older saved settings. */
     fun zoneFor(type: StageMonitorContentType): StageMonitorZone =

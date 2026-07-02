@@ -1198,6 +1198,13 @@
     <string name="stage_monitor_zone_none">Nenhum</string>
     <string name="stage_monitor_notes_from_presentation">As notas são exibidas automaticamente a partir do slide ativo do PowerPoint ou Keynote.</string>
     <string name="stage_monitor_content_section">Conteúdo da Tela</string>
+    <string name="stage_monitor_metronome_position">Posição do Metrônomo</string>
+    <string name="stage_monitor_position_top_center">Superior Centro</string>
+    <string name="stage_monitor_position_middle_left">Centro Esquerda</string>
+    <string name="stage_monitor_position_center">Centro</string>
+    <string name="stage_monitor_position_middle_right">Centro Direita</string>
+    <string name="metronome_bpm_label">Tempo do Metrônomo</string>
+    <string name="unit_bpm">bat/min</string>
 
     <!-- Q&A Tab -->
     <string name="qa_server_not_running">Servidor não está em execução — inicie o servidor companion em Configurações para habilitar P&amp;R</string>

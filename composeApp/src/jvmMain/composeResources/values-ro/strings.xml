@@ -1224,6 +1224,13 @@
     <string name="stage_monitor_zone_none">Niciunul</string>
     <string name="stage_monitor_notes_from_presentation">Notele sunt afișate automat din slide-ul activ PowerPoint sau Keynote.</string>
     <string name="stage_monitor_content_section">Conținut Ecran</string>
+    <string name="stage_monitor_metronome_position">Poziția Metronomului</string>
+    <string name="stage_monitor_position_top_center">Sus Centru</string>
+    <string name="stage_monitor_position_middle_left">Centru Stânga</string>
+    <string name="stage_monitor_position_center">Centru</string>
+    <string name="stage_monitor_position_middle_right">Centru Dreapta</string>
+    <string name="metronome_bpm_label">Tempo Metronom</string>
+    <string name="unit_bpm">băt/min</string>
 
     <!-- Q&A Tab -->
     <string name="qa_server_not_running">Serverul nu rulează — porniți serverul companion din Setări pentru a activa Î&amp;R</string>

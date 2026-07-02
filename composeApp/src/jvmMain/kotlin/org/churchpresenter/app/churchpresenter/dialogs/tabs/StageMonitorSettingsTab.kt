@@ -37,6 +37,11 @@ import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.presentation
 import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.stage_monitor_content_section
+import churchpresenter.composeapp.generated.resources.stage_monitor_metronome_position
+import churchpresenter.composeapp.generated.resources.stage_monitor_position_center
+import churchpresenter.composeapp.generated.resources.stage_monitor_position_middle_left
+import churchpresenter.composeapp.generated.resources.stage_monitor_position_middle_right
+import churchpresenter.composeapp.generated.resources.stage_monitor_position_top_center
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_clock
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_next
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_notes
@@ -58,6 +63,7 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.composables.MetronomeDot
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
@@ -65,8 +71,10 @@ import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.composables.toAlignment
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.MetronomePosition
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContentType
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSettings
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZone
@@ -191,6 +199,20 @@ private fun zoneLabel(zone: StageMonitorZone): String = when (zone) {
 }
 
 @Composable
+private fun metronomePositionLabel(position: MetronomePosition): String = when (position) {
+    MetronomePosition.NONE -> stringResource(Res.string.stage_monitor_zone_none)
+    MetronomePosition.TOP_LEFT -> stringResource(Res.string.stage_monitor_zone_top_left)
+    MetronomePosition.TOP_CENTER -> stringResource(Res.string.stage_monitor_position_top_center)
+    MetronomePosition.TOP_RIGHT -> stringResource(Res.string.stage_monitor_zone_top_right)
+    MetronomePosition.MIDDLE_LEFT -> stringResource(Res.string.stage_monitor_position_middle_left)
+    MetronomePosition.CENTER -> stringResource(Res.string.stage_monitor_position_center)
+    MetronomePosition.MIDDLE_RIGHT -> stringResource(Res.string.stage_monitor_position_middle_right)
+    MetronomePosition.BOTTOM_LEFT -> stringResource(Res.string.stage_monitor_zone_bottom_left)
+    MetronomePosition.BOTTOM_CENTER -> stringResource(Res.string.stage_monitor_zone_bottom_center)
+    MetronomePosition.BOTTOM_RIGHT -> stringResource(Res.string.stage_monitor_zone_bottom_right)
+}
+
+@Composable
 private fun styleZoneLabel(zone: StageMonitorStyleZone): String = when (zone) {
     StageMonitorStyleZone.TOP_LEFT -> stringResource(Res.string.stage_monitor_zone_top_left)
     StageMonitorStyleZone.TOP_RIGHT -> stringResource(Res.string.stage_monitor_zone_top_right)
@@ -213,6 +235,9 @@ private fun StageMonitorContentSection(
     val zoneByLabel = StageMonitorZone.entries.associateBy { zoneLabel(it) }
     val types = StageMonitorContentType.entries
     val columns = types.chunked((types.size + 3) / 4)
+
+    val metronomeOptions = MetronomePosition.entries.map { metronomePositionLabel(it) }
+    val metronomeByLabel = MetronomePosition.entries.associateBy { metronomePositionLabel(it) }
 
     SettingsSection(title = stringResource(Res.string.stage_monitor_content_section)) {
         Row(
@@ -238,6 +263,15 @@ private fun StageMonitorContentSection(
                 }
             }
         }
+        DropdownSettingsField(
+            label = stringResource(Res.string.stage_monitor_metronome_position),
+            value = metronomePositionLabel(sm.metronomePosition),
+            options = metronomeOptions,
+            onValueChange = { picked ->
+                metronomeByLabel[picked]?.let { position -> update { copy(metronomePosition = position) } }
+            },
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
     }
 }
 
@@ -264,6 +298,15 @@ private fun StageMonitorLayoutPreviewSection(sm: StageMonitorSettings) {
                     ZoneLabelCell(text = labelsFor(StageMonitorZone.BOTTOM_RIGHT), modifier = Modifier.weight(1f))
                 }
             }
+            // Preview of where the metronome dot will flash — demo rate, independent of the zone grid above.
+            sm.metronomePosition.toAlignment()?.let { alignment ->
+                MetronomeDot(
+                    bpm = 100,
+                    active = true,
+                    size = 24.dp,
+                    modifier = Modifier.align(alignment).padding(6.dp)
+                )
+            }
         }
         SettingRow(label = stringResource(Res.string.stage_monitor_zone_full_screen)) {
             Text(
@@ -275,6 +318,13 @@ private fun StageMonitorLayoutPreviewSection(sm: StageMonitorSettings) {
         SettingRow(label = stringResource(Res.string.stage_monitor_zone_none)) {
             Text(
                 text = labelsFor(StageMonitorZone.NONE).ifBlank { "—" },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        SettingRow(label = stringResource(Res.string.stage_monitor_metronome_position)) {
+            Text(
+                text = metronomePositionLabel(sm.metronomePosition),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

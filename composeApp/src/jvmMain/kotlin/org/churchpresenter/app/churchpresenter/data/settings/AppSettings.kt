@@ -43,6 +43,7 @@ data class AppSettings(
     val atemSettings: AtemSettings = AtemSettings(),
     val songFavorites: List<String> = emptyList(),
     val songFavoritesPanelHeightDp: Int = 120,
+    val songBpm: Map<String, Int> = emptyMap(), // songId -> metronome BPM (0 = off), not stored in the .song file
     val songColOrder: List<String> = emptyList(),
     val songHiddenCols: Set<String> = setOf("tune", "play_count", "author", "composer"),
     val setupWizardShown: Boolean = false,

@@ -1122,6 +1122,13 @@
     <string name="stage_monitor_zone_none">Keine</string>
     <string name="stage_monitor_notes_from_presentation">Notizen werden automatisch aus der aktiven PowerPoint- oder Keynote-Folie angezeigt.</string>
     <string name="stage_monitor_content_section">Bildschirminhalt</string>
+    <string name="stage_monitor_metronome_position">Metronom-Position</string>
+    <string name="stage_monitor_position_top_center">Oben Mitte</string>
+    <string name="stage_monitor_position_middle_left">Mitte links</string>
+    <string name="stage_monitor_position_center">Mitte</string>
+    <string name="stage_monitor_position_middle_right">Mitte rechts</string>
+    <string name="metronome_bpm_label">Metronomtempo</string>
+    <string name="unit_bpm">Schl./Min</string>
 
     <!-- Q&amp;A Tab -->
     <string name="tab_qa">Fragen &amp; Antworten</string>
