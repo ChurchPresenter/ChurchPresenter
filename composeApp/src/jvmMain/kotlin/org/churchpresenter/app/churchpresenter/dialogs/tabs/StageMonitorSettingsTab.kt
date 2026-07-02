@@ -28,6 +28,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_color
 import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.color
+import churchpresenter.composeapp.generated.resources.content_announcements
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.media
@@ -37,12 +38,10 @@ import churchpresenter.composeapp.generated.resources.presentation
 import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.vertical_alignment
-import churchpresenter.composeapp.generated.resources.stage_monitor_content_duration_timer
 import churchpresenter.composeapp.generated.resources.stage_monitor_content_section
-import churchpresenter.composeapp.generated.resources.stage_monitor_content_specific_time
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_clock
+import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_next
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_notes
-import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_timer
 import churchpresenter.composeapp.generated.resources.shadow_settings
 import churchpresenter.composeapp.generated.resources.stage_monitor_layout_section
 import churchpresenter.composeapp.generated.resources.stage_monitor_zone_bottom_left
@@ -178,9 +177,8 @@ private fun contentTypeLabel(type: StageMonitorContentType): String = when (type
     StageMonitorContentType.QA -> stringResource(Res.string.tab_qa)
     StageMonitorContentType.DICTIONARY -> stringResource(Res.string.tab_dictionary)
     StageMonitorContentType.CLOCK -> stringResource(Res.string.stage_monitor_quadrant_clock)
-    StageMonitorContentType.DURATION_TIMER -> stringResource(Res.string.stage_monitor_content_duration_timer)
-    StageMonitorContentType.COUNTDOWN_TIMER -> stringResource(Res.string.stage_monitor_quadrant_timer)
-    StageMonitorContentType.SPECIFIC_TIME -> stringResource(Res.string.stage_monitor_content_specific_time)
+    StageMonitorContentType.ANNOUNCEMENT_TEXT -> stringResource(Res.string.content_announcements)
+    StageMonitorContentType.NEXT -> stringResource(Res.string.stage_monitor_quadrant_next)
 }
 
 @Composable
@@ -210,7 +208,10 @@ private fun StageMonitorContentSection(
     sm: StageMonitorSettings,
     update: (StageMonitorSettings.() -> StageMonitorSettings) -> Unit
 ) {
-    val zoneOptions = StageMonitorZone.entries.map { zoneLabel(it) }
+    // Bible/Songs/Next are always meant to share the screen with other zones, never take it over.
+    val noFullScreenTypes = setOf(StageMonitorContentType.BIBLE, StageMonitorContentType.SONGS, StageMonitorContentType.NEXT)
+    val allZones = StageMonitorZone.entries.map { zoneLabel(it) }
+    val zonesWithoutFullScreen = StageMonitorZone.entries.filter { it != StageMonitorZone.FULL_SCREEN }.map { zoneLabel(it) }
     val zoneByLabel = StageMonitorZone.entries.associateBy { zoneLabel(it) }
     val types = StageMonitorContentType.entries
     val columns = types.chunked((types.size + 3) / 4)
@@ -229,7 +230,7 @@ private fun StageMonitorContentSection(
                         DropdownSettingsField(
                             label = contentTypeLabel(type),
                             value = zoneLabel(sm.zoneFor(type)),
-                            options = zoneOptions,
+                            options = if (type in noFullScreenTypes) zonesWithoutFullScreen else allZones,
                             onValueChange = { picked ->
                                 zoneByLabel[picked]?.let { zone -> update { copy(contentZones = contentZones + (type to zone)) } }
                             },

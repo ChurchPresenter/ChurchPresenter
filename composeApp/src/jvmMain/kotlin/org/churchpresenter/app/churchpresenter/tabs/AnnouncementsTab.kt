@@ -97,6 +97,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_add_to_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_go_live
+import churchpresenter.composeapp.generated.resources.tooltip_send_to_stage_monitor
 import churchpresenter.composeapp.generated.resources.tooltip_announcement_show
 import churchpresenter.composeapp.generated.resources.tooltip_announcement_hide
 import churchpresenter.composeapp.generated.resources.anim_slide_from_bottom
@@ -123,6 +124,7 @@ import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.go_live
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
@@ -194,6 +196,45 @@ fun AnnouncementsTab(
 
     val availableFonts = remember {
         GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList()
+    }
+
+    // Screens configured as Stage Monitor — locking them to Announcements shows this content
+    // there without disturbing whatever the main projection screen(s) are currently live with.
+    // The lock persists (even as other tabs go live elsewhere) until toggled off again or Escape
+    // is pressed (see MainDesktop.kt's global Escape handler).
+    // If Stage Monitor is the ONLY configured screen there's nothing else to protect from being
+    // locked out, so the button instead behaves as a plain Go Live (global presenting mode, no
+    // per-screen lock) — same visible result, without blocking Bible/Songs from ever showing.
+    val stageMonitorScreenIndices = remember(appSettings.projectionSettings) {
+        appSettings.projectionSettings.screenAssignments.indices.filter {
+            appSettings.projectionSettings.screenAssignments[it].displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
+        }
+    }
+    val hasSeparateMainScreen = stageMonitorScreenIndices.size < appSettings.projectionSettings.screenAssignments.size
+    val canSendToStageMonitor = stageMonitorScreenIndices.isNotEmpty()
+    val currentScreenLocks = presenterManager?.screenLocks?.value ?: emptyMap()
+    val isSentToStageMonitor = if (hasSeparateMainScreen) {
+        canSendToStageMonitor && stageMonitorScreenIndices.all { currentScreenLocks[it] == Presenting.ANNOUNCEMENTS }
+    } else {
+        presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS
+    }
+    fun toggleStageMonitor(text: String) {
+        if (presenterManager == null || !canSendToStageMonitor) return
+        if (!hasSeparateMainScreen) {
+            if (isSentToStageMonitor) {
+                presenterManager.requestClearDisplay()
+            } else {
+                presenterManager.setAnnouncementText(text)
+                presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+            }
+            return
+        }
+        if (isSentToStageMonitor) {
+            stageMonitorScreenIndices.forEach { presenterManager.setScreenLock(it, null) }
+        } else {
+            presenterManager.setAnnouncementText(text)
+            stageMonitorScreenIndices.forEach { presenterManager.setScreenLock(it, Presenting.ANNOUNCEMENTS) }
+        }
     }
 
     val timerExpiredLabel = stringResource(Res.string.timer_expired)
@@ -378,6 +419,26 @@ fun AnnouncementsTab(
                         colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, disabledContainerColor = MaterialTheme.colorScheme.outlineVariant, disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))
                     ) {
                         Icon(Icons.Default.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
+                    }
+                }
+                if (canSendToStageMonitor) {
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_send_to_stage_monitor), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        IconButton(
+                            onClick = { toggleStageMonitor(viewModel.text) },
+                            enabled = viewModel.text.isNotBlank() || isSentToStageMonitor,
+                            modifier = Modifier.size(34.dp),
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                                disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        ) {
+                            Icon(Icons.Default.Cast, contentDescription = null, modifier = Modifier.size(16.dp))
+                        }
                     }
                 }
             }
@@ -786,6 +847,24 @@ fun AnnouncementsTab(
                                         presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
                                     }, colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant, disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))) {
                                         Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                                    }
+                                }
+                            }
+                            // Stage Monitor already shows its own always-on clock, so the plain
+                            // "Clock" timer mode has nothing extra to send there.
+                            if (presenterManager != null && canSendToStageMonitor && viewModel.timerMode != Constants.TIMER_MODE_CLOCK) {
+                                ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_send_to_stage_monitor), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
+                                    IconButton(
+                                        onClick = {
+                                            val liveText = if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) viewModel.liveClockText else AnnouncementsViewModel.formatTimer(displayValue)
+                                            toggleStageMonitor(liveText)
+                                        },
+                                        colors = IconButtonDefaults.iconButtonColors(
+                                            containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                            contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    ) {
+                                        Icon(Icons.Default.Cast, contentDescription = stringResource(Res.string.tooltip_send_to_stage_monitor), modifier = Modifier.size(20.dp))
                                     }
                                 }
                             }

@@ -7,7 +7,15 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 @Serializable
 enum class StageMonitorContentType {
     BIBLE, SONGS, PRESENTATION, PRESENTATION_NOTES, PICTURES, MEDIA, LOWER_THIRD, WEB, STT, CANVAS, QA, DICTIONARY,
-    CLOCK, DURATION_TIMER, COUNTDOWN_TIMER, SPECIFIC_TIME
+    CLOCK,
+    /**
+     * Announcements text and all timer variants (Duration/Countdown/Specific Time) share one
+     * pre-formatted string with no way to tell them apart, so they're a single content type —
+     * having separate entries that all show identical text just duplicated it across zones.
+     */
+    ANNOUNCEMENT_TEXT,
+    /** Next Bible verse (when presenting Bible) or next song line/section (when presenting Songs). */
+    NEXT
 }
 
 /** Where a content type is routed to on the stage monitor screen. */
@@ -51,15 +59,15 @@ data class StageMonitorZoneStyle(
 
 @Serializable
 data class StageMonitorSettings(
-    // Which zone each content type is routed to; every type defaults to Full Screen.
+    // Which zone each content type is routed to; see defaultContentZones() for per-type defaults.
     val contentZones: Map<StageMonitorContentType, StageMonitorZone> = defaultContentZones(),
 
     // Font/color/style/alignment for each of the 6 drawable zones.
     val zoneStyles: Map<StageMonitorStyleZone, StageMonitorZoneStyle> = defaultZoneStyles()
 ) {
-    /** Safe lookup that falls back to Full Screen for content types missing from older saved settings. */
+    /** Safe lookup that falls back to the built-in default zone for content types missing from older saved settings. */
     fun zoneFor(type: StageMonitorContentType): StageMonitorZone =
-        contentZones[type] ?: StageMonitorZone.FULL_SCREEN
+        contentZones[type] ?: defaultContentZones().getValue(type)
 
     /** Safe lookup that falls back to the built-in default style for zones missing from older saved settings. */
     fun styleFor(zone: StageMonitorStyleZone): StageMonitorZoneStyle =
@@ -67,28 +75,34 @@ data class StageMonitorSettings(
 
     companion object {
         fun defaultContentZones(): Map<StageMonitorContentType, StageMonitorZone> =
-            StageMonitorContentType.entries.associateWith { StageMonitorZone.FULL_SCREEN }
+            StageMonitorContentType.entries.associateWith { StageMonitorZone.FULL_SCREEN } + mapOf(
+                StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT,
+                StageMonitorContentType.SONGS to StageMonitorZone.TOP_LEFT,
+                StageMonitorContentType.NEXT to StageMonitorZone.TOP_RIGHT,
+                StageMonitorContentType.CLOCK to StageMonitorZone.BOTTOM_MIDDLE,
+                StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.BOTTOM_LEFT
+            )
 
         fun defaultZoneStyles(): Map<StageMonitorStyleZone, StageMonitorZoneStyle> = mapOf(
             StageMonitorStyleZone.TOP_LEFT to StageMonitorZoneStyle(
-                fontSize = 60, color = "#FFFFFF", bgColor = "#1A1A2E", shadow = true
+                fontSize = 35, color = "#FFFFFF", bgColor = "#000000", shadow = true
             ),
             StageMonitorStyleZone.TOP_RIGHT to StageMonitorZoneStyle(
-                fontSize = 80, color = "#00FF88", bgColor = "#0D1A0D", bold = true,
+                fontSize = 35, color = "#FFFFFF", bgColor = "#000000", bold = true,
                 verticalAlignment = Constants.MIDDLE, horizontalAlignment = Constants.CENTER
             ),
             StageMonitorStyleZone.BOTTOM_LEFT to StageMonitorZoneStyle(
-                fontSize = 40, color = "#AAAAAA", bgColor = "#0D0D1A", italic = true
+                fontSize = 35, color = "#FFFFFF", bgColor = "#000000", italic = true
             ),
             StageMonitorStyleZone.BOTTOM_MIDDLE to StageMonitorZoneStyle(
-                fontSize = 72, color = "#FFFFFF", bgColor = "#000000",
+                fontSize = 35, color = "#FFFFFF", bgColor = "#000000",
                 verticalAlignment = Constants.MIDDLE, horizontalAlignment = Constants.CENTER
             ),
             StageMonitorStyleZone.BOTTOM_RIGHT to StageMonitorZoneStyle(
-                fontSize = 36, color = "#DDDDDD", bgColor = "#111111"
+                fontSize = 35, color = "#FFFFFF", bgColor = "#000000"
             ),
             StageMonitorStyleZone.FULL_SCREEN to StageMonitorZoneStyle(
-                fontSize = 90, color = "#FFFFFF", bgColor = "#000000",
+                fontSize = 80, color = "#FFFFFF", bgColor = "#000000",
                 verticalAlignment = Constants.MIDDLE, horizontalAlignment = Constants.CENTER
             )
         )

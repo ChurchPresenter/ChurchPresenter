@@ -44,6 +44,11 @@ class PresenterManager {
     private val _displayedVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
     val displayedVerses: State<List<SelectedVerse>> = _displayedVerses
 
+    // Next Bible verse after whatever is currently displayed — for Stage Monitor's "Next" zone.
+    // Distinct from displayedVerses, which pairs primary+secondary *language* of the same verse.
+    private val _nextVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
+    val nextVerses: State<List<SelectedVerse>> = _nextVerses
+
     private val _bibleTransitionAlpha = mutableStateOf(1f)
     val bibleTransitionAlpha: State<Float> = _bibleTransitionAlpha
 
@@ -213,6 +218,10 @@ class PresenterManager {
 
     fun setDisplayedVerses(verses: List<SelectedVerse>) {
         _displayedVerses.value = verses
+    }
+
+    fun setNextVerses(verses: List<SelectedVerse>) {
+        _nextVerses.value = verses
     }
 
     fun setBibleTransitionAlpha(alpha: Float) {

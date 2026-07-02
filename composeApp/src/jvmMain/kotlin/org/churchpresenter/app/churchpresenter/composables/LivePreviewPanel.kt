@@ -54,6 +54,8 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.fill_badge
+import churchpresenter.composeapp.generated.resources.display_stage_monitor
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.live_preview_nothing
 import churchpresenter.composeapp.generated.resources.live_preview_title
 import churchpresenter.composeapp.generated.resources.lock_screen_to_tab
@@ -63,6 +65,7 @@ import churchpresenter.composeapp.generated.resources.unlock_screen
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
+import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
@@ -161,6 +164,7 @@ private fun SingleDisplayPreview(
     val screenLocks by presenterManager.screenLocks
     val effectiveMode = screenLocks[screenIndex] ?: presentingMode
     val displayedVerses by presenterManager.displayedVerses
+    val nextVerses by presenterManager.nextVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
     val displayedLyricSection by presenterManager.displayedLyricSection
     val songTransitionAlpha by presenterManager.songTransitionAlpha
@@ -187,7 +191,9 @@ private fun SingleDisplayPreview(
     val websiteUrl by presenterManager.websiteUrl
     val webSnapshot by presenterManager.webSnapshot
     val activeScene by presenterManager.activeScene
+    val displayedQuestion by presenterManager.displayedQuestion
     val displayedDictionaryEntry by presenterManager.displayedDictionaryEntry
+    val presenterNotes by presenterManager.presenterNotes
     val mediaViewModel = LocalMediaViewModel.current
 
     val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
@@ -235,6 +241,30 @@ private fun SingleDisplayPreview(
     ) {
         val primaryRole = screenAssignment.primaryOutputRole
 
+        // ── Stage Monitor: dedicated presenter-confidence layout, not the normal presenter ──
+        if (screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
+            ScaledPresenterContent {
+                StageMonitorScreen(
+                    sm = appSettings.stageMonitorSettings,
+                    presentingMode = effectiveMode,
+                    currentLyricSection = displayedLyricSection,
+                    allLyricSections = allLyricSections,
+                    songDisplaySectionIndex = songDisplaySectionIndex,
+                    displayedVerses = displayedVerses,
+                    nextVerses = nextVerses,
+                    announcementText = displayedAnnouncementText,
+                    displayedImagePath = displayedImagePath,
+                    displayedSlide = displayedSlide,
+                    presenterNotes = presenterNotes,
+                    activeScene = activeScene,
+                    displayedQuestion = displayedQuestion,
+                    qaSettings = appSettings.qaSettings,
+                    displayedDictionaryEntry = displayedDictionaryEntry,
+                    dictionarySettings = appSettings.dictionarySettings,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        } else
         // ── Scaled presenter content (all modes except WEBSITE) ───────────────
         // JavaFX/Swing heavyweight components cannot be scaled by Compose layout,
         // so WEBSITE is handled separately below at native size.
@@ -309,7 +339,6 @@ private fun SingleDisplayPreview(
                             Presenting.CANVAS ->
                                 ScenePresenter(scene = activeScene)
                             Presenting.QA -> {
-                                val displayedQuestion by presenterManager.displayedQuestion
                                 val showQRCode by presenterManager.showQRCodeOnDisplay
                                 if (showQRCode) {
                                     QAQRCodePresenter(url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa", qaSettings = appSettings.qaSettings)
@@ -349,7 +378,7 @@ private fun SingleDisplayPreview(
         // A second JFXPanel instance can't be scaled/clipped by Compose.
         // Instead, WebTab pushes a snapshot bitmap every 200ms via PresenterManager
         // so this panel shows a pixel-accurate mirror including scroll position.
-        if (effectiveMode == Presenting.WEBSITE) {
+        if (screenAssignment.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR && effectiveMode == Presenting.WEBSITE) {
             val snapshot = webSnapshot
             if (snapshot != null) {
                 Image(
@@ -441,17 +470,36 @@ private fun SingleDisplayPreview(
             )
         }
 
-        // Screen number label
-        Text(
-            text = stringResource(Res.string.screen_number, screenIndex + 1),
-            color = Color.White.copy(alpha = 0.6f),
-            fontSize = 9.sp,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(4.dp)
-                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
-                .padding(horizontal = 5.dp, vertical = 2.dp)
-        )
+        // Screen number label (+ display mode, when not the default fullscreen)
+        Column(
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.screen_number, screenIndex + 1),
+                color = Color.White.copy(alpha = 0.6f),
+                fontSize = 9.sp,
+                modifier = Modifier
+                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
+                    .padding(horizontal = 5.dp, vertical = 2.dp)
+            )
+            val modeLabel = when (screenAssignment.displayMode) {
+                Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
+                Constants.DISPLAY_MODE_LOWER_THIRD -> stringResource(Res.string.display_lower_third)
+                else -> null
+            }
+            if (modeLabel != null) {
+                Text(
+                    text = modeLabel,
+                    color = Color.White.copy(alpha = 0.6f),
+                    fontSize = 9.sp,
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
+                        .padding(horizontal = 5.dp, vertical = 2.dp)
+                )
+            }
+        }
 
         // Animated audio indicator — only when presenting and media is playing
         if (effectiveMode != Presenting.NONE

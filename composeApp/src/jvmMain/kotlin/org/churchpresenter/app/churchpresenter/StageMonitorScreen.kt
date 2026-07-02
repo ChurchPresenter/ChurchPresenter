@@ -39,6 +39,9 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.app.churchpresenter.data.settings.DictionarySettings
+import org.churchpresenter.app.churchpresenter.data.settings.QASettings
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContentType
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSettings
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZone
@@ -46,8 +49,13 @@ import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZone
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZoneStyle
 import org.churchpresenter.app.churchpresenter.data.settings.toStyleZone
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.Question
+import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
+import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
@@ -76,12 +84,19 @@ fun StageMonitorScreen(
     sm: StageMonitorSettings,
     presentingMode: Presenting,
     currentLyricSection: LyricSection,
+    allLyricSections: List<LyricSection> = emptyList(),
+    songDisplaySectionIndex: Int = 0,
     displayedVerses: List<SelectedVerse>,
-    timerRemainingSeconds: Int,
-    timerRunning: Boolean,
+    nextVerses: List<SelectedVerse> = emptyList(),
+    announcementText: String = "",
     displayedImagePath: String? = null,
     displayedSlide: ImageBitmap? = null,
     presenterNotes: String = "",
+    activeScene: Scene? = null,
+    displayedQuestion: Question? = null,
+    qaSettings: QASettings = QASettings(),
+    displayedDictionaryEntry: StrongsEntry? = null,
+    dictionarySettings: DictionarySettings = DictionarySettings(),
     modifier: Modifier = Modifier
 ) {
     // Derive current text
@@ -89,6 +104,23 @@ fun StageMonitorScreen(
         Presenting.LYRICS -> currentLyricSection.lines.joinToString("\n")
         Presenting.BIBLE -> {
             val v = displayedVerses.firstOrNull()
+            if (v != null) {
+                val ref = "${v.bookName} ${v.chapter}:${v.verseRange.ifEmpty { v.verseNumber.toString() }}"
+                "$ref\n${v.verseText}"
+            } else ""
+        }
+        else -> ""
+    }
+
+    // Next Bible verse (a dedicated lookahead, not the secondary language of the current verse)
+    // or next song line/section.
+    val nextText: String = when (presentingMode) {
+        Presenting.LYRICS -> {
+            val nextIdx = songDisplaySectionIndex + 1
+            allLyricSections.getOrNull(nextIdx)?.lines?.joinToString("\n") ?: ""
+        }
+        Presenting.BIBLE -> {
+            val v = nextVerses.firstOrNull()
             if (v != null) {
                 val ref = "${v.bookName} ${v.chapter}:${v.verseRange.ifEmpty { v.verseNumber.toString() }}"
                 "$ref\n${v.verseText}"
@@ -112,25 +144,34 @@ fun StageMonitorScreen(
         }
     }
 
-    // Timer text (shared by the Duration/Countdown/Specific-Time content types)
-    val timerText = if (timerRunning || timerRemainingSeconds > 0) formatTimer(timerRemainingSeconds) else "--:--"
+    // Timer text (shared by the Duration/Countdown/Specific-Time content types) — reuses the
+    // same pre-formatted string the real Announcements output shows, since that's already
+    // mode-aware (duration countdown, open-ended stopwatch, or live clock display) and there's
+    // no separate per-mode state to distinguish them here.
+    val timerText = announcementText.ifBlank { "--:--" }
 
     val mediaViewModel = LocalMediaViewModel.current
 
     val renderData = ZoneRenderData(
         currentText = currentText,
+        nextText = nextText,
         currentImageBitmap = currentImageBitmap,
         displayedSlide = displayedSlide,
         clockText = clockText,
         timerText = timerText,
-        presenterNotes = presenterNotes
+        presenterNotes = presenterNotes,
+        activeScene = activeScene,
+        displayedQuestion = displayedQuestion,
+        qaSettings = qaSettings,
+        displayedDictionaryEntry = displayedDictionaryEntry,
+        dictionarySettings = dictionarySettings
     )
 
     // Which content type is "active" for the current presenting mode. Clock is always available
     // as a fallback so a zone assigned both a live type and Clock shows the clock when idle.
     val activeTypes: Set<StageMonitorContentType> = when (presentingMode) {
-        Presenting.BIBLE -> setOf(StageMonitorContentType.BIBLE)
-        Presenting.LYRICS -> setOf(StageMonitorContentType.SONGS)
+        Presenting.BIBLE -> setOf(StageMonitorContentType.BIBLE, StageMonitorContentType.NEXT)
+        Presenting.LYRICS -> setOf(StageMonitorContentType.SONGS, StageMonitorContentType.NEXT)
         Presenting.PRESENTATION -> setOf(StageMonitorContentType.PRESENTATION, StageMonitorContentType.PRESENTATION_NOTES)
         Presenting.PICTURES -> setOf(StageMonitorContentType.PICTURES)
         Presenting.MEDIA -> setOf(StageMonitorContentType.MEDIA)
@@ -140,14 +181,7 @@ fun StageMonitorScreen(
         Presenting.CANVAS -> setOf(StageMonitorContentType.CANVAS)
         Presenting.QA -> setOf(StageMonitorContentType.QA)
         Presenting.DICTIONARY -> setOf(StageMonitorContentType.DICTIONARY)
-        // The announcement timer's exact mode (duration/countdown/specific-time) isn't surfaced
-        // here yet, so all three routes are treated as active and resolved by whichever zone
-        // each was routed to.
-        Presenting.ANNOUNCEMENTS -> setOf(
-            StageMonitorContentType.DURATION_TIMER,
-            StageMonitorContentType.COUNTDOWN_TIMER,
-            StageMonitorContentType.SPECIFIC_TIME
-        )
+        Presenting.ANNOUNCEMENTS -> setOf(StageMonitorContentType.ANNOUNCEMENT_TEXT)
         Presenting.NONE -> emptySet()
     }
 
@@ -226,11 +260,17 @@ private fun StageZoneBox(
 /** Bundles the derived per-frame state so it can be passed to whichever zone needs it. */
 private data class ZoneRenderData(
     val currentText: String,
+    val nextText: String,
     val currentImageBitmap: ImageBitmap?,
     val displayedSlide: ImageBitmap?,
     val clockText: String,
     val timerText: String,
-    val presenterNotes: String
+    val presenterNotes: String,
+    val activeScene: Scene?,
+    val displayedQuestion: Question?,
+    val qaSettings: QASettings,
+    val displayedDictionaryEntry: StrongsEntry?,
+    val dictionarySettings: DictionarySettings
 )
 
 private fun zoneContentAlignment(style: StageMonitorZoneStyle): Alignment {
@@ -270,16 +310,15 @@ private fun ZoneContent(
             }
         }
         StageMonitorContentType.CLOCK -> CenteredText(data.clockText, style)
-        StageMonitorContentType.DURATION_TIMER,
-        StageMonitorContentType.COUNTDOWN_TIMER,
-        StageMonitorContentType.SPECIFIC_TIME -> CenteredText(data.timerText, style)
+        StageMonitorContentType.ANNOUNCEMENT_TEXT -> CenteredText(data.timerText, style)
+        StageMonitorContentType.CANVAS -> ScenePresenter(modifier = Modifier.fillMaxSize(), scene = data.activeScene)
+        StageMonitorContentType.QA -> QAPresenter(question = data.displayedQuestion, qaSettings = data.qaSettings)
+        StageMonitorContentType.DICTIONARY -> DictionaryPresenter(entry = data.displayedDictionaryEntry, dictionarySettings = data.dictionarySettings)
+        StageMonitorContentType.NEXT -> TextContent(style, data.nextText)
         // No live data is plumbed through to the stage monitor for these yet.
         StageMonitorContentType.LOWER_THIRD,
         StageMonitorContentType.WEB,
-        StageMonitorContentType.STT,
-        StageMonitorContentType.CANVAS,
-        StageMonitorContentType.QA,
-        StageMonitorContentType.DICTIONARY -> {}
+        StageMonitorContentType.STT -> {}
     }
 }
 
@@ -367,13 +406,6 @@ private fun CenteredText(text: String, style: StageMonitorZoneStyle) {
 private fun formatClock(): String {
     val pattern = if (Utils.isSystemUsing24HourFormat()) "HH:mm:ss" else "hh:mm:ss a"
     return LocalTime.now().format(DateTimeFormatter.ofPattern(pattern))
-}
-
-private fun formatTimer(totalSeconds: Int): String {
-    val h = totalSeconds / 3600
-    val m = (totalSeconds % 3600) / 60
-    val s = totalSeconds % 60
-    return if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%02d:%02d".format(m, s)
 }
 
 private fun buildTextStyle(

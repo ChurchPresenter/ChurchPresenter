@@ -1584,6 +1584,7 @@ private fun PresenterWindows(
     val screenLocks by presenterManager.screenLocks
     val selectedVerses by presenterManager.selectedVerses
     val displayedVerses by presenterManager.displayedVerses
+    val nextVerses by presenterManager.nextVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
     val lyricSection by presenterManager.lyricSection
     val lyricSectionVersion by presenterManager.lyricSectionVersion
@@ -1628,8 +1629,6 @@ private fun PresenterWindows(
     val qaTransitionAlpha by presenterManager.qaTransitionAlpha
     val showQRCodeOnDisplay by presenterManager.showQRCodeOnDisplay
     val displayedDictionaryEntry by presenterManager.displayedDictionaryEntry
-    val timerRemainingSeconds by presenterManager.timerRemainingSeconds
-    val timerRunning by presenterManager.timerRunning
     val presenterNotes by presenterManager.presenterNotes
 
     val proj = appSettings.projectionSettings
@@ -2243,7 +2242,7 @@ private fun PresenterWindows(
                             }
                         Presenting.DICTIONARY ->
                             if (screenAssignment.showDictionary)
-                                DictzionaryPresenter(
+                                DictionaryPresenter(
                                     dictionarySettings = appSettings.dictionarySettings,
                                     entry = displayedDictionaryEntry,
                                     outputRole = Constants.OUTPUT_ROLE_KEY,
@@ -2509,12 +2508,19 @@ private fun PresenterWindows(
                         sm = appSettings.stageMonitorSettings,
                         presentingMode = presentingMode,
                         currentLyricSection = displayedLyricSection,
+                        allLyricSections = allLyricSections,
+                        songDisplaySectionIndex = songDisplaySectionIndex,
                         displayedVerses = displayedVerses,
-                        timerRemainingSeconds = timerRemainingSeconds,
-                        timerRunning = timerRunning,
+                        nextVerses = nextVerses,
+                        announcementText = displayedAnnouncementText,
                         displayedImagePath = displayedImagePath,
                         displayedSlide = displayedSlide,
                         presenterNotes = presenterNotes,
+                        activeScene = activeScene,
+                        displayedQuestion = displayedQuestion,
+                        qaSettings = appSettings.qaSettings,
+                        displayedDictionaryEntry = displayedDictionaryEntry,
+                        dictionarySettings = appSettings.dictionarySettings,
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
