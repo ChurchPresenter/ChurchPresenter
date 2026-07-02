@@ -885,10 +885,9 @@ fun PresentationTab(
                     )
                 }
 
-                if (appSettings.presentationRemoteSettings.remoteControlEnabled) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-                    // QR code
+                // QR code
                     val qrBaseUrl = presentationDisplayUrl.ifEmpty { serverUrl }
                     val qrUrl = if (qrBaseUrl.isNotEmpty()) {
                         val pw = appSettings.presentationRemoteSettings.remotePassword
@@ -1025,7 +1024,6 @@ fun PresentationTab(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp)
                     )
-                }
             }
         }
     }
