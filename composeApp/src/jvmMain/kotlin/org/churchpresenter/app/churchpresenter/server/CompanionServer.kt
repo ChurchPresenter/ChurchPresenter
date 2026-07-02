@@ -3377,6 +3377,16 @@ class CompanionServer {
 
     // ── Q&A HTML Pages ────────────────────────────────────────────────────────
 
+    /** Shared CSS injected into every Q&A page: semantic color tokens + screen-reader-only utility. */
+    private val qaSharedCss = """
+:root{
+--qa-primary:#1e88e5;--qa-primary-hover:#1565c0;
+--qa-success:#43a047;--qa-success-hover:#2e7d32;
+--qa-danger:#e53935;--qa-danger-hover:#c62828;
+}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+""".trimIndent()
+
     private fun qaSubmissionPageHtml(): String = """
 <!DOCTYPE html>
 <html lang="en">
@@ -3385,36 +3395,46 @@ class CompanionServer {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ask a Question</title>
 <style>
+${qaSharedCss}
+:root{--qa-bg:#f5f5f5;--qa-surface:#fff;--qa-ink:#1e1e2e;--qa-sub:#5f5f6b;--qa-border:#e0e0e0;--qa-muted:#616161}
+@media(prefers-color-scheme:dark){:root{--qa-bg:#16161f;--qa-surface:#22222e;--qa-ink:#e8e8ef;--qa-sub:#a8a8b5;--qa-border:#3a3a4a;--qa-muted:#9a9aa6}}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
-.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.1);padding:32px;max-width:480px;width:100%}
-h1{font-size:24px;margin-bottom:8px;color:#1e1e2e}
-p.sub{color:#666;margin-bottom:24px;font-size:14px}
-textarea{width:100%;min-height:120px;border:2px solid #e0e0e0;border-radius:12px;padding:16px;font-size:16px;resize:vertical;font-family:inherit;transition:border-color .2s}
-textarea:focus{outline:none;border-color:#1e88e5}
-button{width:100%;padding:14px;background:#1e88e5;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;transition:background .2s}
-button:hover{background:#1565c0}
-button:disabled{background:#bbb;cursor:not-allowed}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--qa-bg);color:var(--qa-ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:var(--qa-surface);border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.1);padding:32px;max-width:480px;width:100%}
+h1{font-size:24px;margin-bottom:8px;color:var(--qa-ink)}
+p.sub{color:var(--qa-sub);margin-bottom:24px;font-size:14px}
+label.field-label{display:block;font-size:13px;font-weight:600;color:var(--qa-ink);margin-bottom:6px}
+input.name-input{width:100%;border:2px solid var(--qa-border);border-radius:12px;padding:12px 16px;font-size:15px;font-family:inherit;margin-bottom:16px;background:var(--qa-surface);color:var(--qa-ink);transition:border-color .2s}
+input.name-input:focus{outline:none;border-color:var(--qa-primary)}
+textarea{width:100%;min-height:120px;border:2px solid var(--qa-border);border-radius:12px;padding:16px;font-size:16px;resize:vertical;font-family:inherit;background:var(--qa-surface);color:var(--qa-ink);transition:border-color .2s}
+textarea:focus{outline:none;border-color:var(--qa-primary)}
+input.name-input::placeholder,textarea::placeholder{color:var(--qa-muted)}
+button{width:100%;min-height:48px;padding:14px;background:var(--qa-primary);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;transition:background .2s}
+button:hover{background:var(--qa-primary-hover)}
+button:disabled{background:#9aa0a6;cursor:not-allowed}
 .msg{text-align:center;padding:12px;border-radius:8px;margin-top:16px;font-size:14px}
-.msg.ok{background:#e8f5e9;color:#2e7d32}
-.msg.err{background:#ffebee;color:#c62828}
+.msg.ok{background:#e8f5e9;color:#1b5e20}
+.msg.err{background:#ffebee;color:#b71c1c}
 .msg.off{background:#fff3e0;color:#e65100}
-#charcount{text-align:right;font-size:12px;color:#999;margin-top:4px}
+#charcount{text-align:right;font-size:12px;color:var(--qa-muted);margin-top:4px}
+@media(prefers-color-scheme:dark){.msg.ok{background:#1b3a24;color:#a5d6a7}.msg.err{background:#3a1c1f;color:#ef9a9a}.msg.off{background:#3a2a12;color:#ffcc80}.card{box-shadow:0 2px 12px rgba(0,0,0,.4)}}
 </style>
 </head>
 <body>
-<div class="card">
+<main class="card">
 <h1 id="page-title">Ask a Question</h1>
 <p class="sub" id="page-sub">Your question will be reviewed before being displayed.</p>
 <div id="form-area">
-<input type="text" id="name" placeholder="Your name" style="width:100%;border:2px solid #e0e0e0;border-radius:12px;padding:12px 16px;font-size:15px;font-family:inherit;margin-bottom:12px;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='#1e88e5'" onblur="this.style.borderColor='#e0e0e0'">
+<label class="sr-only" for="name">Your name (optional)</label>
+<input type="text" id="name" class="name-input" placeholder="Your name">
+<label class="sr-only" for="q">Your question</label>
 <textarea id="q" maxlength="500" placeholder="Type your question here..."></textarea>
-<div id="charcount">0 / 500</div>
+<div id="charcount" aria-live="polite">0 / 500</div>
 <button id="btn" onclick="submit()">Submit Question</button>
 </div>
-<div id="msg" class="msg" style="display:none"></div>
-<a id="vote-link" href="/qa/vote" style="display:none;text-align:center;margin-top:12px;text-decoration:none;width:100%;padding:14px;background:#43a047;color:#fff;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s;box-sizing:border-box">Vote on Questions</a>
-</div>
+<div id="msg" class="msg" role="status" aria-live="polite" style="display:none"></div>
+<a id="vote-link" href="/qa/vote" style="display:none;text-align:center;margin-top:12px;text-decoration:none;width:100%;min-height:48px;padding:14px;background:var(--qa-success);color:#fff;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s;box-sizing:border-box">Vote on Questions</a>
+</main>
 <script>
 const q=document.getElementById('q'),btn=document.getElementById('btn'),msg=document.getElementById('msg'),cc=document.getElementById('charcount'),nameField=document.getElementById('name');
 let submitted=false,cooldown=30,votingOn=false;
@@ -3482,40 +3502,44 @@ checkStatus();setInterval(checkStatus,5000);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vote on Questions</title>
 <style>
+${qaSharedCss}
+:root{--qa-bg:#f5f5f5;--qa-surface:#fff;--qa-ink:#1e1e2e;--qa-sub:#5f5f6b;--qa-muted:#616161;--qa-up-bg:#e3f2fd;--qa-down-bg:#ffebee;--qa-score-pos:#2e7d32;--qa-score-neg:#c62828}
+@media(prefers-color-scheme:dark){:root{--qa-bg:#16161f;--qa-surface:#22222e;--qa-ink:#e8e8ef;--qa-sub:#a8a8b5;--qa-muted:#9a9aa6;--qa-up-bg:#12314a;--qa-down-bg:#3a1c1f;--qa-score-pos:#81c784;--qa-score-neg:#ef9a9a}}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;min-height:100vh;padding:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--qa-bg);color:var(--qa-ink);min-height:100vh;padding:16px}
 .container{max-width:600px;margin:0 auto}
-h1{font-size:24px;color:#1e1e2e;text-align:center;margin-bottom:4px}
-p.sub{color:#666;text-align:center;margin-bottom:24px;font-size:14px}
-.question-card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:16px}
-.vote-btns{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:40px}
-.vote-btn{display:flex;align-items:center;justify-content:center;border:none;background:none;cursor:pointer;padding:6px;border-radius:8px;transition:all .2s;width:36px;height:36px}
-.vote-btn:hover{background:#e3f2fd}
-.vote-btn.voted{color:#1e88e5;background:#e3f2fd}
+h1{font-size:24px;color:var(--qa-ink);text-align:center;margin-bottom:4px}
+p.sub{color:var(--qa-sub);text-align:center;margin-bottom:24px;font-size:14px}
+.question-card{background:var(--qa-surface);border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:16px}
+.vote-btns{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:44px}
+.vote-btn{display:flex;align-items:center;justify-content:center;border:none;background:none;cursor:pointer;padding:6px;border-radius:8px;transition:background .2s,color .2s;width:44px;height:44px}
+.vote-btn:hover{background:var(--qa-up-bg)}
+.vote-btn.voted{color:var(--qa-primary);background:var(--qa-up-bg)}
 .vote-btn:disabled{cursor:default}
-.vote-arrow{font-size:18px;line-height:1;color:#999;transition:color .2s}
-.vote-btn.voted .vote-arrow{color:#1e88e5}
-.vote-btn.down-voted{color:#e53935;background:#ffebee}
-.vote-btn.down-voted .vote-arrow{color:#e53935}
+.vote-arrow{font-size:18px;line-height:1;color:var(--qa-muted);transition:color .2s}
+.vote-btn.voted .vote-arrow{color:var(--qa-primary)}
+.vote-btn.down-voted{color:var(--qa-danger);background:var(--qa-down-bg)}
+.vote-btn.down-voted .vote-arrow{color:var(--qa-danger)}
 .vote-score{font-size:13px;font-weight:700;text-align:center;line-height:1;min-width:20px}
 .q-content{flex:1;min-width:0}
-.q-text{font-size:16px;color:#1e1e2e;line-height:1.4;word-wrap:break-word}
-.q-meta{font-size:12px;color:#999;margin-top:6px}
+.q-text{font-size:16px;color:var(--qa-ink);line-height:1.4;word-wrap:break-word}
+.q-meta{font-size:12px;color:var(--qa-muted);margin-top:6px}
 .msg{text-align:center;padding:16px;border-radius:8px;font-size:14px;margin-top:16px}
 .msg.off{background:#fff3e0;color:#e65100}
-.empty{text-align:center;color:#999;font-size:14px;margin-top:40px}
-a.back{display:block;text-align:center;margin-top:20px;text-decoration:none;padding:14px;background:#1e88e5;color:#fff;border-radius:12px;font-size:16px;font-weight:600;transition:background .2s}
-a.back:hover{background:#1565c0}
+.empty{text-align:center;color:var(--qa-muted);font-size:14px;margin-top:40px}
+a.back{display:block;text-align:center;margin-top:20px;text-decoration:none;padding:14px;min-height:48px;background:var(--qa-primary);color:#fff;border-radius:12px;font-size:16px;font-weight:600;transition:background .2s}
+a.back:hover{background:var(--qa-primary-hover)}
+@media(prefers-color-scheme:dark){.msg.off{background:#3a2a12;color:#ffcc80}}
 </style>
 </head>
 <body>
-<div class="container">
+<main class="container">
 <h1 id="page-title">Vote on Questions</h1>
 <p class="sub" id="page-sub">Vote on the questions you'd like answered</p>
 <div id="questions"></div>
-<div id="msg" class="msg" style="display:none"></div>
+<div id="msg" class="msg" role="status" aria-live="polite" style="display:none"></div>
 <a class="back" href="/qa">&larr; Submit a question</a>
-</div>
+</main>
 <script>
 const questionsEl=document.getElementById('questions'),msgEl=document.getElementById('msg');
 const voted=JSON.parse(sessionStorage.getItem('qa_voted')||'{}'); // {id: "up"|"down"}
@@ -3569,12 +3593,12 @@ async function loadQuestions(){
     questionsEl.innerHTML=data.map(q=>{
       const dir=q.voted||voted[q.id]||null;
       const score=(q.upvotes||0)-(q.downvotes||0);
-      const scoreColor=score>0?'#43a047':score<0?'#e53935':'#999';
+      const scoreColor=score>0?'var(--qa-score-pos)':score<0?'var(--qa-score-neg)':'var(--qa-muted)';
       return '<div class="question-card" id="qc-'+q.id+'">'
         +'<div class="vote-btns">'
-        +'<button class="vote-btn'+(dir==='up'?' voted':'')+'" id="up-'+q.id+'" onclick="vote(\''+q.id+'\',\'up\')"><span class="vote-arrow">&#9650;</span></button>'
+        +'<button class="vote-btn'+(dir==='up'?' voted':'')+'" id="up-'+q.id+'" aria-label="Upvote" aria-pressed="'+(dir==='up')+'" onclick="vote(\''+q.id+'\',\'up\')"><span class="vote-arrow" aria-hidden="true">&#9650;</span></button>'
         +'<span class="vote-score" id="vs-'+q.id+'" data-score="'+score+'" style="color:'+scoreColor+'">'+score+'</span>'
-        +'<button class="vote-btn'+(dir==='down'?' down-voted':'')+'" id="dn-'+q.id+'" onclick="vote(\''+q.id+'\',\'down\')"><span class="vote-arrow">&#9660;</span></button>'
+        +'<button class="vote-btn'+(dir==='down'?' down-voted':'')+'" id="dn-'+q.id+'" aria-label="Downvote" aria-pressed="'+(dir==='down')+'" onclick="vote(\''+q.id+'\',\'down\')"><span class="vote-arrow" aria-hidden="true">&#9660;</span></button>'
         +'</div>'
         +'<div class="q-content">'
         +'<div class="q-text">'+escHtml(q.text)+'</div>'
@@ -3600,14 +3624,14 @@ function updateBtns(id,dir,prevDir){
   const up=document.getElementById('up-'+id);
   const dn=document.getElementById('dn-'+id);
   const vs=document.getElementById('vs-'+id);
-  if(up){up.className='vote-btn'+(dir==='up'?' voted':'')}
-  if(dn){dn.className='vote-btn'+(dir==='down'?' down-voted':'')}
+  if(up){up.className='vote-btn'+(dir==='up'?' voted':'');up.setAttribute('aria-pressed',dir==='up')}
+  if(dn){dn.className='vote-btn'+(dir==='down'?' down-voted':'');dn.setAttribute('aria-pressed',dir==='down')}
   if(vs){
     let s=parseInt(vs.dataset.score)||0;
     if(prevDir==='up')s--;else if(prevDir==='down')s++;
     if(dir==='up')s++;else if(dir==='down')s--;
     vs.dataset.score=s;vs.textContent=s;
-    vs.style.color=s>0?'#43a047':s<0?'#e53935':'#999';
+    vs.style.color=s>0?'var(--qa-score-pos)':s<0?'var(--qa-score-neg)':'var(--qa-muted)';
   }
 }
 
@@ -3628,53 +3652,56 @@ setInterval(loadQuestions,5000);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Q&A Admin</title>
 <style>
+${qaSharedCss}
+:root{--qa-bg:#1e1e2e;--qa-surface:#2a2a3e;--qa-ink:#e0e0e0;--qa-muted:#a0a0ad;--qa-border:#3b3b5c}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1e1e2e;color:#e0e0e0;min-height:100vh;padding:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--qa-bg);color:var(--qa-ink);min-height:100vh;padding:16px}
 .header{display:flex;align-items:center;justify-content:space-between;padding:16px;margin-bottom:16px}
 h1{font-size:22px}
 .tabs{display:flex;gap:8px;margin-bottom:16px;padding:0 16px}
-.tab{padding:8px 20px;border-radius:8px;border:1px solid #3b3b5c;background:transparent;color:#e0e0e0;cursor:pointer;font-size:14px;transition:all .2s}
-.tab.active{background:#1e88e5;border-color:#1e88e5;color:#fff}
+.tab{min-height:44px;padding:8px 20px;border-radius:8px;border:1px solid var(--qa-border);background:transparent;color:var(--qa-ink);cursor:pointer;font-size:14px;transition:background .2s,border-color .2s}
+.tab.active{background:var(--qa-primary);border-color:var(--qa-primary);color:#fff}
 .tab .count{background:rgba(255,255,255,.2);border-radius:10px;padding:1px 8px;margin-left:6px;font-size:12px}
 .list{padding:0 16px}
-.q{background:#2a2a3e;border-radius:12px;padding:16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
-.q.live{border:2px solid #43a047}
+.q{background:var(--qa-surface);border-radius:12px;padding:16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.q.live{border:2px solid var(--qa-success)}
 .q-text{flex:1;font-size:15px;line-height:1.4;min-width:150px}
-.q-time{color:#888;font-size:12px;white-space:nowrap;padding-top:3px}
+.q-time{color:var(--qa-muted);font-size:12px;white-space:nowrap;padding-top:3px}
 .q-label{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600}
-.q-label.done{background:#42a5f5;color:#fff}
-.q-label.denied{background:#e53935;color:#fff}
+.q-label.done{background:#42a5f5;color:#08233b}
+.q-label.denied{background:var(--qa-danger);color:#fff}
 .q-actions{display:flex;gap:6px;flex-wrap:wrap}
-.btn{padding:8px 14px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:background .2s}
-.btn-approve{background:#43a047;color:#fff}.btn-approve:hover{background:#2e7d32}
-.btn-deny{background:#e53935;color:#fff}.btn-deny:hover{background:#c62828}
-.btn-live{background:#1e88e5;color:#fff}.btn-live:hover{background:#1565c0}
-.btn-done{background:#42a5f5;color:#fff}.btn-done:hover{background:#1e88e5}
-.btn-back{background:#ff9800;color:#fff}.btn-back:hover{background:#f57c00}
-.btn-golive-confirm{background:#1e88e5;color:#fff;opacity:0.5}.btn-golive-confirm:hover{opacity:1}
-.btn-edit{background:#ff9800;color:#fff}.btn-edit:hover{background:#f57c00}
-.btn-del{background:#555;color:#ccc}.btn-del:hover{background:#777}
+.btn{min-height:44px;padding:8px 14px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:background .2s}
+.btn-approve{background:var(--qa-success);color:#fff}.btn-approve:hover{background:var(--qa-success-hover)}
+.btn-deny{background:var(--qa-danger);color:#fff}.btn-deny:hover{background:var(--qa-danger-hover)}
+.btn-live{background:var(--qa-primary);color:#fff}.btn-live:hover{background:var(--qa-primary-hover)}
+.btn-done{background:#42a5f5;color:#08233b}.btn-done:hover{background:#1e88e5;color:#fff}
+.btn-back{background:#ff9800;color:#3d2600}.btn-back:hover{background:#f57c00;color:#fff}
+.btn-golive-confirm{background:var(--qa-primary);color:#fff;opacity:0.6}.btn-golive-confirm:hover{opacity:1}
+.btn-edit{background:#ff9800;color:#3d2600}.btn-edit:hover{background:#f57c00;color:#fff}
+.btn-del{background:#4a4a5e;color:#e0e0e0}.btn-del:hover{background:#5e5e77}
 .edit-area{width:100%;display:flex;gap:6px;align-items:center;margin-top:8px}
-.edit-area textarea{flex:1;background:#1e1e2e;color:#e0e0e0;border:2px solid #1e88e5;border-radius:8px;padding:8px;font-size:14px;font-family:inherit;resize:vertical;min-height:40px}
+.edit-area textarea{flex:1;background:var(--qa-bg);color:var(--qa-ink);border:2px solid var(--qa-primary);border-radius:8px;padding:8px;font-size:14px;font-family:inherit;resize:vertical;min-height:40px}
 .edit-area .btn{white-space:nowrap}
-.empty{text-align:center;padding:48px;color:#888;font-size:16px}
-.status-bar{padding:8px 16px;background:#43a047;color:#fff;border-radius:8px;margin:0 16px 16px;display:flex;align-items:center;justify-content:space-between}
+.empty{text-align:center;padding:48px;color:var(--qa-muted);font-size:16px}
+.status-bar{padding:8px 16px;background:var(--qa-success);color:#fff;border-radius:8px;margin:0 16px 16px;display:flex;align-items:center;justify-content:space-between}
 .status-bar .btn{background:rgba(255,255,255,.2);color:#fff}
 .add-bar{display:flex;gap:8px;padding:0 16px;margin-bottom:16px}
-.add-bar input{flex:1;background:#2a2a3e;color:#e0e0e0;border:1px solid #3b3b5c;border-radius:8px;padding:10px 14px;font-size:14px;font-family:inherit}
-.add-bar input:focus{outline:none;border-color:#1e88e5}
+.add-bar input{flex:1;min-height:44px;background:var(--qa-surface);color:var(--qa-ink);border:1px solid var(--qa-border);border-radius:8px;padding:10px 14px;font-size:14px;font-family:inherit}
+.add-bar input:focus{outline:none;border-color:var(--qa-primary)}
 .login{max-width:360px;margin:80px auto;text-align:center}
-.login input{width:100%;background:#2a2a3e;color:#e0e0e0;border:2px solid #3b3b5c;border-radius:12px;padding:14px;font-size:16px;margin:16px 0;text-align:center}
-.login input:focus{outline:none;border-color:#1e88e5}
+.login input{width:100%;min-height:48px;background:var(--qa-surface);color:var(--qa-ink);border:2px solid var(--qa-border);border-radius:12px;padding:14px;font-size:16px;margin:16px 0;text-align:center}
+.login input:focus{outline:none;border-color:var(--qa-primary)}
 .login .btn{width:100%;padding:14px;font-size:16px}
-.login .err{color:#e53935;margin-top:8px;font-size:14px}
+.login .err{color:#ef9a9a;margin-top:8px;font-size:14px}
 </style>
 </head>
 <body>
 <div id="login-screen" class="login" style="display:none">
 <h1>Q&A Admin</h1>
-<p style="color:#888;margin-top:8px">Enter admin password to continue</p>
-<input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+<p style="color:var(--qa-muted);margin-top:8px">Enter admin password to continue</p>
+<label class="sr-only" for="pw-input">Admin password</label>
+<input type="password" id="pw-input" aria-label="Admin password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
 <button class="btn btn-live" onclick="doLogin()">Login</button>
 <div class="err" id="pw-err" style="display:none"></div>
 </div>
@@ -3682,7 +3709,7 @@ h1{font-size:22px}
 <div id="main-app" style="display:none">
 <div class="header">
 <h1>Q&A Admin</h1>
-<span id="status" style="font-size:13px;color:#888">Connecting...</span>
+<span id="status" role="status" aria-live="polite" style="font-size:13px;color:var(--qa-muted)">Connecting...</span>
 </div>
 
 <div id="display-bar" class="status-bar" style="display:none">
@@ -3691,7 +3718,8 @@ h1{font-size:22px}
 </div>
 
 <div class="add-bar">
-<input type="text" id="add-input" placeholder="Add a question..." spellcheck="true" onkeydown="if(event.key==='Enter')addQ()">
+<label class="sr-only" for="add-input">Add a question</label>
+<input type="text" id="add-input" aria-label="Add a question" placeholder="Add a question..." spellcheck="true" onkeydown="if(event.key==='Enter')addQ()">
 <button class="btn btn-approve" onclick="addQ()">Add</button>
 </div>
 
@@ -3749,12 +3777,17 @@ function lockOut(){
   document.getElementById('pw-err').style.display='block';
   document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
 }
+let lastLoadSig='';
 async function load(){
   if(!authed)return;
   try{
     const r=await fetch('/api/qa/questions',{headers});
     if(r.status===401){lockOut();return}
     if(r.ok)questions=await r.json();
+    // Skip the full innerHTML rebuild when nothing relevant changed (prevents flicker/mis-taps).
+    const sig=JSON.stringify(questions.map(q=>[q.id,q.status,q.text,q.upvotes,q.downvotes,q.submitterName]))+'|'+displayedId;
+    if(sig===lastLoadSig)return;
+    lastLoadSig=sig;
     if(!editingId)render();
   }catch(e){}
 }
@@ -3843,8 +3876,8 @@ function editQ(id){
   const q=questions.find(q=>q.id===id);if(!q)return;
   editingId=id;
   const el=document.getElementById('qt-'+id);if(!el)return;
-  el.innerHTML='<div class="edit-area"><textarea id="edit-'+id+'" spellcheck="true">'+q.text+'</textarea><button class="btn btn-approve" onclick="saveEdit(\''+id+'\')">Save</button><button class="btn btn-del" onclick="cancelEdit()">Cancel</button></div>';
-  const ta=document.getElementById('edit-'+id);if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}
+  el.innerHTML='<div class="edit-area"><textarea id="edit-'+id+'" spellcheck="true" aria-label="Edit question"></textarea><button class="btn btn-approve" onclick="saveEdit(\''+id+'\')">Save</button><button class="btn btn-del" onclick="cancelEdit()">Cancel</button></div>';
+  const ta=document.getElementById('edit-'+id);if(ta){ta.value=q.text;ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}
 }
 async function saveEdit(id){
   const ta=document.getElementById('edit-'+id);if(!ta)return;
@@ -3876,10 +3909,10 @@ async function checkStatus(){
   if(!authed)return;
   try{const r=await fetch('/api/qa/status');const d=await r.json();
     document.getElementById('status').textContent=d.sessionActive?'Session Active':'Session Inactive';
-    document.getElementById('status').style.color=d.sessionActive?'#43a047':'#e53935';
+    document.getElementById('status').style.color=d.sessionActive?'#66bb6a':'#ef5350';
     const newDisplayed=d.displayedQuestionId||null;
     if(newDisplayed!==displayedId){displayedId=newDisplayed;render()}
-  }catch(e){document.getElementById('status').textContent='Disconnected';document.getElementById('status').style.color='#e53935'}
+  }catch(e){document.getElementById('status').textContent='Disconnected';document.getElementById('status').style.color='#ef5350'}
 }
 
 setInterval(()=>{if(authed)load()},3000);
