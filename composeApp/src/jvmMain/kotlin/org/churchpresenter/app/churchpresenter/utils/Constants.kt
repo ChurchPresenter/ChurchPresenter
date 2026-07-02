@@ -259,7 +259,9 @@ object Constants {
     const val WS_EVENT_PICTURES_UPDATED           = "pictures_updated"
     const val WS_EVENT_DISPLAY_CLEARED            = "display_cleared"
     const val WS_EVENT_SONG_SECTION_SELECTED      = "song_section_selected"
-    const val WS_EVENT_QUESTIONS_UPDATED          = "questions_updated"
+    const val WS_EVENT_QUESTIONS_UPDATED                  = "questions_updated"
+    const val WS_EVENT_PRESENTATION_SLIDE_CHANGED         = "presentation_slide_changed"
+    const val WS_EVENT_PRESENTATION_FREEZE_CHANGED        = "presentation_freeze_changed"
 
     // WebSocket command types (client → server)
     const val WS_CMD_SELECT_SONG            = "select_song"
@@ -284,6 +286,7 @@ object Constants {
     const val ITEM_TYPE_MEDIA        = "media"
 
     // API key authentication
+    const val HEADER_PRESENTATION_PASSWORD = "X-Presentation-Password"
     const val HEADER_API_KEY        = "X-Api-Key"
     const val HEADER_DEVICE_ID      = "X-Device-Id"
     const val HEADER_APP_VERSION    = "X-App-Version"

@@ -43,6 +43,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.app.churchpresenter.data.settings.PresentationRemoteSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -589,6 +590,59 @@ class CompanionServer {
     @Volatile var qaAdminPassword: String = ""
     @Volatile var qaCooldownSeconds: Int = 30
     @Volatile var qaVotingEnabled: Boolean = false
+
+    // Presentation remote control settings
+    @Volatile var presentationRemoteEnabled: Boolean = false
+    @Volatile var presentationRemotePassword: String = ""
+
+    // Current presentation state (updated from desktop, read by remote clients)
+    @Volatile private var _currentPresentationId: String = ""
+    @Volatile private var _currentSlideIndex: Int = 0
+    @Volatile private var _currentSlideTotalCount: Int = 0
+    @Volatile private var _presentationFrozen: Boolean = false
+    @Volatile private var _presentationIsPlaying: Boolean = false
+
+    fun updatePresentationRemoteSettings(settings: PresentationRemoteSettings) {
+        presentationRemoteEnabled = settings.remoteControlEnabled
+        presentationRemotePassword = settings.remotePassword
+    }
+
+    fun broadcastSlideChange(id: String, index: Int, total: Int, isPlaying: Boolean) {
+        _currentPresentationId = id
+        _currentSlideIndex = index
+        _currentSlideTotalCount = total
+        _presentationIsPlaying = isPlaying
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
+            payload = """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying}"""
+        ))
+    }
+
+    fun broadcastFreezeChange(frozen: Boolean) {
+        _presentationFrozen = frozen
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_PRESENTATION_FREEZE_CHANGED,
+            payload = """{"frozen":$frozen}"""
+        ))
+    }
+
+    /** Emitted when remote presses freeze/blank. */
+    val onPresentationFreezeToggle = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when remote presses play/pause. */
+    val onPresentationPlayPause = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when remote jumps to a specific slide index. */
+    val onPresentationGoto = MutableSharedFlow<Int>(
+        extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
 
     // ATEM + lower-third folder config for the Companion lower-third sequencer
     @Volatile private var _atemSettings: AtemSettings? = null
@@ -1497,7 +1551,9 @@ class CompanionServer {
     fun start(port: Int = Constants.SERVER_DEFAULT_PORT, hostOverride: String = "") {
         if (_isRunning.value) return
 
-        val actualPort = findFreePort(port)
+        // Find the first pair of consecutive free ports starting from the requested one.
+        // The server needs port N (plain-HTTP) and port N+1 (plain-HTTP localhost connector).
+        val actualPort = findFreePortPair(port)
         currentPort = actualPort
 
         val displayHost = hostOverride.trim().ifEmpty { localIpAddress() }
@@ -1507,12 +1563,18 @@ class CompanionServer {
         startPlainHttp(actualPort, displayHost)
     }
 
+    /** Fallback plain-HTTP start used only if SSL cert generation fails. */
     private fun startPlainHttp(port: Int, displayHost: String = localIpAddress()) {
         try {
             server = embeddedServer(Netty, configure = {
                 connector {
                     host = "0.0.0.0"
                     this.port = port
+                }
+                // Plain HTTP on localhost for embedded WebView
+                connector {
+                    host = "127.0.0.1"
+                    this.port = port + 1
                 }
             }) { configurePipeline() }
             server?.start(wait = false)
@@ -1533,6 +1595,18 @@ class CompanionServer {
         return startPort
     }
 
+    /**
+     * Finds the first port >= [startPort] where BOTH [port] and [port]+1 are free.
+     * The server requires two consecutive free ports (main HTTP + localhost connector).
+     * Scans up to 20 candidates before giving up and returning [startPort] as-is.
+     */
+    private fun findFreePortPair(startPort: Int): Int {
+        for (candidate in startPort until startPort + 40 step 2) {
+            if (isPortFree(candidate) && isPortFree(candidate + 1)) return candidate
+        }
+        return startPort  // give up — let Netty surface the real error
+    }
+
     private fun isPortFree(port: Int): Boolean = try {
         ServerSocket(port).use { true }
     } catch (_: IOException) {
@@ -1551,6 +1625,7 @@ class CompanionServer {
                 allowHeader(Constants.HEADER_DEVICE_ID)
                 allowHeader(Constants.HEADER_APP_VERSION)
                 allowHeader("X-QA-Password")
+                allowHeader(Constants.HEADER_PRESENTATION_PASSWORD)
                 exposeHeader(Constants.HEADER_SERVER_VERSION)
                 anyHost()
             }
@@ -2114,6 +2189,73 @@ class CompanionServer {
                     } catch (e: Exception) {
                         call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
                     }
+                }
+
+                // ── Presentation remote control endpoints ─────────────────────
+
+                /** GET /presentation-remote — mobile remote control web page */
+                get("/presentation-remote") {
+                    call.respondText(presentationRemotePageHtml(), ContentType.Text.Html)
+                }
+
+                /** GET /api/presentation-remote/status — current presentation state (no auth needed) */
+                get("/api/presentation-remote/status") {
+                    call.respondText(
+                        """{"enabled":$presentationRemoteEnabled,"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"frozen":$_presentationFrozen,"isPlaying":$_presentationIsPlaying,"passwordRequired":${presentationRemotePassword.isNotEmpty()}}""",
+                        ContentType.Application.Json
+                    )
+                }
+
+                /** POST /api/presentation-remote/auth — verify password */
+                post("/api/presentation-remote/auth") {
+                    if (!checkPresentationRemoteAuth(call)) return@post
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                /** POST /api/presentation-remote/next */
+                post("/api/presentation-remote/next") {
+                    if (!checkPresentationRemoteAuth(call)) return@post
+                    val next = (_currentSlideIndex + 1).coerceAtMost(_currentSlideTotalCount - 1)
+                    scope.launch { onPresentationGoto.emit(next) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                /** POST /api/presentation-remote/previous */
+                post("/api/presentation-remote/previous") {
+                    if (!checkPresentationRemoteAuth(call)) return@post
+                    val prev = (_currentSlideIndex - 1).coerceAtLeast(0)
+                    scope.launch { onPresentationGoto.emit(prev) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                /** POST /api/presentation-remote/goto/{index} */
+                post("/api/presentation-remote/goto/{index}") {
+                    if (!checkPresentationRemoteAuth(call)) return@post
+                    val index = call.parameters["index"]?.toIntOrNull()
+                        ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing index"}"""); return@post }
+                    val clamped = index.coerceIn(0, (_currentSlideTotalCount - 1).coerceAtLeast(0))
+                    scope.launch { onPresentationGoto.emit(clamped) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                /** POST /api/presentation-remote/freeze — toggle blank/unblank */
+                post("/api/presentation-remote/freeze") {
+                    if (!checkPresentationRemoteAuth(call)) return@post
+                    scope.launch { onPresentationFreezeToggle.emit(Unit) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                /** POST /api/presentation-remote/play-pause */
+                post("/api/presentation-remote/play-pause") {
+                    if (!checkPresentationRemoteAuth(call)) return@post
+                    scope.launch { onPresentationPlayPause.emit(Unit) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                /** POST /api/presentation-remote/upload — base64 file upload from remote page */
+                post("/api/presentation-remote/upload") {
+                    if (!checkPresentationRemoteAuth(call)) return@post
+                    handlePresentationFileUpload(call)
                 }
 
                 // ── Picture endpoints ─────────────────────────────────────────
@@ -3091,6 +3233,82 @@ class CompanionServer {
         }
     }
 
+    private suspend fun checkPresentationRemoteAuth(call: io.ktor.server.application.ApplicationCall): Boolean {
+        if (!presentationRemoteEnabled) {
+            call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"remote control is disabled"}""")
+            return false
+        }
+        val pw = presentationRemotePassword
+        val provided = call.request.headers[Constants.HEADER_PRESENTATION_PASSWORD]
+            ?: call.request.queryParameters["password"]
+            ?: ""
+        return if (pw.isEmpty() || MessageDigest.isEqual(provided.toByteArray(), pw.toByteArray())) {
+            true
+        } else {
+            call.respond(io.ktor.http.HttpStatusCode.Unauthorized, """{"error":"Invalid password"}""")
+            false
+        }
+    }
+
+    private suspend fun handlePresentationFileUpload(call: io.ktor.server.application.ApplicationCall) {
+        try {
+            val contentLength = call.request.headers["Content-Length"]?.toLongOrNull() ?: 0L
+            if (contentLength > 200 * 1024 * 1024) {
+                call.respond(io.ktor.http.HttpStatusCode.PayloadTooLarge, """{"error":"file too large (max 200 MB)"}""")
+                return
+            }
+            val body   = call.receiveText()
+            val parsed = json.parseToJsonElement(body) as? kotlinx.serialization.json.JsonObject
+            val name   = (parsed?.get("name") as? kotlinx.serialization.json.JsonPrimitive)?.content
+            val data   = (parsed?.get("data") as? kotlinx.serialization.json.JsonPrimitive)?.content
+            if (name.isNullOrBlank() || data.isNullOrBlank()) {
+                call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
+                return
+            }
+            val safeName = File(name).name.ifBlank { "upload.pdf" }
+            val ext = safeName.substringAfterLast('.', "").lowercase()
+            if (ext !in setOf("pdf", "ppt", "pptx", "key")) {
+                call.respond(io.ktor.http.HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
+                return
+            }
+            val base64Match = Regex("^data:[^;]+;base64,(.+)$").find(data)
+            if (base64Match == null) {
+                call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
+                return
+            }
+            val fileBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
+            val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_presentations").also { it.mkdirs() }
+            val uniqueName = if (File(uploadDir, safeName).exists()) {
+                val ts   = System.currentTimeMillis()
+                val base = safeName.substringBeforeLast('.', safeName)
+                "${base}_$ts.$ext"
+            } else safeName
+            val file = File(uploadDir, uniqueName)
+            file.writeBytes(fileBytes)
+            val id = file.absolutePath.hashCode().toUInt().toString(16)
+            _lastDeviceUploadedPresentationId?.let { oldId ->
+                _presentationCatalogs.remove(oldId)
+                _slideBytes.remove(oldId)
+                _presentationFilePaths.remove(oldId)
+            }
+            _lastDeviceUploadedPresentationId = id
+            val uploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+            scope.launch { onPresentationUploaded.emit(file) }
+            scope.launch { onInstantAction.emit(RemoteInstantAction(
+                actionType = "upload",
+                title = file.name,
+                detail = "${fileBytes.size / 1024} KB",
+                clientId = uploadClientId
+            )) }
+            call.respondText(
+                """{"ok":true,"id":"$id","name":"${file.nameWithoutExtension.replace("\"", "\\\"")}"}""",
+                ContentType.Application.Json
+            )
+        } catch (e: Exception) {
+            call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
+        }
+    }
+
     private suspend fun checkQaAdmin(call: io.ktor.server.application.ApplicationCall): Boolean {
         val pw = qaAdminPassword
         if (pw.isEmpty()) return true
@@ -3666,6 +3884,194 @@ async function checkStatus(){
 
 setInterval(()=>{if(authed)load()},3000);
 setInterval(()=>{if(authed)checkStatus()},3000);
+</script>
+</body>
+</html>
+""".trimIndent()
+
+    private fun presentationRemotePageHtml(): String = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Presentation Remote</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#111;color:#fff;height:100dvh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
+#login{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:24px;gap:12px}
+#login h2{font-size:20px;margin-bottom:8px}
+#login input{width:100%;max-width:320px;padding:12px;border-radius:10px;border:1px solid #333;background:#222;color:#fff;font-size:16px;outline:none}
+#login input:focus{border-color:#4fa3e3}
+#login button{width:100%;max-width:320px;padding:13px;background:#4fa3e3;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer}
+#err{color:#e57373;font-size:13px;display:none}
+#app{display:none;flex-direction:column;flex:1;overflow:hidden}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1a1a1a;border-bottom:1px solid #222}
+#counter{font-size:18px;font-weight:700;letter-spacing:1px}
+#btns{display:flex;gap:8px}
+.icon-btn{background:#2a2a2a;border:1px solid #333;color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:500;transition:background .15s}
+.icon-btn:active{background:#3a3a3a}
+.icon-btn.active{background:#e57373;border-color:#e57373}
+.icon-btn.active-play{background:#43a047;border-color:#43a047}
+#slides-area{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+#cur-slide{flex:1;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+#cur-slide img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+#blank-overlay{position:absolute;inset:0;background:#000;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;letter-spacing:1px;display:none}
+#upload-status{font-size:12px;color:#aaa;text-align:center;padding:2px 0;min-height:16px}
+#next-row{height:90px;background:#1a1a1a;border-top:1px solid #222;display:flex;align-items:center;padding:0 16px;gap:12px;overflow:hidden}
+#next-label{font-size:11px;font-weight:600;letter-spacing:1px;color:#888;white-space:nowrap}
+#next-img{height:70px;border-radius:6px;border:1px solid #333;background:#000}
+#thumb-drawer{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10;display:none;flex-direction:column;overflow:hidden}
+#thumb-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;font-size:16px;font-weight:600}
+#thumb-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px 8px;line-height:1}
+#thumb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 12px;overflow-y:auto;flex:1}
+.thumb-item{position:relative;cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid transparent;transition:border .15s}
+.thumb-item.sel{border-color:#4fa3e3}
+.thumb-item img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#000}
+.thumb-num{position:absolute;bottom:3px;right:5px;font-size:10px;font-weight:700;background:rgba(0,0,0,.6);color:#fff;border-radius:3px;padding:1px 4px}
+#botbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1a1a1a;border-top:1px solid #222}
+.nav-btn{background:#2a2a2a;border:1px solid #333;color:#fff;border-radius:10px;padding:10px 20px;font-size:20px;cursor:pointer;font-weight:400;transition:background .15s;flex:1;margin:0 4px;text-align:center}
+.nav-btn:active{background:#3a3a3a}
+#grid-btn{background:none;border:none;color:#bbb;font-size:13px;cursor:pointer;padding:4px 8px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="login">
+  <h2>Presentation Remote</h2>
+  <input id="pw-input" type="password" placeholder="Password (if set)" autocomplete="current-password">
+  <button onclick="doLogin()">Connect</button>
+  <span id="err">Incorrect password</span>
+</div>
+<div id="app">
+  <div id="topbar">
+    <div id="counter">– / –</div>
+    <div id="btns">
+      <button class="icon-btn" id="blank-btn" onclick="toggleBlank()">Blank</button>
+      <button class="icon-btn" id="play-btn" onclick="togglePlay()">▶ Play</button>
+      <button class="icon-btn" id="upload-btn" onclick="document.getElementById('upload-input').click()">⬆ Upload</button>
+      <input type="file" id="upload-input" accept=".pdf,.ppt,.pptx,.key" style="display:none">
+    </div>
+  </div>
+  <div id="slides-area">
+    <div id="cur-slide">
+      <img id="cur-img" alt="" draggable="false">
+      <div id="blank-overlay">BLANKED</div>
+    </div>
+    <div id="next-row">
+      <span id="next-label">NEXT ▸</span>
+      <img id="next-img" alt="" draggable="false">
+    </div>
+  </div>
+  <div id="upload-status"></div>
+  <div id="botbar">
+    <button class="nav-btn" onclick="goSlide(state.index-1)">‹</button>
+    <button id="grid-btn" onclick="openThumb()">⊞ Slides</button>
+    <button class="nav-btn" onclick="goSlide(state.index+1)">›</button>
+  </div>
+</div>
+<div id="thumb-drawer">
+  <div id="thumb-header">
+    <span>Slides</span>
+    <button id="thumb-close" onclick="closeThumb()">✕</button>
+  </div>
+  <div id="thumb-grid"></div>
+</div>
+<script>
+let state={id:'',index:0,total:0,frozen:false,isPlaying:false};
+let password=sessionStorage.getItem('remote_pw')||'';
+const headers={'Content-Type':'application/json'};
+if(password)headers['X-Presentation-Password']=password;
+function slideUrl(index){return'/api/presentations/'+state.id+'/slides/'+index;}
+function updateUI(){
+  document.getElementById('counter').textContent=state.total>0?(state.index+1)+' / '+state.total:'– / –';
+  const fb=document.getElementById('blank-btn');
+  fb.classList.toggle('active',state.frozen);fb.textContent=state.frozen?'Unblank':'Blank';
+  document.getElementById('blank-overlay').style.display=state.frozen?'flex':'none';
+  const pb=document.getElementById('play-btn');
+  pb.classList.toggle('active-play',state.isPlaying);pb.textContent=state.isPlaying?'⏸ Pause':'▶ Play';
+  if(state.id){
+    document.getElementById('cur-img').src=slideUrl(state.index);
+    const ni=document.getElementById('next-img');
+    if(state.index+1<state.total){ni.src=slideUrl(state.index+1);ni.style.display='block';}
+    else{ni.style.display='none';}
+  }
+  const sel=document.querySelector('.thumb-item.sel');if(sel)sel.classList.remove('sel');
+  const newSel=document.getElementById('ti-'+state.index);
+  if(newSel){newSel.classList.add('sel');newSel.scrollIntoView({block:'nearest'});}
+}
+async function fetchStatus(){
+  try{
+    const r=await fetch('/api/presentation-remote/status');const d=await r.json();
+    if(!d.enabled){document.getElementById('login').innerHTML='<h2>Remote control is disabled</h2>';return;}
+    const changed=d.id!==state.id||d.index!==state.index||d.total!==state.total||d.frozen!==state.frozen||d.isPlaying!==state.isPlaying;
+    state=d;if(changed)updateUI();
+  }catch(e){}
+}
+async function doLogin(){
+  password=document.getElementById('pw-input').value;
+  sessionStorage.setItem('remote_pw',password);headers['X-Presentation-Password']=password;
+  const r=await fetch('/api/presentation-remote/auth',{method:'POST',headers});
+  if(r.ok){document.getElementById('login').style.display='none';document.getElementById('app').style.display='flex';startWs();setInterval(fetchStatus,2500);}
+  else{document.getElementById('err').style.display='block';}
+}
+async function post(path){try{await fetch(path,{method:'POST',headers});}catch(e){}}
+function toggleBlank(){post('/api/presentation-remote/freeze');}
+function togglePlay(){post('/api/presentation-remote/play-pause');}
+function goSlide(i){if(i<0||i>=state.total)return;post('/api/presentation-remote/goto/'+i);}
+document.getElementById('upload-input').addEventListener('change',async function(){
+  const file=this.files[0];if(!file)return;
+  const btn=document.getElementById('upload-btn');const status=document.getElementById('upload-status');
+  btn.textContent='Uploading…';btn.disabled=true;status.textContent='Uploading '+file.name+'…';
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      const r=await fetch('/api/presentation-remote/upload',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({name:file.name,data:e.target.result})});
+      if(r.ok){status.textContent='✓ Loaded — slides will appear shortly';}
+      else{const d=await r.json().catch(()=>({}));status.textContent='✗ '+(d.error||'Upload failed');}
+    }catch(err){status.textContent='✗ Network error';}
+    btn.textContent='⬆ Upload';btn.disabled=false;
+  };
+  reader.readAsDataURL(file);this.value='';
+});
+let thumbBuilt=false;
+function openThumb(){
+  if(!thumbBuilt&&state.id){
+    const g=document.getElementById('thumb-grid');g.innerHTML='';
+    for(let i=0;i<state.total;i++){
+      const d=document.createElement('div');d.className='thumb-item'+(i===state.index?' sel':'');d.id='ti-'+i;
+      const idx=i;d.onclick=()=>{goSlide(idx);closeThumb();};
+      const im=document.createElement('img');im.src=slideUrl(i);im.loading='lazy';
+      const span=document.createElement('span');span.className='thumb-num';span.textContent=i+1;
+      d.appendChild(im);d.appendChild(span);g.appendChild(d);
+    }
+    thumbBuilt=true;
+  }
+  document.getElementById('thumb-drawer').style.display='flex';
+}
+function closeThumb(){document.getElementById('thumb-drawer').style.display='none';}
+let touchX=0;
+document.getElementById('cur-slide').addEventListener('touchstart',e=>{touchX=e.changedTouches[0].clientX;},{passive:true});
+document.getElementById('cur-slide').addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-touchX;
+  if(Math.abs(dx)>50){dx<0?goSlide(state.index+1):goSlide(state.index-1);}
+},{passive:true});
+function startWs(){
+  const proto=location.protocol==='https:'?'wss':'ws';
+  const ws=new WebSocket(proto+'://'+location.host+'/ws');
+  ws.onmessage=e=>{
+    try{
+      const msg=JSON.parse(e.data);
+      if(msg.type==='presentation_slide_changed'){const d=JSON.parse(msg.payload);state={...state,id:d.id,index:d.index,total:d.total,isPlaying:d.isPlaying};thumbBuilt=false;updateUI();}
+      else if(msg.type==='presentation_freeze_changed'){const d=JSON.parse(msg.payload);state={...state,frozen:d.frozen};updateUI();}
+    }catch(_){}
+  };
+  ws.onclose=()=>{setTimeout(startWs,2000);};
+}
+(async()=>{
+  const r=await fetch('/api/presentation-remote/status');const d=await r.json();
+  if(!d.enabled){document.getElementById('login').innerHTML='<h2>Remote control is disabled</h2>';return;}
+  if(!d.passwordRequired){document.getElementById('login').style.display='none';document.getElementById('app').style.display='flex';state=d;updateUI();startWs();setInterval(fetchStatus,2500);}
+})();
 </script>
 </body>
 </html>

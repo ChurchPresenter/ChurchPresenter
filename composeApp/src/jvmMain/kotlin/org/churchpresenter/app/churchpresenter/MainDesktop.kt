@@ -202,6 +202,13 @@ fun MainDesktop(
     onStopTunnel: () -> Unit = {},
     qaDisplayUrl: String = "",
     onQaDisplayUrlChanged: (String) -> Unit = {},
+    presentationDisplayUrl: String = "",
+    onPresentationDisplayUrlChanged: (String) -> Unit = {},
+    presentationFrozen: Boolean = false,
+    onFreezeToggle: () -> Unit = {},
+    onSlideChanged: ((id: String, slideIndex: Int, total: Int, isPlaying: Boolean) -> Unit)? = null,
+    remotePresentationPlayPauseFlow: kotlinx.coroutines.flow.Flow<Unit>? = null,
+    remotePresentationGotoFlow: kotlinx.coroutines.flow.Flow<Int>? = null,
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     sttManager: STTManager? = null,
     dialogDismissSignal: Int = 0,
@@ -296,6 +303,21 @@ fun MainDesktop(
 
     val presentationViewModel = remember { PresentationViewModel(appSettings) }
     DisposableEffect(Unit) { onDispose { presentationViewModel.dispose() } }
+    LaunchedEffect(presentationViewModel.selectedSlideIndex, presentationViewModel.slideFiles.size, presentationViewModel.isPlaying) {
+        val f = presentationViewModel.selectedPresentation ?: return@LaunchedEffect
+        val id = f.absolutePath.hashCode().toUInt().toString(16)
+        onSlideChanged?.invoke(id, presentationViewModel.selectedSlideIndex, presentationViewModel.slideFiles.size, presentationViewModel.isPlaying)
+    }
+    LaunchedEffect(remotePresentationPlayPauseFlow) {
+        remotePresentationPlayPauseFlow?.collect { presentationViewModel.togglePlayPause() }
+    }
+    LaunchedEffect(remotePresentationGotoFlow) {
+        remotePresentationGotoFlow?.collect { index ->
+            if (index in presentationViewModel.slideFiles.indices) {
+                presentationViewModel.selectSlide(index)
+            }
+        }
+    }
 
     val sceneViewModel = remember { SceneViewModel() }
 
@@ -1184,7 +1206,16 @@ fun MainDesktop(
                                 presenterManager = presenterManager,
                                 onSlidesLoaded = onPresentationSlidesLoaded,
                                 onSettingsChange = onSettingsChange,
-                                viewModel = presentationViewModel
+                                viewModel = presentationViewModel,
+                                tunnelStatus = tunnelStatus,
+                                tunnelUrl = tunnelUrl,
+                                serverUrl = serverUrl,
+                                presentationDisplayUrl = presentationDisplayUrl,
+                                onPresentationDisplayUrlChanged = onPresentationDisplayUrlChanged,
+                                onStartTunnel = onStartTunnel,
+                                onStopTunnel = onStopTunnel,
+                                presentationFrozen = presentationFrozen,
+                                onFreezeToggle = onFreezeToggle
                             )
 
                             Tabs.MEDIA -> MediaTab(

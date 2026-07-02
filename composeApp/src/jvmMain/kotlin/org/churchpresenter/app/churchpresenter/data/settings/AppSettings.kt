@@ -15,6 +15,7 @@ data class AppSettings(
     val streamingSettings: StreamingSettings = StreamingSettings(),
     val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
     val qaSettings: QASettings = QASettings(),
+    val presentationRemoteSettings: PresentationRemoteSettings = PresentationRemoteSettings(),
     val sttSettings: STTSettings = STTSettings(),
     val bibleEngineSettings: BibleEngineSettings = BibleEngineSettings(),
     val serverSettings: ServerSettings = ServerSettings(),
