@@ -200,6 +200,7 @@ object CrashReporter {
                 options.isAttachThreads = false
                 options.isAttachStacktrace = true
                 options.tracesSampleRate = 1.0
+                options.isEnableAutoSessionTracking = true
             }
         } catch (_: Exception) {
             // Sentry failing to init must never prevent the app from starting
