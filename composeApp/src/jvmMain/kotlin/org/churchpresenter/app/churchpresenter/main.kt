@@ -1584,6 +1584,7 @@ private fun PresenterWindows(
     val screenLocks by presenterManager.screenLocks
     val selectedVerses by presenterManager.selectedVerses
     val displayedVerses by presenterManager.displayedVerses
+    val nextVerses by presenterManager.nextVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
     val lyricSection by presenterManager.lyricSection
     val lyricSectionVersion by presenterManager.lyricSectionVersion
@@ -1594,13 +1595,11 @@ private fun PresenterWindows(
     val songDisplaySectionIndex by presenterManager.songDisplaySectionIndex
     val selectedImagePath by presenterManager.selectedImagePath
     val displayedImagePath by presenterManager.displayedImagePath
-    val nextImagePath by presenterManager.nextImagePath
     val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
     val previousDisplayedImagePath by presenterManager.previousDisplayedImagePath
     val pictureSlideOffset by presenterManager.pictureSlideOffset
     val selectedSlide by presenterManager.selectedSlide
     val displayedSlide by presenterManager.displayedSlide
-    val nextSlide by presenterManager.nextSlide
     val slideTransitionAlpha by presenterManager.slideTransitionAlpha
     val previousDisplayedSlide by presenterManager.previousDisplayedSlide
     val slideSlideOffset by presenterManager.slideSlideOffset
@@ -1630,8 +1629,6 @@ private fun PresenterWindows(
     val qaTransitionAlpha by presenterManager.qaTransitionAlpha
     val showQRCodeOnDisplay by presenterManager.showQRCodeOnDisplay
     val displayedDictionaryEntry by presenterManager.displayedDictionaryEntry
-    val timerRemainingSeconds by presenterManager.timerRemainingSeconds
-    val timerRunning by presenterManager.timerRunning
     val presenterNotes by presenterManager.presenterNotes
 
     val proj = appSettings.projectionSettings
@@ -2510,18 +2507,21 @@ private fun PresenterWindows(
                     StageMonitorScreen(
                         sm = appSettings.stageMonitorSettings,
                         presentingMode = presentingMode,
+                        announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
                         currentLyricSection = displayedLyricSection,
                         allLyricSections = allLyricSections,
                         songDisplaySectionIndex = songDisplaySectionIndex,
                         displayedVerses = displayedVerses,
-                        timerRemainingSeconds = timerRemainingSeconds,
-                        timerRunning = timerRunning,
-                        displayedImagePath = displayedImagePath,
-                        nextImagePath = nextImagePath,
-                        displayedSlide = displayedSlide,
-                        nextSlide = nextSlide,
+                        nextVerses = nextVerses,
                         announcementText = displayedAnnouncementText,
+                        displayedImagePath = displayedImagePath,
+                        displayedSlide = displayedSlide,
                         presenterNotes = presenterNotes,
+                        activeScene = activeScene,
+                        displayedQuestion = displayedQuestion,
+                        qaSettings = appSettings.qaSettings,
+                        displayedDictionaryEntry = displayedDictionaryEntry,
+                        dictionarySettings = appSettings.dictionarySettings,
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
@@ -2721,7 +2721,7 @@ private fun PresenterWindows(
             }
         }
 
-        // Key output window — spawned when a key target is configured (not for simulated slots)
+        // Key output window — spawned when a key target is configured
         if (screenAssignment.hasKeyOutput && screenAssignment.keyTargetType != "decklink") {
             val keyScreenIndex = findScreenIndexByBounds(
                 screens,
@@ -2927,7 +2927,7 @@ private fun PresenterWindows(
             }
         }
 
-        // Key output on DeckLink when primary is a regular screen (not for simulated slots)
+        // Key output on DeckLink when primary is a regular screen
         if (screenAssignment.targetType != "decklink" && screenAssignment.hasKeyOutput && screenAssignment.keyTargetType == "decklink" && screenAssignment.keyTargetDisplay >= 0) {
             if (showPresenterWindow) {
                 DeckLinkComposeOutput(

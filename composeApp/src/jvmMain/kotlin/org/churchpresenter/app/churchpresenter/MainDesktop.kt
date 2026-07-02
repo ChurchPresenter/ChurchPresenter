@@ -370,6 +370,14 @@ fun MainDesktop(
 
     val presentingMode by presenterManager.presentingMode
 
+    // Keep the Stage Monitor's "Next" verse in sync with whatever is currently selected —
+    // recomputes automatically whenever the underlying Bible selection changes, from any source
+    // (manual click, auto-follow, remote API), since nextVerses is a derived state.
+    val nextVerses by bibleViewModel.nextVerses
+    LaunchedEffect(nextVerses) {
+        presenterManager.setNextVerses(nextVerses)
+    }
+
     // When Bible is live and the user is on a different tab, keep the presenter in sync with
     // new auto-follow detections. BibleTab is inside AnimatedContent and leaves the composition
     // on tab switch, so its own LaunchedEffect can't fire while the user is away.
@@ -631,6 +639,11 @@ fun MainDesktop(
                         keyEvent.key == Key.Escape -> {
                             mediaViewModel?.pause()
                             presenterManager.requestClearDisplay()
+                            // Also release any "Send to Stage Monitor" lock (e.g. from Announcements)
+                            // so the stage monitor goes back to following the main presenting mode.
+                            appSettings.projectionSettings.screenAssignments.indices
+                                .filter { appSettings.projectionSettings.screenAssignments[it].displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR }
+                                .forEach { presenterManager.setScreenLock(it, null) }
                             true
                         }
                         keyEvent.key == Key.F6 -> { selectTab(Tabs.BIBLE); true }

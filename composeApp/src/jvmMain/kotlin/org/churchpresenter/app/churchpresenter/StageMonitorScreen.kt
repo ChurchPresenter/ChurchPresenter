@@ -2,18 +2,16 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -24,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -40,16 +39,32 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContent
+import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.app.churchpresenter.data.settings.DictionarySettings
+import org.churchpresenter.app.churchpresenter.data.settings.QASettings
+import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContentType
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSettings
+import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZone
+import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZone
+import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZoneStyle
+import org.churchpresenter.app.churchpresenter.data.settings.toStyleZone
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.Question
+import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
+import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
+import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.composables.MetronomeDot
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
+import org.churchpresenter.app.churchpresenter.composables.toAlignment
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.jetbrains.skia.Image as SkiaImage
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import java.io.File
@@ -57,30 +72,39 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Full-screen stage monitor layout — a fixed 5-zone grid whose content is assigned per zone via
- * settings (sm.topLeftContent, etc.), rather than hardcoded to a specific content type:
+ * Full-screen stage monitor layout — 5 quadrant zones plus a full-screen zone, whose content is
+ * routed per content type via settings (sm.contentZones), rather than hardcoded to a specific zone:
  *   ┌───────────────────┬───────────────────┐
  *   │  Top-Left         │  Top-Right        │
  *   ├─────────┬─────────┴───────────────────┤
- *   │ Bot-Left│   Bot-Center  │  Bot-Right  │
+ *   │ Bot-Left│   Bot-Middle  │  Bot-Right  │
  *   └─────────┴───────────────┴─────────────┘
+ * If a content type is routed to Full Screen, it takes over the entire monitor instead.
  */
 @Composable
 fun StageMonitorScreen(
     sm: StageMonitorSettings,
     presentingMode: Presenting,
+    // True when an announcement has been routed to this stage monitor — either because it's what's
+    // actually live everywhere (presentingMode == ANNOUNCEMENTS), or because Announcements was sent
+    // here specifically via its own "Send to Stage Monitor" toggle. Kept independent of
+    // [presentingMode] so the Bible/Song/etc. zones below keep tracking whatever is really live on
+    // the main output instead of being blanked out by an announcement overlay.
+    announcementActive: Boolean = presentingMode == Presenting.ANNOUNCEMENTS,
     currentLyricSection: LyricSection,
-    allLyricSections: List<LyricSection>,
-    songDisplaySectionIndex: Int,
+    allLyricSections: List<LyricSection> = emptyList(),
+    songDisplaySectionIndex: Int = 0,
     displayedVerses: List<SelectedVerse>,
-    timerRemainingSeconds: Int,
-    timerRunning: Boolean,
-    displayedImagePath: String? = null,
-    nextImagePath: String? = null,
-    displayedSlide: ImageBitmap? = null,
-    nextSlide: ImageBitmap? = null,
+    nextVerses: List<SelectedVerse> = emptyList(),
     announcementText: String = "",
+    displayedImagePath: String? = null,
+    displayedSlide: ImageBitmap? = null,
     presenterNotes: String = "",
+    activeScene: Scene? = null,
+    displayedQuestion: Question? = null,
+    qaSettings: QASettings = QASettings(),
+    displayedDictionaryEntry: StrongsEntry? = null,
+    dictionarySettings: DictionarySettings = DictionarySettings(),
     modifier: Modifier = Modifier
 ) {
     // Derive current text
@@ -93,410 +117,318 @@ fun StageMonitorScreen(
                 "$ref\n${v.verseText}"
             } else ""
         }
-        Presenting.ANNOUNCEMENTS -> announcementText
         else -> ""
     }
 
-    // Derive next text (songs only)
+    // Next Bible verse (a dedicated lookahead, not the secondary language of the current verse)
+    // or next song line/section.
     val nextText: String = when (presentingMode) {
         Presenting.LYRICS -> {
             val nextIdx = songDisplaySectionIndex + 1
             allLyricSections.getOrNull(nextIdx)?.lines?.joinToString("\n") ?: ""
         }
-        else -> ""
-    }
-
-    // Label text (song title or song+section header)
-    val currentLabel: String = when (presentingMode) {
-        Presenting.LYRICS -> {
-            val title = currentLyricSection.title.ifBlank { null }
-            val header = currentLyricSection.header?.removePrefix("[")?.removePrefix("{")
-                ?.removeSuffix("]")?.removeSuffix("}")?.trim()?.ifBlank { null }
-            listOfNotNull(title, header).joinToString(" – ")
+        Presenting.BIBLE -> {
+            val v = nextVerses.firstOrNull()
+            if (v != null) {
+                val ref = "${v.bookName} ${v.chapter}:${v.verseRange.ifEmpty { v.verseNumber.toString() }}"
+                "$ref\n${v.verseText}"
+            } else ""
         }
-        Presenting.BIBLE -> ""
         else -> ""
     }
 
-    // Load image bitmaps for PICTURES mode
+    // Load image bitmap for PICTURES mode
     var currentImageBitmap by remember(displayedImagePath) { mutableStateOf<ImageBitmap?>(null) }
-    var nextImageBitmap by remember(nextImagePath) { mutableStateOf<ImageBitmap?>(null) }
-
     LaunchedEffect(displayedImagePath) {
         currentImageBitmap = loadImageBitmapFromPath(displayedImagePath)
     }
-    LaunchedEffect(nextImagePath) {
-        nextImageBitmap = loadImageBitmapFromPath(nextImagePath)
-    }
 
     // Clock state — ticks every second
-    var clockText by remember { mutableStateOf(formatClock(sm)) }
-    LaunchedEffect(sm.clockFormat24h, sm.clockShowSeconds) {
+    var clockText by remember { mutableStateOf(formatClock()) }
+    LaunchedEffect(Unit) {
         while (true) {
-            clockText = formatClock(sm)
+            clockText = formatClock()
             delay(1000L)
         }
     }
 
-    // Timer text
-    val timerText = formatTimer(timerRemainingSeconds)
+    // Timer text (shared by the Duration/Countdown/Specific-Time content types) — reuses the
+    // same pre-formatted string the real Announcements output shows, since that's already
+    // mode-aware (duration countdown, open-ended stopwatch, or live clock display) and there's
+    // no separate per-mode state to distinguish them here.
+    val timerText = announcementText.ifBlank { "--:--" }
 
     val mediaViewModel = LocalMediaViewModel.current
 
     val renderData = ZoneRenderData(
-        presentingMode = presentingMode,
         currentText = currentText,
-        currentLabel = currentLabel,
+        nextText = nextText,
         currentImageBitmap = currentImageBitmap,
         displayedSlide = displayedSlide,
-        nextText = nextText,
-        nextImageBitmap = nextImageBitmap,
-        nextSlide = nextSlide,
-        timerText = timerText,
-        timerRunning = timerRunning,
-        timerRemainingSeconds = timerRemainingSeconds,
         clockText = clockText,
-        presenterNotes = presenterNotes
+        timerText = timerText,
+        presenterNotes = presenterNotes,
+        activeScene = activeScene,
+        displayedQuestion = displayedQuestion,
+        qaSettings = qaSettings,
+        displayedDictionaryEntry = displayedDictionaryEntry,
+        dictionarySettings = dictionarySettings
     )
+
+    // Which content type is "active" for the current presenting mode. Clock is always available
+    // as a fallback so a zone assigned both a live type and Clock shows the clock when idle.
+    // The announcement zone is additive (see [announcementActive]) rather than exclusive, so it
+    // can be shown alongside whatever else is actually live on the main output.
+    val activeTypes: Set<StageMonitorContentType> = buildSet {
+        when (presentingMode) {
+            Presenting.BIBLE -> { add(StageMonitorContentType.BIBLE); add(StageMonitorContentType.NEXT) }
+            Presenting.LYRICS -> { add(StageMonitorContentType.SONGS); add(StageMonitorContentType.NEXT) }
+            Presenting.PRESENTATION -> { add(StageMonitorContentType.PRESENTATION); add(StageMonitorContentType.PRESENTATION_NOTES) }
+            Presenting.PICTURES -> add(StageMonitorContentType.PICTURES)
+            Presenting.MEDIA -> add(StageMonitorContentType.MEDIA)
+            Presenting.LOWER_THIRD -> add(StageMonitorContentType.LOWER_THIRD)
+            Presenting.WEBSITE -> add(StageMonitorContentType.WEB)
+            Presenting.STT -> add(StageMonitorContentType.STT)
+            Presenting.CANVAS -> add(StageMonitorContentType.CANVAS)
+            Presenting.QA -> add(StageMonitorContentType.QA)
+            Presenting.DICTIONARY -> add(StageMonitorContentType.DICTIONARY)
+            Presenting.ANNOUNCEMENTS, Presenting.NONE -> {}
+        }
+        if (announcementActive) add(StageMonitorContentType.ANNOUNCEMENT_TEXT)
+    }
+
+    fun contentFor(zone: StageMonitorZone): StageMonitorContentType? {
+        val assigned = StageMonitorContentType.entries.filter { sm.zoneFor(it) == zone }
+        if (assigned.isEmpty()) return null
+        assigned.firstOrNull { it in activeTypes }?.let { return it }
+        if (StageMonitorContentType.CLOCK in assigned) return StageMonitorContentType.CLOCK
+        return null
+    }
+
+    val fullScreenContent = contentFor(StageMonitorZone.FULL_SCREEN)
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // ── TOP ROW ───────────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
+        if (fullScreenContent != null) {
+            val style = sm.styleFor(StageMonitorStyleZone.FULL_SCREEN)
+            Box(
+                modifier = Modifier.fillMaxSize().background(parseHexColor(style.bgColor)).padding(12.dp),
+                contentAlignment = zoneContentAlignment(style)
             ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(zoneBackgroundColor(sm.topLeftContent, sm))
-                        .padding(12.dp),
-                    contentAlignment = zoneContentAlignment(sm.topLeftContent)
-                ) {
-                    ZoneContent(sm.topLeftContent, sm, renderData)
-                }
-                VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-                Box(
-                    modifier = Modifier
-                        .weight(0.45f)
-                        .fillMaxHeight()
-                        .background(zoneBackgroundColor(sm.topRightContent, sm))
-                        .padding(12.dp),
-                    contentAlignment = zoneContentAlignment(sm.topRightContent)
-                ) {
-                    ZoneContent(sm.topRightContent, sm, renderData)
-                }
+                ZoneContent(fullScreenContent, style, renderData, mediaViewModel)
             }
-
-            HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
-
-            // ── BOTTOM ROW ────────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.6f)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(zoneBackgroundColor(sm.bottomLeftContent, sm))
-                        .padding(12.dp),
-                    contentAlignment = zoneContentAlignment(sm.bottomLeftContent)
-                ) {
-                    ZoneContent(sm.bottomLeftContent, sm, renderData)
+        } else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // ── TOP ROW (fixed 2:1 against bottom = 67%; left/right split evenly 50/50) ──
+                Row(modifier = Modifier.fillMaxWidth().weight(2f)) {
+                    StageZoneBox(sm, StageMonitorZone.TOP_LEFT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
+                    VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
+                    StageZoneBox(sm, StageMonitorZone.TOP_RIGHT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
                 }
-                VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-                Box(
-                    modifier = Modifier
-                        .weight(0.8f)
-                        .fillMaxHeight()
-                        .background(zoneBackgroundColor(sm.bottomCenterContent, sm))
-                        .padding(12.dp),
-                    contentAlignment = zoneContentAlignment(sm.bottomCenterContent)
-                ) {
-                    ZoneContent(sm.bottomCenterContent, sm, renderData)
-                }
-                VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(zoneBackgroundColor(sm.bottomRightContent, sm))
-                        .padding(12.dp),
-                    contentAlignment = zoneContentAlignment(sm.bottomRightContent)
-                ) {
-                    ZoneContent(sm.bottomRightContent, sm, renderData)
+
+                HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
+
+                // ── BOTTOM ROW (fixed at 33% of total height, regardless of content) ──
+                Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    StageZoneBox(sm, StageMonitorZone.BOTTOM_LEFT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
+                    VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
+                    StageZoneBox(sm, StageMonitorZone.BOTTOM_MIDDLE, renderData, mediaViewModel, ::contentFor, Modifier.weight(0.8f))
+                    VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
+                    StageZoneBox(sm, StageMonitorZone.BOTTOM_RIGHT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
                 }
             }
         }
 
-        // ── MEDIA overlay: when playing media, cover the full stage monitor ──
-        if (presentingMode == Presenting.MEDIA && mediaViewModel != null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black),
-                contentAlignment = Alignment.Center
-            ) {
-                if (mediaViewModel.isLoaded && !mediaViewModel.isAudioFile) {
-                    SoftwareVideoPlayer(
-                        viewModel = mediaViewModel,
-                        modifier = Modifier.fillMaxSize(),
-                        audioEnabled = false // audio is handled by the main output
-                    )
-                }
-            }
+        // Metronome — a silent flash dot, only while a song is actually projected.
+        val metronomeAlignment = sm.metronomePosition.toAlignment()
+        if (metronomeAlignment != null && presentingMode == Presenting.LYRICS && currentLyricSection.bpm > 0) {
+            MetronomeDot(
+                bpm = currentLyricSection.bpm,
+                active = true,
+                size = 36.dp,
+                modifier = Modifier.align(metronomeAlignment).padding(24.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun StageZoneBox(
+    sm: StageMonitorSettings,
+    zone: StageMonitorZone,
+    data: ZoneRenderData,
+    mediaViewModel: MediaViewModel?,
+    contentFor: (StageMonitorZone) -> StageMonitorContentType?,
+    modifier: Modifier
+) {
+    val styleZone = zone.toStyleZone() ?: return
+    val style = sm.styleFor(styleZone)
+    val content = contentFor(zone)
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .background(parseHexColor(style.bgColor))
+            .padding(12.dp),
+        contentAlignment = zoneContentAlignment(style)
+    ) {
+        if (content != null) {
+            ZoneContent(content, style, data, mediaViewModel)
         }
     }
 }
 
 /** Bundles the derived per-frame state so it can be passed to whichever zone needs it. */
 private data class ZoneRenderData(
-    val presentingMode: Presenting,
     val currentText: String,
-    val currentLabel: String,
+    val nextText: String,
     val currentImageBitmap: ImageBitmap?,
     val displayedSlide: ImageBitmap?,
-    val nextText: String,
-    val nextImageBitmap: ImageBitmap?,
-    val nextSlide: ImageBitmap?,
-    val timerText: String,
-    val timerRunning: Boolean,
-    val timerRemainingSeconds: Int,
     val clockText: String,
-    val presenterNotes: String
+    val timerText: String,
+    val presenterNotes: String,
+    val activeScene: Scene?,
+    val displayedQuestion: Question?,
+    val qaSettings: QASettings,
+    val displayedDictionaryEntry: StrongsEntry?,
+    val dictionarySettings: DictionarySettings
 )
 
-private fun zoneBackgroundColor(content: StageMonitorContent, sm: StageMonitorSettings): Color = when (content) {
-    StageMonitorContent.CURRENT_SLIDE -> parseHexColor(sm.currentBgColor)
-    StageMonitorContent.NEXT_SLIDE -> parseHexColor(sm.nextBgColor)
-    StageMonitorContent.TIMER -> parseHexColor(sm.timerBgColor)
-    StageMonitorContent.CLOCK -> parseHexColor(sm.clockBgColor)
-    StageMonitorContent.NOTES -> parseHexColor(sm.notesBgColor)
-}
-
-private fun zoneContentAlignment(content: StageMonitorContent): Alignment = when (content) {
-    StageMonitorContent.TIMER, StageMonitorContent.CLOCK -> Alignment.Center
-    else -> Alignment.TopStart
+private fun zoneContentAlignment(style: StageMonitorZoneStyle): Alignment {
+    val vertical = when (style.verticalAlignment) {
+        Constants.BOTTOM -> 1f
+        Constants.MIDDLE -> 0f
+        else -> -1f
+    }
+    val horizontal = when (style.horizontalAlignment) {
+        Constants.RIGHT -> 1f
+        Constants.CENTER -> 0f
+        else -> -1f
+    }
+    return BiasAlignment(horizontal, vertical)
 }
 
 @Composable
-private fun ZoneContent(content: StageMonitorContent, sm: StageMonitorSettings, data: ZoneRenderData) {
+private fun ZoneContent(
+    content: StageMonitorContentType,
+    style: StageMonitorZoneStyle,
+    data: ZoneRenderData,
+    mediaViewModel: MediaViewModel?
+) {
     when (content) {
-        StageMonitorContent.CURRENT_SLIDE -> CurrentSlideContent(sm, data)
-        StageMonitorContent.NEXT_SLIDE -> NextSlideContent(sm, data)
-        StageMonitorContent.TIMER -> TimerContent(sm, data)
-        StageMonitorContent.CLOCK -> ClockContent(sm, data)
-        StageMonitorContent.NOTES -> NotesContent(sm, data)
+        StageMonitorContentType.BIBLE,
+        StageMonitorContentType.SONGS -> TextContent(style, data.currentText)
+        StageMonitorContentType.PRESENTATION -> SlideContent(data.displayedSlide)
+        StageMonitorContentType.PRESENTATION_NOTES -> ScrollingTextContent(style, data.presenterNotes)
+        StageMonitorContentType.PICTURES -> SlideContent(data.currentImageBitmap)
+        StageMonitorContentType.MEDIA -> {
+            if (mediaViewModel != null && mediaViewModel.isLoaded && !mediaViewModel.isAudioFile) {
+                SoftwareVideoPlayer(
+                    viewModel = mediaViewModel,
+                    modifier = Modifier.fillMaxSize(),
+                    audioEnabled = false // audio is handled by the main output
+                )
+            }
+        }
+        StageMonitorContentType.CLOCK -> CenteredText(data.clockText, style)
+        StageMonitorContentType.ANNOUNCEMENT_TEXT -> CenteredText(data.timerText, style)
+        StageMonitorContentType.CANVAS -> ScenePresenter(modifier = Modifier.fillMaxSize(), scene = data.activeScene)
+        StageMonitorContentType.QA -> QAPresenter(question = data.displayedQuestion, qaSettings = data.qaSettings)
+        StageMonitorContentType.DICTIONARY -> DictionaryPresenter(entry = data.displayedDictionaryEntry, dictionarySettings = data.dictionarySettings)
+        StageMonitorContentType.NEXT -> TextContent(style, data.nextText)
+        // No live data is plumbed through to the stage monitor for these yet.
+        StageMonitorContentType.LOWER_THIRD,
+        StageMonitorContentType.WEB,
+        StageMonitorContentType.STT -> {}
     }
 }
 
 @Composable
-private fun CurrentSlideContent(sm: StageMonitorSettings, data: ZoneRenderData) {
-    when (data.presentingMode) {
-        Presenting.PICTURES -> {
-            val bmp = data.currentImageBitmap
-            if (bmp != null) {
-                Image(
-                    bitmap = bmp,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
-        Presenting.PRESENTATION -> {
-            val bmp = data.displayedSlide
-            if (bmp != null) {
-                Image(
-                    bitmap = bmp,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
-        else -> {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = resolveColumnVerticalArrangement(sm.currentVerticalAlignment),
-                horizontalAlignment = resolveColumnHorizontalAlignment(sm.currentHorizontalAlignment)
-            ) {
-                if (sm.showSongBibleLabel && data.currentLabel.isNotBlank()) {
-                    Text(
-                        text = data.currentLabel,
-                        style = buildTextStyle(
-                            fontType = sm.labelFontType,
-                            fontSize = sm.labelFontSize,
-                            color = parseHexColor(sm.labelColor),
-                            bold = sm.labelBold,
-                            italic = sm.labelItalic
-                        ),
-                        maxLines = 1
-                    )
-                    Spacer(Modifier.height(6.dp))
-                }
-                Text(
-                    text = data.currentText,
-                    style = buildTextStyle(
-                        fontType = sm.currentFontType,
-                        fontSize = sm.currentFontSize,
-                        color = parseHexColor(sm.currentColor),
-                        bold = sm.currentBold,
-                        italic = sm.currentItalic,
-                        underline = sm.currentUnderline,
-                        shadow = sm.currentShadow,
-                        shadowColor = parseHexColor(sm.currentShadowColor),
-                        shadowSize = sm.currentShadowSize,
-                        shadowOpacity = sm.currentShadowOpacity
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = resolveTextAlign(sm.currentHorizontalAlignment)
-                )
-            }
-        }
+private fun TextContent(style: StageMonitorZoneStyle, text: String) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = resolveColumnVerticalArrangement(style.verticalAlignment),
+        horizontalAlignment = resolveColumnHorizontalAlignment(style.horizontalAlignment)
+    ) {
+        Text(
+            text = text,
+            style = buildTextStyle(
+                fontType = style.fontType,
+                fontSize = style.fontSize,
+                color = parseHexColor(style.color),
+                bold = style.bold,
+                italic = style.italic,
+                underline = style.underline,
+                shadow = style.shadow,
+                shadowColor = parseHexColor(style.shadowColor),
+                shadowSize = style.shadowSize,
+                shadowOpacity = style.shadowOpacity
+            ),
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = resolveTextAlign(style.horizontalAlignment)
+        )
     }
 }
 
 @Composable
-private fun NextSlideContent(sm: StageMonitorSettings, data: ZoneRenderData) {
-    when (data.presentingMode) {
-        Presenting.PICTURES -> {
-            val bmp = data.nextImageBitmap
-            if (bmp != null) {
-                Image(
-                    bitmap = bmp,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
-        Presenting.PRESENTATION -> {
-            val bmp = data.nextSlide
-            if (bmp != null) {
-                Image(
-                    bitmap = bmp,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
-        else -> {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = resolveColumnVerticalArrangement(sm.nextVerticalAlignment),
-                horizontalAlignment = resolveColumnHorizontalAlignment(sm.nextHorizontalAlignment)
-            ) {
-                Text(
-                    text = data.nextText,
-                    style = buildTextStyle(
-                        fontType = sm.nextFontType,
-                        fontSize = sm.nextFontSize,
-                        color = parseHexColor(sm.nextColor),
-                        bold = sm.nextBold,
-                        italic = sm.nextItalic,
-                        underline = sm.nextUnderline,
-                        shadow = sm.nextShadow,
-                        shadowColor = parseHexColor(sm.nextShadowColor),
-                        shadowSize = sm.nextShadowSize,
-                        shadowOpacity = sm.nextShadowOpacity
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = resolveTextAlign(sm.nextHorizontalAlignment)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun TimerContent(sm: StageMonitorSettings, data: ZoneRenderData) {
-    Text(
-        text = if (data.timerRunning || data.timerRemainingSeconds > 0) data.timerText else "--:--",
-        style = buildTextStyle(
-            fontType = sm.timerFontType,
-            fontSize = sm.timerFontSize,
-            color = parseHexColor(sm.timerColor),
-            bold = sm.timerBold,
-            italic = sm.timerItalic,
-            underline = sm.timerUnderline,
-            shadow = sm.timerShadow,
-            shadowColor = parseHexColor(sm.timerShadowColor),
-            shadowSize = sm.timerShadowSize,
-            shadowOpacity = sm.timerShadowOpacity
-        ),
-        textAlign = TextAlign.Center
-    )
-}
-
-@Composable
-private fun ClockContent(sm: StageMonitorSettings, data: ZoneRenderData) {
-    Text(
-        text = data.clockText,
-        style = buildTextStyle(
-            fontType = sm.clockFontType,
-            fontSize = sm.clockFontSize,
-            color = parseHexColor(sm.clockColor),
-            bold = sm.clockBold,
-            italic = sm.clockItalic,
-            underline = sm.clockUnderline,
-            shadow = sm.clockShadow,
-            shadowColor = parseHexColor(sm.clockShadowColor),
-            shadowSize = sm.clockShadowSize,
-            shadowOpacity = sm.clockShadowOpacity
-        ),
-        textAlign = TextAlign.Center
-    )
-}
-
-@Composable
-private fun NotesContent(sm: StageMonitorSettings, data: ZoneRenderData) {
+private fun ScrollingTextContent(style: StageMonitorZoneStyle, text: String) {
     val scrollState = rememberScrollState()
     Text(
-        text = data.presenterNotes,
+        text = text,
         style = buildTextStyle(
-            fontType = sm.notesFontType,
-            fontSize = sm.notesFontSize,
-            color = parseHexColor(sm.notesColor),
-            bold = sm.notesBold,
-            italic = sm.notesItalic,
-            underline = sm.notesUnderline,
-            shadow = sm.notesShadow,
-            shadowColor = parseHexColor(sm.notesShadowColor),
-            shadowSize = sm.notesShadowSize,
-            shadowOpacity = sm.notesShadowOpacity
+            fontType = style.fontType,
+            fontSize = style.fontSize,
+            color = parseHexColor(style.color),
+            bold = style.bold,
+            italic = style.italic,
+            underline = style.underline,
+            shadow = style.shadow,
+            shadowColor = parseHexColor(style.shadowColor),
+            shadowSize = style.shadowSize,
+            shadowOpacity = style.shadowOpacity
         ),
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
+        modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+        textAlign = resolveTextAlign(style.horizontalAlignment)
     )
 }
 
-private fun formatClock(sm: StageMonitorSettings): String {
-    val now = LocalTime.now()
-    val pattern = when {
-        sm.clockFormat24h && sm.clockShowSeconds -> "HH:mm:ss"
-        sm.clockFormat24h -> "HH:mm"
-        sm.clockShowSeconds -> "hh:mm:ss a"
-        else -> "hh:mm a"
+@Composable
+private fun SlideContent(bitmap: ImageBitmap?) {
+    if (bitmap != null) {
+        Image(
+            bitmap = bitmap,
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.fillMaxSize()
+        )
     }
-    return now.format(DateTimeFormatter.ofPattern(pattern))
 }
 
-private fun formatTimer(totalSeconds: Int): String {
-    val h = totalSeconds / 3600
-    val m = (totalSeconds % 3600) / 60
-    val s = totalSeconds % 60
-    return if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%02d:%02d".format(m, s)
+@Composable
+private fun CenteredText(text: String, style: StageMonitorZoneStyle) {
+    Text(
+        text = text,
+        style = buildTextStyle(
+            fontType = style.fontType,
+            fontSize = style.fontSize,
+            color = parseHexColor(style.color),
+            bold = style.bold,
+            italic = style.italic,
+            underline = style.underline,
+            shadow = style.shadow,
+            shadowColor = parseHexColor(style.shadowColor),
+            shadowSize = style.shadowSize,
+            shadowOpacity = style.shadowOpacity
+        ),
+        textAlign = TextAlign.Center
+    )
+}
+
+private fun formatClock(): String {
+    val pattern = if (Utils.isSystemUsing24HourFormat()) "HH:mm:ss" else "hh:mm:ss a"
+    return LocalTime.now().format(DateTimeFormatter.ofPattern(pattern))
 }
 
 private fun buildTextStyle(
@@ -538,7 +470,6 @@ private suspend fun loadImageBitmapFromPath(path: String?): ImageBitmap? {
         }
     }
 }
-
 
 private fun resolveTextAlign(horizontal: String): TextAlign {
     return when (horizontal) {

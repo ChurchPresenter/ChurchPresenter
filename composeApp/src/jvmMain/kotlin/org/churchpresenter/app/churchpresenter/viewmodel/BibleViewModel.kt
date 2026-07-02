@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CancellationException
@@ -868,6 +869,82 @@ class BibleViewModel(
         return verseList
     }
 
+    /**
+     * Returns the verse(s) immediately after whatever [getSelectedVerses] currently returns —
+     * same shape (primary, then secondary if bilingual) but read-only: never mutates selection
+     * state. Rolls into the next chapter, and into the next book if that was the last chapter.
+     */
+    fun getNextVerses(): List<SelectedVerse> {
+        if (_verses.value.isEmpty()) return emptyList()
+
+        val referenceIndex = if (_multiVerseEnabled.value && _selectedVerseIndices.isNotEmpty()) {
+            _selectedVerseIndices.max()
+        } else {
+            _selectedVerseIndex.value.coerceIn(0, _verses.value.size - 1)
+        }
+
+        val bookId = _primaryBible.value?.getBookId(_selectedBookIndex.value) ?: (_selectedBookIndex.value + 1)
+
+        // Next verse is in the same chapter.
+        if (referenceIndex < _verses.value.size - 1) {
+            val verse = _verses.value[referenceIndex + 1]
+            val verseNumber = verse.substringBefore(". ").toIntOrNull() ?: return emptyList()
+            return buildNextVerseList(bookId, _selectedChapter.value, verseNumber, verse.substringAfter(". "))
+        }
+
+        // Roll into the next chapter, and into the next book if this was the last chapter.
+        val bible = _primaryBible.value ?: return emptyList()
+        var nextBookIndex = _selectedBookIndex.value
+        var nextChapter = _selectedChapter.value + 1
+        if (nextChapter > bible.getChapterCount(nextBookIndex)) {
+            nextBookIndex += 1
+            nextChapter = 1
+            if (nextBookIndex >= _books.value.size) return emptyList() // past the last book
+        }
+        val nextBookId = bible.getBookId(nextBookIndex)
+        val firstVerse = bible.getChapter(nextBookId, nextChapter).verses.firstOrNull() ?: return emptyList()
+        val verseNumber = firstVerse.substringBefore(". ").toIntOrNull() ?: return emptyList()
+        return buildNextVerseList(nextBookId, nextChapter, verseNumber, firstVerse.substringAfter(". "))
+    }
+
+    /** Builds primary (+ secondary, if bilingual) [SelectedVerse] entries for one verse, by book id. */
+    private fun buildNextVerseList(bookId: Int, chapter: Int, verseNumber: Int, verseText: String): List<SelectedVerse> {
+        val verseList = mutableListOf<SelectedVerse>()
+        if (verseText.isNotEmpty()) {
+            verseList.add(
+                SelectedVerse(
+                    bibleAbbreviation = _primaryBible.value?.getBibleAbbreviation() ?: "",
+                    bibleName = _primaryBible.value?.getBibleTitle() ?: "",
+                    bookName = _primaryBible.value?.getBookName(bookId) ?: "",
+                    chapter = chapter,
+                    verseNumber = verseNumber,
+                    verseText = verseText
+                )
+            )
+        }
+        val codeRef = _primaryBible.value?.getCodeReference(bookId, chapter, verseNumber)
+        val secBook = codeRef?.first ?: bookId
+        val secChapter = codeRef?.second ?: chapter
+        val secVerse = codeRef?.third ?: verseNumber
+        _secondaryBible.value?.takeIf { it.getVerseCount() > 0 }
+            ?.getVerseDetailsByCode(secBook, secChapter, secVerse)?.let { result ->
+            verseList.add(
+                SelectedVerse(
+                    bibleAbbreviation = _secondaryBible.value?.getBibleAbbreviation() ?: "",
+                    bibleName = _secondaryBible.value?.getBibleTitle() ?: "",
+                    bookName = result.bookName,
+                    chapter = result.displayChapter,
+                    verseNumber = result.displayVerse,
+                    verseText = result.verseText
+                )
+            )
+        }
+        return verseList
+    }
+
+    /** Reactively recomputes whenever the underlying selection state changes — for Stage Monitor. */
+    val nextVerses: State<List<SelectedVerse>> = derivedStateOf { getNextVerses() }
+
     /** Returns verse numbers currently selected in multi-verse mode. */
     fun getSelectedVerseNumbers(): List<Int> {
         return _selectedVerseIndices.sorted().mapNotNull { idx ->
@@ -887,34 +964,65 @@ class BibleViewModel(
     }
 
     fun navigateNextVerse(): Boolean {
-        if (_verses.value.isNotEmpty() && _selectedVerseIndex.value < _verses.value.size - 1) {
+        if (_verses.value.isEmpty()) return false
+        if (_selectedVerseIndex.value < _verses.value.size - 1) {
             _selectedVerseIndices.clear()
             _multiVerseEnabled.value = false
             _selectedVerseIndex.value++
             _verseSelectionToken.value++
             return true
         }
-        return false
+        // At the last verse of the chapter — roll into the next chapter, and into the next book
+        // if this was the book's last chapter, instead of silently doing nothing (mirrors the
+        // rollover getNextVerses() already does for the Stage Monitor lookahead).
+        val bible = _primaryBible.value ?: return false
+        var nextBookIndex = _selectedBookIndex.value
+        var nextChapter = _selectedChapter.value + 1
+        if (nextChapter > bible.getChapterCount(nextBookIndex)) {
+            nextBookIndex += 1
+            nextChapter = 1
+            if (nextBookIndex >= _books.value.size) return false // past the last book
+        }
+        _sequentialChapterAdvance = true
+        _selectedVerseIndices.clear()
+        _multiVerseEnabled.value = false
+        loadChapter(nextBookIndex, nextChapter)
+        return true
     }
 
     fun navigatePreviousChapter(): Boolean {
         if (_selectedChapter.value > 1) {
+            _sequentialChapterAdvance = true
             selectChapter(_selectedChapter.value - 1)
             return true
         }
         return false
     }
 
+    // Set right before a sequential chapter advance (next or previous) and consumed by
+    // BibleTab's auto-hold check, so stepping through the Bible via the </> chapter arrows
+    // doesn't get treated as browsing away from what's live (unlike jumping to an arbitrary
+    // chapter/book, which should still engage Hold).
+    private var _sequentialChapterAdvance = false
+
     fun navigateNextChapter(): Boolean {
         _primaryBible.value?.let { bible ->
             // getChapterCount expects 0-based book index
             val maxChapter = bible.getChapterCount(_selectedBookIndex.value)
             if (_selectedChapter.value < maxChapter) {
+                _sequentialChapterAdvance = true
                 selectChapter(_selectedChapter.value + 1)
                 return true
             }
         }
         return false
+    }
+
+    /** Returns true if the most recent chapter change was a sequential "next chapter" advance, clearing the flag. */
+    fun consumeSequentialChapterAdvance(): Boolean {
+        val wasSequentialAdvance = _sequentialChapterAdvance
+        _sequentialChapterAdvance = false
+        return wasSequentialAdvance
     }
 
     private fun refreshFilteredLists() {

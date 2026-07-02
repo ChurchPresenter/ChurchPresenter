@@ -295,6 +295,8 @@
     <string name="tooltip_add_label">Přidat štítek</string>
     <string name="tooltip_remove">Odebrat</string>
     <string name="tooltip_go_live">Zobrazit</string>
+    <string name="tooltip_send_to_stage_monitor">Odeslat na monitor scény</string>
+    <string name="tooltip_hide_from_stage_monitor">Skrýt oznámení</string>
 
     <!-- Bible Books (full list) -->
     <string name="bible_book_1">Genesis</string>
@@ -827,6 +829,13 @@
     <string name="timer_reset">Resetovat</string>
     <string name="timer_resume">Pokračovat</string>
     <string name="timer_seconds">sek</string>
+    <string name="timer_am">dop.</string>
+    <string name="timer_pm">odp.</string>
+    <string name="timer_clock_format">Formát</string>
+    <string name="timer_clock_format_12h_sec">12hodinový (h:mm:ss AM/PM)</string>
+    <string name="timer_clock_format_12h">12hodinový (h:mm AM/PM)</string>
+    <string name="timer_clock_format_24h_sec">24hodinový (HH:mm:ss)</string>
+    <string name="timer_clock_format_24h">24hodinový (HH:mm)</string>
     <string name="timer_start">Spustit</string>
     <string name="timer_text_color">Barva časovače</string>
     <string name="timer_title">Časovač</string>
@@ -1207,7 +1216,23 @@
     <string name="stage_monitor_clock_show_seconds">Zobrazit sekundy</string>
     <string name="stage_monitor_clock_24h">24hodinový formát</string>
     <string name="stage_monitor_no_extra_displays">Žádný sekundární displej nebyl zjištěn. Připojte další monitor pro použití monitoru scény.</string>
+    <string name="stage_monitor_layout_section">Rozvržení obrazovky</string>
+    <string name="stage_monitor_zone_top_left">Vlevo nahoře</string>
+    <string name="stage_monitor_zone_top_right">Vpravo nahoře</string>
+    <string name="stage_monitor_zone_bottom_left">Vlevo dole</string>
+    <string name="stage_monitor_zone_bottom_center">Dole uprostřed</string>
+    <string name="stage_monitor_zone_bottom_right">Vpravo dole</string>
+    <string name="stage_monitor_zone_full_screen">Celá obrazovka</string>
+    <string name="stage_monitor_zone_none">Žádný</string>
     <string name="stage_monitor_notes_from_presentation">Poznámky jsou automaticky zobrazovány z aktivního snímku PowerPointu nebo Keynote.</string>
+    <string name="stage_monitor_content_section">Obsah obrazovky</string>
+    <string name="stage_monitor_metronome_position">Pozice metronomu</string>
+    <string name="stage_monitor_position_top_center">Nahoře uprostřed</string>
+    <string name="stage_monitor_position_middle_left">Uprostřed vlevo</string>
+    <string name="stage_monitor_position_center">Uprostřed</string>
+    <string name="stage_monitor_position_middle_right">Uprostřed vpravo</string>
+    <string name="metronome_bpm_label">Tempo metronomu</string>
+    <string name="unit_bpm">úd/min</string>
 
     <!-- Q&A Tab -->
     <string name="tab_qa">Otázky a odpovědi</string>

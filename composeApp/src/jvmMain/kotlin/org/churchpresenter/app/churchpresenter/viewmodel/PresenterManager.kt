@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.models.AnimationType
@@ -43,6 +44,11 @@ class PresenterManager {
     // Shared Bible transition state — driven by a single animation so all windows stay in sync
     private val _displayedVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
     val displayedVerses: State<List<SelectedVerse>> = _displayedVerses
+
+    // Next Bible verse after whatever is currently displayed — for Stage Monitor's "Next" zone.
+    // Distinct from displayedVerses, which pairs primary+secondary *language* of the same verse.
+    private val _nextVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
+    val nextVerses: State<List<SelectedVerse>> = _nextVerses
 
     private val _bibleTransitionAlpha = mutableStateOf(1f)
     val bibleTransitionAlpha: State<Float> = _bibleTransitionAlpha
@@ -213,6 +219,10 @@ class PresenterManager {
 
     fun setDisplayedVerses(verses: List<SelectedVerse>) {
         _displayedVerses.value = verses
+    }
+
+    fun setNextVerses(verses: List<SelectedVerse>) {
+        _nextVerses.value = verses
     }
 
     fun setBibleTransitionAlpha(alpha: Float) {
@@ -444,16 +454,107 @@ class PresenterManager {
         _activeScene.value = scene
     }
 
-    // Announcements countdown timer — mirrored here so stage monitor can observe it
+    // ── Announcements timer/clock ───────────────────────────────────────────
+    // Ticks here — not in the Announcements tab's ViewModel — so switching to another tab (e.g.
+    // to present a Bible verse) doesn't kill the coroutine and freeze the countdown. Stage
+    // Monitor and the live output both observe timerRemainingSeconds/timerRunning directly.
     private val _timerRemainingSeconds = mutableStateOf(0)
     val timerRemainingSeconds: State<Int> = _timerRemainingSeconds
 
     private val _timerRunning = mutableStateOf(false)
     val timerRunning: State<Boolean> = _timerRunning
 
-    fun setTimerState(remainingSeconds: Int, running: Boolean) {
+    // True once a Duration countdown has run out — the authoritative signal the Announcements tab
+    // uses to show the expired message/color, since it (unlike this manager) may have been
+    // recreated since the countdown actually finished.
+    private val _announcementTimerExpired = mutableStateOf(false)
+    val announcementTimerExpired: State<Boolean> = _announcementTimerExpired
+
+    private var announcementTickerJob: Job? = null
+
+    /** Duration/Countdown — ticks down from [remainingSeconds] and shows [expiredText] on reaching zero. */
+    fun startAnnouncementCountdown(remainingSeconds: Int, expiredText: String) {
+        announcementTickerJob?.cancel()
+        if (remainingSeconds <= 0) return
+        val endEpochSecond = java.time.Instant.now().epochSecond + remainingSeconds
         _timerRemainingSeconds.value = remainingSeconds
-        _timerRunning.value = running
+        _timerRunning.value = true
+        _announcementTimerExpired.value = false
+        announcementTickerJob = preRenderScope.launch {
+            while (true) {
+                val remaining = (endEpochSecond - java.time.Instant.now().epochSecond).toInt()
+                if (remaining <= 0) break
+                _timerRemainingSeconds.value = remaining
+                pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(remaining))
+                delay(1000L)
+            }
+            _timerRemainingSeconds.value = 0
+            _timerRunning.value = false
+            _announcementTimerExpired.value = true
+            pushAnnouncementTextIfLive(expiredText)
+            setPresentingMode(Presenting.ANNOUNCEMENTS)
+        }
+    }
+
+    /** Count-up — an open-ended stopwatch starting from [initialElapsedSeconds]. */
+    fun startAnnouncementCountUp(initialElapsedSeconds: Int) {
+        announcementTickerJob?.cancel()
+        val startEpochSecond = java.time.Instant.now().epochSecond - initialElapsedSeconds
+        _timerRemainingSeconds.value = initialElapsedSeconds
+        _timerRunning.value = true
+        _announcementTimerExpired.value = false
+        announcementTickerJob = preRenderScope.launch {
+            while (true) {
+                val elapsed = (java.time.Instant.now().epochSecond - startEpochSecond).toInt().coerceAtLeast(0)
+                _timerRemainingSeconds.value = elapsed
+                pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(elapsed))
+                delay(1000L)
+            }
+        }
+    }
+
+    /** Specific Time — always-on countdown to the next occurrence of [targetHour]:[targetMinute]:[targetSecond]. */
+    fun startAnnouncementSpecificTime(targetHour: Int, targetMinute: Int, targetSecond: Int) {
+        announcementTickerJob?.cancel()
+        _timerRunning.value = false
+        announcementTickerJob = preRenderScope.launch {
+            while (true) {
+                val nowSec = java.time.LocalTime.now().toSecondOfDay()
+                val targetSec = targetHour * 3600 + targetMinute * 60 + targetSecond
+                val diff = targetSec - nowSec
+                val remaining = if (diff > 0) diff else diff + 86400
+                _timerRemainingSeconds.value = remaining
+                pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(remaining))
+                delay(1000L)
+            }
+        }
+    }
+
+    /** Clock Display — always-on live wall clock formatted with [formatPattern]. */
+    fun startAnnouncementClockDisplay(formatPattern: String) {
+        announcementTickerJob?.cancel()
+        _timerRunning.value = false
+        announcementTickerJob = preRenderScope.launch {
+            while (true) {
+                val text = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern(formatPattern))
+                pushAnnouncementTextIfLive(text)
+                delay(1000L)
+            }
+        }
+    }
+
+    /** Pauses/stops whichever announcement ticker is active, optionally pinning the mirrored remaining value (e.g. on Reset). */
+    fun pauseAnnouncementTimer(remainingSeconds: Int? = null) {
+        announcementTickerJob?.cancel()
+        _timerRunning.value = false
+        _announcementTimerExpired.value = false
+        if (remainingSeconds != null) _timerRemainingSeconds.value = remainingSeconds
+    }
+
+    private fun pushAnnouncementTextIfLive(text: String) {
+        val anyScreenOnAnnouncements = _presentingMode.value == Presenting.ANNOUNCEMENTS ||
+            _screenLocks.value.values.any { it == Presenting.ANNOUNCEMENTS }
+        if (anyScreenOnAnnouncements) setAnnouncementText(text)
     }
 
     // Q&A display state

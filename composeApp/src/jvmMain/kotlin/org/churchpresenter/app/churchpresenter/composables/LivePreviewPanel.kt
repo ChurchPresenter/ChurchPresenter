@@ -54,6 +54,8 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.fill_badge
+import churchpresenter.composeapp.generated.resources.display_stage_monitor
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.live_preview_nothing
 import churchpresenter.composeapp.generated.resources.live_preview_title
 import churchpresenter.composeapp.generated.resources.lock_screen_to_tab
@@ -63,6 +65,7 @@ import churchpresenter.composeapp.generated.resources.unlock_screen
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
+import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
@@ -161,6 +164,7 @@ private fun SingleDisplayPreview(
     val screenLocks by presenterManager.screenLocks
     val effectiveMode = screenLocks[screenIndex] ?: presentingMode
     val displayedVerses by presenterManager.displayedVerses
+    val nextVerses by presenterManager.nextVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
     val displayedLyricSection by presenterManager.displayedLyricSection
     val songTransitionAlpha by presenterManager.songTransitionAlpha
@@ -187,7 +191,9 @@ private fun SingleDisplayPreview(
     val websiteUrl by presenterManager.websiteUrl
     val webSnapshot by presenterManager.webSnapshot
     val activeScene by presenterManager.activeScene
+    val displayedQuestion by presenterManager.displayedQuestion
     val displayedDictionaryEntry by presenterManager.displayedDictionaryEntry
+    val presenterNotes by presenterManager.presenterNotes
     val mediaViewModel = LocalMediaViewModel.current
 
     val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
@@ -226,15 +232,63 @@ private fun SingleDisplayPreview(
         label = "border_color"
     )
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(presenterAspectRatio())
-            .clip(RoundedCornerShape(6.dp))
-            .border(1.dp, borderColor, RoundedCornerShape(6.dp))
-    ) {
+    val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
+    val displayModeChipLabel = when (screenAssignment.displayMode) {
+        Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
+        Constants.DISPLAY_MODE_LOWER_THIRD -> stringResource(Res.string.display_lower_third)
+        else -> null
+    }
+
+    Column(modifier = modifier) {
+        // Display mode chip (e.g. "Stage Monitor", "Lower Third") — sits above the preview so it
+        // never covers the content.
+        if (displayModeChipLabel != null) {
+            Text(
+                text = displayModeChipLabel,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 9.sp,
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(3.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(3.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(presenterAspectRatio())
+                .clip(RoundedCornerShape(6.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(6.dp))
+        ) {
         val primaryRole = screenAssignment.primaryOutputRole
 
+        // ── Stage Monitor: dedicated presenter-confidence layout, not the normal presenter ──
+        if (screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
+            ScaledPresenterContent {
+                StageMonitorScreen(
+                    sm = appSettings.stageMonitorSettings,
+                    presentingMode = presentingMode,
+                    announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
+                    currentLyricSection = displayedLyricSection,
+                    allLyricSections = allLyricSections,
+                    songDisplaySectionIndex = songDisplaySectionIndex,
+                    displayedVerses = displayedVerses,
+                    nextVerses = nextVerses,
+                    announcementText = displayedAnnouncementText,
+                    displayedImagePath = displayedImagePath,
+                    displayedSlide = displayedSlide,
+                    presenterNotes = presenterNotes,
+                    activeScene = activeScene,
+                    displayedQuestion = displayedQuestion,
+                    qaSettings = appSettings.qaSettings,
+                    displayedDictionaryEntry = displayedDictionaryEntry,
+                    dictionarySettings = appSettings.dictionarySettings,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        } else
         // ── Scaled presenter content (all modes except WEBSITE) ───────────────
         // JavaFX/Swing heavyweight components cannot be scaled by Compose layout,
         // so WEBSITE is handled separately below at native size.
@@ -309,7 +363,6 @@ private fun SingleDisplayPreview(
                             Presenting.CANVAS ->
                                 ScenePresenter(scene = activeScene)
                             Presenting.QA -> {
-                                val displayedQuestion by presenterManager.displayedQuestion
                                 val showQRCode by presenterManager.showQRCodeOnDisplay
                                 if (showQRCode) {
                                     QAQRCodePresenter(url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa", qaSettings = appSettings.qaSettings)
@@ -349,7 +402,7 @@ private fun SingleDisplayPreview(
         // A second JFXPanel instance can't be scaled/clipped by Compose.
         // Instead, WebTab pushes a snapshot bitmap every 200ms via PresenterManager
         // so this panel shows a pixel-accurate mirror including scroll position.
-        if (effectiveMode == Presenting.WEBSITE) {
+        if (screenAssignment.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR && effectiveMode == Presenting.WEBSITE) {
             val snapshot = webSnapshot
             if (snapshot != null) {
                 Image(
@@ -402,43 +455,46 @@ private fun SingleDisplayPreview(
             )
         }
 
-        // LOCKED badge — shown when screen is locked to a specific tab
+        // LOCKED badge + lock toggle — not applicable to Stage Monitor screens, which route
+        // their own content dynamically and are never locked to a single tab.
         val lockedMode = screenLocks[screenIndex]
-        if (lockedMode != null) {
-            Text(
-                text = stringResource(Res.string.screen_locked_badge),
-                color = Color.White,
-                fontSize = 9.sp,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(start = 4.dp, bottom = if (screenAssignment.hasKeyOutput) 24.dp else 4.dp)
-                    .background(Color(0xFFFFC107), RoundedCornerShape(3.dp))
-                    .padding(horizontal = 5.dp, vertical = 2.dp)
-            )
-        }
+        if (!isStageMonitor) {
+            if (lockedMode != null) {
+                Text(
+                    text = stringResource(Res.string.screen_locked_badge),
+                    color = Color.White,
+                    fontSize = 9.sp,
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = 4.dp, bottom = if (screenAssignment.hasKeyOutput) 24.dp else 4.dp)
+                        .background(Color(0xFFFFC107), RoundedCornerShape(3.dp))
+                        .padding(horizontal = 5.dp, vertical = 2.dp)
+                )
+            }
 
-        // Lock toggle button — bottom-right corner
-        IconButton(
-            onClick = {
-                if (lockedMode != null) {
-                    presenterManager.setScreenLock(screenIndex, null)
-                } else {
-                    presenterManager.setScreenLock(screenIndex, effectiveMode)
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(2.dp)
-                .size(24.dp),
-            colors = IconButtonDefaults.iconButtonColors(
-                contentColor = if (lockedMode != null) Color(0xFFFFC107) else Color.White.copy(alpha = 0.5f)
-            )
-        ) {
-            Icon(
-                imageVector = if (lockedMode != null) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                contentDescription = if (lockedMode != null) stringResource(Res.string.unlock_screen) else stringResource(Res.string.lock_screen_to_tab),
-                modifier = Modifier.size(13.dp)
-            )
+            // Lock toggle button — bottom-right corner
+            IconButton(
+                onClick = {
+                    if (lockedMode != null) {
+                        presenterManager.setScreenLock(screenIndex, null)
+                    } else {
+                        presenterManager.setScreenLock(screenIndex, effectiveMode)
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(2.dp)
+                    .size(24.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = if (lockedMode != null) Color(0xFFFFC107) else Color.White.copy(alpha = 0.5f)
+                )
+            ) {
+                Icon(
+                    imageVector = if (lockedMode != null) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                    contentDescription = if (lockedMode != null) stringResource(Res.string.unlock_screen) else stringResource(Res.string.lock_screen_to_tab),
+                    modifier = Modifier.size(13.dp)
+                )
+            }
         }
 
         // Screen number label
@@ -466,6 +522,7 @@ private fun SingleDisplayPreview(
             ) {
                 AnimatedEqualizer()
             }
+        }
         }
     }
 }

@@ -455,7 +455,10 @@ fun BibleTab(
         }
     }
 
-    // Auto-pause when user navigates to a different chapter or book while presenting
+    // Auto-pause when user navigates to a different chapter or book while presenting — except
+    // when it's just a sequential chapter advance (Left/Right arrow-key continuation, including
+    // rolling past a chapter's last verse), which is a deliberate continuation of what's live,
+    // not browsing away from it.
     val prevBookRef = remember { mutableStateOf(selectedBookIndex) }
     val prevChapterRef = remember { mutableStateOf(selectedChapter) }
     LaunchedEffect(selectedBookIndex, selectedChapter) {
@@ -463,7 +466,8 @@ fun BibleTab(
         val chapterChanged = selectedChapter != prevChapterRef.value
         prevBookRef.value = selectedBookIndex
         prevChapterRef.value = selectedChapter
-        if ((bookChanged || chapterChanged) && !splitBrowseMode && currentIsPresenting) {
+        val wasSequentialAdvance = viewModel.consumeSequentialChapterAdvance()
+        if ((bookChanged || chapterChanged) && !splitBrowseMode && currentIsPresenting && !wasSequentialAdvance) {
             presenterManager?.setBibleHold(true)
         }
     }

@@ -316,6 +316,8 @@
     <string name="tooltip_clear_schedule">Очистити програму</string>
     <string name="tooltip_settings">Налаштування</string>
     <string name="tooltip_go_live">В ефір</string>
+    <string name="tooltip_send_to_stage_monitor">Надіслати на монітор сцени</string>
+    <string name="tooltip_hide_from_stage_monitor">Приховати оголошення</string>
     <string name="tooltip_remove">Видалити</string>
     <string name="tooltip_edit">Редагувати</string>
     <string name="tooltip_edit_label">Редагувати мітку</string>
@@ -725,6 +727,13 @@
     <string name="timer_reset">Скинути</string>
     <string name="timer_resume">Продовжити</string>
     <string name="timer_seconds">сек</string>
+    <string name="timer_am">дп</string>
+    <string name="timer_pm">пп</string>
+    <string name="timer_clock_format">Формат</string>
+    <string name="timer_clock_format_12h_sec">12-годинний (h:mm:ss AM/PM)</string>
+    <string name="timer_clock_format_12h">12-годинний (h:mm AM/PM)</string>
+    <string name="timer_clock_format_24h_sec">24-годинний (HH:mm:ss)</string>
+    <string name="timer_clock_format_24h">24-годинний (HH:mm)</string>
     <string name="timer_start">Старт</string>
     <string name="timer_text_color">Колір таймера</string>
     <string name="timer_title">Таймер</string>
@@ -1108,7 +1117,23 @@
     <string name="stage_monitor_clock_show_seconds">Показувати секунди</string>
     <string name="stage_monitor_clock_24h">24-годинний формат</string>
     <string name="stage_monitor_no_extra_displays">Додаткові монітори не виявлено. Підключіть додатковий монітор для використання монітора сцени.</string>
+    <string name="stage_monitor_layout_section">Розкладка екрана</string>
+    <string name="stage_monitor_zone_top_left">Вгорі зліва</string>
+    <string name="stage_monitor_zone_top_right">Вгорі справа</string>
+    <string name="stage_monitor_zone_bottom_left">Внизу зліва</string>
+    <string name="stage_monitor_zone_bottom_center">Внизу по центру</string>
+    <string name="stage_monitor_zone_bottom_right">Внизу справа</string>
+    <string name="stage_monitor_zone_full_screen">Весь екран</string>
+    <string name="stage_monitor_zone_none">Немає</string>
     <string name="stage_monitor_notes_from_presentation">Нотатки автоматично відображаються з активного слайда PowerPoint або Keynote.</string>
+    <string name="stage_monitor_content_section">Вміст екрана</string>
+    <string name="stage_monitor_metronome_position">Позиція метронома</string>
+    <string name="stage_monitor_position_top_center">Вгорі по центру</string>
+    <string name="stage_monitor_position_middle_left">Посередині зліва</string>
+    <string name="stage_monitor_position_center">Центр</string>
+    <string name="stage_monitor_position_middle_right">Посередині справа</string>
+    <string name="metronome_bpm_label">Темп метронома</string>
+    <string name="unit_bpm">уд/хв</string>
 
     <!-- Q&A Tab -->
     <string name="tab_qa">Запитання і відповіді</string>

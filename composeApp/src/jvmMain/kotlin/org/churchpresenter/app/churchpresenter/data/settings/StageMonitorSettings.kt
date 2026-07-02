@@ -3,98 +3,120 @@ package org.churchpresenter.app.churchpresenter.data.settings
 import kotlinx.serialization.Serializable
 import org.churchpresenter.app.churchpresenter.utils.Constants
 
-/** What content is displayed in a given stage monitor screen zone. */
+/** A type of content that can be routed to a zone on the stage monitor screen. */
 @Serializable
-enum class StageMonitorContent {
-    CLOCK, TIMER, NOTES, CURRENT_SLIDE, NEXT_SLIDE
+enum class StageMonitorContentType {
+    BIBLE, SONGS, PRESENTATION, PRESENTATION_NOTES, PICTURES, MEDIA, LOWER_THIRD, WEB, STT, CANVAS, QA, DICTIONARY,
+    CLOCK,
+    /**
+     * Announcements text and all timer variants (Duration/Countdown/Specific Time) share one
+     * pre-formatted string with no way to tell them apart, so they're a single content type —
+     * having separate entries that all show identical text just duplicated it across zones.
+     */
+    ANNOUNCEMENT_TEXT,
+    /** Next Bible verse (when presenting Bible) or next song line/section (when presenting Songs). */
+    NEXT
+}
+
+/** Where a content type is routed to on the stage monitor screen. */
+@Serializable
+enum class StageMonitorZone {
+    TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_MIDDLE, BOTTOM_RIGHT, FULL_SCREEN, NONE
+}
+
+/** The zones that are actually drawn and therefore have their own configurable style. */
+@Serializable
+enum class StageMonitorStyleZone {
+    TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_MIDDLE, BOTTOM_RIGHT, FULL_SCREEN
+}
+
+/** Where the metronome flash dot is anchored on the stage monitor screen — a free 3x3 grid, independent of the content zones above (no full-screen option since it's a small overlay). */
+@Serializable
+enum class MetronomePosition {
+    NONE,
+    TOP_LEFT, TOP_CENTER, TOP_RIGHT,
+    MIDDLE_LEFT, CENTER, MIDDLE_RIGHT,
+    BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
+}
+
+fun StageMonitorZone.toStyleZone(): StageMonitorStyleZone? = when (this) {
+    StageMonitorZone.TOP_LEFT -> StageMonitorStyleZone.TOP_LEFT
+    StageMonitorZone.TOP_RIGHT -> StageMonitorStyleZone.TOP_RIGHT
+    StageMonitorZone.BOTTOM_LEFT -> StageMonitorStyleZone.BOTTOM_LEFT
+    StageMonitorZone.BOTTOM_MIDDLE -> StageMonitorStyleZone.BOTTOM_MIDDLE
+    StageMonitorZone.BOTTOM_RIGHT -> StageMonitorStyleZone.BOTTOM_RIGHT
+    StageMonitorZone.FULL_SCREEN -> StageMonitorStyleZone.FULL_SCREEN
+    StageMonitorZone.NONE -> null
 }
 
 @Serializable
-data class StageMonitorSettings(
-    // Which content type appears in each screen zone
-    val topLeftContent: StageMonitorContent = StageMonitorContent.CURRENT_SLIDE,
-    val topRightContent: StageMonitorContent = StageMonitorContent.TIMER,
-    val bottomLeftContent: StageMonitorContent = StageMonitorContent.NEXT_SLIDE,
-    val bottomCenterContent: StageMonitorContent = StageMonitorContent.CLOCK,
-    val bottomRightContent: StageMonitorContent = StageMonitorContent.NOTES,
-
-    // Top-Left: Current slide
-    val currentFontSize: Int = 60,
-    val currentFontType: String = "Arial",
-    val currentColor: String = "#FFFFFF",
-    val currentBgColor: String = "#1A1A2E",
-    val currentBold: Boolean = false,
-    val currentItalic: Boolean = false,
-    val currentUnderline: Boolean = false,
-    val currentShadow: Boolean = true,
-    val currentShadowColor: String = "#000000",
-    val currentShadowSize: Int = 100,
-    val currentShadowOpacity: Int = 80,
-    val currentVerticalAlignment: String = Constants.TOP,
-    val currentHorizontalAlignment: String = Constants.LEFT,
-
-    // Bottom-Left: Next slide
-    val nextFontSize: Int = 40,
-    val nextFontType: String = "Arial",
-    val nextColor: String = "#AAAAAA",
-    val nextBgColor: String = "#0D0D1A",
-    val nextBold: Boolean = false,
-    val nextItalic: Boolean = true,
-    val nextUnderline: Boolean = false,
-    val nextShadow: Boolean = false,
-    val nextShadowColor: String = "#000000",
-    val nextShadowSize: Int = 100,
-    val nextShadowOpacity: Int = 80,
-    val nextVerticalAlignment: String = Constants.TOP,
-    val nextHorizontalAlignment: String = Constants.LEFT,
-
-    // Top-Right: Timer
-    val showTimer: Boolean = true,
-    val timerFontSize: Int = 80,
-    val timerFontType: String = "Arial",
-    val timerColor: String = "#00FF88",
-    val timerBgColor: String = "#0D1A0D",
-    val timerBold: Boolean = true,
-    val timerItalic: Boolean = false,
-    val timerUnderline: Boolean = false,
-    val timerShadow: Boolean = false,
-    val timerShadowColor: String = "#000000",
-    val timerShadowSize: Int = 100,
-    val timerShadowOpacity: Int = 80,
-    // Song/Bible label shown in top-right corner of current/next panels
-    val showSongBibleLabel: Boolean = true,
-    val labelFontSize: Int = 22,
-    val labelFontType: String = "Arial",
-    val labelColor: String = "#888888",
-    val labelBold: Boolean = false,
-    val labelItalic: Boolean = false,
-
-    // Bottom-Center: Clock
-    val showClock: Boolean = true,
-    val clockFontSize: Int = 72,
-    val clockFontType: String = "Arial",
-    val clockColor: String = "#FFFFFF",
-    val clockBgColor: String = "#000000",
-    val clockBold: Boolean = false,
-    val clockItalic: Boolean = false,
-    val clockUnderline: Boolean = false,
-    val clockShadow: Boolean = false,
-    val clockShadowColor: String = "#000000",
-    val clockShadowSize: Int = 100,
-    val clockShadowOpacity: Int = 80,
-    val clockShowSeconds: Boolean = true,
-    val clockFormat24h: Boolean = true,
-
-    // Bottom-Right: Presenter Notes
-    val notesFontSize: Int = 36,
-    val notesFontType: String = "Arial",
-    val notesColor: String = "#DDDDDD",
-    val notesBgColor: String = "#111111",
-    val notesBold: Boolean = false,
-    val notesItalic: Boolean = false,
-    val notesUnderline: Boolean = false,
-    val notesShadow: Boolean = false,
-    val notesShadowColor: String = "#000000",
-    val notesShadowSize: Int = 100,
-    val notesShadowOpacity: Int = 80
+data class StageMonitorZoneStyle(
+    val fontType: String = "Arial",
+    val fontSize: Int = 40,
+    val color: String = "#FFFFFF",
+    val bgColor: String = "#1A1A2E",
+    val bold: Boolean = false,
+    val italic: Boolean = false,
+    val underline: Boolean = false,
+    val shadow: Boolean = false,
+    val shadowColor: String = "#000000",
+    val shadowSize: Int = 100,
+    val shadowOpacity: Int = 80,
+    val verticalAlignment: String = Constants.TOP,
+    val horizontalAlignment: String = Constants.LEFT
 )
+
+@Serializable
+data class StageMonitorSettings(
+    // Which zone each content type is routed to; see defaultContentZones() for per-type defaults.
+    val contentZones: Map<StageMonitorContentType, StageMonitorZone> = defaultContentZones(),
+
+    // Font/color/style/alignment for each of the 6 drawable zones.
+    val zoneStyles: Map<StageMonitorStyleZone, StageMonitorZoneStyle> = defaultZoneStyles(),
+
+    // Where the metronome flash dot is anchored; NONE = disabled (default).
+    val metronomePosition: MetronomePosition = MetronomePosition.NONE
+) {
+    /** Safe lookup that falls back to the built-in default zone for content types missing from older saved settings. */
+    fun zoneFor(type: StageMonitorContentType): StageMonitorZone =
+        contentZones[type] ?: defaultContentZones().getValue(type)
+
+    /** Safe lookup that falls back to the built-in default style for zones missing from older saved settings. */
+    fun styleFor(zone: StageMonitorStyleZone): StageMonitorZoneStyle =
+        zoneStyles[zone] ?: defaultZoneStyles().getValue(zone)
+
+    companion object {
+        fun defaultContentZones(): Map<StageMonitorContentType, StageMonitorZone> =
+            StageMonitorContentType.entries.associateWith { StageMonitorZone.FULL_SCREEN } + mapOf(
+                StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT,
+                StageMonitorContentType.SONGS to StageMonitorZone.TOP_LEFT,
+                StageMonitorContentType.NEXT to StageMonitorZone.TOP_RIGHT,
+                StageMonitorContentType.CLOCK to StageMonitorZone.BOTTOM_MIDDLE,
+                StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.BOTTOM_LEFT
+            )
+
+        fun defaultZoneStyles(): Map<StageMonitorStyleZone, StageMonitorZoneStyle> = mapOf(
+            StageMonitorStyleZone.TOP_LEFT to StageMonitorZoneStyle(
+                fontSize = 35, color = "#FFFFFF", bgColor = "#000000", shadow = true
+            ),
+            StageMonitorStyleZone.TOP_RIGHT to StageMonitorZoneStyle(
+                fontSize = 35, color = "#FFFFFF", bgColor = "#000000", bold = true,
+                verticalAlignment = Constants.MIDDLE, horizontalAlignment = Constants.CENTER
+            ),
+            StageMonitorStyleZone.BOTTOM_LEFT to StageMonitorZoneStyle(
+                fontSize = 35, color = "#FFFFFF", bgColor = "#000000", italic = true
+            ),
+            StageMonitorStyleZone.BOTTOM_MIDDLE to StageMonitorZoneStyle(
+                fontSize = 35, color = "#FFFFFF", bgColor = "#000000",
+                verticalAlignment = Constants.MIDDLE, horizontalAlignment = Constants.CENTER
+            ),
+            StageMonitorStyleZone.BOTTOM_RIGHT to StageMonitorZoneStyle(
+                fontSize = 35, color = "#FFFFFF", bgColor = "#000000"
+            ),
+            StageMonitorStyleZone.FULL_SCREEN to StageMonitorZoneStyle(
+                fontSize = 80, color = "#FFFFFF", bgColor = "#000000",
+                verticalAlignment = Constants.MIDDLE, horizontalAlignment = Constants.CENTER
+            )
+        )
+    }
+}

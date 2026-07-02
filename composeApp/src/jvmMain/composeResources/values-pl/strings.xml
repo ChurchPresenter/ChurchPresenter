@@ -316,6 +316,8 @@
     <string name="tooltip_clear_schedule">Wyczyść program</string>
     <string name="tooltip_settings">Ustawienia</string>
     <string name="tooltip_go_live">Na żywo</string>
+    <string name="tooltip_send_to_stage_monitor">Wyślij do monitora sceny</string>
+    <string name="tooltip_hide_from_stage_monitor">Ukryj ogłoszenie</string>
     <string name="tooltip_remove">Usuń</string>
     <string name="tooltip_edit">Edytuj</string>
     <string name="tooltip_edit_label">Edytuj etykietę</string>
@@ -719,6 +721,13 @@
     <string name="timer_reset">Resetuj</string>
     <string name="timer_resume">Wznów</string>
     <string name="timer_seconds">sek</string>
+    <string name="timer_am">AM</string>
+    <string name="timer_pm">PM</string>
+    <string name="timer_clock_format">Format</string>
+    <string name="timer_clock_format_12h_sec">12-godzinny (h:mm:ss AM/PM)</string>
+    <string name="timer_clock_format_12h">12-godzinny (h:mm AM/PM)</string>
+    <string name="timer_clock_format_24h_sec">24-godzinny (HH:mm:ss)</string>
+    <string name="timer_clock_format_24h">24-godzinny (HH:mm)</string>
     <string name="timer_start">Start</string>
     <string name="timer_text_color">Kolor minutnika</string>
     <string name="timer_title">Minutnik</string>
@@ -1102,7 +1111,23 @@
     <string name="stage_monitor_clock_show_seconds">Pokaż sekundy</string>
     <string name="stage_monitor_clock_24h">Format 24-godzinny</string>
     <string name="stage_monitor_no_extra_displays">Nie wykryto dodatkowych wyświetlaczy. Podłącz dodatkowy monitor, aby korzystać z monitora sceny.</string>
+    <string name="stage_monitor_layout_section">Układ ekranu</string>
+    <string name="stage_monitor_zone_top_left">Góra lewa</string>
+    <string name="stage_monitor_zone_top_right">Góra prawa</string>
+    <string name="stage_monitor_zone_bottom_left">Dół lewa</string>
+    <string name="stage_monitor_zone_bottom_center">Dół środek</string>
+    <string name="stage_monitor_zone_bottom_right">Dół prawa</string>
+    <string name="stage_monitor_zone_full_screen">Pełny ekran</string>
+    <string name="stage_monitor_zone_none">Brak</string>
     <string name="stage_monitor_notes_from_presentation">Notatki są automatycznie wyświetlane z aktywnego slajdu PowerPoint lub Keynote.</string>
+    <string name="stage_monitor_content_section">Zawartość ekranu</string>
+    <string name="stage_monitor_metronome_position">Pozycja metronomu</string>
+    <string name="stage_monitor_position_top_center">Góra środek</string>
+    <string name="stage_monitor_position_middle_left">Środek lewa</string>
+    <string name="stage_monitor_position_center">Środek</string>
+    <string name="stage_monitor_position_middle_right">Środek prawa</string>
+    <string name="metronome_bpm_label">Tempo metronomu</string>
+    <string name="unit_bpm">ud/min</string>
 
     <!-- Q&A Tab -->
     <string name="tab_qa">Pytania i odpowiedzi</string>
