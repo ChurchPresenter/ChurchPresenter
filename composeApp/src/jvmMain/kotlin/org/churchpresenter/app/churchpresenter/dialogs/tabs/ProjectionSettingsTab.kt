@@ -89,6 +89,10 @@ import churchpresenter.composeapp.generated.resources.screen_lang_bible_2
 import churchpresenter.composeapp.generated.resources.screen_lang_language_1
 import churchpresenter.composeapp.generated.resources.screen_lang_language_2
 import churchpresenter.composeapp.generated.resources.screen_lang_off
+import churchpresenter.composeapp.generated.resources.simulate_screens_count
+import churchpresenter.composeapp.generated.resources.simulate_screens_help
+import churchpresenter.composeapp.generated.resources.simulate_screens_section
+import churchpresenter.composeapp.generated.resources.simulated_screen_label
 import churchpresenter.composeapp.generated.resources.song_language_both
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.vlc_browse
@@ -241,6 +245,43 @@ fun ProjectionSettingsTab(
         }
         options.toList()
     }
+
+    // ── Dev-mode-only: simulated (synthetic) screens for testing without extra monitors ──
+    val simulatedScreenCount = if (Constants.isDevMode) proj.simulatedScreenCount else 0
+    LaunchedEffect(simulatedScreenCount, presenterWindowCount) {
+        if (!Constants.isDevMode) return@LaunchedEffect
+        val baseIndex = presenterWindowCount
+        val primaryBounds = primaryDevice.defaultConfiguration.bounds
+        val assignments = proj.screenAssignments.toMutableList()
+        var changed = false
+        val simWidth = 960
+        val simHeight = 540
+        val gap = 16
+        for (n in 0 until simulatedScreenCount) {
+            val idx = baseIndex + n
+            while (assignments.size <= idx) assignments.add(ScreenAssignment())
+            if (assignments[idx].targetType != Constants.TARGET_TYPE_SIMULATED) {
+                assignments[idx] = ScreenAssignment(
+                    targetDisplay = idx,
+                    targetType = Constants.TARGET_TYPE_SIMULATED,
+                    targetBoundsX = primaryBounds.x + primaryBounds.width + gap + n * (simWidth + gap),
+                    targetBoundsY = primaryBounds.y,
+                    targetBoundsW = simWidth,
+                    targetBoundsH = simHeight
+                )
+                changed = true
+            }
+        }
+        // Trim trailing simulated slots beyond the current count — never touches real/DeckLink slots.
+        while (assignments.size > baseIndex + simulatedScreenCount && assignments.lastOrNull()?.targetType == Constants.TARGET_TYPE_SIMULATED) {
+            assignments.removeAt(assignments.lastIndex)
+            changed = true
+        }
+        if (changed) {
+            onSettingsChange { s -> s.copy(projectionSettings = s.projectionSettings.copy(screenAssignments = assignments)) }
+        }
+    }
+    val simulatedAssignments = (0 until simulatedScreenCount).map { proj.getAssignment(presenterWindowCount + it) }
 
     Box(
         modifier = Modifier

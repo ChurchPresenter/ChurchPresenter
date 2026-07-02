@@ -1594,13 +1594,11 @@ private fun PresenterWindows(
     val songDisplaySectionIndex by presenterManager.songDisplaySectionIndex
     val selectedImagePath by presenterManager.selectedImagePath
     val displayedImagePath by presenterManager.displayedImagePath
-    val nextImagePath by presenterManager.nextImagePath
     val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
     val previousDisplayedImagePath by presenterManager.previousDisplayedImagePath
     val pictureSlideOffset by presenterManager.pictureSlideOffset
     val selectedSlide by presenterManager.selectedSlide
     val displayedSlide by presenterManager.displayedSlide
-    val nextSlide by presenterManager.nextSlide
     val slideTransitionAlpha by presenterManager.slideTransitionAlpha
     val previousDisplayedSlide by presenterManager.previousDisplayedSlide
     val slideSlideOffset by presenterManager.slideSlideOffset
@@ -1928,7 +1926,8 @@ private fun PresenterWindows(
     val availableScreens = screens.indices.filter { screens[it] != defaultDevice }
 
     val deckLinkDeviceCount = if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0
-    val windowCount = availableScreens.size + deckLinkDeviceCount
+    val simulatedScreenCount = if (Constants.isDevMode) proj.simulatedScreenCount else 0
+    val windowCount = availableScreens.size + deckLinkDeviceCount + simulatedScreenCount
     for (i in 0 until windowCount) {
         val screenAssignment = proj.getAssignment(i)
         val effectiveMode = screenLocks[i] ?: presentingMode
@@ -2454,21 +2453,26 @@ private fun PresenterWindows(
 
         if (screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
 
-        // Resolve target display
-        val targetScreenIndex = findScreenIndexByBounds(
-            screens,
-            screenAssignment.targetBoundsX,
-            screenAssignment.targetBoundsY,
-            screenAssignment.targetBoundsW,
-            screenAssignment.targetBoundsH
-        ) ?: if (screenAssignment.targetDisplay >= 0 && screenAssignment.targetDisplay < screens.size) {
-            screenAssignment.targetDisplay
-        } else {
-            availableScreens.getOrNull(i) ?: continue
-        }
+        val isSimulated = screenAssignment.targetType == Constants.TARGET_TYPE_SIMULATED
 
-        // Skip if the target screen doesn't exist
-        if (targetScreenIndex < 0 || targetScreenIndex >= screens.size) continue
+        // Resolve target display — skipped for simulated screens, which carry their own
+        // synthetic bounds directly on the assignment rather than pointing at a real device.
+        val targetScreenIndex = if (!isSimulated) {
+            findScreenIndexByBounds(
+                screens,
+                screenAssignment.targetBoundsX,
+                screenAssignment.targetBoundsY,
+                screenAssignment.targetBoundsW,
+                screenAssignment.targetBoundsH
+            ) ?: if (screenAssignment.targetDisplay >= 0 && screenAssignment.targetDisplay < screens.size) {
+                screenAssignment.targetDisplay
+            } else {
+                availableScreens.getOrNull(i) ?: continue
+            }
+        } else -1
+
+        // Skip if the target screen doesn't exist (not applicable to simulated screens)
+        if (!isSimulated && (targetScreenIndex < 0 || targetScreenIndex >= screens.size)) continue
 
         // Per-output background toggle
         val showBg = if (screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
@@ -2477,19 +2481,30 @@ private fun PresenterWindows(
         val primaryRole = screenAssignment.primaryOutputRole
 
         val windowState = remember(i) {
-            val b = screens[targetScreenIndex].defaultConfiguration.bounds
-            WindowState(
-                placement = WindowPlacement.Floating,
-                position = WindowPosition(b.x.dp, b.y.dp),
-                width = b.width.dp,
-                height = b.height.dp
-            )
+            if (isSimulated) {
+                WindowState(
+                    placement = WindowPlacement.Floating,
+                    position = WindowPosition(screenAssignment.targetBoundsX.dp, screenAssignment.targetBoundsY.dp),
+                    width = screenAssignment.targetBoundsW.dp,
+                    height = screenAssignment.targetBoundsH.dp
+                )
+            } else {
+                val b = screens[targetScreenIndex].defaultConfiguration.bounds
+                WindowState(
+                    placement = WindowPlacement.Floating,
+                    position = WindowPosition(b.x.dp, b.y.dp),
+                    width = b.width.dp,
+                    height = b.height.dp
+                )
+            }
         }
 
-        LaunchedEffect(targetScreenIndex) {
-            val b = screens[targetScreenIndex].defaultConfiguration.bounds
-            windowState.position = WindowPosition(b.x.dp, b.y.dp)
-            windowState.size = DpSize(b.width.dp, b.height.dp)
+        if (!isSimulated) {
+            LaunchedEffect(targetScreenIndex) {
+                val b = screens[targetScreenIndex].defaultConfiguration.bounds
+                windowState.position = WindowPosition(b.x.dp, b.y.dp)
+                windowState.size = DpSize(b.width.dp, b.height.dp)
+            }
         }
 
         // Primary window (fill or normal)
@@ -2511,16 +2526,11 @@ private fun PresenterWindows(
                         sm = appSettings.stageMonitorSettings,
                         presentingMode = presentingMode,
                         currentLyricSection = displayedLyricSection,
-                        allLyricSections = allLyricSections,
-                        songDisplaySectionIndex = songDisplaySectionIndex,
                         displayedVerses = displayedVerses,
                         timerRemainingSeconds = timerRemainingSeconds,
                         timerRunning = timerRunning,
                         displayedImagePath = displayedImagePath,
-                        nextImagePath = nextImagePath,
                         displayedSlide = displayedSlide,
-                        nextSlide = nextSlide,
-                        announcementText = displayedAnnouncementText,
                         presenterNotes = presenterNotes,
                         modifier = Modifier.fillMaxSize()
                     )
