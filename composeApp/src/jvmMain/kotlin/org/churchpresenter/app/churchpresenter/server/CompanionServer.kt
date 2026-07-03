@@ -4148,7 +4148,7 @@ function showOffline(){
   offlineMode=true;
   document.getElementById('app').style.display='none';
   document.getElementById('login').style.display='flex';
-  document.getElementById('login').innerHTML='<h2>App not available</h2><p>Connection lost — the app may be closed or the network is unavailable. Will reconnect automatically.</p>';
+  document.getElementById('login').innerHTML='<h2>App not available</h2><p>Connection lost — the app may be closed or the network is unavailable.</p>';
 }
 function startPollingForEnable(){
   (async function poll(){
