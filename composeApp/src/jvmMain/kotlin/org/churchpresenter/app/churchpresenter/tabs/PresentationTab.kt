@@ -734,23 +734,14 @@ fun PresentationTab(
                 }
             )
 
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-        // ── Nav hint bar ──────────────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(32.dp)
-                .background(MaterialTheme.colorScheme.background)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
             Text(
                 text = stringResource(Res.string.presentation_arrow_key_hint),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
+
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
