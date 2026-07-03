@@ -123,6 +123,7 @@ import churchpresenter.composeapp.generated.resources.presentation_remote_contro
 import churchpresenter.composeapp.generated.resources.presentation_remote_copy_url
 import churchpresenter.composeapp.generated.resources.presentation_remote_enable
 import churchpresenter.composeapp.generated.resources.presentation_remote_password_hint
+import churchpresenter.composeapp.generated.resources.presentation_server_not_running
 import churchpresenter.composeapp.generated.resources.presentation_unfreeze_output
 import churchpresenter.composeapp.generated.resources.previous_image
 import churchpresenter.composeapp.generated.resources.qa_downloading_tunnel
@@ -876,19 +877,24 @@ fun PresentationTab(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                val qrBaseUrl = presentationDisplayUrl.ifEmpty { serverUrl }
+                val isServerRunning = qrBaseUrl.isNotEmpty()
+
                 // Header row with toggle
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        stringResource(Res.string.presentation_remote_control),
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Switch(
-                        checked = appSettings.presentationRemoteSettings.remoteControlEnabled,
-                        onCheckedChange = { enabled ->
-                            onSettingsChange { s -> s.copy(presentationRemoteSettings = s.presentationRemoteSettings.copy(remoteControlEnabled = enabled)) }
-                        }
-                    )
+                if (isServerRunning) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            stringResource(Res.string.presentation_remote_control),
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Switch(
+                            checked = appSettings.presentationRemoteSettings.remoteControlEnabled,
+                            onCheckedChange = { enabled ->
+                                onSettingsChange { s -> s.copy(presentationRemoteSettings = s.presentationRemoteSettings.copy(remoteControlEnabled = enabled)) }
+                            }
+                        )
+                    }
                 }
 
                 if (presenterManager != null) {
@@ -928,47 +934,45 @@ fun PresentationTab(
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-                // QR code
-                    val qrBaseUrl = presentationDisplayUrl.ifEmpty { serverUrl }
-                    val qrUrl = if (qrBaseUrl.isNotEmpty()) {
+                if (isServerRunning) {
+                    // QR code
+                    val qrUrl = run {
                         val pw = appSettings.presentationRemoteSettings.remotePassword
                         if (pw.isNotEmpty()) "$qrBaseUrl/presentation-remote?password=$pw"
                         else "$qrBaseUrl/presentation-remote"
-                    } else ""
+                    }
 
-                    if (qrUrl.isNotEmpty()) {
-                        val qrBitmap = remember(qrUrl) { generateQRCodeBitmap(qrUrl, 180) }
-                        if (qrBitmap != null) {
-                            Image(
-                                bitmap = qrBitmap,
-                                contentDescription = null,
-                                modifier = Modifier.size(180.dp).align(Alignment.CenterHorizontally)
-                            )
-                        }
+                    val qrBitmap = remember(qrUrl) { generateQRCodeBitmap(qrUrl, 180) }
+                    if (qrBitmap != null) {
+                        Image(
+                            bitmap = qrBitmap,
+                            contentDescription = null,
+                            modifier = Modifier.size(180.dp).align(Alignment.CenterHorizontally)
+                        )
+                    }
+                    Text(
+                        stringResource(Res.string.qa_qr_code_shows),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    SelectionContainer {
                         Text(
-                            stringResource(Res.string.qa_qr_code_shows),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            qrUrl,
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 3,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
                         )
-                        SelectionContainer {
-                            Text(
-                                qrUrl,
-                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                                color = MaterialTheme.colorScheme.primary,
-                                maxLines = 3,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        OutlinedButton(
-                            onClick = { java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(java.awt.datatransfer.StringSelection(qrUrl), null) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(stringResource(Res.string.presentation_remote_copy_url), style = MaterialTheme.typography.labelSmall)
-                        }
+                    }
+                    OutlinedButton(
+                        onClick = { java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(java.awt.datatransfer.StringSelection(qrUrl), null) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(stringResource(Res.string.presentation_remote_copy_url), style = MaterialTheme.typography.labelSmall)
                     }
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -1065,6 +1069,13 @@ fun PresentationTab(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp)
                     )
+                } else {
+                    Text(
+                        stringResource(Res.string.presentation_server_not_running),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                }
             }
         }
     }
