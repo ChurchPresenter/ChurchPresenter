@@ -3998,8 +3998,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .s-thumb img{width:100%;height:100%;object-fit:cover;display:block;background:#000}
 .s-num{position:absolute;bottom:2px;right:3px;font-size:9px;font-weight:700;background:rgba(0,0,0,.65);color:#fff;border-radius:2px;padding:1px 3px;pointer-events:none}
 #botbar{display:flex;align-items:center;padding:8px 10px;background:#1a1a1a;border-top:1px solid #222;gap:8px;flex-shrink:0}
-.nav-btn{background:#2a2a2a;border:1px solid #333;color:#fff;border-radius:10px;padding:10px;font-size:22px;cursor:pointer;flex:1;text-align:center;transition:background .15s;line-height:1;touch-action:manipulation}
-.nav-btn:active{background:#3a3a3a}
+.nav-btn{background:#484848;border:1px solid #6a6a6a;color:#fff;border-radius:10px;padding:10px;font-size:22px;font-weight:700;cursor:pointer;flex:1;text-align:center;transition:background .15s;line-height:1;touch-action:manipulation}
+.nav-btn:active{background:#606060}
 </style>
 </head>
 <body>
