@@ -219,7 +219,11 @@ fun main() {
         // Business logic layer
         val settingsManager = remember { SettingsManager() }
         val statisticsManager = remember { StatisticsManager() }
-        var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
+        var appSettings by remember {
+            mutableStateOf(settingsManager.loadSettings().let {
+                it.copy(presentationRemoteSettings = it.presentationRemoteSettings.copy(remoteControlEnabled = false))
+            })
+        }
 
         // Resolve any unassigned (-1 auto) screen assignments at startup so that
         // DeckLink-only slots are set to None before the UI renders.
@@ -357,6 +361,17 @@ fun main() {
         val tunnelStatus by companionServer.tunnelManager.status.collectAsState()
         val tunnelUrl by companionServer.tunnelManager.tunnelUrl.collectAsState()
         var qaDisplayUrl by remember { mutableStateOf("") }
+        var presentationDisplayUrl by remember { mutableStateOf("") }
+        var presentationFrozen by remember { mutableStateOf(false) }
+        LaunchedEffect(appSettings.presentationRemoteSettings.remoteControlEnabled, appSettings.presentationRemoteSettings.remotePassword) {
+            companionServer.updatePresentationRemoteSettings(appSettings.presentationRemoteSettings)
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onPresentationFreezeToggle.collect {
+                presentationFrozen = !presentationFrozen
+                companionServer.broadcastFreezeChange(presentationFrozen)
+            }
+        }
         val remoteSelectSongFlow =
             remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 8) }
         var dialogDismissSignal by remember { mutableStateOf(0) }
@@ -1158,6 +1173,18 @@ fun main() {
                                     onStopTunnel = { companionServer.tunnelManager.stop() },
                                     qaDisplayUrl = qaDisplayUrl,
                                     onQaDisplayUrlChanged = { qaDisplayUrl = it },
+                                    presentationDisplayUrl = presentationDisplayUrl,
+                                    onPresentationDisplayUrlChanged = { presentationDisplayUrl = it },
+                                    onSlideChanged = { id, index, total, isPlaying ->
+                                        companionServer.broadcastSlideChange(id, index, total, isPlaying)
+                                    },
+                                    remotePresentationPlayPauseFlow = companionServer.onPresentationPlayPause,
+                                    remotePresentationGotoFlow = companionServer.onPresentationGoto,
+                                    presentationFrozen = presentationFrozen,
+                                    onFreezeToggle = {
+                                        presentationFrozen = !presentationFrozen
+                                        companionServer.broadcastFreezeChange(presentationFrozen)
+                                    },
                                     onOpenLottieGen = { outputDir, onSaved ->
                                         if (outputDir.isNotEmpty() && java.io.File(outputDir).isDirectory) {
                                             lottieGenOutputDir = java.io.File(outputDir)
