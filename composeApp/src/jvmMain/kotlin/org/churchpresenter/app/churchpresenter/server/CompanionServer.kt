@@ -601,20 +601,24 @@ class CompanionServer {
     @Volatile private var _currentSlideTotalCount: Int = 0
     @Volatile private var _presentationFrozen: Boolean = false
     @Volatile private var _presentationIsPlaying: Boolean = false
+    @Volatile private var _presentationIsLive: Boolean = false
 
     fun updatePresentationRemoteSettings(settings: PresentationRemoteSettings) {
         presentationRemoteEnabled = settings.remoteControlEnabled
         presentationRemotePassword = settings.remotePassword
     }
 
+    fun updatePresentationLiveStatus(isLive: Boolean) { _presentationIsLive = isLive }
+
     fun broadcastSlideChange(id: String, index: Int, total: Int, isPlaying: Boolean) {
         _currentPresentationId = id
         _currentSlideIndex = index
         _currentSlideTotalCount = total
         _presentationIsPlaying = isPlaying
+        _presentationIsLive = true
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
-            payload = """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying}"""
+            payload = """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":true}"""
         ))
     }
 
@@ -625,6 +629,12 @@ class CompanionServer {
             payload = """{"frozen":$frozen}"""
         ))
     }
+
+    /** Emitted when remote taps Go Live. */
+    val onPresentationGoLive = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
 
     /** Emitted when remote presses freeze/blank. */
     val onPresentationFreezeToggle = MutableSharedFlow<Unit>(
@@ -2203,7 +2213,7 @@ class CompanionServer {
                 /** GET /api/presentation-remote/status — current presentation state (no auth needed) */
                 get("/api/presentation-remote/status") {
                     call.respondText(
-                        """{"enabled":$presentationRemoteEnabled,"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"frozen":$_presentationFrozen,"isPlaying":$_presentationIsPlaying,"passwordRequired":${presentationRemotePassword.isNotEmpty()}}""",
+                        """{"enabled":$presentationRemoteEnabled,"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"frozen":$_presentationFrozen,"isPlaying":$_presentationIsPlaying,"isLive":$_presentationIsLive,"passwordRequired":${presentationRemotePassword.isNotEmpty()}}""",
                         ContentType.Application.Json
                     )
                 }
@@ -2251,6 +2261,13 @@ class CompanionServer {
                 post("/api/presentation-remote/play-pause") {
                     if (!checkPresentationRemoteAuth(call)) return@post
                     scope.launch { onPresentationPlayPause.emit(Unit) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                /** POST /api/presentation-remote/go-live — send presentation to presenter screen */
+                post("/api/presentation-remote/go-live") {
+                    if (!checkPresentationRemoteAuth(call)) return@post
+                    scope.launch { onPresentationGoLive.emit(Unit) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
@@ -3935,39 +3952,43 @@ setInterval(()=>{if(authed)checkStatus()},3000);
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#111;color:#fff;height:100dvh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
 #login{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:24px;gap:12px}
-#login h2{font-size:20px;margin-bottom:8px}
+#login h2{font-size:20px;margin-bottom:4px}
+#login p{font-size:14px;color:#888;text-align:center;max-width:280px}
 #login input{width:100%;max-width:320px;padding:12px;border-radius:10px;border:1px solid #333;background:#222;color:#fff;font-size:16px;outline:none}
 #login input:focus{border-color:#4fa3e3}
 #login button{width:100%;max-width:320px;padding:13px;background:#4fa3e3;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer}
 #err{color:#e57373;font-size:13px;display:none}
 #app{display:none;flex-direction:column;flex:1;overflow:hidden}
-#topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1a1a1a;border-bottom:1px solid #222}
-#counter{font-size:18px;font-weight:700;letter-spacing:1px}
-#btns{display:flex;gap:8px}
-.icon-btn{background:#2a2a2a;border:1px solid #333;color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:500;transition:background .15s}
+#topbar{display:flex;align-items:center;padding:8px 10px;background:#1a1a1a;border-bottom:1px solid #222;gap:8px;flex-wrap:wrap;flex-shrink:0}
+#counter{font-size:16px;font-weight:700;letter-spacing:1px;min-width:56px}
+#blanked-badge{background:#e57373;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;letter-spacing:.5px;display:none;flex-shrink:0}
+#btns{display:flex;gap:6px;margin-left:auto}
+.icon-btn{background:#2a2a2a;border:1px solid #333;color:#fff;border-radius:8px;padding:7px 10px;font-size:12px;cursor:pointer;font-weight:500;transition:background .15s;white-space:nowrap}
 .icon-btn:active{background:#3a3a3a}
 .icon-btn.active{background:#e57373;border-color:#e57373}
 .icon-btn.active-play{background:#43a047;border-color:#43a047}
-#slides-area{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
-#cur-slide{flex:1;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-#cur-slide img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-#blank-overlay{position:absolute;inset:0;background:#000;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;letter-spacing:1px;display:none}
-#upload-status{font-size:12px;color:#aaa;text-align:center;padding:2px 0;min-height:16px}
-#next-row{height:90px;background:#1a1a1a;border-top:1px solid #222;display:flex;align-items:center;padding:0 16px;gap:12px;overflow:hidden}
-#next-label{font-size:11px;font-weight:600;letter-spacing:1px;color:#888;white-space:nowrap}
-#next-img{height:70px;border-radius:6px;border:1px solid #333;background:#000}
-#thumb-drawer{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10;display:none;flex-direction:column;overflow:hidden}
-#thumb-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;font-size:16px;font-weight:600}
-#thumb-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px 8px;line-height:1}
-#thumb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 12px;overflow-y:auto;flex:1}
-.thumb-item{position:relative;cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid transparent;transition:border .15s}
-.thumb-item.sel{border-color:#4fa3e3}
-.thumb-item img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#000}
-.thumb-num{position:absolute;bottom:3px;right:5px;font-size:10px;font-weight:700;background:rgba(0,0,0,.6);color:#fff;border-radius:3px;padding:1px 4px}
-#botbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1a1a1a;border-top:1px solid #222}
-.nav-btn{background:#2a2a2a;border:1px solid #333;color:#fff;border-radius:10px;padding:10px 20px;font-size:20px;cursor:pointer;font-weight:400;transition:background .15s;flex:1;margin:0 4px;text-align:center}
+#not-live-bar{background:#92400e;color:#fff;font-size:13px;font-weight:600;padding:8px 16px;text-align:center;cursor:pointer;display:none;flex-shrink:0;border-bottom:1px solid #7c3500}
+#not-live-bar:active{background:#7c3500}
+#slides-area{flex:1;display:flex;flex-direction:row;overflow:hidden;min-height:0}
+#cur-wrap{flex:2;position:relative;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;border-right:1px solid #222}
+#cur-img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+#blanked-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-start;justify-content:flex-end;padding:8px;pointer-events:none}
+#blanked-overlay span{background:#e57373;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px}
+#next-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0d0d0d;min-width:0}
+#next-label{font-size:9px;font-weight:700;letter-spacing:1px;color:#555;padding:6px 8px 4px;border-bottom:1px solid #1e1e1e;flex-shrink:0;text-transform:uppercase}
+#next-img-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden}
+#next-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;display:block}
+#upload-status{font-size:11px;color:#aaa;text-align:center;padding:3px 12px;min-height:18px;flex-shrink:0;background:#1a1a1a;border-top:1px solid #222}
+#strip-wrap{height:90px;background:#151515;border-top:1px solid #222;flex-shrink:0;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;padding:8px 10px;gap:8px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#333 transparent}
+#strip-wrap::-webkit-scrollbar{height:3px}
+#strip-wrap::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+.s-thumb{flex-shrink:0;cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid #2a2a2a;transition:border-color .1s;position:relative;height:66px;aspect-ratio:16/9}
+.s-thumb.cur{border-color:#43a047}
+.s-thumb img{width:100%;height:100%;object-fit:cover;display:block;background:#000}
+.s-num{position:absolute;bottom:2px;right:3px;font-size:9px;font-weight:700;background:rgba(0,0,0,.65);color:#fff;border-radius:2px;padding:1px 3px;pointer-events:none}
+#botbar{display:flex;align-items:center;padding:8px 10px;background:#1a1a1a;border-top:1px solid #222;gap:8px;flex-shrink:0}
+.nav-btn{background:#2a2a2a;border:1px solid #333;color:#fff;border-radius:10px;padding:10px;font-size:22px;cursor:pointer;flex:1;text-align:center;transition:background .15s;line-height:1}
 .nav-btn:active{background:#3a3a3a}
-#grid-btn{background:none;border:none;color:#bbb;font-size:13px;cursor:pointer;padding:4px 8px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -3980,6 +4001,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div id="app">
   <div id="topbar">
     <div id="counter">– / –</div>
+    <div id="blanked-badge">BLANKED</div>
     <div id="btns">
       <button class="icon-btn" id="blank-btn" onclick="toggleBlank()">Blank</button>
       <button class="icon-btn" id="play-btn" onclick="togglePlay()">▶ Play</button>
@@ -3987,72 +4009,117 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <input type="file" id="upload-input" accept=".pdf,.ppt,.pptx,.key" style="display:none">
     </div>
   </div>
+  <div id="not-live-bar" onclick="goLive()">Presentation not on screen — Tap to Go Live ▶</div>
   <div id="slides-area">
-    <div id="cur-slide">
+    <div id="cur-wrap">
       <img id="cur-img" alt="" draggable="false">
-      <div id="blank-overlay">BLANKED</div>
+      <div id="blanked-overlay"><span>BLANKED</span></div>
     </div>
-    <div id="next-row">
-      <span id="next-label">NEXT ▸</span>
-      <img id="next-img" alt="" draggable="false">
+    <div id="next-wrap">
+      <div id="next-label">Next Slide</div>
+      <div id="next-img-wrap"><img id="next-img" alt="" draggable="false"></div>
     </div>
   </div>
   <div id="upload-status"></div>
+  <div id="strip-wrap"></div>
   <div id="botbar">
     <button class="nav-btn" onclick="goSlide(state.index-1)">‹</button>
-    <button id="grid-btn" onclick="openThumb()">⊞ Slides</button>
     <button class="nav-btn" onclick="goSlide(state.index+1)">›</button>
   </div>
 </div>
-<div id="thumb-drawer">
-  <div id="thumb-header">
-    <span>Slides</span>
-    <button id="thumb-close" onclick="closeThumb()">✕</button>
-  </div>
-  <div id="thumb-grid"></div>
-</div>
 <script>
-let state={id:'',index:0,total:0,frozen:false,isPlaying:false};
+let state={id:'',index:0,total:0,frozen:false,isPlaying:false,isLive:false};
 let password=sessionStorage.getItem('remote_pw')||'';
 const headers={'Content-Type':'application/json'};
 if(password)headers['X-Presentation-Password']=password;
-function slideUrl(index){return'/api/presentations/'+state.id+'/slides/'+index;}
+function slideUrl(i){return'/api/presentations/'+state.id+'/slides/'+i;}
+let stripBuilt=false;
+function buildStrip(){
+  const wrap=document.getElementById('strip-wrap');
+  wrap.innerHTML='';
+  for(let i=0;i<state.total;i++){
+    const d=document.createElement('div');
+    d.className='s-thumb'+(i===state.index?' cur':'');
+    d.id='st-'+i;
+    const idx=i;
+    d.onclick=()=>goSlide(idx);
+    const im=document.createElement('img');im.src=slideUrl(i);im.loading='lazy';
+    const span=document.createElement('span');span.className='s-num';span.textContent=i+1;
+    d.appendChild(im);d.appendChild(span);
+    wrap.appendChild(d);
+  }
+  stripBuilt=true;
+}
+function updateStripCurrent(){
+  const prev=document.querySelector('.s-thumb.cur');if(prev)prev.classList.remove('cur');
+  const cur=document.getElementById('st-'+state.index);
+  if(cur){cur.classList.add('cur');cur.scrollIntoView({inline:'nearest',block:'nearest',behavior:'smooth'});}
+}
 function updateUI(){
   document.getElementById('counter').textContent=state.total>0?(state.index+1)+' / '+state.total:'– / –';
   const fb=document.getElementById('blank-btn');
   fb.classList.toggle('active',state.frozen);fb.textContent=state.frozen?'Unblank':'Blank';
-  document.getElementById('blank-overlay').style.display=state.frozen?'flex':'none';
+  document.getElementById('blanked-badge').style.display=state.frozen?'inline-block':'none';
+  document.getElementById('blanked-overlay').style.display=state.frozen?'flex':'none';
   const pb=document.getElementById('play-btn');
   pb.classList.toggle('active-play',state.isPlaying);pb.textContent=state.isPlaying?'⏸ Pause':'▶ Play';
+  document.getElementById('not-live-bar').style.display=(state.total>0&&!state.isLive)?'block':'none';
   if(state.id){
     document.getElementById('cur-img').src=slideUrl(state.index);
     const ni=document.getElementById('next-img');
     if(state.index+1<state.total){ni.src=slideUrl(state.index+1);ni.style.display='block';}
     else{ni.style.display='none';}
   }
-  const sel=document.querySelector('.thumb-item.sel');if(sel)sel.classList.remove('sel');
-  const newSel=document.getElementById('ti-'+state.index);
-  if(newSel){newSel.classList.add('sel');newSel.scrollIntoView({block:'nearest'});}
+  if(!stripBuilt||document.getElementById('strip-wrap').children.length!==state.total){buildStrip();}
+  else{updateStripCurrent();}
 }
 async function fetchStatus(){
   try{
     const r=await fetch('/api/presentation-remote/status');const d=await r.json();
-    if(!d.enabled){document.getElementById('login').innerHTML='<h2>Remote control is disabled</h2>';return;}
-    const changed=d.id!==state.id||d.index!==state.index||d.total!==state.total||d.frozen!==state.frozen||d.isPlaying!==state.isPlaying;
-    state=d;if(changed)updateUI();
+    if(!d.enabled){showDisabled();return;}
+    const changed=d.id!==state.id||d.index!==state.index||d.total!==state.total||d.frozen!==state.frozen||d.isPlaying!==state.isPlaying||d.isLive!==state.isLive;
+    state={...state,...d};if(changed)updateUI();
   }catch(e){}
+}
+function showDisabled(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login').style.display='flex';
+  document.getElementById('login').innerHTML='<h2>Remote control is disabled</h2><p>Enable it in the app — this page will auto-connect.</p>';
+  startPollingForEnable();
+}
+function startPollingForEnable(){
+  (async function poll(){
+    try{
+      const r=await fetch('/api/presentation-remote/status');const d=await r.json();
+      if(d.enabled){
+        if(!d.passwordRequired){
+          state={...state,...d};
+          document.getElementById('login').style.display='none';
+          document.getElementById('app').style.display='flex';
+          stripBuilt=false;updateUI();startWs();setInterval(fetchStatus,2500);
+        }else{location.reload();}
+        return;
+      }
+    }catch(_){}
+    setTimeout(poll,3000);
+  })();
 }
 async function doLogin(){
   password=document.getElementById('pw-input').value;
   sessionStorage.setItem('remote_pw',password);headers['X-Presentation-Password']=password;
   const r=await fetch('/api/presentation-remote/auth',{method:'POST',headers});
-  if(r.ok){document.getElementById('login').style.display='none';document.getElementById('app').style.display='flex';startWs();setInterval(fetchStatus,2500);}
-  else{document.getElementById('err').style.display='block';}
+  if(r.ok){
+    const st=await fetch('/api/presentation-remote/status').then(r=>r.json()).catch(()=>null);
+    if(st)state={...state,...st};
+    document.getElementById('login').style.display='none';document.getElementById('app').style.display='flex';
+    stripBuilt=false;updateUI();startWs();setInterval(fetchStatus,2500);
+  }else{document.getElementById('err').style.display='block';}
 }
-async function post(path){try{await fetch(path,{method:'POST',headers});}catch(e){}}
-function toggleBlank(){post('/api/presentation-remote/freeze');}
+async function post(path){try{return await fetch(path,{method:'POST',headers});}catch(e){return null;}}
+function toggleBlank(){state.frozen=!state.frozen;updateUI();post('/api/presentation-remote/freeze');}
 function togglePlay(){post('/api/presentation-remote/play-pause');}
 function goSlide(i){if(i<0||i>=state.total)return;post('/api/presentation-remote/goto/'+i);}
+function goLive(){post('/api/presentation-remote/go-live');}
 document.getElementById('upload-input').addEventListener('change',async function(){
   const file=this.files[0];if(!file)return;
   const btn=document.getElementById('upload-btn');const status=document.getElementById('upload-status');
@@ -4068,25 +4135,9 @@ document.getElementById('upload-input').addEventListener('change',async function
   };
   reader.readAsDataURL(file);this.value='';
 });
-let thumbBuilt=false;
-function openThumb(){
-  if(!thumbBuilt&&state.id){
-    const g=document.getElementById('thumb-grid');g.innerHTML='';
-    for(let i=0;i<state.total;i++){
-      const d=document.createElement('div');d.className='thumb-item'+(i===state.index?' sel':'');d.id='ti-'+i;
-      const idx=i;d.onclick=()=>{goSlide(idx);closeThumb();};
-      const im=document.createElement('img');im.src=slideUrl(i);im.loading='lazy';
-      const span=document.createElement('span');span.className='thumb-num';span.textContent=i+1;
-      d.appendChild(im);d.appendChild(span);g.appendChild(d);
-    }
-    thumbBuilt=true;
-  }
-  document.getElementById('thumb-drawer').style.display='flex';
-}
-function closeThumb(){document.getElementById('thumb-drawer').style.display='none';}
 let touchX=0;
-document.getElementById('cur-slide').addEventListener('touchstart',e=>{touchX=e.changedTouches[0].clientX;},{passive:true});
-document.getElementById('cur-slide').addEventListener('touchend',e=>{
+document.getElementById('cur-wrap').addEventListener('touchstart',e=>{touchX=e.changedTouches[0].clientX;},{passive:true});
+document.getElementById('cur-wrap').addEventListener('touchend',e=>{
   const dx=e.changedTouches[0].clientX-touchX;
   if(Math.abs(dx)>50){dx<0?goSlide(state.index+1):goSlide(state.index-1);}
 },{passive:true});
@@ -4096,16 +4147,32 @@ function startWs(){
   ws.onmessage=e=>{
     try{
       const msg=JSON.parse(e.data);
-      if(msg.type==='presentation_slide_changed'){const d=JSON.parse(msg.payload);state={...state,id:d.id,index:d.index,total:d.total,isPlaying:d.isPlaying};thumbBuilt=false;updateUI();}
-      else if(msg.type==='presentation_freeze_changed'){const d=JSON.parse(msg.payload);state={...state,frozen:d.frozen};updateUI();}
+      if(msg.type==='presentation_slide_changed'){
+        const d=JSON.parse(msg.payload);
+        const newPres=d.id!==state.id;
+        state={...state,id:d.id,index:d.index,total:d.total,isPlaying:d.isPlaying,isLive:d.isLive||false};
+        if(newPres)stripBuilt=false;
+        updateUI();
+      }else if(msg.type==='presentation_freeze_changed'){
+        const d=JSON.parse(msg.payload);state={...state,frozen:d.frozen};updateUI();
+      }
     }catch(_){}
   };
   ws.onclose=()=>{setTimeout(startWs,2000);};
 }
 (async()=>{
-  const r=await fetch('/api/presentation-remote/status');const d=await r.json();
-  if(!d.enabled){document.getElementById('login').innerHTML='<h2>Remote control is disabled</h2>';return;}
-  if(!d.passwordRequired){document.getElementById('login').style.display='none';document.getElementById('app').style.display='flex';state=d;updateUI();startWs();setInterval(fetchStatus,2500);}
+  try{
+    const r=await fetch('/api/presentation-remote/status');const d=await r.json();
+    if(!d.enabled){
+      document.getElementById('login').innerHTML='<h2>Remote control is disabled</h2><p>Enable it in the app — this page will auto-connect.</p>';
+      startPollingForEnable();return;
+    }
+    if(!d.passwordRequired){
+      state={...state,...d};
+      document.getElementById('login').style.display='none';document.getElementById('app').style.display='flex';
+      updateUI();startWs();setInterval(fetchStatus,2500);
+    }
+  }catch(_){}
 })();
 </script>
 </body>

@@ -372,6 +372,16 @@ fun main() {
                 companionServer.broadcastFreezeChange(presentationFrozen)
             }
         }
+        val presentingModeValue = presenterManager.presentingMode.value
+        LaunchedEffect(presentingModeValue) {
+            companionServer.updatePresentationLiveStatus(presentingModeValue == Presenting.PRESENTATION)
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onPresentationGoLive.collect {
+                presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                presenterManager.setShowPresenterWindow(true)
+            }
+        }
         val remoteSelectSongFlow =
             remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 8) }
         var dialogDismissSignal by remember { mutableStateOf(0) }
