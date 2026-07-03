@@ -248,6 +248,7 @@ fun QATab(
         if (pw.isNotEmpty()) "$adminBaseUrl/qa/admin?password=${java.net.URLEncoder.encode(pw, "UTF-8")}"
         else "$adminBaseUrl/qa/admin"
     } else ""
+    val isServerRunning = serverUrl.isNotEmpty()
 
     var selectedFilter by remember { mutableStateOf(0) }
     var sortMode by remember { mutableStateOf(0) } // 0=newest, 1=oldest, 2=most votes, 3=least votes
@@ -337,7 +338,7 @@ fun QATab(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (serverUrl.isEmpty()) {
+                if (!isServerRunning) {
                     Text(
                         stringResource(Res.string.qa_server_not_running),
                         style = MaterialTheme.typography.bodySmall,
@@ -749,7 +750,7 @@ fun QATab(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (submissionUrl.isNotEmpty()) {
+            if (isServerRunning) {
                 Text(stringResource(Res.string.qa_submit_questions), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.height(8.dp))
                 val submissionQR = remember(submissionUrl) { generateQRCodeBitmap(submissionUrl, 256) }
@@ -785,12 +786,7 @@ fun QATab(
                     Text(stringResource(if (showQROnDisplay) Res.string.qa_hide_qr else Res.string.qa_show_qr), fontSize = 12.sp)
                 }
 
-            } else {
-                Text(stringResource(Res.string.qa_server_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 32.dp))
-            }
-
-            // ── Public Access (Tunnel) ──────────────────────────────
-            if (serverUrl.isNotEmpty()) {
+                // ── Public Access (Tunnel) ──────────────────────────────
                 Spacer(Modifier.height(16.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(Modifier.height(12.dp))
@@ -908,10 +904,8 @@ fun QATab(
                         }
                     }
                 }
-            }
 
-            // ── Admin QR Code ──────────────────────────────────────
-            if (adminDisplayUrl.isNotEmpty()) {
+                // ── Admin QR Code ──────────────────────────────────────
                 Spacer(Modifier.height(16.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(Modifier.height(12.dp))
@@ -962,215 +956,217 @@ fun QATab(
                 ) {
                     Text(stringResource(Res.string.qa_copy_url), fontSize = 11.sp)
                 }
-            }
 
-            // ── Voting Toggle ─────────────────────────────────────
-            Spacer(Modifier.height(16.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Spacer(Modifier.height(12.dp))
+                // ── Voting Toggle ─────────────────────────────────────
+                Spacer(Modifier.height(16.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(Modifier.height(12.dp))
 
-            Button(
-                onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(votingEnabled = !s.qaSettings.votingEnabled)) } },
-                modifier = Modifier.fillMaxWidth(),
-                colors = if (qaSettings.votingEnabled) ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.inverseSurface,
-                    contentColor = MaterialTheme.colorScheme.inverseOnSurface
-                ) else ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(if (qaSettings.votingEnabled) stringResource(Res.string.qa_voting_enabled) else stringResource(Res.string.qa_voting_disabled))
-            }
-
-            Spacer(Modifier.height(16.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Spacer(Modifier.height(12.dp))
-
-            Text(stringResource(Res.string.qa_display_styling), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(Modifier.height(8.dp))
-
-            Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(Modifier.height(4.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(42.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                    BasicTextField(
-                        value = qaSettings.qrCodeMessage,
-                        onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                        decorationBox = { innerTextField ->
-                            if (qaSettings.qrCodeMessage.isEmpty()) {
-                                Text(strQrMessageDefault, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
-                            }
-                            innerTextField()
-                        }
-                    )
-                }
-                FilledIconButton(
-                    onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
-                    modifier = Modifier.size(30.dp),
-                    shape = RoundedCornerShape(5.dp),
-                    colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                Button(
+                    onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(votingEnabled = !s.qaSettings.votingEnabled)) } },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = if (qaSettings.votingEnabled) ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.inverseSurface,
+                        contentColor = MaterialTheme.colorScheme.inverseOnSurface
+                    ) else ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))
+                    Text(if (qaSettings.votingEnabled) stringResource(Res.string.qa_voting_enabled) else stringResource(Res.string.qa_voting_disabled))
                 }
-            }
-            Spacer(Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ColorPickerField(label = stringResource(Res.string.qa_qr_fg_color), color = qaSettings.qrForegroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrForegroundColor = it)) } }, modifier = Modifier.weight(1f))
-                ColorPickerField(label = stringResource(Res.string.qa_qr_bg_color), color = qaSettings.qrBackgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundColor = it)) } }, modifier = Modifier.weight(1f))
-            }
-            Spacer(Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(Modifier.width(4.dp))
-                androidx.compose.material3.Slider(
-                    value = qaSettings.qrBackgroundOpacity / 100f,
-                    onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundOpacity = (it * 100).toInt())) } },
-                    modifier = Modifier.weight(1f)
-                )
-                Text("${qaSettings.qrBackgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
-            }
 
-            Spacer(Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ColorPickerField(label = stringResource(Res.string.qa_text_color), color = qaSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textColor = it)) } }, modifier = Modifier.weight(1f))
-                TextStyleButtons(
-                        bold = qaSettings.bold, italic = qaSettings.italic, underline = qaSettings.underline, shadow = qaSettings.shadow,
-                        onBoldChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(bold = it)) } },
-                        onItalicChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(italic = it)) } },
-                        onUnderlineChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(underline = it)) } },
-                        onShadowChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadow = it)) } }
-                )
-            }
+                Spacer(Modifier.height(16.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(Modifier.height(12.dp))
 
-            AnimatedVisibility(visible = qaSettings.shadow) {
-                ShadowDetailRow(
-                    shadowColor = qaSettings.shadowColor, shadowSize = qaSettings.shadowSize, shadowOpacity = qaSettings.shadowOpacity,
-                    onColorChange = { c -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowColor = c)) } },
-                    onSizeChange = { v -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowSize = v)) } },
-                    onOpacityChange = { v -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowOpacity = v)) } },
-                )
-            }
+                Text(stringResource(Res.string.qa_display_styling), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(Modifier.height(8.dp))
 
-            Spacer(Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                FontSettingsDropdown(label = stringResource(Res.string.qa_font), value = qaSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontType = it)) } }, modifier = Modifier.weight(1f))
-                NumberSettingsTextField(label = stringResource(Res.string.qa_size), initialText = qaSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontSize = it)) } })
-            }
-
-            Spacer(Modifier.height(8.dp))
-            Column(horizontalAlignment = Alignment.Start) {
-                ColorPickerField(label = stringResource(Res.string.qa_background_color), color = qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } }, modifier = Modifier.fillMaxWidth())
+                Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                        BasicTextField(
+                            value = qaSettings.qrCodeMessage,
+                            onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            decorationBox = { innerTextField ->
+                                if (qaSettings.qrCodeMessage.isEmpty()) {
+                                    Text(strQrMessageDefault, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
+                                }
+                                innerTextField()
+                            }
+                        )
+                    }
+                    FilledIconButton(
+                        onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
+                        modifier = Modifier.size(30.dp),
+                        shape = RoundedCornerShape(5.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                    ) {
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ColorPickerField(label = stringResource(Res.string.qa_qr_fg_color), color = qaSettings.qrForegroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrForegroundColor = it)) } }, modifier = Modifier.weight(1f))
+                    ColorPickerField(label = stringResource(Res.string.qa_qr_bg_color), color = qaSettings.qrBackgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundColor = it)) } }, modifier = Modifier.weight(1f))
+                }
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.width(4.dp))
                     androidx.compose.material3.Slider(
-                        value = qaSettings.backgroundOpacity / 100f,
-                        onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundOpacity = (it * 100).toInt())) } },
+                        value = qaSettings.qrBackgroundOpacity / 100f,
+                        onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundOpacity = (it * 100).toInt())) } },
                         modifier = Modifier.weight(1f)
                     )
-                    Text("${qaSettings.backgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
+                    Text("${qaSettings.qrBackgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
                 }
-            }
 
-            Spacer(Modifier.height(8.dp))
-            Text(stringResource(Res.string.qa_position), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(Modifier.height(4.dp))
-            val positions = listOf(
-                Constants.TOP_LEFT to stringResource(Res.string.qa_pos_tl),
-                Constants.TOP_CENTER to stringResource(Res.string.qa_pos_tc),
-                Constants.TOP_RIGHT to stringResource(Res.string.qa_pos_tr),
-                Constants.CENTER_LEFT to stringResource(Res.string.qa_pos_cl),
-                Constants.CENTER to stringResource(Res.string.qa_pos_c),
-                Constants.CENTER_RIGHT to stringResource(Res.string.qa_pos_cr),
-                Constants.BOTTOM_LEFT to stringResource(Res.string.qa_pos_bl),
-                Constants.BOTTOM_CENTER to stringResource(Res.string.qa_pos_bc),
-                Constants.BOTTOM_RIGHT to stringResource(Res.string.qa_pos_br),
-            )
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.fillMaxWidth()) {
-                positions.chunked(3).forEach { rowItems ->
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                        rowItems.forEach { (posConst, posLabel) ->
-                            val isSelected = qaSettings.position == posConst
-                            Box(
-                                modifier = Modifier.weight(1f).height(28.dp).clip(RoundedCornerShape(3.dp))
-                                    .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
-                                    .clickable { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(position = posConst)) } },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(posLabel, style = MaterialTheme.typography.labelSmall, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(8.dp))
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ColorPickerField(label = stringResource(Res.string.qa_text_color), color = qaSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textColor = it)) } }, modifier = Modifier.weight(1f))
+                    TextStyleButtons(
+                            bold = qaSettings.bold, italic = qaSettings.italic, underline = qaSettings.underline, shadow = qaSettings.shadow,
+                            onBoldChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(bold = it)) } },
+                            onItalicChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(italic = it)) } },
+                            onUnderlineChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(underline = it)) } },
+                            onShadowChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadow = it)) } }
+                    )
+                }
+
+                AnimatedVisibility(visible = qaSettings.shadow) {
+                    ShadowDetailRow(
+                        shadowColor = qaSettings.shadowColor, shadowSize = qaSettings.shadowSize, shadowOpacity = qaSettings.shadowOpacity,
+                        onColorChange = { c -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowColor = c)) } },
+                        onSizeChange = { v -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowSize = v)) } },
+                        onOpacityChange = { v -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowOpacity = v)) } },
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    FontSettingsDropdown(label = stringResource(Res.string.qa_font), value = qaSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontType = it)) } }, modifier = Modifier.weight(1f))
+                    NumberSettingsTextField(label = stringResource(Res.string.qa_size), initialText = qaSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontSize = it)) } })
+                }
+
+                Spacer(Modifier.height(8.dp))
+                Column(horizontalAlignment = Alignment.Start) {
+                    ColorPickerField(label = stringResource(Res.string.qa_background_color), color = qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } }, modifier = Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                        Spacer(Modifier.width(4.dp))
+                        androidx.compose.material3.Slider(
+                            value = qaSettings.backgroundOpacity / 100f,
+                            onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundOpacity = (it * 100).toInt())) } },
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text("${qaSettings.backgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+                Text(stringResource(Res.string.qa_position), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(Modifier.height(4.dp))
+                val positions = listOf(
+                    Constants.TOP_LEFT to stringResource(Res.string.qa_pos_tl),
+                    Constants.TOP_CENTER to stringResource(Res.string.qa_pos_tc),
+                    Constants.TOP_RIGHT to stringResource(Res.string.qa_pos_tr),
+                    Constants.CENTER_LEFT to stringResource(Res.string.qa_pos_cl),
+                    Constants.CENTER to stringResource(Res.string.qa_pos_c),
+                    Constants.CENTER_RIGHT to stringResource(Res.string.qa_pos_cr),
+                    Constants.BOTTOM_LEFT to stringResource(Res.string.qa_pos_bl),
+                    Constants.BOTTOM_CENTER to stringResource(Res.string.qa_pos_bc),
+                    Constants.BOTTOM_RIGHT to stringResource(Res.string.qa_pos_br),
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.fillMaxWidth()) {
+                    positions.chunked(3).forEach { rowItems ->
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                            rowItems.forEach { (posConst, posLabel) ->
+                                val isSelected = qaSettings.position == posConst
+                                Box(
+                                    modifier = Modifier.weight(1f).height(28.dp).clip(RoundedCornerShape(3.dp))
+                                        .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                                        .clickable { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(position = posConst)) } },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(posLabel, style = MaterialTheme.typography.labelSmall, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            Spacer(Modifier.height(12.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(12.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(Modifier.height(12.dp))
 
-            Text(stringResource(Res.string.qa_settings_section), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(Modifier.height(8.dp))
+                Text(stringResource(Res.string.qa_settings_section), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(Modifier.height(8.dp))
 
-            NumberSettingsTextField(
-                label = stringResource(Res.string.qa_cooldown_label),
-                initialText = qaSettings.rateLimitCooldownSeconds,
-                range = 0..600,
-                onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = it)) } },
-                modifier = Modifier.fillMaxWidth()
-            )
+                NumberSettingsTextField(
+                    label = stringResource(Res.string.qa_cooldown_label),
+                    initialText = qaSettings.rateLimitCooldownSeconds,
+                    range = 0..600,
+                    onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = it)) } },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(12.dp))
 
-            var passwordVisible by remember { mutableStateOf(false) }
-            Text(stringResource(Res.string.qa_admin_password), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(Modifier.height(4.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(42.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                    BasicTextField(
-                        value = qaSettings.adminPassword,
-                        onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(adminPassword = it)) } },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                        decorationBox = { innerTextField ->
-                            if (qaSettings.adminPassword.isEmpty()) {
-                                Text(stringResource(Res.string.qa_no_password), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
+                var passwordVisible by remember { mutableStateOf(false) }
+                Text(stringResource(Res.string.qa_admin_password), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                        BasicTextField(
+                            value = qaSettings.adminPassword,
+                            onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(adminPassword = it)) } },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            decorationBox = { innerTextField ->
+                                if (qaSettings.adminPassword.isEmpty()) {
+                                    Text(stringResource(Res.string.qa_no_password), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
+                                }
+                                innerTextField()
                             }
-                            innerTextField()
-                        }
-                    )
+                        )
+                    }
+                    FilledIconButton(onClick = { passwordVisible = !passwordVisible }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
-                FilledIconButton(onClick = { passwordVisible = !passwordVisible }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                    Icon(
-                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            } else {
+                Text(stringResource(Res.string.qa_server_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 32.dp))
             }
         }
     }
