@@ -373,6 +373,7 @@ fun main() {
             companionServer.onPresentationFreezeToggle.collect {
                 presentationFrozen = !presentationFrozen
                 companionServer.broadcastFreezeChange(presentationFrozen)
+                presenterManager.setSlideFrozen(presentationFrozen)
             }
         }
         val presentingModeValue = presenterManager.presentingMode.value
@@ -1197,6 +1198,7 @@ fun main() {
                                     onFreezeToggle = {
                                         presentationFrozen = !presentationFrozen
                                         companionServer.broadcastFreezeChange(presentationFrozen)
+                                        presenterManager.setSlideFrozen(presentationFrozen)
                                     },
                                     onOpenLottieGen = { outputDir, onSaved ->
                                         if (outputDir.isNotEmpty() && java.io.File(outputDir).isDirectory) {
@@ -1652,6 +1654,7 @@ private fun PresenterWindows(
     val pictureSlideOffset by presenterManager.pictureSlideOffset
     val selectedSlide by presenterManager.selectedSlide
     val displayedSlide by presenterManager.displayedSlide
+    val slideFrozen by presenterManager.slideFrozen
     val slideTransitionAlpha by presenterManager.slideTransitionAlpha
     val previousDisplayedSlide by presenterManager.previousDisplayedSlide
     val slideSlideOffset by presenterManager.slideSlideOffset
@@ -2044,8 +2047,8 @@ private fun PresenterWindows(
                         Presenting.PRESENTATION ->
                             if (screenAssignment.showPictures)
                                 SlidePresenter(
-                                    slide = displayedSlide,
-                                    previousSlide = previousDisplayedSlide,
+                                    slide = if (slideFrozen) null else displayedSlide,
+                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
                                     transitionAlpha = slideTransitionAlpha,
                                     slideOffset = slideSlideOffset,
                                     animationType = animationType
@@ -2200,8 +2203,8 @@ private fun PresenterWindows(
                         Presenting.PRESENTATION ->
                             if (screenAssignment.showPictures)
                                 SlidePresenter(
-                                    slide = displayedSlide,
-                                    previousSlide = previousDisplayedSlide,
+                                    slide = if (slideFrozen) null else displayedSlide,
+                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
                                     transitionAlpha = slideTransitionAlpha,
                                     slideOffset = slideSlideOffset,
                                     animationType = animationType,
@@ -2392,8 +2395,8 @@ private fun PresenterWindows(
                                         Presenting.PRESENTATION ->
                                             if (screenAssignment.showPictures)
                                                 SlidePresenter(
-                                    slide = displayedSlide,
-                                    previousSlide = previousDisplayedSlide,
+                                    slide = if (slideFrozen) null else displayedSlide,
+                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
                                     transitionAlpha = slideTransitionAlpha,
                                     slideOffset = slideSlideOffset,
                                     animationType = animationType,
@@ -2645,8 +2648,8 @@ private fun PresenterWindows(
                             Presenting.PRESENTATION ->
                                 if (screenAssignment.showPictures)
                                     SlidePresenter(
-                                    slide = displayedSlide,
-                                    previousSlide = previousDisplayedSlide,
+                                    slide = if (slideFrozen) null else displayedSlide,
+                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
                                     transitionAlpha = slideTransitionAlpha,
                                     slideOffset = slideSlideOffset,
                                     animationType = animationType
@@ -3038,8 +3041,8 @@ private fun PresenterWindows(
                         Presenting.PRESENTATION ->
                             if (screenAssignment.showPictures)
                                 SlidePresenter(
-                                    slide = displayedSlide,
-                                    previousSlide = previousDisplayedSlide,
+                                    slide = if (slideFrozen) null else displayedSlide,
+                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
                                     transitionAlpha = slideTransitionAlpha,
                                     slideOffset = slideSlideOffset,
                                     animationType = animationType,

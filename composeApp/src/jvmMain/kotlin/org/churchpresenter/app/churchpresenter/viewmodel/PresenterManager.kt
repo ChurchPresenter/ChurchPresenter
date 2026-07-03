@@ -158,6 +158,10 @@ class PresenterManager {
     private val _slideSlideOffset = mutableStateOf(1f)
     val slideSlideOffset: State<Float> = _slideSlideOffset
 
+    private val _slideFrozen = mutableStateOf(false)
+    val slideFrozen: State<Boolean> = _slideFrozen
+    fun setSlideFrozen(frozen: Boolean) { _slideFrozen.value = frozen }
+
     // Shared Announcements transition state
     private val _displayedAnnouncementText = mutableStateOf("")
     val displayedAnnouncementText: State<String> = _displayedAnnouncementText
