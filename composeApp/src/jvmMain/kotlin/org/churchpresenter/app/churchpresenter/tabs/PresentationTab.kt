@@ -68,8 +68,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -863,7 +862,6 @@ fun PresentationTab(
             // ── Right sidebar: remote control ─────────────────────────
             VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             val sidebarScroll = rememberScrollState()
-            val clipboardManager = LocalClipboardManager.current
             Column(
                 modifier = Modifier
                     .width(260.dp)
@@ -934,7 +932,7 @@ fun PresentationTab(
                             )
                         }
                         OutlinedButton(
-                            onClick = { clipboardManager.setText(AnnotatedString(qrUrl)) },
+                            onClick = { java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(java.awt.datatransfer.StringSelection(qrUrl), null) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(8.dp)
                         ) {
