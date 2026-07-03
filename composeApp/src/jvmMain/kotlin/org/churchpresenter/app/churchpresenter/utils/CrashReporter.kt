@@ -201,6 +201,10 @@ object CrashReporter {
                 options.isAttachStacktrace = true
                 options.tracesSampleRate = 1.0
                 options.isEnableAutoSessionTracking = true
+                // Privacy: don't send end-users' machine hostnames to Sentry.
+                options.isAttachServerName = false
+                // Mark our own packages as in-app so app frames stand out in stack traces.
+                options.addInAppInclude("org.churchpresenter")
             }
         } catch (_: Exception) {
             // Sentry failing to init must never prevent the app from starting

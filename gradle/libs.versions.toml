@@ -1,6 +1,7 @@
 [versions]
 androidx-lifecycle = "2.9.6"
 sentry = "7.14.0"
+sentryPlugin = "6.14.0"
 composeHotReload = "1.0.0"
 composeMultiplatform = "1.10.2"
 junit = "4.13.2"
@@ -58,3 +59,4 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMul
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+sentry = { id = "io.sentry.jvm.gradle", version.ref = "sentryPlugin" }

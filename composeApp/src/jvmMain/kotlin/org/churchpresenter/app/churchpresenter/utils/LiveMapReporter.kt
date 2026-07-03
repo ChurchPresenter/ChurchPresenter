@@ -8,10 +8,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.churchpresenter.app.churchpresenter.BuildConfig
 
 /**
  * Sends an anonymous, city-level ping to the ChurchPresenter live world map
- * (churchpresenter.app/map) when the app is opened.
+ * (churchpresenter.org/map) when the app is opened.
  *
  * No personal data is transmitted — Cloudflare derives a city-level coordinate
  * server-side from the network layer. No IP address is stored.
@@ -28,12 +29,19 @@ object LiveMapReporter {
         }
     }
 
-    private const val PING_URL = "https://www.churchpresenter.app/api/ping"
+    private const val PING_URL = "https://www.churchpresenter.org/api/ping"
+
+    // BuildConfig.IS_RELEASE is true only for packaged installer builds (see the
+    // generateBuildConfig task in build.gradle.kts). A `run`/IDE launch is a
+    // developer build, which pings with ?src=dev so test launches are tracked
+    // separately and don't skew real-user stats on the live map.
+    private val isDevBuild: Boolean = !BuildConfig.IS_RELEASE
 
     fun pingOnOpen() {
+        val url = if (isDevBuild) "$PING_URL?src=dev" else PING_URL
         scope.launch {
             try {
-                http.get(PING_URL)
+                http.get(url)
             } catch (_: Exception) {
                 // Non-fatal — silently ignore network errors.
             }

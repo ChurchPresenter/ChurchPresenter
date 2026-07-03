@@ -71,6 +71,11 @@ import churchpresenter.composeapp.generated.resources.pictures_storage_directory
 import churchpresenter.composeapp.generated.resources.presentation_storage_directory
 import churchpresenter.composeapp.generated.resources.reset_settings
 import churchpresenter.composeapp.generated.resources.reset_settings_confirm
+import churchpresenter.composeapp.generated.resources.send_test_event
+import churchpresenter.composeapp.generated.resources.test_event_dev_only
+import churchpresenter.composeapp.generated.resources.test_event_failed
+import churchpresenter.composeapp.generated.resources.test_event_sent
+import churchpresenter.composeapp.generated.resources.test_event_title
 import churchpresenter.composeapp.generated.resources.set_all_directories
 import churchpresenter.composeapp.generated.resources.settings_export_failed
 import churchpresenter.composeapp.generated.resources.settings_exported
@@ -89,6 +94,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
@@ -462,6 +468,36 @@ fun SystemSettingsTab(
                     CrashReporter.setReportingEnabled(enabled)
                     onSettingsChange { s -> s.copy(analyticsReportingEnabled = enabled) }
                 }
+            )
+        }
+
+        // Send a diagnostic test event to Sentry to verify the crash-reporting pipeline.
+        // Developer-only affordance — hidden in packaged installer releases.
+        if (!BuildConfig.IS_RELEASE && settings.analyticsReportingEnabled) {
+            val testEventTitle = stringResource(Res.string.test_event_title)
+            val testEventSentMsg = stringResource(Res.string.test_event_sent)
+            val testEventFailedMsg = stringResource(Res.string.test_event_failed)
+            SettingRow(label = stringResource(Res.string.send_test_event), width = 260.dp) {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val ok = withContext(Dispatchers.IO) { CrashReporter.sendTestEvent() }
+                            JOptionPane.showMessageDialog(
+                                Window.getWindows().firstOrNull { it.isActive },
+                                if (ok) testEventSentMsg else testEventFailedMsg,
+                                testEventTitle,
+                                if (ok) JOptionPane.INFORMATION_MESSAGE else JOptionPane.WARNING_MESSAGE
+                            )
+                        }
+                    }
+                ) {
+                    Text(stringResource(Res.string.send_test_event))
+                }
+            }
+            Text(
+                text = stringResource(Res.string.test_event_dev_only),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 

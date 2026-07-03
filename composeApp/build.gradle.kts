@@ -71,6 +71,18 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.sentry)
+}
+
+// Sentry source context: uploads a source bundle at build time so stack traces show
+// actual source lines. Only enabled when SENTRY_AUTH_TOKEN is present (CI/release),
+// so ordinary developer builds without the token are unaffected.
+sentry {
+    val sentryAuthToken = System.getenv("SENTRY_AUTH_TOKEN")
+    includeSourceContext.set(sentryAuthToken != null)
+    org.set("church-projector")
+    projectName.set("church-presenter-desktop")
+    authToken.set(sentryAuthToken)
 }
 
 // Detect current OS classifier for JavaFX native binaries
@@ -389,6 +401,13 @@ val generateBuildConfig by tasks.registering {
     val commitHash = gitCommitHash()
     val commits = gitCommitCount()
     val appVersion = "$versionYear.${commits / 256}.${commits % 256}"
+    // A packaged installer build (packageDmg/Msi/Exe/Deb, packageDistributionForCurrentOS,
+    // signing/notarization — see .github/workflows/build.yml) is a real release. A plain
+    // `run` or IDE launch is a developer build. Used to tag live-map pings dev vs. user.
+    val isRelease = gradle.startParameter.taskNames.any { task ->
+        val t = task.lowercase()
+        listOf("package", "distributable", "sign", "notariz").any { t.contains(it) }
+    }
     val outputDir = layout.buildDirectory.dir("generated/buildconfig")
 
     // Always re-run — git state (commit count/hash) can change without any file edits
@@ -407,6 +426,7 @@ val generateBuildConfig by tasks.registering {
             |    const val COMMIT_HASH = "$commitHash"
             |    const val COMMIT_COUNT = "$commits"
             |    const val VERSION_DISPLAY = "$appVersion ($commitHash)"
+            |    const val IS_RELEASE = $isRelease
             |}
             """.trimMargin()
         )
