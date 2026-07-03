@@ -41,8 +41,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -141,8 +139,10 @@ fun ServerSettingsTab(
 ) {
     val isRunning by companionServer.isRunning.collectAsState()
     val serverUrl by companionServer.serverUrl.collectAsState()
-    @Suppress("DEPRECATION")
-    val clipboardManager = LocalClipboardManager.current
+    val copyText: (String) -> Unit = { text ->
+        java.awt.Toolkit.getDefaultToolkit().systemClipboard
+            .setContents(java.awt.datatransfer.StringSelection(text), null)
+    }
 
     var portText by remember(settings.serverSettings.port) {
         mutableStateOf(settings.serverSettings.port.toString())
@@ -396,7 +396,7 @@ fun ServerSettingsTab(
                             }
                             Button(
                                 shape = RoundedCornerShape(6.dp),
-                                onClick = { clipboardManager.setText(AnnotatedString(apiKeyText)) },
+                                onClick = { copyText(apiKeyText) },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -613,7 +613,7 @@ fun ServerSettingsTab(
                                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Button(
                                         shape = RoundedCornerShape(6.dp),
-                                        onClick = { clipboardManager.setText(AnnotatedString(triggerUrl(name, withKey = true))) },
+                                        onClick = { copyText(triggerUrl(name, withKey = true)) },
                                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -622,7 +622,7 @@ fun ServerSettingsTab(
                                     ) { Text(stringResource(Res.string.companion_lt_copy_key), style = MaterialTheme.typography.labelSmall) }
                                     Button(
                                         shape = RoundedCornerShape(6.dp),
-                                        onClick = { clipboardManager.setText(AnnotatedString(triggerUrl(name, withKey = false))) },
+                                        onClick = { copyText(triggerUrl(name, withKey = false)) },
                                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -632,7 +632,7 @@ fun ServerSettingsTab(
                                     if (atemConfigured) {
                                         Button(
                                             shape = RoundedCornerShape(6.dp),
-                                            onClick = { clipboardManager.setText(AnnotatedString(stillUrl(name, withKey = true))) },
+                                            onClick = { copyText(stillUrl(name, withKey = true)) },
                                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -641,7 +641,7 @@ fun ServerSettingsTab(
                                         ) { Text(stringResource(Res.string.companion_atem_still_key), style = MaterialTheme.typography.labelSmall) }
                                         Button(
                                             shape = RoundedCornerShape(6.dp),
-                                            onClick = { clipboardManager.setText(AnnotatedString(stillUrl(name, withKey = false))) },
+                                            onClick = { copyText(stillUrl(name, withKey = false)) },
                                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -650,7 +650,7 @@ fun ServerSettingsTab(
                                         ) { Text(stringResource(Res.string.companion_atem_still_only), style = MaterialTheme.typography.labelSmall) }
                                         Button(
                                             shape = RoundedCornerShape(6.dp),
-                                            onClick = { clipboardManager.setText(AnnotatedString(clipUrl(name, withKey = true))) },
+                                            onClick = { copyText(clipUrl(name, withKey = true)) },
                                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -659,7 +659,7 @@ fun ServerSettingsTab(
                                         ) { Text(stringResource(Res.string.companion_atem_clip_key), style = MaterialTheme.typography.labelSmall) }
                                         Button(
                                             shape = RoundedCornerShape(6.dp),
-                                            onClick = { clipboardManager.setText(AnnotatedString(clipUrl(name, withKey = false))) },
+                                            onClick = { copyText(clipUrl(name, withKey = false)) },
                                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -693,7 +693,7 @@ fun ServerSettingsTab(
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Button(
                                     shape = RoundedCornerShape(6.dp),
-                                    onClick = { clipboardManager.setText(AnnotatedString(keyOnUrl())) },
+                                    onClick = { copyText(keyOnUrl()) },
                                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -702,7 +702,7 @@ fun ServerSettingsTab(
                                 ) { Text(stringResource(Res.string.companion_atem_key_on), style = MaterialTheme.typography.labelSmall) }
                                 Button(
                                     shape = RoundedCornerShape(6.dp),
-                                    onClick = { clipboardManager.setText(AnnotatedString(keyOffUrl())) },
+                                    onClick = { copyText(keyOffUrl()) },
                                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -724,9 +724,7 @@ fun ServerSettingsTab(
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(
                                 shape = RoundedCornerShape(6.dp),
-                                onClick = {
-                                    clipboardManager.setText(AnnotatedString("$serverUrl/api/lowerthirds/hide${apiQuery()}"))
-                                },
+                                onClick = { copyText("$serverUrl/api/lowerthirds/hide${apiQuery()}") },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -735,9 +733,7 @@ fun ServerSettingsTab(
                             ) { Text(stringResource(Res.string.companion_lt_copy_hide), style = MaterialTheme.typography.labelSmall) }
                             Button(
                                 shape = RoundedCornerShape(6.dp),
-                                onClick = {
-                                    clipboardManager.setText(AnnotatedString("$serverUrl/api/clear${apiQuery()}"))
-                                },
+                                onClick = { copyText("$serverUrl/api/clear${apiQuery()}") },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.error,

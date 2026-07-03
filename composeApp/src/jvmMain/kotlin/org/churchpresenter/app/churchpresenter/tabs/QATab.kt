@@ -76,8 +76,6 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -301,8 +299,6 @@ fun QATab(
     }
 
     val qaSettings = appSettings.qaSettings
-    @Suppress("DEPRECATION")
-    val clipboardManager = LocalClipboardManager.current
     val availableFonts = remember {
         GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList()
     }
@@ -764,7 +760,7 @@ fun QATab(
                     Text(submissionUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
                 }
                 OutlinedButton(
-                    onClick = { clipboardManager.setText(AnnotatedString(submissionUrl)) },
+                    onClick = { java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(java.awt.datatransfer.StringSelection(submissionUrl), null) },
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     contentPadding = ButtonDefaults.TextButtonContentPadding,
                     shape = RoundedCornerShape(8.dp)
@@ -959,7 +955,7 @@ fun QATab(
                     Text(adminDisplayUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
                 }
                 OutlinedButton(
-                    onClick = { clipboardManager.setText(AnnotatedString(adminQrUrl.ifEmpty { adminDisplayUrl })) },
+                    onClick = { java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(java.awt.datatransfer.StringSelection(adminQrUrl.ifEmpty { adminDisplayUrl }), null) },
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     contentPadding = ButtonDefaults.TextButtonContentPadding,
                     shape = RoundedCornerShape(8.dp)
