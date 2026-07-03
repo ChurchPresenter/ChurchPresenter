@@ -161,6 +161,7 @@ import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.AnimationType
@@ -180,75 +181,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-private object RecentPresentationFiles {
-    private const val MAX = 10
-    private val file = java.io.File(System.getProperty("user.home"), ".churchpresenter/recent_presentation_files.json")
-    private val pinnedFile = java.io.File(System.getProperty("user.home"), ".churchpresenter/pinned_presentation_files.json")
-    val files = androidx.compose.runtime.mutableStateListOf<String>()
-    val pinned = androidx.compose.runtime.mutableStateListOf<String>()
-
-    init { load() }
-
-    fun add(path: String) {
-        files.remove(path)
-        files.add(0, path)
-        while (files.size > MAX) files.removeLast()
-        save()
-    }
-
-    fun togglePin(path: String) {
-        if (path in pinned) {
-            pinned.remove(path)
-        } else {
-            pinned.remove(path)
-            pinned.add(0, path)
-        }
-        savePinned()
-    }
-
-    fun clear() {
-        val keep = files.filter { it in pinned }
-        files.clear()
-        files.addAll(keep)
-        save()
-    }
-
-    private fun load() {
-        try {
-            if (file.exists()) {
-                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
-                val list = json.decodeFromString<List<String>>(file.readText())
-                files.clear()
-                files.addAll(list.take(MAX))
-            }
-        } catch (_: Exception) {}
-        try {
-            if (pinnedFile.exists()) {
-                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
-                val list = json.decodeFromString<List<String>>(pinnedFile.readText())
-                pinned.clear()
-                pinned.addAll(list)
-            }
-        } catch (_: Exception) {}
-    }
-
-    private fun save() {
-        try {
-            file.parentFile?.mkdirs()
-            val json = kotlinx.serialization.json.Json { encodeDefaults = true }
-            file.writeText(json.encodeToString(files.toList()))
-        } catch (_: Exception) {}
-    }
-
-    private fun savePinned() {
-        try {
-            pinnedFile.parentFile?.mkdirs()
-            val json = kotlinx.serialization.json.Json { encodeDefaults = true }
-            pinnedFile.writeText(json.encodeToString(pinned.toList()))
-        } catch (_: Exception) {}
-    }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

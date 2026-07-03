@@ -90,6 +90,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
@@ -661,6 +662,7 @@ fun MainDesktop(
     LaunchedEffect(uploadPresentationFlow) {
         uploadPresentationFlow?.collect { file ->
             presentationViewModel.addPresentation(file)
+            RecentPresentationFiles.add(file.absolutePath)
             // Switch to the Presentations tab so the user can see the newly loaded file
             selectTab(Tabs.PRESENTATION)
         }
