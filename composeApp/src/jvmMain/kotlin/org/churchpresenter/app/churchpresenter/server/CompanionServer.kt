@@ -4046,6 +4046,18 @@ const headers={'Content-Type':'application/json'};
 if(password)headers['X-Presentation-Password']=password;
 function slideUrl(i){return'/api/presentations/'+state.id+'/slides/'+i;}
 let stripBuilt=false;
+function loadImg(img,src){
+  if(img._want===src)return;
+  img._want=src;img._tries=0;
+  img.onerror=function(){
+    if(img._want!==src)return;
+    if(img._tries<6){
+      img._tries++;
+      setTimeout(()=>{if(img._want===src)img.src=src+(src.includes('?')?'&':'?')+'r='+img._tries;},800*img._tries);
+    }
+  };
+  img.src=src;
+}
 function buildStrip(){
   const wrap=document.getElementById('strip-wrap');
   wrap.innerHTML='';
@@ -4055,7 +4067,7 @@ function buildStrip(){
     d.id='st-'+i;
     const idx=i;
     d.onclick=()=>goSlide(idx);
-    const im=document.createElement('img');im.src=slideUrl(i);im.loading='lazy';
+    const im=document.createElement('img');im.loading='lazy';loadImg(im,slideUrl(i));
     const span=document.createElement('span');span.className='s-num';span.textContent=i+1;
     d.appendChild(im);d.appendChild(span);
     wrap.appendChild(d);
@@ -4077,9 +4089,9 @@ function updateUI(){
   pb.classList.toggle('active-play',state.isPlaying);pb.textContent=state.isPlaying?('⏸ Auto '+state.autoScrollInterval+'s'):('Auto ▶ '+state.autoScrollInterval+'s');
   document.getElementById('not-live-bar').style.display=(state.total>0&&!state.isLive)?'block':'none';
   if(state.id){
-    document.getElementById('cur-img').src=slideUrl(state.index);
+    loadImg(document.getElementById('cur-img'),slideUrl(state.index));
     const ni=document.getElementById('next-img');
-    if(state.index+1<state.total){ni.src=slideUrl(state.index+1);ni.style.display='block';}
+    if(state.index+1<state.total){loadImg(ni,slideUrl(state.index+1));ni.style.display='block';}
     else{ni.style.display='none';}
   }
   if(!stripBuilt||document.getElementById('strip-wrap').children.length!==state.total){buildStrip();}
@@ -4148,7 +4160,7 @@ let stripResizing=false,stripY0=0,stripH0=0;
 const sh=document.getElementById('strip-handle');
 const sw=document.getElementById('strip-wrap');
 function onSRStart(y){stripResizing=true;stripY0=y;stripH0=sw.offsetHeight;}
-function onSRMove(y){if(!stripResizing)return;const dh=stripY0-y;const newH=Math.max(52,Math.min(260,stripH0+dh));sw.style.height=newH+'px';sw.style.setProperty('--thumb-h',Math.max(36,newH-24)+'px');}
+function onSRMove(y){if(!stripResizing)return;const dh=stripY0-y;const newH=Math.max(52,Math.min(window.innerHeight*0.75,stripH0+dh));sw.style.height=newH+'px';sw.style.setProperty('--thumb-h',Math.max(36,newH-24)+'px');}
 sh.addEventListener('mousedown',e=>{onSRStart(e.clientY);e.preventDefault();});
 document.addEventListener('mousemove',e=>{onSRMove(e.clientY);});
 document.addEventListener('mouseup',()=>{stripResizing=false;});
