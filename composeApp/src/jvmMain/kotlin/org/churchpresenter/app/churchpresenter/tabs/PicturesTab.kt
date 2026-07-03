@@ -17,11 +17,14 @@ import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedCl
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -99,7 +102,6 @@ import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
 import churchpresenter.composeapp.generated.resources.ic_skip_previous
 import churchpresenter.composeapp.generated.resources.image_counter
-import churchpresenter.composeapp.generated.resources.images_suffix
 import churchpresenter.composeapp.generated.resources.loading
 import churchpresenter.composeapp.generated.resources.loop_off
 import churchpresenter.composeapp.generated.resources.loop_on
@@ -317,12 +319,53 @@ fun PicturesTab(
                 maxLines = 1,
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
-            if (viewModel.images.isNotEmpty()) {
-                Text(
-                    text = "${viewModel.images.size} ${stringResource(Res.string.images_suffix)}",
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.secondary
-                )
+            if (onAddToSchedule != null) {
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                ) {
+                    IconButton(
+                        onClick = { viewModel.getScheduleData()?.let { (path, name, count) -> onAddToSchedule(path, name, count) } },
+                        enabled = viewModel.images.isNotEmpty(),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary,
+                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        ),
+                        modifier = Modifier.size(34.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_playlist_add),
+                            contentDescription = stringResource(Res.string.add_to_schedule),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+            if (presenterManager != null) {
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                ) {
+                    IconButton(
+                        onClick = { viewModel.goLive(presenterManager) },
+                        enabled = viewModel.images.isNotEmpty(),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        ),
+                        modifier = Modifier.size(34.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Tv,
+                            contentDescription = stringResource(Res.string.go_live),
+                            modifier = Modifier.size(15.dp)
+                        )
+                    }
+                }
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -422,7 +465,7 @@ fun PicturesTab(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .heightIn(min = 52.dp)
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -699,91 +742,32 @@ fun PicturesTab(
                 )
             }
 
-            Spacer(Modifier.weight(1f))
-
-            // Right action buttons
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (onAddToSchedule != null) {
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = { viewModel.getScheduleData()?.let { (path, name, count) -> onAddToSchedule(path, name, count) } },
-                            enabled = viewModel.images.isNotEmpty(),
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary,
-                                disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            ),
-                            modifier = Modifier.size(34.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_playlist_add),
-                                contentDescription = stringResource(Res.string.add_to_schedule),
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                }
-                if (presenterManager != null) {
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = { viewModel.goLive(presenterManager) },
-                            enabled = viewModel.images.isNotEmpty(),
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            ),
-                            modifier = Modifier.size(34.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.Tv,
-                                contentDescription = stringResource(Res.string.go_live),
-                                modifier = Modifier.size(15.dp)
-                            )
-                        }
-                    }
-                }
+            @OptIn(ExperimentalLayoutApi::class)
+            FlowRow(
+                modifier = Modifier.weight(1f, fill = false),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.pictures_arrow_key_hint),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp)
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                )
+                Text(
+                    text = "·",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                )
+                Text(
+                    text = stringResource(Res.string.pictures_reorder_hint),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp)
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                )
             }
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-        // ── Nav hint bar ──────────────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(32.dp)
-                .background(MaterialTheme.colorScheme.background)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                text = stringResource(Res.string.pictures_arrow_key_hint),
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp)
-                ),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-            )
-            Text(
-                text = "·",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-            )
-            Text(
-                text = stringResource(Res.string.pictures_reorder_hint),
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp)
-                ),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-            )
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 

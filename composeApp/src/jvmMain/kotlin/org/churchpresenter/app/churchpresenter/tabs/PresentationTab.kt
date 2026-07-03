@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -567,7 +568,7 @@ fun PresentationTab(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .heightIn(min = 52.dp)
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -739,8 +740,7 @@ fun PresentationTab(
                 text = stringResource(Res.string.presentation_arrow_key_hint),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                modifier = Modifier.weight(1f, fill = false)
             )
 
         }
@@ -875,7 +875,7 @@ fun PresentationTab(
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                     .verticalScroll(sidebarScroll)
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val qrBaseUrl = presentationDisplayUrl.ifEmpty { serverUrl }
                 val isServerRunning = qrBaseUrl.isNotEmpty()
@@ -895,6 +895,7 @@ fun PresentationTab(
                             }
                         )
                     }
+                    Spacer(Modifier.height(12.dp))
                 }
 
                 if (presenterManager != null) {
@@ -920,6 +921,7 @@ fun PresentationTab(
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
+                    Spacer(Modifier.height(12.dp))
                 }
 
                 OutlinedButton(
@@ -932,7 +934,9 @@ fun PresentationTab(
                     Text(stringResource(Res.string.presentation_clear), modifier = Modifier.padding(start = 8.dp))
                 }
 
+                Spacer(Modifier.height(16.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(Modifier.height(12.dp))
 
                 if (isServerRunning) {
                     // QR code
@@ -947,8 +951,9 @@ fun PresentationTab(
                         Image(
                             bitmap = qrBitmap,
                             contentDescription = null,
-                            modifier = Modifier.size(180.dp).align(Alignment.CenterHorizontally)
+                            modifier = Modifier.size(180.dp)
                         )
+                        Spacer(Modifier.height(8.dp))
                     }
                     Text(
                         stringResource(Res.string.qa_qr_code_shows),
@@ -957,6 +962,7 @@ fun PresentationTab(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(Modifier.height(4.dp))
                     SelectionContainer {
                         Text(
                             qrUrl,
@@ -967,6 +973,7 @@ fun PresentationTab(
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
+                    Spacer(Modifier.height(8.dp))
                     OutlinedButton(
                         onClick = { java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(java.awt.datatransfer.StringSelection(qrUrl), null) },
                         modifier = Modifier.fillMaxWidth(),
@@ -975,7 +982,9 @@ fun PresentationTab(
                         Text(stringResource(Res.string.presentation_remote_copy_url), style = MaterialTheme.typography.labelSmall)
                     }
 
+                    Spacer(Modifier.height(16.dp))
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    Spacer(Modifier.height(12.dp))
 
                     // Tunnel / public access section
                     Text(
@@ -983,6 +992,7 @@ fun PresentationTab(
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold
                     )
+                    Spacer(Modifier.height(8.dp))
                     when (tunnelStatus) {
                         is TunnelStatus.Idle -> {
                             Text(
@@ -1056,7 +1066,9 @@ fun PresentationTab(
                         }
                     }
 
+                    Spacer(Modifier.height(16.dp))
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    Spacer(Modifier.height(12.dp))
 
                     // Password
                     OutlinedTextField(
