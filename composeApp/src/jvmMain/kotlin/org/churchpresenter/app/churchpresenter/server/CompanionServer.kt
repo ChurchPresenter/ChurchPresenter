@@ -605,8 +605,10 @@ class CompanionServer {
     @Volatile private var _autoScrollInterval: Int = 5
 
     fun updatePresentationRemoteSettings(settings: PresentationRemoteSettings) {
+        val wasEnabled = presentationRemoteEnabled
         presentationRemoteEnabled = settings.remoteControlEnabled
         presentationRemotePassword = settings.remotePassword
+        if (wasEnabled && !presentationRemoteEnabled) clearPresentationState()
     }
 
     fun updateAutoScrollInterval(secs: Int) {
@@ -2534,6 +2536,11 @@ class CompanionServer {
                             WebSocketMessage(Constants.WS_EVENT_PICTURES_UPDATED,
                                 json.encodeToString(PictureFolderResponse.serializer(), pictureCatalog)))))
                     }
+                    send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
+                        WebSocketMessage(
+                            type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
+                            payload = """{"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"isPlaying":$_presentationIsPlaying,"isLive":$_presentationIsLive}"""
+                        ))))
 
                     val broadcastJob = scope.launch {
                         broadcastChannel.collect { message -> send(Frame.Text(message)) }
@@ -4060,6 +4067,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </div>
 <script>
 let state={id:'',index:0,total:0,frozen:false,isPlaying:false,isLive:false,autoScrollInterval:5};
+let fetchFailCount=0;
+let offlineMode=false;
 let password=sessionStorage.getItem('remote_pw')||'';
 const headers={'Content-Type':'application/json'};
 if(password)headers['X-Presentation-Password']=password;
@@ -4112,6 +4121,9 @@ function updateUI(){
     const ni=document.getElementById('next-img');
     if(state.index+1<state.total){loadImg(ni,slideUrl(state.index+1));ni.style.display='block';}
     else{ni.style.display='none';}
+  }else{
+    const ci=document.getElementById('cur-img');ci._want='';ci.src='';
+    const ni=document.getElementById('next-img');ni._want='';ni.src='';ni.style.display='none';
   }
   if(!stripBuilt||document.getElementById('strip-wrap').children.length!==state.total){buildStrip();}
   else{updateStripCurrent();}
@@ -4119,16 +4131,24 @@ function updateUI(){
 async function fetchStatus(){
   try{
     const r=await fetch('/api/presentation-remote/status');const d=await r.json();
+    fetchFailCount=0;
+    if(offlineMode){if(d.enabled){location.reload();}else{offlineMode=false;showDisabled();}return;}
     if(!d.enabled){showDisabled();return;}
     const changed=d.id!==state.id||d.index!==state.index||d.total!==state.total||d.frozen!==state.frozen||d.isPlaying!==state.isPlaying||d.isLive!==state.isLive||d.autoScrollInterval!==state.autoScrollInterval;
     state={...state,...d};if(changed)updateUI();
-  }catch(e){}
+  }catch(e){fetchFailCount++;if(!offlineMode&&fetchFailCount>=2)showOffline();}
 }
 function showDisabled(){
   document.getElementById('app').style.display='none';
   document.getElementById('login').style.display='flex';
   document.getElementById('login').innerHTML='<h2>Remote control is disabled</h2><p>Enable it in the app — this page will auto-connect.</p>';
   startPollingForEnable();
+}
+function showOffline(){
+  offlineMode=true;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login').style.display='flex';
+  document.getElementById('login').innerHTML='<h2>App not available</h2><p>Connection lost — the app may be closed or the network is unavailable. Will reconnect automatically.</p>';
 }
 function startPollingForEnable(){
   (async function poll(){

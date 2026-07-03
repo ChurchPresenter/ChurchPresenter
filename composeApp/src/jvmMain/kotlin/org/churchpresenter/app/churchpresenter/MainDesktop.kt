@@ -311,6 +311,25 @@ fun MainDesktop(
         val id = f.absolutePath.hashCode().toUInt().toString(16)
         onSlideChanged?.invoke(id, presentationViewModel.selectedSlideIndex, presentationViewModel.slideFiles.size, presentationViewModel.isPlaying)
     }
+    LaunchedEffect(appSettings.presentationRemoteSettings.remoteControlEnabled) {
+        if (!appSettings.presentationRemoteSettings.remoteControlEnabled) return@LaunchedEffect
+        val f = presentationViewModel.selectedPresentation ?: return@LaunchedEffect
+        if (presentationViewModel.slideFiles.isEmpty()) return@LaunchedEffect
+        val id = f.absolutePath.hashCode().toUInt().toString(16)
+        onSlideChanged?.invoke(
+            id,
+            presentationViewModel.selectedSlideIndex,
+            presentationViewModel.slideFiles.size,
+            presentationViewModel.isPlaying
+        )
+        onPresentationSlidesLoaded?.invoke(
+            id,
+            f.absolutePath,
+            f.nameWithoutExtension,
+            f.extension.lowercase(),
+            presentationViewModel.slideFiles.toList()
+        )
+    }
     LaunchedEffect(remotePresentationPlayPauseFlow) {
         remotePresentationPlayPauseFlow?.collect { presentationViewModel.togglePlayPause() }
     }

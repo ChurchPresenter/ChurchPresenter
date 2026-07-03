@@ -114,6 +114,7 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
@@ -360,8 +361,18 @@ fun main() {
         }
         val tunnelStatus by companionServer.tunnelManager.status.collectAsState()
         val tunnelUrl by companionServer.tunnelManager.tunnelUrl.collectAsState()
+        val prevTunnelWasConnected = remember { mutableStateOf(false) }
         var qaDisplayUrl by remember { mutableStateOf("") }
         var presentationDisplayUrl by remember { mutableStateOf("") }
+        LaunchedEffect(tunnelStatus) {
+            val isConnected = tunnelStatus is TunnelStatus.Connected
+            if (prevTunnelWasConnected.value && !isConnected) {
+                companionServer.clearPresentationState()
+                qaDisplayUrl = ""
+                presentationDisplayUrl = ""
+            }
+            prevTunnelWasConnected.value = isConnected
+        }
         var presentationFrozen by remember { mutableStateOf(false) }
         LaunchedEffect(appSettings.presentationRemoteSettings.remoteControlEnabled, appSettings.presentationRemoteSettings.remotePassword) {
             companionServer.updatePresentationRemoteSettings(appSettings.presentationRemoteSettings)
@@ -485,6 +496,7 @@ fun main() {
                     )
                     settingsManager.saveSettings(appSettings)
                     if (qaManager.sessionActive) qaManager.toggleSession()
+                    companionServer.clearPresentationState()
                     companionServer.tunnelManager.shutdown()
                     exitApplication()
                 },
@@ -1202,6 +1214,7 @@ fun main() {
                                     },
                                     onClearPresentation = {
                                         companionServer.clearPresentationState()
+                                        presenterManager.requestClearDisplay()
                                     },
                                     onOpenLottieGen = { outputDir, onSaved ->
                                         if (outputDir.isNotEmpty() && java.io.File(outputDir).isDirectory) {

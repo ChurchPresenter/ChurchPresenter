@@ -49,14 +49,23 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.VerticalDivider
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.window.WindowPlacement
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import java.awt.Cursor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -106,7 +115,7 @@ import churchpresenter.composeapp.generated.resources.next_image
 import churchpresenter.composeapp.generated.resources.no_file_selected_presentation
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.pause
-import churchpresenter.composeapp.generated.resources.pictures_arrow_key_hint
+import churchpresenter.composeapp.generated.resources.presentation_arrow_key_hint
 import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.presentation_clear
 import churchpresenter.composeapp.generated.resources.presentation_freeze_output
@@ -257,6 +266,24 @@ fun PresentationTab(
     onClearPresentation: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
+
+    val density = LocalDensity.current
+    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+    val windowState = LocalMainWindowState.current
+    val isMaximized = windowState?.placement != WindowPlacement.Floating
+    val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
+
+    var rightPanelPx by remember(currentLayout.presentationRightPanelWidthDp, isMaximized) {
+        mutableStateOf(with(density) { currentLayout.presentationRightPanelWidthDp.dp.toPx() })
+    }
+
+    fun saveRightPanel() {
+        val dp = with(density) { rightPanelPx.toDp().value.toInt() }
+        onSettingsChangeState.value { s ->
+            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(presentationRightPanelWidthDp = dp))
+            else s.copy(windowedLayout = s.windowedLayout.copy(presentationRightPanelWidthDp = dp))
+        }
+    }
 
     LaunchedEffect(selectedPresentationItem) {
         selectedPresentationItem?.let { viewModel.loadPresentationByPath(it.filePath) }
@@ -554,23 +581,6 @@ fun PresentationTab(
                 }
             }
 
-            // Freeze button
-            TooltipArea(
-                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-            ) {
-                IconButton(
-                    onClick = onFreezeToggle,
-                    modifier = Modifier.size(28.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = if (presentationFrozen) MaterialTheme.colorScheme.errorContainer else Color.Transparent,
-                        contentColor = if (presentationFrozen) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                ) {
-                    Icon(if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility, contentDescription = null, modifier = Modifier.size(16.dp))
-                }
-            }
-
             // Divider
             Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
@@ -746,7 +756,7 @@ fun PresentationTab(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(Res.string.pictures_arrow_key_hint),
+                text = stringResource(Res.string.presentation_arrow_key_hint),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
@@ -860,12 +870,26 @@ fun PresentationTab(
             }
 
             // ── Right sidebar: remote control ─────────────────────────
-            VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             val sidebarScroll = rememberScrollState()
+            Box(
+                modifier = Modifier
+                    .width(6.dp)
+                    .fillMaxHeight()
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                    .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
+                    .draggable(
+                        orientation = Orientation.Horizontal,
+                        state = rememberDraggableState { delta ->
+                            rightPanelPx = (rightPanelPx - delta).coerceAtLeast(with(density) { 160.dp.toPx() })
+                        },
+                        onDragStopped = { saveRightPanel() }
+                    )
+            )
             Column(
                 modifier = Modifier
-                    .width(260.dp)
+                    .width(with(density) { rightPanelPx.toDp() })
                     .fillMaxHeight()
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                     .verticalScroll(sidebarScroll)
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -883,6 +907,31 @@ fun PresentationTab(
                             onSettingsChange { s -> s.copy(presentationRemoteSettings = s.presentationRemoteSettings.copy(remoteControlEnabled = enabled)) }
                         }
                     )
+                }
+
+                if (presenterManager != null) {
+                    OutlinedButton(
+                        onClick = onFreezeToggle,
+                        enabled = viewModel.slideFiles.isNotEmpty(),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = if (presentationFrozen)
+                            ButtonDefaults.outlinedButtonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        else ButtonDefaults.outlinedButtonColors()
+                    ) {
+                        Icon(
+                            if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
                 }
 
                 OutlinedButton(

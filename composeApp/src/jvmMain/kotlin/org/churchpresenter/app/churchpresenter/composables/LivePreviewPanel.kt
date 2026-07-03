@@ -177,6 +177,7 @@ private fun SingleDisplayPreview(
     val pictureSlideOffset by presenterManager.pictureSlideOffset
     val displayedSlide by presenterManager.displayedSlide
     val previousDisplayedSlide by presenterManager.previousDisplayedSlide
+    val slideFrozen by presenterManager.slideFrozen
     val slideTransitionAlpha by presenterManager.slideTransitionAlpha
     val slideSlideOffset by presenterManager.slideSlideOffset
     val animationType by presenterManager.animationType
@@ -337,8 +338,8 @@ private fun SingleDisplayPreview(
                                 )
                             Presenting.PRESENTATION ->
                                 SlidePresenter(
-                                    slide = displayedSlide,
-                                    previousSlide = previousDisplayedSlide,
+                                    slide = if (slideFrozen) null else displayedSlide,
+                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
                                     transitionAlpha = slideTransitionAlpha,
                                     slideOffset = slideSlideOffset,
                                     animationType = animationType,
