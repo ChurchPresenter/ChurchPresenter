@@ -275,7 +275,7 @@ fun AnnouncementsTab(
     val isTimerRunning = isDurationOrCountUp && presenterManager?.timerRunning?.value == true
     val isTimerExpired = viewModel.timerMode == Constants.TIMER_MODE_DURATION && presenterManager?.announcementTimerExpired?.value == true
     val timerDisplayValue = when {
-        isTimerRunning -> presenterManager!!.timerRemainingSeconds.value
+        isTimerRunning -> presenterManager.timerRemainingSeconds.value
         viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP -> viewModel.countUpElapsed
         else -> viewModel.timerRemaining
     }
