@@ -154,6 +154,9 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             // Sentry crash reporting
             implementation(libs.sentry)
+            // Logging backend + Sentry log forwarding (WARN/ERROR → breadcrumbs/events)
+            implementation(libs.logback.classic)
+            implementation(libs.sentry.logback)
             implementation("com.twelvemonkeys.imageio:imageio-core:3.10.1")
             implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.10.1")
             // Apache PDFBox for PDF slide extraction

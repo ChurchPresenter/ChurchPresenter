@@ -124,6 +124,8 @@ jobs:
       # ── Build ───────────────────────────────────────────────────────────────
 
       - name: Build and sign installer
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: ./gradlew :composeApp:signWindowsMsi
 
       - name: Rename MSI (add WINDOWS-x64 label)
@@ -219,6 +221,8 @@ jobs:
       # ── Build ──────────────────────────────────────────────────────────────
 
       - name: Build signed DMG
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: ./gradlew :composeApp:packageDmg
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
@@ -384,6 +388,8 @@ jobs:
       # ── Build ──────────────────────────────────────────────────────────────
 
       - name: Build signed DMG
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: ./gradlew :composeApp:packageDmg
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
@@ -522,6 +528,8 @@ jobs:
           echo "Linux signing configuration written (key: $GPG_KEY_ID)"
 
       - name: Build and sign installer
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: ./gradlew :composeApp:signLinuxDeb
 
       - name: Rename DEB (add DEBIAN-x64 label)

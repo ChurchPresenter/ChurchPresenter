@@ -1686,5 +1686,23 @@
     <string name="dictionary_switch_language">Переключить язык словаря</string>
     <string name="dictionary_bible_primary">Основная Библия</string>
     <string name="dictionary_bible_select">Выбрать перевод Библии</string>
+    <!-- Contact / feedback form (Help -> Contact) -->
+    <string name="menu_contact_us">Контакты</string>
+    <string name="contact_us_title">Связаться с нами</string>
+    <string name="contact_type_label">Тип</string>
+    <string name="contact_type_feature">Запрос функции</string>
+    <string name="contact_type_feedback">Отзыв</string>
+    <string name="contact_type_testimonial">Свидетельство</string>
+    <string name="contact_type_bug">Сообщение об ошибке</string>
+    <string name="contact_name_label">Имя</string>
+    <string name="contact_email_label">Эл. почта (необязательно)</string>
+    <string name="contact_message_label">Сообщение</string>
+    <string name="contact_send">Отправить</string>
+    <string name="contact_sending">Отправка…</string>
+    <string name="contact_sent">Сообщение отправлено. Спасибо!</string>
+    <string name="contact_error">Не удалось отправить. Попробуйте ещё раз.</string>
+    <string name="contact_rate_limited_browser">В целях безопасности завершите отправку в браузере.</string>
+    <string name="contact_network_error">Не удалось связаться с сервером. Проверьте подключение к интернету и повторите попытку.</string>
+    <string name="contact_open_browser">Открыть в браузере</string>
 </resources>
 

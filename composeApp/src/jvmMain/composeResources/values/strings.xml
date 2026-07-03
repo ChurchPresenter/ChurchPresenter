@@ -1184,6 +1184,12 @@
     <string name="test_event_sent">Test event sent to Sentry. Check your dashboard to confirm it arrived.</string>
     <string name="test_event_failed">Could not send test event. Crash reporting is disabled or no DSN is configured.</string>
     <string name="test_event_dev_only">Visible to developers only — hidden in released installer builds.</string>
+    <string name="crash_feedback_title">Report what happened</string>
+    <string name="crash_feedback_message">ChurchPresenter closed unexpectedly last time. Telling us what you were doing helps us fix it. This is optional.</string>
+    <string name="crash_feedback_comment_label">What were you doing?</string>
+    <string name="crash_feedback_email_label">Email (optional)</string>
+    <string name="crash_feedback_send">Send report</string>
+    <string name="crash_feedback_dismiss">Not now</string>
     <string name="song_folder_with_count">%1$s (%2$d songs)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
@@ -1744,4 +1750,22 @@
     <string name="dictionary_bible_select">Select Bible translation</string>
     <string name="dictionary_go_to_verse">Go to verse in Bible tab</string>
     <string name="em_dash">—</string>
+    <!-- Contact / feedback form (Help → Contact) -->
+    <string name="menu_contact_us">Contact</string>
+    <string name="contact_us_title">Contact Us</string>
+    <string name="contact_type_label">Type</string>
+    <string name="contact_type_feature">Feature Request</string>
+    <string name="contact_type_feedback">Feedback</string>
+    <string name="contact_type_testimonial">Testimonial</string>
+    <string name="contact_type_bug">Bug Report</string>
+    <string name="contact_name_label">Name</string>
+    <string name="contact_email_label">Email (optional)</string>
+    <string name="contact_message_label">Message</string>
+    <string name="contact_send">Send</string>
+    <string name="contact_sending">Sending…</string>
+    <string name="contact_sent">Message sent. Thank you!</string>
+    <string name="contact_error">Could not send. Please try again.</string>
+    <string name="contact_rate_limited_browser">For security, please finish sending in your browser.</string>
+    <string name="contact_network_error">Couldn't reach the server. Check your internet connection and try again.</string>
+    <string name="contact_open_browser">Open in Browser</string>
 </resources>

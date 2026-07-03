@@ -1,8 +1,13 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import io.sentry.Attachment
+import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
+import io.sentry.SentryOptions
+import io.sentry.SpanStatus
+import io.sentry.UserFeedback
 import io.sentry.protocol.Message
 import io.sentry.protocol.User
 import org.churchpresenter.app.churchpresenter.BuildConfig
@@ -115,6 +120,13 @@ object CrashReporter {
         crashCountFile.writeText(count.toString())
     } catch (_: Exception) { }
 
+    /**
+     * Anonymous, stable per-install ID, creating it on first access. Exposed so
+     * the live-map ping can dedupe by install (see LiveMapReporter). Same id used
+     * for unique-user counting in Sentry.
+     */
+    fun installId(): String = getOrCreateInstallId()
+
     /** Anonymous, stable per-install ID used for unique-user counting in Sentry. */
     private fun getOrCreateInstallId(): String = try {
         if (installIdFile.exists()) {
@@ -177,6 +189,72 @@ object CrashReporter {
         true
     } catch (_: Exception) { false }
 
+    // ── Telemetry: breadcrumbs, tags, context, tracing, feedback ────────────────
+
+    /** Records a breadcrumb — a lightweight trail of user actions shown on later crashes. */
+    fun breadcrumb(message: String, category: String = "app", level: SentryLevel = SentryLevel.INFO) {
+        try {
+            if (!Sentry.isEnabled()) return
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                this.message = message
+                this.category = category
+                this.level = level
+            })
+        } catch (_: Exception) {}
+    }
+
+    /** Sets a searchable tag on all subsequent events (e.g. active tab, screen count). */
+    fun setTag(key: String, value: String) {
+        try { if (Sentry.isEnabled()) Sentry.setTag(key, value) } catch (_: Exception) {}
+    }
+
+    /** Attaches a structured context block (a named group of key/value data) to events. */
+    fun setContext(name: String, data: Map<String, Any>) {
+        try { if (Sentry.isEnabled()) Sentry.configureScope { it.setContexts(name, data) } } catch (_: Exception) {}
+    }
+
+    /**
+     * Runs [block] inside a Sentry performance transaction so its duration shows up under
+     * Performance. Falls back to running [block] directly when Sentry is disabled.
+     */
+    inline fun <T> trace(operation: String, name: String, block: () -> T): T {
+        if (!isEnabled()) return block()
+        val tx = try { Sentry.startTransaction(name, operation) } catch (_: Exception) { null } ?: return block()
+        return try {
+            block()
+        } catch (e: Throwable) {
+            tx.throwable = e
+            tx.status = SpanStatus.INTERNAL_ERROR
+            throw e
+        } finally {
+            try { tx.finish() } catch (_: Exception) {}
+        }
+    }
+
+    /** Sends user-provided feedback (e.g. after a crash) as a Sentry event + user feedback. */
+    fun sendUserFeedback(comment: String, name: String = "", email: String = "") {
+        try {
+            if (!Sentry.isEnabled() || comment.isBlank()) return
+            val event = SentryEvent().apply {
+                level = SentryLevel.INFO
+                message = Message().apply { message = "User feedback" }
+            }
+            val eventId = Sentry.captureEvent(event)
+            Sentry.captureUserFeedback(UserFeedback(eventId).apply {
+                comments = comment
+                if (name.isNotBlank()) this.name = name
+                if (email.isNotBlank()) this.email = email
+            })
+            Sentry.flush(3_000)
+        } catch (_: Exception) {}
+    }
+
+    /** Most recently written local crash-report file, if any (used for event attachments). */
+    private fun latestCrashFile(): File? = try {
+        crashDir.listFiles { f -> f.isFile && f.name.startsWith("crash_") }
+            ?.maxByOrNull { it.lastModified() }
+    } catch (_: Exception) { null }
+
     // ── Sentry ────────────────────────────────────────────────────────────────
 
     private fun readDsn(): String {
@@ -195,17 +273,32 @@ object CrashReporter {
             Sentry.init { options ->
                 options.dsn = dsn
                 options.release = appVersion
-                options.environment = "production"
+                // Keep developer test runs out of production release-health stats.
+                options.environment = if (BuildConfig.IS_RELEASE) "production" else "development"
                 options.isEnableUncaughtExceptionHandler = true
                 options.isAttachThreads = false
                 options.isAttachStacktrace = true
                 options.tracesSampleRate = 1.0
+                // Capture CPU profiles for sampled transactions (see Performance → Profiling).
+                options.profilesSampleRate = 1.0
                 options.isEnableAutoSessionTracking = true
                 // Privacy: don't send end-users' machine hostnames to Sentry.
                 options.isAttachServerName = false
                 // Mark our own packages as in-app so app frames stand out in stack traces.
                 options.addInAppInclude("org.churchpresenter")
+                // Attach the most recent local crash-report file to error/fatal events.
+                options.beforeSend = SentryOptions.BeforeSendCallback { event, hint ->
+                    try {
+                        if (event.level == SentryLevel.ERROR || event.level == SentryLevel.FATAL) {
+                            latestCrashFile()?.let { hint.addAttachment(Attachment(it.absolutePath)) }
+                        }
+                    } catch (_: Exception) { /* never block delivery */ }
+                    event
+                }
             }
+            // Static context that helps triage: OS arch and dev/release build.
+            setTag("os.arch", System.getProperty("os.arch", "unknown"))
+            setTag("build.type", if (BuildConfig.IS_RELEASE) "release" else "dev")
         } catch (_: Exception) {
             // Sentry failing to init must never prevent the app from starting
         }

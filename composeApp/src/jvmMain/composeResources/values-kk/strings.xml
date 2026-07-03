@@ -1683,5 +1683,23 @@
     <string name="bible_engine_run_local">Движокты жергілікті іске қосу</string>
     <string name="bible_engine_host">Движок хосты</string>
     <string name="bible_engine_port">Порт</string>
+    <!-- Contact / feedback form (Help -> Contact) -->
+    <string name="menu_contact_us">Байланыс</string>
+    <string name="contact_us_title">Бізбен байланысу</string>
+    <string name="contact_type_label">Түрі</string>
+    <string name="contact_type_feature">Функция сұрауы</string>
+    <string name="contact_type_feedback">Пікір</string>
+    <string name="contact_type_testimonial">Ұсыныс-пікір</string>
+    <string name="contact_type_bug">Қате туралы есеп</string>
+    <string name="contact_name_label">Аты</string>
+    <string name="contact_email_label">Электрондық пошта (міндетті емес)</string>
+    <string name="contact_message_label">Хабарлама</string>
+    <string name="contact_send">Жіберу</string>
+    <string name="contact_sending">Жіберілуде…</string>
+    <string name="contact_sent">Хабарлама жіберілді. Рахмет!</string>
+    <string name="contact_error">Жіберу мүмкін болмады. Қайталап көріңіз.</string>
+    <string name="contact_rate_limited_browser">Қауіпсіздік үшін жіберуді браузерде аяқтаңыз.</string>
+    <string name="contact_network_error">Серверге қосылу мүмкін болмады. Интернет байланысын тексеріп, қайталап көріңіз.</string>
+    <string name="contact_open_browser">Браузерде ашу</string>
 </resources>
 

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
@@ -430,7 +431,7 @@ class Bible {
         searchExp: Regex,
         book: Int? = null,
         chapter: Int? = null
-    ): List<BibleSearch> {
+    ): List<BibleSearch> = CrashReporter.trace("bible.search", "Search Bible") {
         val returnResults = mutableListOf<BibleSearch>()
         var sw = searchExp.pattern
         sw = sw.replace("\\b(", "").replace(")\\b", "")
@@ -459,7 +460,7 @@ class Bible {
                 }
             }
 
-        return returnResults
+        returnResults
     }
 
     private val bookIdToName: Map<String, String> get() =

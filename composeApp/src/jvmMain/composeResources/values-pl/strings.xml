@@ -1683,5 +1683,23 @@
     <string name="bible_engine_run_local">Uruchom silnik lokalnie</string>
     <string name="bible_engine_host">Host silnika</string>
     <string name="bible_engine_port">Port</string>
+    <!-- Contact / feedback form (Help -> Contact) -->
+    <string name="menu_contact_us">Kontakt</string>
+    <string name="contact_us_title">Kontakt</string>
+    <string name="contact_type_label">Typ</string>
+    <string name="contact_type_feature">Propozycja funkcji</string>
+    <string name="contact_type_feedback">Opinia</string>
+    <string name="contact_type_testimonial">Referencja</string>
+    <string name="contact_type_bug">Zgłoszenie błędu</string>
+    <string name="contact_name_label">Imię</string>
+    <string name="contact_email_label">E-mail (opcjonalnie)</string>
+    <string name="contact_message_label">Wiadomość</string>
+    <string name="contact_send">Wyślij</string>
+    <string name="contact_sending">Wysyłanie…</string>
+    <string name="contact_sent">Wiadomość wysłana. Dziękujemy!</string>
+    <string name="contact_error">Nie udało się wysłać. Spróbuj ponownie.</string>
+    <string name="contact_rate_limited_browser">Ze względów bezpieczeństwa dokończ wysyłanie w przeglądarce.</string>
+    <string name="contact_network_error">Nie można połączyć się z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.</string>
+    <string name="contact_open_browser">Otwórz w przeglądarce</string>
 </resources>
 

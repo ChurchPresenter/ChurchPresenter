@@ -1710,4 +1710,22 @@
     <string name="qa_qr_bg_color">Fondo QR</string>
     <string name="qa_qr_message_label">Mensaje del código QR</string>
     <string name="qa_qr_message_reset">Restablecer por defecto</string>
+    <!-- Contact / feedback form (Help -> Contact) -->
+    <string name="menu_contact_us">Contacto</string>
+    <string name="contact_us_title">Contáctanos</string>
+    <string name="contact_type_label">Tipo</string>
+    <string name="contact_type_feature">Solicitud de función</string>
+    <string name="contact_type_feedback">Comentarios</string>
+    <string name="contact_type_testimonial">Testimonio</string>
+    <string name="contact_type_bug">Informe de error</string>
+    <string name="contact_name_label">Nombre</string>
+    <string name="contact_email_label">Correo electrónico (opcional)</string>
+    <string name="contact_message_label">Mensaje</string>
+    <string name="contact_send">Enviar</string>
+    <string name="contact_sending">Enviando…</string>
+    <string name="contact_sent">Mensaje enviado. ¡Gracias!</string>
+    <string name="contact_error">No se pudo enviar. Inténtalo de nuevo.</string>
+    <string name="contact_rate_limited_browser">Por seguridad, completa el envío en tu navegador.</string>
+    <string name="contact_network_error">No se pudo conectar con el servidor. Comprueba tu conexión a internet e inténtalo de nuevo.</string>
+    <string name="contact_open_browser">Abrir en el navegador</string>
 </resources>

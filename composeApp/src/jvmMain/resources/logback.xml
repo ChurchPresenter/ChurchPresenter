@@ -1,0 +1,25 @@
+<configuration>
+    <!-- Console output for developers -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Forward logs to Sentry. Uses the SDK already initialised in CrashReporter
+         (no DSN here). ERROR+ become Sentry issues; WARN+ become breadcrumbs. -->
+    <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+        <minimumEventLevel>ERROR</minimumEventLevel>
+        <minimumBreadcrumbLevel>WARN</minimumBreadcrumbLevel>
+    </appender>
+
+    <!-- Keep noisy third-party libraries quiet -->
+    <logger name="io.netty" level="ERROR"/>
+    <logger name="org.apache" level="ERROR"/>
+    <logger name="io.ktor" level="WARN"/>
+
+    <root level="WARN">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="Sentry"/>
+    </root>
+</configuration>

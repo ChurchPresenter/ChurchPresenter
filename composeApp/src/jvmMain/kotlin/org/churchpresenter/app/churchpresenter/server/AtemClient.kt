@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.server
 
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -403,7 +404,9 @@ class AtemClient(val host: String, val port: Int = 9910) {
             // Lock still store (storeId 0)
             sendCommandAndWait("LOCK", buildLockPayload(0, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
             try {
-                performTransfer(storeId = 0, frameIndex = slot, frame = frame, name = name, onProgress = onProgress)
+                CrashReporter.trace("atem.upload", "ATEM upload still") {
+                    performTransfer(storeId = 0, frameIndex = slot, frame = frame, name = name, onProgress = onProgress)
+                }
             } finally {
                 // Unlock even if the transfer failed midway; best-effort so a dead socket
                 // here can't mask the original failure

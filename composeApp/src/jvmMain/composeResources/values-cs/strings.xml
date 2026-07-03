@@ -1767,5 +1767,23 @@
     <string name="bible_engine_run_local">Spustit engine lokálně</string>
     <string name="bible_engine_host">Hostitel enginu</string>
     <string name="bible_engine_port">Port</string>
+    <!-- Contact / feedback form (Help -> Contact) -->
+    <string name="menu_contact_us">Kontakt</string>
+    <string name="contact_us_title">Kontaktujte nás</string>
+    <string name="contact_type_label">Typ</string>
+    <string name="contact_type_feature">Požadavek na funkci</string>
+    <string name="contact_type_feedback">Zpětná vazba</string>
+    <string name="contact_type_testimonial">Reference</string>
+    <string name="contact_type_bug">Hlášení chyby</string>
+    <string name="contact_name_label">Jméno</string>
+    <string name="contact_email_label">E-mail (nepovinné)</string>
+    <string name="contact_message_label">Zpráva</string>
+    <string name="contact_send">Odeslat</string>
+    <string name="contact_sending">Odesílání…</string>
+    <string name="contact_sent">Zpráva odeslána. Děkujeme!</string>
+    <string name="contact_error">Odeslání se nezdařilo. Zkuste to znovu.</string>
+    <string name="contact_rate_limited_browser">Z bezpečnostních důvodů dokončete odeslání v prohlížeči.</string>
+    <string name="contact_network_error">Server se nepodařilo kontaktovat. Zkontrolujte připojení k internetu a zkuste to znovu.</string>
+    <string name="contact_open_browser">Otevřít v prohlížeči</string>
 </resources>
 

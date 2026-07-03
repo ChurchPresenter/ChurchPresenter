@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,11 +38,19 @@ object LiveMapReporter {
     // separately and don't skew real-user stats on the live map.
     private val isDevBuild: Boolean = !BuildConfig.IS_RELEASE
 
-    fun pingOnOpen() {
+    /**
+     * @param installId Stable anonymous install id, sent as the X-Install-Id
+     * header so the server dedupes repeat launches to one row per install. Pass
+     * null (the default) to opt out — the server then falls back to a coarse
+     * geo-grid dedupe. Callers should only pass an id when analytics is enabled.
+     */
+    fun pingOnOpen(installId: String? = null) {
         val url = if (isDevBuild) "$PING_URL?src=dev" else PING_URL
         scope.launch {
             try {
-                http.get(url)
+                http.get(url) {
+                    if (!installId.isNullOrBlank()) header("X-Install-Id", installId)
+                }
             } catch (_: Exception) {
                 // Non-fatal — silently ignore network errors.
             }

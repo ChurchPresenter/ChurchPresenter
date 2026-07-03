@@ -94,6 +94,7 @@ import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
 import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
+import org.churchpresenter.app.churchpresenter.dialogs.CrashFeedbackDialog
 import org.churchpresenter.app.churchpresenter.dialogs.KonamiEasterEggDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
@@ -121,6 +122,7 @@ import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
@@ -646,6 +648,10 @@ fun MainDesktop(
 
     LaunchedEffect(selectedTabIndex) {
         onTabChange(selectedTabIndex)
+        visibleTabs.getOrNull(effectiveTabIndex)?.name?.let { tabName ->
+            CrashReporter.setTag("active_tab", tabName)
+            CrashReporter.breadcrumb("Tab: $tabName", category = "navigation")
+        }
         // Re-request focus so F-key shortcuts keep working after the new tab's children steal focus
         mainFocusRequester.requestFocus()
     }
@@ -1523,4 +1529,18 @@ fun MainDesktop(
         onDismiss = { showKonamiEasterEgg = false },
         theme = theme
     )
+
+    // Invite feedback on the launch after an unexpected shutdown (opt-in analytics only).
+    var showCrashFeedback by remember {
+        mutableStateOf(CrashReporter.didCrashLastRun && appSettings.analyticsReportingEnabled)
+    }
+    if (showCrashFeedback) {
+        CrashFeedbackDialog(
+            onDismiss = { showCrashFeedback = false },
+            onSend = { comment, email ->
+                CrashReporter.sendUserFeedback(comment, email = email)
+                showCrashFeedback = false
+            }
+        )
+    }
 }

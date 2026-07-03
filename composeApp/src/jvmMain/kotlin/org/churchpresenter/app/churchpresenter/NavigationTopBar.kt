@@ -43,6 +43,7 @@ import churchpresenter.composeapp.generated.resources.menu_help_item
 import churchpresenter.composeapp.generated.resources.menu_how_to_blog
 import churchpresenter.composeapp.generated.resources.open_converter
 import churchpresenter.composeapp.generated.resources.menu_check_for_updates
+import churchpresenter.composeapp.generated.resources.menu_contact_us
 import churchpresenter.composeapp.generated.resources.menu_language
 import churchpresenter.composeapp.generated.resources.menu_view
 import churchpresenter.composeapp.generated.resources.menu_new_schedule
@@ -80,7 +81,8 @@ fun FrameWindowScope.NavigationTopBar(
     onGettingStarted: () -> Unit = {},
     onConverter: () -> Unit = {},
     onKeyboardShortcuts: () -> Unit = {},
-    onCheckForUpdates: () -> Unit = {}
+    onCheckForUpdates: () -> Unit = {},
+    onContactUs: () -> Unit = {}
 ) {
 
     val fileLabel = stringResource(Res.string.menu_file)
@@ -273,6 +275,7 @@ fun FrameWindowScope.NavigationTopBar(
             Item(stringResource(Res.string.open_converter), onClick = onConverter)
             Item(stringResource(Res.string.menu_about), onClick = onAbout)
             Item(stringResource(Res.string.menu_help_item), onClick = onHelp)
+            Item(stringResource(Res.string.menu_contact_us), onClick = onContactUs)
             Item(stringResource(Res.string.menu_check_for_updates), onClick = onCheckForUpdates)
         }
     }

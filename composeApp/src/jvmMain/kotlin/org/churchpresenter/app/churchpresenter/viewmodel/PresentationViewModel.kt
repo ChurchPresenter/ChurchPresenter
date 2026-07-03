@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.awt.image.BufferedImage
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -248,7 +249,10 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         }
     }
 
-    private suspend fun renderSlides(file: File) {
+    private suspend fun renderSlides(file: File) = CrashReporter.trace(
+        operation = "presentation.render",
+        name = "Render ${file.extension.lowercase()} slides"
+    ) {
         val cacheDir = slidesCacheDir(file).also { it.deleteRecursively(); it.mkdirs() }
         var success = false
         try {

@@ -1219,11 +1219,13 @@ class CompanionServer {
         val file = File(filePath)
         if (!file.exists()) return
         try {
-            val images: List<BufferedImage> = when (file.extension.lowercase()) {
-                "pdf"         -> renderPdfForServer(file)
-                "pptx", "ppt" -> renderPowerPointForServer(file)
-                "key"         -> renderKeynoteForServer(file)
-                else          -> return
+            val images: List<BufferedImage> = CrashReporter.trace("server.render", "Server render presentation") {
+                when (file.extension.lowercase()) {
+                    "pdf"         -> renderPdfForServer(file)
+                    "pptx", "ppt" -> renderPowerPointForServer(file)
+                    "key"         -> renderKeynoteForServer(file)
+                    else          -> return
+                }
             }
             if (images.isEmpty()) return
             val jpegSlides = images.map { img ->

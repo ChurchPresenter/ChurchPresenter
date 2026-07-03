@@ -16,6 +16,7 @@ import org.cef.browser.CefBrowser
 import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.server.AtemRenderCache
@@ -187,6 +188,10 @@ class PresenterManager {
     val mediaTransitionAlpha: State<Float> = _mediaTransitionAlpha
 
     fun setPresentingMode(mode: Presenting) {
+        if (_presentingMode.value != mode) {
+            CrashReporter.setTag("presenting", mode.name)
+            CrashReporter.breadcrumb("Presenting: ${mode.name}", category = "presenter")
+        }
         _presentingMode.value = mode
         if (mode != Presenting.NONE) {
             _clearDisplayRequested.value = false

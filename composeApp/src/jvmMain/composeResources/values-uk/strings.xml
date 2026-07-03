@@ -1688,5 +1688,23 @@
     <string name="bible_engine_run_local">Запустити двигун локально</string>
     <string name="bible_engine_host">Хост двигуна</string>
     <string name="bible_engine_port">Порт</string>
+    <!-- Contact / feedback form (Help -> Contact) -->
+    <string name="menu_contact_us">Контакти</string>
+    <string name="contact_us_title">Зв'язатися з нами</string>
+    <string name="contact_type_label">Тип</string>
+    <string name="contact_type_feature">Запит функції</string>
+    <string name="contact_type_feedback">Відгук</string>
+    <string name="contact_type_testimonial">Свідчення</string>
+    <string name="contact_type_bug">Звіт про помилку</string>
+    <string name="contact_name_label">Ім'я</string>
+    <string name="contact_email_label">Ел. пошта (необов'язково)</string>
+    <string name="contact_message_label">Повідомлення</string>
+    <string name="contact_send">Надіслати</string>
+    <string name="contact_sending">Надсилання…</string>
+    <string name="contact_sent">Повідомлення надіслано. Дякуємо!</string>
+    <string name="contact_error">Не вдалося надіслати. Спробуйте ще раз.</string>
+    <string name="contact_rate_limited_browser">З міркувань безпеки завершіть надсилання у браузері.</string>
+    <string name="contact_network_error">Не вдалося зв’язатися із сервером. Перевірте підключення до інтернету та повторіть спробу.</string>
+    <string name="contact_open_browser">Відкрити у браузері</string>
 </resources>
 

@@ -1710,4 +1710,22 @@
     <string name="qa_qr_bg_color">Pozadie QR</string>
     <string name="qa_qr_message_label">Správa QR kódu</string>
     <string name="qa_qr_message_reset">Obnoviť predvolené</string>
+    <!-- Contact / feedback form (Help -> Contact) -->
+    <string name="menu_contact_us">Kontakt</string>
+    <string name="contact_us_title">Kontaktujte nás</string>
+    <string name="contact_type_label">Typ</string>
+    <string name="contact_type_feature">Požiadavka na funkciu</string>
+    <string name="contact_type_feedback">Spätná väzba</string>
+    <string name="contact_type_testimonial">Referencia</string>
+    <string name="contact_type_bug">Hlásenie chyby</string>
+    <string name="contact_name_label">Meno</string>
+    <string name="contact_email_label">E-mail (nepovinné)</string>
+    <string name="contact_message_label">Správa</string>
+    <string name="contact_send">Odoslať</string>
+    <string name="contact_sending">Odosielanie…</string>
+    <string name="contact_sent">Správa odoslaná. Ďakujeme!</string>
+    <string name="contact_error">Odoslanie zlyhalo. Skúste to znova.</string>
+    <string name="contact_rate_limited_browser">Z bezpečnostných dôvodov dokončite odoslanie v prehliadači.</string>
+    <string name="contact_network_error">Server sa nepodarilo kontaktovať. Skontrolujte pripojenie na internet a skúste to znova.</string>
+    <string name="contact_open_browser">Otvoriť v prehliadači</string>
 </resources>

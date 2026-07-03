@@ -72,6 +72,7 @@ import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
+import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
@@ -177,8 +178,13 @@ fun main() {
     // Install crash reporting before anything else
     val startupSettings = SettingsManager().loadSettings()
     CrashReporter.initialize(startupSettings.analyticsReportingEnabled)
+    CrashReporter.breadcrumb("Application started", category = "lifecycle")
 
-    LiveMapReporter.pingOnOpen()
+    // Pass the install id only when analytics is enabled, so opted-out users
+    // still send an anonymous geo ping but no persistent identifier.
+    LiveMapReporter.pingOnOpen(
+        installId = if (startupSettings.analyticsReportingEnabled) CrashReporter.installId() else null
+    )
 
     // Catch exceptions thrown inside coroutines / Compose lambdas —
     // these never reach Thread.setDefaultUncaughtExceptionHandler on their own.
@@ -364,6 +370,7 @@ fun main() {
         var showStatisticsDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var showAboutDialog by remember { mutableStateOf(false) }
+        var showContactDialog by remember { mutableStateOf(false) }
         var showConverterWindow by remember { mutableStateOf(false) }
         var showLottieGenWindow by remember { mutableStateOf(false) }
         var lottieGenOutputDir by remember { mutableStateOf<java.io.File?>(null) }
@@ -989,6 +996,7 @@ fun main() {
                                 NavigationTopBar(
                                     currentTheme = theme,
                                     onAbout = { showAboutDialog = true },
+                                    onContactUs = { showContactDialog = true },
                                     onGettingStarted = { showSetupWizard = true },
                                     onStatistics = { showStatisticsDialog = true },
                                     onConverter = { showConverterWindow = true },
@@ -1239,6 +1247,10 @@ fun main() {
                                     isVisible = showAboutDialog,
                                     onDismiss = { showAboutDialog = false; dialogDismissSignal++ },
                                     theme = theme
+                                )
+                                ContactUsDialog(
+                                    isVisible = showContactDialog,
+                                    onDismiss = { showContactDialog = false; dialogDismissSignal++ }
                                 )
                                 if (showConverterWindow) {
                                     ConverterWindow(
