@@ -366,6 +366,9 @@ fun main() {
         LaunchedEffect(appSettings.presentationRemoteSettings.remoteControlEnabled, appSettings.presentationRemoteSettings.remotePassword) {
             companionServer.updatePresentationRemoteSettings(appSettings.presentationRemoteSettings)
         }
+        LaunchedEffect(appSettings.presentationSettings.autoScrollInterval) {
+            companionServer.updateAutoScrollInterval(appSettings.presentationSettings.autoScrollInterval.toInt())
+        }
         LaunchedEffect(Unit) {
             companionServer.onPresentationFreezeToggle.collect {
                 presentationFrozen = !presentationFrozen

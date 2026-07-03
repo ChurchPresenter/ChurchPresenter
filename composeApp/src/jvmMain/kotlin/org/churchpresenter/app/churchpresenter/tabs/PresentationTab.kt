@@ -885,6 +885,31 @@ fun PresentationTab(
                     )
                 }
 
+                if (presenterManager != null) {
+                    OutlinedButton(
+                        onClick = onFreezeToggle,
+                        enabled = viewModel.slideFiles.isNotEmpty(),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = if (presentationFrozen)
+                            ButtonDefaults.outlinedButtonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        else ButtonDefaults.outlinedButtonColors()
+                    ) {
+                        Icon(
+                            if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                }
+
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                 // QR code

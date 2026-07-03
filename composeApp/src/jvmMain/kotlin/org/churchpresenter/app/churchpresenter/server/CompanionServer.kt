@@ -602,23 +602,32 @@ class CompanionServer {
     @Volatile private var _presentationFrozen: Boolean = false
     @Volatile private var _presentationIsPlaying: Boolean = false
     @Volatile private var _presentationIsLive: Boolean = false
+    @Volatile private var _autoScrollInterval: Int = 5
 
     fun updatePresentationRemoteSettings(settings: PresentationRemoteSettings) {
         presentationRemoteEnabled = settings.remoteControlEnabled
         presentationRemotePassword = settings.remotePassword
     }
 
-    fun updatePresentationLiveStatus(isLive: Boolean) { _presentationIsLive = isLive }
+    fun updateAutoScrollInterval(secs: Int) { _autoScrollInterval = secs }
+
+    fun updatePresentationLiveStatus(isLive: Boolean) {
+        if (_presentationIsLive == isLive) return
+        _presentationIsLive = isLive
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_PRESENTATION_LIVE_CHANGED,
+            payload = """{"isLive":$isLive}"""
+        ))
+    }
 
     fun broadcastSlideChange(id: String, index: Int, total: Int, isPlaying: Boolean) {
         _currentPresentationId = id
         _currentSlideIndex = index
         _currentSlideTotalCount = total
         _presentationIsPlaying = isPlaying
-        _presentationIsLive = true
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
-            payload = """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":true}"""
+            payload = """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":$_presentationIsLive}"""
         ))
     }
 
@@ -2213,7 +2222,7 @@ class CompanionServer {
                 /** GET /api/presentation-remote/status — current presentation state (no auth needed) */
                 get("/api/presentation-remote/status") {
                     call.respondText(
-                        """{"enabled":$presentationRemoteEnabled,"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"frozen":$_presentationFrozen,"isPlaying":$_presentationIsPlaying,"isLive":$_presentationIsLive,"passwordRequired":${presentationRemotePassword.isNotEmpty()}}""",
+                        """{"enabled":$presentationRemoteEnabled,"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"frozen":$_presentationFrozen,"isPlaying":$_presentationIsPlaying,"isLive":$_presentationIsLive,"autoScrollInterval":$_autoScrollInterval,"passwordRequired":${presentationRemotePassword.isNotEmpty()}}""",
                         ContentType.Application.Json
                     )
                 }
@@ -3963,31 +3972,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 #counter{font-size:16px;font-weight:700;letter-spacing:1px;min-width:56px}
 #blanked-badge{background:#e57373;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;letter-spacing:.5px;display:none;flex-shrink:0}
 #btns{display:flex;gap:6px;margin-left:auto}
-.icon-btn{background:#2a2a2a;border:1px solid #333;color:#fff;border-radius:8px;padding:7px 10px;font-size:12px;cursor:pointer;font-weight:500;transition:background .15s;white-space:nowrap}
+.icon-btn{background:#2a2a2a;border:1px solid #333;color:#fff;border-radius:8px;padding:7px 10px;font-size:12px;cursor:pointer;font-weight:500;transition:background .15s;white-space:nowrap;touch-action:manipulation}
 .icon-btn:active{background:#3a3a3a}
 .icon-btn.active{background:#e57373;border-color:#e57373}
 .icon-btn.active-play{background:#43a047;border-color:#43a047}
-#not-live-bar{background:#92400e;color:#fff;font-size:13px;font-weight:600;padding:8px 16px;text-align:center;cursor:pointer;display:none;flex-shrink:0;border-bottom:1px solid #7c3500}
-#not-live-bar:active{background:#7c3500}
+#not-live-bar{background:#1e3a5f;color:#aac4e8;font-size:12px;font-weight:500;padding:6px 16px;text-align:center;display:none;flex-shrink:0;border-bottom:1px solid #2a4a70;letter-spacing:.2px}
 #slides-area{flex:1;display:flex;flex-direction:row;overflow:hidden;min-height:0}
 #cur-wrap{flex:2;position:relative;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;border-right:1px solid #222}
 #cur-img{max-width:100%;max-height:100%;object-fit:contain;display:block}
 #blanked-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-start;justify-content:flex-end;padding:8px;pointer-events:none}
 #blanked-overlay span{background:#e57373;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px}
-#next-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0d0d0d;min-width:0}
-#next-label{font-size:9px;font-weight:700;letter-spacing:1px;color:#555;padding:6px 8px 4px;border-bottom:1px solid #1e1e1e;flex-shrink:0;text-transform:uppercase}
-#next-img-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden}
+#next-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0d0d0d;min-width:0;cursor:pointer;touch-action:manipulation}
+#next-label{font-size:9px;font-weight:700;letter-spacing:1px;color:#555;padding:6px 8px 4px;border-bottom:1px solid #1e1e1e;flex-shrink:0;text-transform:uppercase;pointer-events:none}
+#next-img-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden;pointer-events:none}
 #next-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;display:block}
 #upload-status{font-size:11px;color:#aaa;text-align:center;padding:3px 12px;min-height:18px;flex-shrink:0;background:#1a1a1a;border-top:1px solid #222}
-#strip-wrap{height:90px;background:#151515;border-top:1px solid #222;flex-shrink:0;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;padding:8px 10px;gap:8px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#333 transparent}
-#strip-wrap::-webkit-scrollbar{height:3px}
-#strip-wrap::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
-.s-thumb{flex-shrink:0;cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid #2a2a2a;transition:border-color .1s;position:relative;height:66px;aspect-ratio:16/9}
+#strip-handle{height:6px;background:#222;cursor:row-resize;border-top:1px solid #333;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+#strip-handle::after{content:'';width:36px;height:2px;background:#444;border-radius:1px}
+#strip-wrap{height:90px;background:#151515;flex-shrink:0;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;padding:8px 10px;gap:8px;-webkit-overflow-scrolling:touch;scrollbar-width:auto;scrollbar-color:#555 #222}
+#strip-wrap::-webkit-scrollbar{height:6px}
+#strip-wrap::-webkit-scrollbar-track{background:#222}
+#strip-wrap::-webkit-scrollbar-thumb{background:#555;border-radius:3px}
+.s-thumb{flex-shrink:0;cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid #2a2a2a;transition:border-color .1s;position:relative;height:var(--thumb-h,66px);aspect-ratio:16/9;touch-action:manipulation}
 .s-thumb.cur{border-color:#43a047}
 .s-thumb img{width:100%;height:100%;object-fit:cover;display:block;background:#000}
 .s-num{position:absolute;bottom:2px;right:3px;font-size:9px;font-weight:700;background:rgba(0,0,0,.65);color:#fff;border-radius:2px;padding:1px 3px;pointer-events:none}
 #botbar{display:flex;align-items:center;padding:8px 10px;background:#1a1a1a;border-top:1px solid #222;gap:8px;flex-shrink:0}
-.nav-btn{background:#2a2a2a;border:1px solid #333;color:#fff;border-radius:10px;padding:10px;font-size:22px;cursor:pointer;flex:1;text-align:center;transition:background .15s;line-height:1}
+.nav-btn{background:#2a2a2a;border:1px solid #333;color:#fff;border-radius:10px;padding:10px;font-size:22px;cursor:pointer;flex:1;text-align:center;transition:background .15s;line-height:1;touch-action:manipulation}
 .nav-btn:active{background:#3a3a3a}
 </style>
 </head>
@@ -4004,23 +4015,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div id="blanked-badge">BLANKED</div>
     <div id="btns">
       <button class="icon-btn" id="blank-btn" onclick="toggleBlank()">Blank</button>
-      <button class="icon-btn" id="play-btn" onclick="togglePlay()">▶ Play</button>
+      <button class="icon-btn" id="play-btn" onclick="togglePlay()">Auto ▶ 5s</button>
       <button class="icon-btn" id="upload-btn" onclick="document.getElementById('upload-input').click()">⬆ Upload</button>
       <input type="file" id="upload-input" accept=".pdf,.ppt,.pptx,.key" style="display:none">
     </div>
   </div>
-  <div id="not-live-bar" onclick="goLive()">Presentation not on screen — Tap to Go Live ▶</div>
+  <div id="not-live-bar">⚠ Presentation not on screen — enable from the desktop app</div>
   <div id="slides-area">
     <div id="cur-wrap">
       <img id="cur-img" alt="" draggable="false">
       <div id="blanked-overlay"><span>BLANKED</span></div>
     </div>
-    <div id="next-wrap">
+    <div id="next-wrap" onclick="goSlide(state.index+1)">
       <div id="next-label">Next Slide</div>
       <div id="next-img-wrap"><img id="next-img" alt="" draggable="false"></div>
     </div>
   </div>
   <div id="upload-status"></div>
+  <div id="strip-handle"></div>
   <div id="strip-wrap"></div>
   <div id="botbar">
     <button class="nav-btn" onclick="goSlide(state.index-1)">‹</button>
@@ -4028,7 +4040,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 <script>
-let state={id:'',index:0,total:0,frozen:false,isPlaying:false,isLive:false};
+let state={id:'',index:0,total:0,frozen:false,isPlaying:false,isLive:false,autoScrollInterval:5};
 let password=sessionStorage.getItem('remote_pw')||'';
 const headers={'Content-Type':'application/json'};
 if(password)headers['X-Presentation-Password']=password;
@@ -4062,7 +4074,7 @@ function updateUI(){
   document.getElementById('blanked-badge').style.display=state.frozen?'inline-block':'none';
   document.getElementById('blanked-overlay').style.display=state.frozen?'flex':'none';
   const pb=document.getElementById('play-btn');
-  pb.classList.toggle('active-play',state.isPlaying);pb.textContent=state.isPlaying?'⏸ Pause':'▶ Play';
+  pb.classList.toggle('active-play',state.isPlaying);pb.textContent=state.isPlaying?('⏸ Auto '+state.autoScrollInterval+'s'):('Auto ▶ '+state.autoScrollInterval+'s');
   document.getElementById('not-live-bar').style.display=(state.total>0&&!state.isLive)?'block':'none';
   if(state.id){
     document.getElementById('cur-img').src=slideUrl(state.index);
@@ -4091,15 +4103,7 @@ function startPollingForEnable(){
   (async function poll(){
     try{
       const r=await fetch('/api/presentation-remote/status');const d=await r.json();
-      if(d.enabled){
-        if(!d.passwordRequired){
-          state={...state,...d};
-          document.getElementById('login').style.display='none';
-          document.getElementById('app').style.display='flex';
-          stripBuilt=false;updateUI();startWs();setInterval(fetchStatus,2500);
-        }else{location.reload();}
-        return;
-      }
+      if(d.enabled){location.reload();return;}
     }catch(_){}
     setTimeout(poll,3000);
   })();
@@ -4119,7 +4123,6 @@ async function post(path){try{return await fetch(path,{method:'POST',headers});}
 function toggleBlank(){state.frozen=!state.frozen;updateUI();post('/api/presentation-remote/freeze');}
 function togglePlay(){post('/api/presentation-remote/play-pause');}
 function goSlide(i){if(i<0||i>=state.total)return;post('/api/presentation-remote/goto/'+i);}
-function goLive(){post('/api/presentation-remote/go-live');}
 document.getElementById('upload-input').addEventListener('change',async function(){
   const file=this.files[0];if(!file)return;
   const btn=document.getElementById('upload-btn');const status=document.getElementById('upload-status');
@@ -4141,6 +4144,17 @@ document.getElementById('cur-wrap').addEventListener('touchend',e=>{
   const dx=e.changedTouches[0].clientX-touchX;
   if(Math.abs(dx)>50){dx<0?goSlide(state.index+1):goSlide(state.index-1);}
 },{passive:true});
+let stripResizing=false,stripY0=0,stripH0=0;
+const sh=document.getElementById('strip-handle');
+const sw=document.getElementById('strip-wrap');
+function onSRStart(y){stripResizing=true;stripY0=y;stripH0=sw.offsetHeight;}
+function onSRMove(y){if(!stripResizing)return;const dh=stripY0-y;const newH=Math.max(52,Math.min(260,stripH0+dh));sw.style.height=newH+'px';sw.style.setProperty('--thumb-h',Math.max(36,newH-24)+'px');}
+sh.addEventListener('mousedown',e=>{onSRStart(e.clientY);e.preventDefault();});
+document.addEventListener('mousemove',e=>{onSRMove(e.clientY);});
+document.addEventListener('mouseup',()=>{stripResizing=false;});
+sh.addEventListener('touchstart',e=>{onSRStart(e.touches[0].clientY);},{passive:true});
+document.addEventListener('touchmove',e=>{if(stripResizing){onSRMove(e.touches[0].clientY);e.preventDefault();}},{passive:false});
+document.addEventListener('touchend',()=>{stripResizing=false;});
 function startWs(){
   const proto=location.protocol==='https:'?'wss':'ws';
   const ws=new WebSocket(proto+'://'+location.host+'/ws');
@@ -4155,6 +4169,8 @@ function startWs(){
         updateUI();
       }else if(msg.type==='presentation_freeze_changed'){
         const d=JSON.parse(msg.payload);state={...state,frozen:d.frozen};updateUI();
+      }else if(msg.type==='presentation_live_changed'){
+        const d=JSON.parse(msg.payload);state={...state,isLive:d.isLive};updateUI();
       }
     }catch(_){}
   };
