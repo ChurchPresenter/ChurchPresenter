@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
@@ -71,6 +72,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -81,6 +83,8 @@ import androidx.compose.ui.layout.ContentScale
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
@@ -131,6 +135,7 @@ import churchpresenter.composeapp.generated.resources.qa_downloading_tunnel
 import churchpresenter.composeapp.generated.resources.qa_enable_public_access
 import churchpresenter.composeapp.generated.resources.qa_disable_public_access
 import churchpresenter.composeapp.generated.resources.qa_local
+import churchpresenter.composeapp.generated.resources.qa_no_password
 import churchpresenter.composeapp.generated.resources.qa_public
 import churchpresenter.composeapp.generated.resources.qa_public_access
 import churchpresenter.composeapp.generated.resources.qa_public_access_description
@@ -940,10 +945,11 @@ fun PresentationTab(
 
                 if (isServerRunning) {
                     // QR code
+                    val qrDisplayUrl = "$qrBaseUrl/presentation-remote"
                     val qrUrl = run {
                         val pw = appSettings.presentationRemoteSettings.remotePassword
-                        if (pw.isNotEmpty()) "$qrBaseUrl/presentation-remote?password=$pw"
-                        else "$qrBaseUrl/presentation-remote"
+                        if (pw.isNotEmpty()) "$qrDisplayUrl?password=$pw"
+                        else qrDisplayUrl
                     }
 
                     val qrBitmap = remember(qrUrl) { generateQRCodeBitmap(qrUrl, 180) }
@@ -965,7 +971,7 @@ fun PresentationTab(
                     Spacer(Modifier.height(4.dp))
                     SelectionContainer {
                         Text(
-                            qrUrl,
+                            qrDisplayUrl,
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
                             color = MaterialTheme.colorScheme.primary,
                             maxLines = 3,
@@ -1071,16 +1077,45 @@ fun PresentationTab(
                     Spacer(Modifier.height(12.dp))
 
                     // Password
-                    OutlinedTextField(
-                        value = appSettings.presentationRemoteSettings.remotePassword,
-                        onValueChange = { pw ->
-                            onSettingsChange { s -> s.copy(presentationRemoteSettings = s.presentationRemoteSettings.copy(remotePassword = pw)) }
-                        },
-                        label = { Text(stringResource(Res.string.presentation_remote_password_hint)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    )
+                    var passwordVisible by remember { mutableStateOf(false) }
+                    Text(stringResource(Res.string.presentation_remote_password_hint), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    Spacer(Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(42.dp)
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                            BasicTextField(
+                                value = appSettings.presentationRemoteSettings.remotePassword,
+                                onValueChange = { pw ->
+                                    onSettingsChange { s -> s.copy(presentationRemoteSettings = s.presentationRemoteSettings.copy(remotePassword = pw)) }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                decorationBox = { innerTextField ->
+                                    if (appSettings.presentationRemoteSettings.remotePassword.isEmpty()) {
+                                        Text(stringResource(Res.string.qa_no_password), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
+                                    }
+                                    innerTextField()
+                                }
+                            )
+                        }
+                        FilledIconButton(onClick = { passwordVisible = !passwordVisible }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 } else {
                     Text(
                         stringResource(Res.string.presentation_server_not_running),

@@ -28,7 +28,7 @@ data class QASettings(
     val qrBackgroundOpacity: Int = 100,
 )
 
-private fun generateDefaultPassword(): String {
+internal fun generateDefaultPassword(): String {
     val chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"
     return (1..6).map { chars.random() }.joinToString("")
 }

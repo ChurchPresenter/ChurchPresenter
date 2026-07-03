@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.data
 import java.io.File
 import kotlinx.serialization.decodeFromString
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.generateDefaultPassword
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
@@ -42,7 +43,7 @@ class SettingsManager {
                 val migrated = migrateProjectionSettings(migrateScreenAssignmentModes(raw))
                 try {
                     val settings = jsonFormat.decodeFromString<AppSettings>(migrated)
-                    migrateHiddenTabs(settings, raw)
+                    migrateEmptyPasswords(migrateHiddenTabs(settings, raw))
                 } catch (e: Exception) {
                     AppSettings()
                 }
@@ -67,6 +68,22 @@ class SettingsManager {
         if ("\"sttSettings\"" !in raw && "STT" !in result.hiddenTabs) {
             result = result.copy(hiddenTabs = result.hiddenTabs + "STT")
         }
+        return result
+    }
+
+    /** Ensures existing users with a blank Q&A admin or presentation remote password get a generated one. */
+    private fun migrateEmptyPasswords(settings: AppSettings): AppSettings {
+        var result = settings
+        var changed = false
+        if (result.qaSettings.adminPassword.isEmpty()) {
+            result = result.copy(qaSettings = result.qaSettings.copy(adminPassword = generateDefaultPassword()))
+            changed = true
+        }
+        if (result.presentationRemoteSettings.remotePassword.isEmpty()) {
+            result = result.copy(presentationRemoteSettings = result.presentationRemoteSettings.copy(remotePassword = generateDefaultPassword()))
+            changed = true
+        }
+        if (changed) saveSettings(result)
         return result
     }
 
