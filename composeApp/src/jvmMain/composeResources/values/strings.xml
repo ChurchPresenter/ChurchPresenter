@@ -533,6 +533,7 @@
     <string name="presentation_remote_enable">Enable Remote Control</string>
     <string name="presentation_freeze_output">Blank Output</string>
     <string name="presentation_unfreeze_output">Unblank Output</string>
+    <string name="presentation_clear">Clear Presentation</string>
     <string name="presentation_remote_password_hint">Remote password (optional)</string>
     <string name="presentation_remote_copy_url">Copy URL</string>
     <string name="select_presentation_file_dialog">Select Presentation File</string>

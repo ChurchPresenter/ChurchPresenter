@@ -1200,6 +1200,9 @@ fun main() {
                                         companionServer.broadcastFreezeChange(presentationFrozen)
                                         presenterManager.setSlideFrozen(presentationFrozen)
                                     },
+                                    onClearPresentation = {
+                                        companionServer.clearPresentationState()
+                                    },
                                     onOpenLottieGen = { outputDir, onSaved ->
                                         if (outputDir.isNotEmpty() && java.io.File(outputDir).isDirectory) {
                                             lottieGenOutputDir = java.io.File(outputDir)

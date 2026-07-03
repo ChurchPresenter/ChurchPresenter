@@ -208,6 +208,7 @@ fun MainDesktop(
     onPresentationDisplayUrlChanged: (String) -> Unit = {},
     presentationFrozen: Boolean = false,
     onFreezeToggle: () -> Unit = {},
+    onClearPresentation: () -> Unit = {},
     onSlideChanged: ((id: String, slideIndex: Int, total: Int, isPlaying: Boolean) -> Unit)? = null,
     remotePresentationPlayPauseFlow: kotlinx.coroutines.flow.Flow<Unit>? = null,
     remotePresentationGotoFlow: kotlinx.coroutines.flow.Flow<Int>? = null,
@@ -1221,7 +1222,8 @@ fun MainDesktop(
                                 onStartTunnel = onStartTunnel,
                                 onStopTunnel = onStopTunnel,
                                 presentationFrozen = presentationFrozen,
-                                onFreezeToggle = onFreezeToggle
+                                onFreezeToggle = onFreezeToggle,
+                                onClearPresentation = onClearPresentation
                             )
 
                             Tabs.MEDIA -> MediaTab(

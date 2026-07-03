@@ -109,6 +109,7 @@ import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.pictures_arrow_key_hint
 import churchpresenter.composeapp.generated.resources.play
+import churchpresenter.composeapp.generated.resources.presentation_clear
 import churchpresenter.composeapp.generated.resources.presentation_freeze_output
 import churchpresenter.composeapp.generated.resources.presentation_remote_control
 import churchpresenter.composeapp.generated.resources.presentation_remote_copy_url
@@ -253,7 +254,8 @@ fun PresentationTab(
     onStartTunnel: () -> Unit = {},
     onStopTunnel: () -> Unit = {},
     presentationFrozen: Boolean = false,
-    onFreezeToggle: () -> Unit = {}
+    onFreezeToggle: () -> Unit = {},
+    onClearPresentation: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
 
@@ -885,29 +887,14 @@ fun PresentationTab(
                     )
                 }
 
-                if (presenterManager != null) {
-                    OutlinedButton(
-                        onClick = onFreezeToggle,
-                        enabled = viewModel.slideFiles.isNotEmpty(),
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = if (presentationFrozen)
-                            ButtonDefaults.outlinedButtonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                        else ButtonDefaults.outlinedButtonColors()
-                    ) {
-                        Icon(
-                            if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
+                OutlinedButton(
+                    onClick = { viewModel.clearPresentations(); onClearPresentation() },
+                    enabled = viewModel.slideFiles.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Icon(painterResource(Res.drawable.ic_close), contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(stringResource(Res.string.presentation_clear), modifier = Modifier.padding(start = 8.dp))
                 }
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

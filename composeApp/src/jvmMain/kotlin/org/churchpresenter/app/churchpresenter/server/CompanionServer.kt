@@ -609,7 +609,26 @@ class CompanionServer {
         presentationRemotePassword = settings.remotePassword
     }
 
-    fun updateAutoScrollInterval(secs: Int) { _autoScrollInterval = secs }
+    fun updateAutoScrollInterval(secs: Int) {
+        if (_autoScrollInterval == secs) return
+        _autoScrollInterval = secs
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_PRESENTATION_AUTO_SCROLL_CHANGED,
+            payload = """{"autoScrollInterval":$secs}"""
+        ))
+    }
+
+    fun clearPresentationState() {
+        _currentPresentationId = ""
+        _currentSlideIndex = 0
+        _currentSlideTotalCount = 0
+        _presentationIsPlaying = false
+        _presentationIsLive = false
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
+            payload = """{"id":"","index":0,"total":0,"isPlaying":false,"isLive":false}"""
+        ))
+    }
 
     fun updatePresentationLiveStatus(isLive: Boolean) {
         if (_presentationIsLive == isLive) return
@@ -3995,7 +4014,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 #strip-wrap::-webkit-scrollbar-thumb{background:#555;border-radius:3px}
 .s-thumb{flex-shrink:0;cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid #2a2a2a;transition:border-color .1s;position:relative;height:var(--thumb-h,66px);aspect-ratio:16/9;touch-action:manipulation}
 .s-thumb.cur{border-color:#43a047}
-.s-thumb img{width:100%;height:100%;object-fit:cover;display:block;background:#000}
+.s-thumb img{width:100%;height:100%;object-fit:contain;display:block;background:#000}
 .s-num{position:absolute;bottom:2px;right:3px;font-size:9px;font-weight:700;background:rgba(0,0,0,.65);color:#fff;border-radius:2px;padding:1px 3px;pointer-events:none}
 #botbar{display:flex;align-items:center;padding:8px 10px;background:#1a1a1a;border-top:1px solid #222;gap:8px;flex-shrink:0}
 .nav-btn{background:#484848;border:1px solid #6a6a6a;color:#fff;border-radius:10px;padding:10px;font-size:22px;font-weight:700;cursor:pointer;flex:1;text-align:center;transition:background .15s;line-height:1;touch-action:manipulation}
@@ -4101,7 +4120,7 @@ async function fetchStatus(){
   try{
     const r=await fetch('/api/presentation-remote/status');const d=await r.json();
     if(!d.enabled){showDisabled();return;}
-    const changed=d.id!==state.id||d.index!==state.index||d.total!==state.total||d.frozen!==state.frozen||d.isPlaying!==state.isPlaying||d.isLive!==state.isLive;
+    const changed=d.id!==state.id||d.index!==state.index||d.total!==state.total||d.frozen!==state.frozen||d.isPlaying!==state.isPlaying||d.isLive!==state.isLive||d.autoScrollInterval!==state.autoScrollInterval;
     state={...state,...d};if(changed)updateUI();
   }catch(e){}
 }
@@ -4181,6 +4200,8 @@ function startWs(){
         updateUI();
       }else if(msg.type==='presentation_freeze_changed'){
         const d=JSON.parse(msg.payload);state={...state,frozen:d.frozen};updateUI();
+      }else if(msg.type==='presentation_auto_scroll_changed'){
+        const d=JSON.parse(msg.payload);state={...state,autoScrollInterval:d.autoScrollInterval};updateUI();
       }else if(msg.type==='presentation_live_changed'){
         const d=JSON.parse(msg.payload);state={...state,isLive:d.isLive};updateUI();
       }
