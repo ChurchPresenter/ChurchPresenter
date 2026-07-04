@@ -135,91 +135,21 @@
     <string name="right">Vpravo</string>
     <string name="song_files">Soubory písní</string>
     <string name="storage_directory">Adresář úložiště</string>
-    <string name="browse">Procházet</string>
     <string name="import_song_file">Importovat soubor písně</string>
     <string name="remove_song_file">Odebrat soubor písně</string>
     <string name="word_wrap">Zalamování řádků</string>
     <string name="position">Pozice:</string>
     <string name="color">Barva</string>
-    <string name="show_on_first_page">Zobrazit pouze na první straně</string>
 
     <!-- Bible Settings Strings -->
-    <string name="bible_book_directory">Adresář biblických knih</string>
     <string name="primary_bible">Primární Bible</string>
     <string name="secondary_bible">Sekundární Bible</string>
     <string name="primary_bible_reference">Primární biblický odkaz</string>
     <string name="secondary_bible_reference">Sekundární biblický odkaz</string>
-    <string name="show_book_abbreviation">Zobrazit zkratku knihy</string>
     <string name="caption_language">Jazyk titulků</string>
     <string name="language_source">Zdroj jazyka:</string>
 
     <!-- Bible Books -->
-    <string name="genesis">Genesis</string>
-    <string name="exodus">Exodus</string>
-    <string name="leviticus">Leviticus</string>
-    <string name="numbers">Numeri</string>
-    <string name="deuteronomy">Deuteronomium</string>
-    <string name="joshua">Jozue</string>
-    <string name="judges">Soudců</string>
-    <string name="ruth">Rút</string>
-    <string name="1_samuel">1. Samuelova</string>
-    <string name="2_samuel">2. Samuelova</string>
-    <string name="1_kings">1. Královská</string>
-    <string name="2_kings">2. Královská</string>
-    <string name="1_chronicles">1. Paralipomenon</string>
-    <string name="2_chronicles">2. Paralipomenon</string>
-    <string name="ezra">Ezdráš</string>
-    <string name="nehemiah">Nehemiáš</string>
-    <string name="esther">Ester</string>
-    <string name="job">Jób</string>
-    <string name="psalms">Žalmy</string>
-    <string name="proverbs">Přísloví</string>
-    <string name="ecclesiastes">Kazatel</string>
-    <string name="song_of_solomon">Píseň písní</string>
-    <string name="isaiah">Izaiáš</string>
-    <string name="jeremiah">Jeremiáš</string>
-    <string name="lamentations">Pláč Jeremiášův</string>
-    <string name="ezekiel">Ezechiel</string>
-    <string name="daniel">Daniel</string>
-    <string name="hosea">Ozeáš</string>
-    <string name="joel">Joel</string>
-    <string name="amos">Ámos</string>
-    <string name="obadiah">Abdiáš</string>
-    <string name="jonah">Jonáš</string>
-    <string name="micah">Micheáš</string>
-    <string name="nahum">Nahum</string>
-    <string name="habakkuk">Abakuk</string>
-    <string name="zephaniah">Sofoniáš</string>
-    <string name="haggai">Aggeus</string>
-    <string name="zechariah">Zachariáš</string>
-    <string name="malachi">Malachiáš</string>
-    <string name="matthew">Matouš</string>
-    <string name="mark">Marek</string>
-    <string name="luke">Lukáš</string>
-    <string name="john">Jan</string>
-    <string name="acts">Skutky apoštolů</string>
-    <string name="romans">Římanům</string>
-    <string name="1_corinthians">1. Korintským</string>
-    <string name="2_corinthians">2. Korintským</string>
-    <string name="galatians">Galatským</string>
-    <string name="ephesians">Efezským</string>
-    <string name="philippians">Filipským</string>
-    <string name="colossians">Koloským</string>
-    <string name="1_thessalonians">1. Tesalonickým</string>
-    <string name="2_thessalonians">2. Tesalonickým</string>
-    <string name="1_timothy">1. Timoteovi</string>
-    <string name="2_timothy">2. Timoteovi</string>
-    <string name="titus">Titovi</string>
-    <string name="philemon">Filemonovi</string>
-    <string name="hebrews">Židům</string>
-    <string name="james">Jakub</string>
-    <string name="1_peter">1. Petrův</string>
-    <string name="2_peter">2. Petrův</string>
-    <string name="1_john">1. Janův</string>
-    <string name="2_john">2. Janův</string>
-    <string name="3_john">3. Janův</string>
-    <string name="jude">Judův</string>
-    <string name="revelation">Zjevení</string>
 
     <string name="light_theme">Světlý motiv</string>
     <string name="dark_theme">Tmavý motiv</string>
@@ -266,7 +196,6 @@
     <string name="tooltip_note">Poznámka</string>
     <string name="tooltip_note_done">Uložit poznámku</string>
     <string name="tooltip_note_clear">Vymazat poznámku</string>
-    <string name="tooltip_save_as_schedule">Uložit program jako</string>
     <string name="tooltip_move_to_top">Přesunout nahoru</string>
     <string name="tooltip_move_up">Posunout nahoru</string>
     <string name="tooltip_move_down">Posunout dolů</string>
@@ -280,13 +209,10 @@
     <string name="edit_song">Upravit píseň</string>
     <string name="save">Uložit</string>
     <string name="song_title">Název písně</string>
-    <string name="song_lyrics">Text písně</string>
     <string name="author">Autor</string>
     <string name="composer">Skladatel</string>
 
     <!-- Presenter Window -->
-    <string name="presenter">Prezenter</string>
-    <string name="no_content">Žádný obsah k zobrazení</string>
 
     <!-- Label Strings -->
     <string name="add_label">Přidat štítek</string>
@@ -885,7 +811,6 @@
     <string name="web_go_live">Zobrazit živě</string>
     <string name="web_live_badge">ŽIVĚ</string>
     <string name="web_preview_hint">Zadejte URL výše a klepněte na Zobrazit živě</string>
-    <string name="web_preview_label">Náhled</string>
     <string name="web_under_construction">Tato funkce je ve vývoji.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -1235,7 +1160,6 @@
     <string name="stage_monitor_show_clock">Zobrazit hodiny</string>
     <string name="stage_monitor_show_timer">Zobrazit odpočítávání</string>
     <string name="stage_monitor_show_section_label">Zobrazit popisek sekce</string>
-    <string name="stage_monitor_show_label">Zobrazit popisek písně/Bible</string>
     <string name="stage_monitor_show_notes">Zobrazit poznámky moderátora</string>
     <string name="general">Obecné</string>
     <string name="stage_monitor_text_color">Barva textu</string>
@@ -1247,12 +1171,8 @@
     <string name="stage_monitor_layout_quadrants">Rozložení do 4 kvadrantů</string>
     <string name="stage_monitor_quadrant_current">Vlevo nahoře: aktuální snímek</string>
     <string name="stage_monitor_quadrant_next">Vlevo dole: další snímek</string>
-    <string name="stage_monitor_quadrant_timer">Vpravo nahoře: odpočítávání</string>
     <string name="stage_monitor_quadrant_clock">Dole uprostřed: hodiny</string>
     <string name="stage_monitor_quadrant_notes">Vpravo dole: poznámky moderátora</string>
-    <string name="stage_monitor_label_style_section">Styl popisku</string>
-    <string name="stage_monitor_clock_show_seconds">Zobrazit sekundy</string>
-    <string name="stage_monitor_clock_24h">24hodinový formát</string>
     <string name="stage_monitor_no_extra_displays">Žádný sekundární displej nebyl zjištěn. Připojte další monitor pro použití monitoru scény.</string>
     <string name="stage_monitor_layout_section">Rozvržení obrazovky</string>
     <string name="stage_monitor_zone_top_left">Vlevo nahoře</string>

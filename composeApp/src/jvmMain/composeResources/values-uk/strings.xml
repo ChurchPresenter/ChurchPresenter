@@ -403,15 +403,10 @@
     <string name="screen">Екран</string>
     <string name="projection_position_help">Значення положення задають зміщення в пікселях від країв екрана. Використовуйте їх для налаштування положення вікна проекції на додаткових дисплеях.</string>
     <string name="screen_assignment">Призначення екрану</string>
-    <string name="screen_1">Екран 1</string>
-    <string name="screen_2">Екран 2</string>
-    <string name="screen_3">Екран 3</string>
-    <string name="screen_4">Екран 4</string>
     <string name="content_bible">Біблія</string>
     <string name="content_songs">Пісні</string>
     <string name="content_announcements">Оголошення</string>
     <string name="content_media">Медіа</string>
-    <string name="content_presentations">Презентації</string>
     <string name="display_lower_third">Нижня третина</string>
 
     <!-- Background Settings Tab -->
@@ -779,7 +774,6 @@
     <string name="web_go_live">В ефір</string>
     <string name="web_live_badge">ЕФІР</string>
     <string name="web_preview_hint">Введіть URL вище та натисніть «В ефір»</string>
-    <string name="web_preview_label">Попередній перегляд</string>
     <string name="web_under_construction">Ця функція в розробці.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -1135,7 +1129,6 @@
     <string name="stage_monitor_show_clock">Показувати годинник</string>
     <string name="stage_monitor_show_timer">Показувати зворотній відлік</string>
     <string name="stage_monitor_show_section_label">Показувати мітку розділу</string>
-    <string name="stage_monitor_show_label">Показувати мітку пісні/Біблії</string>
     <string name="stage_monitor_show_notes">Показувати нотатки ведучого</string>
     <string name="general">Загальні</string>
     <string name="stage_monitor_text_color">Колір тексту</string>
@@ -1147,12 +1140,8 @@
     <string name="stage_monitor_layout_quadrants">Розмітка на 4 частини</string>
     <string name="stage_monitor_quadrant_current">Верх-ліво: поточний слайд</string>
     <string name="stage_monitor_quadrant_next">Низ-ліво: наступний слайд</string>
-    <string name="stage_monitor_quadrant_timer">Верх-право: зворотній відлік</string>
     <string name="stage_monitor_quadrant_clock">Низ-центр: годинник</string>
     <string name="stage_monitor_quadrant_notes">Низ-право: нотатки ведучого</string>
-    <string name="stage_monitor_label_style_section">Стиль мітки</string>
-    <string name="stage_monitor_clock_show_seconds">Показувати секунди</string>
-    <string name="stage_monitor_clock_24h">24-годинний формат</string>
     <string name="stage_monitor_no_extra_displays">Додаткові монітори не виявлено. Підключіть додатковий монітор для використання монітора сцени.</string>
     <string name="stage_monitor_layout_section">Розкладка екрана</string>
     <string name="stage_monitor_zone_top_left">Вгорі зліва</string>
