@@ -75,6 +75,17 @@ class PresenterManager {
         _screenLocks.value = updated
     }
 
+    // Per-Browser-Source-output lock: separate index space from _screenLocks since
+    // ProjectionSettings.browserSourceOutputs has its own independent 0-based indices.
+    private val _browserSourceLocks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
+    val browserSourceLocks: State<Map<Int, Presenting>> = _browserSourceLocks
+
+    fun setBrowserSourceLock(index: Int, mode: Presenting?) {
+        val updated = _browserSourceLocks.value.toMutableMap()
+        if (mode == null) updated.remove(index) else updated[index] = mode
+        _browserSourceLocks.value = updated
+    }
+
     private val _lyricSection = mutableStateOf(LyricSection())
     val lyricSection: State<LyricSection> = _lyricSection
 

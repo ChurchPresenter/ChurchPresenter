@@ -218,6 +218,7 @@ fun OptionsDialog(
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 },
+                                companionServer = companionServer,
                                 onIdentifyScreen = { onIdentifyScreen() },
                                 scenes = scenes
                             )

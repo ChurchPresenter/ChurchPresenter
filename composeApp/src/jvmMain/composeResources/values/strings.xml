@@ -577,6 +577,16 @@
     <string name="projection_auto_display">Auto</string>
     <string name="projection_display_label">Display %1$d (%2$dx%3$d)</string>
 
+    <!-- Browser Source Outputs (OBS/vMix overlay) -->
+    <string name="browser_source_outputs">Browser Source Outputs</string>
+    <string name="browser_source_outputs_help">Virtual outputs served as a web page — paste the URL into an OBS/vMix Browser Source to overlay live content, transparent background supported.</string>
+    <string name="add_browser_source_output">Add Output</string>
+    <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_require_api_key">Require API Key</string>
+    <string name="browser_source_uses_server_api_key">Uses the same key as Server settings; enable there first.</string>
+    <string name="copy_url_transparent">Copy URL (Transparent)</string>
+    <string name="copy_url_black_bg">Copy URL (Black BG)</string>
+
     <!-- Background Settings Tab -->
     <string name="default_background_color">Default Background</string>
     <string name="default_background_color_help">Used when 'Default' is selected for Bible or Songs</string>
@@ -982,6 +992,7 @@
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Change port before starting the server.</string>
     <string name="api_key_protection">API Key Protection</string>
+    <string name="browser_source_note_in_server_settings">Individual Browser Source outputs (Projection settings) can independently require this key.</string>
     <string name="allow_file_upload">Allow File Upload</string>
     <string name="allow_file_upload_description">Allow mobile devices to upload files (photos and presentations) to this computer.</string>
     <string name="api_key_label">API Key</string>

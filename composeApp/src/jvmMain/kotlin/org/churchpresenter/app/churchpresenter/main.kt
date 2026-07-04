@@ -41,6 +41,9 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.key as composeKey
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.DpSize
@@ -85,6 +88,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialog
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
+import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
@@ -394,6 +398,37 @@ fun main() {
         val presentingModeValue = presenterManager.presentingMode.value
         LaunchedEffect(presentingModeValue) {
             companionServer.updatePresentationLiveStatus(presentingModeValue == Presenting.PRESENTATION)
+        }
+        // ── Browser Source outputs (OBS/vMix overlay) ─────────────────────────────
+        // Each output gets its own off-screen renderer (BrowserSourceVideoRenderer) that
+        // renders the same BiblePresenter/SongPresenter/AnnouncementsPresenter/PicturePresenter/
+        // StageMonitorScreen composables used everywhere else, streamed to CompanionServer as
+        // PNG frames — pixel-identical to the native output, no separate styling logic to
+        // maintain. PresenterManager itself never leaves this scope; only each renderer's
+        // frame flow crosses into CompanionServer.
+        LaunchedEffect(appSettings.projectionSettings.browserSourceOutputs) {
+            companionServer.updateBrowserSourceOutputs(appSettings.projectionSettings.browserSourceOutputs)
+        }
+        appSettings.projectionSettings.browserSourceOutputs.indices.forEach { i ->
+            composeKey(i) {
+                val appSettingsState = remember { derivedStateOf { appSettings } }
+                val screenAssignmentState = remember {
+                    derivedStateOf { appSettings.projectionSettings.browserSourceOutputs.getOrNull(i) ?: ScreenAssignment() }
+                }
+                val effectiveModeState = remember {
+                    derivedStateOf { presenterManager.browserSourceLocks.value[i] ?: presenterManager.presentingMode.value }
+                }
+                val renderer = remember(i) {
+                    BrowserSourceVideoRenderer(presenterManager, appSettingsState, screenAssignmentState, effectiveModeState)
+                }
+                LaunchedEffect(renderer) {
+                    renderer.start(this)
+                    companionServer.registerBrowserSourceFrames(i, renderer.frames)
+                }
+                DisposableEffect(renderer) {
+                    onDispose { renderer.stop() }
+                }
+            }
         }
         LaunchedEffect(Unit) {
             companionServer.onPresentationGoLive.collect {

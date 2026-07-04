@@ -3,9 +3,11 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,9 +40,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,13 +53,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.add_browser_source_output
 import churchpresenter.composeapp.generated.resources.audio_output
 import churchpresenter.composeapp.generated.resources.audio_output_default
 import churchpresenter.composeapp.generated.resources.audio_output_device
 import churchpresenter.composeapp.generated.resources.bottom
+import churchpresenter.composeapp.generated.resources.browser_source_outputs
+import churchpresenter.composeapp.generated.resources.browser_source_outputs_help
+import churchpresenter.composeapp.generated.resources.browser_source_output_label
+import churchpresenter.composeapp.generated.resources.browser_source_require_api_key
+import churchpresenter.composeapp.generated.resources.browser_source_uses_server_api_key
+import churchpresenter.composeapp.generated.resources.copy_url_transparent
+import churchpresenter.composeapp.generated.resources.copy_url_black_bg
+import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.content_announcements
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.content_bible
@@ -111,6 +125,7 @@ import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
@@ -121,6 +136,7 @@ import kotlin.io.path.absolutePathString
 fun ProjectionSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    companionServer: CompanionServer,
     onIdentifyScreen: () -> Unit = {},
     scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList()
 ) {
@@ -242,6 +258,52 @@ fun ProjectionSettingsTab(
         options.toList()
     }
 
+    // Content-type columns — shared by the per-hardware Screen Assignment grid (Card 1)
+    // and the per-output Browser Source checkboxes (Card 1.5).
+    val bibleLabel = stringResource(Res.string.content_bible)
+    val songsLabel = stringResource(Res.string.content_songs)
+    val picturesLabel = stringResource(Res.string.content_pictures)
+    val mediaLabel = stringResource(Res.string.content_media)
+    val streamingLabel = stringResource(Res.string.content_streaming)
+    val announcementsLabel = stringResource(Res.string.content_announcements)
+    val dictionaryLabel = stringResource(Res.string.tab_dictionary)
+    val songLaLabel = stringResource(Res.string.projection_content_song_la)
+
+    data class ContentCol(
+        val label: String,
+        val getter: (ScreenAssignment) -> Boolean,
+        val setter: (ScreenAssignment, Boolean) -> ScreenAssignment,
+        val enabled: (ScreenAssignment) -> Boolean = { true },
+        val tooltip: String? = null
+    )
+
+    val songLaTooltip = stringResource(Res.string.projection_content_song_la_tooltip)
+    val contentCols = listOf(
+        ContentCol(songLaLabel, { it.songLookAhead }, { a, v ->
+            if (v) a.copy(songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode, songLookAhead = true)
+            else a.copy(songLookAhead = false)
+        }, enabled = { it.songMode != Constants.SONG_LANG_OFF }, tooltip = songLaTooltip),
+        ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
+        ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
+        ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),
+        ContentCol(announcementsLabel, { it.showAnnouncements }, { a, v -> a.copy(showAnnouncements = v) }),
+        ContentCol("Web", { it.showWebsite }, { a, v -> a.copy(showWebsite = v) }),
+        ContentCol("Q&A", { it.showQA }, { a, v -> a.copy(showQA = v) }),
+        ContentCol("STT", { it.showSTT }, { a, v -> a.copy(showSTT = v) }),
+        ContentCol(dictionaryLabel, { it.showDictionary }, { a, v -> a.copy(showDictionary = v) }),
+        ContentCol("Background", { it.showFullscreenBackground }, { a, v -> a.copy(showFullscreenBackground = v) }),
+        ContentCol("Lower Third Background", { it.showLowerThirdBackground }, { a, v -> a.copy(showLowerThirdBackground = v) }),
+    )
+
+    val fullScreenLabel = stringResource(Res.string.display_fullscreen)
+    val lowerThirdLabel = stringResource(Res.string.display_lower_third)
+    val stageMonitorLabel = stringResource(Res.string.display_stage_monitor)
+    val displayModes = listOf(
+        fullScreenLabel to Constants.DISPLAY_MODE_FULLSCREEN,
+        lowerThirdLabel to Constants.DISPLAY_MODE_LOWER_THIRD,
+        stageMonitorLabel to Constants.DISPLAY_MODE_STAGE_MONITOR
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -291,62 +353,18 @@ fun ProjectionSettingsTab(
         val displayDropdownWidth = 100.dp
         val displayModeColWidth = 70.dp
 
-        val bibleLabel = stringResource(Res.string.content_bible)
-        val songsLabel = stringResource(Res.string.content_songs)
-        val picturesLabel = stringResource(Res.string.content_pictures)
-        val mediaLabel = stringResource(Res.string.content_media)
-        val streamingLabel = stringResource(Res.string.content_streaming)
-        val announcementsLabel = stringResource(Res.string.content_announcements)
-        val dictionaryLabel = stringResource(Res.string.tab_dictionary)
-        val fullScreenLabel = stringResource(Res.string.display_fullscreen)
-        val lowerThirdLabel = stringResource(Res.string.display_lower_third)
-        val stageMonitorLabel = stringResource(Res.string.display_stage_monitor)
-
         val offLabel = stringResource(Res.string.screen_lang_off)
         val bothLabel = stringResource(Res.string.song_language_both)
         val bible1Label = stringResource(Res.string.screen_lang_bible_1)
         val bible2Label = stringResource(Res.string.screen_lang_bible_2)
         val lang1Label = stringResource(Res.string.screen_lang_language_1)
         val lang2Label = stringResource(Res.string.screen_lang_language_2)
-        val songLaLabel = stringResource(Res.string.projection_content_song_la)
 
         val bibleLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to bible1Label, Constants.SONG_LANG_SECONDARY to bible2Label, Constants.SONG_LANG_BOTH to bothLabel)
         val songLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to lang1Label, Constants.SONG_LANG_SECONDARY to lang2Label, Constants.SONG_LANG_BOTH to bothLabel)
         val langDropdownWidth = 95.dp
 
         val cellWidth = 82.dp
-
-        data class ContentCol(
-            val label: String,
-            val getter: (ScreenAssignment) -> Boolean,
-            val setter: (ScreenAssignment, Boolean) -> ScreenAssignment,
-            val enabled: (ScreenAssignment) -> Boolean = { true },
-            val tooltip: String? = null
-        )
-
-        val songLaTooltip = stringResource(Res.string.projection_content_song_la_tooltip)
-        val contentCols = listOf(
-            ContentCol(songLaLabel, { it.songLookAhead }, { a, v ->
-                if (v) a.copy(songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode, songLookAhead = true)
-                else a.copy(songLookAhead = false)
-            }, enabled = { it.songMode != Constants.SONG_LANG_OFF }, tooltip = songLaTooltip),
-            ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
-            ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
-            ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),
-            ContentCol(announcementsLabel, { it.showAnnouncements }, { a, v -> a.copy(showAnnouncements = v) }),
-            ContentCol("Web", { it.showWebsite }, { a, v -> a.copy(showWebsite = v) }),
-            ContentCol("Q&A", { it.showQA }, { a, v -> a.copy(showQA = v) }),
-            ContentCol("STT", { it.showSTT }, { a, v -> a.copy(showSTT = v) }),
-            ContentCol(dictionaryLabel, { it.showDictionary }, { a, v -> a.copy(showDictionary = v) }),
-            ContentCol("Background", { it.showFullscreenBackground }, { a, v -> a.copy(showFullscreenBackground = v) }),
-            ContentCol("Lower Third Background", { it.showLowerThirdBackground }, { a, v -> a.copy(showLowerThirdBackground = v) }),
-        )
-
-        val displayModes = listOf(
-            fullScreenLabel to Constants.DISPLAY_MODE_FULLSCREEN,
-            lowerThirdLabel to Constants.DISPLAY_MODE_LOWER_THIRD,
-            stageMonitorLabel to Constants.DISPLAY_MODE_STAGE_MONITOR
-        )
 
         val contentScrollState = rememberScrollState()
 
@@ -893,6 +911,206 @@ fun ProjectionSettingsTab(
             )
         }
 
+    }
+
+    // ── Card 1.5: Browser Source Outputs (OBS/vMix overlay) ───────────────────
+    SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
+        Text(
+            text = stringResource(Res.string.browser_source_outputs_help),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        val serverUrl by companionServer.serverUrl.collectAsState()
+        val copyText: (String) -> Unit = { text ->
+            java.awt.Toolkit.getDefaultToolkit().systemClipboard
+                .setContents(java.awt.datatransfer.StringSelection(text), null)
+        }
+
+        proj.browserSourceOutputs.forEachIndexed { i, output ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = stringResource(Res.string.browser_source_output_label, i + 1),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Button(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = {
+                            onSettingsChange { s ->
+                                s.copy(projectionSettings = s.projectionSettings.removeBrowserSourceOutput(i))
+                            }
+                        },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    ) {
+                        Text(stringResource(Res.string.remove), style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+
+                if (serverUrl.isNotBlank()) {
+                    val overlayUrl = "$serverUrl${Constants.ENDPOINT_BROWSER_SOURCE}/$i"
+                    val apiKeyParam = if (output.browserSourceApiKeyRequired && settings.serverSettings.apiKey.isNotBlank())
+                        "apiKey=${settings.serverSettings.apiKey}" else null
+                    fun urlWithBg(bg: String): String =
+                        overlayUrl + "?" + listOfNotNull(apiKeyParam, "bg=$bg").joinToString("&")
+
+                    Text(
+                        text = overlayUrl,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontFamily = FontFamily.Monospace,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            shape = RoundedCornerShape(6.dp),
+                            onClick = { copyText(urlWithBg("transparent")) },
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(stringResource(Res.string.copy_url_transparent), style = MaterialTheme.typography.labelSmall)
+                        }
+                        Button(
+                            shape = RoundedCornerShape(6.dp),
+                            onClick = { copyText(urlWithBg("black")) },
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(stringResource(Res.string.copy_url_black_bg), style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Switch(
+                        checked = output.browserSourceApiKeyRequired,
+                        onCheckedChange = { checked ->
+                            val updated = output.copy(browserSourceApiKeyRequired = checked)
+                            onSettingsChange { s ->
+                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                            }
+                        }
+                    )
+                    Column {
+                        Text(
+                            text = stringResource(Res.string.browser_source_require_api_key),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = stringResource(Res.string.browser_source_uses_server_api_key),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    val bibleChecked = output.showBible
+                    val songsChecked = output.showSongs
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = bibleChecked,
+                            onCheckedChange = { checked ->
+                                val updated = output.copy(bibleMode = if (checked) Constants.SONG_LANG_BOTH else Constants.SONG_LANG_OFF)
+                                onSettingsChange { s ->
+                                    s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                }
+                            }
+                        )
+                        Text(bibleLabel, style = MaterialTheme.typography.labelSmall)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = songsChecked,
+                            onCheckedChange = { checked ->
+                                val updated = output.copy(songMode = if (checked) Constants.SONG_LANG_BOTH else Constants.SONG_LANG_OFF)
+                                onSettingsChange { s ->
+                                    s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                }
+                            }
+                        )
+                        Text(songsLabel, style = MaterialTheme.typography.labelSmall)
+                    }
+                    contentCols.forEach { col ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = col.getter(output),
+                                enabled = col.enabled(output),
+                                onCheckedChange = { checked ->
+                                    val updated = col.setter(output, checked)
+                                    onSettingsChange { s ->
+                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                    }
+                                }
+                            )
+                            Text(col.label, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.display_mode),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    displayModes.forEach { (label, modeValue) ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable {
+                                val updated = output.copy(displayMode = modeValue)
+                                onSettingsChange { s ->
+                                    s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                }
+                            }
+                        ) {
+                            RadioButton(
+                                selected = output.displayMode == modeValue,
+                                onClick = {
+                                    val updated = output.copy(displayMode = modeValue)
+                                    onSettingsChange { s ->
+                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                    }
+                                }
+                            )
+                            Text(label, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+            }
+        }
+
+        Button(
+            shape = RoundedCornerShape(6.dp),
+            onClick = {
+                onSettingsChange { s ->
+                    s.copy(projectionSettings = s.projectionSettings.addBrowserSourceOutput())
+                }
+            }
+        ) {
+            Text(stringResource(Res.string.add_browser_source_output), style = MaterialTheme.typography.labelSmall)
+        }
     }
 
     // ── Card 2: Audio Output ─────────────────────────────────────────────────

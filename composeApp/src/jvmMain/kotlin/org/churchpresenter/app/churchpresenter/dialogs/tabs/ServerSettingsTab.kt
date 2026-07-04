@@ -89,6 +89,7 @@ import churchpresenter.composeapp.generated.resources.allowed_clients_descriptio
 import churchpresenter.composeapp.generated.resources.api_key_hint
 import churchpresenter.composeapp.generated.resources.api_key_label
 import churchpresenter.composeapp.generated.resources.api_key_protection
+import churchpresenter.composeapp.generated.resources.browser_source_note_in_server_settings
 import churchpresenter.composeapp.generated.resources.allow_file_upload
 import churchpresenter.composeapp.generated.resources.allow_file_upload_description
 import churchpresenter.composeapp.generated.resources.blocked_clients
@@ -352,6 +353,11 @@ fun ServerSettingsTab(
                         }
                     )
                 }
+                Text(
+                    text = stringResource(Res.string.browser_source_note_in_server_settings),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
                 // ── API Key field + Generate + Copy all in one row ────────────
                 if (settings.serverSettings.apiKeyEnabled) {

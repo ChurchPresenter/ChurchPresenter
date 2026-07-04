@@ -54,6 +54,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.fill_badge
+import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.live_preview_nothing
@@ -128,6 +129,27 @@ fun LivePreviewPanel(
                 serverUrl = serverUrl,
                 qaDisplayUrl = qaDisplayUrl,
                 sttManager = sttManager,
+                locks = presenterManager.screenLocks.value,
+                onToggleLock = { mode -> presenterManager.setScreenLock(i, mode) },
+                label = stringResource(Res.string.screen_number, i + 1),
+            )
+        }
+
+        // Browser Source outputs — virtual, no physical hardware, so they get their own
+        // loop over ProjectionSettings.browserSourceOutputs and their own lock index space.
+        for (i in proj.browserSourceOutputs.indices) {
+            SingleDisplayPreview(
+                screenIndex = i,
+                screenAssignment = proj.browserSourceOutputs[i],
+                presenterManager = presenterManager,
+                appSettings = appSettings,
+                modifier = Modifier.fillMaxWidth(),
+                serverUrl = serverUrl,
+                qaDisplayUrl = qaDisplayUrl,
+                sttManager = sttManager,
+                locks = presenterManager.browserSourceLocks.value,
+                onToggleLock = { mode -> presenterManager.setBrowserSourceLock(i, mode) },
+                label = stringResource(Res.string.browser_source_output_label, i + 1),
             )
         }
 
@@ -159,10 +181,12 @@ private fun SingleDisplayPreview(
     serverUrl: String = "",
     qaDisplayUrl: String = "",
     sttManager: org.churchpresenter.app.churchpresenter.viewmodel.STTManager? = null,
+    locks: Map<Int, Presenting> = emptyMap(),
+    onToggleLock: (Presenting?) -> Unit = {},
+    label: String,
 ) {
     val presentingMode by presenterManager.presentingMode
-    val screenLocks by presenterManager.screenLocks
-    val effectiveMode = screenLocks[screenIndex] ?: presentingMode
+    val effectiveMode = locks[screenIndex] ?: presentingMode
     val displayedVerses by presenterManager.displayedVerses
     val nextVerses by presenterManager.nextVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
@@ -458,7 +482,7 @@ private fun SingleDisplayPreview(
 
         // LOCKED badge + lock toggle — not applicable to Stage Monitor screens, which route
         // their own content dynamically and are never locked to a single tab.
-        val lockedMode = screenLocks[screenIndex]
+        val lockedMode = locks[screenIndex]
         if (!isStageMonitor) {
             if (lockedMode != null) {
                 Text(
@@ -477,9 +501,9 @@ private fun SingleDisplayPreview(
             IconButton(
                 onClick = {
                     if (lockedMode != null) {
-                        presenterManager.setScreenLock(screenIndex, null)
+                        onToggleLock(null)
                     } else {
-                        presenterManager.setScreenLock(screenIndex, effectiveMode)
+                        onToggleLock(effectiveMode)
                     }
                 },
                 modifier = Modifier
@@ -498,9 +522,9 @@ private fun SingleDisplayPreview(
             }
         }
 
-        // Screen number label
+        // Screen/output label
         Text(
-            text = stringResource(Res.string.screen_number, screenIndex + 1),
+            text = label,
             color = Color.White.copy(alpha = 0.6f),
             fontSize = 9.sp,
             modifier = Modifier

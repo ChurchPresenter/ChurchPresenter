@@ -16,6 +16,9 @@ import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
+import io.ktor.server.response.respondBytesWriter
+import io.ktor.utils.io.writeFully
+import io.ktor.utils.io.writeStringUtf8
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
@@ -44,6 +47,7 @@ import kotlinx.serialization.json.jsonObject
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.data.settings.PresentationRemoteSettings
+import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -723,6 +727,38 @@ class CompanionServer {
         _lowerThirdFolder = lowerThirdFolder
     }
 
+    // ── Browser Source outputs (OBS/vMix overlay) ─────────────────────────────
+    // Content is rendered off-screen in main.kt (BrowserSourceVideoRenderer, the same
+    // BiblePresenter/SongPresenter/etc composables used everywhere else) and streamed here
+    // as PNG frames — this class only owns HTTP serving, never PresenterManager/content state.
+    @Volatile private var _browserSourceOutputs: List<ScreenAssignment> = emptyList()
+    private val _browserSourceFrameFlows = java.util.concurrent.ConcurrentHashMap<Int, kotlinx.coroutines.flow.SharedFlow<ByteArray>>()
+
+    fun updateBrowserSourceOutputs(outputs: List<ScreenAssignment>) {
+        _browserSourceOutputs = outputs
+    }
+
+    fun browserSourceOutput(index: Int): ScreenAssignment? = _browserSourceOutputs.getOrNull(index)
+
+    /** Registers (or replaces) the PNG frame flow a given output's renderer produces. */
+    fun registerBrowserSourceFrames(index: Int, frames: kotlinx.coroutines.flow.SharedFlow<ByteArray>) {
+        _browserSourceFrameFlows[index] = frames
+    }
+
+    /** Checks the given output's independent Browser Source API-key requirement (separate from [_apiKeyEnabled]). */
+    private suspend fun checkBrowserSourceApiKey(call: io.ktor.server.application.ApplicationCall, output: ScreenAssignment): Boolean {
+        if (!output.browserSourceApiKeyRequired || _apiKey.value.isEmpty()) return true
+        val provided = call.request.headers[Constants.HEADER_API_KEY]
+            ?: call.request.queryParameters[Constants.QUERY_PARAM_API_KEY]
+            ?: ""
+        return if (MessageDigest.isEqual(provided.toByteArray(), _apiKey.value.toByteArray())) {
+            true
+        } else {
+            call.respond(io.ktor.http.HttpStatusCode.Unauthorized, "Invalid API key")
+            false
+        }
+    }
+
     /** Lottie files in the configured lower-third folder. */
     private fun lowerThirdFiles(): List<java.io.File> =
         java.io.File(_lowerThirdFolder).takeIf { _lowerThirdFolder.isNotEmpty() && it.isDirectory }
@@ -1084,6 +1120,11 @@ class CompanionServer {
     private val json = Json {
         prettyPrint = false
         ignoreUnknownKeys = true
+        // Without this, fields still at their Kotlin default value (e.g. an unmodified
+        // BibleSettings/SongSettings/StageMonitorSettings) are omitted from the JSON
+        // entirely, which the Browser Source overlay page's JS can't distinguish from
+        // "field doesn't exist" — it needs every field present to apply real styling.
+        encodeDefaults = true
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -2901,6 +2942,51 @@ class CompanionServer {
                     handleKeyToggle(call, onAir = false)
                 }
 
+                // ── Browser Source Endpoints (OBS/vMix overlay) ────────────────────
+
+                get("${Constants.ENDPOINT_BROWSER_SOURCE}/{index}") {
+                    val index = call.parameters["index"]?.toIntOrNull()
+                    val output = index?.let { browserSourceOutput(it) }
+                    if (index == null || output == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Unknown browser source output")
+                        return@get
+                    }
+                    if (!checkBrowserSourceApiKey(call, output)) return@get
+                    val bgOverride = call.request.queryParameters["bg"]
+                    call.respondText(browserSourceOverlayPageHtml(index, output, bgOverride), ContentType.Text.Html)
+                }
+
+                // Continuous PNG video stream (multipart/x-mixed-replace) of this output's
+                // off-screen-rendered content — see BrowserSourceVideoRenderer in main.kt.
+                // A frame is only pushed when its pixels actually changed since the previous
+                // tick, so a static slide costs one frame, not continuous encoding.
+                get("/api${Constants.ENDPOINT_BROWSER_SOURCE}/{index}/stream") {
+                    val index = call.parameters["index"]?.toIntOrNull()
+                    val output = index?.let { browserSourceOutput(it) }
+                    if (index == null || output == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Unknown browser source output")
+                        return@get
+                    }
+                    if (!checkBrowserSourceApiKey(call, output)) return@get
+                    val frames = _browserSourceFrameFlows[index]
+                    if (frames == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, "Renderer not ready")
+                        return@get
+                    }
+                    call.respondBytesWriter(contentType = ContentType.parse("multipart/x-mixed-replace; boundary=frame")) {
+                        try {
+                            frames.collect { png ->
+                                writeStringUtf8("--frame\r\nContent-Type: image/png\r\nContent-Length: ${png.size}\r\n\r\n")
+                                writeFully(png)
+                                writeStringUtf8("\r\n")
+                                flush()
+                            }
+                        } catch (_: Exception) {
+                            // client disconnected — collection just stops
+                        }
+                    }
+                }
+
                 // ── Q&A Endpoints ─────────────────────────────────────────────────
 
                 // Public: submission page
@@ -3533,6 +3619,129 @@ class CompanionServer {
     }
 
     // ── Q&A HTML Pages ────────────────────────────────────────────────────────
+
+    /**
+     * Self-contained HTML page for an OBS/vMix Browser Source input. The actual content is
+     * rendered off-screen in main.kt ([org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer],
+     * using the same BiblePresenter/SongPresenter/AnnouncementsPresenter/PicturePresenter/
+     * StageMonitorScreen composables as everywhere else) and streamed as PNG frames — so
+     * styling is pixel-identical to the native output by construction, not reimplemented in
+     * CSS/JS. The page consumes the stream via `fetch()` + manual multipart-boundary parsing
+     * into a `<canvas>`, rather than relying on a plain `<img src>` pointed at the multipart
+     * response — modern Chromium's support for `multipart/x-mixed-replace` in `<img>` is
+     * legacy/inconsistent (historically JPEG-only and increasingly unreliable), which is why
+     * an `<img>`-based first pass showed a black/blank frame instead of live video.
+     */
+    private fun browserSourceOverlayPageHtml(index: Int, output: ScreenAssignment, bgOverride: String? = null): String {
+        val needsKey = output.browserSourceApiKeyRequired || (_apiKeyEnabled.value && _apiKey.value.isNotEmpty())
+        val keyParam = if (needsKey) "?${Constants.QUERY_PARAM_API_KEY}=" + java.net.URLEncoder.encode(_apiKey.value, "UTF-8") else ""
+        // ?bg= is a per-request debug override (e.g. for viewing outside OBS, where a page
+        // background left transparent just renders as opaque white in a plain browser tab) —
+        // it doesn't touch the persisted browserSourceTransparentBackground setting.
+        val bodyBg = when (bgOverride?.lowercase()) {
+            "black" -> "#000"
+            "transparent" -> "transparent"
+            else -> if (output.browserSourceTransparentBackground) "transparent" else "#000"
+        }
+        val streamUrl = "/api${Constants.ENDPOINT_BROWSER_SOURCE}/$index/stream$keyParam"
+        return """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ChurchPresenter Browser Source</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:$bodyBg;overflow:hidden}
+#stage{position:fixed;inset:0}
+#frame{width:100%;height:100%;display:block}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="frame"></canvas></div>
+<script>
+const src='$streamUrl';
+const canvas=document.getElementById('frame');
+const ctx=canvas.getContext('2d');
+// Setting canvas.width/height clears its pixel buffer per spec — since frames are only
+// pushed on content change (not continuously), a resize with no content change right after
+// would otherwise leave the canvas blank until the next real change. Cache the last drawn
+// bitmap and repaint it immediately after every resize so nothing goes black in between.
+let lastBitmap=null;
+function paintBitmap(){
+  if(!lastBitmap)return;
+  const scale=Math.min(canvas.width/lastBitmap.width, canvas.height/lastBitmap.height);
+  const w=lastBitmap.width*scale, h=lastBitmap.height*scale;
+  const x=(canvas.width-w)/2, y=(canvas.height-h)/2;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(lastBitmap,x,y,w,h);
+}
+function resizeCanvas(){
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+  paintBitmap();
+}
+window.addEventListener('resize',resizeCanvas);
+resizeCanvas();
+
+let buf=new Uint8Array(0);
+function append(chunk){
+  const merged=new Uint8Array(buf.length+chunk.length);
+  merged.set(buf,0);merged.set(chunk,buf.length);
+  buf=merged;
+}
+function indexOfSeq(hay,needle,from){
+  outer: for(let i=from;i<=hay.length-needle.length;i++){
+    for(let j=0;j<needle.length;j++){ if(hay[i+j]!==needle[j]) continue outer; }
+    return i;
+  }
+  return -1;
+}
+const HEADER_END=new TextEncoder().encode('\r\n\r\n');
+async function drawFrame(pngBytes){
+  try{
+    const blob=new Blob([pngBytes],{type:'image/png'});
+    const bitmap=await createImageBitmap(blob);
+    if(lastBitmap)lastBitmap.close();
+    lastBitmap=bitmap;
+    paintBitmap();
+  }catch(e){}
+}
+async function processBuffer(){
+  while(true){
+    const headerEndIdx=indexOfSeq(buf,HEADER_END,0);
+    if(headerEndIdx===-1)return;
+    const headerText=new TextDecoder().decode(buf.slice(0,headerEndIdx));
+    const m=headerText.match(/Content-Length:\s*(\d+)/i);
+    if(!m){ buf=buf.slice(headerEndIdx+4); continue; }
+    const len=parseInt(m[1],10);
+    const bodyStart=headerEndIdx+4;
+    const bodyEnd=bodyStart+len;
+    if(buf.length<bodyEnd+2)return;
+    const pngBytes=buf.slice(bodyStart,bodyEnd);
+    await drawFrame(pngBytes);
+    buf=buf.slice(bodyEnd+2);
+  }
+}
+async function streamLoop(){
+  try{
+    const resp=await fetch(src);
+    const reader=resp.body.getReader();
+    while(true){
+      const {done,value}=await reader.read();
+      if(done)break;
+      append(value);
+      await processBuffer();
+    }
+  }catch(e){}
+  setTimeout(streamLoop,2000);
+}
+streamLoop();
+</script>
+</body>
+</html>
+""".trimIndent()
+    }
 
     /** Shared CSS injected into every Q&A page: semantic color tokens + screen-reader-only utility. */
     private val qaSharedCss = """

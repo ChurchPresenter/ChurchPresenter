@@ -30,7 +30,9 @@ data class ScreenAssignment(
     val showSTT: Boolean = true,
     val showDictionary: Boolean = true,
     val showFullscreenBackground: Boolean = true, // show configured background in fullscreen mode
-    val showLowerThirdBackground: Boolean = true  // show configured background in lower third mode
+    val showLowerThirdBackground: Boolean = true, // show configured background in lower third mode
+    val browserSourceApiKeyRequired: Boolean = false, // only used by ProjectionSettings.browserSourceOutputs entries
+    val browserSourceTransparentBackground: Boolean = true // only used by ProjectionSettings.browserSourceOutputs entries
 ) {
     val showBible: Boolean get() = bibleMode != Constants.SONG_LANG_OFF
     val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF
