@@ -4024,8 +4024,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .s-thumb img{width:100%;height:100%;object-fit:contain;display:block;background:#000}
 .s-num{position:absolute;bottom:2px;right:3px;font-size:9px;font-weight:700;background:rgba(0,0,0,.65);color:#fff;border-radius:2px;padding:1px 3px;pointer-events:none}
 #botbar{display:flex;align-items:center;padding:8px 10px;background:#1a1a1a;border-top:1px solid #222;gap:8px;flex-shrink:0}
-.nav-btn{background:#484848;border:1px solid #6a6a6a;color:#fff;border-radius:10px;padding:10px;font-size:22px;font-weight:700;cursor:pointer;flex:1;text-align:center;transition:background .15s;line-height:1;touch-action:manipulation}
+.nav-btn{background:#484848;border:1px solid #6a6a6a;color:#fff;border-radius:10px;padding:14px;font-size:18px;font-weight:700;cursor:pointer;flex:1;text-align:center;transition:background .15s;line-height:1;touch-action:manipulation}
 .nav-btn:active{background:#606060}
+.hidden{display:none}
+.grid-icon{display:inline-grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;width:14px;height:14px;vertical-align:middle}
+.grid-icon i{background:#fff;border-radius:1px;display:block}
+#botbar.expanded{flex:1;align-items:stretch;padding:12px;gap:12px}
+#botbar.expanded .nav-btn{font-size:44px;display:flex;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
@@ -4040,6 +4045,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div id="counter">– / –</div>
     <div id="blanked-badge">BLANKED</div>
     <div id="btns">
+      <button class="icon-btn" id="hide-btn" onclick="toggleHideSlides()" title="Hide slides" aria-label="Hide slides"><span class="grid-icon"><i></i><i></i><i></i><i></i></span></button>
       <button class="icon-btn" id="blank-btn" onclick="toggleBlank()">Blank</button>
       <button class="icon-btn" id="play-btn" onclick="togglePlay()">Auto ▶ 5s</button>
       <button class="icon-btn" id="upload-btn" onclick="document.getElementById('upload-input').click()">⬆ Upload</button>
@@ -4061,14 +4067,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div id="strip-handle"></div>
   <div id="strip-wrap"></div>
   <div id="botbar">
-    <button class="nav-btn" onclick="goSlide(state.index-1)">‹</button>
-    <button class="nav-btn" onclick="goSlide(state.index+1)">›</button>
+    <button class="nav-btn" onclick="goSlide(state.index-1)">‹ Backward</button>
+    <button class="nav-btn" onclick="goSlide(state.index+1)">Forward ›</button>
   </div>
 </div>
 <script>
 let state={id:'',index:0,total:0,frozen:false,isPlaying:false,isLive:false,autoScrollInterval:5};
 let fetchFailCount=0;
 let offlineMode=false;
+let slidesHidden=localStorage.getItem('remote_slides_hidden')==='1';
 let password=new URLSearchParams(location.search).get('password')||sessionStorage.getItem('remote_pw')||'';
 if(password)sessionStorage.setItem('remote_pw',password);
 const headers={'Content-Type':'application/json'};
@@ -4108,6 +4115,18 @@ function updateStripCurrent(){
   const cur=document.getElementById('st-'+state.index);
   if(cur){cur.classList.add('cur');cur.scrollIntoView({inline:'nearest',block:'nearest',behavior:'smooth'});}
 }
+function applyHideSlides(){
+  document.getElementById('slides-area').classList.toggle('hidden',slidesHidden);
+  document.getElementById('strip-wrap').classList.toggle('hidden',slidesHidden);
+  document.getElementById('strip-handle').classList.toggle('hidden',slidesHidden);
+  document.getElementById('upload-status').classList.toggle('hidden',slidesHidden);
+  if(slidesHidden)document.getElementById('not-live-bar').style.display='none';
+  document.getElementById('botbar').classList.toggle('expanded',slidesHidden);
+  const hb=document.getElementById('hide-btn');
+  hb.classList.toggle('active',slidesHidden);
+  hb.title=slidesHidden?'Show slides':'Hide slides';hb.setAttribute('aria-label',hb.title);
+}
+function toggleHideSlides(){slidesHidden=!slidesHidden;localStorage.setItem('remote_slides_hidden',slidesHidden?'1':'0');applyHideSlides();}
 function updateUI(){
   document.getElementById('counter').textContent=state.total>0?(state.index+1)+' / '+state.total:'– / –';
   const fb=document.getElementById('blank-btn');
@@ -4128,6 +4147,7 @@ function updateUI(){
   }
   if(!stripBuilt||document.getElementById('strip-wrap').children.length!==state.total){buildStrip();}
   else{updateStripCurrent();}
+  applyHideSlides();
 }
 async function fetchStatus(){
   try{
