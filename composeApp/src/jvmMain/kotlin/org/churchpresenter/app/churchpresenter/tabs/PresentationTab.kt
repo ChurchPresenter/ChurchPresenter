@@ -9,10 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,26 +45,15 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.window.WindowPlacement
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import java.awt.Cursor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -83,8 +69,6 @@ import androidx.compose.ui.layout.ContentScale
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
@@ -93,6 +77,8 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.ic_folder
+import churchpresenter.composeapp.generated.resources.ic_stop
+import churchpresenter.composeapp.generated.resources.tooltip_presentation_remote
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.animation_fade
 import churchpresenter.composeapp.generated.resources.animation_none
@@ -124,24 +110,8 @@ import churchpresenter.composeapp.generated.resources.presentation_arrow_key_hin
 import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.presentation_clear
 import churchpresenter.composeapp.generated.resources.presentation_freeze_output
-import churchpresenter.composeapp.generated.resources.presentation_remote_control
-import churchpresenter.composeapp.generated.resources.presentation_remote_copy_url
-import churchpresenter.composeapp.generated.resources.presentation_remote_enable
-import churchpresenter.composeapp.generated.resources.presentation_remote_password_hint
-import churchpresenter.composeapp.generated.resources.presentation_server_not_running
 import churchpresenter.composeapp.generated.resources.presentation_unfreeze_output
 import churchpresenter.composeapp.generated.resources.previous_image
-import churchpresenter.composeapp.generated.resources.qa_downloading_tunnel
-import churchpresenter.composeapp.generated.resources.qa_enable_public_access
-import churchpresenter.composeapp.generated.resources.qa_disable_public_access
-import churchpresenter.composeapp.generated.resources.qa_local
-import churchpresenter.composeapp.generated.resources.qa_no_password
-import churchpresenter.composeapp.generated.resources.qa_public
-import churchpresenter.composeapp.generated.resources.qa_public_access
-import churchpresenter.composeapp.generated.resources.qa_public_access_description
-import churchpresenter.composeapp.generated.resources.qa_qr_code_shows
-import churchpresenter.composeapp.generated.resources.qa_retry
-import churchpresenter.composeapp.generated.resources.qa_starting_tunnel
 import churchpresenter.composeapp.generated.resources.recent
 import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.select_presentation_file
@@ -156,18 +126,17 @@ import churchpresenter.composeapp.generated.resources.transition_duration
 import churchpresenter.composeapp.generated.resources.unit_ms
 import churchpresenter.composeapp.generated.resources.unit_s
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.dialogs.PresentationRemoteDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -180,6 +149,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 
 private object RecentPresentationFiles {
     private const val MAX = 10
@@ -273,24 +243,7 @@ fun PresentationTab(
     onClearPresentation: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
-
-    val density = LocalDensity.current
-    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
-    val windowState = LocalMainWindowState.current
-    val isMaximized = windowState?.placement != WindowPlacement.Floating
-    val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
-
-    var rightPanelPx by remember(currentLayout.presentationRightPanelWidthDp, isMaximized) {
-        mutableStateOf(with(density) { currentLayout.presentationRightPanelWidthDp.dp.toPx() })
-    }
-
-    fun saveRightPanel() {
-        val dp = with(density) { rightPanelPx.toDp().value.toInt() }
-        onSettingsChangeState.value { s ->
-            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(presentationRightPanelWidthDp = dp))
-            else s.copy(windowedLayout = s.windowedLayout.copy(presentationRightPanelWidthDp = dp))
-        }
-    }
+    var showRemoteDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(selectedPresentationItem) {
         selectedPresentationItem?.let { viewModel.loadPresentationByPath(it.filePath) }
@@ -429,6 +382,70 @@ fun PresentationTab(
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.primary
                 )
+            }
+            TooltipArea(
+                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_presentation_remote), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+            ) {
+                IconButton(
+                    onClick = { showRemoteDialog = true },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    ),
+                    modifier = Modifier.size(34.dp)
+                ) {
+                    Icon(Icons.Default.SettingsRemote, contentDescription = stringResource(Res.string.tooltip_presentation_remote), modifier = Modifier.size(16.dp))
+                }
+            }
+            if (presenterManager != null) {
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                ) {
+                    IconButton(
+                        onClick = onFreezeToggle,
+                        enabled = viewModel.slideFiles.isNotEmpty(),
+                        colors = if (presentationFrozen)
+                            IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        else IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        ),
+                        modifier = Modifier.size(34.dp)
+                    ) {
+                        Icon(
+                            if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+            TooltipArea(
+                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.presentation_clear), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+            ) {
+                IconButton(
+                    onClick = { viewModel.clearPresentations(); onClearPresentation() },
+                    enabled = viewModel.slideFiles.isNotEmpty(),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    ),
+                    modifier = Modifier.size(34.dp)
+                ) {
+                    Icon(painterResource(Res.drawable.ic_stop), contentDescription = stringResource(Res.string.presentation_clear), modifier = Modifier.size(16.dp))
+                }
             }
             if (onAddToSchedule != null) {
                 TooltipArea(
@@ -856,275 +873,24 @@ fun PresentationTab(
                     }
                 }
             }
-
-            // ── Right sidebar: remote control ─────────────────────────
-            val sidebarScroll = rememberScrollState()
-            Box(
-                modifier = Modifier
-                    .width(6.dp)
-                    .fillMaxHeight()
-                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-                    .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                    .draggable(
-                        orientation = Orientation.Horizontal,
-                        state = rememberDraggableState { delta ->
-                            rightPanelPx = (rightPanelPx - delta).coerceAtLeast(with(density) { 160.dp.toPx() })
-                        },
-                        onDragStopped = { saveRightPanel() }
-                    )
-            )
-            Column(
-                modifier = Modifier
-                    .width(with(density) { rightPanelPx.toDp() })
-                    .fillMaxHeight()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                    .verticalScroll(sidebarScroll)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                val qrBaseUrl = presentationDisplayUrl.ifEmpty { serverUrl }
-                val isServerRunning = qrBaseUrl.isNotEmpty()
-
-                // Header row with toggle
-                if (isServerRunning) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            stringResource(Res.string.presentation_remote_control),
-                            style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Switch(
-                            checked = appSettings.presentationRemoteSettings.remoteControlEnabled,
-                            onCheckedChange = { enabled ->
-                                onSettingsChange { s -> s.copy(presentationRemoteSettings = s.presentationRemoteSettings.copy(remoteControlEnabled = enabled)) }
-                            }
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
-                }
-
-                if (presenterManager != null) {
-                    OutlinedButton(
-                        onClick = onFreezeToggle,
-                        enabled = viewModel.slideFiles.isNotEmpty(),
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = if (presentationFrozen)
-                            ButtonDefaults.outlinedButtonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                        else ButtonDefaults.outlinedButtonColors()
-                    ) {
-                        Icon(
-                            if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
-                }
-
-                OutlinedButton(
-                    onClick = { viewModel.clearPresentations(); onClearPresentation() },
-                    enabled = viewModel.slideFiles.isNotEmpty(),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Icon(painterResource(Res.drawable.ic_close), contentDescription = null, modifier = Modifier.size(18.dp))
-                    Text(stringResource(Res.string.presentation_clear), modifier = Modifier.padding(start = 8.dp))
-                }
-
-                Spacer(Modifier.height(16.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Spacer(Modifier.height(12.dp))
-
-                if (isServerRunning) {
-                    // QR code
-                    val qrDisplayUrl = "$qrBaseUrl/presentation-remote"
-                    val qrUrl = run {
-                        val pw = appSettings.presentationRemoteSettings.remotePassword
-                        if (pw.isNotEmpty()) "$qrDisplayUrl?password=$pw"
-                        else qrDisplayUrl
-                    }
-
-                    val qrBitmap = remember(qrUrl) { generateQRCodeBitmap(qrUrl, 180) }
-                    if (qrBitmap != null) {
-                        Image(
-                            bitmap = qrBitmap,
-                            contentDescription = null,
-                            modifier = Modifier.size(180.dp)
-                        )
-                        Spacer(Modifier.height(8.dp))
-                    }
-                    Text(
-                        stringResource(Res.string.qa_qr_code_shows),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    SelectionContainer {
-                        Text(
-                            qrDisplayUrl,
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                            color = MaterialTheme.colorScheme.primary,
-                            maxLines = 3,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedButton(
-                        onClick = { java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(java.awt.datatransfer.StringSelection(qrUrl), null) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(stringResource(Res.string.presentation_remote_copy_url), style = MaterialTheme.typography.labelSmall)
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    Spacer(Modifier.height(12.dp))
-
-                    // Tunnel / public access section
-                    Text(
-                        stringResource(Res.string.qa_public_access),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    when (tunnelStatus) {
-                        is TunnelStatus.Idle -> {
-                            Text(
-                                stringResource(Res.string.qa_public_access_description),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                            )
-                            OutlinedButton(
-                                onClick = onStartTunnel,
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text(stringResource(Res.string.qa_enable_public_access), style = MaterialTheme.typography.labelSmall)
-                            }
-                        }
-                        is TunnelStatus.Downloading -> {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                Text(stringResource(Res.string.qa_downloading_tunnel), style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                        is TunnelStatus.Starting -> {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                Text(stringResource(Res.string.qa_starting_tunnel), style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                        is TunnelStatus.Connected -> {
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                OutlinedButton(
-                                    onClick = { onPresentationDisplayUrlChanged(serverUrl) },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = if (presentationDisplayUrl.isEmpty() || presentationDisplayUrl == serverUrl)
-                                        ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                                    else ButtonDefaults.outlinedButtonColors()
-                                ) { Text(stringResource(Res.string.qa_local), style = MaterialTheme.typography.labelSmall) }
-                                OutlinedButton(
-                                    onClick = { onPresentationDisplayUrlChanged(tunnelUrl) },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = if (presentationDisplayUrl == tunnelUrl)
-                                        ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                                    else ButtonDefaults.outlinedButtonColors()
-                                ) { Text(stringResource(Res.string.qa_public), style = MaterialTheme.typography.labelSmall) }
-                            }
-                            OutlinedButton(
-                                onClick = onStopTunnel,
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text(stringResource(Res.string.qa_disable_public_access), style = MaterialTheme.typography.labelSmall)
-                            }
-                        }
-                        is TunnelStatus.Error -> {
-                            Text(
-                                tunnelStatus.message,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                            OutlinedButton(
-                                onClick = onStartTunnel,
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
-                                    Text(stringResource(Res.string.qa_retry), style = MaterialTheme.typography.labelSmall)
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    Spacer(Modifier.height(12.dp))
-
-                    // Password
-                    var passwordVisible by remember { mutableStateOf(false) }
-                    Text(stringResource(Res.string.presentation_remote_password_hint), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                    Spacer(Modifier.height(4.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(42.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                            BasicTextField(
-                                value = appSettings.presentationRemoteSettings.remotePassword,
-                                onValueChange = { pw ->
-                                    onSettingsChange { s -> s.copy(presentationRemoteSettings = s.presentationRemoteSettings.copy(remotePassword = pw)) }
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true,
-                                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                decorationBox = { innerTextField ->
-                                    if (appSettings.presentationRemoteSettings.remotePassword.isEmpty()) {
-                                        Text(stringResource(Res.string.qa_no_password), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
-                                    }
-                                    innerTextField()
-                                }
-                            )
-                        }
-                        FilledIconButton(onClick = { passwordVisible = !passwordVisible }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                            Icon(
-                                imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                } else {
-                    Text(
-                        stringResource(Res.string.presentation_server_not_running),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                }
-            }
         }
+    }
+
+    if (showRemoteDialog) {
+        PresentationRemoteDialog(
+            settings = appSettings,
+            onSettingsChange = onSettingsChange,
+            serverUrl = serverUrl,
+            apiKeyEnabled = appSettings.serverSettings.apiKeyEnabled,
+            apiKey = appSettings.serverSettings.apiKey,
+            tunnelStatus = tunnelStatus,
+            tunnelUrl = tunnelUrl,
+            presentationDisplayUrl = presentationDisplayUrl,
+            onPresentationDisplayUrlChanged = onPresentationDisplayUrlChanged,
+            onStartTunnel = onStartTunnel,
+            onStopTunnel = onStopTunnel,
+            onDismiss = { showRemoteDialog = false }
+        )
     }
 }
 

@@ -374,8 +374,9 @@ fun main() {
             prevTunnelWasConnected.value = isConnected
         }
         var presentationFrozen by remember { mutableStateOf(false) }
-        LaunchedEffect(appSettings.presentationRemoteSettings.remoteControlEnabled, appSettings.presentationRemoteSettings.remotePassword) {
-            companionServer.updatePresentationRemoteSettings(appSettings.presentationRemoteSettings)
+        LaunchedEffect(appSettings.presentationRemoteSettings.remoteControlEnabled, appSettings.serverSettings.apiKeyEnabled, appSettings.serverSettings.apiKey) {
+            val activeApiKey = if (appSettings.serverSettings.apiKeyEnabled) appSettings.serverSettings.apiKey else ""
+            companionServer.updatePresentationRemoteSettings(appSettings.presentationRemoteSettings, activeApiKey)
         }
         LaunchedEffect(appSettings.presentationSettings.autoScrollInterval) {
             companionServer.updateAutoScrollInterval(appSettings.presentationSettings.autoScrollInterval.toInt())

@@ -71,16 +71,12 @@ class SettingsManager {
         return result
     }
 
-    /** Ensures existing users with a blank Q&A admin or presentation remote password get a generated one. */
+    /** Ensures existing users with a blank Q&A admin password get a generated one. */
     private fun migrateEmptyPasswords(settings: AppSettings): AppSettings {
         var result = settings
         var changed = false
         if (result.qaSettings.adminPassword.isEmpty()) {
             result = result.copy(qaSettings = result.qaSettings.copy(adminPassword = generateDefaultPassword()))
-            changed = true
-        }
-        if (result.presentationRemoteSettings.remotePassword.isEmpty()) {
-            result = result.copy(presentationRemoteSettings = result.presentationRemoteSettings.copy(remotePassword = generateDefaultPassword()))
             changed = true
         }
         if (changed) saveSettings(result)

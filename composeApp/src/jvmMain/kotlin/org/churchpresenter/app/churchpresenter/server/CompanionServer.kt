@@ -604,10 +604,10 @@ class CompanionServer {
     @Volatile private var _presentationIsLive: Boolean = false
     @Volatile private var _autoScrollInterval: Int = 5
 
-    fun updatePresentationRemoteSettings(settings: PresentationRemoteSettings) {
+    fun updatePresentationRemoteSettings(settings: PresentationRemoteSettings, apiKey: String) {
         val wasEnabled = presentationRemoteEnabled
         presentationRemoteEnabled = settings.remoteControlEnabled
-        presentationRemotePassword = settings.remotePassword
+        presentationRemotePassword = apiKey
         if (wasEnabled && !presentationRemoteEnabled) clearPresentationState()
     }
 
@@ -4069,10 +4069,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 let state={id:'',index:0,total:0,frozen:false,isPlaying:false,isLive:false,autoScrollInterval:5};
 let fetchFailCount=0;
 let offlineMode=false;
-let password=sessionStorage.getItem('remote_pw')||'';
+let password=new URLSearchParams(location.search).get('password')||sessionStorage.getItem('remote_pw')||'';
+if(password)sessionStorage.setItem('remote_pw',password);
 const headers={'Content-Type':'application/json'};
 if(password)headers['X-Presentation-Password']=password;
-function slideUrl(i){return'/api/presentations/'+state.id+'/slides/'+i;}
+function slideUrl(i){return'/api/presentations/'+state.id+'/slides/'+i+(password?('?apiKey='+encodeURIComponent(password)):'');}
 let stripBuilt=false;
 function loadImg(img,src){
   if(img._want===src)return;
@@ -4236,7 +4237,11 @@ function startWs(){
       document.getElementById('login').innerHTML='<h2>Remote control is disabled</h2><p>Enable it in the app — this page will auto-connect.</p>';
       startPollingForEnable();return;
     }
-    if(!d.passwordRequired){
+    if(!d.passwordRequired||password){
+      if(d.passwordRequired){
+        const authR=await fetch('/api/presentation-remote/auth',{method:'POST',headers});
+        if(!authR.ok){document.getElementById('pw-input').value=password;return;}
+      }
       state={...state,...d};
       document.getElementById('login').style.display='none';document.getElementById('app').style.display='flex';
       updateUI();startWs();setInterval(fetchStatus,2500);

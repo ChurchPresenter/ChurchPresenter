@@ -4,6 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PresentationRemoteSettings(
-    val remoteControlEnabled: Boolean = false,
-    val remotePassword: String = generateDefaultPassword()
+    val remoteControlEnabled: Boolean = false
 )
