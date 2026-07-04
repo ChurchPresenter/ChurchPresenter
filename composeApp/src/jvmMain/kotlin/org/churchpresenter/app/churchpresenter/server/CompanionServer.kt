@@ -612,6 +612,7 @@ class CompanionServer {
     @Volatile private var _presentationIsPlaying: Boolean = false
     @Volatile private var _presentationIsLive: Boolean = false
     @Volatile private var _autoScrollInterval: Int = 5
+    @Volatile private var _presentationIsLooping: Boolean = true
 
     fun updatePresentationRemoteSettings(settings: PresentationRemoteSettings, apiKey: String) {
         val wasEnabled = presentationRemoteEnabled
@@ -626,6 +627,15 @@ class CompanionServer {
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_PRESENTATION_AUTO_SCROLL_CHANGED,
             payload = """{"autoScrollInterval":$secs}"""
+        ))
+    }
+
+    fun updateLoopingState(looping: Boolean) {
+        if (_presentationIsLooping == looping) return
+        _presentationIsLooping = looping
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_PRESENTATION_LOOP_CHANGED,
+            payload = """{"looping":$looping}"""
         ))
     }
 
@@ -683,6 +693,12 @@ class CompanionServer {
 
     /** Emitted when remote presses play/pause. */
     val onPresentationPlayPause = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when remote presses the loop toggle. */
+    val onPresentationLoopToggle = MutableSharedFlow<Unit>(
         extraBufferCapacity = 4,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
@@ -2258,7 +2274,7 @@ class CompanionServer {
                 /** GET /api/presentation-remote/status — current presentation state (no auth needed) */
                 get("/api/presentation-remote/status") {
                     call.respondText(
-                        """{"enabled":$presentationRemoteEnabled,"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"frozen":$_presentationFrozen,"isPlaying":$_presentationIsPlaying,"isLive":$_presentationIsLive,"autoScrollInterval":$_autoScrollInterval,"passwordRequired":${presentationRemotePassword.isNotEmpty()}}""",
+                        """{"enabled":$presentationRemoteEnabled,"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"frozen":$_presentationFrozen,"isPlaying":$_presentationIsPlaying,"isLive":$_presentationIsLive,"autoScrollInterval":$_autoScrollInterval,"looping":$_presentationIsLooping,"passwordRequired":${presentationRemotePassword.isNotEmpty()}}""",
                         ContentType.Application.Json
                     )
                 }
@@ -2307,6 +2323,13 @@ class CompanionServer {
                 post("/api/presentation-remote/play-pause") {
                     if (!checkPresentationRemoteAuth(call)) return@post
                     scope.launch { onPresentationPlayPause.emit(Unit) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                /** POST /api/presentation-remote/loop — toggle slide looping */
+                post("/api/presentation-remote/loop") {
+                    if (!checkPresentationRemoteAuth(call)) return@post
+                    scope.launch { onPresentationLoopToggle.emit(Unit) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
@@ -4083,6 +4106,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <button class="icon-btn" id="hide-btn" onclick="toggleHideSlides()" title="Hide slides" aria-label="Hide slides"><span class="grid-icon"><i></i><i></i><i></i><i></i></span></button>
       <button class="icon-btn" id="blank-btn" onclick="toggleBlank()">Blank</button>
       <button class="icon-btn" id="play-btn" onclick="togglePlay()">Auto ▶ 5s</button>
+      <button class="icon-btn" id="loop-btn" onclick="toggleLoop()">Loop</button>
       <button class="icon-btn" id="upload-btn" onclick="document.getElementById('upload-input').click()">⬆ Upload</button>
       <input type="file" id="upload-input" accept=".pdf,.ppt,.pptx,.key" style="display:none">
     </div>
@@ -4107,7 +4131,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 <script>
-let state={id:'',index:0,total:0,frozen:false,isPlaying:false,isLive:false,autoScrollInterval:5};
+let state={id:'',index:0,total:0,frozen:false,isPlaying:false,isLive:false,autoScrollInterval:5,looping:true};
 let fetchFailCount=0;
 let offlineMode=false;
 let slidesHidden=localStorage.getItem('remote_slides_hidden')==='1';
@@ -4172,6 +4196,7 @@ function updateUI(){
   document.getElementById('blanked-overlay').style.display=state.frozen?'flex':'none';
   const pb=document.getElementById('play-btn');
   pb.classList.toggle('active-play',state.isPlaying);pb.textContent=state.isPlaying?('⏸ Auto '+state.autoScrollInterval+'s'):('Auto ▶ '+state.autoScrollInterval+'s');
+  document.getElementById('loop-btn').classList.toggle('active-play',state.looping);
   document.getElementById('not-live-bar').style.display=(state.total>0&&!state.isLive)?'block':'none';
   if(state.id){
     loadImg(document.getElementById('cur-img'),slideUrl(state.index));
@@ -4192,7 +4217,7 @@ async function fetchStatus(){
     fetchFailCount=0;
     if(offlineMode){if(d.enabled){location.reload();}else{offlineMode=false;showDisabled();}return;}
     if(!d.enabled){showDisabled();return;}
-    const changed=d.id!==state.id||d.index!==state.index||d.total!==state.total||d.frozen!==state.frozen||d.isPlaying!==state.isPlaying||d.isLive!==state.isLive||d.autoScrollInterval!==state.autoScrollInterval;
+    const changed=d.id!==state.id||d.index!==state.index||d.total!==state.total||d.frozen!==state.frozen||d.isPlaying!==state.isPlaying||d.isLive!==state.isLive||d.autoScrollInterval!==state.autoScrollInterval||d.looping!==state.looping;
     state={...state,...d};if(changed)updateUI();
   }catch(e){fetchFailCount++;if(!offlineMode&&fetchFailCount>=2)showOffline();}
 }
@@ -4239,6 +4264,7 @@ async function doLogin(){
 async function post(path){try{return await fetch(path,{method:'POST',headers});}catch(e){return null;}}
 function toggleBlank(){state.frozen=!state.frozen;updateUI();post('/api/presentation-remote/freeze');}
 function togglePlay(){post('/api/presentation-remote/play-pause');}
+function toggleLoop(){post('/api/presentation-remote/loop');}
 function goSlide(i){if(i<0||i>=state.total)return;post('/api/presentation-remote/goto/'+i);}
 document.getElementById('upload-input').addEventListener('change',async function(){
   const file=this.files[0];if(!file)return;
@@ -4290,6 +4316,8 @@ function startWs(){
         const d=JSON.parse(msg.payload);state={...state,autoScrollInterval:d.autoScrollInterval};updateUI();
       }else if(msg.type==='presentation_live_changed'){
         const d=JSON.parse(msg.payload);state={...state,isLive:d.isLive};updateUI();
+      }else if(msg.type==='presentation_looping_changed'){
+        const d=JSON.parse(msg.payload);state={...state,looping:d.looping};updateUI();
       }
     }catch(_){}
   };

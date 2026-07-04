@@ -381,6 +381,9 @@ fun main() {
         LaunchedEffect(appSettings.presentationSettings.autoScrollInterval) {
             companionServer.updateAutoScrollInterval(appSettings.presentationSettings.autoScrollInterval.toInt())
         }
+        LaunchedEffect(appSettings.presentationSettings.isLooping) {
+            companionServer.updateLoopingState(appSettings.presentationSettings.isLooping)
+        }
         LaunchedEffect(Unit) {
             companionServer.onPresentationFreezeToggle.collect {
                 presentationFrozen = !presentationFrozen
@@ -1240,6 +1243,7 @@ fun main() {
                                         companionServer.broadcastSlideChange(id, index, total, isPlaying)
                                     },
                                     remotePresentationPlayPauseFlow = companionServer.onPresentationPlayPause,
+                                    remotePresentationLoopToggleFlow = companionServer.onPresentationLoopToggle,
                                     remotePresentationGotoFlow = companionServer.onPresentationGoto,
                                     presentationFrozen = presentationFrozen,
                                     onFreezeToggle = {

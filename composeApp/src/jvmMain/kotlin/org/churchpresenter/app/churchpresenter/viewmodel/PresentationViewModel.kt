@@ -192,6 +192,8 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
             _selectedSlideIndex.value++
         } else if (_isLooping.value && _slideFiles.isNotEmpty()) {
             _selectedSlideIndex.value = 0
+        } else {
+            _isPlaying.value = false
         }
     }
 

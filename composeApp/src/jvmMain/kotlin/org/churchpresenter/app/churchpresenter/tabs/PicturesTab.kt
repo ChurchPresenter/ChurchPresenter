@@ -553,10 +553,12 @@ fun PicturesTab(
                         onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(isLooping = viewModel.isLooping)) }
                     },
                     modifier = Modifier.size(28.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
+                    colors = if (viewModel.isLooping) IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ) else IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Transparent,
-                        contentColor = if (viewModel.isLooping) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-                                       else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+                        contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
                     )
                 ) {
                     Icon(painterResource(Res.drawable.ic_refresh), contentDescription = null, modifier = Modifier.size(16.dp))

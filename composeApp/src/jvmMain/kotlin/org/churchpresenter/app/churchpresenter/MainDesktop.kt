@@ -212,6 +212,7 @@ fun MainDesktop(
     onClearPresentation: () -> Unit = {},
     onSlideChanged: ((id: String, slideIndex: Int, total: Int, isPlaying: Boolean) -> Unit)? = null,
     remotePresentationPlayPauseFlow: kotlinx.coroutines.flow.Flow<Unit>? = null,
+    remotePresentationLoopToggleFlow: kotlinx.coroutines.flow.Flow<Unit>? = null,
     remotePresentationGotoFlow: kotlinx.coroutines.flow.Flow<Int>? = null,
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     sttManager: STTManager? = null,
@@ -333,6 +334,12 @@ fun MainDesktop(
     }
     LaunchedEffect(remotePresentationPlayPauseFlow) {
         remotePresentationPlayPauseFlow?.collect { presentationViewModel.togglePlayPause() }
+    }
+    LaunchedEffect(remotePresentationLoopToggleFlow) {
+        remotePresentationLoopToggleFlow?.collect {
+            presentationViewModel.isLooping = !presentationViewModel.isLooping
+            onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(isLooping = presentationViewModel.isLooping)) }
+        }
     }
     LaunchedEffect(remotePresentationGotoFlow) {
         remotePresentationGotoFlow?.collect { index ->

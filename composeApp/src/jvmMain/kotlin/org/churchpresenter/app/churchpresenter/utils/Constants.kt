@@ -264,6 +264,7 @@ object Constants {
     const val WS_EVENT_PRESENTATION_FREEZE_CHANGED        = "presentation_freeze_changed"
     const val WS_EVENT_PRESENTATION_LIVE_CHANGED          = "presentation_live_changed"
     const val WS_EVENT_PRESENTATION_AUTO_SCROLL_CHANGED   = "presentation_auto_scroll_changed"
+    const val WS_EVENT_PRESENTATION_LOOP_CHANGED          = "presentation_looping_changed"
 
     // WebSocket command types (client → server)
     const val WS_CMD_SELECT_SONG            = "select_song"
