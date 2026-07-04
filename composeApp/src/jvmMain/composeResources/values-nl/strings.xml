@@ -21,6 +21,7 @@
     <string name="starts_with">Begint met</string>
     <string name="exact_match">Exacte overeenkomst</string>
     <string name="all_song_categories">Alle liedcategorieën</string>
+    <string name="filter">Filter</string>
     <string name="filter_colon">Filter:</string>
     <string name="filter_type_colon">Filtertype:</string>
     <string name="service_schedule">Dienst programma:</string>
@@ -50,6 +51,7 @@
     <string name="none">Geen</string>
     <string name="first_page">Eerste pagina</string>
     <string name="every_page">Elke pagina</string>
+    <string name="show">Tonen</string>
     <string name="show_title">Titel tonen:</string>
     <string name="show_number">Nummer tonen:</string>
     <string name="font_size">Lettergrootte:</string>
@@ -98,6 +100,7 @@
     <string name="menu_help">Help</string>
     <string name="menu_about">Over</string>
     <string name="about_title">Over Church Presenter</string>
+    <string name="about_copyright">© %1$s Church Presenter</string>
     <string name="open_crash_logs">Crashlogs openen</string>
     <string name="open_converter">Converter</string>
     <string name="report_bug">Bug melden</string>
@@ -429,6 +432,7 @@
     <string name="tooltip_edit">Bewerken</string>
     <string name="tooltip_edit_label">Label bewerken</string>
     <string name="tooltip_go_live">Live gaan</string>
+    <string name="tooltip_presentation_remote">Afstandsbediening openen</string>
     <string name="tooltip_send_to_stage_monitor">Naar stage monitor sturen</string>
     <string name="tooltip_hide_from_stage_monitor">Aankondiging verbergen</string>
     <string name="tooltip_add_label">Label toevoegen</string>
@@ -477,6 +481,7 @@
     <string name="settings">Instellingen</string>
     <string name="images_suffix">afbeeldingen</string>
     <string name="pictures_arrow_key_hint">← → volgende/vorige afbeelding  ·  ↑ ↓ door rijen navigeren</string>
+    <string name="presentation_arrow_key_hint">← → volgende/vorige dia</string>
     <string name="pictures_reorder_hint">Shift+slepen om miniaturen te herordenen</string>
     <string name="slideshow_settings">Diapresentatie-instellingen</string>
     <string name="transition_settings">Overgangs-instellingen</string>
@@ -485,6 +490,7 @@
     <!-- Presentation Tab Strings -->
     <string name="no_file_selected_presentation">Geen bestand geselecteerd</string>
     <string name="slide_count">%1$d dia's</string>
+    <string name="loading_slides_progress">%1$d / %2$d dia's</string>
     <string name="slide_counter">Dia %1$d van %2$d</string>
     <string name="loading_slides">Dia's laden...</string>
     <string name="select_presentation_file">Selecteer een presentatiebestand om dia's te bekijken</string>
@@ -493,6 +499,17 @@
     <string name="slide_number">Dia %1$d</string>
     <string name="remove">Verwijderen</string>
     <string name="select_presentation_file_button">Bestand selecteren</string>
+    <string name="presentation_remote_control">Afstandsbediening</string>
+    <string name="presentation_remote_enable">Afstandsbediening inschakelen</string>
+    <string name="presentation_remote_description">Hiermee kunnen verbonden telefoons en tablets presentatiedia's bekijken en bedienen. Scan de QR-code hieronder om verbinding te maken.</string>
+    <string name="presentation_freeze_output">Uitvoer leegmaken</string>
+    <string name="presentation_unfreeze_output">Uitvoer herstellen</string>
+    <string name="presentation_clear">Presentatie wissen</string>
+    <string name="presentation_remote_copy_url">URL kopiëren</string>
+    <string name="presentation_remote_uses_api_key">Externe toegang gebruikt de API-sleutel van uw server (Serverinstellingen).</string>
+    <string name="presentation_remote_tunnel_temporary_note">Openbare tunnellinks zijn tijdelijk en veranderen elke keer dat u een nieuwe tunnel start.</string>
+    <string name="presentation_public_access_description">Laat verbonden telefoons en tablets de presentatie bedienen via mobiele data zonder verbinding te maken met uw wifi</string>
+    <string name="presentation_server_not_running">Server draait niet — start de companion-server in Instellingen om afstandsbediening in te schakelen</string>
     <string name="select_presentation_file_dialog">Presentatiebestand selecteren</string>
 
     <!-- Projection Settings Tab -->
@@ -538,6 +555,9 @@
     <string name="gradient_top_color">Bovenkleur:</string>
     <string name="gradient_bottom_color">Onderkleur:</string>
     <string name="gradient_opacity">Dekking</string>
+    <string name="background_opacity">Achtergrondtransparantie</string>
+    <string name="gradient_top_opacity">Transparantie boven</string>
+    <string name="gradient_bottom_opacity">Transparantie onder</string>
     <string name="gradient_position">Overgangspositie</string>
 
     <!-- System Settings -->
@@ -1045,6 +1065,8 @@
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Toevoegen aan programma</string>
     <string name="remote_api_project">Projecteren (live gaan)</string>
+    <string name="remote_api_presentation_connect">Verbinden met presentatie-afstandsbediening</string>
+    <string name="remote_api_presentation_connect_detail">Een telefoon of tablet wil uw presentatiedia's bekijken en bedienen.</string>
     <string name="remote_api_qa_add">V&amp;A: Vraag toevoegen</string>
     <string name="remote_api_qa_edit">V&amp;A: Vraag bewerken</string>
     <string name="remote_api_qa_delete">V&amp;A: Vraag verwijderen</string>
@@ -1053,6 +1075,8 @@
     <string name="remote_api_qa_done">V&amp;A: Markeren als klaar</string>
     <string name="remote_api_qa_display">V&amp;A: Live gaan</string>
     <string name="remote_api_qa_clear_display">V&amp;A: Scherm wissen</string>
+    <string name="remote_api_qa_admin_connect">Verbinden met V&amp;A-beheer</string>
+    <string name="remote_api_qa_admin_connect_detail">Een telefoon of tablet wil V&amp;A-vragen modereren.</string>
     <string name="remote_api_request_title">Extern API-verzoek</string>
     <string name="remote_api_request_title_queued">Extern API-verzoek (%1$d in wachtrij)</string>
     <string name="remote_client_label">Client:</string>
@@ -1062,6 +1086,10 @@
     <string name="remote_queue_waiting_many">%1$d verzoeken wachten in de wachtrij</string>
     <string name="remote_activity_added_to_schedule">Toegevoegd aan programma</string>
     <string name="remote_activity_projected">Geprojecteerd (live gegaan)</string>
+    <string name="remote_activity_presentation_connect">Verbonden met presentatie-afstandsbediening</string>
+    <string name="remote_activity_presentation_connect_detail">Nu verbonden</string>
+    <string name="remote_activity_qa_admin_connect">Verbonden met V&amp;A-beheer</string>
+    <string name="remote_activity_qa_admin_connect_detail">Nu verbonden</string>
     <string name="remote_activity_presented">Presenteren</string>
     <string name="remote_activity_uploaded">Geüpload</string>
     <string name="remote_activity_cleared">Scherm gewist</string>
@@ -1122,6 +1150,18 @@
     <string name="tooltip_directory_not_found">Map niet gevonden. Maak hem aan of kies een andere locatie.</string>
     <string name="tooltip_directory_not_writable">Kan niet schrijven naar deze map. Kies een andere locatie of wijzig de rechten.</string>
     <string name="launch_on_login">Starten bij aanmelden</string>
+    <string name="analytics_reporting">Anonieme crash- en analyserapporten delen</string>
+    <string name="send_test_event">Testgebeurtenis verzenden</string>
+    <string name="test_event_title">Sentry-testgebeurtenis</string>
+    <string name="test_event_sent">Testgebeurtenis verzonden naar Sentry. Controleer uw dashboard om te bevestigen dat het is aangekomen.</string>
+    <string name="test_event_failed">Kon testgebeurtenis niet verzenden. Crashrapportage is uitgeschakeld of er is geen DSN geconfigureerd.</string>
+    <string name="test_event_dev_only">Alleen zichtbaar voor ontwikkelaars — verborgen in uitgebrachte installatiebuilds.</string>
+    <string name="crash_feedback_title">Meld wat er is gebeurd</string>
+    <string name="crash_feedback_message">ChurchPresenter is de vorige keer onverwacht afgesloten. Als u ons vertelt wat u aan het doen was, helpt dat ons om het op te lossen. Dit is optioneel.</string>
+    <string name="crash_feedback_comment_label">Wat was u aan het doen?</string>
+    <string name="crash_feedback_email_label">E-mail (optioneel)</string>
+    <string name="crash_feedback_send">Rapport verzenden</string>
+    <string name="crash_feedback_dismiss">Niet nu</string>
     <string name="song_folder_with_count">%1$s (%2$d liederen)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
@@ -1165,6 +1205,7 @@
     <string name="stage_monitor_show_timer">Afteltimer tonen</string>
     <string name="stage_monitor_show_section_label">Sectielabel tonen</string>
     <string name="stage_monitor_show_notes">Presentatienotities tonen</string>
+    <string name="general">Algemeen</string>
     <string name="stage_monitor_section_general">Algemeen</string>
     <string name="stage_monitor_section_current">Huidige dia</string>
     <string name="stage_monitor_section_next">Voorbeeld volgende dia</string>
@@ -1247,8 +1288,6 @@
     <string name="qa_position">Positie</string>
     <string name="qa_settings_section">Instellingen</string>
     <string name="qa_cooldown_label">Wachttijd tussen vragen (seconden)</string>
-    <string name="qa_admin_password">Beheerderswachtwoord</string>
-    <string name="qa_no_password">Geen wachtwoord</string>
     <string name="qa_approve">Goedkeuren</string>
     <string name="qa_deny">Weigeren</string>
     <string name="qa_mark_done">Markeren als klaar</string>
@@ -1287,6 +1326,8 @@
     <string name="qa_sort_oldest">Oudste eerst</string>
     <string name="qa_sort_most_votes">Meeste stemmen</string>
     <string name="qa_sort_least_votes">Minste stemmen</string>
+    <string name="qa_filter_label">Filter</string>
+    <string name="qa_sort_label">Sorteren</string>
     <string name="qa_add">Toevoegen</string>
     <string name="qa_clear_all_confirm_message">Weet u zeker dat u alle vragen wilt wissen? Dit kan niet ongedaan worden gemaakt.</string>
     <string name="qa_clear">Wissen</string>
@@ -1415,6 +1456,7 @@
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>
+    <string name="obs_section_connection">OBS WebSocket</string>
     <string name="obs_description">Schakel automatisch OBS Studio-scènes wanneer inhoud verandert.</string>
     <string name="obs_enable">Verbinden met OBS Studio</string>
     <string name="obs_host">Host</string>
@@ -1496,6 +1538,7 @@
     <string name="midnight_theme">Middernacht-thema</string>
     <string name="forest_theme">Bos-thema</string>
     <string name="mocha_theme">Mokka-thema</string>
+    <string name="studio_theme">Studio-thema</string>
     <string name="projection_decklink_io_conflict_tooltip">Ook gebruikt voor invoer — werkt mogelijk niet op apparaten zonder gelijktijdige I/O</string>
     <string name="stop">Stoppen</string>
     <string name="timer_mode_duration">Duur</string>
@@ -1607,6 +1650,7 @@
     <string name="atem_loading_slots">Slots laden…</string>
     <string name="atem_slots_error">Kan slots niet laden: %1$s</string>
     <string name="atem_not_configured">Configureer ATEM in Instellingen om deze knop te activeren.</string>
+    <string name="atem_section_connection">Blackmagic ATEM</string>
     <string name="atem_section_upload_defaults">Standaard uploadinstellingen</string>
     <string name="atem_slot_unnamed">Slot %1$d</string>
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
@@ -1652,6 +1696,7 @@
     <string name="dictionary_back">Terug</string>
     <string name="dictionary_forward">Vooruit</string>
     <string name="dictionary_go_to_verse">Ga naar vers in Bijbel-tabblad</string>
+    <string name="em_dash">—</string>
     <string name="bible_smart_search_hint">Referentie of tekst — bijv. Johannes 3:16, Mat 1 of een woord</string>
     <string name="bible_search_mode_auto">Auto</string>
     <string name="bible_search_mode_reference">Referentie</string>
@@ -1696,11 +1741,21 @@
     <string name="bible_stt_src_explicit">Uitgesproken referentie</string>
     <string name="bible_stt_src_reverse">Gevonden via tekst</string>
     <string name="bible_stt_src_continuation">Volgen</string>
+    <string name="bible_stt_track_transcription">Gehoord in transcriptie</string>
+    <string name="bible_stt_track_translation">Gehoord in vertaling</string>
     <string name="bible_stt_match_label">Tekstovereenkomst</string>
     <string name="bible_stt_level_off">Uit</string>
     <string name="bible_stt_level_conservative">Conservatief</string>
     <string name="bible_stt_level_balanced">Gebalanceerd</string>
     <string name="bible_stt_level_aggressive">Agressief</string>
+    <string name="bible_stt_engine_connecting">Engine wordt gestart…</string>
+    <string name="bible_stt_engine_unavailable">Engine niet beschikbaar</string>
+    <string name="bible_stt_no_bible">Geen Bijbel geconfigureerd</string>
+    <string name="bible_stt_waiting_for_stt">Actief — wachten op STT</string>
+    <string name="stt_status_not_connected">STT niet verbonden</string>
+    <string name="stt_status_connecting">Verbinden met STT…</string>
+    <string name="stt_status_unreachable">Kan STT-server niet bereiken — opnieuw proberen…</string>
+    <string name="stt_status_reconnecting">STT verbroken — opnieuw verbinden…</string>
     <string name="bible_engine_detect">Schrift detecteren</string>
     <string name="bible_engine_run_local">Engine lokaal uitvoeren</string>
     <string name="bible_engine_host">Engine-host</string>
@@ -1710,6 +1765,7 @@
     <string name="qa_qr_bg_color">QR achtergrond</string>
     <string name="qa_qr_message_label">QR-codebericht</string>
     <string name="qa_qr_message_reset">Terugzetten naar standaard</string>
+    <string name="qa_admin_uses_api_key">Beheerderstoegang gebruikt de API-sleutel van uw server (Serverinstellingen).</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Contact</string>
     <string name="contact_us_title">Contact</string>

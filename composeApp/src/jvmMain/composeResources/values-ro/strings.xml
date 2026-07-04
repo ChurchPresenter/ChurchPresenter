@@ -21,6 +21,7 @@
     <string name="starts_with">Începe Cu</string>
     <string name="exact_match">Potrivire Exactă</string>
     <string name="all_song_categories">Toate Categoriile de Cântări</string>
+    <string name="filter">Filtru</string>
     <string name="filter_colon">Filtru:</string>
     <string name="filter_type_colon">Tip Filtru:</string>
     <string name="service_schedule">Programul Serviciului:</string>
@@ -50,6 +51,7 @@
     <string name="none">Niciunul</string>
     <string name="first_page">Prima Pagină</string>
     <string name="every_page">Fiecare Pagină</string>
+    <string name="show">Afișează</string>
     <string name="show_title">Afișează Titlul:</string>
     <string name="show_number">Afișează Numărul:</string>
     <string name="font_size">Dimensiune Font:</string>
@@ -103,6 +105,7 @@
     <string name="menu_getting_started">Noțiuni de bază…</string>
     <string name="menu_about">Despre</string>
     <string name="about_title">Despre Church Presenter</string>
+    <string name="about_copyright">© %1$s Church Presenter</string>
     <string name="converter_window_title">ChurchPresenter Converter</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="clear_recents">Șterge recente</string>
@@ -251,6 +254,7 @@
     <string name="midnight_theme">Temă Miezul Nopții</string>
     <string name="forest_theme">Temă Pădure</string>
     <string name="mocha_theme">Temă Mocha</string>
+    <string name="studio_theme">Temă Studio</string>
     <!-- Placeholder strings for other tabs -->
     <string name="bible_tab_content">Conținutul filei Biblie va fi implementat</string>
     <string name="text_settings_tab_content">Conținutul filei Setări Text și Culori va fi implementat</string>
@@ -444,6 +448,7 @@
     <string name="tooltip_edit">Editează</string>
     <string name="tooltip_edit_label">Editează Etichetă</string>
     <string name="tooltip_go_live">Proiectează</string>
+    <string name="tooltip_presentation_remote">Deschide telecomanda</string>
     <string name="tooltip_send_to_stage_monitor">Trimite la Monitorul de Scenă</string>
     <string name="tooltip_hide_from_stage_monitor">Ascunde Anunțul</string>
     <string name="tooltip_add_label">Adaugă Etichetă</string>
@@ -493,6 +498,7 @@
     <string name="settings">Setări</string>
     <string name="images_suffix">imagini</string>
     <string name="pictures_arrow_key_hint">← → imaginea următoare/anterioară  ·  ↑ ↓ navigare rânduri</string>
+    <string name="presentation_arrow_key_hint">← → slide următor/anterior</string>
     <string name="pictures_reorder_hint">Shift+glisare miniaturi pentru reordonare</string>
     <string name="slideshow_settings">Setări Prezentare Media</string>
     <string name="transition_settings">Setări Tranziție</string>
@@ -501,6 +507,7 @@
     <!-- Presentation Tab Strings -->
     <string name="no_file_selected_presentation">Niciun fișier selectat</string>
     <string name="slide_count">%1$d slide-uri</string>
+    <string name="loading_slides_progress">%1$d / %2$d slide-uri</string>
     <string name="slide_counter">Slide-ul %1$d din %2$d</string>
     <string name="loading_slides">Se încarcă slide-urile...</string>
     <string name="select_presentation_file">Selectați un fișier de prezentare pentru a vedea slide-urile</string>
@@ -509,6 +516,17 @@
     <string name="slide_number">Slide-ul %1$d</string>
     <string name="remove">Elimină</string>
     <string name="select_presentation_file_button">Selectează Fișier</string>
+    <string name="presentation_remote_control">Telecomandă</string>
+    <string name="presentation_remote_enable">Activează telecomanda</string>
+    <string name="presentation_remote_description">Permite telefoanelor și tabletelor conectate să navigheze și să controleze slide-urile prezentării. Scanează codul QR de mai jos pentru a te conecta.</string>
+    <string name="presentation_freeze_output">Golește ieșirea</string>
+    <string name="presentation_unfreeze_output">Restabilește ieșirea</string>
+    <string name="presentation_clear">Golește Prezentarea</string>
+    <string name="presentation_remote_copy_url">Copiază URL</string>
+    <string name="presentation_remote_uses_api_key">Accesul de la distanță folosește cheia API a serverului (Setări Server).</string>
+    <string name="presentation_remote_tunnel_temporary_note">Linkurile tunelului public sunt temporare și se schimbă de fiecare dată când pornești un tunel nou.</string>
+    <string name="presentation_public_access_description">Permite telefoanelor și tabletelor conectate să controleze prezentarea prin date mobile fără a te conecta la rețeaua WiFi</string>
+    <string name="presentation_server_not_running">Serverul nu rulează — pornește serverul companion din Setări pentru a activa telecomanda</string>
     <string name="select_presentation_file_dialog">Selectați Fișierul de Prezentare</string>
 
     <!-- Projection Settings Tab -->
@@ -554,6 +572,9 @@
     <string name="gradient_top_color">Culoare Sus:</string>
     <string name="gradient_bottom_color">Culoare Jos:</string>
     <string name="gradient_opacity">Opacitate</string>
+    <string name="background_opacity">Opacitate Fundal</string>
+    <string name="gradient_top_opacity">Opacitate Sus</string>
+    <string name="gradient_bottom_opacity">Opacitate Jos</string>
     <string name="gradient_position">Poziția Tranziției</string>
 
     <!-- System Settings -->
@@ -1071,6 +1092,8 @@
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Adaugă la Program</string>
     <string name="remote_api_project">Proiectează (Live)</string>
+    <string name="remote_api_presentation_connect">Conectează-te la Telecomanda Prezentării</string>
+    <string name="remote_api_presentation_connect_detail">Un telefon sau o tabletă dorește să navigheze și să controleze slide-urile prezentării tale.</string>
     <string name="remote_api_qa_add">Î&amp;R: Adaugă Întrebare</string>
     <string name="remote_api_qa_edit">Î&amp;R: Editează Întrebare</string>
     <string name="remote_api_qa_delete">Î&amp;R: Șterge Întrebare</string>
@@ -1079,6 +1102,8 @@
     <string name="remote_api_qa_done">Î&amp;R: Marchează ca Rezolvată</string>
     <string name="remote_api_qa_display">Î&amp;R: Proiectează</string>
     <string name="remote_api_qa_clear_display">Î&amp;R: Golește Ecranul</string>
+    <string name="remote_api_qa_admin_connect">Conectează-te la Admin Î&amp;R</string>
+    <string name="remote_api_qa_admin_connect_detail">Un telefon sau o tabletă dorește să modereze întrebările Î&amp;R.</string>
     <string name="remote_api_request_title">Cerere API Remote</string>
     <string name="remote_api_request_title_queued">Cerere API Remote (%1$d în așteptare)</string>
     <string name="remote_client_label">Client:</string>
@@ -1088,6 +1113,10 @@
     <string name="remote_queue_waiting_many">mai %1$d cereri în așteptare în coadă</string>
     <string name="remote_activity_added_to_schedule">Adăugat la Program</string>
     <string name="remote_activity_projected">Proiectat (Live)</string>
+    <string name="remote_activity_presentation_connect">Conectat la Telecomanda Prezentării</string>
+    <string name="remote_activity_presentation_connect_detail">Acum conectat</string>
+    <string name="remote_activity_qa_admin_connect">Conectat la Admin Î&amp;R</string>
+    <string name="remote_activity_qa_admin_connect_detail">Acum conectat</string>
     <string name="remote_activity_presented">Se Prezintă</string>
     <string name="remote_activity_uploaded">Încărcat</string>
     <string name="remote_activity_cleared">Ecran Golit</string>
@@ -1148,6 +1177,18 @@
     <string name="tooltip_directory_not_found">Directorul nu a fost găsit. Creați-l sau alegeți o altă locație.</string>
     <string name="tooltip_directory_not_writable">Nu se poate scrie în acest director. Alegeți o altă locație sau modificați permisiunile.</string>
     <string name="launch_on_login">Pornește la autentificare</string>
+    <string name="analytics_reporting">Distribuie rapoarte anonime de erori și analize</string>
+    <string name="send_test_event">Trimite eveniment de test</string>
+    <string name="test_event_title">Eveniment de test Sentry</string>
+    <string name="test_event_sent">Evenimentul de test a fost trimis către Sentry. Verifică tabloul de bord pentru a confirma sosirea.</string>
+    <string name="test_event_failed">Nu s-a putut trimite evenimentul de test. Raportarea erorilor este dezactivată sau nu este configurat niciun DSN.</string>
+    <string name="test_event_dev_only">Vizibil doar pentru dezvoltatori — ascuns în versiunile lansate ale instalatorului.</string>
+    <string name="crash_feedback_title">Raportează ce s-a întâmplat</string>
+    <string name="crash_feedback_message">ChurchPresenter s-a închis neașteptat ultima dată. Spunându-ne ce făceai ne ajută să reparăm problema. Este opțional.</string>
+    <string name="crash_feedback_comment_label">Ce făceai?</string>
+    <string name="crash_feedback_email_label">Email (opțional)</string>
+    <string name="crash_feedback_send">Trimite raportul</string>
+    <string name="crash_feedback_dismiss">Nu acum</string>
     <string name="song_folder_with_count">%1$s (%2$d cântări)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
@@ -1191,6 +1232,7 @@
     <string name="stage_monitor_show_timer">Afișează Cronometru Invers</string>
     <string name="stage_monitor_show_section_label">Afișează Eticheta Secțiunii</string>
     <string name="stage_monitor_show_notes">Afișează Notele Prezentatorului</string>
+    <string name="general">General</string>
     <string name="stage_monitor_section_general">General</string>
     <string name="stage_monitor_section_current">Slide Curent</string>
     <string name="stage_monitor_section_next">Previzualizare Slide Următor</string>
@@ -1274,6 +1316,7 @@
     <string name="qa_qr_message_label">Mesaj Cod QR</string>
     <string name="qa_qr_message_default">Scanați pentru a adresa o întrebare</string>
     <string name="qa_qr_message_reset">Resetați la implicit</string>
+    <string name="qa_admin_uses_api_key">Accesul de administrator folosește cheia API a serverului (Setări Server).</string>
     <string name="qa_font">Font</string>
     <string name="qa_size">Dimensiune</string>
     <string name="qa_background_color">Culoare Fundal</string>
@@ -1281,8 +1324,6 @@
     <string name="qa_position">Poziție</string>
     <string name="qa_settings_section">Setări</string>
     <string name="qa_cooldown_label">Pauză între întrebări (secunde)</string>
-    <string name="qa_admin_password">Parolă Admin</string>
-    <string name="qa_no_password">Fără parolă</string>
     <string name="qa_approve">Aprobă</string>
     <string name="qa_deny">Respinge</string>
     <string name="qa_mark_done">Marchează ca Rezolvată</string>
@@ -1321,6 +1362,8 @@
     <string name="qa_sort_oldest">Cele Mai Vechi</string>
     <string name="qa_sort_most_votes">Cele Mai Votate</string>
     <string name="qa_sort_least_votes">Cele Mai Puțin Votate</string>
+    <string name="qa_filter_label">Filtru</string>
+    <string name="qa_sort_label">Sortare</string>
     <string name="qa_add">Adaugă</string>
     <string name="qa_clear_all_confirm_message">Sigur doriți să ștergeți toate întrebările? Această acțiune nu poate fi anulată.</string>
     <string name="qa_clear">Golește</string>
@@ -1449,6 +1492,7 @@
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>
+    <string name="obs_section_connection">OBS WebSocket</string>
     <string name="obs_description">Comută automat scenele OBS Studio când conținutul se schimbă.</string>
     <string name="obs_enable">Conectare la OBS Studio</string>
     <string name="obs_host">Host</string>
@@ -1614,6 +1658,7 @@
     <string name="atem_loading_slots">Se încarcă slot-urile…</string>
     <string name="atem_slots_error">Nu s-au putut încărca slot-urile: %1$s</string>
     <string name="atem_not_configured">Configurați ATEM în Setări pentru a activa acest buton.</string>
+    <string name="atem_section_connection">Blackmagic ATEM</string>
     <string name="atem_section_upload_defaults">Setări implicite de încărcare</string>
     <string name="atem_slot_unnamed">Slot %1$d</string>
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
@@ -1659,6 +1704,7 @@
     <string name="dictionary_back">Înapoi</string>
     <string name="dictionary_forward">Înainte</string>
     <string name="dictionary_go_to_verse">Mergi la verset în fila Biblie</string>
+    <string name="em_dash">—</string>
     <string name="bible_smart_search_hint">Referință sau text — ex. Ioan 3:16, Mat 1 sau un cuvânt</string>
     <string name="bible_search_mode_auto">Auto</string>
     <string name="bible_search_mode_reference">Referință</string>
@@ -1703,11 +1749,21 @@
     <string name="bible_stt_src_explicit">Referință rostită</string>
     <string name="bible_stt_src_reverse">Găsit prin text</string>
     <string name="bible_stt_src_continuation">Urmărire</string>
+    <string name="bible_stt_track_transcription">Auzit în transcriere</string>
+    <string name="bible_stt_track_translation">Auzit în traducere</string>
     <string name="bible_stt_match_label">Potrivire text</string>
     <string name="bible_stt_level_off">Dezactivat</string>
     <string name="bible_stt_level_conservative">Conservator</string>
     <string name="bible_stt_level_balanced">Echilibrat</string>
     <string name="bible_stt_level_aggressive">Agresiv</string>
+    <string name="bible_stt_engine_connecting">Se pornește motorul…</string>
+    <string name="bible_stt_engine_unavailable">Motor indisponibil</string>
+    <string name="bible_stt_no_bible">Nicio Biblie configurată</string>
+    <string name="bible_stt_waiting_for_stt">Rulează — se așteaptă STT</string>
+    <string name="stt_status_not_connected">STT neconectat</string>
+    <string name="stt_status_connecting">Se conectează la STT…</string>
+    <string name="stt_status_unreachable">Nu se poate ajunge la serverul STT — se reîncearcă…</string>
+    <string name="stt_status_reconnecting">STT deconectat — se reconectează…</string>
     <string name="bible_engine_detect">Detectați Scriptura</string>
     <string name="bible_engine_run_local">Rulați motorul local</string>
     <string name="bible_engine_host">Gazda motorului</string>

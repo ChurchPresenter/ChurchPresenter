@@ -21,6 +21,7 @@
     <string name="starts_with">Začína na</string>
     <string name="exact_match">Přesná shoda</string>
     <string name="all_song_categories">Všechny kategorie</string>
+    <string name="filter">Filtr</string>
     <string name="filter_colon">Filtr:</string>
     <string name="filter_type_colon">Typ filtru:</string>
     <string name="service_schedule">Plán bohoslužby:</string>
@@ -39,6 +40,7 @@
     <string name="none">Žádný</string>
     <string name="first_page">První strana</string>
     <string name="every_page">Každá strana</string>
+    <string name="show">Zobrazit</string>
     <string name="show_title">Zobrazit název:</string>
     <string name="show_number">Zobrazit číslo:</string>
     <string name="font_size">Velikost písma:</string>
@@ -93,6 +95,7 @@
     <string name="menu_getting_started">Začínáme…</string>
     <string name="menu_about">O programu</string>
     <string name="about_title">O Church Presenter</string>
+    <string name="about_copyright">© %1$s Church Presenter</string>
     <string name="converter_window_title">ChurchPresenter Converter</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="clear_recents">Vymazat nedávné</string>
@@ -227,6 +230,7 @@
     <string name="midnight_theme">Půlnoční motiv</string>
     <string name="forest_theme">Lesní motiv</string>
     <string name="mocha_theme">Mocha motiv</string>
+    <string name="studio_theme">Studio motiv</string>
 
     <string name="menu_language">Jazyk</string>
 
@@ -295,6 +299,7 @@
     <string name="tooltip_add_label">Přidat štítek</string>
     <string name="tooltip_remove">Odebrat</string>
     <string name="tooltip_go_live">Zobrazit</string>
+    <string name="tooltip_presentation_remote">Otevřít dálkové ovládání</string>
     <string name="tooltip_send_to_stage_monitor">Odeslat na monitor scény</string>
     <string name="tooltip_hide_from_stage_monitor">Skrýt oznámení</string>
 
@@ -461,6 +466,7 @@
     <string name="settings">Nastavení</string>
     <string name="images_suffix">obrázků</string>
     <string name="pictures_arrow_key_hint">← → ↑ ↓ pro přepínání obrázků</string>
+    <string name="presentation_arrow_key_hint">← → další/předchozí snímek</string>
     <string name="pictures_reorder_hint">Shift+přetáhnout pro změnu pořadí</string>
     <string name="slideshow_settings">Nastavení prezentace</string>
     <string name="transition_settings">Nastavení přechodu</string>
@@ -470,6 +476,7 @@
     <!-- Presentation Tab Strings -->
     <string name="no_file_selected_presentation">Žádný soubor nevybrán</string>
     <string name="slide_count">%1$d snímků</string>
+    <string name="loading_slides_progress">%1$d / %2$d snímků</string>
     <string name="slide_counter">Snímek %1$d z %2$d</string>
     <string name="loading_slides">Načítání snímků...</string>
     <string name="select_presentation_file">Vyberte soubor prezentace pro zobrazení snímků</string>
@@ -478,6 +485,17 @@
     <string name="slide_number">Snímek %1$d</string>
     <string name="remove">Odstranit</string>
     <string name="select_presentation_file_button">Vybrat soubor</string>
+    <string name="presentation_remote_control">Dálkové ovládání</string>
+    <string name="presentation_remote_enable">Povolit dálkové ovládání</string>
+    <string name="presentation_remote_description">Umožňuje připojeným telefonům a tabletům procházet a ovládat snímky prezentace. Naskenujte QR kód níže pro připojení.</string>
+    <string name="presentation_freeze_output">Ztlumit výstup</string>
+    <string name="presentation_unfreeze_output">Zrušit ztlumení výstupu</string>
+    <string name="presentation_clear">Vymazat prezentaci</string>
+    <string name="presentation_remote_copy_url">Kopírovat URL</string>
+    <string name="presentation_remote_uses_api_key">Vzdálený přístup používá API klíč vašeho serveru (Nastavení serveru).</string>
+    <string name="presentation_remote_tunnel_temporary_note">Odkazy veřejného tunelu jsou dočasné a mění se při každém spuštění nového tunelu.</string>
+    <string name="presentation_public_access_description">Umožněte připojeným telefonům a tabletům ovládat prezentaci přes mobilní data bez nutnosti připojení k vaší Wi-Fi</string>
+    <string name="presentation_server_not_running">Server neběží — spusťte doprovodný server v Nastavení pro povolení dálkového ovládání</string>
     <string name="select_presentation_file_dialog">Select Presentation File</string>
 
     <!-- Projection Settings Tab -->
@@ -742,6 +760,9 @@
     <string name="gradient_bottom_color">Spodní barva:</string>
     <string name="gradient_enabled">Přechod</string>
     <string name="gradient_opacity">Neprůhlednost</string>
+    <string name="background_opacity">Neprůhlednost pozadí</string>
+    <string name="gradient_top_opacity">Neprůhlednost nahoře</string>
+    <string name="gradient_bottom_opacity">Neprůhlednost dole</string>
     <string name="gradient_position">Pozice přechodu</string>
     <string name="gradient_top_color">Horní barva:</string>
     <string name="key_output">Klíčový výstup</string>
@@ -923,10 +944,14 @@
     <string name="endpoint_desc_ws_project">projektovat položku přímo (WS)</string>
     <string name="remote_api_add_to_schedule">Přidat do plánu</string>
     <string name="remote_api_project">Projektovat (Spustit živě)</string>
+    <string name="remote_api_presentation_connect">Připojit k dálkovému ovládání prezentace</string>
+    <string name="remote_api_presentation_connect_detail">Telefon nebo tablet chce procházet a ovládat snímky vaší prezentace.</string>
     <string name="remote_api_qa_add">Q&amp;A: Přidat otázku</string>
     <string name="remote_api_qa_edit">Q&amp;A: Upravit otázku</string>
     <string name="remote_api_qa_delete">Q&amp;A: Smazat otázku</string>
     <string name="remote_api_qa_clear_display">Q&amp;A: Vymazat zobrazení</string>
+    <string name="remote_api_qa_admin_connect">Připojit k administraci Q&amp;A</string>
+    <string name="remote_api_qa_admin_connect_detail">Telefon nebo tablet chce moderovat otázky Q&amp;A.</string>
     <string name="remote_api_request_title">Požadavek vzdáleného API</string>
     <string name="remote_api_request_title_queued">Požadavek vzdáleného API (%1$d čekající)</string>
     <string name="remote_client_label">Klient:</string>
@@ -977,6 +1002,18 @@
     <string name="tooltip_directory_not_found">Adresář nebyl nalezen. Vytvořte ho nebo zvolte jiné umístění.</string>
     <string name="tooltip_directory_not_writable">Do tohoto adresáře nelze zapisovat. Zvolte jiné umístění nebo změňte oprávnění.</string>
     <string name="launch_on_login">Spustit při přihlášení</string>
+    <string name="analytics_reporting">Sdílet anonymní hlášení o pádech a analytice</string>
+    <string name="send_test_event">Odeslat testovací událost</string>
+    <string name="test_event_title">Testovací událost Sentry</string>
+    <string name="test_event_sent">Testovací událost byla odeslána do Sentry. Zkontrolujte svůj dashboard, zda dorazila.</string>
+    <string name="test_event_failed">Nepodařilo se odeslat testovací událost. Hlášení o pádech je vypnuté nebo není nakonfigurováno DSN.</string>
+    <string name="test_event_dev_only">Viditelné pouze pro vývojáře — skryté ve vydaných instalačních sestaveních.</string>
+    <string name="crash_feedback_title">Nahlásit, co se stalo</string>
+    <string name="crash_feedback_message">Aplikace ChurchPresenter se naposledy neočekávaně ukončila. Popis toho, co jste dělali, nám pomůže to opravit. Je to nepovinné.</string>
+    <string name="crash_feedback_comment_label">Co jste dělali?</string>
+    <string name="crash_feedback_email_label">E-mail (nepovinné)</string>
+    <string name="crash_feedback_send">Odeslat hlášení</string>
+    <string name="crash_feedback_dismiss">Teď ne</string>
     <string name="song_folder_with_count">%1$s (%2$d písní)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
@@ -1200,6 +1237,7 @@
     <string name="stage_monitor_show_section_label">Zobrazit popisek sekce</string>
     <string name="stage_monitor_show_label">Zobrazit popisek písně/Bible</string>
     <string name="stage_monitor_show_notes">Zobrazit poznámky moderátora</string>
+    <string name="general">Obecné</string>
     <string name="stage_monitor_text_color">Barva textu</string>
     <string name="stage_monitor_font_size">Velikost písma</string>
     <string name="stage_monitor_background_color">Barva pozadí</string>
@@ -1286,8 +1324,7 @@
     <string name="qa_qr_message_label">Zpráva QR kódu</string>
     <string name="qa_qr_message_default">Naskenujte pro zadání otázky</string>
     <string name="qa_qr_message_reset">Obnovit výchozí</string>
-    <string name="qa_admin_password">Heslo administrátora</string>
-    <string name="qa_no_password">Bez hesla</string>
+    <string name="qa_admin_uses_api_key">Přístup administrátora používá API klíč vašeho serveru (Nastavení serveru).</string>
     <string name="qa_approve">Schválit</string>
     <string name="qa_deny">Zamítnout</string>
     <string name="qa_mark_done">Označit jako hotové</string>
@@ -1325,6 +1362,8 @@
     <string name="qa_sort_oldest">Nejstarší první</string>
     <string name="qa_sort_most_votes">Nejvíce hlasů</string>
     <string name="qa_sort_least_votes">Nejméně hlasů</string>
+    <string name="qa_filter_label">Filtr</string>
+    <string name="qa_sort_label">Řazení</string>
     <string name="qa_add">Přidat</string>
     <string name="qa_clear_all_confirm_message">Opravdu chcete smazat všechny otázky? Tuto akci nelze vrátit zpět.</string>
     <string name="qa_clear">Vymazat</string>
@@ -1439,6 +1478,7 @@
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>
+    <string name="obs_section_connection">OBS WebSocket</string>
     <string name="obs_description">Automaticky přepínejte scény OBS Studio při změně obsahu.</string>
     <string name="obs_enable">Připojit k OBS Studio</string>
     <string name="obs_host">Hostitel</string>
@@ -1531,6 +1571,10 @@
     <string name="qa_add_question_hint">Přidat otázku…</string>
     <string name="remote_activity_added_to_schedule">Přidáno do programu</string>
     <string name="remote_activity_projected">Promítáno (živě)</string>
+    <string name="remote_activity_presentation_connect">Připojeno k dálkovému ovládání prezentace</string>
+    <string name="remote_activity_presentation_connect_detail">Nyní připojeno</string>
+    <string name="remote_activity_qa_admin_connect">Připojeno k administraci Q&amp;A</string>
+    <string name="remote_activity_qa_admin_connect_detail">Nyní připojeno</string>
     <string name="remote_activity_presented">Prezentuje se</string>
     <string name="remote_activity_uploaded">Nahráno</string>
     <string name="remote_activity_cleared">Obrazovka vymazána</string>
@@ -1669,6 +1713,7 @@
     <string name="atem_loading_slots">Načítání slotů…</string>
     <string name="atem_slots_error">Sloty se nepodařilo načíst: %1$s</string>
     <string name="atem_not_configured">Nakonfigurujte ATEM v Nastavení pro aktivaci tohoto tlačítka.</string>
+    <string name="atem_section_connection">Blackmagic ATEM</string>
     <string name="atem_section_upload_defaults">Výchozí nastavení nahrávání</string>
     <string name="atem_slot_unnamed">Slot %1$d</string>
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
@@ -1714,6 +1759,7 @@
     <string name="dictionary_back">Zpět</string>
     <string name="dictionary_forward">Vpřed</string>
     <string name="dictionary_go_to_verse">Přejít na verš na záložce Bible</string>
+    <string name="em_dash">—</string>
     <string name="bible_smart_search_hint">Odkaz nebo text — např. Jan 3:16, Mat 1 nebo slovo</string>
     <string name="bible_search_mode_auto">Auto</string>
     <string name="bible_search_mode_reference">Odkaz</string>
@@ -1758,11 +1804,21 @@
     <string name="bible_stt_src_explicit">Vyslovený odkaz</string>
     <string name="bible_stt_src_reverse">Nalezeno textem</string>
     <string name="bible_stt_src_continuation">Sledování</string>
+    <string name="bible_stt_track_transcription">Slyšeno v přepisu</string>
+    <string name="bible_stt_track_translation">Slyšeno v překladu</string>
     <string name="bible_stt_match_label">Shoda textu</string>
     <string name="bible_stt_level_off">Vypnuto</string>
     <string name="bible_stt_level_conservative">Konzervativní</string>
     <string name="bible_stt_level_balanced">Vyvážený</string>
     <string name="bible_stt_level_aggressive">Agresivní</string>
+    <string name="bible_stt_engine_connecting">Spouštění enginu…</string>
+    <string name="bible_stt_engine_unavailable">Engine není k dispozici</string>
+    <string name="bible_stt_no_bible">Bible není nakonfigurována</string>
+    <string name="bible_stt_waiting_for_stt">Běží — čekání na STT</string>
+    <string name="stt_status_not_connected">STT není připojeno</string>
+    <string name="stt_status_connecting">Připojování k STT…</string>
+    <string name="stt_status_unreachable">Nelze se připojit k serveru STT — opakuje se…</string>
+    <string name="stt_status_reconnecting">STT odpojeno — opětovné připojování…</string>
     <string name="bible_engine_detect">Detekovat Písmo</string>
     <string name="bible_engine_run_local">Spustit engine lokálně</string>
     <string name="bible_engine_host">Hostitel enginu</string>

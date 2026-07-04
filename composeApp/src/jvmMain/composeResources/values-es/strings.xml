@@ -21,6 +21,7 @@
     <string name="starts_with">Empieza con</string>
     <string name="exact_match">Coincidencia exacta</string>
     <string name="all_song_categories">Todas las categorías</string>
+    <string name="filter">Filtro</string>
     <string name="filter_colon">Filtro:</string>
     <string name="filter_type_colon">Tipo de filtro:</string>
     <string name="service_schedule">Programa del servicio:</string>
@@ -50,6 +51,7 @@
     <string name="none">Ninguno</string>
     <string name="first_page">Primera página</string>
     <string name="every_page">Cada página</string>
+    <string name="show">Mostrar</string>
     <string name="show_title">Mostrar título:</string>
     <string name="show_number">Mostrar número:</string>
     <string name="font_size">Tamaño de fuente:</string>
@@ -98,6 +100,7 @@
     <string name="menu_help">Ayuda</string>
     <string name="menu_about">Acerca de</string>
     <string name="about_title">Acerca de Church Presenter</string>
+    <string name="about_copyright">© %1$s Church Presenter</string>
     <string name="open_crash_logs">Abrir registros de errores</string>
     <string name="open_converter">Convertidor</string>
     <string name="report_bug">Reportar un error</string>
@@ -429,6 +432,7 @@
     <string name="tooltip_edit">Editar</string>
     <string name="tooltip_edit_label">Editar etiqueta</string>
     <string name="tooltip_go_live">Presentar en vivo</string>
+    <string name="tooltip_presentation_remote">Abrir control remoto</string>
     <string name="tooltip_send_to_stage_monitor">Enviar al monitor de escenario</string>
     <string name="tooltip_hide_from_stage_monitor">Ocultar anuncio</string>
     <string name="tooltip_add_label">Añadir etiqueta</string>
@@ -477,6 +481,7 @@
     <string name="settings">Configuración</string>
     <string name="images_suffix">imágenes</string>
     <string name="pictures_arrow_key_hint">← → imagen siguiente/anterior  ·  ↑ ↓ navegar filas</string>
+    <string name="presentation_arrow_key_hint">← → diapositiva sig./ant.</string>
     <string name="pictures_reorder_hint">Shift+arrastrar miniaturas para reordenar</string>
     <string name="slideshow_settings">Configuración de presentación multimedia</string>
     <string name="transition_settings">Configuración de transición</string>
@@ -485,6 +490,7 @@
     <!-- Presentation Tab Strings -->
     <string name="no_file_selected_presentation">Ningún archivo seleccionado</string>
     <string name="slide_count">%1$d diapositivas</string>
+    <string name="loading_slides_progress">%1$d / %2$d diapositivas</string>
     <string name="slide_counter">Diapositiva %1$d de %2$d</string>
     <string name="loading_slides">Cargando diapositivas...</string>
     <string name="select_presentation_file">Seleccione un archivo de presentación para ver las diapositivas</string>
@@ -493,6 +499,17 @@
     <string name="slide_number">Diapositiva %1$d</string>
     <string name="remove">Eliminar</string>
     <string name="select_presentation_file_button">Seleccionar archivo</string>
+    <string name="presentation_remote_control">Control remoto</string>
+    <string name="presentation_remote_enable">Activar control remoto</string>
+    <string name="presentation_remote_description">Permite que los teléfonos y tabletas conectados naveguen y controlen las diapositivas de la presentación. Escanee el código QR de abajo para conectarse.</string>
+    <string name="presentation_freeze_output">Ocultar salida</string>
+    <string name="presentation_unfreeze_output">Mostrar salida</string>
+    <string name="presentation_clear">Borrar presentación</string>
+    <string name="presentation_remote_copy_url">Copiar URL</string>
+    <string name="presentation_remote_uses_api_key">El acceso remoto utiliza la clave API de su servidor (Configuración del servidor).</string>
+    <string name="presentation_remote_tunnel_temporary_note">Los enlaces del túnel público son temporales y cambian cada vez que inicia un nuevo túnel.</string>
+    <string name="presentation_public_access_description">Permita que los teléfonos y tabletas conectados controlen la presentación mediante datos móviles sin unirse a su WiFi</string>
+    <string name="presentation_server_not_running">Servidor no en ejecución — inicie el servidor complementario en Ajustes para habilitar el control remoto</string>
     <string name="select_presentation_file_dialog">Seleccionar archivo de presentación</string>
 
     <!-- Projection Settings Tab -->
@@ -538,6 +555,9 @@
     <string name="gradient_top_color">Color superior:</string>
     <string name="gradient_bottom_color">Color inferior:</string>
     <string name="gradient_opacity">Opacidad</string>
+    <string name="background_opacity">Opacidad de fondo</string>
+    <string name="gradient_top_opacity">Opacidad superior</string>
+    <string name="gradient_bottom_opacity">Opacidad inferior</string>
     <string name="gradient_position">Posición de transición</string>
 
     <!-- System Settings -->
@@ -1045,6 +1065,8 @@
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Añadir al programa</string>
     <string name="remote_api_project">Proyectar (en vivo)</string>
+    <string name="remote_api_presentation_connect">Conectar al control remoto de presentación</string>
+    <string name="remote_api_presentation_connect_detail">Un teléfono o tableta desea navegar y controlar las diapositivas de su presentación.</string>
     <string name="remote_api_qa_add">P&amp;R: Añadir pregunta</string>
     <string name="remote_api_qa_edit">P&amp;R: Editar pregunta</string>
     <string name="remote_api_qa_delete">P&amp;R: Eliminar pregunta</string>
@@ -1053,6 +1075,8 @@
     <string name="remote_api_qa_done">P&amp;R: Marcar como hecha</string>
     <string name="remote_api_qa_display">P&amp;R: Presentar en vivo</string>
     <string name="remote_api_qa_clear_display">P&amp;R: Limpiar pantalla</string>
+    <string name="remote_api_qa_admin_connect">Conectar al Admin de P&amp;R</string>
+    <string name="remote_api_qa_admin_connect_detail">Un teléfono o tableta desea moderar las preguntas de P&amp;R.</string>
     <string name="remote_api_request_title">Solicitud de API remota</string>
     <string name="remote_api_request_title_queued">Solicitud de API remota (%1$d pendiente(s))</string>
     <string name="remote_client_label">Cliente:</string>
@@ -1062,6 +1086,10 @@
     <string name="remote_queue_waiting_many">%1$d solicitudes más esperando en la cola</string>
     <string name="remote_activity_added_to_schedule">Añadido al programa</string>
     <string name="remote_activity_projected">Proyectado (en vivo)</string>
+    <string name="remote_activity_presentation_connect">Conectado al control remoto de presentación</string>
+    <string name="remote_activity_presentation_connect_detail">Ahora conectado</string>
+    <string name="remote_activity_qa_admin_connect">Conectado al Admin de P&amp;R</string>
+    <string name="remote_activity_qa_admin_connect_detail">Ahora conectado</string>
     <string name="remote_activity_presented">Presentando</string>
     <string name="remote_activity_uploaded">Cargado</string>
     <string name="remote_activity_cleared">Pantalla limpiada</string>
@@ -1122,6 +1150,18 @@
     <string name="tooltip_directory_not_found">Directorio no encontrado. Créelo o elija una ubicación diferente.</string>
     <string name="tooltip_directory_not_writable">No se puede escribir en este directorio. Elija una ubicación diferente o cambie los permisos.</string>
     <string name="launch_on_login">Iniciar al iniciar sesión</string>
+    <string name="analytics_reporting">Compartir informes anónimos de fallos y análisis</string>
+    <string name="send_test_event">Enviar evento de prueba</string>
+    <string name="test_event_title">Evento de prueba de Sentry</string>
+    <string name="test_event_sent">Evento de prueba enviado a Sentry. Consulte su panel para confirmar que llegó.</string>
+    <string name="test_event_failed">No se pudo enviar el evento de prueba. Los informes de fallos están desactivados o no hay un DSN configurado.</string>
+    <string name="test_event_dev_only">Visible solo para desarrolladores — oculto en las compilaciones del instalador publicadas.</string>
+    <string name="crash_feedback_title">Informar lo sucedido</string>
+    <string name="crash_feedback_message">ChurchPresenter se cerró inesperadamente la última vez. Contarnos qué estaba haciendo nos ayuda a solucionarlo. Esto es opcional.</string>
+    <string name="crash_feedback_comment_label">¿Qué estaba haciendo?</string>
+    <string name="crash_feedback_email_label">Correo electrónico (opcional)</string>
+    <string name="crash_feedback_send">Enviar informe</string>
+    <string name="crash_feedback_dismiss">Ahora no</string>
     <string name="song_folder_with_count">%1$s (%2$d cantos)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
@@ -1165,6 +1205,7 @@
     <string name="stage_monitor_show_timer">Mostrar temporizador de cuenta regresiva</string>
     <string name="stage_monitor_show_section_label">Mostrar etiqueta de sección</string>
     <string name="stage_monitor_show_notes">Mostrar notas del presentador</string>
+    <string name="general">General</string>
     <string name="stage_monitor_section_general">General</string>
     <string name="stage_monitor_section_current">Diapositiva actual</string>
     <string name="stage_monitor_section_next">Vista previa de la siguiente diapositiva</string>
@@ -1247,8 +1288,6 @@
     <string name="qa_position">Posición</string>
     <string name="qa_settings_section">Configuración</string>
     <string name="qa_cooldown_label">Tiempo de espera entre preguntas (segundos)</string>
-    <string name="qa_admin_password">Contraseña de administrador</string>
-    <string name="qa_no_password">Sin contraseña</string>
     <string name="qa_approve">Aprobar</string>
     <string name="qa_deny">Denegar</string>
     <string name="qa_mark_done">Marcar como hecha</string>
@@ -1287,6 +1326,8 @@
     <string name="qa_sort_oldest">Más antiguas primero</string>
     <string name="qa_sort_most_votes">Más votos</string>
     <string name="qa_sort_least_votes">Menos votos</string>
+    <string name="qa_filter_label">Filtro</string>
+    <string name="qa_sort_label">Ordenar</string>
     <string name="qa_add">Añadir</string>
     <string name="qa_clear_all_confirm_message">¿Está seguro de que desea borrar todas las preguntas? Esta acción no se puede deshacer.</string>
     <string name="qa_clear">Borrar</string>
@@ -1415,6 +1456,7 @@
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>
+    <string name="obs_section_connection">OBS WebSocket</string>
     <string name="obs_description">Cambia automáticamente las escenas de OBS Studio cuando cambia el contenido.</string>
     <string name="obs_enable">Conectar a OBS Studio</string>
     <string name="obs_host">Host</string>
@@ -1496,6 +1538,7 @@
     <string name="midnight_theme">Tema Medianoche</string>
     <string name="forest_theme">Tema Bosque</string>
     <string name="mocha_theme">Tema Moca</string>
+    <string name="studio_theme">Tema Studio</string>
     <string name="projection_decklink_io_conflict_tooltip">También se usa para entrada — puede no funcionar en dispositivos sin E/S simultánea</string>
     <string name="stop">Detener</string>
     <string name="timer_mode_duration">Duración</string>
@@ -1607,6 +1650,7 @@
     <string name="atem_loading_slots">Cargando ranuras…</string>
     <string name="atem_slots_error">No se pudieron cargar las ranuras: %1$s</string>
     <string name="atem_not_configured">Configure el ATEM en Ajustes para activar este botón.</string>
+    <string name="atem_section_connection">Blackmagic ATEM</string>
     <string name="atem_section_upload_defaults">Valores predeterminados de carga</string>
     <string name="atem_slot_unnamed">Ranura %1$d</string>
     <string name="atem_slot_named">Ranura %1$d – %2$s</string>
@@ -1652,6 +1696,7 @@
     <string name="dictionary_back">Atrás</string>
     <string name="dictionary_forward">Adelante</string>
     <string name="dictionary_go_to_verse">Ir al versículo en la pestaña Biblia</string>
+    <string name="em_dash">—</string>
     <string name="bible_smart_search_hint">Referencia o texto — ej. Juan 3:16, Mat 1 o una palabra</string>
     <string name="bible_search_mode_auto">Auto</string>
     <string name="bible_search_mode_reference">Referencia</string>
@@ -1696,11 +1741,21 @@
     <string name="bible_stt_src_explicit">Referencia hablada</string>
     <string name="bible_stt_src_reverse">Encontrado por texto</string>
     <string name="bible_stt_src_continuation">Siguiendo</string>
+    <string name="bible_stt_track_transcription">Escuchado en la transcripción</string>
+    <string name="bible_stt_track_translation">Escuchado en la traducción</string>
     <string name="bible_stt_match_label">Coincidencia de texto</string>
     <string name="bible_stt_level_off">Apagado</string>
     <string name="bible_stt_level_conservative">Conservador</string>
     <string name="bible_stt_level_balanced">Equilibrado</string>
     <string name="bible_stt_level_aggressive">Agresivo</string>
+    <string name="bible_stt_engine_connecting">Iniciando motor…</string>
+    <string name="bible_stt_engine_unavailable">Motor no disponible</string>
+    <string name="bible_stt_no_bible">No hay una Biblia configurada</string>
+    <string name="bible_stt_waiting_for_stt">En ejecución — esperando STT</string>
+    <string name="stt_status_not_connected">STT no conectado</string>
+    <string name="stt_status_connecting">Conectando a STT…</string>
+    <string name="stt_status_unreachable">No se puede alcanzar el servidor STT — reintentando…</string>
+    <string name="stt_status_reconnecting">STT desconectado — reconectando…</string>
     <string name="bible_engine_detect">Detectar Escrituras</string>
     <string name="bible_engine_run_local">Ejecutar motor localmente</string>
     <string name="bible_engine_host">Host del motor</string>
@@ -1710,6 +1765,7 @@
     <string name="qa_qr_bg_color">Fondo QR</string>
     <string name="qa_qr_message_label">Mensaje del código QR</string>
     <string name="qa_qr_message_reset">Restablecer por defecto</string>
+    <string name="qa_admin_uses_api_key">El acceso de administrador utiliza la clave API de su servidor (Configuración del servidor).</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Contacto</string>
     <string name="contact_us_title">Contáctanos</string>
