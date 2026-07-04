@@ -353,9 +353,9 @@ fun main() {
                     obsManager.setScene(sceneName)
                 }
         }
-        // Sync QA settings to server
-        LaunchedEffect(appSettings.qaSettings.adminPassword, appSettings.qaSettings.rateLimitCooldownSeconds, appSettings.qaSettings.votingEnabled) {
-            companionServer.qaAdminPassword = appSettings.qaSettings.adminPassword
+        // Sync QA settings to server — admin auth reuses the server API key, just like the presentation remote
+        LaunchedEffect(appSettings.serverSettings.apiKeyEnabled, appSettings.serverSettings.apiKey, appSettings.qaSettings.rateLimitCooldownSeconds, appSettings.qaSettings.votingEnabled) {
+            companionServer.qaAdminPassword = if (appSettings.serverSettings.apiKeyEnabled) appSettings.serverSettings.apiKey else ""
             companionServer.qaCooldownSeconds = appSettings.qaSettings.rateLimitCooldownSeconds
             companionServer.qaVotingEnabled = appSettings.qaSettings.votingEnabled
         }
@@ -1012,6 +1012,40 @@ fun main() {
                                         }
                                         val event = RemoteEvent(
                                             type = RemoteEventType.PRESENTATION_CONNECT,
+                                            title = "",
+                                            clientId = clientId,
+                                            clientLabel = remoteClientManager.getLabel(clientId)
+                                        )
+                                        val allow: () -> Unit = { pending.decision.complete(true) }
+                                        val deny: () -> Unit  = { pending.decision.complete(false) }
+                                        remoteEventQueue.add(Triple(event, allow, deny))
+                                    }
+                                }
+
+                                // ── Q&A admin connection requests ─────────────────────────────────────────────
+                                LaunchedEffect(Unit) {
+                                    companionServer.onQaAdminConnect.collect { pending ->
+                                        val clientId = pending.clientId
+                                        if (remoteClientManager.isBlocked(clientId) ||
+                                            (clientId.isNotBlank() && sessionBlockedClients.contains(clientId))
+                                        ) {
+                                            pending.decision.complete(false)
+                                            return@collect
+                                        }
+                                        if (remoteClientManager.isAllowed(clientId) ||
+                                            (clientId.isNotBlank() && sessionAllowedClients.contains(clientId))
+                                        ) {
+                                            pending.decision.complete(true)
+                                            remoteActivityNotifications.add(RemoteActivityNotification(
+                                                type = RemoteEventType.QA_ADMIN_CONNECT,
+                                                title = "",
+                                                clientId = clientId,
+                                                clientLabel = remoteClientManager.getLabel(clientId)
+                                            ))
+                                            return@collect
+                                        }
+                                        val event = RemoteEvent(
+                                            type = RemoteEventType.QA_ADMIN_CONNECT,
                                             title = "",
                                             clientId = clientId,
                                             clientLabel = remoteClientManager.getLabel(clientId)

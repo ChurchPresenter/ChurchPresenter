@@ -19,7 +19,6 @@ data class QASettings(
     val shadowOpacity: Int = 78,
     val horizontalAlignment: String = Constants.CENTER,
     val position: String = Constants.BOTTOM_CENTER,
-    val adminPassword: String = generateDefaultPassword(),
     val rateLimitCooldownSeconds: Int = 30,
     val votingEnabled: Boolean = false,
     val qrCodeMessage: String = "",
@@ -27,8 +26,3 @@ data class QASettings(
     val qrBackgroundColor: String = "#FFFFFF",
     val qrBackgroundOpacity: Int = 100,
 )
-
-internal fun generateDefaultPassword(): String {
-    val chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"
-    return (1..6).map { chars.random() }.joinToString("")
-}

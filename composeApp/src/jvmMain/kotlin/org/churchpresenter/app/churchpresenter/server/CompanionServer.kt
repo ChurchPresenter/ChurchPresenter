@@ -1023,6 +1023,12 @@ class CompanionServer {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /** Emitted when a device authenticates against the Q&A admin panel for the first time this session. */
+    val onQaAdminConnect = MutableSharedFlow<PendingConnectionRequest>(
+        extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     /** Emitted when the web admin triggers Go Live or clear display for Q&A. Payload: Question or null. */
     val onQADisplay = MutableSharedFlow<org.churchpresenter.app.churchpresenter.models.Question?>(
         extraBufferCapacity = 4,
@@ -3015,6 +3021,7 @@ class CompanionServer {
                 // Admin: check password
                 post("/api/qa/auth") {
                     if (!checkQaAdmin(call)) return@post
+                    if (!checkQaAdminConnect(call)) return@post
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
@@ -3433,6 +3440,23 @@ class CompanionServer {
         }
     }
 
+    /**
+     * Asks the desktop operator to approve/deny this device connecting to the Q&A admin panel,
+     * exactly like the presentation remote's initial connection handshake.
+     * Only called from the initial /api/qa/auth handshake — not on every subsequent action —
+     * so an approved or session-approved device is never re-prompted mid-session.
+     */
+    private suspend fun checkQaAdminConnect(call: io.ktor.server.application.ApplicationCall): Boolean {
+        val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+        val pending = PendingConnectionRequest(clientId)
+        onQaAdminConnect.emit(pending)
+        val approved = pending.decision.await()
+        if (!approved) {
+            call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"connection denied"}""")
+        }
+        return approved
+    }
+
 
     private fun broadcast(msg: WebSocketMessage) {
         scope.launch {
@@ -3812,7 +3836,8 @@ h1{font-size:22px}
 <p style="color:var(--qa-muted);margin-top:8px">Enter admin password to continue</p>
 <label class="sr-only" for="pw-input">Admin password</label>
 <input type="password" id="pw-input" aria-label="Admin password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
-<button class="btn btn-live" onclick="doLogin()">Login</button>
+<button class="btn btn-live" id="login-btn" onclick="doLogin()">Login</button>
+<p id="connecting-msg" style="display:none;color:var(--qa-muted);margin-top:8px">Waiting for approval on the desktop…</p>
 <div class="err" id="pw-err" style="display:none"></div>
 </div>
 
@@ -3849,35 +3874,50 @@ h1{font-size:22px}
 <script>
 let questions=[],filter='ALL',sortBy='time',displayedId=null,editingId=null,authed=false;
 let password=new URLSearchParams(window.location.search).get('password')||localStorage.getItem('qa_admin_pw')||'';
-if(password)localStorage.setItem('qa_admin_pw',password);
-const headers={'Content-Type':'application/json'};
+if(password){localStorage.setItem('qa_admin_pw',password);document.getElementById('pw-input').value=password;}
+let deviceId=localStorage.getItem('qa_admin_device_id');
+if(!deviceId){deviceId=(crypto.randomUUID?crypto.randomUUID():(Date.now()+'-'+Math.random().toString(36).slice(2)));localStorage.setItem('qa_admin_device_id',deviceId);}
+const headers={'Content-Type':'application/json','X-Device-Id':deviceId};
 
 function setHeaders(){
   if(password)headers['X-QA-Password']=password;
 }
 setHeaders();
 
-async function checkAuth(){
-  const r=await fetch('/api/qa/auth',{method:'POST',headers});
-  if(r.ok){authed=true;document.getElementById('login-screen').style.display='none';document.getElementById('main-app').style.display='block';load();checkStatus()}
-  else{document.getElementById('login-screen').style.display='block';document.getElementById('main-app').style.display='none';document.getElementById('pw-input').focus()}
+// Sends /api/qa/auth and waits for the desktop operator to approve this device — mirrors the
+// presentation remote's connection handshake, showing a "waiting for approval" state meanwhile.
+async function attemptAuth(){
+  const btn=document.getElementById('login-btn');
+  const msg=document.getElementById('connecting-msg');
+  const errEl=document.getElementById('pw-err');
+  document.getElementById('login-screen').style.display='block';
+  document.getElementById('main-app').style.display='none';
+  errEl.style.display='none';
+  btn.disabled=true;msg.style.display='block';
+  try{
+    const r=await fetch('/api/qa/auth',{method:'POST',headers});
+    if(r.ok){authed=true;document.getElementById('login-screen').style.display='none';document.getElementById('main-app').style.display='block';load();checkStatus();return true}
+    errEl.textContent=r.status===403?'Connection request denied':'Incorrect password';
+    errEl.style.display='block';
+    document.getElementById('pw-input').focus();
+    return false
+  }catch(e){
+    errEl.textContent='Could not reach the app';
+    errEl.style.display='block';
+    return false
+  }finally{
+    btn.disabled=false;msg.style.display='none';
+  }
 }
 async function doLogin(){
   password=document.getElementById('pw-input').value;
   localStorage.setItem('qa_admin_pw',password);
   headers['X-QA-Password']=password;
-  const r=await fetch('/api/qa/auth',{method:'POST',headers});
-  if(r.ok){authed=true;document.getElementById('login-screen').style.display='none';document.getElementById('main-app').style.display='block';load();checkStatus()}
-  else{document.getElementById('pw-err').textContent='Incorrect password';document.getElementById('pw-err').style.display='block'}
+  await attemptAuth();
 }
 
-// Check if password needed
-(async()=>{
-  try{const r=await fetch('/api/qa/auth',{method:'POST',headers});
-    if(r.ok){authed=true;document.getElementById('main-app').style.display='block';load();checkStatus()}
-    else{document.getElementById('login-screen').style.display='block';document.getElementById('pw-input').focus()}
-  }catch(e){document.getElementById('login-screen').style.display='block'}
-})();
+// Auto-connect on load — approval popup (if any) surfaces on the desktop while this awaits
+attemptAuth();
 
 function lockOut(){
   authed=false;password='';localStorage.removeItem('qa_admin_pw');
@@ -4136,7 +4176,7 @@ let fetchFailCount=0;
 let offlineMode=false;
 let slidesHidden=localStorage.getItem('remote_slides_hidden')==='1';
 let password=new URLSearchParams(location.search).get('password')||sessionStorage.getItem('remote_pw')||'';
-if(password)sessionStorage.setItem('remote_pw',password);
+if(password){sessionStorage.setItem('remote_pw',password);document.getElementById('pw-input').value=password;}
 let deviceId=localStorage.getItem('remote_device_id');
 if(!deviceId){deviceId=(crypto.randomUUID?crypto.randomUUID():(Date.now()+'-'+Math.random().toString(36).slice(2)));localStorage.setItem('remote_device_id',deviceId);}
 const headers={'Content-Type':'application/json','X-Device-Id':deviceId};

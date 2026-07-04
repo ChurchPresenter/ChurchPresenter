@@ -538,6 +538,7 @@
     <string name="presentation_unfreeze_output">Unblank Output</string>
     <string name="presentation_clear">Clear Presentation</string>
     <string name="presentation_remote_copy_url">Copy URL</string>
+    <string name="presentation_remote_uses_api_key">Remote access uses your server API key (Server settings).</string>
     <string name="presentation_remote_tunnel_temporary_note">Public tunnel links are temporary and change every time you start a new tunnel.</string>
     <string name="presentation_public_access_description">Let connected phones and tablets control the presentation via mobile data without joining your WiFi</string>
     <string name="presentation_server_not_running">Server not running — start the companion server in Settings to enable remote control</string>
@@ -1117,6 +1118,8 @@
     <string name="remote_api_qa_done">Q&amp;A: Mark as Done</string>
     <string name="remote_api_qa_display">Q&amp;A: Go Live</string>
     <string name="remote_api_qa_clear_display">Q&amp;A: Clear Display</string>
+    <string name="remote_api_qa_admin_connect">Connect to Q&amp;A Admin</string>
+    <string name="remote_api_qa_admin_connect_detail">A phone or tablet wants to moderate Q&amp;A questions.</string>
     <string name="remote_api_request_title">Remote API Request</string>
     <string name="remote_api_request_title_queued">Remote API Request (%1$d pending)</string>
     <string name="remote_client_label">Client:</string>
@@ -1128,6 +1131,8 @@
     <string name="remote_activity_projected">Projected (Go Live)</string>
     <string name="remote_activity_presentation_connect">Connected to Presentation Remote</string>
     <string name="remote_activity_presentation_connect_detail">Now connected</string>
+    <string name="remote_activity_qa_admin_connect">Connected to Q&amp;A Admin</string>
+    <string name="remote_activity_qa_admin_connect_detail">Now connected</string>
     <string name="remote_activity_presented">Presenting</string>
     <string name="remote_activity_uploaded">Uploaded</string>
     <string name="remote_activity_cleared">Cleared Display</string>
@@ -1333,8 +1338,7 @@
     <string name="qa_qr_message_label">QR Code Message</string>
     <string name="qa_qr_message_default">Scan to ask a question</string>
     <string name="qa_qr_message_reset">Reset to default</string>
-    <string name="qa_admin_password">Admin Password</string>
-    <string name="qa_no_password">No password</string>
+    <string name="qa_admin_uses_api_key">Admin access uses your server API key (Server settings).</string>
     <string name="qa_approve">Approve</string>
     <string name="qa_deny">Deny</string>
     <string name="qa_mark_done">Mark Done</string>

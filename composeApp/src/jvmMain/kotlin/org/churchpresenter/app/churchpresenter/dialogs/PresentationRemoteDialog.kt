@@ -46,6 +46,7 @@ import churchpresenter.composeapp.generated.resources.qa_public
 import churchpresenter.composeapp.generated.resources.presentation_public_access_description
 import churchpresenter.composeapp.generated.resources.qa_public_access
 import churchpresenter.composeapp.generated.resources.presentation_remote_tunnel_temporary_note
+import churchpresenter.composeapp.generated.resources.presentation_remote_uses_api_key
 import churchpresenter.composeapp.generated.resources.qa_qr_code_shows
 import churchpresenter.composeapp.generated.resources.qa_retry
 import churchpresenter.composeapp.generated.resources.qa_starting_tunnel
@@ -133,6 +134,13 @@ fun PresentationRemoteDialog(
                     val qrDisplayUrl = "$qrBaseUrl/presentation-remote"
                     val qrUrl = if (apiKeyEnabled && apiKey.isNotBlank()) "$qrDisplayUrl?password=$apiKey" else qrDisplayUrl
                     val qrBitmap = remember(qrUrl) { generateQRCodeBitmap(qrUrl, 180) }
+                    Text(
+                        stringResource(Res.string.presentation_remote_uses_api_key),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(8.dp))
                     if (qrBitmap != null) {
                         Image(bitmap = qrBitmap, contentDescription = null, modifier = Modifier.size(180.dp))
                         Spacer(Modifier.height(8.dp))
@@ -146,7 +154,7 @@ fun PresentationRemoteDialog(
                     Spacer(Modifier.height(4.dp))
                     SelectionContainer {
                         Text(
-                            qrDisplayUrl,
+                            qrUrl,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center
@@ -155,7 +163,7 @@ fun PresentationRemoteDialog(
                     Spacer(Modifier.height(8.dp))
                     Button(
                         shape = RoundedCornerShape(6.dp),
-                        onClick = { copyText(qrDisplayUrl) },
+                        onClick = { copyText(qrUrl) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer

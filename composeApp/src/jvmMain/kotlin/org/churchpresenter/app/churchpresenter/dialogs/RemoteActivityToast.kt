@@ -52,6 +52,8 @@ import churchpresenter.composeapp.generated.resources.remote_activity_qa_display
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_clear_display
 import churchpresenter.composeapp.generated.resources.remote_activity_presentation_connect
 import churchpresenter.composeapp.generated.resources.remote_activity_presentation_connect_detail
+import churchpresenter.composeapp.generated.resources.remote_activity_qa_admin_connect
+import churchpresenter.composeapp.generated.resources.remote_activity_qa_admin_connect_detail
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 
@@ -134,11 +136,13 @@ private fun RemoteActivityToast(
         RemoteEventType.QA_DISPLAY      -> stringResource(Res.string.remote_activity_qa_display)
         RemoteEventType.QA_CLEAR_DISPLAY -> stringResource(Res.string.remote_activity_qa_clear_display)
         RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_presentation_connect)
+        RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect)
     }
     val icon = when (notification.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
         RemoteEventType.PROJECT         -> "📡"
         RemoteEventType.PRESENTATION_CONNECT -> "📱"
+        RemoteEventType.QA_ADMIN_CONNECT -> "📱"
         RemoteEventType.PRESENT         -> "▶️"
         RemoteEventType.UPLOAD          -> "📤"
         RemoteEventType.CLEAR           -> "🔲"
@@ -159,7 +163,11 @@ private fun RemoteActivityToast(
     }
 
     val bodyTitle = notification.title.ifBlank {
-        if (notification.type == RemoteEventType.PRESENTATION_CONNECT) stringResource(Res.string.remote_activity_presentation_connect_detail) else ""
+        when (notification.type) {
+            RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_presentation_connect_detail)
+            RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect_detail)
+            else -> ""
+        }
     }
 
     Surface(

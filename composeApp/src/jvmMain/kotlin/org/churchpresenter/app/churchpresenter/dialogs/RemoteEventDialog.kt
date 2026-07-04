@@ -67,6 +67,8 @@ import churchpresenter.composeapp.generated.resources.remote_api_qa_deny
 import churchpresenter.composeapp.generated.resources.remote_api_qa_done
 import churchpresenter.composeapp.generated.resources.remote_api_qa_display
 import churchpresenter.composeapp.generated.resources.remote_api_qa_clear_display
+import churchpresenter.composeapp.generated.resources.remote_api_qa_admin_connect
+import churchpresenter.composeapp.generated.resources.remote_api_qa_admin_connect_detail
 import churchpresenter.composeapp.generated.resources.remote_api_request_title
 import churchpresenter.composeapp.generated.resources.remote_api_request_title_queued
 import churchpresenter.composeapp.generated.resources.remote_client_allowed_badge
@@ -104,6 +106,7 @@ enum class RemoteEventType {
     QA_DONE,
     QA_DISPLAY,
     QA_CLEAR_DISPLAY,
+    QA_ADMIN_CONNECT,
 }
 
 /**
@@ -147,12 +150,14 @@ fun RemoteEventDialog(
         RemoteEventType.QA_DONE         -> stringResource(Res.string.remote_api_qa_done)
         RemoteEventType.QA_DISPLAY      -> stringResource(Res.string.remote_api_qa_display)
         RemoteEventType.QA_CLEAR_DISPLAY -> stringResource(Res.string.remote_api_qa_clear_display)
+        RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_api_qa_admin_connect)
         else                            -> stringResource(Res.string.remote_api_request_title)
     }
     val icon = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
         RemoteEventType.PROJECT         -> "📡"
         RemoteEventType.PRESENTATION_CONNECT -> "📱"
+        RemoteEventType.QA_ADMIN_CONNECT -> "📱"
         RemoteEventType.QA_ADD,
         RemoteEventType.QA_EDIT,
         RemoteEventType.QA_DELETE,
@@ -164,7 +169,11 @@ fun RemoteEventDialog(
         else                            -> "🔔"
     }
     val bodyTitle = event.title.ifBlank {
-        if (event.type == RemoteEventType.PRESENTATION_CONNECT) stringResource(Res.string.remote_api_presentation_connect_detail) else ""
+        when (event.type) {
+            RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_api_presentation_connect_detail)
+            RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_api_qa_admin_connect_detail)
+            else -> ""
+        }
     }
     val remaining = queueSize - 1  // items behind this one
 
