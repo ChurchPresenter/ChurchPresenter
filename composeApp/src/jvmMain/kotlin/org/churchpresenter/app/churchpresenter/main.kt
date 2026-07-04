@@ -1233,8 +1233,8 @@ fun main() {
                                         )
                                     },
                                     onScheduleChanged = { items -> companionServer.updateSchedule(items) },
-                                    onPresentationSlidesLoaded = { id, filePath, fileName, fileType, slides ->
-                                        companionServer.updatePresentation(id, filePath, fileName, fileType, slides)
+                                    onPresentationSlidesLoaded = { id, filePath, fileName, fileType, slides, notes ->
+                                        companionServer.updatePresentation(id, filePath, fileName, fileType, slides, notes)
                                     },
                                     onPicturesLoaded = { folderId, folderName, folderPath, imageFiles ->
                                         companionServer.updatePictures(folderId, folderName, folderPath, imageFiles)

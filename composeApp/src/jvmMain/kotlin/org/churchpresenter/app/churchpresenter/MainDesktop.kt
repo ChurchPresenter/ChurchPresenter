@@ -180,7 +180,7 @@ fun MainDesktop(
     onSongsLoaded: ((List<SongItem>) -> Unit)? = null,
     onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null,
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
-    onPresentationSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>) -> Unit)? = null,
+    onPresentationSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>, slideNotes: List<String>) -> Unit)? = null,
     onPicturesLoaded: ((folderId: String, folderName: String, folderPath: String, imageFiles: List<File>) -> Unit)? = null,
     selectPictureImageFlow: Flow<Pair<String, Int>>? = null,
     /**
@@ -329,7 +329,8 @@ fun MainDesktop(
             f.absolutePath,
             f.nameWithoutExtension,
             f.extension.lowercase(),
-            presentationViewModel.slideFiles.toList()
+            presentationViewModel.slideFiles.toList(),
+            presentationViewModel.slideNotes.toList()
         )
     }
     LaunchedEffect(remotePresentationPlayPauseFlow) {

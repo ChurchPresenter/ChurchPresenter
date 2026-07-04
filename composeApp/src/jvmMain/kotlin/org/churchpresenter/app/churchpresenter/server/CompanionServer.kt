@@ -665,9 +665,10 @@ class CompanionServer {
         _currentSlideIndex = index
         _currentSlideTotalCount = total
         _presentationIsPlaying = isPlaying
+        val note = _presentationNotes[id]?.getOrNull(index) ?: ""
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
-            payload = """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":$_presentationIsLive}"""
+            payload = """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":$_presentationIsLive,"notes":"${jsonEscape(note)}"}"""
         ))
     }
 
@@ -884,6 +885,8 @@ class CompanionServer {
     private val _presentationCatalogs = ConcurrentHashMap<String, PresentationDto>()
     /** presentationId (file hash) → absolute file path — populated by updatePresentation and updateSchedule */
     private val _presentationFilePaths = ConcurrentHashMap<String, String>()
+    /** presentationId (file hash) → per-slide presenter notes (index = slide number) */
+    private val _presentationNotes = ConcurrentHashMap<String, List<String>>()
     /** schedule item UUID → presentation file hash — populated when schedule is updated */
     private val _scheduleItemToPresentationId = ConcurrentHashMap<String, String>()
     /** Set of presentation IDs currently being background-rendered (avoids duplicate renders) */
@@ -897,7 +900,10 @@ class CompanionServer {
         _slideBytesOrder.addFirst(id)
         while (_slideBytesOrder.size > MAX_CACHED_PRESENTATIONS) {
             val evicted = _slideBytesOrder.pollLast()
-            if (evicted != null) _slideBytes.remove(evicted)
+            if (evicted != null) {
+                _slideBytes.remove(evicted)
+                _presentationNotes.remove(evicted)
+            }
         }
     }
 
@@ -1172,11 +1178,13 @@ class CompanionServer {
         filePath: String,
         fileName: String,
         fileType: String,
-        slideFiles: List<File>
+        slideFiles: List<File>,
+        slideNotes: List<String> = emptyList()
     ) {
         if (filePath.isNotBlank()) {
             _presentationFilePaths[id] = filePath
         }
+        _presentationNotes[id] = slideNotes
         _activeUpdateJob?.cancel()
         _activeUpdateJob = scope.launch {
             val jpegSlides = slideFiles.map { it.readBytes() }
@@ -2279,8 +2287,9 @@ class CompanionServer {
 
                 /** GET /api/presentation-remote/status — current presentation state (no auth needed) */
                 get("/api/presentation-remote/status") {
+                    val note = _presentationNotes[_currentPresentationId]?.getOrNull(_currentSlideIndex) ?: ""
                     call.respondText(
-                        """{"enabled":$presentationRemoteEnabled,"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"frozen":$_presentationFrozen,"isPlaying":$_presentationIsPlaying,"isLive":$_presentationIsLive,"autoScrollInterval":$_autoScrollInterval,"looping":$_presentationIsLooping,"passwordRequired":${presentationRemotePassword.isNotEmpty()}}""",
+                        """{"enabled":$presentationRemoteEnabled,"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"frozen":$_presentationFrozen,"isPlaying":$_presentationIsPlaying,"isLive":$_presentationIsLive,"autoScrollInterval":$_autoScrollInterval,"looping":$_presentationIsLooping,"passwordRequired":${presentationRemotePassword.isNotEmpty()},"notes":"${jsonEscape(note)}"}""",
                         ContentType.Application.Json
                     )
                 }
@@ -3310,6 +3319,20 @@ class CompanionServer {
         return null
     }
 
+    private fun jsonEscape(s: String): String = buildString {
+        for (c in s) {
+            when {
+                c == '\\' -> append("\\\\")
+                c == '"' -> append("\\\"")
+                c == '\n' -> append("\\n")
+                c == '\r' -> append("\\r")
+                c == '\t' -> append("\\t")
+                c.code < 0x20 -> append("\\u%04x".format(c.code))
+                else -> append(c)
+            }
+        }
+    }
+
     private fun contentTypeForExtension(ext: String): ContentType = when (ext.lowercase()) {
         "jpg", "jpeg" -> ContentType.Image.JPEG
         "png"         -> ContentType.Image.PNG
@@ -4100,6 +4123,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .icon-btn.active{background:#e57373;border-color:#e57373}
 .icon-btn.active-play{background:#43a047;border-color:#43a047}
 #not-live-bar{background:#1e3a5f;color:#aac4e8;font-size:12px;font-weight:500;padding:6px 16px;text-align:center;display:none;flex-shrink:0;border-bottom:1px solid #2a4a70;letter-spacing:.2px}
+#notes-panel{background:#161616;color:#ddd;font-size:14px;line-height:1.5;padding:10px 14px;max-height:26vh;overflow-y:auto;border-bottom:1px solid #222;white-space:pre-wrap;flex-shrink:0}
+#notes-panel.hidden{display:none}
+#notes-text:empty::before{content:'No presenter notes for this slide';color:#666;font-style:italic}
 #slides-area{flex:1;display:flex;flex-direction:row;overflow:hidden;min-height:0}
 #cur-wrap{flex:2;position:relative;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;border-right:1px solid #222}
 #cur-img{max-width:100%;max-height:100%;object-fit:contain;display:block}
@@ -4147,11 +4173,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <button class="icon-btn" id="blank-btn" onclick="toggleBlank()">Blank</button>
       <button class="icon-btn" id="play-btn" onclick="togglePlay()">Auto ▶ 5s</button>
       <button class="icon-btn" id="loop-btn" onclick="toggleLoop()">Loop</button>
+      <button class="icon-btn" id="notes-btn" onclick="toggleNotes()" title="Presenter notes" aria-label="Presenter notes">📝 Notes</button>
       <button class="icon-btn" id="upload-btn" onclick="document.getElementById('upload-input').click()">⬆ Upload</button>
       <input type="file" id="upload-input" accept=".pdf,.ppt,.pptx,.key" style="display:none">
     </div>
   </div>
   <div id="not-live-bar">⚠ Presentation not on screen — enable from the desktop app</div>
+  <div id="notes-panel" class="hidden"><div id="notes-text"></div></div>
   <div id="slides-area">
     <div id="cur-wrap">
       <img id="cur-img" alt="" draggable="false">
@@ -4171,10 +4199,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 <script>
-let state={id:'',index:0,total:0,frozen:false,isPlaying:false,isLive:false,autoScrollInterval:5,looping:true};
+let state={id:'',index:0,total:0,frozen:false,isPlaying:false,isLive:false,autoScrollInterval:5,looping:true,notes:''};
 let fetchFailCount=0;
 let offlineMode=false;
 let slidesHidden=localStorage.getItem('remote_slides_hidden')==='1';
+let notesOverride=localStorage.getItem('remote_notes_visible'); // '1'/'0' = explicit user choice, null = auto (show when notes present)
 let password=new URLSearchParams(location.search).get('password')||sessionStorage.getItem('remote_pw')||'';
 if(password){sessionStorage.setItem('remote_pw',password);document.getElementById('pw-input').value=password;}
 let deviceId=localStorage.getItem('remote_device_id');
@@ -4228,6 +4257,17 @@ function applyHideSlides(){
   hb.title=slidesHidden?'Show slides':'Hide slides';hb.setAttribute('aria-label',hb.title);
 }
 function toggleHideSlides(){slidesHidden=!slidesHidden;localStorage.setItem('remote_slides_hidden',slidesHidden?'1':'0');applyHideSlides();}
+function isNotesVisible(){return notesOverride===null?!!state.notes:notesOverride==='1';}
+function applyNotesVisibility(){
+  const v=isNotesVisible();
+  document.getElementById('notes-panel').classList.toggle('hidden',!v);
+  document.getElementById('notes-btn').classList.toggle('active',v);
+}
+function toggleNotes(){
+  notesOverride=isNotesVisible()?'0':'1';
+  localStorage.setItem('remote_notes_visible',notesOverride);
+  applyNotesVisibility();
+}
 function updateUI(){
   document.getElementById('counter').textContent=state.total>0?(state.index+1)+' / '+state.total:'– / –';
   const fb=document.getElementById('blank-btn');
@@ -4250,6 +4290,8 @@ function updateUI(){
   if(!stripBuilt||document.getElementById('strip-wrap').children.length!==state.total){buildStrip();}
   else{updateStripCurrent();}
   applyHideSlides();
+  document.getElementById('notes-text').textContent=state.notes||'';
+  applyNotesVisibility();
 }
 async function fetchStatus(){
   try{
@@ -4257,7 +4299,7 @@ async function fetchStatus(){
     fetchFailCount=0;
     if(offlineMode){if(d.enabled){location.reload();}else{offlineMode=false;showDisabled();}return;}
     if(!d.enabled){showDisabled();return;}
-    const changed=d.id!==state.id||d.index!==state.index||d.total!==state.total||d.frozen!==state.frozen||d.isPlaying!==state.isPlaying||d.isLive!==state.isLive||d.autoScrollInterval!==state.autoScrollInterval||d.looping!==state.looping;
+    const changed=d.id!==state.id||d.index!==state.index||d.total!==state.total||d.frozen!==state.frozen||d.isPlaying!==state.isPlaying||d.isLive!==state.isLive||d.autoScrollInterval!==state.autoScrollInterval||d.looping!==state.looping||d.notes!==state.notes;
     state={...state,...d};if(changed)updateUI();
   }catch(e){fetchFailCount++;if(!offlineMode&&fetchFailCount>=2)showOffline();}
 }
@@ -4347,7 +4389,7 @@ function startWs(){
       if(msg.type==='presentation_slide_changed'){
         const d=JSON.parse(msg.payload);
         const newPres=d.id!==state.id;
-        state={...state,id:d.id,index:d.index,total:d.total,isPlaying:d.isPlaying,isLive:d.isLive||false};
+        state={...state,id:d.id,index:d.index,total:d.total,isPlaying:d.isPlaying,isLive:d.isLive||false,notes:d.notes||''};
         if(newPres)stripBuilt=false;
         updateUI();
       }else if(msg.type==='presentation_freeze_changed'){

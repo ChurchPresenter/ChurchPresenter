@@ -160,7 +160,7 @@ fun PresentationTab(
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
     selectedPresentationItem: ScheduleItem.PresentationItem? = null,
     presenterManager: PresenterManager? = null,
-    onSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>) -> Unit)? = null,
+    onSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>, slideNotes: List<String>) -> Unit)? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     viewModel: PresentationViewModel = remember { PresentationViewModel(appSettings) },
     tunnelStatus: TunnelStatus = TunnelStatus.Idle,
@@ -197,7 +197,7 @@ fun PresentationTab(
             val f = viewModel.selectedPresentation
             if (f != null && viewModel.slideFiles.isNotEmpty()) {
                 val id = f.absolutePath.hashCode().toUInt().toString(16)
-                onSlidesLoaded?.invoke(id, f.absolutePath, f.nameWithoutExtension, f.extension.lowercase(), viewModel.slideFiles.toList())
+                onSlidesLoaded?.invoke(id, f.absolutePath, f.nameWithoutExtension, f.extension.lowercase(), viewModel.slideFiles.toList(), viewModel.slideNotes.toList())
             }
         }
     }
