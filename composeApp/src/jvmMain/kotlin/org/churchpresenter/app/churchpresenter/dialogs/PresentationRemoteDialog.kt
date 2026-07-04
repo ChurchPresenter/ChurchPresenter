@@ -146,7 +146,7 @@ fun PresentationRemoteDialog(
                     Spacer(Modifier.height(4.dp))
                     SelectionContainer {
                         Text(
-                            qrUrl,
+                            qrDisplayUrl,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center
@@ -155,7 +155,7 @@ fun PresentationRemoteDialog(
                     Spacer(Modifier.height(8.dp))
                     Button(
                         shape = RoundedCornerShape(6.dp),
-                        onClick = { copyText(qrUrl) },
+                        onClick = { copyText(qrDisplayUrl) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
