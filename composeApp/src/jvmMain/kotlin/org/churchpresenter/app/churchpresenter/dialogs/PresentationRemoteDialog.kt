@@ -43,8 +43,8 @@ import churchpresenter.composeapp.generated.resources.qa_downloading_tunnel
 import churchpresenter.composeapp.generated.resources.qa_enable_public_access
 import churchpresenter.composeapp.generated.resources.qa_local
 import churchpresenter.composeapp.generated.resources.qa_public
+import churchpresenter.composeapp.generated.resources.presentation_public_access_description
 import churchpresenter.composeapp.generated.resources.qa_public_access
-import churchpresenter.composeapp.generated.resources.qa_public_access_description
 import churchpresenter.composeapp.generated.resources.presentation_remote_tunnel_temporary_note
 import churchpresenter.composeapp.generated.resources.qa_qr_code_shows
 import churchpresenter.composeapp.generated.resources.qa_retry
@@ -183,7 +183,7 @@ fun PresentationRemoteDialog(
                     when (tunnelStatus) {
                         is TunnelStatus.Idle -> {
                             Text(
-                                stringResource(Res.string.qa_public_access_description),
+                                stringResource(Res.string.presentation_public_access_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

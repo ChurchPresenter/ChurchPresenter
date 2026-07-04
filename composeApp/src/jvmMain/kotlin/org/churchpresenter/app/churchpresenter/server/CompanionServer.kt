@@ -557,6 +557,15 @@ data class PendingBatchRequest(
     val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
 )
 
+/**
+ * Emitted when a device authenticates against the presentation remote for the first time
+ * this session, so the desktop operator can approve/deny it like any other remote action.
+ */
+data class PendingConnectionRequest(
+    val clientId: String = "",
+    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+)
+
 // ── CompanionServer ───────────────────────────────────────────────────────────
 
 /**
@@ -974,6 +983,12 @@ class CompanionServer {
     /** Emitted when a remote client requests an item to be sent directly to projection. */
     val onProject = MutableSharedFlow<PendingRemoteRequest>(
         extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when a device authenticates against the presentation remote for the first time this session. */
+    val onPresentationRemoteConnect = MutableSharedFlow<PendingConnectionRequest>(
+        extraBufferCapacity = 8,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -2248,9 +2263,10 @@ class CompanionServer {
                     )
                 }
 
-                /** POST /api/presentation-remote/auth — verify password */
+                /** POST /api/presentation-remote/auth — verify password, then ask the operator to approve the device */
                 post("/api/presentation-remote/auth") {
                     if (!checkPresentationRemoteAuth(call)) return@post
+                    if (!checkPresentationRemoteConnect(call)) return@post
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
@@ -3304,6 +3320,23 @@ class CompanionServer {
         }
     }
 
+    /**
+     * Asks the desktop operator to approve/deny this device connecting to the presentation
+     * remote, exactly like any other remote action (add to schedule, QA moderation, etc.).
+     * Only called from the initial /auth handshake — not on every subsequent action —
+     * so an approved or session-approved device is never re-prompted mid-session.
+     */
+    private suspend fun checkPresentationRemoteConnect(call: io.ktor.server.application.ApplicationCall): Boolean {
+        val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+        val pending = PendingConnectionRequest(clientId)
+        onPresentationRemoteConnect.emit(pending)
+        val approved = pending.decision.await()
+        if (!approved) {
+            call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"connection denied"}""")
+        }
+        return approved
+    }
+
     private suspend fun handlePresentationFileUpload(call: io.ktor.server.application.ApplicationCall) {
         try {
             val contentLength = call.request.headers["Content-Length"]?.toLongOrNull() ?: 0L
@@ -3993,6 +4026,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 #login input:focus{border-color:#4fa3e3}
 #login button{width:100%;max-width:320px;padding:13px;background:#4fa3e3;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer}
 #err{color:#e57373;font-size:13px;display:none}
+#connecting-msg{color:#888;font-size:14px;display:none}
 #app{display:none;flex-direction:column;flex:1;overflow:hidden}
 #topbar{display:flex;align-items:center;padding:8px 10px;background:#1a1a1a;border-bottom:1px solid #222;gap:8px;flex-wrap:wrap;flex-shrink:0}
 #counter{font-size:16px;font-weight:700;letter-spacing:1px;min-width:56px}
@@ -4036,8 +4070,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <body>
 <div id="login">
   <h2>Presentation Remote</h2>
+  <div id="connecting-msg">Waiting for approval on the desktop…</div>
   <input id="pw-input" type="password" placeholder="Password (if set)" autocomplete="current-password">
-  <button onclick="doLogin()">Connect</button>
+  <button id="connect-btn" onclick="doLogin()">Connect</button>
   <span id="err">Incorrect password</span>
 </div>
 <div id="app">
@@ -4078,7 +4113,9 @@ let offlineMode=false;
 let slidesHidden=localStorage.getItem('remote_slides_hidden')==='1';
 let password=new URLSearchParams(location.search).get('password')||sessionStorage.getItem('remote_pw')||'';
 if(password)sessionStorage.setItem('remote_pw',password);
-const headers={'Content-Type':'application/json'};
+let deviceId=localStorage.getItem('remote_device_id');
+if(!deviceId){deviceId=(crypto.randomUUID?crypto.randomUUID():(Date.now()+'-'+Math.random().toString(36).slice(2)));localStorage.setItem('remote_device_id',deviceId);}
+const headers={'Content-Type':'application/json','X-Device-Id':deviceId};
 if(password)headers['X-Presentation-Password']=password;
 function slideUrl(i){return'/api/presentations/'+state.id+'/slides/'+i+(password?('?apiKey='+encodeURIComponent(password)):'');}
 let stripBuilt=false;
@@ -4183,13 +4220,21 @@ function startPollingForEnable(){
 async function doLogin(){
   password=document.getElementById('pw-input').value;
   sessionStorage.setItem('remote_pw',password);headers['X-Presentation-Password']=password;
-  const r=await fetch('/api/presentation-remote/auth',{method:'POST',headers});
-  if(r.ok){
-    const st=await fetch('/api/presentation-remote/status').then(r=>r.json()).catch(()=>null);
-    if(st)state={...state,...st};
-    document.getElementById('login').style.display='none';document.getElementById('app').style.display='flex';
-    stripBuilt=false;updateUI();startWs();setInterval(fetchStatus,2500);
-  }else{document.getElementById('err').style.display='block';}
+  const btn=document.getElementById('connect-btn');
+  const errEl=document.getElementById('err');
+  errEl.style.display='none';btn.disabled=true;btn.textContent='Waiting for approval…';
+  try{
+    const r=await fetch('/api/presentation-remote/auth',{method:'POST',headers});
+    if(r.ok){
+      const st=await fetch('/api/presentation-remote/status').then(r=>r.json()).catch(()=>null);
+      if(st)state={...state,...st};
+      document.getElementById('login').style.display='none';document.getElementById('app').style.display='flex';
+      stripBuilt=false;updateUI();startWs();setInterval(fetchStatus,2500);
+      return;
+    }
+    errEl.textContent=r.status===403?'Connection request denied':'Incorrect password';
+    errEl.style.display='block';
+  }finally{btn.disabled=false;btn.textContent='Connect';}
 }
 async function post(path){try{return await fetch(path,{method:'POST',headers});}catch(e){return null;}}
 function toggleBlank(){state.frozen=!state.frozen;updateUI();post('/api/presentation-remote/freeze');}
@@ -4258,9 +4303,17 @@ function startWs(){
       startPollingForEnable();return;
     }
     if(!d.passwordRequired||password){
-      if(d.passwordRequired){
-        const authR=await fetch('/api/presentation-remote/auth',{method:'POST',headers});
-        if(!authR.ok){document.getElementById('pw-input').value=password;return;}
+      const pwInput=document.getElementById('pw-input');const connectBtn=document.getElementById('connect-btn');
+      const connMsg=document.getElementById('connecting-msg');
+      pwInput.style.display='none';connectBtn.style.display='none';connMsg.style.display='block';
+      const authR=await fetch('/api/presentation-remote/auth',{method:'POST',headers});
+      pwInput.style.display='';connectBtn.style.display='';connMsg.style.display='none';
+      if(!authR.ok){
+        pwInput.value=password;
+        const errEl=document.getElementById('err');
+        errEl.textContent=authR.status===403?'Connection request denied':'Incorrect password';
+        errEl.style.display='block';
+        return;
       }
       state={...state,...d};
       document.getElementById('login').style.display='none';document.getElementById('app').style.display='flex';

@@ -56,6 +56,8 @@ import churchpresenter.composeapp.generated.resources.block_for_session
 import churchpresenter.composeapp.generated.resources.block_permanently
 import churchpresenter.composeapp.generated.resources.deny
 import churchpresenter.composeapp.generated.resources.remote_api_add_to_schedule
+import churchpresenter.composeapp.generated.resources.remote_api_presentation_connect
+import churchpresenter.composeapp.generated.resources.remote_api_presentation_connect_detail
 import churchpresenter.composeapp.generated.resources.remote_api_project
 import churchpresenter.composeapp.generated.resources.remote_api_qa_add
 import churchpresenter.composeapp.generated.resources.remote_api_qa_edit
@@ -90,6 +92,7 @@ data class RemoteEvent(
 enum class RemoteEventType {
     ADD_TO_SCHEDULE,
     PROJECT,
+    PRESENTATION_CONNECT,
     PRESENT,    // instant: select_song_section / select_picture / select_slide / select_bible_verse
     UPLOAD,     // instant: presentation or picture upload
     CLEAR,      // instant: POST /api/clear
@@ -135,6 +138,7 @@ fun RemoteEventDialog(
     val actionLabel = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> stringResource(Res.string.remote_api_add_to_schedule)
         RemoteEventType.PROJECT         -> stringResource(Res.string.remote_api_project)
+        RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_api_presentation_connect)
         RemoteEventType.QA_ADD          -> stringResource(Res.string.remote_api_qa_add)
         RemoteEventType.QA_EDIT         -> stringResource(Res.string.remote_api_qa_edit)
         RemoteEventType.QA_DELETE       -> stringResource(Res.string.remote_api_qa_delete)
@@ -148,6 +152,7 @@ fun RemoteEventDialog(
     val icon = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
         RemoteEventType.PROJECT         -> "📡"
+        RemoteEventType.PRESENTATION_CONNECT -> "📱"
         RemoteEventType.QA_ADD,
         RemoteEventType.QA_EDIT,
         RemoteEventType.QA_DELETE,
@@ -157,6 +162,9 @@ fun RemoteEventDialog(
         RemoteEventType.QA_DISPLAY,
         RemoteEventType.QA_CLEAR_DISPLAY -> "💬"
         else                            -> "🔔"
+    }
+    val bodyTitle = event.title.ifBlank {
+        if (event.type == RemoteEventType.PRESENTATION_CONNECT) stringResource(Res.string.remote_api_presentation_connect_detail) else ""
     }
     val remaining = queueSize - 1  // items behind this one
 
@@ -226,7 +234,7 @@ fun RemoteEventDialog(
 
                 // ── Item details ──────────────────────────────────────────────
                 Column {
-                    Text(event.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                    Text(bodyTitle, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
                     if (event.detail.isNotBlank()) {
                         Spacer(Modifier.height(4.dp))
                         Text(event.detail, style = MaterialTheme.typography.bodyMedium,

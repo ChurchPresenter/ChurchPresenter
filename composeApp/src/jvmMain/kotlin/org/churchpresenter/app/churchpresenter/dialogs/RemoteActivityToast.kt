@@ -50,6 +50,8 @@ import churchpresenter.composeapp.generated.resources.remote_activity_qa_deny
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_done
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_display
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_clear_display
+import churchpresenter.composeapp.generated.resources.remote_activity_presentation_connect
+import churchpresenter.composeapp.generated.resources.remote_activity_presentation_connect_detail
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 
@@ -131,10 +133,12 @@ private fun RemoteActivityToast(
         RemoteEventType.QA_DONE         -> stringResource(Res.string.remote_activity_qa_done)
         RemoteEventType.QA_DISPLAY      -> stringResource(Res.string.remote_activity_qa_display)
         RemoteEventType.QA_CLEAR_DISPLAY -> stringResource(Res.string.remote_activity_qa_clear_display)
+        RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_presentation_connect)
     }
     val icon = when (notification.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
         RemoteEventType.PROJECT         -> "📡"
+        RemoteEventType.PRESENTATION_CONNECT -> "📱"
         RemoteEventType.PRESENT         -> "▶️"
         RemoteEventType.UPLOAD          -> "📤"
         RemoteEventType.CLEAR           -> "🔲"
@@ -152,6 +156,10 @@ private fun RemoteActivityToast(
         notification.clientLabel.isNotBlank() -> notification.clientLabel
         notification.clientId.isNotBlank()    -> notification.clientId.take(12)
         else                                   -> ""
+    }
+
+    val bodyTitle = notification.title.ifBlank {
+        if (notification.type == RemoteEventType.PRESENTATION_CONNECT) stringResource(Res.string.remote_activity_presentation_connect_detail) else ""
     }
 
     Surface(
@@ -203,7 +211,7 @@ private fun RemoteActivityToast(
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = notification.title,
+                        text = bodyTitle,
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,

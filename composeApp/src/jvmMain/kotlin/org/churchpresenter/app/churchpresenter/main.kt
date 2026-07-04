@@ -985,6 +985,40 @@ fun main() {
                                     }
                                 }
 
+                                // ── Presentation remote connection requests ───────────────────────────────────
+                                LaunchedEffect(Unit) {
+                                    companionServer.onPresentationRemoteConnect.collect { pending ->
+                                        val clientId = pending.clientId
+                                        if (remoteClientManager.isBlocked(clientId) ||
+                                            (clientId.isNotBlank() && sessionBlockedClients.contains(clientId))
+                                        ) {
+                                            pending.decision.complete(false)
+                                            return@collect
+                                        }
+                                        if (remoteClientManager.isAllowed(clientId) ||
+                                            (clientId.isNotBlank() && sessionAllowedClients.contains(clientId))
+                                        ) {
+                                            pending.decision.complete(true)
+                                            remoteActivityNotifications.add(RemoteActivityNotification(
+                                                type = RemoteEventType.PRESENTATION_CONNECT,
+                                                title = "",
+                                                clientId = clientId,
+                                                clientLabel = remoteClientManager.getLabel(clientId)
+                                            ))
+                                            return@collect
+                                        }
+                                        val event = RemoteEvent(
+                                            type = RemoteEventType.PRESENTATION_CONNECT,
+                                            title = "",
+                                            clientId = clientId,
+                                            clientLabel = remoteClientManager.getLabel(clientId)
+                                        )
+                                        val allow: () -> Unit = { pending.decision.complete(true) }
+                                        val deny: () -> Unit  = { pending.decision.complete(false) }
+                                        remoteEventQueue.add(Triple(event, allow, deny))
+                                    }
+                                }
+
                                 // ── Remote Bible hold toggle ──────────────────────────────────────────────────
                                 LaunchedEffect(Unit) {
                                     companionServer.onBibleHold.collect { hold ->
