@@ -25,6 +25,14 @@ class PresenterManager {
 
     companion object {
         const val PRERENDER_FPS = 30
+
+        // Held simultaneously as raw ARGB frames for the lifetime of the lower third —
+        // must stay well under the heap ceiling alongside everything else the app needs.
+        private const val MAX_PRERENDER_BYTES = 1_200_000_000L
+
+        // Output windows render pre-rendered frames with ContentScale.Fit, so a canvas
+        // larger than the app's default render resolution wastes memory with no visual benefit.
+        private const val MAX_CANVAS_DIMENSION = 1920
     }
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -420,9 +428,26 @@ class PresenterManager {
         if (json.isNotBlank()) {
             preRenderJob = preRenderScope.launch {
                 try {
-                    val (w, h) = AtemRenderCache.lottieCanvasSize(json) ?: (1920 to 1080)
+                    val (rawW, rawH) = AtemRenderCache.lottieCanvasSize(json) ?: (1920 to 1080)
+                    val (w, h) = clampCanvasSize(rawW, rawH)
                     val frameCount = AtemRenderCache.clipFrameCount(json, PRERENDER_FPS.toDouble())
                         ?: return@launch
+
+                    val estimatedBytes = frameCount.toLong() * w.toLong() * h.toLong() * 4L
+                    if (estimatedBytes > MAX_PRERENDER_BYTES) {
+                        CrashReporter.reportWarning(
+                            "Lottie pre-render skipped: estimated size exceeds budget",
+                            tags = mapOf(
+                                "subsystem" to "lower_third",
+                                "estimatedBytes" to estimatedBytes.toString(),
+                                "frameCount" to frameCount.toString(),
+                                "width" to w.toString(),
+                                "height" to h.toString()
+                            )
+                        )
+                        return@launch
+                    }
+
                     val renderer = LowerThirdOffscreenRenderer(w, h)
                     val frames = renderer.renderAllFrames(json, frameCount)
                     withContext(Dispatchers.Main) {
@@ -437,6 +462,14 @@ class PresenterManager {
                 }
             }
         }
+    }
+
+    /** Scales (w, h) down proportionally so neither side exceeds [MAX_CANVAS_DIMENSION]. */
+    private fun clampCanvasSize(w: Int, h: Int): Pair<Int, Int> {
+        val longestSide = maxOf(w, h)
+        if (longestSide <= MAX_CANVAS_DIMENSION) return w to h
+        val scale = MAX_CANVAS_DIMENSION.toDouble() / longestSide
+        return (w * scale).toInt().coerceAtLeast(1) to (h * scale).toInt().coerceAtLeast(1)
     }
 
     private val _lottiePauseFrame = mutableStateOf(-1f)

@@ -250,7 +250,7 @@ compose.desktop {
         jvmArgs(
             // Memory
             "-Xms512m",
-            "-Xmx1536m",
+            "-Xmx3072m",
             // GC
             "-XX:+UseG1GC",
             "-XX:+UnlockExperimentalVMOptions",
@@ -310,7 +310,7 @@ compose.desktop {
 
             val commonJvmArgs = listOf(
                 "-Xms512m",
-                "-Xmx1536m",
+                "-Xmx3072m",
                 "-XX:+UseG1GC",
                 "-XX:+UnlockExperimentalVMOptions",
                 "-XX:G1NewSizePercent=20",
