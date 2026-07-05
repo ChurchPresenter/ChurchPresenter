@@ -73,10 +73,13 @@ import churchpresenter.composeapp.generated.resources.web_bookmark_add
 import churchpresenter.composeapp.generated.resources.web_bookmark_remove
 import churchpresenter.composeapp.generated.resources.web_add_to_schedule
 import churchpresenter.composeapp.generated.resources.web_back
+import churchpresenter.composeapp.generated.resources.web_engine_unavailable_body
+import churchpresenter.composeapp.generated.resources.web_engine_unavailable_title
 import churchpresenter.composeapp.generated.resources.web_clear_cache
 import churchpresenter.composeapp.generated.resources.web_forward
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.outlined.Warning
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.web_go_live
@@ -90,6 +93,7 @@ import churchpresenter.composeapp.generated.resources.web_zoom_in
 import churchpresenter.composeapp.generated.resources.web_zoom_out
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.WebBookmark
+import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
@@ -118,6 +122,14 @@ fun WebTab(
     onAddToSchedule: ((url: String, title: String) -> Unit)? = null,
     onUpdateScheduleTitle: ((url: String, title: String) -> Unit)? = null
 ) {
+    // JCEF's native engine can fail to load at startup (broken chrome_elf.dll, missing
+    // VC++ runtime, etc.). CefManager.init() catches that and leaves the engine down for
+    // the whole session, so show an actionable panel instead of dead browser chrome.
+    if (!CefManager.initialized) {
+        WebEngineUnavailable(modifier)
+        return
+    }
+
     val previewAspectRatio = remember { presenterAspectRatio() }
 
     // Restore URL / title from PresenterManager so state survives tab switches
@@ -869,6 +881,44 @@ fun WebTab(
             }
         }
         }
+    }
+}
+
+/**
+ * Shown in place of the browser when JCEF's native engine failed to load at startup.
+ * Points the user at the Microsoft Visual C++ Redistributable, the most common cause.
+ */
+@Composable
+private fun WebEngineUnavailable(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Warning,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(Res.string.web_engine_unavailable_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(Res.string.web_engine_unavailable_body),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(max = 420.dp)
+        )
     }
 }
 

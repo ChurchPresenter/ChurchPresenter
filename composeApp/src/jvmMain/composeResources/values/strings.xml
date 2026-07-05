@@ -802,6 +802,8 @@
     <string name="web_bookmark_add">Add Bookmark</string>
     <string name="web_bookmark_remove">Remove Bookmark</string>
     <string name="web_preview_hint">Enter a URL above and tap Go Live</string>
+    <string name="web_engine_unavailable_title">Web browser unavailable</string>
+    <string name="web_engine_unavailable_body">The browser engine could not start. Install the Microsoft Visual C++ Redistributable (x64) and restart the app.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Type to page</string>
     <string name="web_type_to_page_placeholder">Click an input on the live page first</string>

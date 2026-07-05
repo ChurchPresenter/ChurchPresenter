@@ -101,15 +101,39 @@ object CefManager {
         }.onSuccess { return }
     }
 
+    /**
+     * Root directory for JCEF's native install + web cache.
+     *
+     * On Windows, prefer an ASCII-safe, username-free path under %ProgramData%
+     * (e.g. C:\ProgramData\ChurchPresenter) — a home directory containing non-ASCII
+     * characters is a suspected trigger for native-load failures, and a fresh
+     * extraction here also clears any partially-corrupted install. Fall back to
+     * ~/.churchpresenter when ProgramData is missing or not writable.
+     *
+     * On macOS/Linux the home directory is used unchanged — no accent problem, no ProgramData.
+     */
+    private fun jcefRootDir(): File {
+        val isWindows = System.getProperty("os.name", "").lowercase().contains("win")
+        if (isWindows) {
+            val programData = System.getenv("ProgramData") ?: "C:\\ProgramData"
+            val candidate = File(programData, "ChurchPresenter")
+            // Only use it if we can actually create and write to it (ProgramData ACLs vary).
+            val usable = runCatching { candidate.mkdirs(); candidate.isDirectory && candidate.canWrite() }
+                .getOrDefault(false)
+            if (usable) return candidate
+        }
+        return File(System.getProperty("user.home"), ".churchpresenter")
+    }
+
     fun init() {
         if (initialized) return
         // Must run before any JCEF class is loaded — CefBrowserWindowMac.getWindowHandle()
         // directly references sun.awt.AWTAccessor which the JVM module system blocks by default.
         patchJcefModuleAccess()
+        val installDir = File(jcefRootDir(), "jcef")
         try {
-            val installDir = File(System.getProperty("user.home"), ".churchpresenter/jcef")
             installDir.mkdirs()
-            val cacheDir = File(System.getProperty("user.home"), ".churchpresenter/webview-cache")
+            val cacheDir = File(jcefRootDir(), "webview-cache")
             cacheDir.mkdirs()
 
             val builder = CefAppBuilder()
@@ -141,6 +165,16 @@ object CefManager {
             // does not crash at startup; embedded web features simply stay unavailable.
             cefApp = null
             initialized = false
+            // Best-effort telemetry: distinguish the accented-path theory from the
+            // VC++-runtime theory at a glance in Sentry. Never let telemetry throw.
+            runCatching {
+                CrashReporter.setTag("jcef.path_ascii", installDir.path.all { it.code < 128 }.toString())
+                CrashReporter.setContext("jcef", mapOf(
+                    "installDir" to installDir.path,
+                    "os" to (System.getProperty("os.name") ?: ""),
+                    "arch" to (System.getProperty("os.arch") ?: "")
+                ))
+            }
             CrashReporter.reportException(t, context = "CefManager.init")
         }
     }
