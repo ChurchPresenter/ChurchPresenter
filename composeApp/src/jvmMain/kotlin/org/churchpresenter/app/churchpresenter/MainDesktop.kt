@@ -848,10 +848,12 @@ fun MainDesktop(
                         onAddWebsite = { showAddWebsiteDialog = true },
 
                         onPresentBible = { item ->
+                            selectTab(Tabs.BIBLE)
                             selectedBibleVerseItem = item
                             presenting(Presenting.BIBLE)
                         },
                         onPresentSong = { item ->
+                            selectTab(Tabs.SONGS)
                             selectedSongItem = item
                             selectedSongItemVersion++
                             onSongItemSelected(
@@ -871,6 +873,7 @@ fun MainDesktop(
                             presenting(Presenting.LYRICS)
                         },
                         onPresentPresentation = { item ->
+                            selectTab(Tabs.PRESENTATION)
                             selectedPresentationItem = item
                             presenting(Presenting.PRESENTATION)
                         },
@@ -880,6 +883,7 @@ fun MainDesktop(
                             presenting(Presenting.PICTURES)
                         },
                         onPresentMedia = { item ->
+                            selectTab(Tabs.MEDIA)
                             selectedMediaItem = item
                             presenting(Presenting.MEDIA)
                         },

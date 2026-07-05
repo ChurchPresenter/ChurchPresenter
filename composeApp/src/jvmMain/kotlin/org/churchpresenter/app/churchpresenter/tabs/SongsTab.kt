@@ -272,6 +272,8 @@ fun SongsTab(
         liveLineIndex = viewModel.selectedLineIndex.value
     }
 
+    val tabFocusRequester = remember { FocusRequester() }
+
     // React to schedule item selection
     // Uses selectedSongItemVersion as a key so clicking the same song twice always re-fires
     LaunchedEffect(selectedSongItem, selectedSongItemVersion) {
@@ -284,6 +286,7 @@ fun SongsTab(
             val found = viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook, item.songId)
             if (found) {
                 sendToPresenter()
+                tabFocusRequester.requestFocus()
             }
         }
     }
@@ -318,7 +321,6 @@ fun SongsTab(
     val density = LocalDensity.current
     val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
 
-    val tabFocusRequester = remember { FocusRequester() }
     LaunchedEffect(dialogDismissSignal) { tabFocusRequester.requestFocus() }
 
     // Column widths driven by settings; local state for smooth dragging

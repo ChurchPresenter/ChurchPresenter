@@ -227,6 +227,7 @@ fun MediaTab(
                 else -> selectedSourceType = Constants.MEDIA_TYPE_LOCAL
             }
             viewModel.loadMediaFromSchedule(url = it.mediaUrl, title = it.mediaTitle, type = it.mediaType)
+            focusRequester.requestFocus()
         }
     }
 

@@ -61,6 +61,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -225,12 +228,15 @@ fun PicturesTab(
         }
     }
 
+    val focusRequester = remember { FocusRequester() }
+
     // Load folder when a picture schedule item is selected
     LaunchedEffect(selectedPictureItem) {
         selectedPictureItem?.let { pictureItem ->
             val folder = File(pictureItem.folderPath)
             if (folder.exists() && folder.isDirectory) {
                 viewModel.selectFolder(folder)
+                focusRequester.requestFocus()
             }
         }
     }
@@ -252,6 +258,8 @@ fun PicturesTab(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .focusRequester(focusRequester)
+            .focusable()
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown && viewModel.images.isNotEmpty()) {
                     val columnCount = (gridState.layoutInfo.visibleItemsInfo.maxOfOrNull { it.column } ?: 0) + 1

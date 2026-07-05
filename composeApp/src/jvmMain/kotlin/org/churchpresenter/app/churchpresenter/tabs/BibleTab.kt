@@ -222,12 +222,17 @@ fun BibleTab(
         }
     }
 
+    val focusRequester = remember { FocusRequester() }
+
     LaunchedEffect(selectedVerseItem) {
         selectedVerseItem?.let { item ->
             if (!viewModel.isFullyLoadedFlow.value) {
                 viewModel.isFullyLoadedFlow.first { it }
             }
-            viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber, item.verseRange)
+            val found = viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber, item.verseRange)
+            if (found) {
+                focusRequester.requestFocus()
+            }
         }
     }
 
@@ -267,7 +272,6 @@ fun BibleTab(
     val selectedModeIndex by viewModel.selectedModeIndex
     val selectedMode = modeOptions.getOrElse(selectedModeIndex) { modeOptions.first() }
 
-    val focusRequester = remember { FocusRequester() }
     LaunchedEffect(dialogDismissSignal) { focusRequester.requestFocus() }
 
     val verseSelectionToken by viewModel.verseSelectionToken
