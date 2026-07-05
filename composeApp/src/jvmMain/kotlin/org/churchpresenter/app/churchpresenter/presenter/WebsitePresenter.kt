@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.Color
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import me.friwi.jcefmaven.CefAppBuilder
@@ -133,7 +134,14 @@ object CefManager {
 
             cefApp = builder.build()
             initialized = true
-        } catch (_: Exception) {
+        } catch (t: Throwable) {
+            // JCEF native load can fail with UnsatisfiedLinkError (an Error, not an
+            // Exception) — e.g. a broken/partial chrome_elf.dll install, a missing VC++
+            // runtime, or a non-ASCII install path. Catch Throwable so the whole app
+            // does not crash at startup; embedded web features simply stay unavailable.
+            cefApp = null
+            initialized = false
+            CrashReporter.reportException(t, context = "CefManager.init")
         }
     }
 
