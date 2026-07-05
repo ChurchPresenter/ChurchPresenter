@@ -409,6 +409,7 @@ fun main() {
         LaunchedEffect(appSettings.projectionSettings.browserSourceOutputs) {
             companionServer.updateBrowserSourceOutputs(appSettings.projectionSettings.browserSourceOutputs)
         }
+        val browserSourceServerUrlState = companionServer.serverUrl.collectAsState()
         appSettings.projectionSettings.browserSourceOutputs.indices.forEach { i ->
             composeKey(i) {
                 val appSettingsState = remember { derivedStateOf { appSettings } }
@@ -418,8 +419,14 @@ fun main() {
                 val effectiveModeState = remember {
                     derivedStateOf { presenterManager.browserSourceLocks.value[i] ?: presenterManager.presentingMode.value }
                 }
+                val qaDisplayUrlState = remember { derivedStateOf { qaDisplayUrl } }
                 val renderer = remember(i) {
-                    BrowserSourceVideoRenderer(presenterManager, appSettingsState, screenAssignmentState, effectiveModeState)
+                    BrowserSourceVideoRenderer(
+                        presenterManager, appSettingsState, screenAssignmentState, effectiveModeState,
+                        sttManager = sttManager,
+                        qaDisplayUrlState = qaDisplayUrlState,
+                        serverUrlState = browserSourceServerUrlState,
+                    )
                 }
                 LaunchedEffect(renderer) {
                     renderer.start(this)
@@ -514,7 +521,7 @@ fun main() {
 
         // Splash screen while app is loading
         if (!appReady) {
-            SplashWindow()
+            SplashWindow(theme = theme)
         }
 
         if (appReady && eulaAccepted) {
@@ -1691,7 +1698,7 @@ private fun executeProjectItem(
 }
 
 @Composable
-private fun SplashWindow() {
+private fun SplashWindow(theme: ThemeMode) {
     Window(
         onCloseRequest = {},
         title = stringResource(Res.string.app_name),
@@ -1705,7 +1712,7 @@ private fun SplashWindow() {
         resizable = false,
         alwaysOnTop = true
     ) {
-        AppThemeWrapper(theme = ThemeMode.SYSTEM) {
+        AppThemeWrapper(theme = theme) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

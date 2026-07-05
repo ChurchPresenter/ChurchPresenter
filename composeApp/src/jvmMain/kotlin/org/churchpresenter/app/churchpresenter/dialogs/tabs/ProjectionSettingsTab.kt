@@ -3,11 +3,9 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,8 +39,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_browser_source_output
@@ -62,9 +62,12 @@ import churchpresenter.composeapp.generated.resources.audio_output
 import churchpresenter.composeapp.generated.resources.audio_output_default
 import churchpresenter.composeapp.generated.resources.audio_output_device
 import churchpresenter.composeapp.generated.resources.bottom
+import churchpresenter.composeapp.generated.resources.cancel
+import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.browser_source_outputs
 import churchpresenter.composeapp.generated.resources.browser_source_outputs_help
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
+import churchpresenter.composeapp.generated.resources.browser_source_confirm_remove_message
 import churchpresenter.composeapp.generated.resources.browser_source_require_api_key
 import churchpresenter.composeapp.generated.resources.browser_source_uses_server_api_key
 import churchpresenter.composeapp.generated.resources.copy_url_transparent
@@ -109,6 +112,7 @@ import churchpresenter.composeapp.generated.resources.vlc_browse
 import churchpresenter.composeapp.generated.resources.vlc_custom_path
 import churchpresenter.composeapp.generated.resources.vlc_path_hint
 import churchpresenter.composeapp.generated.resources.projection_decklink_io_conflict_tooltip
+import churchpresenter.composeapp.generated.resources.browser_source_content_unavailable_tooltip
 import churchpresenter.composeapp.generated.resources.projection_web_decklink_tooltip
 import churchpresenter.composeapp.generated.resources.vlc_path_invalid
 import churchpresenter.composeapp.generated.resources.window_position
@@ -304,6 +308,16 @@ fun ProjectionSettingsTab(
         stageMonitorLabel to Constants.DISPLAY_MODE_STAGE_MONITOR
     )
 
+    // Shared column widths — used by both the Screen Assignment table (Card 1) and the
+    // Browser Source Outputs table (Card 1.5) so their columns line up the same way.
+    val displayModeColWidth = 92.dp
+    val langDropdownWidth = 95.dp
+    val cellWidth = 82.dp
+    // Reserves 2 lines of bodySmall (16.sp line height) so single-line labels (Bible, display
+    // mode, etc.) sit flush with the bottom of the tallest label (e.g. "Pictures/Presentation",
+    // which wraps to 2 lines) — keeping every checkbox/radio button in the row aligned.
+    val contentLabelHeight = 32.dp
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -351,7 +365,6 @@ fun ProjectionSettingsTab(
         // Grid table — screens are rows (left), content types are columns (top)
         val screenLabelWidth = 58.dp
         val displayDropdownWidth = 100.dp
-        val displayModeColWidth = 70.dp
 
         val offLabel = stringResource(Res.string.screen_lang_off)
         val bothLabel = stringResource(Res.string.song_language_both)
@@ -362,61 +375,73 @@ fun ProjectionSettingsTab(
 
         val bibleLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to bible1Label, Constants.SONG_LANG_SECONDARY to bible2Label, Constants.SONG_LANG_BOTH to bothLabel)
         val songLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to lang1Label, Constants.SONG_LANG_SECONDARY to lang2Label, Constants.SONG_LANG_BOTH to bothLabel)
-        val langDropdownWidth = 95.dp
-
-        val cellWidth = 82.dp
 
         val contentScrollState = rememberScrollState()
 
-        // Header row: Screen label + Display + Key Output + content columns + display mode
+        // Header row: Screen label + Display + Key Output + content columns + display mode.
+        // Every label sits in a fixed-height, bottom-aligned Box so columns whose title wraps
+        // to 2 lines (e.g. "Pictures/Presentation") don't push single-line titles out of
+        // alignment — all labels' bottoms line up right above the divider.
         Row(verticalAlignment = Alignment.CenterVertically) {
             Spacer(modifier = Modifier.width(screenLabelWidth))
-            Text(
-                text = stringResource(Res.string.projection_target_display),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.width(displayDropdownWidth)
-            )
-            Text(
-                text = stringResource(Res.string.key_output),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.width(displayDropdownWidth)
-            )
+            Box(modifier = Modifier.width(displayDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                Text(
+                    text = stringResource(Res.string.projection_target_display),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            Box(modifier = Modifier.width(displayDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                Text(
+                    text = stringResource(Res.string.key_output),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             Row(modifier = Modifier.weight(1f).horizontalScroll(contentScrollState), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(
-                    text = bibleLabel,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(langDropdownWidth)
-                )
-                Text(
-                    text = songsLabel,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(langDropdownWidth)
-                )
-                contentCols.forEach { col ->
+                Box(modifier = Modifier.width(langDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
                     Text(
-                        text = col.label,
+                        text = bibleLabel,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.width(cellWidth)
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
+                Box(modifier = Modifier.width(langDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                    Text(
+                        text = songsLabel,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                contentCols.forEach { col ->
+                    Box(modifier = Modifier.width(cellWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                        Text(
+                            text = col.label,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
-            Text(
-                text = stringResource(Res.string.display_mode),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.width(displayModeColWidth * 3)
-            )
+            Box(modifier = Modifier.width(displayModeColWidth * 3).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                Text(
+                    text = stringResource(Res.string.display_mode),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
         // Sub-header for display mode columns
@@ -429,6 +454,8 @@ fun ProjectionSettingsTab(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    softWrap = false,
                     modifier = Modifier.width(displayModeColWidth)
                 )
             }
@@ -936,167 +963,252 @@ fun ProjectionSettingsTab(
                     .padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                var showRemoveConfirm by remember { mutableStateOf(false) }
+                val overlayUrl = if (serverUrl.isNotBlank()) "$serverUrl${Constants.ENDPOINT_BROWSER_SOURCE}/${i + 1}" else null
+                val apiKeyParam = if (output.browserSourceApiKeyRequired && settings.serverSettings.apiKey.isNotBlank())
+                    "apiKey=${settings.serverSettings.apiKey}" else null
+                fun urlWithBg(bg: String): String =
+                    (overlayUrl ?: "") + "?" + listOfNotNull(apiKeyParam, "bg=$bg").joinToString("&")
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = stringResource(Res.string.browser_source_output_label, i + 1),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Button(
-                        shape = RoundedCornerShape(6.dp),
-                        onClick = {
-                            onSettingsChange { s ->
-                                s.copy(projectionSettings = s.projectionSettings.removeBrowserSourceOutput(i))
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.browser_source_output_label, i + 1),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        if (overlayUrl != null) {
+                            Text(
+                                text = overlayUrl,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontFamily = FontFamily.Monospace,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (overlayUrl != null) {
+                            Button(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = { copyText(urlWithBg("transparent")) },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(stringResource(Res.string.copy_url_transparent), style = MaterialTheme.typography.labelSmall)
+                            }
+                            Button(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = { copyText(urlWithBg("black")) },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(stringResource(Res.string.copy_url_black_bg), style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                        Button(
+                            shape = RoundedCornerShape(6.dp),
+                            onClick = { showRemoveConfirm = true },
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        ) {
+                            Text(stringResource(Res.string.remove), style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+
+                if (showRemoveConfirm) {
+                    AlertDialog(
+                        onDismissRequest = { showRemoveConfirm = false },
+                        title = { Text(stringResource(Res.string.confirm_delete)) },
+                        text = {
+                            Text(stringResource(Res.string.browser_source_confirm_remove_message, stringResource(Res.string.browser_source_output_label, i + 1)))
+                        },
+                        confirmButton = {
+                            TextButton(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = {
+                                    showRemoveConfirm = false
+                                    onSettingsChange { s ->
+                                        s.copy(projectionSettings = s.projectionSettings.removeBrowserSourceOutput(i))
+                                    }
+                                }
+                            ) {
+                                Text(stringResource(Res.string.remove), color = Color(0xFFE53935))
                             }
                         },
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                    ) {
-                        Text(stringResource(Res.string.remove), style = MaterialTheme.typography.labelSmall)
-                    }
-                }
-
-                if (serverUrl.isNotBlank()) {
-                    val overlayUrl = "$serverUrl${Constants.ENDPOINT_BROWSER_SOURCE}/$i"
-                    val apiKeyParam = if (output.browserSourceApiKeyRequired && settings.serverSettings.apiKey.isNotBlank())
-                        "apiKey=${settings.serverSettings.apiKey}" else null
-                    fun urlWithBg(bg: String): String =
-                        overlayUrl + "?" + listOfNotNull(apiKeyParam, "bg=$bg").joinToString("&")
-
-                    Text(
-                        text = overlayUrl,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Button(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = { copyText(urlWithBg("transparent")) },
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            Text(stringResource(Res.string.copy_url_transparent), style = MaterialTheme.typography.labelSmall)
-                        }
-                        Button(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = { copyText(urlWithBg("black")) },
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            Text(stringResource(Res.string.copy_url_black_bg), style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Switch(
-                        checked = output.browserSourceApiKeyRequired,
-                        onCheckedChange = { checked ->
-                            val updated = output.copy(browserSourceApiKeyRequired = checked)
-                            onSettingsChange { s ->
-                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                        dismissButton = {
+                            TextButton(shape = RoundedCornerShape(6.dp), onClick = { showRemoveConfirm = false }) {
+                                Text(stringResource(Res.string.cancel))
                             }
                         }
                     )
+                }
+
+                val rowScrollState = rememberScrollState()
+                Row(verticalAlignment = Alignment.Top) {
+                    Row(modifier = Modifier.weight(1f).horizontalScroll(rowScrollState), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                                Text(
+                                    text = bibleLabel,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            Checkbox(
+                                checked = output.showBible,
+                                onCheckedChange = { checked ->
+                                    val updated = output.copy(bibleMode = if (checked) Constants.SONG_LANG_BOTH else Constants.SONG_LANG_OFF)
+                                    onSettingsChange { s ->
+                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                    }
+                                }
+                            )
+                        }
+                        Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                                Text(
+                                    text = songsLabel,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            Checkbox(
+                                checked = output.showSongs,
+                                onCheckedChange = { checked ->
+                                    val updated = output.copy(songMode = if (checked) Constants.SONG_LANG_BOTH else Constants.SONG_LANG_OFF)
+                                    onSettingsChange { s ->
+                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                    }
+                                }
+                            )
+                        }
+                        @OptIn(ExperimentalMaterial3Api::class)
+                        contentCols.forEach { col ->
+                            val isUnavailableInBrowserSource = col.label == mediaLabel || col.label == "Web"
+                            Column(modifier = Modifier.width(cellWidth), horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                                    Text(
+                                        text = col.label,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                                if (isUnavailableInBrowserSource) {
+                                    TooltipBox(
+                                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                                        tooltip = { PlainTooltip { Text(stringResource(Res.string.browser_source_content_unavailable_tooltip)) } },
+                                        state = rememberTooltipState()
+                                    ) {
+                                        Checkbox(checked = false, enabled = false, onCheckedChange = {})
+                                    }
+                                } else {
+                                    Checkbox(
+                                        checked = col.getter(output),
+                                        enabled = col.enabled(output),
+                                        onCheckedChange = { checked ->
+                                            val updated = col.setter(output, checked)
+                                            onSettingsChange { s ->
+                                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        @OptIn(ExperimentalMaterial3Api::class)
+                        Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                                Text(
+                                    text = stringResource(Res.string.browser_source_require_api_key),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 2,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                                tooltip = { PlainTooltip { Text(stringResource(Res.string.browser_source_uses_server_api_key)) } },
+                                state = rememberTooltipState()
+                            ) {
+                                Checkbox(
+                                    checked = output.browserSourceApiKeyRequired,
+                                    onCheckedChange = { checked ->
+                                        val updated = output.copy(browserSourceApiKeyRequired = checked)
+                                        onSettingsChange { s ->
+                                            s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
                     Column {
                         Text(
-                            text = stringResource(Res.string.browser_source_require_api_key),
-                            style = MaterialTheme.typography.bodySmall
+                            text = stringResource(Res.string.display_mode),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(displayModeColWidth * 3)
                         )
-                        Text(
-                            text = stringResource(Res.string.browser_source_uses_server_api_key),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    val bibleChecked = output.showBible
-                    val songsChecked = output.showSongs
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = bibleChecked,
-                            onCheckedChange = { checked ->
-                                val updated = output.copy(bibleMode = if (checked) Constants.SONG_LANG_BOTH else Constants.SONG_LANG_OFF)
-                                onSettingsChange { s ->
-                                    s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                        Row {
+                            displayModes.forEach { (label, modeValue) ->
+                                Column(modifier = Modifier.width(displayModeColWidth), horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    RadioButton(
+                                        selected = output.displayMode == modeValue,
+                                        onClick = {
+                                            val updated = output.copy(displayMode = modeValue)
+                                            onSettingsChange { s ->
+                                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                            }
+                                        }
+                                    )
                                 }
                             }
-                        )
-                        Text(bibleLabel, style = MaterialTheme.typography.labelSmall)
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = songsChecked,
-                            onCheckedChange = { checked ->
-                                val updated = output.copy(songMode = if (checked) Constants.SONG_LANG_BOTH else Constants.SONG_LANG_OFF)
-                                onSettingsChange { s ->
-                                    s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                }
-                            }
-                        )
-                        Text(songsLabel, style = MaterialTheme.typography.labelSmall)
-                    }
-                    contentCols.forEach { col ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = col.getter(output),
-                                enabled = col.enabled(output),
-                                onCheckedChange = { checked ->
-                                    val updated = col.setter(output, checked)
-                                    onSettingsChange { s ->
-                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                    }
-                                }
-                            )
-                            Text(col.label, style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.display_mode),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    displayModes.forEach { (label, modeValue) ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable {
-                                val updated = output.copy(displayMode = modeValue)
-                                onSettingsChange { s ->
-                                    s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                }
-                            }
-                        ) {
-                            RadioButton(
-                                selected = output.displayMode == modeValue,
-                                onClick = {
-                                    val updated = output.copy(displayMode = modeValue)
-                                    onSettingsChange { s ->
-                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                    }
-                                }
+                Row {
+                    Box(modifier = Modifier.weight(1f)) {
+                        HorizontalScrollbar(
+                            adapter = rememberScrollbarAdapter(rowScrollState),
+                            modifier = Modifier.fillMaxWidth().height(10.dp),
+                            style = LocalScrollbarStyle.current.copy(
+                                thickness = 8.dp,
+                                unhoverColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                hoverColor = MaterialTheme.colorScheme.primary
                             )
-                            Text(label, style = MaterialTheme.typography.labelSmall)
-                        }
+                        )
                     }
+                    Spacer(modifier = Modifier.width(displayModeColWidth * 3))
                 }
             }
         }

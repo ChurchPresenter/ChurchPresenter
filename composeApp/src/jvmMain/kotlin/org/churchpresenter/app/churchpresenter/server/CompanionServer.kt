@@ -2945,15 +2945,19 @@ class CompanionServer {
                 // ── Browser Source Endpoints (OBS/vMix overlay) ────────────────────
 
                 get("${Constants.ENDPOINT_BROWSER_SOURCE}/{index}") {
-                    val index = call.parameters["index"]?.toIntOrNull()
+                    // Path segment is the 1-based number shown in Projection Settings
+                    // (e.g. "Browser Source 1" -> /browser-source/1); convert to the
+                    // 0-based array index for lookups.
+                    val displayIndex = call.parameters["index"]?.toIntOrNull()
+                    val index = displayIndex?.minus(1)
                     val output = index?.let { browserSourceOutput(it) }
-                    if (index == null || output == null) {
+                    if (displayIndex == null || output == null) {
                         call.respond(io.ktor.http.HttpStatusCode.NotFound, "Unknown browser source output")
                         return@get
                     }
                     if (!checkBrowserSourceApiKey(call, output)) return@get
                     val bgOverride = call.request.queryParameters["bg"]
-                    call.respondText(browserSourceOverlayPageHtml(index, output, bgOverride), ContentType.Text.Html)
+                    call.respondText(browserSourceOverlayPageHtml(displayIndex, output, bgOverride), ContentType.Text.Html)
                 }
 
                 // Continuous PNG video stream (multipart/x-mixed-replace) of this output's
@@ -2961,9 +2965,12 @@ class CompanionServer {
                 // A frame is only pushed when its pixels actually changed since the previous
                 // tick, so a static slide costs one frame, not continuous encoding.
                 get("/api${Constants.ENDPOINT_BROWSER_SOURCE}/{index}/stream") {
-                    val index = call.parameters["index"]?.toIntOrNull()
+                    // Same 1-based -> 0-based conversion as the overlay page route above,
+                    // since this URL is embedded inside that page using the same display index.
+                    val displayIndex = call.parameters["index"]?.toIntOrNull()
+                    val index = displayIndex?.minus(1)
                     val output = index?.let { browserSourceOutput(it) }
-                    if (index == null || output == null) {
+                    if (displayIndex == null || output == null) {
                         call.respond(io.ktor.http.HttpStatusCode.NotFound, "Unknown browser source output")
                         return@get
                     }

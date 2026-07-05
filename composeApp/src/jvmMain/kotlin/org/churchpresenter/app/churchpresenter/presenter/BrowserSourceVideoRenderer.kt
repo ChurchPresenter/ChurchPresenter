@@ -7,6 +7,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.Density
+import io.github.alexzhirkevich.compottie.LottieCompositionSpec
+import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,6 +21,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
@@ -27,8 +30,15 @@ import javax.imageio.ImageIO
  * Renders a Browser Source output's live content off-screen (no window, no JCEF — same
  * [ImageComposeScene] technique as [LowerThirdOffscreenRenderer]) and encodes changed frames
  * as PNG, so a remote OBS/vMix Browser Source gets a pixel-identical stream of the same
- * BiblePresenter/SongPresenter/AnnouncementsPresenter/PicturePresenter/StageMonitorScreen
- * composables used everywhere else in the app — no reimplementation drift.
+ * presenter composables used everywhere else in the app — no reimplementation drift.
+ *
+ * Supported content types: Bible, Songs/Lyrics, Announcements, Pictures, Presentation slides,
+ * Lower Third (Lottie graphics), Canvas (scene compositor), Q&A, STT captions, Dictionary —
+ * plus Stage Monitor as a whole separate display-mode layout. Not yet supported: Media
+ * (video/audio — would need `MediaViewModel`/`LocalMediaViewModel`, and unlike the others,
+ * real video never settles into an "unchanged" frame, so it would force continuous encoding
+ * at the full tick rate rather than only-on-change) and Website (JCEF-rendered, would need
+ * its own off-screen browser instance rather than a Compose composable).
  *
  * Only encodes and emits a frame when the rendered pixels actually changed since the last
  * tick, so a static slide costs one encode, not continuous encoding — this is what keeps a
@@ -41,6 +51,9 @@ class BrowserSourceVideoRenderer(
     private val appSettingsState: State<AppSettings>,
     private val screenAssignmentState: State<ScreenAssignment>,
     private val effectiveModeState: State<Presenting>,
+    private val sttManager: STTManager? = null,
+    private val qaDisplayUrlState: State<String>? = null,
+    private val serverUrlState: State<String>? = null,
     private val width: Int = 1920,
     private val height: Int = 1080,
 ) {
@@ -94,8 +107,13 @@ class BrowserSourceVideoRenderer(
                         val showsContent = when (effectiveMode) {
                             Presenting.BIBLE -> screenAssignment.showBible
                             Presenting.LYRICS -> screenAssignment.showSongs
-                            Presenting.PICTURES -> screenAssignment.showPictures
+                            Presenting.PICTURES, Presenting.PRESENTATION -> screenAssignment.showPictures
                             Presenting.ANNOUNCEMENTS -> screenAssignment.showAnnouncements
+                            Presenting.LOWER_THIRD -> screenAssignment.showStreaming
+                            Presenting.CANVAS -> true
+                            Presenting.QA -> screenAssignment.showQA
+                            Presenting.STT -> screenAssignment.showSTT
+                            Presenting.DICTIONARY -> screenAssignment.showDictionary
                             else -> false
                         }
                         if (effectiveMode != Presenting.NONE && showsContent) {
@@ -134,6 +152,59 @@ class BrowserSourceVideoRenderer(
                                     appSettings = appSettings,
                                     outputRole = outputRole,
                                     transitionAlpha = presenterManager.announcementTransitionAlpha.value
+                                )
+                                Presenting.PRESENTATION -> {
+                                    val frozen = presenterManager.slideFrozen.value
+                                    SlidePresenter(
+                                        slide = if (frozen) null else presenterManager.displayedSlide.value,
+                                        previousSlide = if (frozen) null else presenterManager.previousDisplayedSlide.value,
+                                        transitionAlpha = presenterManager.slideTransitionAlpha.value,
+                                        slideOffset = presenterManager.slideSlideOffset.value,
+                                        animationType = presenterManager.animationType.value,
+                                        outputRole = outputRole
+                                    )
+                                }
+                                Presenting.LOWER_THIRD -> {
+                                    val lottieJsonContent = presenterManager.lottieJsonContent.value
+                                    val lottieComposition by rememberLottieComposition(key = lottieJsonContent) {
+                                        LottieCompositionSpec.JsonString(lottieJsonContent.ifBlank { "{}" })
+                                    }
+                                    LowerThirdPresenter(
+                                        composition = lottieComposition,
+                                        progress = { presenterManager.lottieProgress.value },
+                                        appSettings = appSettings,
+                                        outputRole = outputRole
+                                    )
+                                }
+                                Presenting.CANVAS -> ScenePresenter(scene = presenterManager.activeScene.value)
+                                Presenting.QA -> {
+                                    val showQRCode = presenterManager.showQRCodeOnDisplay.value
+                                    val qaTransitionAlpha = presenterManager.qaTransitionAlpha.value
+                                    if (showQRCode) {
+                                        val base = qaDisplayUrlState?.value?.ifEmpty { serverUrlState?.value ?: "" } ?: (serverUrlState?.value ?: "")
+                                        QAQRCodePresenter(url = "$base/qa", qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
+                                    } else {
+                                        QAPresenter(question = presenterManager.displayedQuestion.value, qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
+                                    }
+                                }
+                                Presenting.STT -> {
+                                    sttManager?.let { stt ->
+                                        STTPresenter(
+                                            segments = stt.segments,
+                                            inProgressText = stt.inProgressText.value,
+                                            translationSegments = stt.translationSegments,
+                                            inProgressTranslation = stt.inProgressTranslation.value,
+                                            highlightedWords = stt.highlightedWords,
+                                            sttSettings = appSettings.sttSettings,
+                                            outputRole = outputRole
+                                        )
+                                    }
+                                }
+                                Presenting.DICTIONARY -> DictionaryPresenter(
+                                    entry = presenterManager.displayedDictionaryEntry.value,
+                                    dictionarySettings = appSettings.dictionarySettings,
+                                    outputRole = outputRole,
+                                    transitionAlpha = 1f
                                 )
                                 else -> {}
                             }
