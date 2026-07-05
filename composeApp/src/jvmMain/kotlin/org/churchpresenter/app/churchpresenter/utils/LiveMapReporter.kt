@@ -38,6 +38,19 @@ object LiveMapReporter {
     // separately and don't skew real-user stats on the live map.
     private val isDevBuild: Boolean = !BuildConfig.IS_RELEASE
 
+    // Same os.name convention already used in AutoStartManager.kt/UpdateChecker.kt.
+    // Explicitly checks for "linux" rather than treating it as the else-case,
+    // matching the website's own os validation (unrecognized -> "unknown"
+    // rather than assumed) instead of guessing for anything unexpected.
+    private val os: String = System.getProperty("os.name", "").lowercase().let {
+        when {
+            it.contains("win") -> "windows"
+            it.contains("mac") -> "macos"
+            it.contains("linux") -> "linux"
+            else -> "unknown"
+        }
+    }
+
     /**
      * @param installId Stable anonymous install id, sent as the X-Install-Id
      * header so the server dedupes repeat launches to one row per install. Pass
@@ -48,6 +61,7 @@ object LiveMapReporter {
         val url = buildString {
             append(PING_URL)
             append("?platform=desktop")
+            append("&os=$os")
             if (isDevBuild) append("&src=dev")
         }
         scope.launch {

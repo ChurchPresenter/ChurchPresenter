@@ -4375,7 +4375,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .grid-icon{display:inline-grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;width:14px;height:14px;vertical-align:middle}
 .grid-icon i{background:#fff;border-radius:1px;display:block}
 #botbar.expanded{flex:1;align-items:stretch;padding:12px;gap:12px}
-#botbar.expanded .nav-btn{font-size:44px;display:flex;align-items:center;justify-content:center}
+#botbar.expanded .nav-btn{font-size:clamp(20px,8vw,44px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;overflow:hidden}
+#botbar.expanded .nav-chevron{font-size:1.3em;line-height:1}
 </style>
 </head>
 <body>
@@ -4416,8 +4417,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div id="strip-handle"></div>
   <div id="strip-wrap"></div>
   <div id="botbar">
-    <button class="nav-btn" onclick="goSlide(state.index-1)">‹ Backward</button>
-    <button class="nav-btn" onclick="goSlide(state.index+1)">Forward ›</button>
+    <button class="nav-btn" onclick="goSlide(state.index-1)"><span class="nav-chevron">‹</span><span class="nav-label">Backward</span></button>
+    <button class="nav-btn" onclick="goSlide(state.index+1)"><span class="nav-label">Forward</span><span class="nav-chevron">›</span></button>
   </div>
 </div>
 <script>
