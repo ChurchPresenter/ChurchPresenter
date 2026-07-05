@@ -14,6 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -152,7 +154,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun PresentationTab(
     modifier: Modifier = Modifier,
@@ -519,14 +521,15 @@ fun PresentationTab(
         }
 
         // ── Playback controls bar ─────────────────────────────────────
-        Row(
+        FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 52.dp)
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            itemVerticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Transport (inner gap: 4dp)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -696,7 +699,9 @@ fun PresentationTab(
                 text = stringResource(Res.string.presentation_arrow_key_hint),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                modifier = Modifier.weight(1f, fill = false)
+                modifier = Modifier.weight(1f, fill = false),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
         }

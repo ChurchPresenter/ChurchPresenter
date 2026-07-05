@@ -202,7 +202,7 @@ private object RecentPictureFolders {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun PicturesTab(
     modifier: Modifier = Modifier,
@@ -462,14 +462,15 @@ fun PicturesTab(
         }
 
         // ── Playback controls bar ─────────────────────────────────────
-        Row(
+        FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 52.dp)
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            itemVerticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Transport controls (inner gap: 4dp)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -755,7 +756,9 @@ fun PicturesTab(
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp)
                     ),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = "·",
@@ -767,7 +770,9 @@ fun PicturesTab(
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp)
                     ),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
