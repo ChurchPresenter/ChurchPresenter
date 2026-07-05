@@ -1694,9 +1694,7 @@ class CompanionServer {
     fun start(port: Int = Constants.SERVER_DEFAULT_PORT, hostOverride: String = "") {
         if (_isRunning.value) return
 
-        // Find the first pair of consecutive free ports starting from the requested one.
-        // The server needs port N (plain-HTTP) and port N+1 (plain-HTTP localhost connector).
-        val actualPort = findFreePortPair(port)
+        val actualPort = findFreePort(port)
         currentPort = actualPort
 
         val displayHost = hostOverride.trim().ifEmpty { localIpAddress() }
@@ -1713,11 +1711,6 @@ class CompanionServer {
                 connector {
                     host = "0.0.0.0"
                     this.port = port
-                }
-                // Plain HTTP on localhost for embedded WebView
-                connector {
-                    host = "127.0.0.1"
-                    this.port = port + 1
                 }
             }) { configurePipeline() }
             server?.start(wait = false)
@@ -1737,18 +1730,6 @@ class CompanionServer {
             if (isPortFree(candidate)) return candidate
         }
         return startPort
-    }
-
-    /**
-     * Finds the first port >= [startPort] where BOTH [port] and [port]+1 are free.
-     * The server requires two consecutive free ports (main HTTP + localhost connector).
-     * Scans up to 20 candidates before giving up and returning [startPort] as-is.
-     */
-    private fun findFreePortPair(startPort: Int): Int {
-        for (candidate in startPort until startPort + 40 step 2) {
-            if (isPortFree(candidate) && isPortFree(candidate + 1)) return candidate
-        }
-        return startPort  // give up — let Netty surface the real error
     }
 
     private fun isPortFree(port: Int): Boolean = try {
