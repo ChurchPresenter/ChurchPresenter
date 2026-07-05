@@ -97,6 +97,7 @@ import churchpresenter.composeapp.generated.resources.qa_qr_message_reset
 import churchpresenter.composeapp.generated.resources.qa_approve
 import churchpresenter.composeapp.generated.resources.qa_back_to_incoming
 import churchpresenter.composeapp.generated.resources.qa_background_color
+import churchpresenter.composeapp.generated.resources.qa_transparent
 import churchpresenter.composeapp.generated.resources.qa_text_color
 import churchpresenter.composeapp.generated.resources.qa_qr_fg_color
 import churchpresenter.composeapp.generated.resources.qa_qr_bg_color
@@ -1066,7 +1067,23 @@ fun QATab(
 
                 Spacer(Modifier.height(8.dp))
                 Column(horizontalAlignment = Alignment.Start) {
-                    ColorPickerField(label = stringResource(Res.string.qa_background_color), color = qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } }, modifier = Modifier.fillMaxWidth())
+                    val bgIsTransparent = qaSettings.backgroundColor.equals("transparent", ignoreCase = true)
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
+                        if (bgIsTransparent) {
+                            OutlinedButton(
+                                onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "#1E1E2E")) } },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(6.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                            ) { Text(stringResource(Res.string.qa_background_color) + " · " + stringResource(Res.string.qa_transparent), style = MaterialTheme.typography.labelSmall) }
+                        } else {
+                            ColorPickerField(label = stringResource(Res.string.qa_background_color), color = qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } }, modifier = Modifier.weight(1f))
+                            OutlinedButton(
+                                onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "transparent")) } },
+                                shape = RoundedCornerShape(6.dp)
+                            ) { Text(stringResource(Res.string.qa_transparent), style = MaterialTheme.typography.labelSmall) }
+                        }
+                    }
                     Spacer(Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
