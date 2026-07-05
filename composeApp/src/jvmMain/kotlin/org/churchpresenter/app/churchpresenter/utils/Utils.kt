@@ -12,7 +12,7 @@ import java.util.Locale
 object Utils {
 
     fun getAvailableSystemFonts(): List<String> {
-        return GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList()
+        return GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.sortedBy { it.lowercase() }
     }
 
     /** True if the system's default locale displays time in 24-hour format (no AM/PM). */
