@@ -125,15 +125,37 @@ object CefManager {
         return File(System.getProperty("user.home"), ".churchpresenter")
     }
 
+    /**
+     * One-time cleanup of the legacy JCEF footprint left under ~/.churchpresenter after a
+     * Windows user is relocated to %ProgramData%. Only runs when [activeRoot] is NOT the home
+     * directory — i.e. we actually moved. If ProgramData was unwritable and we fell back to the
+     * home dir, that location is live and must be left untouched. Deletes only the jcef and
+     * webview-cache subdirs (never the parent, which holds settings/song cache/crash reports).
+     * Best-effort on a daemon thread: ~100 MB recursive delete shouldn't block startup, and
+     * locked files are simply skipped and retried on a future launch.
+     */
+    private fun cleanupLegacyJcef(activeRoot: File) {
+        val homeRoot = File(System.getProperty("user.home"), ".churchpresenter")
+        if (activeRoot.absolutePath == homeRoot.absolutePath) return
+        val legacyDirs = listOf(File(homeRoot, "jcef"), File(homeRoot, "webview-cache"))
+        if (legacyDirs.none { it.isDirectory }) return
+        Thread {
+            legacyDirs.forEach { dir ->
+                runCatching { if (dir.isDirectory) dir.deleteRecursively() }
+            }
+        }.apply { isDaemon = true; name = "jcef-legacy-cleanup" }.start()
+    }
+
     fun init() {
         if (initialized) return
         // Must run before any JCEF class is loaded — CefBrowserWindowMac.getWindowHandle()
         // directly references sun.awt.AWTAccessor which the JVM module system blocks by default.
         patchJcefModuleAccess()
-        val installDir = File(jcefRootDir(), "jcef")
+        val root = jcefRootDir()
+        val installDir = File(root, "jcef")
         try {
             installDir.mkdirs()
-            val cacheDir = File(jcefRootDir(), "webview-cache")
+            val cacheDir = File(root, "webview-cache")
             cacheDir.mkdirs()
 
             val builder = CefAppBuilder()
@@ -158,6 +180,8 @@ object CefManager {
 
             cefApp = builder.build()
             initialized = true
+            // Now that the relocated install works, reclaim the orphaned old footprint.
+            cleanupLegacyJcef(root)
         } catch (t: Throwable) {
             // JCEF native load can fail with UnsatisfiedLinkError (an Error, not an
             // Exception) — e.g. a broken/partial chrome_elf.dll install, a missing VC++
