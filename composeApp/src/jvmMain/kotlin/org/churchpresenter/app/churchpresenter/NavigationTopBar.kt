@@ -19,6 +19,7 @@ import churchpresenter.composeapp.generated.resources.language_belarusian
 import churchpresenter.composeapp.generated.resources.language_czech
 import churchpresenter.composeapp.generated.resources.language_dutch
 import churchpresenter.composeapp.generated.resources.language_english
+import churchpresenter.composeapp.generated.resources.language_estonian
 import churchpresenter.composeapp.generated.resources.language_french
 import churchpresenter.composeapp.generated.resources.language_german
 import churchpresenter.composeapp.generated.resources.language_kazakh
@@ -265,6 +266,10 @@ fun FrameWindowScope.NavigationTopBar(
             Item(
                 text = "🇸🇰 ${stringResource(Res.string.language_slovak)}",
                 onClick = { onLanguageChange(Language.SLOVAK) }
+            )
+            Item(
+                text = "🇪🇪 ${stringResource(Res.string.language_estonian)}",
+                onClick = { onLanguageChange(Language.ESTONIAN) }
             )
         }
 

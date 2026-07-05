@@ -419,6 +419,7 @@
     <string name="language_portuguese">Portuguese</string>
     <string name="language_romanian">Romanian</string>
     <string name="language_slovak">Slovak</string>
+    <string name="language_estonian">Estonian</string>
 
     <!-- Search Results -->
     <string name="no_results_found">No results found for "%1$s"</string>

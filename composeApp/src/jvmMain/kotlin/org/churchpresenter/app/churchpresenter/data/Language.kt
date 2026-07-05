@@ -14,6 +14,7 @@ enum class Language(val code: String, val nativeName: String) {
     DUTCH("nl", "Nederlands"),
     PORTUGUESE("pt", "Português"),
     ROMANIAN("ro", "Română"),
-    SLOVAK("sk", "Slovenčina")
+    SLOVAK("sk", "Slovenčina"),
+    ESTONIAN("et", "Eesti")
 }
 
