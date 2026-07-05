@@ -86,6 +86,20 @@ class PresenterManager {
         _browserSourceLocks.value = updated
     }
 
+    // Indices of Browser Source outputs currently showing the "Identify" overlay
+    // (their output number, briefly flashed) — same idea as identifyingScreen for
+    // physical displays, but per-output since there's no window to flash instead.
+    private val _browserSourceIdentifying = mutableStateOf<Set<Int>>(emptySet())
+    val browserSourceIdentifying: State<Set<Int>> = _browserSourceIdentifying
+
+    fun identifyBrowserSourceOutput(index: Int) {
+        _browserSourceIdentifying.value = _browserSourceIdentifying.value + index
+        preRenderScope.launch {
+            delay(5_000L)
+            _browserSourceIdentifying.value = _browserSourceIdentifying.value - index
+        }
+    }
+
     private val _lyricSection = mutableStateOf(LyricSection())
     val lyricSection: State<LyricSection> = _lyricSection
 

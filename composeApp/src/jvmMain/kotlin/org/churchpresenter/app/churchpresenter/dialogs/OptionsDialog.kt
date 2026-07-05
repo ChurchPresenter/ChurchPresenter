@@ -81,6 +81,7 @@ fun OptionsDialog(
     onDismiss: () -> Unit,
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {},
+    onIdentifyBrowserSource: (Int) -> Unit = {},
     onThemeChange: (ThemeMode) -> Unit = {},
     scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList(),
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
@@ -220,6 +221,7 @@ fun OptionsDialog(
                                 },
                                 companionServer = companionServer,
                                 onIdentifyScreen = { onIdentifyScreen() },
+                                onIdentifyBrowserSource = { index -> onIdentifyBrowserSource(index) },
                                 scenes = scenes
                             )
                             5 -> LowerThirdSettingsTab(

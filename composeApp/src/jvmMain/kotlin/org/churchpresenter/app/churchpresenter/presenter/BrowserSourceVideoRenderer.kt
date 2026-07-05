@@ -1,12 +1,23 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshots.Snapshot
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.sp
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +62,7 @@ class BrowserSourceVideoRenderer(
     private val appSettingsState: State<AppSettings>,
     private val screenAssignmentState: State<ScreenAssignment>,
     private val effectiveModeState: State<Presenting>,
+    private val outputIndex: Int = 0,
     private val sttManager: STTManager? = null,
     private val qaDisplayUrlState: State<String>? = null,
     private val serverUrlState: State<String>? = null,
@@ -74,11 +86,27 @@ class BrowserSourceVideoRenderer(
                 val appSettings by appSettingsState
                 val screenAssignment by screenAssignmentState
                 val effectiveMode by effectiveModeState
+                val isIdentifying = presenterManager.browserSourceIdentifying.value.contains(outputIndex)
                 val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
                 val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
                 val outputRole = Constants.OUTPUT_ROLE_NORMAL
 
-                if (isStageMonitor) {
+                if (isIdentifying) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.75f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        BasicText(
+                            text = "Browser Source ${outputIndex + 1}",
+                            style = TextStyle(
+                                color = Color.White,
+                                fontSize = 96.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                    }
+                } else if (isStageMonitor) {
                     StageMonitorScreen(
                         sm = appSettings.stageMonitorSettings,
                         presentingMode = effectiveMode,

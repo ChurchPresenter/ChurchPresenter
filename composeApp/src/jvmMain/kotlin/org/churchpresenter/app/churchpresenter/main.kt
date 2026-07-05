@@ -423,6 +423,7 @@ fun main() {
                 val renderer = remember(i) {
                     BrowserSourceVideoRenderer(
                         presenterManager, appSettingsState, screenAssignmentState, effectiveModeState,
+                        outputIndex = i,
                         sttManager = sttManager,
                         qaDisplayUrlState = qaDisplayUrlState,
                         serverUrlState = browserSourceServerUrlState,
@@ -1389,6 +1390,9 @@ fun main() {
                                             delay(5_000L)
                                             identifyingScreen = false
                                         }
+                                    },
+                                    onIdentifyBrowserSource = { index ->
+                                        presenterManager.identifyBrowserSourceOutput(index)
                                     },
                                     onOpenLottieGen = { outputDir, onSaved ->
                                         if (outputDir.isNotEmpty() && java.io.File(outputDir).isDirectory) {

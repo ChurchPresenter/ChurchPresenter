@@ -142,6 +142,7 @@ fun ProjectionSettingsTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     companionServer: CompanionServer,
     onIdentifyScreen: () -> Unit = {},
+    onIdentifyBrowserSource: (Int) -> Unit = {},
     scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList()
 ) {
     val scope = rememberCoroutineScope()
@@ -308,6 +309,17 @@ fun ProjectionSettingsTab(
         stageMonitorLabel to Constants.DISPLAY_MODE_STAGE_MONITOR
     )
 
+    // Shared Bible/Songs language-mode dropdown options — used by both the Screen Assignment
+    // table (Card 1) and the Browser Source Outputs table (Card 1.5).
+    val offLabel = stringResource(Res.string.screen_lang_off)
+    val bothLabel = stringResource(Res.string.song_language_both)
+    val bible1Label = stringResource(Res.string.screen_lang_bible_1)
+    val bible2Label = stringResource(Res.string.screen_lang_bible_2)
+    val lang1Label = stringResource(Res.string.screen_lang_language_1)
+    val lang2Label = stringResource(Res.string.screen_lang_language_2)
+    val bibleLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to bible1Label, Constants.SONG_LANG_SECONDARY to bible2Label, Constants.SONG_LANG_BOTH to bothLabel)
+    val songLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to lang1Label, Constants.SONG_LANG_SECONDARY to lang2Label, Constants.SONG_LANG_BOTH to bothLabel)
+
     // Shared column widths — used by both the Screen Assignment table (Card 1) and the
     // Browser Source Outputs table (Card 1.5) so their columns line up the same way.
     val displayModeColWidth = 92.dp
@@ -365,16 +377,6 @@ fun ProjectionSettingsTab(
         // Grid table — screens are rows (left), content types are columns (top)
         val screenLabelWidth = 58.dp
         val displayDropdownWidth = 100.dp
-
-        val offLabel = stringResource(Res.string.screen_lang_off)
-        val bothLabel = stringResource(Res.string.song_language_both)
-        val bible1Label = stringResource(Res.string.screen_lang_bible_1)
-        val bible2Label = stringResource(Res.string.screen_lang_bible_2)
-        val lang1Label = stringResource(Res.string.screen_lang_language_1)
-        val lang2Label = stringResource(Res.string.screen_lang_language_2)
-
-        val bibleLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to bible1Label, Constants.SONG_LANG_SECONDARY to bible2Label, Constants.SONG_LANG_BOTH to bothLabel)
-        val songLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to lang1Label, Constants.SONG_LANG_SECONDARY to lang2Label, Constants.SONG_LANG_BOTH to bothLabel)
 
         val contentScrollState = rememberScrollState()
 
@@ -1014,6 +1016,13 @@ fun ProjectionSettingsTab(
                         }
                         Button(
                             shape = RoundedCornerShape(6.dp),
+                            onClick = { onIdentifyBrowserSource(i) },
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(stringResource(Res.string.identify_screen), style = MaterialTheme.typography.labelSmall)
+                        }
+                        Button(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = { showRemoveConfirm = true },
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -1067,15 +1076,36 @@ fun ProjectionSettingsTab(
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
-                            Checkbox(
-                                checked = output.showBible,
-                                onCheckedChange = { checked ->
-                                    val updated = output.copy(bibleMode = if (checked) Constants.SONG_LANG_BOTH else Constants.SONG_LANG_OFF)
-                                    onSettingsChange { s ->
-                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                    }
+                            var bibleModeExpanded by remember { mutableStateOf(false) }
+                            OutlinedButton(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = { bibleModeExpanded = true },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = bibleLangModes.find { it.first == output.bibleMode }?.second ?: offLabel,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = bibleModeExpanded,
+                                onDismissRequest = { bibleModeExpanded = false }
+                            ) {
+                                bibleLangModes.forEach { (value, label) ->
+                                    DropdownMenuItem(
+                                        text = { Text(label, style = MaterialTheme.typography.bodySmall) },
+                                        onClick = {
+                                            bibleModeExpanded = false
+                                            val updated = output.copy(bibleMode = value)
+                                            onSettingsChange { s ->
+                                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                            }
+                                        }
+                                    )
                                 }
-                            )
+                            }
                         }
                         Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
@@ -1087,15 +1117,39 @@ fun ProjectionSettingsTab(
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
-                            Checkbox(
-                                checked = output.showSongs,
-                                onCheckedChange = { checked ->
-                                    val updated = output.copy(songMode = if (checked) Constants.SONG_LANG_BOTH else Constants.SONG_LANG_OFF)
-                                    onSettingsChange { s ->
-                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                    }
+                            var songModeExpanded by remember { mutableStateOf(false) }
+                            OutlinedButton(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = { songModeExpanded = true },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = songLangModes.find { it.first == output.songMode }?.second ?: offLabel,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = songModeExpanded,
+                                onDismissRequest = { songModeExpanded = false }
+                            ) {
+                                songLangModes.forEach { (value, label) ->
+                                    DropdownMenuItem(
+                                        text = { Text(label, style = MaterialTheme.typography.bodySmall) },
+                                        onClick = {
+                                            songModeExpanded = false
+                                            val updated = if (value == Constants.SONG_LANG_OFF)
+                                                output.copy(songMode = value, songLookAhead = false)
+                                            else
+                                                output.copy(songMode = value)
+                                            onSettingsChange { s ->
+                                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                            }
+                                        }
+                                    )
                                 }
-                            )
+                            }
                         }
                         @OptIn(ExperimentalMaterial3Api::class)
                         contentCols.forEach { col ->
