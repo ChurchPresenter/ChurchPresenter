@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.churchpresenter.app.churchpresenter.models.SceneSource
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 
 /**
  * Shared camera frame cache — ensures only one capture process runs per device,
@@ -130,6 +131,10 @@ object SharedCameraFrameCache {
         }
         if (!opened) {
             System.err.println("[DeckLink Input] Failed to open input on device ${source.deckLinkIndex}")
+            CrashReporter.reportWarning(
+                "DeckLink: Failed to open input on device ${source.deckLinkIndex}",
+                tags = mapOf("subsystem" to "decklink")
+            )
             entry.error.value = "Cannot open input — device may already be in use for output"
             return
         }
@@ -359,6 +364,10 @@ object SharedCameraFrameCache {
 
         if (consecutiveFailures >= 5) {
             System.err.println("[Camera] Giving up after $consecutiveFailures consecutive failures")
+            CrashReporter.reportWarning(
+                "Camera: Giving up on device after $consecutiveFailures consecutive ffmpeg failures",
+                tags = mapOf("subsystem" to "camera")
+            )
         }
     }
 }

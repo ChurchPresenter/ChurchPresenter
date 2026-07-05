@@ -23,6 +23,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.io.ByteArrayInputStream
 import java.net.ServerSocket
 import java.net.URI
@@ -296,6 +297,10 @@ object SharedBrowserFrameCache {
         val browserPath = findBrowserExecutable()
         if (browserPath == null) {
             System.err.println("[BrowserSource] No Chrome or Edge browser found on system")
+            CrashReporter.reportWarning(
+                "BrowserSource: No Chrome or Edge browser found on system",
+                tags = mapOf("subsystem" to "browser-source")
+            )
             entry.error.value = "Chrome or Edge not found. Install a Chromium browser to use Browser sources."
             return
         }
@@ -351,6 +356,10 @@ object SharedBrowserFrameCache {
         val ready = waitForCdpReady(port, timeoutMs = 15000)
         if (!ready) {
             System.err.println("[BrowserSource] CDP did not become ready in time")
+            CrashReporter.reportWarning(
+                "BrowserSource: CDP did not become ready in time",
+                tags = mapOf("subsystem" to "browser-source")
+            )
             entry.error.value = "Browser failed to start"
             killProcess(process)
             entry.browserProcess = null
@@ -362,6 +371,10 @@ object SharedBrowserFrameCache {
         val wsUrl = withContext(Dispatchers.IO) { getPageWebSocketUrl(port) }
         if (wsUrl == null) {
             System.err.println("[BrowserSource] Could not get page WebSocket URL")
+            CrashReporter.reportWarning(
+                "BrowserSource: Could not get page WebSocket URL",
+                tags = mapOf("subsystem" to "browser-source")
+            )
             killProcess(process)
             entry.browserProcess = null
             return
@@ -373,6 +386,10 @@ object SharedBrowserFrameCache {
         val connected = withContext(Dispatchers.IO) { cdp.connect(wsUrl) }
         if (!connected) {
             System.err.println("[BrowserSource] WebSocket connection failed")
+            CrashReporter.reportWarning(
+                "BrowserSource: WebSocket connection to CDP failed",
+                tags = mapOf("subsystem" to "browser-source")
+            )
             killProcess(process)
             entry.browserProcess = null
             return

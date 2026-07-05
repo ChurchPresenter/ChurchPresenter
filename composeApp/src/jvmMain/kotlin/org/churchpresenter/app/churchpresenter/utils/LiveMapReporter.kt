@@ -45,7 +45,11 @@ object LiveMapReporter {
      * geo-grid dedupe. Callers should only pass an id when analytics is enabled.
      */
     fun pingOnOpen(installId: String? = null) {
-        val url = if (isDevBuild) "$PING_URL?src=dev" else PING_URL
+        val url = buildString {
+            append(PING_URL)
+            append("?platform=desktop")
+            if (isDevBuild) append("&src=dev")
+        }
         scope.launch {
             try {
                 http.get(url) {

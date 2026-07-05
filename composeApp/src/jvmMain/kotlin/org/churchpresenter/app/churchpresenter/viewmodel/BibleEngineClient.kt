@@ -23,6 +23,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import java.time.Instant
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.json.JSONObject
 
 /**
@@ -92,6 +93,10 @@ class BibleEngineClient(
                     // that prevents the WS server from binding). Don't enter the connect loop against
                     // a server that will never exist; surface the failure for retry instead.
                     System.err.println("bible-engine: in-process engine failed to start on port $port")
+                    CrashReporter.reportWarning(
+                        "Bible engine: in-process engine failed to start on port $port",
+                        tags = mapOf("subsystem" to "bible-engine")
+                    )
                     _startFailed.value = true
                     return@launch
                 }

@@ -272,9 +272,19 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                 File(cacheDir, "mtime.txt").writeText(file.lastModified().toString())
                 withContext(Dispatchers.Main) { _loadGeneration.value++ }
                 success = true
+            } else {
+                CrashReporter.reportWarning(
+                    "Presentation: No slides extracted from ${file.extension.lowercase()} file",
+                    tags = mapOf("subsystem" to "presentation", "file.type" to file.extension.lowercase())
+                )
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            CrashReporter.reportWarning(
+                "Presentation: Failed to render ${file.extension.lowercase()} slides",
+                throwable = e,
+                tags = mapOf("subsystem" to "presentation", "file.type" to file.extension.lowercase())
+            )
         } finally {
             if (!success) cacheDir.deleteRecursively()
             withContext(Dispatchers.Main) { _isLoading.value = false }

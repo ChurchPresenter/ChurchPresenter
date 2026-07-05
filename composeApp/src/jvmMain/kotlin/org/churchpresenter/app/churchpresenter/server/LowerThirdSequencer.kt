@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 
 /**
  * Orchestrates the Bitfocus Companion lower-third sequence so one HTTP call does
@@ -99,6 +100,11 @@ object LowerThirdSequencer {
             } catch (e: Exception) {
                 keyError = e.message ?: "ATEM unreachable"
                 System.err.println("[LowerThirdSequencer] key on failed: $keyError")
+                CrashReporter.reportWarning(
+                    "LowerThirdSequencer: ATEM key on failed",
+                    throwable = e,
+                    tags = mapOf("subsystem" to "atem")
+                )
                 activeHost = null
                 activeMixEffect = -1
                 activeKeyer = -1
@@ -161,6 +167,13 @@ object LowerThirdSequencer {
         activeUseDsk = false
         runCatching {
             AtemConnectionManager.use(host, port) { it.setKeyOnAir(useDsk, mixEffect, keyer, false) }
-        }.onFailure { System.err.println("[LowerThirdSequencer] key off failed: ${it.message}") }
+        }.onFailure {
+            System.err.println("[LowerThirdSequencer] key off failed: ${it.message}")
+            CrashReporter.reportWarning(
+                "LowerThirdSequencer: ATEM key off failed",
+                throwable = it,
+                tags = mapOf("subsystem" to "atem")
+            )
+        }
     }
 }

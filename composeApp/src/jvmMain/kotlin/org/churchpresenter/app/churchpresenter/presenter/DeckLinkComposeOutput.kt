@@ -32,6 +32,7 @@ import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.jetbrains.skiko.SkiaLayer
@@ -155,6 +156,10 @@ fun DeckLinkComposeOutput(
             val layer = skiaLayer
             if (layer == null) {
                 System.err.println("[DeckLink] Device $deviceIndex: Could not find SkiaLayer")
+                CrashReporter.reportWarning(
+                    "DeckLink: Could not find SkiaLayer for device $deviceIndex output",
+                    tags = mapOf("subsystem" to "decklink")
+                )
                 return@launch
             }
             System.err.println("[DeckLink] Device $deviceIndex: SkiaLayer found, starting capture, role=$outputRole")
