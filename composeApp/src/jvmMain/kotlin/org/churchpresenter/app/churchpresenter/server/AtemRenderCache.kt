@@ -123,7 +123,9 @@ object AtemRenderCache {
         val key = keyFor(lottieJson, variant)
         // computeIfAbsent must not race a completing job removing itself — loop once
         while (true) {
+            var created = false
             val job = jobs.computeIfAbsent(key) {
+                created = true
                 scope.async {
                     val dest = cacheFile(key)
                     if (!dest.exists()) {
@@ -133,8 +135,12 @@ object AtemRenderCache {
                     }
                     progressFlows.getOrPut(key) { MutableStateFlow(0f) }.value = 1f
                     dest
-                }.also { d -> d.invokeOnCompletion { jobs.remove(key, d) } }
+                }
             }
+            // Registered outside computeIfAbsent: an already-completed Deferred invokes this
+            // handler synchronously, and doing that from within the map's own update callback
+            // is what causes ConcurrentHashMap's "Recursive update" IllegalStateException.
+            if (created) job.invokeOnCompletion { jobs.remove(key, job) }
             if (!job.isCancelled) return job
         }
     }
