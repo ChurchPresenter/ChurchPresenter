@@ -1161,6 +1161,11 @@ class CompanionServer {
                             ?.forEach { file ->
                                 try { songs.loadFromSpsAppend(file.absolutePath) } catch (e: Exception) {
                                     System.err.println("[CompanionServer] Failed to load song ${file.name}: ${e.message}")
+                                    CrashReporter.reportWarning(
+                                        "Server: Failed to load song ${file.name}",
+                                        throwable = e,
+                                        tags = mapOf("subsystem" to "server")
+                                    )
                                 }
                             }
                         if (songs.getSongCount() > 0) {
@@ -1169,6 +1174,11 @@ class CompanionServer {
                     }
                 } catch (e: Exception) {
                     System.err.println("[CompanionServer] Failed to load songs from $songStorageDir: ${e.message}")
+                    CrashReporter.reportWarning(
+                        "Server: Failed to load songs from storage",
+                        throwable = e,
+                        tags = mapOf("subsystem" to "server")
+                    )
                 }
             }
 
@@ -1183,6 +1193,11 @@ class CompanionServer {
                     }
                 } catch (e: Exception) {
                     System.err.println("[CompanionServer] Failed to load bible $primaryBibleFileName: ${e.message}")
+                    CrashReporter.reportWarning(
+                        "Server: Failed to load bible $primaryBibleFileName",
+                        throwable = e,
+                        tags = mapOf("subsystem" to "server")
+                    )
                 }
             }
         }
@@ -1708,6 +1723,7 @@ class CompanionServer {
             server?.start(wait = false)
             _isRunning.value = true
             _serverUrl.value = "http://$displayHost:$port"
+            CrashReporter.breadcrumb("Server started on port $port", category = "server")
             scope.launch { clearDeviceUploads() }
         } catch (_: java.net.BindException) {
             server = null
@@ -2820,7 +2836,11 @@ class CompanionServer {
                             AtemUploadStatus.clear(uploadId)
                         } catch (e: Exception) {
                             System.err.println("[CompanionServer] ATEM still upload failed for '$name': ${e.message}")
-                            CrashReporter.reportException(e, "ATEM still upload: $name")
+                            CrashReporter.reportWarning(
+                                "ATEM still upload failed: $name",
+                                throwable = e,
+                                tags = mapOf("subsystem" to "atem")
+                            )
                             AtemUploadStatus.fail(uploadId, e.message)
                         }
                     }
@@ -2915,7 +2935,11 @@ class CompanionServer {
                             }
                         } catch (e: Exception) {
                             System.err.println("[CompanionServer] ATEM clip upload failed for '$name': ${e.message}")
-                            CrashReporter.reportException(e, "ATEM clip upload: $name")
+                            CrashReporter.reportWarning(
+                                "ATEM clip upload failed: $name",
+                                throwable = e,
+                                tags = mapOf("subsystem" to "atem")
+                            )
                             AtemUploadStatus.fail(uploadId, e.message)
                         }
                     }
@@ -3346,6 +3370,7 @@ class CompanionServer {
         scope.coroutineContext[kotlinx.coroutines.Job]?.cancelChildren()
         _isRunning.value = false
         _serverUrl.value = ""
+        CrashReporter.breadcrumb("Server stopped", category = "server")
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

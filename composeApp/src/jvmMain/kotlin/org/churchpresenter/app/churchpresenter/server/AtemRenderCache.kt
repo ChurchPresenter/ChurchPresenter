@@ -16,6 +16,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -166,6 +167,11 @@ object AtemRenderCache {
                 prepare(json, Variant(true, w, h, atem.clipFps, frames))
             } catch (e: Exception) {
                 System.err.println("[AtemRenderCache] Failed to prepare ${file.name}: ${e.message}")
+                CrashReporter.reportWarning(
+                    "ATEM: Failed to prepare render cache for ${file.name}",
+                    throwable = e,
+                    tags = mapOf("subsystem" to "atem")
+                )
             }
         }
     }

@@ -24,6 +24,7 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.security.MessageDigest
 import java.util.Base64
 import java.util.UUID
@@ -69,6 +70,7 @@ class OBSWebSocketManager {
                     check(identified["op"]?.jsonPrimitive?.int == 2) { "Authentication failed — check your OBS password" }
 
                     withContext(Dispatchers.Main) { _status.value = ConnectionStatus.CONNECTED }
+                    CrashReporter.breadcrumb("OBS connected ($host:$port)", category = "integration")
 
                     for (frame in incoming) { /* drain event notifications */ }
                 }
@@ -92,6 +94,9 @@ class OBSWebSocketManager {
     }
 
     fun disconnect() {
+        if (_status.value != ConnectionStatus.DISCONNECTED) {
+            CrashReporter.breadcrumb("OBS disconnected", category = "integration")
+        }
         connectionJob?.cancel()
         connectionJob = null
         activeSession = null

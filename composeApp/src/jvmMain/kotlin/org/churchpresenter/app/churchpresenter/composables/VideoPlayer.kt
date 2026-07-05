@@ -245,6 +245,11 @@ private fun createMediaPlayerComponent(): Component? {
         val msg = e.message ?: e.toString()
         vlcUnavailableReason = msg
         System.err.println("VLCJ: Could not initialise. Is VLC installed? $msg")
+        CrashReporter.reportWarning(
+            "VLCJ: Could not initialise. Is VLC installed? $msg",
+            throwable = e,
+            tags = mapOf("subsystem" to "vlc")
+        )
         null
     }
 }

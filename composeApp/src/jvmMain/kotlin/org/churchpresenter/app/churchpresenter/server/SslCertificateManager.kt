@@ -17,6 +17,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import org.bouncycastle.util.io.pem.PemObject
 import org.bouncycastle.util.io.pem.PemWriter
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.io.File
 import java.io.StringWriter
 import java.math.BigInteger
@@ -132,6 +133,11 @@ object SslCertificateManager {
                 }
             } catch (e: Exception) {
                 System.err.println("[SslCertificateManager] Existing CA keystore unreadable, regenerating: ${e.message}")
+                CrashReporter.reportWarning(
+                    "SSL: Existing CA keystore unreadable, regenerating",
+                    throwable = e,
+                    tags = mapOf("subsystem" to "ssl")
+                )
             }
             caKeystoreFile.delete()
         }

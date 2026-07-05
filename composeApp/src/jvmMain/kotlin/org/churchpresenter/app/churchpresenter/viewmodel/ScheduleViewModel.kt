@@ -7,6 +7,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.io.File
 import java.security.SecureRandom
 import java.util.Base64
@@ -237,6 +238,7 @@ class ScheduleViewModel(
             val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
             file.writeText(encrypt(serialized))
             clearAutoSave()
+            CrashReporter.breadcrumb("Schedule saved (${file.name})", category = "schedule")
         } else {
             saveScheduleAs(dialogTitle, fileFilterDescription)
         }
@@ -259,6 +261,7 @@ class ScheduleViewModel(
             file.writeText(encrypt(serialized))
             currentFilePath = file.absolutePathString()
             clearAutoSave()
+            CrashReporter.breadcrumb("Schedule saved as (${file.fileName})", category = "schedule")
         }
     }
 
@@ -299,6 +302,7 @@ class ScheduleViewModel(
                     _canRedo.value = false
                     clearAutoSave()
                     notifyChanged()
+                    CrashReporter.breadcrumb("Schedule opened (${file.fileName}, ${items.size} items)", category = "schedule")
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

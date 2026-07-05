@@ -43,6 +43,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import java.awt.Cursor
+import java.awt.GraphicsEnvironment
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -82,6 +83,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.toComposeImageBitmap
 
+import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
@@ -689,6 +691,25 @@ fun MainDesktop(
     // keys and other shortcuts stop working until the user clicks back on the main window).
     LaunchedEffect(dialogDismissSignal) {
         if (dialogDismissSignal > 0) mainFocusRequester.requestFocus()
+    }
+
+    // One-time startup snapshot of the configuration as searchable Sentry tags, so errors can
+    // be filtered by setup (screen/output count, integrations, VLC availability). Off the main
+    // thread because the VLC probe can block.
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            val screenCount = try {
+                GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size
+            } catch (_: Exception) { 0 }
+            CrashReporter.setConfigTags(mapOf(
+                "vlc.available" to isVlcAvailable.toString(),
+                "screen.count" to screenCount.toString(),
+                "output.count" to appSettings.projectionSettings.screenAssignments.size.toString(),
+                "atem.enabled" to appSettings.atemSettings.host.isNotBlank().toString(),
+                "obs.enabled" to appSettings.obsSettings.enabled.toString(),
+                "server.enabled" to appSettings.serverSettings.enabled.toString()
+            ))
+        }
     }
 
     Box(

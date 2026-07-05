@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 
 /**
  * Singleton that maintains a single reusable [AtemClient] connection.
@@ -74,6 +75,7 @@ object AtemConnectionManager {
 
     /** Immediately closes the cached connection (e.g. when ATEM settings change). */
     fun invalidate() {
+        if (client != null) CrashReporter.breadcrumb("ATEM disconnected", category = "integration")
         client?.disconnect()
         client = null
         cachedHost = ""
@@ -103,6 +105,7 @@ object AtemConnectionManager {
         client = c
         cachedHost = host
         cachedPort = port
+        CrashReporter.breadcrumb("ATEM connected ($host:$port)", category = "integration")
         return c
     }
 }

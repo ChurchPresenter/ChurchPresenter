@@ -105,6 +105,24 @@ object CrashReporter {
         writeCrashLog(throwable, context, fatal = false)
     }
 
+    /**
+     * Sends a non-fatal WARNING to Sentry (message + optional throwable + tags). Unlike
+     * [reportException] this writes **no** local crash file — use it to surface genuine
+     * silent failures (VLC/ATEM/SSL/server) that today only print to stderr.
+     */
+    fun reportWarning(context: String, throwable: Throwable? = null, tags: Map<String, String> = emptyMap()) {
+        try {
+            if (!Sentry.isEnabled()) return
+            breadcrumb(context, category = "warning", level = SentryLevel.WARNING)
+            val event = (if (throwable != null) SentryEvent(throwable) else SentryEvent()).apply {
+                level = SentryLevel.WARNING
+                message = Message().apply { message = context }
+                tags.forEach { (k, v) -> setTag(k, v) }
+            }
+            Sentry.captureEvent(event)
+        } catch (_: Exception) {}
+    }
+
     /** Re-enable video backgrounds (user override from the warning banner). */
     fun reEnableVideoBackgrounds() {
         videoBackgroundsDisabled = false
@@ -208,6 +226,15 @@ object CrashReporter {
         try { if (Sentry.isEnabled()) Sentry.setTag(key, value) } catch (_: Exception) {}
     }
 
+    /**
+     * Applies a batch of startup configuration tags (output/screen count, integration
+     * enablement, VLC/JCEF availability) so errors can be filtered by configuration.
+     * A thin wrapper over [setTag]; re-applying on settings change is safe (overwrites).
+     */
+    fun setConfigTags(tags: Map<String, String>) {
+        tags.forEach { (k, v) -> setTag(k, v) }
+    }
+
     /** Attaches a structured context block (a named group of key/value data) to events. */
     fun setContext(name: String, data: Map<String, Any>) {
         try { if (Sentry.isEnabled()) Sentry.configureScope { it.setContexts(name, data) } } catch (_: Exception) {}
@@ -255,6 +282,50 @@ object CrashReporter {
             ?.maxByOrNull { it.lastModified() }
     } catch (_: Exception) { null }
 
+    // ── PII scrubbing ───────────────────────────────────────────────────────────
+
+    private val userName: String = System.getProperty("user.name", "").trim()
+
+    /**
+     * Redacts `\Users\NAME`, `/Users/NAME`, `/home/NAME` path segments and any literal
+     * occurrence of the current OS username. Case-insensitive; leaves the rest of the
+     * path intact. Used by [beforeSend] so app-generated paths never leak the username.
+     */
+    private fun scrubPii(text: String?): String? {
+        if (text.isNullOrEmpty()) return text
+        var out = text.replace(Regex("(?i)([/\\\\](?:Users|home)[/\\\\])[^/\\\\\\r\\n\"']+"), "$1<user>")
+        if (userName.length >= 3) out = out.replace(userName, "<user>", ignoreCase = true)
+        return out
+    }
+
+    /**
+     * Walks a Sentry event and scrubs PII in place from the message, exception values,
+     * breadcrumb messages, and context values (e.g. the `jcef` block's `installDir`).
+     * All best-effort — each sub-step is wrapped so telemetry never throws.
+     */
+    private fun scrubEvent(event: SentryEvent) {
+        try {
+            event.message?.let { msg ->
+                msg.formatted = scrubPii(msg.formatted)
+                msg.message = scrubPii(msg.message)
+            }
+        } catch (_: Exception) {}
+        try { event.exceptions?.forEach { it.value = scrubPii(it.value) } } catch (_: Exception) {}
+        try { event.breadcrumbs?.forEach { it.message = scrubPii(it.message) } } catch (_: Exception) {}
+        try {
+            val contexts = event.contexts
+            for (key in contexts.keys.toList()) {
+                val value = contexts[key]
+                if (value is Map<*, *>) {
+                    val scrubbed = value.entries.associate { (k, v) ->
+                        k to (if (v is String) scrubPii(v) else v)
+                    }
+                    contexts[key] = scrubbed
+                }
+            }
+        } catch (_: Exception) {}
+    }
+
     // ── Sentry ────────────────────────────────────────────────────────────────
 
     private fun readDsn(): String {
@@ -278,19 +349,26 @@ object CrashReporter {
                 options.isEnableUncaughtExceptionHandler = true
                 options.isAttachThreads = false
                 options.isAttachStacktrace = true
-                options.tracesSampleRate = 1.0
+                // Sample perf/profile volume down in release so it can't crowd out error
+                // events in the quota (errors are captured directly and are unaffected).
+                options.tracesSampleRate = if (BuildConfig.IS_RELEASE) 0.2 else 1.0
                 // Capture CPU profiles for sampled transactions (see Performance → Profiling).
-                options.profilesSampleRate = 1.0
+                options.profilesSampleRate = if (BuildConfig.IS_RELEASE) 0.2 else 1.0
                 options.isEnableAutoSessionTracking = true
                 // Privacy: don't send end-users' machine hostnames to Sentry.
                 options.isAttachServerName = false
                 // Mark our own packages as in-app so app frames stand out in stack traces.
                 options.addInAppInclude("org.churchpresenter")
-                // Attach the most recent local crash-report file to error/fatal events.
+                // Scrub PII from every outgoing event, then attach the most recent local
+                // crash-report file (also scrubbed) to error/fatal events.
                 options.beforeSend = SentryOptions.BeforeSendCallback { event, hint ->
+                    try { scrubEvent(event) } catch (_: Exception) { /* never block delivery */ }
                     try {
                         if (event.level == SentryLevel.ERROR || event.level == SentryLevel.FATAL) {
-                            latestCrashFile()?.let { hint.addAttachment(Attachment(it.absolutePath)) }
+                            latestCrashFile()?.let { file ->
+                                val scrubbed = scrubPii(file.readText()) ?: ""
+                                hint.addAttachment(Attachment(scrubbed.toByteArray(), file.name))
+                            }
                         }
                     } catch (_: Exception) { /* never block delivery */ }
                     event
