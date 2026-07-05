@@ -1751,5 +1751,6 @@
     <string name="contact_rate_limited_browser">Bitte schließen Sie das Senden aus Sicherheitsgründen in Ihrem Browser ab.</string>
     <string name="contact_network_error">Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.</string>
     <string name="contact_open_browser">Im Browser öffnen</string>
+    <string name="browser_source_outputs_help">Virtuelle Ausgaben, die als Webseite bereitgestellt werden – fügen Sie die URL in eine Browser Source ein, um Live-Inhalte einzublenden, transparenter Hintergrund wird unterstützt.</string>
 </resources>
 

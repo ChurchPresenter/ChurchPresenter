@@ -580,7 +580,7 @@
 
     <!-- Browser Source Outputs (OBS/vMix overlay) -->
     <string name="browser_source_outputs">Browser Source Outputs</string>
-    <string name="browser_source_outputs_help">Virtual outputs served as a web page — paste the URL into an OBS/vMix Browser Source to overlay live content, transparent background supported.</string>
+    <string name="browser_source_outputs_help">Virtual outputs served as a web page — paste the URL into a Browser Source to overlay live content, transparent background supported.</string>
     <string name="add_browser_source_output">Add Output</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
     <string name="browser_source_confirm_remove_message">Are you sure you want to remove %1$s?</string>

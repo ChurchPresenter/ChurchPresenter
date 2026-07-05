@@ -1751,5 +1751,6 @@
     <string name="contact_rate_limited_browser">Қауіпсіздік үшін жіберуді браузерде аяқтаңыз.</string>
     <string name="contact_network_error">Серверге қосылу мүмкін болмады. Интернет байланысын тексеріп, қайталап көріңіз.</string>
     <string name="contact_open_browser">Браузерде ашу</string>
+    <string name="browser_source_outputs_help">Веб-бет ретінде берілетін виртуалды шығыстар — тікелей эфир мазмұнын қабаттастыру үшін URL мекенжайын Browser Source көзіне қойыңыз, мөлдір фон қолдау көрсетіледі.</string>
 </resources>
 

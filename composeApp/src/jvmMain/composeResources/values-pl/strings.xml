@@ -1751,5 +1751,6 @@
     <string name="contact_rate_limited_browser">Ze względów bezpieczeństwa dokończ wysyłanie w przeglądarce.</string>
     <string name="contact_network_error">Nie można połączyć się z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.</string>
     <string name="contact_open_browser">Otwórz w przeglądarce</string>
+    <string name="browser_source_outputs_help">Wirtualne wyjścia udostępniane jako strona internetowa — wklej adres URL do Browser Source, aby nakładać treści na żywo, obsługiwane jest przezroczyste tło.</string>
 </resources>
 

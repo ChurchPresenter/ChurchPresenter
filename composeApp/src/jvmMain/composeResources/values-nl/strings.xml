@@ -1779,4 +1779,5 @@
     <string name="contact_rate_limited_browser">Voltooi het verzenden voor de veiligheid in uw browser.</string>
     <string name="contact_network_error">Kan de server niet bereiken. Controleer je internetverbinding en probeer het opnieuw.</string>
     <string name="contact_open_browser">Openen in browser</string>
+    <string name="browser_source_outputs_help">Virtuele uitgangen aangeboden als webpagina — plak de URL in een Browser Source om live content te overlayen, transparante achtergrond wordt ondersteund.</string>
 </resources>

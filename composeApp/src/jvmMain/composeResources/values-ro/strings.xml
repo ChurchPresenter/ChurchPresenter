@@ -1781,4 +1781,5 @@
     <string name="contact_rate_limited_browser">Din motive de securitate, finalizează trimiterea în browser.</string>
     <string name="contact_network_error">Serverul nu a putut fi contactat. Verifică conexiunea la internet și încearcă din nou.</string>
     <string name="contact_open_browser">Deschide în Browser</string>
+    <string name="browser_source_outputs_help">Ieșiri virtuale livrate ca pagină web — inserați URL-ul într-o Browser Source pentru a suprapune conținut live, fundal transparent acceptat.</string>
 </resources>

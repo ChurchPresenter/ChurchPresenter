@@ -1779,4 +1779,5 @@
     <string name="contact_rate_limited_browser">Por seguridad, completa el envío en tu navegador.</string>
     <string name="contact_network_error">No se pudo conectar con el servidor. Comprueba tu conexión a internet e inténtalo de nuevo.</string>
     <string name="contact_open_browser">Abrir en el navegador</string>
+    <string name="browser_source_outputs_help">Salidas virtuales servidas como una página web — pega la URL en una Browser Source para superponer contenido en vivo, se admite fondo transparente.</string>
 </resources>

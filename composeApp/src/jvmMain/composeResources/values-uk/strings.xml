@@ -1751,5 +1751,6 @@
     <string name="contact_rate_limited_browser">З міркувань безпеки завершіть надсилання у браузері.</string>
     <string name="contact_network_error">Не вдалося зв’язатися із сервером. Перевірте підключення до інтернету та повторіть спробу.</string>
     <string name="contact_open_browser">Відкрити у браузері</string>
+    <string name="browser_source_outputs_help">Віртуальні виходи, що подаються як веб-сторінка — вставте URL-адресу в Browser Source, щоб накласти живий вміст, підтримується прозорий фон.</string>
 </resources>
 

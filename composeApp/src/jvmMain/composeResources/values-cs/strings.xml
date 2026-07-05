@@ -1761,5 +1761,6 @@
     <string name="contact_rate_limited_browser">Z bezpečnostních důvodů dokončete odeslání v prohlížeči.</string>
     <string name="contact_network_error">Server se nepodařilo kontaktovat. Zkontrolujte připojení k internetu a zkuste to znovu.</string>
     <string name="contact_open_browser">Otevřít v prohlížeči</string>
+    <string name="browser_source_outputs_help">Virtuální výstupy poskytované jako webová stránka — vložte adresu URL do Browser Source pro překrytí živého obsahu, průhledné pozadí je podporováno.</string>
 </resources>
 
