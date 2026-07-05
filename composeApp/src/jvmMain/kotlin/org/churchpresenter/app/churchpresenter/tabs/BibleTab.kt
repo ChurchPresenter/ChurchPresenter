@@ -911,7 +911,7 @@ fun BibleTab(
             }
 
             // ── Detected references — at most 5 rows tall, scrolls beyond ──
-            val detRowHeight = 28.dp
+            val detRowHeight = 24.dp
             val detMaxVisibleRows = 5
             if (detectedReferences.isNotEmpty()) {
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -927,7 +927,6 @@ fun BibleTab(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
-                        .height(detRowHeight)
                         .background(
                             if (isSelected) MaterialTheme.colorScheme.surfaceVariant
                             else MaterialTheme.colorScheme.surface
@@ -939,7 +938,7 @@ fun BibleTab(
                             onClick = { selectedDetectionIdx = idx; viewModel.applyDetectedReference(ref); focusRequester.requestFocus() },
                             onDoubleClick = { selectedDetectionIdx = idx; viewModel.applyDetectedReference(ref, goLiveSource = "detection"); focusRequester.requestFocus() }
                         )
-                        .padding(start = 12.dp, end = 6.dp)
+                        .padding(start = 12.dp, top = 4.dp, end = 6.dp, bottom = 4.dp)
                 ) {
                     // Fixed-width icon column (source markers + transcription/translation markers) so
                     // every reference + verse text lines up vertically, regardless of marker count.
