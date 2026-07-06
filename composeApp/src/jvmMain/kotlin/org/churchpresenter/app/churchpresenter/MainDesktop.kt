@@ -109,6 +109,7 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
@@ -214,6 +215,8 @@ fun MainDesktop(
     /** Persistent "Following <host>" badge shown above the Schedule panel while connected via Instance Link. */
     instanceLinkConnectionStatus: InstanceLinkStatus = InstanceLinkStatus.DISCONNECTED,
     instanceLinkFollowingHost: String = "",
+    /** The primary's live schedule while connected via Instance Link — mirrored into [ScheduleViewModel]. */
+    instanceLinkRemoteSchedule: List<ScheduleItemDto> = emptyList(),
     qaManager: QAManager? = null,
     tunnelStatus: TunnelStatus = TunnelStatus.Idle,
     tunnelUrl: String = "",
@@ -443,6 +446,16 @@ fun MainDesktop(
     val onScheduleChangedState = rememberUpdatedState(onScheduleChanged)
     val scheduleViewModel = remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
     DisposableEffect(Unit) { onDispose { scheduleViewModel.dispose() } }
+
+    // Mirrors the primary's schedule while connected via Instance Link, handing local editing
+    // back to the operator on disconnect (see ScheduleViewModel.applyRemoteSchedule/stopFollowingRemote).
+    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkRemoteSchedule) {
+        if (instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED) {
+            scheduleViewModel.applyRemoteSchedule(instanceLinkRemoteSchedule)
+        } else {
+            scheduleViewModel.stopFollowingRemote()
+        }
+    }
 
     val presentingMode by presenterManager.presentingMode
 
