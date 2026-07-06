@@ -412,7 +412,7 @@ fun STTTab(
                 NumberSettingsTextField(
                     label = stringResource(Res.string.stt_drip_feed_speed),
                     initialText = sttSettings.dripFeedSpeed,
-                    range = 10..500,
+                    range = 1..100,
                     onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(dripFeedSpeed = it)) } },
                     modifier = Modifier.width(130.dp)
                 )

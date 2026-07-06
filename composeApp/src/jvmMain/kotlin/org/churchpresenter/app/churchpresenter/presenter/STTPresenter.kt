@@ -97,9 +97,9 @@ fun STTPresenter(
     val showTranscription = sttSettings.displayMode == "transcribe" || sttSettings.displayMode == "both"
     val showTranslation = sttSettings.displayMode == "translate" || sttSettings.displayMode == "both"
 
-    // Drip feed: reveal newest segment word-by-word
+    // Drip feed: reveal newest segment letter-by-letter
     val dripEnabled = sttSettings.dripFeedEnabled
-    val dripSpeed = sttSettings.dripFeedSpeed.toLong().coerceAtLeast(10L)
+    val dripSpeed = sttSettings.dripFeedSpeed.toLong().coerceAtLeast(1L)
     val dripTranscription = useDripFeed(segments, enabled = dripEnabled && !sttSettings.showInProgress, delayMs = dripSpeed)
     val dripTranslation = useDripFeed(translationSegments, enabled = dripEnabled && !sttSettings.showTranslationInProgress, delayMs = dripSpeed)
 
@@ -309,7 +309,7 @@ private fun buildDisplayText(
 }
 
 /**
- * Drip feed: reveals the newest segment word-by-word (ChatGPT-style).
+ * Drip feed: reveals the newest segment letter-by-letter (ChatGPT-style).
  * Returns the segment list with the last segment's text partially revealed.
  */
 @Composable
@@ -317,28 +317,28 @@ private fun useDripFeed(segments: List<STTSegment>, enabled: Boolean, delayMs: L
     if (!enabled || segments.isEmpty()) return segments
 
     val lastSegment = segments.last()
-    val newWords = remember(lastSegment.id, lastSegment.text) {
-        lastSegment.text.trim().split(Regex("\\s+"))
+    val fullNewText = remember(lastSegment.id, lastSegment.text) {
+        lastSegment.text.trim()
     }
 
     var revealedForSegmentId by remember { mutableIntStateOf(lastSegment.id) }
-    var revealedWordCount by remember { mutableIntStateOf(Int.MAX_VALUE) }
+    var revealedCharCount by remember { mutableIntStateOf(Int.MAX_VALUE) }
 
-    // If segment changed but LaunchedEffect hasn't fired, show 0 words
-    val effectiveRevealed = if (revealedForSegmentId != lastSegment.id) 0 else revealedWordCount
+    // If segment changed but LaunchedEffect hasn't fired, show 0 characters
+    val effectiveRevealed = if (revealedForSegmentId != lastSegment.id) 0 else revealedCharCount
 
     LaunchedEffect(lastSegment.id, lastSegment.text) {
         revealedForSegmentId = lastSegment.id
-        revealedWordCount = 0
-        for (i in 1..newWords.size) {
+        revealedCharCount = 0
+        for (i in 1..fullNewText.length) {
             delay(delayMs)
-            revealedWordCount = i
+            revealedCharCount = i
         }
     }
 
-    if (effectiveRevealed >= newWords.size) return segments
+    if (effectiveRevealed >= fullNewText.length) return segments
 
-    val revealedText = newWords.take(effectiveRevealed).joinToString(" ")
+    val revealedText = fullNewText.take(effectiveRevealed)
     return segments.dropLast(1) + lastSegment.copy(text = revealedText)
 }
 

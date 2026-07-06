@@ -15,7 +15,7 @@ data class STTSettings(
     val showInProgress: Boolean = false,
     val showTranslationInProgress: Boolean = false,
     val dripFeedEnabled: Boolean = true,
-    val dripFeedSpeed: Int = 140, // ms per word
+    val dripFeedSpeed: Int = 25, // ms per character
     val textColor: String = "#FFFFFF",
     val translationTextColor: String = "#FFFFFF",
     val backgroundColor: String = "transparent",

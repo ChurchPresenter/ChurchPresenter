@@ -1434,7 +1434,7 @@
     <string name="stt_in_progress_text">In-Progress Text</string>
     <string name="stt_translation_in_progress">Translation In-Progress</string>
     <string name="stt_drip_feed">Drip Feed</string>
-    <string name="stt_drip_feed_speed">Speed (ms/word)</string>
+    <string name="stt_drip_feed_speed">Speed (ms/letter)</string>
     <string name="stt_live_preview">Live Preview</string>
     <string name="stt_not_connected">Not connected. Enter the STT server URL and click Connect.</string>
     <string name="stt_waiting_for_transcription">Waiting for transcription…</string>
