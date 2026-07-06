@@ -126,6 +126,10 @@ import churchpresenter.composeapp.generated.resources.loading_slides_progress
 import churchpresenter.composeapp.generated.resources.slide_counter
 import churchpresenter.composeapp.generated.resources.slide_number
 import churchpresenter.composeapp.generated.resources.presentation_static_note
+import churchpresenter.composeapp.generated.resources.presentation_error_password_protected
+import churchpresenter.composeapp.generated.resources.presentation_error_empty_document
+import churchpresenter.composeapp.generated.resources.presentation_error_library_missing
+import churchpresenter.composeapp.generated.resources.presentation_error_render_failed
 import churchpresenter.composeapp.generated.resources.supported_formats
 import churchpresenter.composeapp.generated.resources.transition_duration
 import churchpresenter.composeapp.generated.resources.unit_ms
@@ -143,6 +147,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.PresentationRemoteDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.app.churchpresenter.models.PresentationLoadError
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -700,10 +705,30 @@ fun PresentationTab(
                         }
                     }
                 } else if (viewModel.selectedPresentation != null) {
+                    val currentLoadError = viewModel.loadError
                     Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                            Text(stringResource(Res.string.loading_slides), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                        if (!viewModel.isLoading && currentLoadError != null) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    text = stringResource(
+                                        when (currentLoadError) {
+                                            PresentationLoadError.PASSWORD_PROTECTED -> Res.string.presentation_error_password_protected
+                                            PresentationLoadError.EMPTY_DOCUMENT -> Res.string.presentation_error_empty_document
+                                            PresentationLoadError.LIBRARY_MISSING -> Res.string.presentation_error_library_missing
+                                            PresentationLoadError.RENDER_FAILED -> Res.string.presentation_error_render_failed
+                                        }
+                                    ),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.error,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(horizontal = 32.dp)
+                                )
+                            }
+                        } else {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                                Text(stringResource(Res.string.loading_slides), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            }
                         }
                     }
                 } else {

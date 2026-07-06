@@ -10,8 +10,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.app.churchpresenter.models.PresentationLoadError
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.awt.image.BufferedImage
@@ -20,6 +22,7 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.lang.reflect.InvocationTargetException
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 import javax.imageio.ImageIO
@@ -76,6 +79,10 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
     private val _isLoading = mutableStateOf(false)
     val isLoading: Boolean
         get() = _isLoading.value
+
+    private val _loadError = mutableStateOf<PresentationLoadError?>(null)
+    val loadError: PresentationLoadError?
+        get() = _loadError.value
 
     private val _autoScrollInterval = mutableStateOf(appSettings?.presentationSettings?.autoScrollInterval ?: 5f)
     var autoScrollInterval: Float
@@ -233,6 +240,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
     // ── Load / cache orchestration ────────────────────────────────────────────
 
     private suspend fun loadOrCacheSlides(file: File) {
+        withContext(Dispatchers.Main) { _loadError.value = null }
         val cached = loadSlidesFromCache(file)
         if (cached != null) {
             val dir = slidesCacheDir(file)
@@ -264,7 +272,10 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                 _isLoading.value = true
             }
             when (file.extension.lowercase()) {
-                "pdf" -> loadPdfSlides(file, cacheDir)
+                "pdf" -> {
+                    val failure = loadPdfSlides(file, cacheDir)
+                    if (failure != null) withContext(Dispatchers.Main) { _loadError.value = failure }
+                }
                 "pptx", "ppt" -> loadPowerPointSlides(file, cacheDir)
                 "key" -> loadKeynoteSlides(file, cacheDir)
             }
@@ -273,9 +284,14 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                 withContext(Dispatchers.Main) { _loadGeneration.value++ }
                 success = true
             } else {
+                if (_loadError.value == null) withContext(Dispatchers.Main) { _loadError.value = PresentationLoadError.RENDER_FAILED }
                 CrashReporter.reportWarning(
                     "Presentation: No slides extracted from ${file.extension.lowercase()} file",
-                    tags = mapOf("subsystem" to "presentation", "file.type" to file.extension.lowercase())
+                    tags = mapOf(
+                        "subsystem" to "presentation",
+                        "file.type" to file.extension.lowercase(),
+                        "failure.reason" to (_loadError.value?.name?.lowercase() ?: "unknown")
+                    )
                 )
             }
         } catch (e: Exception) {
@@ -293,33 +309,48 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
 
     // ── Format-specific renderers ─────────────────────────────────────────────
 
-    private suspend fun loadPdfSlides(file: File, cacheDir: File, notesPerSlide: List<String> = emptyList()) {
-        try {
-            val pdDocumentClass = Class.forName("org.apache.pdfbox.pdmodel.PDDocument")
+    private suspend fun loadPdfSlides(file: File, cacheDir: File, notesPerSlide: List<String> = emptyList()): PresentationLoadError? {
+        val pdDocumentClass = try {
+            Class.forName("org.apache.pdfbox.pdmodel.PDDocument")
+        } catch (e: ClassNotFoundException) {
+            return PresentationLoadError.LIBRARY_MISSING
+        }
+        var document: Any? = null
+        return try {
             val pdfRendererClass = Class.forName("org.apache.pdfbox.rendering.PDFRenderer")
             val loadMethod = pdDocumentClass.getMethod("load", File::class.java)
-            val document = loadMethod.invoke(null, file)
+            document = loadMethod.invoke(null, file)
             val numberOfPages = pdDocumentClass.getMethod("getNumberOfPages").invoke(document) as Int
+            if (numberOfPages == 0) return PresentationLoadError.EMPTY_DOCUMENT
             withContext(Dispatchers.Main) { _totalSlides.value = numberOfPages }
             val renderer = pdfRendererClass.getConstructor(pdDocumentClass).newInstance(document)
             val renderMethod = pdfRendererClass.getMethod("renderImageWithDPI", Int::class.java, Float::class.java)
             val targetDpi = 150f
             for (page in 0 until numberOfPages) {
-                val image = renderMethod.invoke(renderer, page, targetDpi) as BufferedImage
-                val slideFile = File(cacheDir, "slide_%04d.jpg".format(page))
-                ImageIO.write(image, "jpg", slideFile)
-                val notes = notesPerSlide.getOrElse(page) { "" }
-                if (notes.isNotBlank()) File(cacheDir, "note_%04d.txt".format(page)).writeText(notes)
-                withContext(Dispatchers.Main) {
-                    _slideFiles.add(slideFile)
-                    _slideNotes.add(notes)
+                try {
+                    val image = renderMethod.invoke(renderer, page, targetDpi) as BufferedImage
+                    val slideFile = File(cacheDir, "slide_%04d.jpg".format(page))
+                    ImageIO.write(image, "jpg", slideFile)
+                    val notes = notesPerSlide.getOrElse(page) { "" }
+                    if (notes.isNotBlank()) File(cacheDir, "note_%04d.txt".format(page)).writeText(notes)
+                    withContext(Dispatchers.Main) {
+                        _slideFiles.add(slideFile)
+                        _slideNotes.add(notes)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
-            pdDocumentClass.getMethod("close").invoke(document)
-        } catch (e: ClassNotFoundException) {
-            // PDFBox not found
+            null
+        } catch (e: InvocationTargetException) {
+            val cause = e.targetException
+            (cause ?: e).printStackTrace()
+            if (cause is InvalidPasswordException) PresentationLoadError.PASSWORD_PROTECTED else PresentationLoadError.RENDER_FAILED
         } catch (e: Exception) {
             e.printStackTrace()
+            PresentationLoadError.RENDER_FAILED
+        } finally {
+            try { document?.let { pdDocumentClass.getMethod("close").invoke(it) } } catch (_: Exception) {}
         }
     }
 

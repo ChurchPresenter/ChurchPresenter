@@ -58,6 +58,8 @@ import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.data.settings.PresentationRemoteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
+import org.churchpresenter.app.churchpresenter.models.PresentationLoadError
 import org.churchpresenter.app.churchpresenter.models.Question
 import org.churchpresenter.app.churchpresenter.models.QuestionDto
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
@@ -84,6 +86,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.lang.reflect.InvocationTargetException
 import java.net.NetworkInterface
 import java.net.ServerSocket
 import java.util.Base64
@@ -1401,15 +1404,30 @@ class CompanionServer {
         val file = File(filePath)
         if (!file.exists()) return
         try {
+            var failureReason: PresentationLoadError? = null
             val images: List<BufferedImage> = CrashReporter.trace("server.render", "Server render presentation") {
                 when (file.extension.lowercase()) {
-                    "pdf"         -> renderPdfForServer(file)
+                    "pdf" -> {
+                        val (imgs, reason) = renderPdfForServer(file)
+                        failureReason = reason
+                        imgs
+                    }
                     "pptx", "ppt" -> renderPowerPointForServer(file)
                     "key"         -> renderKeynoteForServer(file)
                     else          -> return
                 }
             }
-            if (images.isEmpty()) return
+            if (images.isEmpty()) {
+                CrashReporter.reportWarning(
+                    "Presentation: No slides extracted from ${file.extension.lowercase()} file (server)",
+                    tags = buildMap {
+                        put("subsystem", "presentation")
+                        put("file.type", file.extension.lowercase())
+                        failureReason?.let { put("failure.reason", it.name.lowercase()) }
+                    }
+                )
+                return
+            }
             val jpegSlides = images.map { img ->
                 ByteArrayOutputStream().also { baos -> ImageIO.write(img, "jpg", baos) }.toByteArray()
             }
@@ -1430,23 +1448,39 @@ class CompanionServer {
         }
     }
 
-    private fun renderPdfForServer(file: File): List<BufferedImage> {
+    private fun renderPdfForServer(file: File): Pair<List<BufferedImage>, PresentationLoadError?> {
         val result = mutableListOf<BufferedImage>()
-        try {
-            val docClass  = Class.forName("org.apache.pdfbox.pdmodel.PDDocument")
+        val docClass = try {
+            Class.forName("org.apache.pdfbox.pdmodel.PDDocument")
+        } catch (e: ClassNotFoundException) {
+            return result to PresentationLoadError.LIBRARY_MISSING
+        }
+        var doc: Any? = null
+        return try {
             val rendClass = Class.forName("org.apache.pdfbox.rendering.PDFRenderer")
-            val doc   = docClass.getMethod("load", File::class.java).invoke(null, file)
-            try {
-                val pages = docClass.getMethod("getNumberOfPages").invoke(doc) as Int
-                val rend  = rendClass.getConstructor(docClass).newInstance(doc)
-                val renderDpi = rendClass.getMethod("renderImageWithDPI", Int::class.java, Float::class.java)
-                for (p in 0 until pages) result.add(renderDpi.invoke(rend, p, 150f) as BufferedImage)
-            } finally {
-                docClass.getMethod("close").invoke(doc)
+            doc = docClass.getMethod("load", File::class.java).invoke(null, file)
+            val pages = docClass.getMethod("getNumberOfPages").invoke(doc) as Int
+            if (pages == 0) return result to PresentationLoadError.EMPTY_DOCUMENT
+            val rend = rendClass.getConstructor(docClass).newInstance(doc)
+            val renderDpi = rendClass.getMethod("renderImageWithDPI", Int::class.java, Float::class.java)
+            for (p in 0 until pages) {
+                try {
+                    result.add(renderDpi.invoke(rend, p, 150f) as BufferedImage)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
-        } catch (_: ClassNotFoundException) {
-        } catch (e: Exception) { e.printStackTrace() }
-        return result
+            result to null
+        } catch (e: InvocationTargetException) {
+            val cause = e.targetException
+            (cause ?: e).printStackTrace()
+            result to if (cause is InvalidPasswordException) PresentationLoadError.PASSWORD_PROTECTED else PresentationLoadError.RENDER_FAILED
+        } catch (e: Exception) {
+            e.printStackTrace()
+            result to PresentationLoadError.RENDER_FAILED
+        } finally {
+            try { doc?.let { docClass.getMethod("close").invoke(it) } } catch (_: Exception) {}
+        }
     }
 
     private fun renderPowerPointForServer(file: File): List<BufferedImage> {

@@ -531,6 +531,10 @@
     <string name="select_presentation_file">Select a presentation file to view slides</string>
     <string name="supported_formats">Supported: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Slides are rendered as static images — animations, transitions, videos, and audio are not supported.</string>
+    <string name="presentation_error_password_protected">This PDF is password-protected and can\'t be opened. Remove the password and try again.</string>
+    <string name="presentation_error_empty_document">This file has no pages to display.</string>
+    <string name="presentation_error_library_missing">PDF support isn\'t available in this build.</string>
+    <string name="presentation_error_render_failed">Couldn\'t read this file — it may be corrupted or in an unsupported format.</string>
     <string name="slide_number">Slide %1$d</string>
     <string name="remove">Remove</string>
     <string name="select_presentation_file_button">Select File</string>
