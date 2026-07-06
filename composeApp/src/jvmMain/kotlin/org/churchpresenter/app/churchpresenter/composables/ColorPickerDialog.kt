@@ -8,6 +8,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.Arrangement
+import kotlinx.serialization.json.Json
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -73,7 +74,7 @@ private object RecentColors {
     private fun load() {
         try {
             if (file.exists()) {
-                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                val json = Json { ignoreUnknownKeys = true }
                 val list = json.decodeFromString<List<String>>(file.readText())
                 colors.clear()
                 colors.addAll(list.take(MAX))
@@ -84,7 +85,7 @@ private object RecentColors {
     private fun save() {
         try {
             file.parentFile?.mkdirs()
-            val json = kotlinx.serialization.json.Json { encodeDefaults = true }
+            val json = Json { encodeDefaults = true }
             file.writeText(json.encodeToString(colors.toList()))
         } catch (_: Exception) {}
     }

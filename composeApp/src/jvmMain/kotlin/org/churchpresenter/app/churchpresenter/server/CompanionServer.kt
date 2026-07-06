@@ -3,7 +3,10 @@ package org.churchpresenter.app.churchpresenter.server
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
@@ -46,12 +49,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.data.settings.PresentationRemoteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.app.churchpresenter.models.Question
+import org.churchpresenter.app.churchpresenter.models.QuestionDto
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
@@ -757,7 +765,7 @@ class CompanionServer {
     }
 
     /** Pure check for the given output's independent Browser Source API-key requirement (separate from [_apiKeyEnabled]) — no response side effects, usable from both HTTP and WebSocket routes. */
-    private fun browserSourceApiKeyValid(call: io.ktor.server.application.ApplicationCall, output: ScreenAssignment): Boolean {
+    private fun browserSourceApiKeyValid(call: ApplicationCall, output: ScreenAssignment): Boolean {
         if (!output.browserSourceApiKeyRequired || _apiKey.value.isEmpty()) return true
         val provided = call.request.headers[Constants.HEADER_API_KEY]
             ?: call.request.queryParameters[Constants.QUERY_PARAM_API_KEY]
@@ -766,9 +774,9 @@ class CompanionServer {
     }
 
     /** Same check as [browserSourceApiKeyValid], but responds 401 on an HTTP route when invalid. */
-    private suspend fun checkBrowserSourceApiKey(call: io.ktor.server.application.ApplicationCall, output: ScreenAssignment): Boolean {
+    private suspend fun checkBrowserSourceApiKey(call: ApplicationCall, output: ScreenAssignment): Boolean {
         if (browserSourceApiKeyValid(call, output)) return true
-        call.respond(io.ktor.http.HttpStatusCode.Unauthorized, "Invalid API key")
+        call.respond(HttpStatusCode.Unauthorized, "Invalid API key")
         return false
     }
 
@@ -803,22 +811,22 @@ class CompanionServer {
 
     /** Shared body of the run/show endpoints. */
     private suspend fun handleLowerThirdTrigger(
-        call: io.ktor.server.application.ApplicationCall,
+        call: ApplicationCall,
         autoEnd: Boolean
     ) {
         val rawName = call.parameters["name"] ?: ""
         val file = lowerThirdFiles().firstOrNull { it.nameWithoutExtension.equals(rawName, ignoreCase = true) }
         if (file == null) {
-            call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
+            call.respond(HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
             return
         }
         val ltJson = try { file.readText() } catch (_: Exception) {
-            call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"could not read lottie file"}""")
+            call.respond(HttpStatusCode.InternalServerError, """{"error":"could not read lottie file"}""")
             return
         }
         val durationMs = AtemRenderCache.lottieDurationMs(ltJson)
         if (durationMs == null) {
-            call.respond(io.ktor.http.HttpStatusCode.UnprocessableEntity, """{"error":"lottie has no timing information"}""")
+            call.respond(HttpStatusCode.UnprocessableEntity, """{"error":"lottie has no timing information"}""")
             return
         }
         val atem = _atemSettings ?: AtemSettings()
@@ -837,7 +845,7 @@ class CompanionServer {
             keyer = if (keyParam != null) keyParam - 1
                 else if (useDsk) atem.dskIndex else atem.keyIndex
             validateKeyTarget(atem, useDsk, mixEffect, keyer)?.let {
-                call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
+                call.respond(HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
                 return
             }
         }
@@ -871,10 +879,10 @@ class CompanionServer {
      * keepalive connection when free; falls back to a short-lived connection when an
      * upload holds it, so a key cut never waits behind an upload. Synchronous 200/502.
      */
-    private suspend fun handleKeyToggle(call: io.ktor.server.application.ApplicationCall, onAir: Boolean) {
+    private suspend fun handleKeyToggle(call: ApplicationCall, onAir: Boolean) {
         val atem = _atemSettings
         if (atem == null || atem.host.isBlank()) {
-            call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, """{"error":"ATEM not configured"}""")
+            call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"ATEM not configured"}""")
             return
         }
         val useDsk = resolveUseDsk(call, atem)
@@ -884,7 +892,7 @@ class CompanionServer {
         val keyer = if (keyParam != null) keyParam - 1
             else if (useDsk) atem.dskIndex else atem.keyIndex
         validateKeyTarget(atem, useDsk, mixEffect, keyer)?.let {
-            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
+            call.respond(HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
             return
         }
         try {
@@ -899,7 +907,7 @@ class CompanionServer {
             )
         } catch (e: Exception) {
             call.respond(
-                io.ktor.http.HttpStatusCode.BadGateway,
+                HttpStatusCode.BadGateway,
                 """{"error":${jsonStr(e.message ?: "ATEM command failed")}}"""
             )
         }
@@ -927,7 +935,7 @@ class CompanionServer {
      * Resolves whether a request should drive a downstream key: `?keytype=dsk|usk` (or
      * `downstream|upstream`) overrides; otherwise the persisted [AtemSettings.useDownstreamKey].
      */
-    private fun resolveUseDsk(call: io.ktor.server.application.ApplicationCall, atem: AtemSettings): Boolean =
+    private fun resolveUseDsk(call: ApplicationCall, atem: AtemSettings): Boolean =
         when (call.request.queryParameters["keytype"]?.lowercase()) {
             "dsk", "downstream" -> true
             "usk", "upstream" -> false
@@ -1105,7 +1113,7 @@ class CompanionServer {
     )
 
     /** Emitted when the web admin triggers Go Live or clear display for Q&A. Payload: Question or null. */
-    val onQADisplay = MutableSharedFlow<org.churchpresenter.app.churchpresenter.models.Question?>(
+    val onQADisplay = MutableSharedFlow<Question?>(
         extraBufferCapacity = 4,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
@@ -1771,7 +1779,7 @@ class CompanionServer {
         false
     }
 
-    private fun io.ktor.server.application.Application.configurePipeline() {
+    private fun Application.configurePipeline() {
             install(ContentNegotiation) { json(json) }
             install(WebSockets)
             install(CORS) {
@@ -1820,13 +1828,13 @@ class CompanionServer {
                     val bytes = SslCertificateManager.getCaCertBytes()
                     if (bytes == null) {
                         call.respond(
-                            io.ktor.http.HttpStatusCode.NotFound,
+                            HttpStatusCode.NotFound,
                             "CA certificate is not available (server may be running in plain-HTTP fallback mode)"
                         )
                         return@get
                     }
                     call.response.headers.append(
-                        io.ktor.http.HttpHeaders.ContentDisposition,
+                        HttpHeaders.ContentDisposition,
                         """attachment; filename="ChurchPresenter-CA.crt""""
                     )
                     call.respondBytes(bytes, ContentType("application", "x-x509-ca-cert"))
@@ -1845,13 +1853,13 @@ class CompanionServer {
                     val pem = SslCertificateManager.getCaCertPem()
                     if (pem == null) {
                         call.respond(
-                            io.ktor.http.HttpStatusCode.NotFound,
+                            HttpStatusCode.NotFound,
                             "CA certificate is not available (server may be running in plain-HTTP fallback mode)"
                         )
                         return@get
                     }
                     call.response.headers.append(
-                        io.ktor.http.HttpHeaders.ContentDisposition,
+                        HttpHeaders.ContentDisposition,
                         """attachment; filename="ChurchPresenter-CA.pem""""
                     )
                     call.respondText(pem, ContentType("application", "x-pem-file"))
@@ -1911,7 +1919,7 @@ class CompanionServer {
                 get("${Constants.ENDPOINT_SONGS}/{identifier}") {
                     if (!checkApiKey(call)) return@get
                     val identifier = call.parameters["identifier"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing identifier"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing identifier"}""")
                         return@get
                     }
                     val songbookFilter = call.request.queryParameters[Constants.QUERY_PARAM_SONGBOOK]
@@ -1931,7 +1939,7 @@ class CompanionServer {
                         }
                     }
                     if (song == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"song not found"}""")
+                        call.respond(HttpStatusCode.NotFound, """{"error":"song not found"}""")
                         return@get
                     }
                     call.respond(buildSongDetail(song))
@@ -1949,7 +1957,7 @@ class CompanionServer {
                 post("${Constants.ENDPOINT_SONGS}/{number}/select") {
                     if (!checkApiKey(call)) return@post
                     val number = call.parameters["number"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing number"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing number"}""")
                         return@post
                     }
                     // Accept section from query param OR JSON body
@@ -1958,7 +1966,7 @@ class CompanionServer {
                             json.decodeFromString(SelectSongSectionRequest.serializer(), call.receiveText()).section
                         }.getOrNull()
                     if (sectionIndex == null || sectionIndex < 0) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing or invalid section index"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing or invalid section index"}""")
                         return@post
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
@@ -1989,7 +1997,7 @@ class CompanionServer {
                     val body = call.receiveText()
                     val item = parseRemoteItem(body)
                     if (item == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
                         return@post
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
@@ -1999,7 +2007,7 @@ class CompanionServer {
                     if (allowed) {
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     } else {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden,
+                        call.respond(HttpStatusCode.Forbidden,
                             """{"ok":false,"reason":"${pending.decision.let { "denied" }}"}""")
                     }
                 }
@@ -2029,7 +2037,7 @@ class CompanionServer {
                             .items.mapNotNull { it.toScheduleItem() }
                     } catch (_: Exception) { null }
                     if (items.isNullOrEmpty()) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest,
+                        call.respond(HttpStatusCode.BadRequest,
                             """{"error":"invalid request body or no recognisable items"}""")
                         return@post
                     }
@@ -2040,7 +2048,7 @@ class CompanionServer {
                     if (allowed) {
                         call.respondText("""{"ok":true,"added":${items.size}}""", ContentType.Application.Json)
                     } else {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden,
+                        call.respond(HttpStatusCode.Forbidden,
                             """{"ok":false,"reason":"denied"}""")
                     }
                 }
@@ -2054,7 +2062,7 @@ class CompanionServer {
                     val body = call.receiveText()
                     val item = parseRemoteItem(body)
                     if (item == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
                         return@post
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
@@ -2064,7 +2072,7 @@ class CompanionServer {
                     if (allowed) {
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     } else {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden,
+                        call.respond(HttpStatusCode.Forbidden,
                             """{"ok":false,"reason":"denied"}""")
                     }
                 }
@@ -2091,7 +2099,7 @@ class CompanionServer {
                     if (!checkApiKey(call)) return@get
                     val catalog = _bibleCatalog.value
                     if (catalog == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, "Bible not loaded")
+                        call.respond(HttpStatusCode.ServiceUnavailable, "Bible not loaded")
                         return@get
                     }
                     val bookParam     = call.request.queryParameters[Constants.QUERY_PARAM_BOOK]
@@ -2102,12 +2110,12 @@ class CompanionServer {
                     if (bookIdParam != null && chapterFilter != null) {
                         val bible = _bible.value
                         if (bible == null) {
-                            call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, "Bible not loaded")
+                            call.respond(HttpStatusCode.ServiceUnavailable, "Bible not loaded")
                             return@get
                         }
                         val rawVerses = bible.getChapterVerses(bookIdParam, chapterFilter)
                         if (rawVerses.isEmpty()) {
-                            call.respond(io.ktor.http.HttpStatusCode.NotFound, "Chapter not found")
+                            call.respond(HttpStatusCode.NotFound, "Chapter not found")
                             return@get
                         }
                         val bookName = bible.getBookName(bookIdParam) ?: "Book $bookIdParam"
@@ -2158,7 +2166,7 @@ class CompanionServer {
                     val req = try {
                         json.decodeFromString(SelectBibleVerseRequest.serializer(), body)
                     } catch (_: Exception) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
                         return@post
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
@@ -2205,13 +2213,13 @@ class CompanionServer {
                 get("${Constants.ENDPOINT_PRESENTATIONS}/{id}") {
                     if (!checkApiKey(call)) return@get
                     val id = call.parameters["id"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Missing id")
+                        call.respond(HttpStatusCode.BadRequest, "Missing id")
                         return@get
                     }
                     val resolvedId = _scheduleItemToPresentationId[id] ?: id
                     val dto = _presentationCatalogs[resolvedId]
                     if (dto == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Presentation not found or not yet rendered")
+                        call.respond(HttpStatusCode.NotFound, "Presentation not found or not yet rendered")
                         return@get
                     }
                     call.respond(dto)
@@ -2223,16 +2231,16 @@ class CompanionServer {
                  */
                 get("${Constants.ENDPOINT_PRESENTATIONS}/{id}/slides/{index}") {
                     if (!checkApiKey(call)) return@get
-                    val id    = call.parameters["id"]    ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Missing id"); return@get }
-                    val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Invalid index"); return@get }
+                    val id    = call.parameters["id"]    ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(HttpStatusCode.BadRequest, "Invalid index"); return@get }
                     val resolvedId = _scheduleItemToPresentationId[id] ?: id
                     val slides = _slideBytes[resolvedId]
                     if (slides == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Presentation not found")
+                        call.respond(HttpStatusCode.NotFound, "Presentation not found")
                         return@get
                     }
                     if (index < 0 || index >= slides.size) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Slide index out of range")
+                        call.respond(HttpStatusCode.NotFound, "Slide index out of range")
                         return@get
                     }
                     call.respondBytes(slides[index], ContentType.Image.JPEG)
@@ -2250,7 +2258,7 @@ class CompanionServer {
                 post("${Constants.ENDPOINT_PRESENTATIONS}/{id}/select") {
                     if (!checkApiKey(call)) return@post
                     val id = call.parameters["id"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
                     }
                     val index = call.request.queryParameters["index"]?.toIntOrNull()
@@ -2258,7 +2266,7 @@ class CompanionServer {
                             json.decodeFromString(SelectSlideRequest.serializer(), call.receiveText()).index
                         }.getOrNull()
                     if (index == null || index < 0) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing or invalid index"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing or invalid index"}""")
                         return@post
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
@@ -2286,32 +2294,32 @@ class CompanionServer {
                 post("${Constants.ENDPOINT_PRESENTATIONS}/upload") {
                     if (!checkApiKey(call)) return@post
                     if (!_fileUploadEnabled.value) {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post
                     }
                     try {
                         val contentLength = call.request.headers["Content-Length"]?.toLongOrNull() ?: 0L
                         if (contentLength > 200 * 1024 * 1024) { // 200 MB limit
-                            call.respond(io.ktor.http.HttpStatusCode.PayloadTooLarge, """{"error":"file too large (max 200 MB)"}""")
+                            call.respond(HttpStatusCode.PayloadTooLarge, """{"error":"file too large (max 200 MB)"}""")
                             return@post
                         }
                         val body   = call.receiveText()
-                        val parsed = json.parseToJsonElement(body) as? kotlinx.serialization.json.JsonObject
-                        val name   = (parsed?.get("name") as? kotlinx.serialization.json.JsonPrimitive)?.content
-                        val data   = (parsed?.get("data") as? kotlinx.serialization.json.JsonPrimitive)?.content
+                        val parsed = json.parseToJsonElement(body) as? JsonObject
+                        val name   = (parsed?.get("name") as? JsonPrimitive)?.content
+                        val data   = (parsed?.get("data") as? JsonPrimitive)?.content
                         if (name.isNullOrBlank() || data.isNullOrBlank()) {
-                            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
+                            call.respond(HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
                             return@post
                         }
                         val safeName = File(name).name.ifBlank { "upload.pdf" }
                         val ext = safeName.substringAfterLast('.', "").lowercase()
                         if (ext !in setOf("pdf", "ppt", "pptx", "key")) {
-                            call.respond(io.ktor.http.HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
+                            call.respond(HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
                             return@post
                         }
                         val base64Match = Regex("^data:[^;]+;base64,(.+)$").find(data)
                         if (base64Match == null) {
-                            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
+                            call.respond(HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
                             return@post
                         }
                         val fileBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
@@ -2345,7 +2353,7 @@ class CompanionServer {
                             ContentType.Application.Json
                         )
                     } catch (e: Exception) {
-                        call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
+                        call.respond(HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
                     }
                 }
 
@@ -2392,7 +2400,7 @@ class CompanionServer {
                 post("/api/presentation-remote/goto/{index}") {
                     if (!checkPresentationRemoteAuth(call)) return@post
                     val index = call.parameters["index"]?.toIntOrNull()
-                        ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing index"}"""); return@post }
+                        ?: run { call.respond(HttpStatusCode.BadRequest, """{"error":"missing index"}"""); return@post }
                     val clamped = index.coerceIn(0, (_currentSlideTotalCount - 1).coerceAtLeast(0))
                     scope.launch { onPresentationGoto.emit(clamped) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
@@ -2442,7 +2450,7 @@ class CompanionServer {
                     if (!checkApiKey(call)) return@get
                     val catalog = _pictureCatalog.value
                     if (catalog == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, "No picture folder loaded")
+                        call.respond(HttpStatusCode.ServiceUnavailable, "No picture folder loaded")
                         return@get
                     }
                     call.respond(catalog)
@@ -2456,10 +2464,10 @@ class CompanionServer {
                  */
                 get("${Constants.ENDPOINT_PICTURES}/{id}") {
                     if (!checkApiKey(call)) return@get
-                    val id = call.parameters["id"] ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val id = call.parameters["id"] ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
                     val catalog = _pictureCatalogs[id]
                     if (catalog == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Picture folder not found")
+                        call.respond(HttpStatusCode.NotFound, "Picture folder not found")
                         return@get
                     }
                     call.respond(catalog)
@@ -2471,20 +2479,20 @@ class CompanionServer {
                  */
                 get("${Constants.ENDPOINT_PICTURES}/{id}/images/{index}") {
                     if (!checkApiKey(call)) return@get
-                    val id    = call.parameters["id"]    ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Missing id"); return@get }
-                    val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Invalid index"); return@get }
+                    val id    = call.parameters["id"]    ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(HttpStatusCode.BadRequest, "Invalid index"); return@get }
                     val files = _pictureFiles[id]
                     if (files == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Picture folder not found")
+                        call.respond(HttpStatusCode.NotFound, "Picture folder not found")
                         return@get
                     }
                     if (index < 0 || index >= files.size) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Image index out of range")
+                        call.respond(HttpStatusCode.NotFound, "Image index out of range")
                         return@get
                     }
                     val file = files[index]
                     if (!file.exists()) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Image file not found on disk")
+                        call.respond(HttpStatusCode.NotFound, "Image file not found on disk")
                         return@get
                     }
                     // HEIC/HEIF are not displayable by browsers — convert to JPEG first
@@ -2494,7 +2502,7 @@ class CompanionServer {
                         if (jpegBytes != null) {
                             call.respondBytes(jpegBytes, ContentType.Image.JPEG)
                         } else {
-                            call.respond(io.ktor.http.HttpStatusCode.InternalServerError, "Failed to convert HEIC image")
+                            call.respond(HttpStatusCode.InternalServerError, "Failed to convert HEIC image")
                         }
                     } else {
                         call.respondBytes(file.readBytes(), contentTypeForExtension(ext))
@@ -2527,7 +2535,7 @@ class CompanionServer {
                         )) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     } catch (_: Exception) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
                     }
                 }
 
@@ -2542,22 +2550,22 @@ class CompanionServer {
                 post("${Constants.ENDPOINT_PICTURES}/upload") {
                     if (!checkApiKey(call)) return@post
                     if (!_fileUploadEnabled.value) {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post
                     }
                     try {
                         val body = call.receiveText()
-                        val parsed = json.parseToJsonElement(body) as? kotlinx.serialization.json.JsonObject
-                        val name = (parsed?.get("name") as? kotlinx.serialization.json.JsonPrimitive)?.content
-                        val data = (parsed?.get("data") as? kotlinx.serialization.json.JsonPrimitive)?.content
+                        val parsed = json.parseToJsonElement(body) as? JsonObject
+                        val name = (parsed?.get("name") as? JsonPrimitive)?.content
+                        val data = (parsed?.get("data") as? JsonPrimitive)?.content
                         if (name.isNullOrBlank() || data.isNullOrBlank()) {
-                            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
+                            call.respond(HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
                             return@post
                         }
                         val safeName = File(name).name.ifBlank { "upload.jpg" }
                         val base64Match = Regex("^data:[^;]+;base64,(.+)$").find(data)
                         if (base64Match == null) {
-                            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
+                            call.respond(HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
                             return@post
                         }
                         val imageBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
@@ -2619,7 +2627,7 @@ class CompanionServer {
                             ContentType.Application.Json
                         )
                     } catch (e: Exception) {
-                        call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"","\\\"")}"}""")
+                        call.respond(HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"","\\\"")}"}""")
                     }
                 }
 
@@ -2803,17 +2811,17 @@ class CompanionServer {
                 post("/api/atem/still/{name}") {
                     if (!checkApiKey(call)) return@post
                     val name = call.parameters["name"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"name required"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"name required"}""")
                         return@post
                     }
                     val file = lowerThirdFiles().firstOrNull { it.nameWithoutExtension.equals(name, ignoreCase = true) }
                     if (file == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
+                        call.respond(HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
                         return@post
                     }
                     val atem = _atemSettings
                     if (atem == null || atem.host.isBlank()) {
-                        call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, """{"error":"ATEM not configured"}""")
+                        call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"ATEM not configured"}""")
                         return@post
                     }
                     val slotParam = call.request.queryParameters["slot"]?.toIntOrNull()
@@ -2827,7 +2835,7 @@ class CompanionServer {
                     val keyer = if (keyParam != null && keyParam > 0) keyParam - 1
                         else if (useDsk) atem.dskIndex else atem.keyIndex
                     if (keyOn) validateKeyTarget(atem, useDsk, mixEffect, keyer)?.let {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
                         return@post
                     }
                     scope.launch {
@@ -2877,17 +2885,17 @@ class CompanionServer {
                 post("/api/atem/clip/{name}") {
                     if (!checkApiKey(call)) return@post
                     val name = call.parameters["name"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"name required"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"name required"}""")
                         return@post
                     }
                     val file = lowerThirdFiles().firstOrNull { it.nameWithoutExtension.equals(name, ignoreCase = true) }
                     if (file == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
+                        call.respond(HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
                         return@post
                     }
                     val atem = _atemSettings
                     if (atem == null || atem.host.isBlank()) {
-                        call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, """{"error":"ATEM not configured"}""")
+                        call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"ATEM not configured"}""")
                         return@post
                     }
                     val slotParam = call.request.queryParameters["slot"]?.toIntOrNull()
@@ -2900,7 +2908,7 @@ class CompanionServer {
                     val keyer = if (keyParam != null && keyParam > 0) keyParam - 1
                         else if (useDsk) atem.dskIndex else atem.keyIndex
                     if (keyOn) validateKeyTarget(atem, useDsk, mixEffect, keyer)?.let {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
                         return@post
                     }
                     val lottieJson = file.readText()
@@ -2912,7 +2920,7 @@ class CompanionServer {
                     if (clipCapacity != null && frameCount > clipCapacity) {
                         val secs = String.format(java.util.Locale.US, "%.1f", clipCapacity / fps)
                         call.respond(
-                            io.ktor.http.HttpStatusCode.UnprocessableEntity,
+                            HttpStatusCode.UnprocessableEntity,
                             """{"error":${jsonStr("Clip is $frameCount frames but slot ${slot + 1} holds at most $clipCapacity frames (≈$secs s); use a shorter clip or lower fps")}}"""
                         )
                         return@post
@@ -2990,11 +2998,11 @@ class CompanionServer {
                     val index = displayIndex?.minus(1)
                     val output = index?.let { browserSourceOutput(it) }
                     if (displayIndex == null || output == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Unknown browser source output")
+                        call.respond(HttpStatusCode.NotFound, "Unknown browser source output")
                         return@get
                     }
                     if (!output.browserSourceEnabled) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Browser source output is disabled")
+                        call.respond(HttpStatusCode.NotFound, "Browser source output is disabled")
                         return@get
                     }
                     if (!checkBrowserSourceApiKey(call, output)) return@get
@@ -3099,18 +3107,18 @@ class CompanionServer {
                 post("/api/qa/submit") {
                     val qa = qaManager
                     if (qa == null || !qa.sessionActive) {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"Q&A session is not active"}""")
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"Q&A session is not active"}""")
                         return@post
                     }
                     val body = call.receiveText()
                     val request = try {
                         json.decodeFromString(SubmitQuestionRequest.serializer(), body)
                     } catch (_: Exception) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
                         return@post
                     }
                     if (request.text.isBlank()) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"question text is required"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"question text is required"}""")
                         return@post
                     }
                     val clientIp = call.request.headers["CF-Connecting-IP"]
@@ -3120,14 +3128,14 @@ class CompanionServer {
                     val question = qa.submitQuestion(request.text, request.name, clientIp, qaCooldownSeconds, deviceId)
                     if (question != null) {
                         call.respondText(
-                            json.encodeToString(org.churchpresenter.app.churchpresenter.models.QuestionDto.serializer(), question.toDto()),
+                            json.encodeToString(QuestionDto.serializer(), question.toDto()),
                             ContentType.Application.Json
                         )
                     } else {
                         if (qa.isRateLimited(clientIp, qaCooldownSeconds)) {
-                            call.respond(io.ktor.http.HttpStatusCode.TooManyRequests, """{"error":"Too many questions. Please wait a moment."}""")
+                            call.respond(HttpStatusCode.TooManyRequests, """{"error":"Too many questions. Please wait a moment."}""")
                         } else {
-                            call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"submission failed"}""")
+                            call.respond(HttpStatusCode.Forbidden, """{"error":"submission failed"}""")
                         }
                     }
                 }
@@ -3140,7 +3148,7 @@ class CompanionServer {
                 // Public: list approved questions (for voting)
                 get("/api/qa/approved") {
                     if (!qaVotingEnabled) {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"Voting is not enabled"}""")
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"Voting is not enabled"}""")
                         return@get
                     }
                     val qa = qaManager
@@ -3166,28 +3174,28 @@ class CompanionServer {
                 // Public: vote for a question
                 post("/api/qa/vote") {
                     if (!qaVotingEnabled) {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"Voting is not enabled"}""")
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"Voting is not enabled"}""")
                         return@post
                     }
                     val qa = qaManager
                     if (qa == null || !qa.sessionActive) {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"Q&A session is not active"}""")
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"Q&A session is not active"}""")
                         return@post
                     }
                     val body = call.receiveText()
                     val request = try {
                         json.decodeFromString(VoteRequest.serializer(), body)
                     } catch (_: Exception) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
                         return@post
                     }
                     val question = qa.findQuestion(request.questionId)
                     if (question == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                        call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                         return@post
                     }
                     if (question.status != QuestionStatus.APPROVED) {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"question is not available for voting"}""")
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"question is not available for voting"}""")
                         return@post
                     }
                     val clientIp = call.request.headers["CF-Connecting-IP"]
@@ -3221,7 +3229,7 @@ class CompanionServer {
                     } else qa.questions
                     val dtos = filtered.map { it.toDto() }
                     call.respondText(
-                        json.encodeToString(kotlinx.serialization.builtins.ListSerializer(org.churchpresenter.app.churchpresenter.models.QuestionDto.serializer()), dtos),
+                        json.encodeToString(ListSerializer(QuestionDto.serializer()), dtos),
                         ContentType.Application.Json
                     )
                 }
@@ -3230,31 +3238,31 @@ class CompanionServer {
                 post("/api/qa/questions/{id}/approve") {
                     if (!checkQaAdmin(call)) return@post
                     val id = call.parameters["id"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
                     }
                     val question = qaManager?.findQuestion(id)
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     val pending = PendingQAAdminRequest(action = "approve", questionId = id, text = question?.text ?: "", clientId = clientId)
                     onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) { call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
+                    if (!pending.decision.await()) { call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
                     val ok = qaManager?.approveQuestion(id) ?: false
                     if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
-                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                    else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                 }
 
                 // Admin: edit question text
                 post("/api/qa/questions/{id}/edit") {
                     if (!checkQaAdmin(call)) return@post
                     val id = call.parameters["id"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
                     }
                     val body = call.receiveText()
                     val request = try {
                         json.decodeFromString(SubmitQuestionRequest.serializer(), body)
                     } catch (_: Exception) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
                         return@post
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
@@ -3267,80 +3275,80 @@ class CompanionServer {
                     onQAAdminRequest.emit(pending)
                     val allowed = pending.decision.await()
                     if (!allowed) {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@post
                     }
                     val ok = qaManager?.editQuestion(id, request.text) ?: false
                     if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
-                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                    else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                 }
 
                 // Admin: deny question
                 post("/api/qa/questions/{id}/deny") {
                     if (!checkQaAdmin(call)) return@post
                     val id = call.parameters["id"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
                     }
                     val question = qaManager?.findQuestion(id)
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     val pending = PendingQAAdminRequest(action = "deny", questionId = id, text = question?.text ?: "", clientId = clientId)
                     onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) { call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
+                    if (!pending.decision.await()) { call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
                     val ok = qaManager?.denyQuestion(id) ?: false
                     if (ok) {
                         if (qaManager?.displayedQuestion == null) scope.launch { onQADisplay.emit(null) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     }
-                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                    else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                 }
 
                 // Admin: mark question as done
                 post("/api/qa/questions/{id}/done") {
                     if (!checkQaAdmin(call)) return@post
                     val id = call.parameters["id"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
                     }
                     val question = qaManager?.findQuestion(id)
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     val pending = PendingQAAdminRequest(action = "done", questionId = id, text = question?.text ?: "", clientId = clientId)
                     onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) { call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
+                    if (!pending.decision.await()) { call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
                     val ok = qaManager?.markDone(id) ?: false
                     if (ok) {
                         if (qaManager?.displayedQuestion == null) scope.launch { onQADisplay.emit(null) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     }
-                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                    else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                 }
 
                 // Admin: display question on projection
                 post("/api/qa/questions/{id}/display") {
                     if (!checkQaAdmin(call)) return@post
                     val id = call.parameters["id"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
                     }
                     val question = qaManager?.findQuestion(id)
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     val pending = PendingQAAdminRequest(action = "display", questionId = id, text = question?.text ?: "", clientId = clientId)
                     onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) { call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
+                    if (!pending.decision.await()) { call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
                     val qa = qaManager
                     val ok = qa?.displayQuestion(id) ?: false
                     if (ok) {
                         scope.launch { onQADisplay.emit(qa.displayedQuestion) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     }
-                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found or not approved"}""")
+                    else call.respond(HttpStatusCode.NotFound, """{"error":"question not found or not approved"}""")
                 }
 
                 // Admin: delete question
                 delete("/api/qa/questions/{id}") {
                     if (!checkQaAdmin(call)) return@delete
                     val id = call.parameters["id"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@delete
                     }
                     val question = qaManager?.findQuestion(id)
@@ -3354,12 +3362,12 @@ class CompanionServer {
                     onQAAdminRequest.emit(pending)
                     val allowed = pending.decision.await()
                     if (!allowed) {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@delete
                     }
                     val ok = qaManager?.deleteQuestion(id) ?: false
                     if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
-                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                    else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                 }
 
                 // Admin: add question (admin-created)
@@ -3369,7 +3377,7 @@ class CompanionServer {
                     val request = try {
                         json.decodeFromString(SubmitQuestionRequest.serializer(), body)
                     } catch (_: Exception) {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
                         return@post
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
@@ -3381,17 +3389,17 @@ class CompanionServer {
                     onQAAdminRequest.emit(pending)
                     val allowed = pending.decision.await()
                     if (!allowed) {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@post
                     }
                     val question = qaManager?.addQuestion(request.text)
                     if (question != null) {
                         call.respondText(
-                            json.encodeToString(org.churchpresenter.app.churchpresenter.models.QuestionDto.serializer(), question.toDto()),
+                            json.encodeToString(QuestionDto.serializer(), question.toDto()),
                             ContentType.Application.Json
                         )
                     } else {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"failed to add question"}""")
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"failed to add question"}""")
                     }
                 }
 
@@ -3402,7 +3410,7 @@ class CompanionServer {
                     val pending = PendingQAAdminRequest(action = "clear-display", clientId = clientId)
                     onQAAdminRequest.emit(pending)
                     if (!pending.decision.await()) {
-                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied"}""")
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied"}""")
                         return@post
                     }
                     qaManager?.clearDisplay()
@@ -3517,7 +3525,7 @@ class CompanionServer {
         else          -> ContentType.Image.JPEG
     }
 
-    private suspend fun checkApiKey(call: io.ktor.server.application.ApplicationCall): Boolean {
+    private suspend fun checkApiKey(call: ApplicationCall): Boolean {
         if (!_apiKeyEnabled.value || _apiKey.value.isEmpty()) return true
         val provided = call.request.headers[Constants.HEADER_API_KEY]
             ?: call.request.queryParameters[Constants.QUERY_PARAM_API_KEY]
@@ -3525,14 +3533,14 @@ class CompanionServer {
         return if (MessageDigest.isEqual(provided.toByteArray(), _apiKey.value.toByteArray())) {
             true
         } else {
-            call.respond(io.ktor.http.HttpStatusCode.Unauthorized, "Invalid API key")
+            call.respond(HttpStatusCode.Unauthorized, "Invalid API key")
             false
         }
     }
 
-    private suspend fun checkPresentationRemoteAuth(call: io.ktor.server.application.ApplicationCall): Boolean {
+    private suspend fun checkPresentationRemoteAuth(call: ApplicationCall): Boolean {
         if (!presentationRemoteEnabled) {
-            call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"remote control is disabled"}""")
+            call.respond(HttpStatusCode.Forbidden, """{"error":"remote control is disabled"}""")
             return false
         }
         val pw = presentationRemotePassword
@@ -3542,7 +3550,7 @@ class CompanionServer {
         return if (pw.isEmpty() || MessageDigest.isEqual(provided.toByteArray(), pw.toByteArray())) {
             true
         } else {
-            call.respond(io.ktor.http.HttpStatusCode.Unauthorized, """{"error":"Invalid password"}""")
+            call.respond(HttpStatusCode.Unauthorized, """{"error":"Invalid password"}""")
             false
         }
     }
@@ -3553,41 +3561,41 @@ class CompanionServer {
      * Only called from the initial /auth handshake — not on every subsequent action —
      * so an approved or session-approved device is never re-prompted mid-session.
      */
-    private suspend fun checkPresentationRemoteConnect(call: io.ktor.server.application.ApplicationCall): Boolean {
+    private suspend fun checkPresentationRemoteConnect(call: ApplicationCall): Boolean {
         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
         val pending = PendingConnectionRequest(clientId)
         onPresentationRemoteConnect.emit(pending)
         val approved = pending.decision.await()
         if (!approved) {
-            call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"connection denied"}""")
+            call.respond(HttpStatusCode.Forbidden, """{"error":"connection denied"}""")
         }
         return approved
     }
 
-    private suspend fun handlePresentationFileUpload(call: io.ktor.server.application.ApplicationCall) {
+    private suspend fun handlePresentationFileUpload(call: ApplicationCall) {
         try {
             val contentLength = call.request.headers["Content-Length"]?.toLongOrNull() ?: 0L
             if (contentLength > 200 * 1024 * 1024) {
-                call.respond(io.ktor.http.HttpStatusCode.PayloadTooLarge, """{"error":"file too large (max 200 MB)"}""")
+                call.respond(HttpStatusCode.PayloadTooLarge, """{"error":"file too large (max 200 MB)"}""")
                 return
             }
             val body   = call.receiveText()
-            val parsed = json.parseToJsonElement(body) as? kotlinx.serialization.json.JsonObject
-            val name   = (parsed?.get("name") as? kotlinx.serialization.json.JsonPrimitive)?.content
-            val data   = (parsed?.get("data") as? kotlinx.serialization.json.JsonPrimitive)?.content
+            val parsed = json.parseToJsonElement(body) as? JsonObject
+            val name   = (parsed?.get("name") as? JsonPrimitive)?.content
+            val data   = (parsed?.get("data") as? JsonPrimitive)?.content
             if (name.isNullOrBlank() || data.isNullOrBlank()) {
-                call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
+                call.respond(HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
                 return
             }
             val safeName = File(name).name.ifBlank { "upload.pdf" }
             val ext = safeName.substringAfterLast('.', "").lowercase()
             if (ext !in setOf("pdf", "ppt", "pptx", "key")) {
-                call.respond(io.ktor.http.HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
+                call.respond(HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
                 return
             }
             val base64Match = Regex("^data:[^;]+;base64,(.+)$").find(data)
             if (base64Match == null) {
-                call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
+                call.respond(HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
                 return
             }
             val fileBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
@@ -3619,11 +3627,11 @@ class CompanionServer {
                 ContentType.Application.Json
             )
         } catch (e: Exception) {
-            call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
+            call.respond(HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
         }
     }
 
-    private suspend fun checkQaAdmin(call: io.ktor.server.application.ApplicationCall): Boolean {
+    private suspend fun checkQaAdmin(call: ApplicationCall): Boolean {
         val pw = qaAdminPassword
         if (pw.isEmpty()) return true
         val provided = call.request.headers["X-QA-Password"]
@@ -3632,7 +3640,7 @@ class CompanionServer {
         return if (MessageDigest.isEqual(provided.toByteArray(), pw.toByteArray())) {
             true
         } else {
-            call.respond(io.ktor.http.HttpStatusCode.Unauthorized, """{"error":"Invalid admin password"}""")
+            call.respond(HttpStatusCode.Unauthorized, """{"error":"Invalid admin password"}""")
             false
         }
     }
@@ -3643,13 +3651,13 @@ class CompanionServer {
      * Only called from the initial /api/qa/auth handshake — not on every subsequent action —
      * so an approved or session-approved device is never re-prompted mid-session.
      */
-    private suspend fun checkQaAdminConnect(call: io.ktor.server.application.ApplicationCall): Boolean {
+    private suspend fun checkQaAdminConnect(call: ApplicationCall): Boolean {
         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
         val pending = PendingConnectionRequest(clientId)
         onQaAdminConnect.emit(pending)
         val approved = pending.decision.await()
         if (!approved) {
-            call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"connection denied"}""")
+            call.respond(HttpStatusCode.Forbidden, """{"error":"connection denied"}""")
         }
         return approved
     }
@@ -3710,7 +3718,7 @@ class CompanionServer {
 
     /**
      * Self-contained HTML page for an OBS/vMix Browser Source input. The actual content is
-     * rendered off-screen in main.kt ([org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer],
+     * rendered off-screen in main.kt (BrowserSourceVideoRenderer,
      * using the same BiblePresenter/SongPresenter/AnnouncementsPresenter/PicturePresenter/
      * StageMonitorScreen composables as everywhere else) and streamed as binary-framed PNG
      * deltas over a WebSocket — so styling is pixel-identical to the native output by

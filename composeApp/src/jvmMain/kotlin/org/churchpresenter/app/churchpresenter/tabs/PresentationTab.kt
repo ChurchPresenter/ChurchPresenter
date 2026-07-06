@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -297,7 +298,7 @@ fun PresentationTab(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 0.dp)
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
             ) {
                 Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
                 Spacer(Modifier.width(7.dp))
@@ -662,7 +663,7 @@ fun PresentationTab(
                         modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 18.dp)
+                        contentPadding = PaddingValues(vertical = 18.dp)
                     ) {
                         itemsIndexed(viewModel.slideFiles) { index, slideFile ->
                             val bitmap = remember(slideFile) {

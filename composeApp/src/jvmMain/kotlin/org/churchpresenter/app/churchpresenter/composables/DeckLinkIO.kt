@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.app.churchpresenter.models.Scene
+import org.churchpresenter.app.churchpresenter.models.SceneSource
+
 /**
  * Kotlin wrapper for BlackMagic DeckLink JNI native library.
  * Supports multiple simultaneous device outputs.
@@ -216,11 +219,11 @@ object DeckLinkManager {
     fun isInputActive(deviceIndex: Int): Boolean = deviceIndex in inputDevices
 
     /** Check if a device is configured for input in any scene (not just currently running). */
-    fun isInputConfigured(deviceIndex: Int, scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList()): Boolean {
+    fun isInputConfigured(deviceIndex: Int, scenes: List<Scene> = emptyList()): Boolean {
         // Check provided scenes list
         if (scenes.any { scene ->
             scene.sources.any { source ->
-                source is org.churchpresenter.app.churchpresenter.models.SceneSource.CameraSource &&
+                source is SceneSource.CameraSource &&
                     source.isDeckLink && source.deckLinkIndex == deviceIndex
             }
         }) return true

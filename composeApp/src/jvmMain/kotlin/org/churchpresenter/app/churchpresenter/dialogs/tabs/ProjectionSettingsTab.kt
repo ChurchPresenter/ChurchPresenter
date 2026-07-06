@@ -38,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.app.churchpresenter.models.Scene
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -149,7 +150,7 @@ fun ProjectionSettingsTab(
     companionServer: CompanionServer,
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
-    scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList()
+    scenes: List<Scene> = emptyList()
 ) {
     val scope = rememberCoroutineScope()
     val proj = settings.projectionSettings

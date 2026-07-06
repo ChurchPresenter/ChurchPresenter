@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import kotlinx.serialization.json.Json
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
@@ -111,12 +112,12 @@ import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
-private val exportJsonFormat = kotlinx.serialization.json.Json {
+private val exportJsonFormat = Json {
     encodeDefaults = true
     prettyPrint = true
 }
 
-private val importJsonFormat = kotlinx.serialization.json.Json {
+private val importJsonFormat = Json {
     ignoreUnknownKeys = true
 }
 

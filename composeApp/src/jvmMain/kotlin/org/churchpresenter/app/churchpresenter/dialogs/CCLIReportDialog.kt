@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -870,7 +871,7 @@ private fun PresetButton(label: String, onClick: () -> Unit) {
     OutlinedButton(
         shape = RoundedCornerShape(6.dp),
         onClick = onClick,
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
         modifier = Modifier.height(32.dp)
     ) {
         Text(label, style = MaterialTheme.typography.labelSmall)
@@ -904,7 +905,7 @@ private fun LegendDot(color: Color) {
 }
 
 @Composable
-private fun androidx.compose.foundation.layout.RowScope.TableHeader(
+private fun RowScope.TableHeader(
     text: String,
     fixedWidth: Float? = null,
     weight: Float = 1f
@@ -919,7 +920,7 @@ private fun androidx.compose.foundation.layout.RowScope.TableHeader(
 }
 
 @Composable
-private fun androidx.compose.foundation.layout.RowScope.TableCell(
+private fun RowScope.TableCell(
     text: String,
     fixedWidth: Float? = null,
     weight: Float = 1f,

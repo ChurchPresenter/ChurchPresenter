@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.delay
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -200,7 +201,7 @@ private fun BottomAlignedText(
     // Reference text with exactly maxLines lines — measured to get precise pixel height
     val referenceText = remember(maxLines) { "\n".repeat(maxLines - 1).ifEmpty { " " } }
 
-    androidx.compose.ui.layout.Layout(
+    Layout(
         content = {
             // Invisible reference: measures exact height of maxLines lines
             Text(

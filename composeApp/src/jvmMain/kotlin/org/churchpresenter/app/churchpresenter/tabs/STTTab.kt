@@ -123,7 +123,11 @@ import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import androidx.compose.ui.text.AnnotatedString
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 
@@ -131,7 +135,7 @@ import java.awt.GraphicsEnvironment
 fun STTTab(
     modifier: Modifier = Modifier,
     sttManager: STTManager,
-    presenterManager: org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager,
+    presenterManager: PresenterManager,
     presenting: (Presenting) -> Unit,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
@@ -649,10 +653,10 @@ fun STTTab(
 
 private fun applyHighlighting(
     text: String,
-    highlightedWords: List<org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord>,
+    highlightedWords: List<HighlightedWord>,
     enabled: Boolean,
     baseColor: Color
-): androidx.compose.ui.text.AnnotatedString {
+): AnnotatedString {
     if (!enabled || highlightedWords.isEmpty()) {
         return buildAnnotatedString {
             withStyle(SpanStyle(color = baseColor)) { append(text) }
@@ -663,7 +667,7 @@ private fun applyHighlighting(
     for (hw in highlightedWords) {
         if (hw.word.isBlank()) continue
         try {
-            val highlightColor = org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor(hw.color)
+            val highlightColor = Utils.parseHexColor(hw.color)
             val wb = "(?<![\\p{L}\\p{N}])"
             val we = "(?![\\p{L}\\p{N}])"
             val rawPattern = if (hw.isRegex) {

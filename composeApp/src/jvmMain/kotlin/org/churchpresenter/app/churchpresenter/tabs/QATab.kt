@@ -999,7 +999,7 @@ private fun QAIconButton(
             colors = IconButtonDefaults.filledIconButtonColors(
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContainerColor = androidx.compose.ui.graphics.Color.Transparent,
+                disabledContainerColor = Color.Transparent,
                 disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
         ) {

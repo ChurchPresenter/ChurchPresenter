@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import kotlinx.serialization.json.Json
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
@@ -10,6 +11,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -158,16 +160,16 @@ private object RecentMediaFiles {
     }
 
     private fun load() {
-        try { if (file.exists()) { val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }; val list = json.decodeFromString<List<String>>(file.readText()); paths.clear(); paths.addAll(list.take(MAX)) } } catch (_: Exception) {}
-        try { if (pinnedFile.exists()) { val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }; val list = json.decodeFromString<List<String>>(pinnedFile.readText()); pinned.clear(); pinned.addAll(list) } } catch (_: Exception) {}
+        try { if (file.exists()) { val json = Json { ignoreUnknownKeys = true }; val list = json.decodeFromString<List<String>>(file.readText()); paths.clear(); paths.addAll(list.take(MAX)) } } catch (_: Exception) {}
+        try { if (pinnedFile.exists()) { val json = Json { ignoreUnknownKeys = true }; val list = json.decodeFromString<List<String>>(pinnedFile.readText()); pinned.clear(); pinned.addAll(list) } } catch (_: Exception) {}
     }
 
     private fun save() {
-        try { file.parentFile?.mkdirs(); val json = kotlinx.serialization.json.Json { encodeDefaults = true }; file.writeText(json.encodeToString(paths.toList())) } catch (_: Exception) {}
+        try { file.parentFile?.mkdirs(); val json = Json { encodeDefaults = true }; file.writeText(json.encodeToString(paths.toList())) } catch (_: Exception) {}
     }
 
     private fun savePinned() {
-        try { pinnedFile.parentFile?.mkdirs(); val json = kotlinx.serialization.json.Json { encodeDefaults = true }; pinnedFile.writeText(json.encodeToString(pinned.toList())) } catch (_: Exception) {}
+        try { pinnedFile.parentFile?.mkdirs(); val json = Json { encodeDefaults = true }; pinnedFile.writeText(json.encodeToString(pinned.toList())) } catch (_: Exception) {}
     }
 }
 
@@ -292,7 +294,7 @@ fun MediaTab(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 0.dp)
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
                     ) {
                         Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
                         Spacer(Modifier.width(7.dp))
@@ -359,7 +361,7 @@ fun MediaTab(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 0.dp)
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
                     ) {
                         Text(stringResource(Res.string.media_load), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold))
                     }

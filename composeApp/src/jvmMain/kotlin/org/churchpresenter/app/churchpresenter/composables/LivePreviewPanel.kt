@@ -89,6 +89,7 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -103,7 +104,7 @@ fun LivePreviewPanel(
     modifier: Modifier = Modifier,
     serverUrl: String = "",
     qaDisplayUrl: String = "",
-    sttManager: org.churchpresenter.app.churchpresenter.viewmodel.STTManager? = null,
+    sttManager: STTManager? = null,
 ) {
     val proj = appSettings.projectionSettings
     val deckLinkCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
@@ -180,7 +181,7 @@ private fun SingleDisplayPreview(
     modifier: Modifier = Modifier,
     serverUrl: String = "",
     qaDisplayUrl: String = "",
-    sttManager: org.churchpresenter.app.churchpresenter.viewmodel.STTManager? = null,
+    sttManager: STTManager? = null,
     locks: Map<Int, Presenting> = emptyMap(),
     onToggleLock: (Presenting?) -> Unit = {},
     label: String,

@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import kotlinx.serialization.json.Json
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -18,6 +19,7 @@ import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -76,6 +78,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
@@ -172,7 +176,7 @@ private object RecentPictureFolders {
     private fun load() {
         try {
             if (file.exists()) {
-                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                val json = Json { ignoreUnknownKeys = true }
                 val list = json.decodeFromString<List<String>>(file.readText())
                 folders.clear()
                 folders.addAll(list.take(MAX))
@@ -180,7 +184,7 @@ private object RecentPictureFolders {
         } catch (_: Exception) {}
         try {
             if (pinnedFile.exists()) {
-                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                val json = Json { ignoreUnknownKeys = true }
                 val list = json.decodeFromString<List<String>>(pinnedFile.readText())
                 pinned.clear()
                 pinned.addAll(list)
@@ -191,7 +195,7 @@ private object RecentPictureFolders {
     private fun save() {
         try {
             file.parentFile?.mkdirs()
-            val json = kotlinx.serialization.json.Json { encodeDefaults = true }
+            val json = Json { encodeDefaults = true }
             file.writeText(json.encodeToString(folders.toList()))
         } catch (_: Exception) {}
     }
@@ -199,7 +203,7 @@ private object RecentPictureFolders {
     private fun savePinned() {
         try {
             pinnedFile.parentFile?.mkdirs()
-            val json = kotlinx.serialization.json.Json { encodeDefaults = true }
+            val json = Json { encodeDefaults = true }
             pinnedFile.writeText(json.encodeToString(pinned.toList()))
         } catch (_: Exception) {}
     }
@@ -307,14 +311,14 @@ fun PicturesTab(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 0.dp)
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
             ) {
                 Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
                 Spacer(Modifier.width(7.dp))
                 Text(
                     stringResource(Res.string.select_folder),
                     style = MaterialTheme.typography.labelMedium.copy(
-                        fontSize = androidx.compose.ui.unit.TextUnit(12.5f, androidx.compose.ui.unit.TextUnitType.Sp),
+                        fontSize = TextUnit(12.5f, TextUnitType.Sp),
                         fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
                     )
                 )
@@ -567,8 +571,8 @@ fun PicturesTab(
                 ) {
                     Text(
                         text = stringResource(Res.string.auto_scroll_interval).uppercase(),
-                        fontSize = androidx.compose.ui.unit.TextUnit(8f, androidx.compose.ui.unit.TextUnitType.Sp),
-                        lineHeight = androidx.compose.ui.unit.TextUnit(9f, androidx.compose.ui.unit.TextUnitType.Sp),
+                        fontSize = TextUnit(8f, TextUnitType.Sp),
+                        lineHeight = TextUnit(9f, TextUnitType.Sp),
                         fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
                         letterSpacing = 0.9.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
@@ -597,7 +601,7 @@ fun PicturesTab(
                                 onValueChange = { intervalInput = it },
                                 suffix = { Text(stringResource(Res.string.unit_s)) },
                                 singleLine = true,
-                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                             )
                         },
                         confirmButton = {
@@ -630,8 +634,8 @@ fun PicturesTab(
                 ) {
                     Text(
                         text = stringResource(Res.string.transition_duration).uppercase(),
-                        fontSize = androidx.compose.ui.unit.TextUnit(8f, androidx.compose.ui.unit.TextUnitType.Sp),
-                        lineHeight = androidx.compose.ui.unit.TextUnit(9f, androidx.compose.ui.unit.TextUnitType.Sp),
+                        fontSize = TextUnit(8f, TextUnitType.Sp),
+                        lineHeight = TextUnit(9f, TextUnitType.Sp),
                         fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
                         letterSpacing = 0.9.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
@@ -660,7 +664,7 @@ fun PicturesTab(
                                 onValueChange = { transitionInput = it },
                                 suffix = { Text(stringResource(Res.string.unit_ms)) },
                                 singleLine = true,
-                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                             )
                         },
                         confirmButton = {
@@ -728,7 +732,7 @@ fun PicturesTab(
                 Text(
                     text = stringResource(Res.string.pictures_arrow_key_hint),
                     style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp)
+                        fontSize = TextUnit(11.5f, TextUnitType.Sp)
                     ),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                     maxLines = 1,
@@ -742,7 +746,7 @@ fun PicturesTab(
                 Text(
                     text = stringResource(Res.string.pictures_reorder_hint),
                     style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp)
+                        fontSize = TextUnit(11.5f, TextUnitType.Sp)
                     ),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                     maxLines = 1,
@@ -768,7 +772,7 @@ fun PicturesTab(
                     modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 18.dp)
+                    contentPadding = PaddingValues(vertical = 18.dp)
                 ) {
                     items(viewModel.images, key = { it.absolutePath }) { imageFile ->
                         val index = viewModel.images.indexOf(imageFile)
@@ -891,7 +895,7 @@ fun PicturesTab(
                                 Text(
                                     text = imageFile.nameWithoutExtension,
                                     style = MaterialTheme.typography.labelSmall.copy(
-                                        fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp),
+                                        fontSize = TextUnit(11.5f, TextUnitType.Sp),
                                         fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.SemiBold
                                                      else androidx.compose.ui.text.font.FontWeight.Medium
                                     ),

@@ -195,6 +195,11 @@ import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.SourceTransform
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.window.DialogWindow
+import androidx.compose.ui.window.rememberDialogState
 import org.jetbrains.compose.resources.painterResource
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -366,9 +371,9 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
         modifier = Modifier.clickable { showTextDialog = true }.padding(vertical = 2.dp)
     )
     if (showTextDialog) {
-        androidx.compose.ui.window.DialogWindow(
+        DialogWindow(
             onCloseRequest = { showTextDialog = false },
-            state = androidx.compose.ui.window.rememberDialogState(
+            state = rememberDialogState(
                 width = 600.dp, height = 450.dp
             ),
             title = stringResource(Res.string.canvas_text_content),
@@ -805,7 +810,7 @@ private fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSou
                 enabled = remaining > 0 || isRunning,
                 modifier = Modifier.weight(1f).height(32.dp),
                 shape = RoundedCornerShape(8.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
             ) {
                 Text(if (isRunning) stringResource(Res.string.pause) else stringResource(Res.string.timer_start), style = MaterialTheme.typography.labelSmall)
             }
@@ -813,7 +818,7 @@ private fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSou
                 onClick = { TimerStateManager.reset(source.id, totalSeconds) },
                 modifier = Modifier.weight(1f).height(32.dp),
                 shape = RoundedCornerShape(8.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
             ) {
                 Text(stringResource(Res.string.timer_reset), style = MaterialTheme.typography.labelSmall)
             }
@@ -1716,7 +1721,7 @@ private fun BibleProperties(
     val storageDir = appSettings?.bibleSettings?.storageDirectory ?: ""
     val bibleFiles = remember(storageDir) {
         if (storageDir.isEmpty()) emptyList()
-        else org.churchpresenter.app.churchpresenter.viewmodel.FileManager()
+        else FileManager()
             .getBibleFilesInDirectory(storageDir)
     }
     val bibleDisplayNames = remember(storageDir, bibleFiles) {
@@ -1740,7 +1745,7 @@ private fun BibleProperties(
     val bibleVm = remember(appSettings, selectedBibleFile) {
         appSettings?.let {
             val settings = it.copy(bibleSettings = it.bibleSettings.copy(primaryBible = selectedBibleFile))
-            org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel(settings)
+            BibleViewModel(settings)
         }
     }
 

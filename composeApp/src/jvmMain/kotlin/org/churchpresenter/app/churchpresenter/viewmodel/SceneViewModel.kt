@@ -8,6 +8,7 @@ import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.SourceTransform
+import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import java.io.File
 import java.util.UUID
 
@@ -46,7 +47,7 @@ class SceneViewModel {
     // --- Scene operations ---
 
     fun addScene(name: String = "Scene"): Scene {
-        val bounds = org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds()
+        val bounds = presenterScreenBounds()
         val scene = Scene(
             name = name,
             canvasWidth = if (bounds.width > 0) bounds.width else 1920,

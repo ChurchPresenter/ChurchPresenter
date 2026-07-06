@@ -324,7 +324,7 @@ private fun TypePill(label: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun StatusLine(text: String, color: androidx.compose.ui.graphics.Color) {
+private fun StatusLine(text: String, color: Color) {
     Text(
         text = text,
         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),

@@ -31,6 +31,7 @@ import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.app.churchpresenter.models.Scene
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.appearance
 import churchpresenter.composeapp.generated.resources.background
@@ -83,7 +84,7 @@ fun OptionsDialog(
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
     onThemeChange: (ThemeMode) -> Unit = {},
-    scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList(),
+    scenes: List<Scene> = emptyList(),
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     obsManager: OBSWebSocketManager? = null,
     initialTab: Int = 0,

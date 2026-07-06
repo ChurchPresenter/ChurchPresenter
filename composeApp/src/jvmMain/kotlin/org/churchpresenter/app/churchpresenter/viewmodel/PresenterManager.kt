@@ -17,6 +17,7 @@ import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.app.churchpresenter.models.Question
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.server.AtemRenderCache
@@ -625,8 +626,8 @@ class PresenterManager {
     }
 
     // Q&A display state
-    private val _displayedQuestion = mutableStateOf<org.churchpresenter.app.churchpresenter.models.Question?>(null)
-    val displayedQuestion: State<org.churchpresenter.app.churchpresenter.models.Question?> = _displayedQuestion
+    private val _displayedQuestion = mutableStateOf<Question?>(null)
+    val displayedQuestion: State<Question?> = _displayedQuestion
 
     private val _qaTransitionAlpha = mutableStateOf(1f)
     val qaTransitionAlpha: State<Float> = _qaTransitionAlpha
@@ -634,7 +635,7 @@ class PresenterManager {
     private val _showQRCodeOnDisplay = mutableStateOf(false)
     val showQRCodeOnDisplay: State<Boolean> = _showQRCodeOnDisplay
 
-    fun setDisplayedQuestion(question: org.churchpresenter.app.churchpresenter.models.Question?) {
+    fun setDisplayedQuestion(question: Question?) {
         _displayedQuestion.value = question
     }
 

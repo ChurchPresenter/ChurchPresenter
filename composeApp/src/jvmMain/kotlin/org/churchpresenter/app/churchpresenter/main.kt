@@ -117,7 +117,9 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.server.AtemRenderCache
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
@@ -216,7 +218,7 @@ fun main() {
 
     // Pre-render ATEM upload caches for lower thirds in the background so
     // "Send to ATEM" is instant even before the Lower Third tab is opened
-    org.churchpresenter.app.churchpresenter.server.AtemRenderCache.ensureForFolder(
+    AtemRenderCache.ensureForFolder(
         startupSettings.streamingSettings.lowerThirdFolder,
         startupSettings.atemSettings
     )
@@ -980,7 +982,7 @@ fun main() {
                                 // The sequencer handles the ATEM DSK and timing; these collectors do the
                                 // same go-live / off-air the Lower Third tab does.
                                 LaunchedEffect(Unit) {
-                                    org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer.onShow.collect { req ->
+                                    LowerThirdSequencer.onShow.collect { req ->
                                         presenterManager.setLottieContent(
                                             req.json, req.pauseAtFrame, req.pauseFrame, req.pauseDurationMs
                                         )
@@ -989,7 +991,7 @@ fun main() {
                                     }
                                 }
                                 LaunchedEffect(Unit) {
-                                    org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer.onClear.collect {
+                                    LowerThirdSequencer.onClear.collect {
                                         if (presenterManager.presentingMode.value == Presenting.LOWER_THIRD) {
                                             presenterManager.requestClearDisplay()
                                         }
