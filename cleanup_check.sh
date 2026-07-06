@@ -16,8 +16,10 @@ else
     echo "   ✅ PASS"
 fi
 
-# Count Material 2 imports
-MATERIAL2=$(grep -r 'import androidx.compose.material\.[^3]' --include='*.kt' composeApp/src/ 2>/dev/null | wc -l | tr -d ' ')
+# Count Material 2 imports (androidx.compose.material.icons.* is Material 3's icon library and
+# is explicitly allowed — see DEVELOPMENT_GUIDE.md's "Use Material 3 icons" rule — so it's excluded
+# here rather than being flagged as a false Material 2 violation)
+MATERIAL2=$(grep -r 'import androidx.compose.material\.[^3]' --include='*.kt' composeApp/src/ 2>/dev/null | grep -v 'import androidx\.compose\.material\.icons' | wc -l | tr -d ' ')
 echo "🎨 Material 2 imports: $MATERIAL2"
 if [ "$MATERIAL2" -gt 0 ]; then
     echo "   ❌ FAIL - Should be 0"
