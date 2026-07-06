@@ -117,6 +117,10 @@ class BrowserSourceVideoRenderer(
                 val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
                 val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
                 val outputRole = Constants.OUTPUT_ROLE_NORMAL
+                // General per-output background toggle — same field/logic as native output
+                // (main.kt). showBibleBackground/showSongsBackground below are an additional
+                // layer on top of this, not a replacement for it.
+                val showBg = if (isLowerThird) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
 
                 if (isIdentifying) {
                     Box(
@@ -157,7 +161,7 @@ class BrowserSourceVideoRenderer(
                         appSettings = appSettings,
                         outputRole = outputRole,
                         isLowerThird = isLowerThird,
-                        showBackground = !screenAssignment.browserSourceTransparentBackground
+                        showBackground = showBg
                     ) {
                         val showsContent = when (effectiveMode) {
                             Presenting.BIBLE -> screenAssignment.showBible
@@ -179,6 +183,7 @@ class BrowserSourceVideoRenderer(
                                     isLowerThird = isLowerThird,
                                     outputRole = outputRole,
                                     transitionAlpha = presenterManager.bibleTransitionAlpha.value,
+                                    showBackground = showBg && screenAssignment.showBibleBackground,
                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
                                     languageMode = screenAssignment.bibleMode
                                 )
@@ -192,6 +197,7 @@ class BrowserSourceVideoRenderer(
                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                     allLyricSections = presenterManager.allLyricSections.value,
                                     displaySectionIndex = presenterManager.songDisplaySectionIndex.value,
+                                    showBackground = showBg && screenAssignment.showSongsBackground,
                                     crossfadeEnabled = appSettings.songSettings.crossfade,
                                     languageOverride = screenAssignment.songMode
                                 )
@@ -206,7 +212,8 @@ class BrowserSourceVideoRenderer(
                                     text = presenterManager.displayedAnnouncementText.value,
                                     appSettings = appSettings,
                                     outputRole = outputRole,
-                                    transitionAlpha = presenterManager.announcementTransitionAlpha.value
+                                    transitionAlpha = presenterManager.announcementTransitionAlpha.value,
+                                    showBackground = showBg
                                 )
                                 Presenting.PRESENTATION -> {
                                     val frozen = presenterManager.slideFrozen.value

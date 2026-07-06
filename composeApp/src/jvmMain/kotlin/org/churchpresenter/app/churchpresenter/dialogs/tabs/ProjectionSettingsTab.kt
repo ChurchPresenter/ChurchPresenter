@@ -79,9 +79,12 @@ import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.content_announcements
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.content_bible
+import churchpresenter.composeapp.generated.resources.content_bible_background
+import churchpresenter.composeapp.generated.resources.content_background_layered_tooltip
 import churchpresenter.composeapp.generated.resources.content_media
 import churchpresenter.composeapp.generated.resources.content_pictures
 import churchpresenter.composeapp.generated.resources.content_songs
+import churchpresenter.composeapp.generated.resources.content_songs_background
 import churchpresenter.composeapp.generated.resources.content_streaming
 import churchpresenter.composeapp.generated.resources.detected_screens
 import churchpresenter.composeapp.generated.resources.display_fullscreen
@@ -276,6 +279,9 @@ fun ProjectionSettingsTab(
     val announcementsLabel = stringResource(Res.string.content_announcements)
     val dictionaryLabel = stringResource(Res.string.tab_dictionary)
     val songLaLabel = stringResource(Res.string.projection_content_song_la)
+    val bibleBackgroundLabel = stringResource(Res.string.content_bible_background)
+    val songsBackgroundLabel = stringResource(Res.string.content_songs_background)
+    val backgroundLayeredTooltip = stringResource(Res.string.content_background_layered_tooltip)
 
     data class ContentCol(
         val label: String,
@@ -301,6 +307,8 @@ fun ProjectionSettingsTab(
         ContentCol(dictionaryLabel, { it.showDictionary }, { a, v -> a.copy(showDictionary = v) }),
         ContentCol("Background", { it.showFullscreenBackground }, { a, v -> a.copy(showFullscreenBackground = v) }),
         ContentCol("Lower Third Background", { it.showLowerThirdBackground }, { a, v -> a.copy(showLowerThirdBackground = v) }),
+        ContentCol(bibleBackgroundLabel, { it.showBibleBackground }, { a, v -> a.copy(showBibleBackground = v) }, tooltip = backgroundLayeredTooltip),
+        ContentCol(songsBackgroundLabel, { it.showSongsBackground }, { a, v -> a.copy(showSongsBackground = v) }, tooltip = backgroundLayeredTooltip),
     )
 
     val fullScreenLabel = stringResource(Res.string.display_fullscreen)

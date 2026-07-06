@@ -414,14 +414,24 @@ fun main() {
         val browserSourceServerUrlState = companionServer.serverUrl.collectAsState()
         appSettings.projectionSettings.browserSourceOutputs.indices.forEach { i ->
             composeKey(i) {
-                val appSettingsState = remember { derivedStateOf { appSettings } }
-                val screenAssignmentState = remember {
-                    derivedStateOf { appSettings.projectionSettings.browserSourceOutputs.getOrNull(i) ?: ScreenAssignment() }
-                }
+                // rememberUpdatedState, not remember { derivedStateOf { ... } } — appSettings and
+                // qaDisplayUrl are plain composable parameters, not Compose State reads, so a
+                // keyless derivedStateOf wrapping them would only ever capture their value from
+                // this composeKey block's first-ever composition and never update again (no
+                // tracked State read inside the calculation to invalidate on). That silently
+                // froze every appSettings-driven Browser Source setting — background
+                // image/type, fonts, colors, etc. — at whatever it was when the app started,
+                // which is why a background image change only took effect after restarting the
+                // app. effectiveModeState is unaffected since it genuinely reads presenterManager
+                // State objects (.value), which derivedStateOf tracks correctly.
+                val appSettingsState = rememberUpdatedState(appSettings)
+                val screenAssignmentState = rememberUpdatedState(
+                    appSettings.projectionSettings.browserSourceOutputs.getOrNull(i) ?: ScreenAssignment()
+                )
                 val effectiveModeState = remember {
                     derivedStateOf { presenterManager.browserSourceLocks.value[i] ?: presenterManager.presentingMode.value }
                 }
-                val qaDisplayUrlState = remember { derivedStateOf { qaDisplayUrl } }
+                val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
                 val renderer = remember(i) {
                     BrowserSourceVideoRenderer(
                         presenterManager, appSettingsState, screenAssignmentState, effectiveModeState,
@@ -2748,7 +2758,7 @@ private fun PresenterWindows(
                                         isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                         outputRole = primaryRole,
                                         transitionAlpha = bibleTransitionAlpha,
-                                        showBackground = showBg,
+                                        showBackground = showBg && screenAssignment.showBibleBackground,
                                         crossfadeEnabled = appSettings.bibleSettings.crossfade,
                                         languageMode = screenAssignment.bibleMode
                                     )
@@ -2766,7 +2776,7 @@ private fun PresenterWindows(
                                         lookAheadEnabled = screenAssignment.songLookAhead,
                                         allLyricSections = allLyricSections,
                                         displaySectionIndex = songDisplaySectionIndex,
-                                        showBackground = showBg,
+                                        showBackground = showBg && screenAssignment.showSongsBackground,
                                         crossfadeEnabled = appSettings.songSettings.crossfade,
                                         languageOverride = screenAssignment.songMode
                                     )

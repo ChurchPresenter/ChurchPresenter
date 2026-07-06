@@ -3736,11 +3736,12 @@ class CompanionServer {
         val keyParam = if (needsKey) "?${Constants.QUERY_PARAM_API_KEY}=" + java.net.URLEncoder.encode(_apiKey.value, "UTF-8") else ""
         // ?bg= is a per-request debug override (e.g. for viewing outside OBS, where a page
         // background left transparent just renders as opaque white in a plain browser tab) —
-        // it doesn't touch the persisted browserSourceTransparentBackground setting.
+        // it's purely a page-preview convenience, unrelated to whether the rendered frame itself
+        // has a background (that's screenAssignment.showFullscreenBackground/showLowerThirdBackground,
+        // read by BrowserSourceVideoRenderer, same fields native output uses).
         val bodyBg = when (bgOverride?.lowercase()) {
             "black" -> "#000"
-            "transparent" -> "transparent"
-            else -> if (output.browserSourceTransparentBackground) "transparent" else "#000"
+            else -> "transparent"
         }
         val wsPath = "/api${Constants.ENDPOINT_BROWSER_SOURCE}/$index/ws$keyParam"
         return """

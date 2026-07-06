@@ -564,6 +564,9 @@
     <string name="presenter_windows_count">Presenter windows: %1$d</string>
     <string name="content_bible">Bible</string>
     <string name="content_songs">Songs</string>
+    <string name="content_bible_background">Bible Background</string>
+    <string name="content_songs_background">Songs Background</string>
+    <string name="content_background_layered_tooltip">Only takes effect when the general Background (or Lower Third Background) checkbox above is also on.</string>
     <string name="content_pictures">Pictures/Presentation</string>
     <string name="content_media">Media</string>
     <string name="content_streaming">Lower Third</string>
