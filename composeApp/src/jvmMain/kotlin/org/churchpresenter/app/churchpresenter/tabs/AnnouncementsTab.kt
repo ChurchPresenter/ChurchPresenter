@@ -590,7 +590,8 @@ fun AnnouncementsTab(
                                 },
                                 buttonWidth = 76.dp,
                                 buttonHeight = 28.dp,
-                                fontSize = 9.sp
+                                fontSize = 9.sp,
+                                compactColumns = 2
                             )
                         }
 

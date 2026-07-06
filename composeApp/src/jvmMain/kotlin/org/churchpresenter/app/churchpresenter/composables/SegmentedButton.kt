@@ -5,6 +5,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -49,87 +51,137 @@ fun <T> SegmentedButton(
     buttonWidth: Dp = 40.dp,
     buttonHeight: Dp = 40.dp,
     fontSize: TextUnit = 16.sp,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+    compactColumns: Int? = null
 ) {
     require(items.isNotEmpty()) { "SegmentedButton requires at least one item" }
 
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(0.dp)
-    ) {
-        items.forEachIndexed { index, item ->
-            val isSelected = selectedValue == item.value
-            val shape = when {
-                items.size == 1 -> RoundedCornerShape(4.dp)
-                index == 0 -> RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 0.dp, bottomEnd = 0.dp)
-                index == items.lastIndex -> RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = 4.dp, bottomEnd = 4.dp)
-                else -> RoundedCornerShape(0.dp)
-            }
+    if (compactColumns == null) {
+        SegmentedButtonGrid(
+            items = items,
+            columns = items.size,
+            selectedValue = selectedValue,
+            onValueChange = onValueChange,
+            buttonWidth = buttonWidth,
+            buttonHeight = buttonHeight,
+            fontSize = fontSize,
+            contentPadding = contentPadding,
+            modifier = modifier
+        )
+    } else {
+        BoxWithConstraints(modifier = modifier) {
+            val fullRowWidth = buttonWidth * items.size
+            val columns = if (maxWidth >= fullRowWidth) items.size else compactColumns
+            SegmentedButtonGrid(
+                items = items,
+                columns = columns,
+                selectedValue = selectedValue,
+                onValueChange = onValueChange,
+                buttonWidth = buttonWidth,
+                buttonHeight = buttonHeight,
+                fontSize = fontSize,
+                contentPadding = contentPadding
+            )
+        }
+    }
+}
 
-            val button: @Composable () -> Unit = {
-                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
-                    OutlinedButton(
-                        onClick = { onValueChange(item.value) },
-                        modifier = Modifier
-                            .height(buttonHeight)
-                            .width(buttonWidth),
-                        shape = shape,
-                        border = BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.outline
-                        ),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = if (isSelected)
-                                MaterialTheme.colorScheme.onSecondary
-                            else
-                                Color.Transparent,
-                            contentColor = MaterialTheme.colorScheme.onSurface
-                        ),
-                        contentPadding = contentPadding
-                    ) {
-                        if (item.icon != null) {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.label,
-                                modifier = Modifier.size(fontSize.value.dp * 1.1f)
-                            )
-                        } else {
-                            Text(
-                                text = item.label,
-                                fontSize = fontSize,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1
-                            )
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun <T> SegmentedButtonGrid(
+    items: List<SegmentedButtonItem<T>>,
+    columns: Int,
+    selectedValue: T,
+    onValueChange: (T) -> Unit,
+    buttonWidth: Dp,
+    buttonHeight: Dp,
+    fontSize: TextUnit,
+    contentPadding: PaddingValues,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        items.chunked(columns).forEach { rowItems ->
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(0.dp)
+            ) {
+                rowItems.forEachIndexed { index, item ->
+                    val isSelected = selectedValue == item.value
+                    val shape = when {
+                        rowItems.size == 1 -> RoundedCornerShape(4.dp)
+                        index == 0 -> RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 0.dp, bottomEnd = 0.dp)
+                        index == rowItems.lastIndex -> RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = 4.dp, bottomEnd = 4.dp)
+                        else -> RoundedCornerShape(0.dp)
+                    }
+
+                    val button: @Composable () -> Unit = {
+                        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+                            OutlinedButton(
+                                onClick = { onValueChange(item.value) },
+                                modifier = Modifier
+                                    .height(buttonHeight)
+                                    .width(buttonWidth),
+                                shape = shape,
+                                border = BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outline
+                                ),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = if (isSelected)
+                                        MaterialTheme.colorScheme.onSecondary
+                                    else
+                                        Color.Transparent,
+                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                ),
+                                contentPadding = contentPadding
+                            ) {
+                                if (item.icon != null) {
+                                    Icon(
+                                        imageVector = item.icon,
+                                        contentDescription = item.label,
+                                        modifier = Modifier.size(fontSize.value.dp * 1.1f)
+                                    )
+                                } else {
+                                    Text(
+                                        text = item.label,
+                                        fontSize = fontSize,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
                         }
                     }
-                }
-            }
 
-            if (item.tooltip != null) {
-                TooltipArea(
-                    tooltip = {
-                        Surface(
-                            color = MaterialTheme.colorScheme.inverseSurface,
-                            shape = MaterialTheme.shapes.extraSmall,
-                            tonalElevation = 4.dp
-                        ) {
-                            Text(
-                                text = item.tooltip,
-                                color = MaterialTheme.colorScheme.inverseOnSurface,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    if (item.tooltip != null) {
+                        TooltipArea(
+                            tooltip = {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    shape = MaterialTheme.shapes.extraSmall,
+                                    tonalElevation = 4.dp
+                                ) {
+                                    Text(
+                                        text = item.tooltip,
+                                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.ComponentRect(
+                                anchor = Alignment.BottomCenter,
+                                offset = DpOffset(0.dp, 4.dp)
                             )
+                        ) {
+                            button()
                         }
-                    },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(
-                        anchor = Alignment.BottomCenter,
-                        offset = DpOffset(0.dp, 4.dp)
-                    )
-                ) {
-                    button()
+                    } else {
+                        button()
+                    }
                 }
-            } else {
-                button()
             }
         }
     }
