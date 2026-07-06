@@ -15,6 +15,7 @@ import org.churchpresenter.app.churchpresenter.models.CompanionSurfaceSlot
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Image as SkiaImage
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Owns every configured [CompanionSatelliteClient] connection to Bitfocus Companion instances on
@@ -55,11 +56,15 @@ class CompanionSatelliteViewModel {
     private val _connectionStates = mutableStateMapOf<CompanionSurfaceSlot, CompanionConnectionUiState>()
     val connectionStates: Map<CompanionSurfaceSlot, CompanionConnectionUiState> get() = _connectionStates
 
-    private val _buttons = mutableMapOf<CompanionSurfaceSlot, SnapshotStateList<CompanionButtonState>>()
+    // ConcurrentHashMap because entries are both read from Compose's main thread during
+    // composition and inserted/removed from each connection's own background socket-read thread
+    // (see clientFor's callbacks below) — a plain HashMap is not safe for that concurrent
+    // structural mutation.
+    private val _buttons = ConcurrentHashMap<CompanionSurfaceSlot, SnapshotStateList<CompanionButtonState>>()
 
     /** The live button grid for [slot] — created empty on first access. */
     fun buttonsFor(slot: CompanionSurfaceSlot): SnapshotStateList<CompanionButtonState> =
-        _buttons.getOrPut(slot) { mutableStateListOf() }
+        _buttons.computeIfAbsent(slot) { mutableStateListOf() }
 
     /** TAB always uses the connection's configured [CompanionSatelliteSettings.deviceId] directly
      * since it's the one placement every connection already had before multi-placement existed — a

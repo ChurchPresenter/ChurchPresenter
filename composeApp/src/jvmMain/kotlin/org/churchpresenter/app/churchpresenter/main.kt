@@ -70,6 +70,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
@@ -382,21 +383,29 @@ fun main() {
                 }
             }
         }
-        // Reconcile placement checkbox changes live for already-active connections — otherwise
-        // unchecking e.g. "Left Sidebar" would leave that slot's client running until the user
-        // manually hits Disconnect/Connect again, which is surprising since the checkbox looks
-        // like the on/off control for that placement. connectAll() is diff-based (see
-        // CompanionSatelliteViewModel), so this is a no-op for placements that aren't changing.
-        LaunchedEffect(
-            appSettings.companionSatelliteConnections.map {
-                listOf(it.id, it.showInTab, it.showInLeftSidebar, it.showInRightSidebar)
-            }
-        ) {
+        // Reconcile any live settings edit for already-active connections — otherwise unchecking
+        // e.g. "Left Sidebar", or editing rows/columns/host/port/etc. on a connection that's
+        // already live, would leave that slot's client running with stale registration until the
+        // user manually hits Disconnect/Connect again. connectAll() is diff-based (see
+        // CompanionSatelliteViewModel), so this is a no-op for connections that aren't changing.
+        // Keyed on the full connection list (not hand-picked fields) so this never needs updating
+        // when a new registration-affecting setting is added.
+        val lastReconciled = remember { mutableMapOf<String, CompanionSatelliteSettings>() }
+        LaunchedEffect(appSettings.companionSatelliteConnections) {
             for (connection in appSettings.companionSatelliteConnections) {
                 val hasLiveSlot = companionSatelliteViewModel.connectionStates.keys.any { it.connectionId == connection.id }
-                if (hasLiveSlot || connection.autoConnect) {
+                // A connection seen before by this effect with different settings than last time
+                // was actively edited by the user just now (not merely observed for the first time
+                // at startup) — treat that the same as toggling the placement checkbox itself: an
+                // explicit action, so it should connect even if autoConnect is off and nothing was
+                // live yet. A brand-new/never-before-seen connection still only auto-connects when
+                // autoConnect is set, preserving startup's opt-in-only behavior (handled primarily
+                // by the auto-connect-once effect above).
+                val isLiveEdit = lastReconciled[connection.id]?.let { it != connection } ?: false
+                if (hasLiveSlot || connection.autoConnect || isLiveEdit) {
                     companionSatelliteViewModel.connectAll(connection)
                 }
+                lastReconciled[connection.id] = connection
             }
         }
         remember(qaManager) { companionServer.qaManager = qaManager; true }

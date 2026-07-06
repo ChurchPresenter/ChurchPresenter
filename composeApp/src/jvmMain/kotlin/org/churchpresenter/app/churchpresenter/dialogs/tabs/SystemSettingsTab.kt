@@ -927,13 +927,13 @@ private suspend fun copySongSamples(storageDirectory: String): Int {
     val targetDir = java.io.File(storageDirectory, "Song Samples")
     if (!targetDir.exists()) targetDir.mkdirs()
 
-    val indexBytes = churchpresenter.composeapp.generated.resources.Res.readBytes("files/song_samples/index.txt")
+    val indexBytes = Res.readBytes("files/song_samples/index.txt")
     val filenames = indexBytes.toString(Charsets.UTF_8).lines().filter { it.isNotBlank() }
 
     var count = 0
     for (filename in filenames) {
         try {
-            val songBytes = churchpresenter.composeapp.generated.resources.Res.readBytes("files/song_samples/$filename")
+            val songBytes = Res.readBytes("files/song_samples/$filename")
             val targetFile = java.io.File(targetDir, filename)
             targetFile.writeBytes(songBytes)
             count++
@@ -948,13 +948,13 @@ private suspend fun copyBibleSamples(storageDirectory: String): Int {
     val targetDir = java.io.File(storageDirectory)
     if (!targetDir.exists()) targetDir.mkdirs()
 
-    val indexBytes = churchpresenter.composeapp.generated.resources.Res.readBytes("files/bible_samples/index.txt")
+    val indexBytes = Res.readBytes("files/bible_samples/index.txt")
     val filenames = indexBytes.toString(Charsets.UTF_8).lines().filter { it.isNotBlank() }
 
     var count = 0
     for (filename in filenames) {
         try {
-            val bibleBytes = churchpresenter.composeapp.generated.resources.Res.readBytes("files/bible_samples/$filename")
+            val bibleBytes = Res.readBytes("files/bible_samples/$filename")
             val targetFile = java.io.File(targetDir, filename)
             targetFile.writeBytes(bibleBytes)
             count++

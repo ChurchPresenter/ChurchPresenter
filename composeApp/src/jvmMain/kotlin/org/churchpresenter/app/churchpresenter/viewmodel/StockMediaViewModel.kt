@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -41,10 +42,17 @@ class StockMediaViewModel(
     var hasMore by mutableStateOf(false)
         private set
 
+    // Guards against overlapping searches: without cancelling the prior job, submitting a new
+    // query while an older one is still in flight lets whichever network response arrives last
+    // win, regardless of which query is actually current — a fast second search can be overwritten
+    // by a slow first one that resolves after it.
+    private var searchJob: Job? = null
+
     fun search(apiKey: String) {
         if (apiKey.isBlank() || query.isBlank()) return
         currentPage = 1
-        viewModelScope.launch {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
             isLoading = true
             searchError = null
             when (val outcome = StockMediaClient.search(source, apiKey, mediaType, query, currentPage)) {
@@ -64,7 +72,8 @@ class StockMediaViewModel(
     fun loadMore(apiKey: String) {
         if (apiKey.isBlank() || query.isBlank() || isLoading || !hasMore) return
         val nextPage = currentPage + 1
-        viewModelScope.launch {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
             isLoading = true
             when (val outcome = StockMediaClient.search(source, apiKey, mediaType, query, nextPage)) {
                 is StockMediaClient.SearchOutcome.Success -> {

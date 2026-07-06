@@ -189,6 +189,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         if (existingFile != null) {
             _selectedPresentation.value = existingFile
             _selectedSlideIndex.value = 0
+            _loadError.value = null
             activeLoadJob?.cancel()
             activeLoadJob = scope.launch { loadOrCacheSlides(existingFile) }
         }
@@ -277,7 +278,10 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                     if (failure != null) withContext(Dispatchers.Main) { _loadError.value = failure }
                 }
                 "pptx", "ppt" -> loadPowerPointSlides(file, cacheDir)
-                "key" -> loadKeynoteSlides(file, cacheDir)
+                "key" -> {
+                    val failure = loadKeynoteSlides(file, cacheDir)
+                    if (failure != null) withContext(Dispatchers.Main) { _loadError.value = failure }
+                }
             }
             if (_slideFiles.isNotEmpty()) {
                 File(cacheDir, "mtime.txt").writeText(file.lastModified().toString())
@@ -296,6 +300,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            if (_loadError.value == null) withContext(Dispatchers.Main) { _loadError.value = PresentationLoadError.RENDER_FAILED }
             CrashReporter.reportWarning(
                 "Presentation: Failed to render ${file.extension.lowercase()} slides",
                 throwable = e,
@@ -449,42 +454,45 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         }
     }
 
-    private suspend fun loadKeynoteSlides(file: File, cacheDir: File) {
+    private suspend fun loadKeynoteSlides(file: File, cacheDir: File): PresentationLoadError? {
+        var lastError: PresentationLoadError? = null
+
         val nativePdf = tryExportKeynoteViaApp(file)
         if (nativePdf != null) {
             try {
                 val n = extractKeynoteNotes(file)
-                loadPdfSlides(nativePdf, cacheDir, notesPerSlide = n)
+                loadPdfSlides(nativePdf, cacheDir, notesPerSlide = n)?.let { lastError = it }
             } finally {
                 nativePdf.delete()
             }
-            if (_slideFiles.isNotEmpty()) return
+            if (_slideFiles.isNotEmpty()) return null
         }
 
         val quickLookPdf = extractKeynoteQuickLookPdf(file)
         if (quickLookPdf != null) {
             try {
                 val n = extractKeynoteNotes(file)
-                loadPdfSlides(quickLookPdf, cacheDir, notesPerSlide = n)
+                loadPdfSlides(quickLookPdf, cacheDir, notesPerSlide = n)?.let { lastError = it }
             } finally {
                 quickLookPdf.delete()
             }
-            if (_slideFiles.isNotEmpty()) return
+            if (_slideFiles.isNotEmpty()) return null
         }
 
         val pdfFile = tryExportKeynoteToPdf(file)
         if (pdfFile != null) {
             try {
                 val n = extractKeynoteNotes(file)
-                loadPdfSlides(pdfFile, cacheDir, notesPerSlide = n)
+                loadPdfSlides(pdfFile, cacheDir, notesPerSlide = n)?.let { lastError = it }
             } finally {
                 pdfFile.delete()
             }
-            if (_slideFiles.isNotEmpty()) return
+            if (_slideFiles.isNotEmpty()) return null
         }
 
         System.err.println("[Keynote] Falling back to embedded thumbnails for ${file.name}")
         loadKeynoteViaUnzip(file, cacheDir)
+        return if (_slideFiles.isNotEmpty()) null else lastError
     }
 
     private suspend fun tryExportKeynoteViaApp(file: File): File? = withContext(Dispatchers.IO) {

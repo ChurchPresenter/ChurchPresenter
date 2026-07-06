@@ -2,12 +2,13 @@ package org.churchpresenter.app.churchpresenter.data.settings
 
 import kotlinx.serialization.Serializable
 import org.churchpresenter.app.churchpresenter.models.CompanionSurfacePlacement
+import java.util.UUID
 
 /** One configured connection to a Bitfocus Companion instance. Multiple can be configured. */
 @Serializable
 data class CompanionSatelliteSettings(
     /** Stable identity for this connection entry — independent of [deviceId], survives edits. */
-    val id: String = java.util.UUID.randomUUID().toString(),
+    val id: String = UUID.randomUUID().toString(),
     /** Display label shown when more than one connection is configured. */
     val name: String = "Companion",
     val host: String = "",
@@ -17,7 +18,7 @@ data class CompanionSatelliteSettings(
      * ties "current page" to one device id, so two placements sharing an id would fight over the
      * same page — but default to being derived from this one ([deviceIdFor]) rather than requiring
      * every user to fill in three ids for the common single-placement case. */
-    val deviceId: String = java.util.UUID.randomUUID().toString(),
+    val deviceId: String = UUID.randomUUID().toString(),
     /** Overrides the auto-derived "$deviceId-left_sidebar"/"$deviceId-right_sidebar" id when
      * non-blank — lets a user match an id Companion already has permissions/pages configured for,
      * instead of ChurchPresenter's suffix always winning. Blank (the default) keeps the automatic
