@@ -560,6 +560,33 @@
     <string name="gradient_bottom_opacity">Opacité inférieure</string>
     <string name="gradient_position">Position de transition</string>
 
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">Clé API Pexels</string>
+    <string name="stock_photo_pixabay_key_label">Clé API Pixabay</string>
+    <string name="stock_photo_get_key">Obtenir une clé gratuite →</string>
+    <string name="stock_photo_get_key_hint">Gratuit, sans carte bancaire — la clé apparaît immédiatement après l'inscription.</string>
+    <string name="stock_photo_browse_tooltip">Parcourir les photos/vidéos libres de droits</string>
+    <string name="stock_photo_browse_photos_title">Parcourir les Photos Libres de Droits</string>
+    <string name="stock_photo_browse_videos_title">Parcourir les Vidéos Libres de Droits</string>
+    <string name="stock_photo_search_placeholder_photo">Rechercher des photos…</string>
+    <string name="stock_photo_search_placeholder_video">Rechercher des vidéos…</string>
+    <string name="stock_photo_no_results">Aucun résultat trouvé</string>
+    <string name="stock_photo_key_required_hint">Ajoutez votre clé API %1$s ci-dessus pour effectuer une recherche.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Clé API invalide</string>
+    <string name="stock_photo_error_rate_limited">Limite de requêtes atteinte — réessayez plus tard</string>
+    <string name="stock_photo_error_network">Erreur réseau — vérifiez votre connexion</string>
+    <string name="stock_photo_error_generic">Une erreur s'est produite. Veuillez réessayer.</string>
+    <string name="stock_photo_download_error_network">Échec du téléchargement — vérifiez votre connexion</string>
+    <string name="stock_photo_download_error_generic">Échec du téléchargement. Veuillez réessayer.</string>
+    <string name="stock_photo_load_more">Charger plus</string>
+    <string name="stock_library_tooltip">Parcourir la bibliothèque téléchargée</string>
+    <string name="stock_library_title_photos">Bibliothèque d'Images</string>
+    <string name="stock_library_title_videos">Bibliothèque de Vidéos</string>
+    <string name="stock_library_empty">Rien n'a encore été téléchargé — utilisez la recherche pour ajouter des photos ou des vidéos.</string>
+    <string name="stock_library_search_placeholder">Filtrer par nom de fichier…</string>
+
     <!-- System Settings -->
     <string name="reset_settings">Réinitialiser tous les paramètres</string>
     <string name="reset_settings_confirm">Êtes-vous sûr de vouloir réinitialiser tous les paramètres par défaut ?\n\nL'application va redémarrer.</string>

@@ -560,6 +560,33 @@
     <string name="gradient_bottom_opacity">Transparantie onder</string>
     <string name="gradient_position">Overgangspositie</string>
 
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">Pexels API-sleutel</string>
+    <string name="stock_photo_pixabay_key_label">Pixabay API-sleutel</string>
+    <string name="stock_photo_get_key">Gratis sleutel aanvragen →</string>
+    <string name="stock_photo_get_key_hint">Gratis, geen creditcard nodig — de sleutel verschijnt direct na aanmelding.</string>
+    <string name="stock_photo_browse_tooltip">Bekijk stockfoto's/video's</string>
+    <string name="stock_photo_browse_photos_title">Bekijk Stockfoto's</string>
+    <string name="stock_photo_browse_videos_title">Bekijk Stockvideo's</string>
+    <string name="stock_photo_search_placeholder_photo">Zoek naar foto's…</string>
+    <string name="stock_photo_search_placeholder_video">Zoek naar video's…</string>
+    <string name="stock_photo_no_results">Geen resultaten gevonden</string>
+    <string name="stock_photo_key_required_hint">Voeg hierboven je %1$s API-sleutel toe om te zoeken.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Ongeldige API-sleutel</string>
+    <string name="stock_photo_error_rate_limited">Limiet bereikt — probeer het later opnieuw</string>
+    <string name="stock_photo_error_network">Netwerkfout — controleer je verbinding</string>
+    <string name="stock_photo_error_generic">Er is iets misgegaan. Probeer het opnieuw.</string>
+    <string name="stock_photo_download_error_network">Downloaden mislukt — controleer je verbinding</string>
+    <string name="stock_photo_download_error_generic">Downloaden mislukt. Probeer het opnieuw.</string>
+    <string name="stock_photo_load_more">Meer laden</string>
+    <string name="stock_library_tooltip">Bekijk gedownloade bibliotheek</string>
+    <string name="stock_library_title_photos">Afbeeldingenbibliotheek</string>
+    <string name="stock_library_title_videos">Videobibliotheek</string>
+    <string name="stock_library_empty">Nog niets gedownload — gebruik Zoeken om foto's of video's toe te voegen.</string>
+    <string name="stock_library_search_placeholder">Filter op bestandsnaam…</string>
+
     <!-- System Settings -->
     <string name="reset_settings">Alle instellingen resetten</string>
     <string name="reset_settings_confirm">Weet u zeker dat u alle instellingen naar standaard wilt resetten?\n\nDe toepassing wordt opnieuw gestart.</string>

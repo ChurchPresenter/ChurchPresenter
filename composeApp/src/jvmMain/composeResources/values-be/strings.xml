@@ -661,6 +661,33 @@
     <string name="gradient_top_opacity">Празрыстасць верху</string>
     <string name="gradient_bottom_opacity">Празрыстасць нізу</string>
     <string name="gradient_position">Пазіцыя пераходу</string>
+
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">API-ключ Pexels</string>
+    <string name="stock_photo_pixabay_key_label">API-ключ Pixabay</string>
+    <string name="stock_photo_get_key">Атрымаць бясплатны ключ →</string>
+    <string name="stock_photo_get_key_hint">Бясплатна, без банкаўскай карты — ключ з'явіцца адразу пасля рэгістрацыі.</string>
+    <string name="stock_photo_browse_tooltip">Праглядзець фота/відэа з фотабанкаў</string>
+    <string name="stock_photo_browse_photos_title">Прагляд стокавых фота</string>
+    <string name="stock_photo_browse_videos_title">Прагляд стокавых відэа</string>
+    <string name="stock_photo_search_placeholder_photo">Пошук фота…</string>
+    <string name="stock_photo_search_placeholder_video">Пошук відэа…</string>
+    <string name="stock_photo_no_results">Нічога не знойдзена</string>
+    <string name="stock_photo_key_required_hint">Дадайце свой API-ключ %1$s вышэй, каб пачаць пошук.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Няправільны API-ключ</string>
+    <string name="stock_photo_error_rate_limited">Дасягнуты ліміт запытаў — паспрабуйце пазней</string>
+    <string name="stock_photo_error_network">Памылка сеткі — праверце злучэнне</string>
+    <string name="stock_photo_error_generic">Нешта пайшло не так. Паспрабуйце яшчэ раз.</string>
+    <string name="stock_photo_download_error_network">Не ўдалося спампаваць — праверце злучэнне</string>
+    <string name="stock_photo_download_error_generic">Не ўдалося спампаваць. Паспрабуйце яшчэ раз.</string>
+    <string name="stock_photo_load_more">Загрузіць яшчэ</string>
+    <string name="stock_library_tooltip">Праглядзець спампаваную бібліятэку</string>
+    <string name="stock_library_title_photos">Бібліятэка выяў</string>
+    <string name="stock_library_title_videos">Бібліятэка відэа</string>
+    <string name="stock_library_empty">Пакуль нічога не спампавана — скарыстайцеся пошукам, каб дадаць фота ці відэа.</string>
+    <string name="stock_library_search_placeholder">Фільтр па назве файла…</string>
     <string name="gradient_top_color">Верхні колер:</string>
     <string name="key_output">Ключавы выхад</string>
     <string name="key_output_none">Няма</string>

@@ -679,6 +679,33 @@
     <string name="gradient_top_opacity">Непрозрачность сверху</string>
     <string name="gradient_bottom_opacity">Непрозрачность снизу</string>
     <string name="gradient_position">Позиция перехода</string>
+
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">API-ключ Pexels</string>
+    <string name="stock_photo_pixabay_key_label">API-ключ Pixabay</string>
+    <string name="stock_photo_get_key">Получить бесплатный ключ →</string>
+    <string name="stock_photo_get_key_hint">Бесплатно, без банковской карты — ключ появится сразу после регистрации.</string>
+    <string name="stock_photo_browse_tooltip">Просмотреть фотографии/видео из фотобанков</string>
+    <string name="stock_photo_browse_photos_title">Просмотр стоковых фото</string>
+    <string name="stock_photo_browse_videos_title">Просмотр стоковых видео</string>
+    <string name="stock_photo_search_placeholder_photo">Поиск фото…</string>
+    <string name="stock_photo_search_placeholder_video">Поиск видео…</string>
+    <string name="stock_photo_no_results">Ничего не найдено</string>
+    <string name="stock_photo_key_required_hint">Добавьте свой API-ключ %1$s выше, чтобы начать поиск.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Неверный API-ключ</string>
+    <string name="stock_photo_error_rate_limited">Достигнут лимит запросов — попробуйте позже</string>
+    <string name="stock_photo_error_network">Ошибка сети — проверьте подключение</string>
+    <string name="stock_photo_error_generic">Что-то пошло не так. Попробуйте ещё раз.</string>
+    <string name="stock_photo_download_error_network">Не удалось скачать — проверьте подключение</string>
+    <string name="stock_photo_download_error_generic">Не удалось скачать. Попробуйте ещё раз.</string>
+    <string name="stock_photo_load_more">Загрузить ещё</string>
+    <string name="stock_library_tooltip">Просмотреть загруженную библиотеку</string>
+    <string name="stock_library_title_photos">Библиотека изображений</string>
+    <string name="stock_library_title_videos">Библиотека видео</string>
+    <string name="stock_library_empty">Пока ничего не скачано — используйте поиск, чтобы добавить фото или видео.</string>
+    <string name="stock_library_search_placeholder">Фильтр по имени файла…</string>
     <string name="gradient_top_color">Верхний цвет:</string>
     <string name="key_output">Ключевой выход</string>
     <string name="key_output_none">Нет</string>

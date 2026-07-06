@@ -577,6 +577,33 @@
     <string name="gradient_bottom_opacity">Opacitate Jos</string>
     <string name="gradient_position">Poziția Tranziției</string>
 
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">Cheie API Pexels</string>
+    <string name="stock_photo_pixabay_key_label">Cheie API Pixabay</string>
+    <string name="stock_photo_get_key">Obțineți o cheie gratuită →</string>
+    <string name="stock_photo_get_key_hint">Gratuit, fără card de credit — cheia apare imediat după înregistrare.</string>
+    <string name="stock_photo_browse_tooltip">Răsfoiți fotografii/videoclipuri stock</string>
+    <string name="stock_photo_browse_photos_title">Răsfoiți Fotografii Stock</string>
+    <string name="stock_photo_browse_videos_title">Răsfoiți Videoclipuri Stock</string>
+    <string name="stock_photo_search_placeholder_photo">Căutați fotografii…</string>
+    <string name="stock_photo_search_placeholder_video">Căutați videoclipuri…</string>
+    <string name="stock_photo_no_results">Niciun rezultat găsit</string>
+    <string name="stock_photo_key_required_hint">Adăugați cheia API %1$s mai sus pentru a căuta.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Cheie API nevalidă</string>
+    <string name="stock_photo_error_rate_limited">Limita de solicitări a fost atinsă — încercați din nou mai târziu</string>
+    <string name="stock_photo_error_network">Eroare de rețea — verificați conexiunea</string>
+    <string name="stock_photo_error_generic">Ceva nu a mers bine. Încercați din nou.</string>
+    <string name="stock_photo_download_error_network">Descărcarea a eșuat — verificați conexiunea</string>
+    <string name="stock_photo_download_error_generic">Descărcarea a eșuat. Încercați din nou.</string>
+    <string name="stock_photo_load_more">Încărcați mai multe</string>
+    <string name="stock_library_tooltip">Răsfoiți biblioteca descărcată</string>
+    <string name="stock_library_title_photos">Bibliotecă de Imagini</string>
+    <string name="stock_library_title_videos">Bibliotecă de Videoclipuri</string>
+    <string name="stock_library_empty">Nimic descărcat încă — folosiți căutarea pentru a adăuga fotografii sau videoclipuri.</string>
+    <string name="stock_library_search_placeholder">Filtrați după numele fișierului…</string>
+
     <!-- System Settings -->
     <string name="reset_settings">Resetează Toate Setările</string>
     <string name="reset_settings_confirm">Sigur doriți să resetați toate setările la valorile implicite?\n\nAplicația va reporni.</string>

@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,15 +17,26 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_color
@@ -50,14 +64,19 @@ import churchpresenter.composeapp.generated.resources.gradient_position
 import churchpresenter.composeapp.generated.resources.gradient_top_color
 import churchpresenter.composeapp.generated.resources.gradient_top_opacity
 import churchpresenter.composeapp.generated.resources.songs
+import churchpresenter.composeapp.generated.resources.stock_library_tooltip
+import churchpresenter.composeapp.generated.resources.stock_photo_browse_tooltip
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundConfig
+import org.churchpresenter.app.churchpresenter.dialogs.LocalLibraryDialog
+import org.churchpresenter.app.churchpresenter.dialogs.StockMediaBrowserDialog
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.BackgroundSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -68,6 +87,13 @@ fun BackgroundSettingsTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
     val viewModel = remember { BackgroundSettingsViewModel() }
+
+    val onPexelsApiKeyChange: (String) -> Unit = { key ->
+        onSettingsChange { s -> s.copy(stockPhotoSettings = s.stockPhotoSettings.copy(pexelsApiKey = key)) }
+    }
+    val onPixabayApiKeyChange: (String) -> Unit = { key ->
+        onSettingsChange { s -> s.copy(stockPhotoSettings = s.stockPhotoSettings.copy(pixabayApiKey = key)) }
+    }
 
     Box(
         modifier = Modifier
@@ -131,13 +157,17 @@ fun BackgroundSettingsTab(
                         }
                         Constants.BACKGROUND_IMAGE -> {
                             SettingRow(stringResource(Res.string.background_image)) {
-                                FileImagePicker(
+                                ImagePickerRow(
                                     imagePath = settings.backgroundSettings.defaultBackgroundImage,
                                     onImagePathChange = { path ->
                                         onSettingsChange { s ->
                                             s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundImage = path))
                                         }
                                     },
+                                    pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                    onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                    pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                    onPixabayApiKeyChange = onPixabayApiKeyChange,
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
@@ -149,13 +179,17 @@ fun BackgroundSettingsTab(
                         }
                         Constants.BACKGROUND_VIDEO -> {
                             SettingRow(stringResource(Res.string.background_video)) {
-                                FileVideoPicker(
+                                VideoPickerRow(
                                     videoPath = settings.backgroundSettings.defaultBackgroundVideo,
                                     onVideoPathChange = { path ->
                                         onSettingsChange { s ->
                                             s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundVideo = path))
                                         }
                                     },
+                                    pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                    onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                    pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                    onPixabayApiKeyChange = onPixabayApiKeyChange,
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
@@ -219,13 +253,17 @@ fun BackgroundSettingsTab(
                         }
                         Constants.BACKGROUND_IMAGE -> {
                             SettingRow(stringResource(Res.string.background_image)) {
-                                FileImagePicker(
+                                ImagePickerRow(
                                     imagePath = settings.backgroundSettings.defaultLowerThirdBackgroundImage,
                                     onImagePathChange = { path ->
                                         onSettingsChange { s ->
                                             s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundImage = path))
                                         }
                                     },
+                                    pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                    onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                    pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                    onPixabayApiKeyChange = onPixabayApiKeyChange,
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
@@ -237,13 +275,17 @@ fun BackgroundSettingsTab(
                         }
                         Constants.BACKGROUND_VIDEO -> {
                             SettingRow(stringResource(Res.string.background_video)) {
-                                FileVideoPicker(
+                                VideoPickerRow(
                                     videoPath = settings.backgroundSettings.defaultLowerThirdBackgroundVideo,
                                     onVideoPathChange = { path ->
                                         onSettingsChange { s ->
                                             s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundVideo = path))
                                         }
                                     },
+                                    pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                    onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                    pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                    onPixabayApiKeyChange = onPixabayApiKeyChange,
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
@@ -276,7 +318,11 @@ fun BackgroundSettingsTab(
                                 subtitle = stringResource(Res.string.full_screen),
                                 config = settings.backgroundSettings.bibleBackground,
                                 onConfigChange = { viewModel.updateBibleBackground(it, onSettingsChange) },
-                                isLowerThird = false
+                                isLowerThird = false,
+                                pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                onPixabayApiKeyChange = onPixabayApiKeyChange
                             )
                         }
                         Column(modifier = Modifier.weight(1f)) {
@@ -284,7 +330,11 @@ fun BackgroundSettingsTab(
                                 subtitle = stringResource(Res.string.display_lower_third),
                                 config = settings.backgroundSettings.bibleLowerThirdBackground,
                                 onConfigChange = { viewModel.updateBibleLowerThirdBackground(it, onSettingsChange) },
-                                isLowerThird = true
+                                isLowerThird = true,
+                                pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                onPixabayApiKeyChange = onPixabayApiKeyChange
                             )
                         }
                     }
@@ -304,7 +354,11 @@ fun BackgroundSettingsTab(
                                 subtitle = stringResource(Res.string.full_screen),
                                 config = settings.backgroundSettings.songBackground,
                                 onConfigChange = { viewModel.updateSongBackground(it, onSettingsChange) },
-                                isLowerThird = false
+                                isLowerThird = false,
+                                pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                onPixabayApiKeyChange = onPixabayApiKeyChange
                             )
                         }
                         Column(modifier = Modifier.weight(1f)) {
@@ -312,7 +366,11 @@ fun BackgroundSettingsTab(
                                 subtitle = stringResource(Res.string.display_lower_third),
                                 config = settings.backgroundSettings.songLowerThirdBackground,
                                 onConfigChange = { viewModel.updateSongLowerThirdBackground(it, onSettingsChange) },
-                                isLowerThird = true
+                                isLowerThird = true,
+                                pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                onPixabayApiKeyChange = onPixabayApiKeyChange
                             )
                         }
                     }
@@ -328,7 +386,11 @@ private fun BackgroundColumn(
     subtitle: String,
     config: BackgroundConfig,
     onConfigChange: (BackgroundConfig) -> Unit,
-    isLowerThird: Boolean = false
+    isLowerThird: Boolean = false,
+    pexelsApiKey: String = "",
+    onPexelsApiKeyChange: (String) -> Unit = {},
+    pixabayApiKey: String = "",
+    onPixabayApiKeyChange: (String) -> Unit = {}
 ) {
     val backgroundDefaultStr      = stringResource(Res.string.background_default)
     val backgroundColorStr        = stringResource(Res.string.background_color_option)
@@ -383,9 +445,13 @@ private fun BackgroundColumn(
         }
         Constants.BACKGROUND_IMAGE -> {
             SettingRow(stringResource(Res.string.background_image)) {
-                FileImagePicker(
+                ImagePickerRow(
                     imagePath = config.backgroundImage,
                     onImagePathChange = { onConfigChange(config.copy(backgroundImage = it)) },
+                    pexelsApiKey = pexelsApiKey,
+                    onPexelsApiKeyChange = onPexelsApiKeyChange,
+                    pixabayApiKey = pixabayApiKey,
+                    onPixabayApiKeyChange = onPixabayApiKeyChange,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -393,9 +459,13 @@ private fun BackgroundColumn(
         }
         Constants.BACKGROUND_VIDEO -> {
             SettingRow(stringResource(Res.string.background_video)) {
-                FileVideoPicker(
+                VideoPickerRow(
                     videoPath = config.backgroundVideo,
                     onVideoPathChange = { onConfigChange(config.copy(backgroundVideo = it)) },
+                    pexelsApiKey = pexelsApiKey,
+                    onPexelsApiKeyChange = onPexelsApiKeyChange,
+                    pixabayApiKey = pixabayApiKey,
+                    onPixabayApiKeyChange = onPixabayApiKeyChange,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -540,3 +610,122 @@ private fun OpacitySlider(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun TooltipIconButton(
+    icon: ImageVector,
+    tooltip: String,
+    onClick: () -> Unit
+) {
+    TooltipArea(
+        tooltip = {
+            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                Text(
+                    text = tooltip,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        },
+        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+    ) {
+        IconButton(onClick = onClick) {
+            Icon(icon, contentDescription = tooltip)
+        }
+    }
+}
+
+@Composable
+private fun ImagePickerRow(
+    imagePath: String,
+    onImagePathChange: (String) -> Unit,
+    pexelsApiKey: String,
+    onPexelsApiKeyChange: (String) -> Unit,
+    pixabayApiKey: String,
+    onPixabayApiKeyChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showBrowser by remember { mutableStateOf(false) }
+    var showLibrary by remember { mutableStateOf(false) }
+    val browseTooltip = stringResource(Res.string.stock_photo_browse_tooltip)
+    val libraryTooltip = stringResource(Res.string.stock_library_tooltip)
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        FileImagePicker(
+            imagePath = imagePath,
+            onImagePathChange = onImagePathChange,
+            modifier = Modifier.weight(1f)
+        )
+        TooltipIconButton(Icons.Default.PhotoLibrary, libraryTooltip) { showLibrary = true }
+        TooltipIconButton(Icons.Default.Search, browseTooltip) { showBrowser = true }
+    }
+    if (showBrowser) {
+        StockMediaBrowserDialog(
+            mediaType = StockMediaClient.StockMediaType.PHOTO,
+            pexelsApiKey = pexelsApiKey,
+            onPexelsApiKeyChange = onPexelsApiKeyChange,
+            pixabayApiKey = pixabayApiKey,
+            onPixabayApiKeyChange = onPixabayApiKeyChange,
+            onDismiss = { showBrowser = false },
+            onMediaDownloaded = onImagePathChange
+        )
+    }
+    if (showLibrary) {
+        LocalLibraryDialog(
+            mediaType = StockMediaClient.StockMediaType.PHOTO,
+            onDismiss = { showLibrary = false },
+            onMediaSelected = onImagePathChange
+        )
+    }
+}
+
+@Composable
+private fun VideoPickerRow(
+    videoPath: String,
+    onVideoPathChange: (String) -> Unit,
+    pexelsApiKey: String,
+    onPexelsApiKeyChange: (String) -> Unit,
+    pixabayApiKey: String,
+    onPixabayApiKeyChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showBrowser by remember { mutableStateOf(false) }
+    var showLibrary by remember { mutableStateOf(false) }
+    val browseTooltip = stringResource(Res.string.stock_photo_browse_tooltip)
+    val libraryTooltip = stringResource(Res.string.stock_library_tooltip)
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        FileVideoPicker(
+            videoPath = videoPath,
+            onVideoPathChange = onVideoPathChange,
+            modifier = Modifier.weight(1f)
+        )
+        TooltipIconButton(Icons.Default.PhotoLibrary, libraryTooltip) { showLibrary = true }
+        TooltipIconButton(Icons.Default.Search, browseTooltip) { showBrowser = true }
+    }
+    if (showBrowser) {
+        StockMediaBrowserDialog(
+            mediaType = StockMediaClient.StockMediaType.VIDEO,
+            pexelsApiKey = pexelsApiKey,
+            onPexelsApiKeyChange = onPexelsApiKeyChange,
+            pixabayApiKey = pixabayApiKey,
+            onPixabayApiKeyChange = onPixabayApiKeyChange,
+            onDismiss = { showBrowser = false },
+            onMediaDownloaded = onVideoPathChange
+        )
+    }
+    if (showLibrary) {
+        LocalLibraryDialog(
+            mediaType = StockMediaClient.StockMediaType.VIDEO,
+            onDismiss = { showLibrary = false },
+            onMediaSelected = onVideoPathChange
+        )
+    }
+}

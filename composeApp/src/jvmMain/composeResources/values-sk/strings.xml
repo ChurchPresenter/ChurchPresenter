@@ -560,6 +560,33 @@
     <string name="gradient_bottom_opacity">Nepriehľadnosť dole</string>
     <string name="gradient_position">Pozícia prechodu</string>
 
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">API kľúč Pexels</string>
+    <string name="stock_photo_pixabay_key_label">API kľúč Pixabay</string>
+    <string name="stock_photo_get_key">Získať bezplatný kľúč →</string>
+    <string name="stock_photo_get_key_hint">Zadarmo, bez kreditnej karty — kľúč sa zobrazí hneď po registrácii.</string>
+    <string name="stock_photo_browse_tooltip">Prehľadávať stock fotky/videá</string>
+    <string name="stock_photo_browse_photos_title">Prehľadávať stock fotky</string>
+    <string name="stock_photo_browse_videos_title">Prehľadávať stock videá</string>
+    <string name="stock_photo_search_placeholder_photo">Hľadať fotky…</string>
+    <string name="stock_photo_search_placeholder_video">Hľadať videá…</string>
+    <string name="stock_photo_no_results">Nenašli sa žiadne výsledky</string>
+    <string name="stock_photo_key_required_hint">Ak chcete vyhľadávať, pridajte vyššie svoj API kľúč %1$s.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Neplatný API kľúč</string>
+    <string name="stock_photo_error_rate_limited">Dosiahnutý limit požiadaviek — skúste to neskôr</string>
+    <string name="stock_photo_error_network">Chyba siete — skontrolujte pripojenie</string>
+    <string name="stock_photo_error_generic">Niečo sa pokazilo. Skúste to znova.</string>
+    <string name="stock_photo_download_error_network">Sťahovanie zlyhalo — skontrolujte pripojenie</string>
+    <string name="stock_photo_download_error_generic">Sťahovanie zlyhalo. Skúste to znova.</string>
+    <string name="stock_photo_load_more">Načítať ďalšie</string>
+    <string name="stock_library_tooltip">Prehľadávať stiahnutú knižnicu</string>
+    <string name="stock_library_title_photos">Knižnica obrázkov</string>
+    <string name="stock_library_title_videos">Knižnica videí</string>
+    <string name="stock_library_empty">Zatiaľ nič nie je stiahnuté — použite vyhľadávanie na pridanie fotiek alebo videí.</string>
+    <string name="stock_library_search_placeholder">Filtrovať podľa názvu súboru…</string>
+
     <!-- System Settings -->
     <string name="reset_settings">Obnoviť všetky nastavenia</string>
     <string name="reset_settings_confirm">Naozaj chcete obnoviť všetky nastavenia na predvolené?\n\nAplikácia sa reštartuje.</string>

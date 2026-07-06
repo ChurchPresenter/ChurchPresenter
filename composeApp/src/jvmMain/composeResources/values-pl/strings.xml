@@ -660,6 +660,33 @@
     <string name="gradient_top_opacity">Przezroczystość góry</string>
     <string name="gradient_bottom_opacity">Przezroczystość dołu</string>
     <string name="gradient_position">Pozycja przejścia</string>
+
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">Klucz API Pexels</string>
+    <string name="stock_photo_pixabay_key_label">Klucz API Pixabay</string>
+    <string name="stock_photo_get_key">Pobierz darmowy klucz →</string>
+    <string name="stock_photo_get_key_hint">Za darmo, bez karty kredytowej — klucz pojawia się od razu po rejestracji.</string>
+    <string name="stock_photo_browse_tooltip">Przeglądaj zdjęcia/wideo stockowe</string>
+    <string name="stock_photo_browse_photos_title">Przeglądaj zdjęcia stockowe</string>
+    <string name="stock_photo_browse_videos_title">Przeglądaj wideo stockowe</string>
+    <string name="stock_photo_search_placeholder_photo">Szukaj zdjęć…</string>
+    <string name="stock_photo_search_placeholder_video">Szukaj wideo…</string>
+    <string name="stock_photo_no_results">Nie znaleziono wyników</string>
+    <string name="stock_photo_key_required_hint">Dodaj powyżej swój klucz API %1$s, aby wyszukiwać.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Nieprawidłowy klucz API</string>
+    <string name="stock_photo_error_rate_limited">Osiągnięto limit zapytań — spróbuj ponownie później</string>
+    <string name="stock_photo_error_network">Błąd sieci — sprawdź połączenie</string>
+    <string name="stock_photo_error_generic">Coś poszło nie tak. Spróbuj ponownie.</string>
+    <string name="stock_photo_download_error_network">Pobieranie nie powiodło się — sprawdź połączenie</string>
+    <string name="stock_photo_download_error_generic">Pobieranie nie powiodło się. Spróbuj ponownie.</string>
+    <string name="stock_photo_load_more">Wczytaj więcej</string>
+    <string name="stock_library_tooltip">Przeglądaj pobraną bibliotekę</string>
+    <string name="stock_library_title_photos">Biblioteka obrazów</string>
+    <string name="stock_library_title_videos">Biblioteka wideo</string>
+    <string name="stock_library_empty">Nic jeszcze nie pobrano — użyj wyszukiwania, aby dodać zdjęcia lub wideo.</string>
+    <string name="stock_library_search_placeholder">Filtruj według nazwy pliku…</string>
     <string name="gradient_top_color">Kolor górny:</string>
     <string name="key_output">Wyjście klucza</string>
     <string name="key_output_none">Brak</string>

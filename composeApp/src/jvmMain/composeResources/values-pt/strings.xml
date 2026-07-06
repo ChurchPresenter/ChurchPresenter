@@ -560,6 +560,33 @@
     <string name="gradient_bottom_opacity">Opacidade Inferior</string>
     <string name="gradient_position">Posição de Transição</string>
 
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">Chave de API do Pexels</string>
+    <string name="stock_photo_pixabay_key_label">Chave de API do Pixabay</string>
+    <string name="stock_photo_get_key">Obter uma chave gratuita →</string>
+    <string name="stock_photo_get_key_hint">Grátis, sem cartão de crédito — a chave aparece imediatamente após o cadastro.</string>
+    <string name="stock_photo_browse_tooltip">Explorar fotos/vídeos de banco de imagens</string>
+    <string name="stock_photo_browse_photos_title">Explorar Fotos de Banco de Imagens</string>
+    <string name="stock_photo_browse_videos_title">Explorar Vídeos de Banco de Imagens</string>
+    <string name="stock_photo_search_placeholder_photo">Buscar fotos…</string>
+    <string name="stock_photo_search_placeholder_video">Buscar vídeos…</string>
+    <string name="stock_photo_no_results">Nenhum resultado encontrado</string>
+    <string name="stock_photo_key_required_hint">Adicione sua chave de API do %1$s acima para pesquisar.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Chave de API inválida</string>
+    <string name="stock_photo_error_rate_limited">Limite de solicitações atingido — tente novamente mais tarde</string>
+    <string name="stock_photo_error_network">Erro de rede — verifique sua conexão</string>
+    <string name="stock_photo_error_generic">Algo deu errado. Tente novamente.</string>
+    <string name="stock_photo_download_error_network">Falha no download — verifique sua conexão</string>
+    <string name="stock_photo_download_error_generic">Falha no download. Tente novamente.</string>
+    <string name="stock_photo_load_more">Carregar mais</string>
+    <string name="stock_library_tooltip">Explorar biblioteca baixada</string>
+    <string name="stock_library_title_photos">Biblioteca de Imagens</string>
+    <string name="stock_library_title_videos">Biblioteca de Vídeos</string>
+    <string name="stock_library_empty">Nada baixado ainda — use a Busca para adicionar fotos ou vídeos.</string>
+    <string name="stock_library_search_placeholder">Filtrar por nome do arquivo…</string>
+
     <!-- System Settings -->
     <string name="reset_settings">Redefinir Todas as Configurações</string>
     <string name="reset_settings_confirm">Tem certeza de que deseja redefinir todas as configurações para os padrões?\n\nO aplicativo será reiniciado.</string>

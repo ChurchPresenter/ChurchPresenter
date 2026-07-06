@@ -614,6 +614,33 @@
     <string name="gradient_bottom_opacity">Bottom Opacity</string>
     <string name="gradient_position">Transition Position</string>
 
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">Pexels API Key</string>
+    <string name="stock_photo_pixabay_key_label">Pixabay API Key</string>
+    <string name="stock_photo_get_key">Get a free key →</string>
+    <string name="stock_photo_get_key_hint">Free, no credit card — the key appears immediately after you sign up.</string>
+    <string name="stock_photo_browse_tooltip">Browse stock photos/videos</string>
+    <string name="stock_photo_browse_photos_title">Browse Stock Photos</string>
+    <string name="stock_photo_browse_videos_title">Browse Stock Videos</string>
+    <string name="stock_photo_search_placeholder_photo">Search for photos…</string>
+    <string name="stock_photo_search_placeholder_video">Search for videos…</string>
+    <string name="stock_photo_no_results">No results found</string>
+    <string name="stock_photo_key_required_hint">Add your %1$s API key above to search.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Invalid API key</string>
+    <string name="stock_photo_error_rate_limited">Rate limit reached — try again later</string>
+    <string name="stock_photo_error_network">Network error — check your connection</string>
+    <string name="stock_photo_error_generic">Something went wrong. Please try again.</string>
+    <string name="stock_photo_download_error_network">Download failed — check your connection</string>
+    <string name="stock_photo_download_error_generic">Download failed. Please try again.</string>
+    <string name="stock_photo_load_more">Load more</string>
+    <string name="stock_library_tooltip">Browse downloaded library</string>
+    <string name="stock_library_title_photos">Image Library</string>
+    <string name="stock_library_title_videos">Video Library</string>
+    <string name="stock_library_empty">Nothing downloaded yet — use Search to add photos or videos.</string>
+    <string name="stock_library_search_placeholder">Filter by file name…</string>
+
     <!-- System Settings -->
     <string name="reset_settings">Reset All Settings</string>
     <string name="reset_settings_confirm">Are you sure you want to reset all settings to defaults?\n\nThe application will restart.</string>

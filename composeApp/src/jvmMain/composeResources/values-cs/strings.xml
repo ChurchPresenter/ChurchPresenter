@@ -690,6 +690,33 @@
     <string name="gradient_top_opacity">Neprůhlednost nahoře</string>
     <string name="gradient_bottom_opacity">Neprůhlednost dole</string>
     <string name="gradient_position">Pozice přechodu</string>
+
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">API klíč Pexels</string>
+    <string name="stock_photo_pixabay_key_label">API klíč Pixabay</string>
+    <string name="stock_photo_get_key">Získat bezplatný klíč →</string>
+    <string name="stock_photo_get_key_hint">Zdarma, bez kreditní karty — klíč se zobrazí ihned po registraci.</string>
+    <string name="stock_photo_browse_tooltip">Procházet stock fotky/videa</string>
+    <string name="stock_photo_browse_photos_title">Procházet stock fotky</string>
+    <string name="stock_photo_browse_videos_title">Procházet stock videa</string>
+    <string name="stock_photo_search_placeholder_photo">Hledat fotky…</string>
+    <string name="stock_photo_search_placeholder_video">Hledat videa…</string>
+    <string name="stock_photo_no_results">Nebyly nalezeny žádné výsledky</string>
+    <string name="stock_photo_key_required_hint">Chcete-li vyhledávat, přidejte výše svůj API klíč %1$s.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Neplatný API klíč</string>
+    <string name="stock_photo_error_rate_limited">Byl dosažen limit požadavků — zkuste to později</string>
+    <string name="stock_photo_error_network">Chyba sítě — zkontrolujte připojení</string>
+    <string name="stock_photo_error_generic">Něco se pokazilo. Zkuste to prosím znovu.</string>
+    <string name="stock_photo_download_error_network">Stahování se nezdařilo — zkontrolujte připojení</string>
+    <string name="stock_photo_download_error_generic">Stahování se nezdařilo. Zkuste to prosím znovu.</string>
+    <string name="stock_photo_load_more">Načíst další</string>
+    <string name="stock_library_tooltip">Procházet staženou knihovnu</string>
+    <string name="stock_library_title_photos">Knihovna obrázků</string>
+    <string name="stock_library_title_videos">Knihovna videí</string>
+    <string name="stock_library_empty">Zatím nic není staženo — pomocí vyhledávání přidejte fotky nebo videa.</string>
+    <string name="stock_library_search_placeholder">Filtrovat podle názvu souboru…</string>
     <string name="gradient_top_color">Horní barva:</string>
     <string name="key_output">Klíčový výstup</string>
     <string name="key_output_none">Žádný</string>

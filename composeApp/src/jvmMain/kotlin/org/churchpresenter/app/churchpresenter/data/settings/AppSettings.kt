@@ -9,6 +9,7 @@ data class AppSettings(
     val bibleSettings: BibleSettings = BibleSettings(),
     val dictionarySettings: DictionarySettings = DictionarySettings(),
     val backgroundSettings: BackgroundSettings = BackgroundSettings(),
+    val stockPhotoSettings: StockPhotoSettings = StockPhotoSettings(),
     val projectionSettings: ProjectionSettings = ProjectionSettings(),
     val pictureSettings: PictureSettings = PictureSettings(),
     val presentationSettings: PresentationSettings = PresentationSettings(),

@@ -661,6 +661,33 @@
     <string name="gradient_top_opacity">Transparenz oben</string>
     <string name="gradient_bottom_opacity">Transparenz unten</string>
     <string name="gradient_position">Übergangsposition</string>
+
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">Pexels-API-Schlüssel</string>
+    <string name="stock_photo_pixabay_key_label">Pixabay-API-Schlüssel</string>
+    <string name="stock_photo_get_key">Kostenlosen Schlüssel holen →</string>
+    <string name="stock_photo_get_key_hint">Kostenlos, keine Kreditkarte erforderlich — der Schlüssel erscheint sofort nach der Anmeldung.</string>
+    <string name="stock_photo_browse_tooltip">Stockfotos/-videos durchsuchen</string>
+    <string name="stock_photo_browse_photos_title">Stockfotos durchsuchen</string>
+    <string name="stock_photo_browse_videos_title">Stockvideos durchsuchen</string>
+    <string name="stock_photo_search_placeholder_photo">Nach Fotos suchen…</string>
+    <string name="stock_photo_search_placeholder_video">Nach Videos suchen…</string>
+    <string name="stock_photo_no_results">Keine Ergebnisse gefunden</string>
+    <string name="stock_photo_key_required_hint">Fügen Sie oben Ihren %1$s-API-Schlüssel hinzu, um zu suchen.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Ungültiger API-Schlüssel</string>
+    <string name="stock_photo_error_rate_limited">Ratenlimit erreicht — versuchen Sie es später erneut</string>
+    <string name="stock_photo_error_network">Netzwerkfehler — überprüfen Sie Ihre Verbindung</string>
+    <string name="stock_photo_error_generic">Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.</string>
+    <string name="stock_photo_download_error_network">Download fehlgeschlagen — überprüfen Sie Ihre Verbindung</string>
+    <string name="stock_photo_download_error_generic">Download fehlgeschlagen. Bitte versuchen Sie es erneut.</string>
+    <string name="stock_photo_load_more">Mehr laden</string>
+    <string name="stock_library_tooltip">Heruntergeladene Bibliothek durchsuchen</string>
+    <string name="stock_library_title_photos">Bildbibliothek</string>
+    <string name="stock_library_title_videos">Videobibliothek</string>
+    <string name="stock_library_empty">Noch nichts heruntergeladen — verwenden Sie die Suche, um Fotos oder Videos hinzuzufügen.</string>
+    <string name="stock_library_search_placeholder">Nach Dateiname filtern…</string>
     <string name="gradient_top_color">Obere Farbe:</string>
     <string name="key_output">Key-Ausgabe</string>
     <string name="key_output_none">Keine</string>

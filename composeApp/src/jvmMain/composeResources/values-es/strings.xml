@@ -560,6 +560,33 @@
     <string name="gradient_bottom_opacity">Opacidad inferior</string>
     <string name="gradient_position">Posición de transición</string>
 
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">Clave de API de Pexels</string>
+    <string name="stock_photo_pixabay_key_label">Clave de API de Pixabay</string>
+    <string name="stock_photo_get_key">Obtener una clave gratis →</string>
+    <string name="stock_photo_get_key_hint">Gratis, sin tarjeta de crédito — la clave aparece inmediatamente después de registrarte.</string>
+    <string name="stock_photo_browse_tooltip">Explorar fotos/videos de stock</string>
+    <string name="stock_photo_browse_photos_title">Explorar Fotos de Stock</string>
+    <string name="stock_photo_browse_videos_title">Explorar Videos de Stock</string>
+    <string name="stock_photo_search_placeholder_photo">Buscar fotos…</string>
+    <string name="stock_photo_search_placeholder_video">Buscar videos…</string>
+    <string name="stock_photo_no_results">No se encontraron resultados</string>
+    <string name="stock_photo_key_required_hint">Agrega tu clave de API de %1$s arriba para buscar.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Clave de API no válida</string>
+    <string name="stock_photo_error_rate_limited">Límite de solicitudes alcanzado — inténtalo de nuevo más tarde</string>
+    <string name="stock_photo_error_network">Error de red — verifica tu conexión</string>
+    <string name="stock_photo_error_generic">Algo salió mal. Inténtalo de nuevo.</string>
+    <string name="stock_photo_download_error_network">Error al descargar — verifica tu conexión</string>
+    <string name="stock_photo_download_error_generic">Error al descargar. Inténtalo de nuevo.</string>
+    <string name="stock_photo_load_more">Cargar más</string>
+    <string name="stock_library_tooltip">Explorar biblioteca descargada</string>
+    <string name="stock_library_title_photos">Biblioteca de Imágenes</string>
+    <string name="stock_library_title_videos">Biblioteca de Videos</string>
+    <string name="stock_library_empty">Aún no hay nada descargado — usa la búsqueda para agregar fotos o videos.</string>
+    <string name="stock_library_search_placeholder">Filtrar por nombre de archivo…</string>
+
     <!-- System Settings -->
     <string name="reset_settings">Restablecer toda la configuración</string>
     <string name="reset_settings_confirm">¿Está seguro de que desea restablecer toda la configuración a los valores predeterminados?\n\nLa aplicación se reiniciará.</string>

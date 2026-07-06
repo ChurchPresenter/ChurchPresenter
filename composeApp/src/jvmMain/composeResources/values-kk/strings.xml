@@ -661,6 +661,33 @@
     <string name="gradient_top_opacity">Жоғарғы мөлдірлік</string>
     <string name="gradient_bottom_opacity">Төменгі мөлдірлік</string>
     <string name="gradient_position">Өту орны</string>
+
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">Pexels API кілті</string>
+    <string name="stock_photo_pixabay_key_label">Pixabay API кілті</string>
+    <string name="stock_photo_get_key">Тегін кілт алу →</string>
+    <string name="stock_photo_get_key_hint">Тегін, несие картасы қажет емес — тіркелгеннен кейін кілт бірден пайда болады.</string>
+    <string name="stock_photo_browse_tooltip">Стоктық фото/бейнелерді шолу</string>
+    <string name="stock_photo_browse_photos_title">Стоктық фотоларды шолу</string>
+    <string name="stock_photo_browse_videos_title">Стоктық бейнелерді шолу</string>
+    <string name="stock_photo_search_placeholder_photo">Фото іздеу…</string>
+    <string name="stock_photo_search_placeholder_video">Бейне іздеу…</string>
+    <string name="stock_photo_no_results">Нәтиже табылмады</string>
+    <string name="stock_photo_key_required_hint">Іздеу үшін жоғарыда %1$s API кілтіңізді қосыңыз.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Жарамсыз API кілті</string>
+    <string name="stock_photo_error_rate_limited">Сұрау шегіне жетті — кейінірек қайталап көріңіз</string>
+    <string name="stock_photo_error_network">Желі қатесі — байланысты тексеріңіз</string>
+    <string name="stock_photo_error_generic">Бірдеңе дұрыс болмады. Қайталап көріңіз.</string>
+    <string name="stock_photo_download_error_network">Жүктеу сәтсіз аяқталды — байланысты тексеріңіз</string>
+    <string name="stock_photo_download_error_generic">Жүктеу сәтсіз аяқталды. Қайталап көріңіз.</string>
+    <string name="stock_photo_load_more">Көбірек жүктеу</string>
+    <string name="stock_library_tooltip">Жүктелген кітапхананы шолу</string>
+    <string name="stock_library_title_photos">Сурет кітапханасы</string>
+    <string name="stock_library_title_videos">Бейне кітапханасы</string>
+    <string name="stock_library_empty">Әлі ештеңе жүктелмеген — фото немесе бейне қосу үшін іздеуді пайдаланыңыз.</string>
+    <string name="stock_library_search_placeholder">Файл атауы бойынша сүзу…</string>
     <string name="gradient_top_color">Жоғарғы түс:</string>
     <string name="key_output">Key шығыс</string>
     <string name="key_output_none">Жоқ</string>

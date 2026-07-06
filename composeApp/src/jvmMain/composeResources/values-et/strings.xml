@@ -605,6 +605,33 @@
     <string name="gradient_bottom_opacity">Alaosa läbipaistmatus</string>
     <string name="gradient_position">Ülemineku asukoht</string>
 
+    <!-- Stock Photo/Video Search -->
+    <string name="stock_photo_pexels_key_label">Pexelsi API-võti</string>
+    <string name="stock_photo_pixabay_key_label">Pixabay API-võti</string>
+    <string name="stock_photo_get_key">Hangi tasuta võti →</string>
+    <string name="stock_photo_get_key_hint">Tasuta, ilma krediitkaardita — võti ilmub kohe pärast registreerumist.</string>
+    <string name="stock_photo_browse_tooltip">Sirvi varufotosid/-videoid</string>
+    <string name="stock_photo_browse_photos_title">Sirvi Varufotosid</string>
+    <string name="stock_photo_browse_videos_title">Sirvi Varuvideoid</string>
+    <string name="stock_photo_search_placeholder_photo">Otsi fotosid…</string>
+    <string name="stock_photo_search_placeholder_video">Otsi videoid…</string>
+    <string name="stock_photo_no_results">Tulemusi ei leitud</string>
+    <string name="stock_photo_key_required_hint">Otsimiseks lisa ülal oma %1$s API-võti.</string>
+    <string name="stock_photo_source_pexels">Pexels</string>
+    <string name="stock_photo_source_pixabay">Pixabay</string>
+    <string name="stock_photo_error_invalid_key">Vale API-võti</string>
+    <string name="stock_photo_error_rate_limited">Päringute limiit täis — proovi hiljem uuesti</string>
+    <string name="stock_photo_error_network">Võrgu viga — kontrolli oma ühendust</string>
+    <string name="stock_photo_error_generic">Midagi läks valesti. Palun proovi uuesti.</string>
+    <string name="stock_photo_download_error_network">Allalaadimine ebaõnnestus — kontrolli oma ühendust</string>
+    <string name="stock_photo_download_error_generic">Allalaadimine ebaõnnestus. Palun proovi uuesti.</string>
+    <string name="stock_photo_load_more">Laadi rohkem</string>
+    <string name="stock_library_tooltip">Sirvi allalaaditud kogu</string>
+    <string name="stock_library_title_photos">Pildikogu</string>
+    <string name="stock_library_title_videos">Videokogu</string>
+    <string name="stock_library_empty">Veel pole midagi alla laaditud — kasuta otsingut fotode või videote lisamiseks.</string>
+    <string name="stock_library_search_placeholder">Filtreeri failinime järgi…</string>
+
     <!-- System Settings -->
     <string name="reset_settings">Lähtesta kõik seaded</string>
     <string name="reset_settings_confirm">Kas oled kindel, et soovid lähtestada kõik seaded vaikeväärtustele?\n\nRakendus taaskäivitub.</string>
