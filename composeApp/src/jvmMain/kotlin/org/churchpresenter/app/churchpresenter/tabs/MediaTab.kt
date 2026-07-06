@@ -73,7 +73,6 @@ import churchpresenter.composeapp.generated.resources.ic_fast_rewind
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_star
 import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.ic_stop
@@ -104,9 +103,10 @@ import churchpresenter.composeapp.generated.resources.recent
 import churchpresenter.composeapp.generated.resources.stop
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
+import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SharedVideoOutputDisplay
@@ -532,44 +532,18 @@ fun MediaTab(
             // Action buttons
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (onAddToSchedule != null) {
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = { onAddToSchedule(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType) },
-                            enabled = viewModel.isLoaded,
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary,
-                                disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            ),
-                            modifier = Modifier.size(34.dp)
-                        ) {
-                            Icon(painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(16.dp))
-                        }
-                    }
+                    AddToScheduleButton(
+                        onClick = { onAddToSchedule(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType) },
+                        enabled = viewModel.isLoaded,
+                        tooltipText = stringResource(Res.string.add_to_schedule)
+                    )
                 }
                 if (presenterManager != null) {
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = { presenterManager.setPresentingMode(Presenting.MEDIA); presenterManager.setShowPresenterWindow(true); viewModel.play() },
-                            enabled = viewModel.isLoaded,
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            ),
-                            modifier = Modifier.size(34.dp)
-                        ) {
-                            Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(15.dp))
-                        }
-                    }
+                    GoLiveButton(
+                        onClick = { presenterManager.setPresentingMode(Presenting.MEDIA); presenterManager.setShowPresenterWindow(true); viewModel.play() },
+                        enabled = viewModel.isLoaded,
+                        tooltipText = stringResource(Res.string.go_live)
+                    )
                 }
             }
         }

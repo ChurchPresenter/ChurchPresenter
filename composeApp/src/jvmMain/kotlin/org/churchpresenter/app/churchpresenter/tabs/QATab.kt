@@ -181,6 +181,7 @@ import churchpresenter.composeapp.generated.resources.qa_approved
 import churchpresenter.composeapp.generated.resources.qa_denied
 import churchpresenter.composeapp.generated.resources.qa_done
 import churchpresenter.composeapp.generated.resources.qa_incoming_approved
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
@@ -1343,9 +1344,7 @@ private fun QuestionRow(
                         }
                         QuestionStatus.APPROVED -> {
                             if (!isDisplayed) {
-                                QAIconButton(tooltip = strGoLive, onClick = onDisplay) {
-                                    Icon(Icons.Default.Tv, strGoLive, tint = MaterialTheme.colorScheme.secondary)
-                                }
+                                GoLiveButton(onClick = onDisplay, tooltipText = strGoLive)
                             }
                             QAIconButton(tooltip = if (isDisplayed) strDoneClear else strMarkDone, onClick = onMarkDone) {
                                 Icon(
@@ -1364,16 +1363,12 @@ private fun QuestionRow(
                             }
                             if (confirmGoLive) {
                                 Text(stringResource(Res.string.qa_confirm_go_live_prompt), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(end = 4.dp))
-                                QAIconButton(tooltip = strConfirmGoLive, onClick = { confirmGoLive = false; onApprove(); onDisplay() }) {
-                                    Icon(Icons.Default.Tv, strConfirmGoLive, tint = MaterialTheme.colorScheme.secondary)
-                                }
+                                GoLiveButton(onClick = { confirmGoLive = false; onApprove(); onDisplay() }, tooltipText = strConfirmGoLive)
                                 QAIconButton(tooltip = strCancel, onClick = { confirmGoLive = false }) {
                                     Icon(Icons.Default.Close, strCancel, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             } else {
-                                QAIconButton(tooltip = strGoLive, onClick = { confirmGoLive = true }) {
-                                    Icon(Icons.Default.Tv, strGoLive, tint = MaterialTheme.colorScheme.secondary)
-                                }
+                                GoLiveButton(onClick = { confirmGoLive = true }, tooltipText = strGoLive)
                             }
                         }
                         QuestionStatus.DENIED -> {
@@ -1382,16 +1377,12 @@ private fun QuestionRow(
                             }
                             if (confirmGoLive) {
                                 Text(stringResource(Res.string.qa_confirm_go_live_prompt), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary, modifier = Modifier.padding(end = 4.dp))
-                                QAIconButton(tooltip = strConfirmGoLive, onClick = { confirmGoLive = false; onApprove(); onDisplay() }) {
-                                    Icon(Icons.Default.Tv, strConfirmGoLive, tint = MaterialTheme.colorScheme.secondary)
-                                }
+                                GoLiveButton(onClick = { confirmGoLive = false; onApprove(); onDisplay() }, tooltipText = strConfirmGoLive)
                                 QAIconButton(tooltip = strCancel, onClick = { confirmGoLive = false }) {
                                     Icon(Icons.Default.Close, strCancel, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             } else {
-                                QAIconButton(tooltip = strGoLive, onClick = { confirmGoLive = true }) {
-                                    Icon(Icons.Default.Tv, strGoLive, tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
-                                }
+                                GoLiveButton(onClick = { confirmGoLive = true }, tooltipText = strGoLive, dimmed = true)
                             }
                         }
                     }

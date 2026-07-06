@@ -18,6 +18,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
+import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -75,11 +77,9 @@ import androidx.compose.material.icons.filled.Warning
 import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ic_edit
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.canvas_create_scene
 import churchpresenter.composeapp.generated.resources.canvas_new_scene
@@ -807,52 +807,24 @@ fun CanvasTab(
 
                     // Action buttons (right)
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Add to Schedule
-                        TooltipArea(
-                            tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
-                            },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                        ) {
-                            IconButton(
-                                onClick = { onAddToSchedule(currentScene.id, currentScene.name) },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondary,
-                                    contentColor = MaterialTheme.colorScheme.onSecondary
-                                )
-                            ) {
-                                Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
-                            }
-                        }
+                        AddToScheduleButton(
+                            onClick = { onAddToSchedule(currentScene.id, currentScene.name) },
+                            tooltipText = stringResource(Res.string.add_to_schedule)
+                        )
 
                         // Go Live
-                        TooltipArea(
-                            tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
+                        GoLiveButton(
+                            onClick = {
+                                presenterManager.setActiveScene(currentScene)
+                                presenterManager.setPresentingMode(Presenting.CANVAS)
+                                presenterManager.setShowPresenterWindow(true)
                             },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    presenterManager.setActiveScene(currentScene)
-                                    presenterManager.setPresentingMode(Presenting.CANVAS)
-                                    presenterManager.setShowPresenterWindow(true)
-                                },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                )
-                            ) {
-                                Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
-                            }
-                        }
+                            tooltipText = stringResource(Res.string.go_live)
+                        )
                     }
                 }
 

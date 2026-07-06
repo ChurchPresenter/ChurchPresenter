@@ -40,7 +40,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
@@ -103,15 +102,15 @@ import churchpresenter.composeapp.generated.resources.dictionary_search_hint
 import churchpresenter.composeapp.generated.resources.dictionary_select_entry
 import churchpresenter.composeapp.generated.resources.dictionary_transliteration
 import churchpresenter.composeapp.generated.resources.go_live
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.verse
 import java.awt.Cursor
+import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
+import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -490,44 +489,24 @@ private fun DictionaryDetailPane(
             horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
             // Back / Forward history buttons
-            TooltipArea(
-                tooltip = {
-                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                        Text(backStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                    }
-                },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
-            ) {
-                IconButton(onClick = onGoBack, enabled = canGoBack) {
-                    Icon(
-                        painterResource(Res.drawable.ic_undo),
-                        contentDescription = backStr,
-                        modifier = Modifier.size(20.dp),
-                        tint = if (canGoBack) MaterialTheme.colorScheme.onSurface
-                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    )
-                }
-            }
-            TooltipArea(
-                tooltip = {
-                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                        Text(forwardStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                    }
-                },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
-            ) {
-                IconButton(onClick = onGoForward, enabled = canGoForward) {
-                    Icon(
-                        painterResource(Res.drawable.ic_redo),
-                        contentDescription = forwardStr,
-                        modifier = Modifier.size(20.dp),
-                        tint = if (canGoForward) MaterialTheme.colorScheme.onSurface
-                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    )
-                }
-            }
+            ActionIconButton(
+                onClick = onGoBack,
+                enabled = canGoBack,
+                tooltipText = backStr,
+                painter = painterResource(Res.drawable.ic_undo),
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            ActionIconButton(
+                onClick = onGoForward,
+                enabled = canGoForward,
+                tooltipText = forwardStr,
+                painter = painterResource(Res.drawable.ic_redo),
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             TooltipArea(
                 tooltip = {
                     Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
@@ -557,46 +536,18 @@ private fun DictionaryDetailPane(
                 }
             }
             if (onAddToSchedule != null) {
-                TooltipArea(
-                    tooltip = {
-                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                            Text(addScheduleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                        }
-                    },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
-                ) {
-                    IconButton(
-                        onClick = { entry?.let { onAddToSchedule(it) } },
-                        enabled = entry != null,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary,
-                        ),
-                    ) {
-                        Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
-                    }
-                }
+                AddToScheduleButton(
+                    onClick = { entry?.let { onAddToSchedule(it) } },
+                    enabled = entry != null,
+                    tooltipText = addScheduleStr
+                )
             }
             if (onGoLive != null) {
-                TooltipArea(
-                    tooltip = {
-                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                            Text(goLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                        }
-                    },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
-                ) {
-                    IconButton(
-                        onClick = { entry?.let { onGoLive(it) } },
-                        enabled = entry != null,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                        ),
-                    ) {
-                        Icon(Icons.Default.Tv, contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
-                    }
-                }
+                GoLiveButton(
+                    onClick = { entry?.let { onGoLive(it) } },
+                    enabled = entry != null,
+                    tooltipText = goLiveStr
+                )
             }
             } // end right-side Row
         }

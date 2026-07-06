@@ -37,20 +37,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -118,6 +111,8 @@ import churchpresenter.composeapp.generated.resources.stt_translation_in_progres
 import churchpresenter.composeapp.generated.resources.stt_translation_label
 import churchpresenter.composeapp.generated.resources.stt_waiting_for_transcription
 import churchpresenter.composeapp.generated.resources.stt_word_highlighting
+import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
@@ -187,7 +182,7 @@ fun STTTab(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 StyledTextField(
                     value = urlInput,
@@ -221,71 +216,37 @@ fun STTTab(
                 )
 
                 if (connected) {
-                    @OptIn(ExperimentalMaterial3Api::class)
-                    TooltipBox(
-                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                        tooltip = { PlainTooltip { Text(stringResource(Res.string.stt_disconnect)) } },
-                        state = rememberTooltipState()
-                    ) {
-                        IconButton(
-                            onClick = { sttManager.disconnect() },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = Color(0xFFE53935),
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Icon(Icons.Default.Stop, contentDescription = stringResource(Res.string.stt_disconnect), modifier = Modifier.size(20.dp))
-                        }
-                    }
+                    ActionIconButton(
+                        onClick = { sttManager.disconnect() },
+                        tooltipText = stringResource(Res.string.stt_disconnect),
+                        icon = Icons.Default.Stop,
+                        containerColor = Color(0xFFE53935),
+                        contentColor = Color.White
+                    )
                 } else {
-                    @OptIn(ExperimentalMaterial3Api::class)
-                    TooltipBox(
-                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                        tooltip = { PlainTooltip { Text(stringResource(Res.string.stt_connect)) } },
-                        state = rememberTooltipState()
-                    ) {
-                        IconButton(
-                            onClick = {
-                                val url = if (urlInput.isNotBlank() && !urlInput.startsWith("http://") && !urlInput.startsWith("https://")) "http://$urlInput" else urlInput
-                                urlInput = url
-                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(serverUrl = url)) }
-                                sttManager.connect(url)
-                            },
-                            enabled = !connecting && urlInput.isNotBlank(),
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = Color(0xFF43A047),
-                                contentColor = Color.White,
-                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            )
-                        ) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = stringResource(Res.string.stt_connect), modifier = Modifier.size(20.dp))
-                        }
-                    }
+                    ActionIconButton(
+                        onClick = {
+                            val url = if (urlInput.isNotBlank() && !urlInput.startsWith("http://") && !urlInput.startsWith("https://")) "http://$urlInput" else urlInput
+                            urlInput = url
+                            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(serverUrl = url)) }
+                            sttManager.connect(url)
+                        },
+                        enabled = !connecting && urlInput.isNotBlank(),
+                        tooltipText = stringResource(Res.string.stt_connect),
+                        icon = Icons.Default.PlayArrow,
+                        containerColor = Color(0xFF43A047),
+                        contentColor = Color.White
+                    )
                 }
 
                 // Go Live
-                @OptIn(ExperimentalMaterial3Api::class)
-                TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                    tooltip = { PlainTooltip { Text(stringResource(Res.string.stt_go_live)) } },
-                    state = rememberTooltipState()
-                ) {
-                    IconButton(
-                        onClick = {
-                            presenting(Presenting.STT)
-                        },
-                        enabled = connected && !isLive,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    ) {
-                        Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.stt_go_live), modifier = Modifier.size(20.dp))
-                    }
-                }
+                GoLiveButton(
+                    onClick = {
+                        presenting(Presenting.STT)
+                    },
+                    enabled = connected && !isLive,
+                    tooltipText = stringResource(Res.string.stt_go_live)
+                )
             }
 
             // Connection status label — names the transient/problem states the colour dot can't

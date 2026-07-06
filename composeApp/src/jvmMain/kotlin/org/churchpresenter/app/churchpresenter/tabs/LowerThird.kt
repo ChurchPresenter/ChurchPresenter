@@ -12,6 +12,8 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
+import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -119,10 +121,8 @@ import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.confirm_delete_file
 import churchpresenter.composeapp.generated.resources.go_live
-import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_key
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_upload
 import churchpresenter.composeapp.generated.resources.lottie_no_presets
 import churchpresenter.composeapp.generated.resources.lottie_select_preset
@@ -897,62 +897,40 @@ fun LowerThirdTab(
                 }
 
                 // Add to Schedule
-                Tooltip(stringResource(Res.string.add_to_schedule)) {
-                    FilledIconButton(
-                        onClick = {
-                            val file = selectedFile ?: return@FilledIconButton
-                            onAddToSchedule(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)
-                        },
-                        enabled = selectedFile != null,
-                        modifier = Modifier.size(34.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary,
-                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    ) {
-                        Icon(painterResource(Res.drawable.ic_playlist_add), contentDescription = null, modifier = Modifier.size(16.dp))
-                    }
-                }
+                AddToScheduleButton(
+                    onClick = {
+                        val file = selectedFile ?: return@AddToScheduleButton
+                        onAddToSchedule(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)
+                    },
+                    enabled = selectedFile != null,
+                    tooltipText = stringResource(Res.string.add_to_schedule)
+                )
 
                 // Go Live
-                Tooltip(stringResource(Res.string.go_live)) {
-                    FilledIconButton(
-                        onClick = {
-                            val atemSettings = appSettings.atemSettings
-                            if (atemSettings.goLiveKey && atemConfigured) {
-                                val durationMs = AtemRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
-                                val name = selectedFile?.nameWithoutExtension ?: ""
-                                val useDsk = atemSettings.useDownstreamKey
-                                scope.launch {
-                                    val keyError = LowerThirdSequencer.run(
-                                        name = name, json = jsonContent, durationMs = durationMs,
-                                        pauseAtFrame = false, pauseDurationMs = 0L,
-                                        mixEffect = if (useDsk) 0 else atemSettings.keyMixEffect,
-                                        keyer = if (useDsk) atemSettings.dskIndex else atemSettings.keyIndex,
-                                        atem = atemSettings, useDownstreamKey = useDsk
-                                    )
-                                    if (keyError != null) atemError = keyError
-                                }
-                            } else {
-                                onGoLive(jsonContent, false, -1f, 0L)
+                GoLiveButton(
+                    onClick = {
+                        val atemSettings = appSettings.atemSettings
+                        if (atemSettings.goLiveKey && atemConfigured) {
+                            val durationMs = AtemRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
+                            val name = selectedFile?.nameWithoutExtension ?: ""
+                            val useDsk = atemSettings.useDownstreamKey
+                            scope.launch {
+                                val keyError = LowerThirdSequencer.run(
+                                    name = name, json = jsonContent, durationMs = durationMs,
+                                    pauseAtFrame = false, pauseDurationMs = 0L,
+                                    mixEffect = if (useDsk) 0 else atemSettings.keyMixEffect,
+                                    keyer = if (useDsk) atemSettings.dskIndex else atemSettings.keyIndex,
+                                    atem = atemSettings, useDownstreamKey = useDsk
+                                )
+                                if (keyError != null) atemError = keyError
                             }
-                        },
-                        enabled = canPlay,
-                        modifier = Modifier.size(34.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    ) {
-                        Icon(Icons.Default.Tv, contentDescription = null, modifier = Modifier.size(15.dp))
-                    }
-                }
+                        } else {
+                            onGoLive(jsonContent, false, -1f, 0L)
+                        }
+                    },
+                    enabled = canPlay,
+                    tooltipText = stringResource(Res.string.go_live)
+                )
 
                 // ATEM controls
                 if (atemConfigured && atemEverConnected) {

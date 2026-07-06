@@ -96,7 +96,6 @@ import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.clear_recents
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
@@ -132,9 +131,11 @@ import churchpresenter.composeapp.generated.resources.unit_ms
 import churchpresenter.composeapp.generated.resources.unit_s
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SettingsRemote
-import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
+import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -269,7 +270,7 @@ fun PresentationTab(
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Button(
                 onClick = {
@@ -326,131 +327,66 @@ fun PresentationTab(
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-            TooltipArea(
-                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_presentation_remote), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-            ) {
-                IconButton(
-                    onClick = { showRemoteDialog = true },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                    ),
-                    modifier = Modifier.size(34.dp)
-                ) {
-                    Icon(Icons.Default.SettingsRemote, contentDescription = stringResource(Res.string.tooltip_presentation_remote), modifier = Modifier.size(16.dp))
-                }
-            }
+            ActionIconButton(
+                onClick = { showRemoteDialog = true },
+                tooltipText = stringResource(Res.string.tooltip_presentation_remote),
+                icon = Icons.Default.SettingsRemote,
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
             if (presenterManager != null) {
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    IconButton(
-                        onClick = onFreezeToggle,
-                        enabled = viewModel.slideFiles.isNotEmpty(),
-                        colors = if (presentationFrozen)
-                            IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                                disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            )
-                        else IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        ),
-                        modifier = Modifier.size(34.dp)
-                    ) {
-                        Icon(
-                            if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-            }
-            TooltipArea(
-                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.presentation_clear), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-            ) {
-                IconButton(
-                    onClick = { viewModel.clearPresentations(); onClearPresentation() },
+                ActionIconButton(
+                    onClick = onFreezeToggle,
                     enabled = viewModel.slideFiles.isNotEmpty(),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    ),
-                    modifier = Modifier.size(34.dp)
-                ) {
-                    Icon(painterResource(Res.drawable.ic_stop), contentDescription = stringResource(Res.string.presentation_clear), modifier = Modifier.size(16.dp))
-                }
+                    tooltipText = stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
+                    icon = if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    containerColor = if (presentationFrozen) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = if (presentationFrozen) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
+                )
             }
+            ActionIconButton(
+                onClick = { viewModel.clearPresentations(); onClearPresentation() },
+                enabled = viewModel.slideFiles.isNotEmpty(),
+                tooltipText = stringResource(Res.string.presentation_clear),
+                painter = painterResource(Res.drawable.ic_stop),
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            )
             if (onAddToSchedule != null) {
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    IconButton(
-                        onClick = {
-                            val f = viewModel.selectedPresentation ?: return@IconButton
-                            onAddToSchedule(f.absolutePath, f.nameWithoutExtension, viewModel.slideFiles.size, f.extension.lowercase())
-                        },
-                        enabled = viewModel.selectedPresentation != null,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary,
-                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        ),
-                        modifier = Modifier.size(34.dp)
-                    ) {
-                        Icon(painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(16.dp))
-                    }
-                }
+                AddToScheduleButton(
+                    onClick = {
+                        val f = viewModel.selectedPresentation ?: return@AddToScheduleButton
+                        onAddToSchedule(f.absolutePath, f.nameWithoutExtension, viewModel.slideFiles.size, f.extension.lowercase())
+                    },
+                    enabled = viewModel.selectedPresentation != null,
+                    tooltipText = stringResource(Res.string.add_to_schedule)
+                )
             }
             if (presenterManager != null) {
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    IconButton(
-                        onClick = {
-                            val idx = viewModel.selectedSlideIndex
-                            scope.launch {
-                                val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
-                                    withContext(Dispatchers.IO) {
-                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                                    }
+                GoLiveButton(
+                    onClick = {
+                        val idx = viewModel.selectedSlideIndex
+                        scope.launch {
+                            val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
+                                withContext(Dispatchers.IO) {
+                                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
                                 }
-                                val nextBitmap = viewModel.slideFiles.getOrNull(idx + 1)?.let { f ->
-                                    withContext(Dispatchers.IO) {
-                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                                    }
-                                }
-                                presenterManager.setSelectedSlide(bitmap)
-                                presenterManager.setNextSlide(nextBitmap)
-                                presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
                             }
-                            presenterManager.setPresentingMode(Presenting.PRESENTATION)
-                            presenterManager.setShowPresenterWindow(true)
-                        },
-                        enabled = viewModel.slideFiles.isNotEmpty(),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        ),
-                        modifier = Modifier.size(34.dp)
-                    ) {
-                        Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(15.dp))
-                    }
-                }
+                            val nextBitmap = viewModel.slideFiles.getOrNull(idx + 1)?.let { f ->
+                                withContext(Dispatchers.IO) {
+                                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                }
+                            }
+                            presenterManager.setSelectedSlide(bitmap)
+                            presenterManager.setNextSlide(nextBitmap)
+                            presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
+                        }
+                        presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                        presenterManager.setShowPresenterWindow(true)
+                    },
+                    enabled = viewModel.slideFiles.isNotEmpty(),
+                    tooltipText = stringResource(Res.string.go_live)
+                )
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

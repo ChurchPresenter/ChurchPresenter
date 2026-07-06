@@ -2,8 +2,6 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,7 +25,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -78,10 +75,10 @@ import churchpresenter.composeapp.generated.resources.web_engine_unavailable_tit
 import churchpresenter.composeapp.generated.resources.web_clear_cache
 import churchpresenter.composeapp.generated.resources.web_forward
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.Warning
 import churchpresenter.composeapp.generated.resources.ic_cast
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.web_go_live
 import churchpresenter.composeapp.generated.resources.web_focus_first_input
 import churchpresenter.composeapp.generated.resources.web_live_badge
@@ -102,6 +99,9 @@ import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavControlle
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
+import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.awt.event.InputEvent
@@ -331,93 +331,53 @@ fun WebTab(
 
         val actionButtons: @Composable RowScope.() -> Unit = {
             // Star bookmark toggle
-            TooltipArea(
-                tooltip = {
-                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                        Text(
-                            stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall
-                        )
+            ActionIconButton(
+                onClick = {
+                    val url = normaliseUrl(urlInput)
+                    if (isBookmarked) {
+                        onSettingsChange { s ->
+                            s.copy(webBookmarks = s.webBookmarks.filter { it.url != url })
+                        }
+                    } else {
+                        val title = pageTitle.ifBlank { url }
+                        onSettingsChange { s ->
+                            s.copy(webBookmarks = s.webBookmarks + WebBookmark(url = url, title = title))
+                        }
                     }
                 },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-            ) {
-                IconButton(
-                    onClick = {
-                        val url = normaliseUrl(urlInput)
-                        if (isBookmarked) {
-                            onSettingsChange { s ->
-                                s.copy(webBookmarks = s.webBookmarks.filter { it.url != url })
-                            }
-                        } else {
-                            val title = pageTitle.ifBlank { url }
-                            onSettingsChange { s ->
-                                s.copy(webBookmarks = s.webBookmarks + WebBookmark(url = url, title = title))
-                            }
-                        }
-                    },
-                    enabled = urlInput.isNotBlank() && urlInput != "https://"
-                ) {
-                    Text(
-                        text = if (isBookmarked) "\u2605" else "\u2606",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = if (isBookmarked) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+                enabled = urlInput.isNotBlank() && urlInput != "https://",
+                tooltipText = stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add),
+                icon = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                containerColor = if (isBookmarked) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = if (isBookmarked) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
             // Add to Schedule
             if (onAddToSchedule != null) {
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.web_add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    IconButton(
-                        onClick = {
-                            val url = normaliseUrl(urlInput)
-                            val title = pageTitle.ifBlank { url }
-                            onAddToSchedule(url, title)
-                        },
-                        enabled = urlInput.isNotBlank(),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    ) {
-                        Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.web_add_to_schedule), modifier = Modifier.size(20.dp))
-                    }
-                }
+                AddToScheduleButton(
+                    onClick = {
+                        val url = normaliseUrl(urlInput)
+                        val title = pageTitle.ifBlank { url }
+                        onAddToSchedule(url, title)
+                    },
+                    enabled = urlInput.isNotBlank(),
+                    tooltipText = stringResource(Res.string.web_add_to_schedule)
+                )
             }
 
             // Go Live
             val goLiveEnabled = urlInput.isNotBlank() && hasSecondaryDisplay && hasWebCapableOutput
-            TooltipArea(
-                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.web_go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-            ) {
-                IconButton(
-                    onClick = {
-                        val url = normaliseUrl(urlInput)
-                        urlInput = url
-                        liveUrl = url
-                        presenterManager?.setWebsiteUrl(url)
-                        presenterManager?.setPresentingMode(Presenting.WEBSITE)
-                    },
-                    enabled = goLiveEnabled,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    )
-                ) {
-                    Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.web_go_live), modifier = Modifier.size(20.dp))
-                }
-            }
+            GoLiveButton(
+                onClick = {
+                    val url = normaliseUrl(urlInput)
+                    urlInput = url
+                    liveUrl = url
+                    presenterManager?.setWebsiteUrl(url)
+                    presenterManager?.setPresentingMode(Presenting.WEBSITE)
+                },
+                enabled = goLiveEnabled,
+                tooltipText = stringResource(Res.string.web_go_live)
+            )
         }
 
         val onMobileToggle: (Boolean) -> Unit = { mobile ->
@@ -439,7 +399,7 @@ fun WebTab(
                 // Everything on one line
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     NavButtons(navController, presenterManager, isLive, useInteractivePreview,
@@ -452,7 +412,7 @@ fun WebTab(
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         NavButtons(navController, presenterManager, isLive, useInteractivePreview,
@@ -934,55 +894,58 @@ private fun RowScope.NavButtons(
     onMobileToggle: (Boolean) -> Unit
 ) {
     // Back
-    TooltipIconButton(
-        painter = painterResource(Res.drawable.ic_arrow_left),
-        text = stringResource(Res.string.web_back),
+    ActionIconButton(
         onClick = {
             val live = presenterManager?.liveBrowser?.value
             if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
         },
-        iconTint = MaterialTheme.colorScheme.onSurface
+        tooltipText = stringResource(Res.string.web_back),
+        painter = painterResource(Res.drawable.ic_arrow_left),
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
     // Forward
-    TooltipIconButton(
-        painter = painterResource(Res.drawable.ic_arrow_right),
-        text = stringResource(Res.string.web_forward),
+    ActionIconButton(
         onClick = {
             val live = presenterManager?.liveBrowser?.value
             if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
         },
-        iconTint = MaterialTheme.colorScheme.onSurface
+        tooltipText = stringResource(Res.string.web_forward),
+        painter = painterResource(Res.drawable.ic_arrow_right),
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
     // Refresh
-    TooltipIconButton(
-        painter = painterResource(Res.drawable.ic_refresh),
-        text = stringResource(Res.string.web_refresh),
+    ActionIconButton(
         onClick = {
             val live = presenterManager?.liveBrowser?.value
             if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
         },
-        iconTint = MaterialTheme.colorScheme.onSurface
+        tooltipText = stringResource(Res.string.web_refresh),
+        painter = painterResource(Res.drawable.ic_refresh),
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
     // Clear cache
-    TooltipIconButton(
-        painter = painterResource(Res.drawable.ic_clear_cache),
-        text = stringResource(Res.string.web_clear_cache),
+    ActionIconButton(
         onClick = {
             val cacheDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/webview-cache")
             if (cacheDir.exists()) cacheDir.deleteRecursively()
             cacheDir.mkdirs()
         },
-        iconTint = MaterialTheme.colorScheme.error
+        tooltipText = stringResource(Res.string.web_clear_cache),
+        painter = painterResource(Res.drawable.ic_clear_cache),
+        containerColor = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer
     )
 
     // Zoom out
-    TooltipIconButton(
-        painter = painterResource(Res.drawable.ic_arrow_down),
-        text = stringResource(Res.string.web_zoom_out),
+    ActionIconButton(
         onClick = { applyZoom(zoomLevel - 0.5) },
-        iconTint = MaterialTheme.colorScheme.onSurface,
-        buttonSize = 32.dp,
-        iconSize = 16.dp
+        tooltipText = stringResource(Res.string.web_zoom_out),
+        painter = painterResource(Res.drawable.ic_arrow_down),
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
     // Zoom percentage
     Text(
@@ -991,13 +954,12 @@ private fun RowScope.NavButtons(
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     // Zoom in
-    TooltipIconButton(
-        painter = painterResource(Res.drawable.ic_arrow_up),
-        text = stringResource(Res.string.web_zoom_in),
+    ActionIconButton(
         onClick = { applyZoom(zoomLevel + 0.5) },
-        iconTint = MaterialTheme.colorScheme.onSurface,
-        buttonSize = 32.dp,
-        iconSize = 16.dp
+        tooltipText = stringResource(Res.string.web_zoom_in),
+        painter = painterResource(Res.drawable.ic_arrow_up),
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
     // Mobile / Desktop toggle
     Surface(

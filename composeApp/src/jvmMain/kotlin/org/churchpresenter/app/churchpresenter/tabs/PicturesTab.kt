@@ -14,6 +14,8 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isShiftPressed
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -87,7 +89,6 @@ import churchpresenter.composeapp.generated.resources.animation_slide_right
 import churchpresenter.composeapp.generated.resources.animation_type
 import churchpresenter.composeapp.generated.resources.auto_scroll_interval
 import churchpresenter.composeapp.generated.resources.go_live
-import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_star
 import churchpresenter.composeapp.generated.resources.ic_star_filled
@@ -100,7 +101,6 @@ import churchpresenter.composeapp.generated.resources.clear_recents
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.recent
 import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
 import churchpresenter.composeapp.generated.resources.ic_skip_previous
@@ -290,7 +290,7 @@ fun PicturesTab(
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Button(
                 onClick = {
@@ -328,52 +328,18 @@ fun PicturesTab(
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
             if (onAddToSchedule != null) {
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    IconButton(
-                        onClick = { viewModel.getScheduleData()?.let { (path, name, count) -> onAddToSchedule(path, name, count) } },
-                        enabled = viewModel.images.isNotEmpty(),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary,
-                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        ),
-                        modifier = Modifier.size(34.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_playlist_add),
-                            contentDescription = stringResource(Res.string.add_to_schedule),
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
+                AddToScheduleButton(
+                    onClick = { viewModel.getScheduleData()?.let { (path, name, count) -> onAddToSchedule(path, name, count) } },
+                    enabled = viewModel.images.isNotEmpty(),
+                    tooltipText = stringResource(Res.string.add_to_schedule)
+                )
             }
             if (presenterManager != null) {
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    IconButton(
-                        onClick = { viewModel.goLive(presenterManager) },
-                        enabled = viewModel.images.isNotEmpty(),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        ),
-                        modifier = Modifier.size(34.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Tv,
-                            contentDescription = stringResource(Res.string.go_live),
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
-                }
+                GoLiveButton(
+                    onClick = { viewModel.goLive(presenterManager) },
+                    enabled = viewModel.images.isNotEmpty(),
+                    tooltipText = stringResource(Res.string.go_live)
+                )
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

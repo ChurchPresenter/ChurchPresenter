@@ -166,6 +166,9 @@ import churchpresenter.composeapp.generated.resources.swap_bibles
 import churchpresenter.composeapp.generated.resources.swap_bibles_hint
 import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
+import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -1200,7 +1203,8 @@ fun BibleTab(
                 VerticalDivider(modifier = Modifier.height(16.dp), color = MaterialTheme.colorScheme.outlineVariant)
                 Row(
                     modifier = Modifier.weight(1f).padding(start = 12.dp, end = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
                         text = stringResource(Res.string.verse).uppercase(),
@@ -1282,103 +1286,56 @@ fun BibleTab(
                             }
                         }
                     }
-                    // Go Live (amber)
-                    TooltipArea(
-                        tooltip = {
-                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
-                                Text(goLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                            }
-                        },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = { goLiveWithHistory(); focusRequester.requestFocus() },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        ) {
-                            Icon(Icons.Default.Tv, contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
-                        }
-                    }
-                    // Add to Schedule (teal)
-                    TooltipArea(
-                        tooltip = {
-                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
-                                Text(addScheduleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                            }
-                        },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = {
-                                viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
-                                    onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
-                                }
-                                focusRequester.requestFocus()
-                            },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary
-                            )
-                        ) {
-                            Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
-                        }
-                    }
                     // STT mic button — visible once a successful connection has been made to the current URL
                     val sttEverConnectedToCurrentUrl = appSettings.sttSettings.lastConnectedUrl.isNotBlank() &&
                         appSettings.sttSettings.lastConnectedUrl == appSettings.sttSettings.serverUrl
                     if (sttEverConnectedToCurrentUrl && sttManager != null) {
                         val sttActionStr = if (sttConnected) stringResource(Res.string.stt_disconnect) else stringResource(Res.string.stt_connect)
-                        TooltipArea(
-                            tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
-                                    Text(sttActionStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
-                            },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    if (sttConnected) sttManager.disconnect()
-                                    else sttManager.connect(appSettings.sttSettings.serverUrl)
-                                    focusRequester.requestFocus()
-                                },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = if (sttConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                                    contentColor = if (sttConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            ) {
-                                Icon(Icons.Filled.Mic, contentDescription = sttActionStr, modifier = Modifier.size(20.dp))
-                            }
-                        }
-                    }
-                    // Swap Bibles (blue)
-                    TooltipArea(
-                        tooltip = {
-                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
-                                Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                                    Text(stringResource(Res.string.swap_bibles_hint), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
-                                    Text("${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}", color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall)
-                                    Text("${stringResource(Res.string.secondary_bible)} ${appSettings.bibleSettings.secondaryBible.substringBeforeLast('.').ifEmpty { "-" }}", color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall)
-                                }
-                            }
-                        },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
+                        ActionIconButton(
                             onClick = {
-                                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) }
+                                if (sttConnected) sttManager.disconnect()
+                                else sttManager.connect(appSettings.sttSettings.serverUrl)
                                 focusRequester.requestFocus()
                             },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.tertiary,
-                                contentColor = MaterialTheme.colorScheme.onTertiary
-                            )
-                        ) {
-                            Icon(painter = painterResource(Res.drawable.ic_swap), contentDescription = swapBiblesStr, modifier = Modifier.size(20.dp))
-                        }
+                            tooltipText = sttActionStr,
+                            icon = Icons.Filled.Mic,
+                            containerColor = if (sttConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = if (sttConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
+                    // Swap Bibles (blue)
+                    ActionIconButton(
+                        onClick = {
+                            onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) }
+                            focusRequester.requestFocus()
+                        },
+                        tooltipText = swapBiblesStr,
+                        painter = painterResource(Res.drawable.ic_swap),
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                        tooltipContent = {
+                            Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                                Text(stringResource(Res.string.swap_bibles_hint), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                                Text("${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}", color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall)
+                                Text("${stringResource(Res.string.secondary_bible)} ${appSettings.bibleSettings.secondaryBible.substringBeforeLast('.').ifEmpty { "-" }}", color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    )
+                    // Add to Schedule (teal)
+                    AddToScheduleButton(
+                        onClick = {
+                            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
+                                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
+                            }
+                            focusRequester.requestFocus()
+                        },
+                        tooltipText = addScheduleStr
+                    )
+                    // Go Live (amber)
+                    GoLiveButton(
+                        onClick = { goLiveWithHistory(); focusRequester.requestFocus() },
+                        tooltipText = goLiveStr
+                    )
                 }
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

@@ -94,6 +94,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
+import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import java.awt.Cursor
@@ -1378,7 +1381,7 @@ fun SongsTab(
             @OptIn(ExperimentalLayoutApi::class)
             FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.End,
+                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 if (hasStageMonitorScreen && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
@@ -1447,93 +1450,41 @@ fun SongsTab(
                 }
 
                 if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                    TooltipArea(
-                        tooltip = {
-                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                Text(editSongStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                            }
-                        },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true; tabFocusRequester.requestFocus() },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.tertiary,
-                                contentColor = MaterialTheme.colorScheme.onTertiary
-                            )
-                        ) {
-                            Icon(painter = painterResource(Res.drawable.ic_edit), contentDescription = editSongStr, modifier = Modifier.size(20.dp))
-                        }
-                    }
+                    ActionIconButton(
+                        onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true; tabFocusRequester.requestFocus() },
+                        tooltipText = editSongStr,
+                        painter = painterResource(Res.drawable.ic_edit),
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
                 }
 
                 // New Song button
-                TooltipArea(
-                    tooltip = {
-                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                            Text(newSongStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                        }
-                    },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    IconButton(
-                        onClick = { showNewSongDialog = true; tabFocusRequester.requestFocus() },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary,
-                            contentColor = MaterialTheme.colorScheme.onTertiary
-                        )
-                    ) {
-                        Icon(painter = painterResource(Res.drawable.ic_add), contentDescription = newSongStr, modifier = Modifier.size(20.dp))
-                    }
-                }
+                ActionIconButton(
+                    onClick = { showNewSongDialog = true; tabFocusRequester.requestFocus() },
+                    tooltipText = newSongStr,
+                    painter = painterResource(Res.drawable.ic_add),
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary
+                )
 
                 if (onAddToSchedule != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                    TooltipArea(
-                        tooltip = {
-                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                Text(addScheduleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                    AddToScheduleButton(
+                        onClick = {
+                            filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
+                                onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
                             }
+                            tabFocusRequester.requestFocus()
                         },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = {
-                                filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
-                                    onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
-                                }
-                                tabFocusRequester.requestFocus()
-                            },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary
-                            )
-                        ) {
-                            Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
-                        }
-                    }
+                        tooltipText = addScheduleStr
+                    )
                 }
 
-                TooltipArea(
-                    tooltip = {
-                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                            Text(goLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                        }
-                    },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    IconButton(
-                        onClick = { sendToPresenter(goLive = true); onPresenting(Presenting.LYRICS); tabFocusRequester.requestFocus() },
-                        enabled = hasSongSelected,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    ) {
-                        Icon(Icons.Default.Tv, contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
-                    }
-                }
+                GoLiveButton(
+                    onClick = { sendToPresenter(goLive = true); onPresenting(Presenting.LYRICS); tabFocusRequester.requestFocus() },
+                    enabled = hasSongSelected,
+                    tooltipText = goLiveStr
+                )
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 

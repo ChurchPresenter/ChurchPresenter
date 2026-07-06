@@ -1,6 +1,9 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
+import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -69,8 +72,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.foundation.text.BasicTextField
@@ -128,8 +129,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.CastConnected
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Tv
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
@@ -161,7 +160,6 @@ import churchpresenter.composeapp.generated.resources.top_left
 import churchpresenter.composeapp.generated.resources.top_right
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
-import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
@@ -364,77 +362,43 @@ fun AnnouncementsTab(
                     }
                 )
             }
-            if (onAddToSchedule != null) {
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    IconButton(
-                        onClick = { onAddToSchedule.invoke(viewModel.buildSettings().copy(timerHours = 0, timerMinutes = 0, timerSeconds = 0, timerTextColor = "#FFFFFF", timerExpiredText = "", timerMode = Constants.TIMER_MODE_DURATION)) },
-                        enabled = viewModel.text.isNotBlank(),
-                        modifier = Modifier.size(34.dp),
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.secondary, contentColor = MaterialTheme.colorScheme.onSecondary, disabledContainerColor = MaterialTheme.colorScheme.outlineVariant, disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))
-                    ) {
-                        Icon(painterResource(Res.drawable.ic_playlist_add), contentDescription = null, modifier = Modifier.size(16.dp))
-                    }
-                }
-            }
             if (presenterManager != null) {
                 val announcementTextIsLive = presenterManager.presentingMode.value == Presenting.ANNOUNCEMENTS && !isTimerRunning
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (announcementTextIsLive) Res.string.tooltip_announcement_hide else Res.string.tooltip_announcement_show), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    IconButton(
-                        onClick = {
-                            if (announcementTextIsLive) presenterManager.requestClearDisplay()
-                            else { viewModel.pauseTimer(presenterManager); presenterManager.setAnnouncementText(viewModel.text); presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS) }
-                        },
-                        enabled = viewModel.text.isNotBlank() || announcementTextIsLive,
-                        modifier = Modifier.size(34.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = if (announcementTextIsLive) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primary,
-                            contentColor = if (announcementTextIsLive) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    ) {
-                        Icon(painterResource(if (announcementTextIsLive) Res.drawable.ic_pause else Res.drawable.ic_play), contentDescription = null, modifier = Modifier.size(16.dp))
-                    }
-                }
-                TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                ) {
-                    IconButton(
-                        onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
-                        enabled = viewModel.text.isNotBlank(),
-                        modifier = Modifier.size(34.dp),
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, disabledContainerColor = MaterialTheme.colorScheme.outlineVariant, disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))
-                    ) {
-                        Icon(Icons.Default.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
-                    }
-                }
+                ActionIconButton(
+                    onClick = {
+                        if (announcementTextIsLive) presenterManager.requestClearDisplay()
+                        else { viewModel.pauseTimer(presenterManager); presenterManager.setAnnouncementText(viewModel.text); presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS) }
+                    },
+                    enabled = viewModel.text.isNotBlank() || announcementTextIsLive,
+                    tooltipText = stringResource(if (announcementTextIsLive) Res.string.tooltip_announcement_hide else Res.string.tooltip_announcement_show),
+                    painter = painterResource(if (announcementTextIsLive) Res.drawable.ic_pause else Res.drawable.ic_play),
+                    containerColor = if (announcementTextIsLive) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primary,
+                    contentColor = if (announcementTextIsLive) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimary
+                )
                 if (canSendToStageMonitor) {
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(if (isSentToStageMonitor) stringResource(Res.string.tooltip_hide_from_stage_monitor) else stringResource(Res.string.tooltip_send_to_stage_monitor), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = { toggleStageMonitor(viewModel.text) },
-                            enabled = viewModel.text.isNotBlank() || isSentToStageMonitor,
-                            modifier = Modifier.size(34.dp),
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                                disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            )
-                        ) {
-                            Icon(if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast, contentDescription = null, modifier = Modifier.size(16.dp))
-                        }
-                    }
+                    ActionIconButton(
+                        onClick = { toggleStageMonitor(viewModel.text) },
+                        enabled = viewModel.text.isNotBlank() || isSentToStageMonitor,
+                        tooltipText = if (isSentToStageMonitor) stringResource(Res.string.tooltip_hide_from_stage_monitor) else stringResource(Res.string.tooltip_send_to_stage_monitor),
+                        icon = if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast,
+                        containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
+            }
+            if (onAddToSchedule != null) {
+                AddToScheduleButton(
+                    onClick = { onAddToSchedule.invoke(viewModel.buildSettings().copy(timerHours = 0, timerMinutes = 0, timerSeconds = 0, timerTextColor = "#FFFFFF", timerExpiredText = "", timerMode = Constants.TIMER_MODE_DURATION)) },
+                    enabled = viewModel.text.isNotBlank(),
+                    tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
+                )
+            }
+            if (presenterManager != null) {
+                GoLiveButton(
+                    onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
+                    enabled = viewModel.text.isNotBlank(),
+                    tooltipText = stringResource(Res.string.tooltip_go_live)
+                )
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -780,7 +744,7 @@ fun AnnouncementsTab(
                         @OptIn(ExperimentalLayoutApi::class)
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             itemVerticalAlignment = Alignment.CenterVertically
                         ) {
@@ -790,43 +754,59 @@ fun AnnouncementsTab(
                             // live Clock always track automatically — "Go Live" is enough to push them.
                             val hasPlayPause = viewModel.timerMode == Constants.TIMER_MODE_DURATION || viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP
                             if (hasPlayPause) {
-                                ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(if (isTimerRunning) pauseLabel else startLabel, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
-                                    IconButton(
-                                        onClick = {
-                                            viewModel.saveToSettings(onSettingsChange)
-                                            viewModel.startPauseTimer(presenterManager)
-                                        },
-                                        enabled = viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || isTimerRunning,
-                                        colors = IconButtonDefaults.iconButtonColors(
-                                            containerColor = if (isTimerRunning) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
-                                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                        )
-                                    ) {
-                                        Icon(painter = painterResource(if (isTimerRunning) Res.drawable.ic_pause else Res.drawable.ic_play), contentDescription = if (isTimerRunning) pauseLabel else startLabel, tint = if (isTimerRunning) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer)
-                                    }
-                                }
+                                ActionIconButton(
+                                    onClick = {
+                                        viewModel.saveToSettings(onSettingsChange)
+                                        viewModel.startPauseTimer(presenterManager)
+                                    },
+                                    enabled = viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || isTimerRunning,
+                                    tooltipText = if (isTimerRunning) pauseLabel else startLabel,
+                                    painter = painterResource(if (isTimerRunning) Res.drawable.ic_pause else Res.drawable.ic_play),
+                                    containerColor = if (isTimerRunning) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = if (isTimerRunning) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
+                                )
                             }
                             // Reset only makes sense for Timer/Duration, which count down/up from a
                             // starting point. Specific Time and the live Clock always track the wall
                             // clock automatically — there's nothing to reset back to.
                             if (hasPlayPause) {
-                                ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(resetLabel, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
-                                    IconButton(onClick = { viewModel.resetTimer(presenterManager) }, colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                                        Icon(painter = painterResource(Res.drawable.ic_refresh), contentDescription = resetLabel, modifier = Modifier.size(20.dp))
-                                    }
-                                }
+                                ActionIconButton(
+                                    onClick = { viewModel.resetTimer(presenterManager) },
+                                    tooltipText = resetLabel,
+                                    painter = painterResource(Res.drawable.ic_refresh),
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            // Stage Monitor already shows its own always-on clock, so the plain
+                            // "Clock" timer mode has nothing extra to send there.
+                            if (presenterManager != null && canSendToStageMonitor && viewModel.timerMode != Constants.TIMER_MODE_CLOCK_DISPLAY) {
+                                ActionIconButton(
+                                    onClick = {
+                                        // Specific Time has no Start button of its own — sending it to
+                                        // Stage Monitor is what kicks off its always-on ticking.
+                                        if (!isSentToStageMonitor && viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
+                                            presenterManager.startAnnouncementSpecificTime(viewModel.targetHour, viewModel.targetMinute, viewModel.targetSecond)
+                                        }
+                                        val liveText = AnnouncementsViewModel.formatTimer(timerDisplayValue)
+                                        toggleStageMonitor(liveText)
+                                    },
+                                    tooltipText = if (isSentToStageMonitor) stringResource(Res.string.tooltip_hide_from_stage_monitor) else stringResource(Res.string.tooltip_send_to_stage_monitor),
+                                    icon = if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast,
+                                    containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                             if (onAddToSchedule != null) {
-                                ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
-                                    IconButton(onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) }, enabled = viewModel.text.isNotBlank() || viewModel.timerMode != Constants.TIMER_MODE_DURATION || viewModel.timerHours > 0 || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0, colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.secondary, contentColor = MaterialTheme.colorScheme.onSecondary, disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant, disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))) {
-                                        Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
-                                    }
-                                }
+                                AddToScheduleButton(
+                                    onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) },
+                                    enabled = viewModel.text.isNotBlank() || viewModel.timerMode != Constants.TIMER_MODE_DURATION || viewModel.timerHours > 0 || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0,
+                                    tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
+                                )
                             }
                             if (presenterManager != null) {
-                                ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
-                                    IconButton(onClick = {
+                                GoLiveButton(
+                                    onClick = {
                                         // Specific Time / Clock Display have no Start button of their own —
                                         // Go Live is what kicks off their always-on ticking.
                                         when (viewModel.timerMode) {
@@ -837,33 +817,9 @@ fun AnnouncementsTab(
                                         val liveText = if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) viewModel.liveClockText else AnnouncementsViewModel.formatTimer(timerDisplayValue)
                                         presenterManager.setAnnouncementText(liveText)
                                         presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
-                                    }, colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant, disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))) {
-                                        Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
-                                    }
-                                }
-                            }
-                            // Stage Monitor already shows its own always-on clock, so the plain
-                            // "Clock" timer mode has nothing extra to send there.
-                            if (presenterManager != null && canSendToStageMonitor && viewModel.timerMode != Constants.TIMER_MODE_CLOCK_DISPLAY) {
-                                ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(if (isSentToStageMonitor) stringResource(Res.string.tooltip_hide_from_stage_monitor) else stringResource(Res.string.tooltip_send_to_stage_monitor), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
-                                    IconButton(
-                                        onClick = {
-                                            // Specific Time has no Start button of its own — sending it to
-                                            // Stage Monitor is what kicks off its always-on ticking.
-                                            if (!isSentToStageMonitor && viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
-                                                presenterManager.startAnnouncementSpecificTime(viewModel.targetHour, viewModel.targetMinute, viewModel.targetSecond)
-                                            }
-                                            val liveText = AnnouncementsViewModel.formatTimer(timerDisplayValue)
-                                            toggleStageMonitor(liveText)
-                                        },
-                                        colors = IconButtonDefaults.iconButtonColors(
-                                            containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                                            contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    ) {
-                                        Icon(if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast, contentDescription = if (isSentToStageMonitor) stringResource(Res.string.tooltip_hide_from_stage_monitor) else stringResource(Res.string.tooltip_send_to_stage_monitor), modifier = Modifier.size(20.dp))
-                                    }
-                                }
+                                    },
+                                    tooltipText = stringResource(Res.string.tooltip_go_live)
+                                )
                             }
                         }
 
