@@ -31,7 +31,7 @@ data class CompanionSatelliteSettings(
     /** Delay before retrying after a dropped connection. */
     val reconnectDelayMs: Int = 2000,
     /** Which UI locations show this connection's button grid — any combination, including all three. */
-    val showInTab: Boolean = true,
+    val showInTab: Boolean = false,
     val showInLeftSidebar: Boolean = false,
     val showInRightSidebar: Boolean = false,
     /** Grid shape registered with Companion for each placement — independent per placement since

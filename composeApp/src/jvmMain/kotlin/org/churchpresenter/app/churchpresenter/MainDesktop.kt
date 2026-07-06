@@ -252,7 +252,7 @@ fun MainDesktop(
 
     var showCrosswordTab by remember { mutableStateOf(false) }
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
-    val hasCompanionTabConnections = appSettings.companionSatelliteConnections.any { it.showInTab }
+    val hasCompanionTabConnections = appSettings.companionSatelliteConnections.any { it.showInTab && it.host.isNotBlank() }
     val visibleTabs = remember(appSettings.hiddenTabs, showCrosswordTab, hasCompanionTabConnections) {
         (Tabs.entries.filter { tab ->
             tab != Tabs.CROSSWORD && tab.name !in appSettings.hiddenTabs &&
@@ -1074,7 +1074,7 @@ fun MainDesktop(
                         onScheduleChanged = onScheduleChanged
                     )
                     } // end Box (ScheduleTab weight)
-                    val leftSidebarConnections = appSettings.companionSatelliteConnections.filter { it.showInLeftSidebar }
+                    val leftSidebarConnections = appSettings.companionSatelliteConnections.filter { it.showInLeftSidebar && it.host.isNotBlank() }
                     if (leftSidebarConnections.isNotEmpty()) {
                         HorizontalDivider()
                         var selectedLeftSidebarId by remember(leftSidebarConnections.map { it.id }) {
@@ -1595,7 +1595,7 @@ fun MainDesktop(
                             qaDisplayUrl = qaDisplayUrl,
                             sttManager = sttManager,
                         )
-                        val rightSidebarConnections = appSettings.companionSatelliteConnections.filter { it.showInRightSidebar }
+                        val rightSidebarConnections = appSettings.companionSatelliteConnections.filter { it.showInRightSidebar && it.host.isNotBlank() }
                         if (rightSidebarConnections.isNotEmpty()) {
                             // Pushes everything below (divider + panel) down to the bottom of this
                             // fillMaxHeight column instead of sitting right under the live preview
