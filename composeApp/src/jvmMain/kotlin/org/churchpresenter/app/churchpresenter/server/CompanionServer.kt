@@ -3838,9 +3838,26 @@ async function drawFrame(pngBytes,rx,ry,rw,rh,fullW,fullH){
 // Int32s: x, y, rectWidth, rectHeight, fullWidth, fullHeight) followed by the raw PNG bytes. No
 // manual buffer/boundary parsing needed: the browser's WebSocket implementation already delivers
 // complete messages, unlike the old fetch()+ReadableStream+multipart approach this replaced.
-// drawFrame is async (createImageBitmap) — chain each call after the previous one so frames
-// composite in arrival order even if one decode happens to take longer than the next.
-let processingChain=Promise.resolve();
+// drawFrame is async (createImageBitmap) — during a burst of large frames (e.g. a full-screen
+// crossfade) decode+draw can take longer than the ~33ms tick interval frames arrive at. Chaining
+// every message unconditionally would grow an ever-longer backlog and make the display fall
+// further and further behind real time. Instead, coalesce to the latest: if a new message arrives
+// while one is still being processed, only the newest is kept — any skipped intermediate partial
+// delta leaves the offscreen canvas briefly wrong in that region, but the server's periodic
+// full-frame reseed (~every 5s, see FULL_FRAME_RESEED_MS in BrowserSourceVideoRenderer.kt)
+// self-heals that within a bounded window, which is a better trade than unbounded latency growth.
+let isProcessingFrame=false;
+let pendingFrame=null;
+async function processPendingFrame(){
+  if(isProcessingFrame)return;
+  const frame=pendingFrame;
+  if(!frame)return;
+  pendingFrame=null;
+  isProcessingFrame=true;
+  await drawFrame(frame.pngBytes,frame.x,frame.y,frame.w,frame.h,frame.fullW,frame.fullH);
+  isProcessingFrame=false;
+  if(pendingFrame)processPendingFrame();
+}
 function onSocketMessage(event){
   const buf=event.data;
   const view=new DataView(buf);
@@ -3851,7 +3868,8 @@ function onSocketMessage(event){
   const fullW=view.getInt32(16);
   const fullH=view.getInt32(20);
   const pngBytes=new Uint8Array(buf,24);
-  processingChain=processingChain.then(()=>drawFrame(pngBytes,x,y,w,h,fullW,fullH));
+  pendingFrame={pngBytes,x,y,w,h,fullW,fullH};
+  processPendingFrame();
 }
 function connect(){
   // A fresh connection may follow a stale/dropped one — never composite a partial delta onto

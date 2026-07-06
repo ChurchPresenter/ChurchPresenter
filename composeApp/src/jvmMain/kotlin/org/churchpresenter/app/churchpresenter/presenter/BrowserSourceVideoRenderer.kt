@@ -55,7 +55,10 @@ import javax.imageio.ImageIO
  * Only encodes and emits a frame when the rendered pixels actually changed since the last
  * tick, so a static slide costs one encode, not continuous encoding — this is what keeps a
  * per-output stream far cheaper than NDI (which encodes continuously regardless of change
- * or of whether anyone is even watching).
+ * or of whether anyone is even watching). The one exception is a periodic full-frame
+ * recapture (see [FULL_FRAME_RESEED_MS]) that fires on its own schedule regardless of
+ * whether content changed, to bound how long a client can stay desynced from a dropped
+ * dirty-rect delta (see [frames]'s KDoc for why that can happen).
  */
 /**
  * One emitted delta: a PNG-encoded sub-rectangle of the full [fullWidth]x[fullHeight] frame,
@@ -89,14 +92,24 @@ class BrowserSourceVideoRenderer(
     private val height: Int = 1080,
 ) {
     private companion object {
-        const val FRAME_NANOS = 16_666_667L
-        const val TICK_DELAY_MS = 100L // ~10fps sampling; only changed frames are actually encoded/emitted
+        const val TICK_DELAY_MS = 33L // ~30fps sampling; only changed frames are actually encoded/emitted
+        const val FRAME_NANOS = TICK_DELAY_MS * 1_000_000L // keep the virtual animation clock in step with real sampling time
+        // DROP_OLDEST (below) is only safe for dirty-rect deltas because of this: each delta is
+        // only valid applied on top of the exact state the previous delta produced, so a silently
+        // dropped intermediate delta leaves a connected client permanently wrong in that region
+        // with no way to detect it. Forcing a fresh full-frame recapture on this schedule (not
+        // just on new-subscriber) bounds how long that drift can persist.
+        const val FULL_FRAME_RESEED_MS = 5_000L
     }
 
     /**
      * Latest frame delta, replayed to any newly-subscribed HTTP client. Uses [BufferOverflow.DROP_OLDEST]
      * (the established pattern elsewhere in this codebase) rather than the default SUSPEND — a
      * slow network consumer must never stall the render loop itself, only skip stale frames.
+     *
+     * Dropping a *dirty-rect* frame this way is only safe because of [FULL_FRAME_RESEED_MS] —
+     * each delta is only valid applied on top of the state the previous one produced, so on its
+     * own a dropped delta would leave a client permanently wrong in that region.
      */
     val frames = MutableSharedFlow<BrowserSourceFrame>(
         replay = 1,
@@ -280,6 +293,7 @@ class BrowserSourceVideoRenderer(
                 val intBuf = IntArray(width * height)
                 var lastBuf: IntArray? = null
                 var lastSeenSubscriberCount = 0
+                var lastFullFrameAtMs = 0L
                 while (true) {
                     timeNanos += FRAME_NANOS
                     Snapshot.sendApplyNotifications()
@@ -301,8 +315,16 @@ class BrowserSourceVideoRenderer(
                     val previous = lastBuf
                     val contentChanged = previous == null || !intBuf.contentEquals(previous)
 
-                    if (contentChanged || newSubscriberJoined) {
-                        val frame = if (previous == null || newSubscriberJoined) {
+                    // Independent of contentChanged: this must fire on its own schedule, not only
+                    // when content happens to be changing, since drift from a dropped delta can
+                    // persist forever otherwise once content settles into a static state (nothing
+                    // left to trigger a corrective resend).
+                    val elapsedMs = timeNanos / 1_000_000
+                    val periodicReseedDue = elapsedMs - lastFullFrameAtMs >= FULL_FRAME_RESEED_MS
+
+                    if (contentChanged || newSubscriberJoined || periodicReseedDue) {
+                        val forceFullFrame = previous == null || newSubscriberJoined || periodicReseedDue
+                        val frame = if (forceFullFrame) {
                             BrowserSourceFrame(0, 0, width, height, width, height, encodePng(intBuf, width, height))
                         } else {
                             val rect = computeDirtyRect(intBuf, previous, width, height)
@@ -313,6 +335,7 @@ class BrowserSourceVideoRenderer(
                             )
                         }
                         frames.emit(frame)
+                        if (forceFullFrame) lastFullFrameAtMs = elapsedMs
                         if (contentChanged) lastBuf = intBuf.copyOf()
                     }
                     delay(TICK_DELAY_MS)
