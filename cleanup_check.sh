@@ -27,8 +27,10 @@ else
     echo "   ✅ PASS"
 fi
 
-# Count debug prints
-PRINTS=$(grep -rE '(println|print\()' --include='*.kt' composeApp/src/jvmMain/kotlin/ 2>/dev/null | wc -l | tr -d ' ')
+# Count debug prints (word-boundaried so e.g. "getCaCertFingerprint(" doesn't match "print(" as a
+# substring; System.err.println is excluded — DEVELOPMENT_GUIDE.md's Decision Log keeps those
+# intentionally for VLC/JCEF/WebView/CompanionServer error diagnostics, they're not debug spam)
+PRINTS=$(grep -rE '\b(println|print)\(' --include='*.kt' composeApp/src/jvmMain/kotlin/ 2>/dev/null | grep -v 'System\.err\.println' | wc -l | tr -d ' ')
 echo "🐛 Debug print statements: $PRINTS"
 if [ "$PRINTS" -gt 0 ]; then
     echo "   ⚠️  WARN - Should be 0"
@@ -36,8 +38,10 @@ else
     echo "   ✅ PASS"
 fi
 
-# Count fully qualified type names
-QUALIFIED=$(grep -r 'androidx\.compose\.[a-z]*\.[a-zA-Z]*\.[A-Z]' --include='*.kt' composeApp/src/ 2>/dev/null | wc -l | tr -d ' ')
+# Count fully qualified type names used inline (e.g. in a function signature) — import statements
+# are excluded since they're the correct, required way to reference a type, not a violation of the
+# "no fully-qualified names when an import exists" rule
+QUALIFIED=$(grep -rE 'androidx\.compose\.[a-z]*\.[a-zA-Z]*\.[A-Z]' --include='*.kt' composeApp/src/ 2>/dev/null | grep -vE '^\S*:\s*import\b' | wc -l | tr -d ' ')
 echo "📝 Fully qualified type names: $QUALIFIED"
 if [ "$QUALIFIED" -gt 0 ]; then
     echo "   ⚠️  WARN - Should be 0"
