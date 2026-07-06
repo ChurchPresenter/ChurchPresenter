@@ -10,6 +10,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.readRawBytes
 import io.ktor.http.HttpMethod
 import io.ktor.http.isSuccess
 import io.ktor.websocket.Frame
@@ -207,6 +208,32 @@ class InstanceLinkClient(
             }
             if (!response.status.isSuccess()) return null
             json.decodeFromString(SongDetailDto.serializer(), response.bodyAsText())
+        }.getOrNull()
+    }
+
+    /** Fetches one picture's raw bytes from the primary — used to mirror a live picture (resolved
+     *  via [LiveStateDto.pictureFolderId]/[LiveStateDto.pictureIndex]) without a local copy of it. */
+    suspend fun fetchPictureImageBytes(folderId: String, index: Int): ByteArray? {
+        if (currentHost.isEmpty()) return null
+        return runCatching {
+            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_PICTURES}/$folderId/images/$index") {
+                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
+            }
+            if (!response.status.isSuccess()) return null
+            response.readRawBytes()
+        }.getOrNull()
+    }
+
+    /** Fetches one presentation slide's raw bytes from the primary — mirrors [RemotePresentationSlide]
+     *  (from the existing presentation_slide_changed broadcast) without a local copy of the file. */
+    suspend fun fetchPresentationSlideBytes(id: String, index: Int): ByteArray? {
+        if (currentHost.isEmpty()) return null
+        return runCatching {
+            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_PRESENTATIONS}/$id/slides/$index") {
+                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
+            }
+            if (!response.status.isSuccess()) return null
+            response.readRawBytes()
         }.getOrNull()
     }
 

@@ -80,6 +80,14 @@ class InstanceLinkViewModel {
     suspend fun fetchSongDetail(number: String, songbook: String): SongDetailDto? =
         client.fetchSongDetail(number, songbook)
 
+    /** Fetches one live picture's bytes — see [InstanceLinkClient.fetchPictureImageBytes]. */
+    suspend fun fetchPictureImageBytes(folderId: String, index: Int): ByteArray? =
+        client.fetchPictureImageBytes(folderId, index)
+
+    /** Fetches one live presentation slide's bytes — see [InstanceLinkClient.fetchPresentationSlideBytes]. */
+    suspend fun fetchPresentationSlideBytes(id: String, index: Int): ByteArray? =
+        client.fetchPresentationSlideBytes(id, index)
+
     fun dispose() {
         client.dispose()
     }

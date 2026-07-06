@@ -33,6 +33,8 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toComposeImageBitmap
+import org.jetbrains.skia.Image
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -435,7 +437,23 @@ fun main() {
         LaunchedEffect(instanceLinkViewModel) {
             instanceLinkViewModel.remoteLiveState.collect { state ->
                 if (state == null) return@collect
-                applyRemoteLiveState(state, presenterManager)
+                applyRemoteLiveState(state, presenterManager, instanceLinkViewModel)
+            }
+        }
+        // Presentations have their own dedicated broadcast (richer than LiveStateDto's mode-only
+        // PRESENTATION entry) — fetch and mirror whichever slide the primary is currently showing.
+        LaunchedEffect(instanceLinkViewModel) {
+            instanceLinkViewModel.remotePresentationSlide.collect { slide ->
+                if (slide == null) return@collect
+                val bytes = instanceLinkViewModel.fetchPresentationSlideBytes(slide.id, slide.index) ?: return@collect
+                val bitmap = runCatching {
+                    Image.makeFromEncoded(bytes).toComposeImageBitmap()
+                }.getOrNull() ?: return@collect
+                presenterManager.setSelectedSlide(bitmap)
+                if (slide.isLive) {
+                    presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                    presenterManager.setShowPresenterWindow(true)
+                }
             }
         }
         LaunchedEffect(instanceLinkViewModel) {
@@ -1782,15 +1800,26 @@ fun main() {
     }
 }
 
+/** Where fetched picture bytes are cached so PresenterManager.setSelectedImagePath (which needs a
+ *  local path, not bytes) can display them like any other local file. */
+private val instanceLinkPictureCacheDir: File by lazy {
+    File(System.getProperty("user.home"), ".churchpresenter/instance-link-cache/pictures").apply { mkdirs() }
+}
+
 /**
  * Applies a [LiveStateDto] received from another instance's CompanionServer to this instance's own
  * [PresenterManager], so an InstanceLink follower mirrors the primary's output. Bible verses, song
- * sections, announcements and website content are mirrored in full since their display text already
- * rides the broadcast; pictures/presentations/media/scenes/Q&A/dictionary switch the presenting mode
- * so the right output pane activates, but fetching their actual binary/rendered content over the
- * network is not wired yet (fast-follow).
+ * sections, announcements, website content and pictures are mirrored in full; presentations use
+ * their own richer dedicated broadcast instead (see the remotePresentationSlide collector in
+ * MainDesktop's caller). Media/scenes/Q&A/dictionary switch the presenting mode so the right output
+ * pane activates, but fetching their actual binary/rendered content over the network is not wired
+ * yet (fast-follow).
  */
-private fun applyRemoteLiveState(state: LiveStateDto, presenterManager: PresenterManager) {
+private suspend fun applyRemoteLiveState(
+    state: LiveStateDto,
+    presenterManager: PresenterManager,
+    instanceLinkViewModel: InstanceLinkViewModel
+) {
     val mode = runCatching { Presenting.valueOf(state.contentType) }.getOrNull() ?: return
     when (mode) {
         Presenting.BIBLE -> if (state.bookName != null) {
@@ -1819,7 +1848,19 @@ private fun applyRemoteLiveState(state: LiveStateDto, presenterManager: Presente
             state.websiteUrl?.let { presenterManager.setWebsiteUrl(it) }
             state.websiteTitle?.let { presenterManager.setWebPageTitle(it) }
         }
-        else -> { /* pictures/presentation/media/canvas/qa/dictionary: mode-only for now */ }
+        Presenting.PICTURES -> {
+            val folderId = state.pictureFolderId
+            val index = state.pictureIndex
+            if (folderId != null && index != null) {
+                val cacheFile = File(instanceLinkPictureCacheDir, "${folderId}_$index.jpg")
+                if (!cacheFile.exists()) {
+                    val bytes = instanceLinkViewModel.fetchPictureImageBytes(folderId, index)
+                    if (bytes != null) cacheFile.writeBytes(bytes) else return
+                }
+                presenterManager.setSelectedImagePath(cacheFile.absolutePath)
+            }
+        }
+        else -> { /* presentation/media/canvas/qa/dictionary: mode-only for now */ }
     }
     presenterManager.setPresentingMode(mode)
     presenterManager.setShowPresenterWindow(true)
