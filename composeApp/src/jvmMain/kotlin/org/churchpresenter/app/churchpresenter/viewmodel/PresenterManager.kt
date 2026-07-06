@@ -44,10 +44,17 @@ class PresenterManager {
     /** Notified whenever live-content state changes (mode, verse, lyric section, picture, media,
      *  announcement, website, scene, Q&A, dictionary) — wired in main.kt to broadcast an
      *  InstanceLink live-state update via CompanionServer.updateLiveState(). Excludes purely
-     *  visual transition/animation state (alphas, offsets) so it doesn't fire on every frame. */
-    var onLiveStateChanged: ((PresenterManager) -> Unit)? = null
-    private fun notifyLiveStateChanged() {
-        onLiveStateChanged?.invoke(this)
+     *  visual transition/animation state (alphas, offsets) so it doesn't fire on every frame.
+     *
+     *  The second parameter is the content type THIS specific change belongs to — e.g. setSelectedVerse
+     *  always reports [Presenting.BIBLE], regardless of what [presentingMode] currently holds. Content
+     *  setters and [setPresentingMode] are independent calls from application code, so deriving the
+     *  reported type from the live (possibly not-yet-updated) [presentingMode] value instead would let
+     *  a broadcast pair the wrong mode with fresh content, or the right mode with stale content,
+     *  whichever setter happened to run first. */
+    var onLiveStateChanged: ((PresenterManager, Presenting) -> Unit)? = null
+    private fun notifyLiveStateChanged(source: Presenting) {
+        onLiveStateChanged?.invoke(this, source)
     }
 
     // Flag to request fade-out before clearing display
@@ -245,7 +252,7 @@ class PresenterManager {
     fun setCurrentMedia(url: String, type: String) {
         _currentMediaUrl.value = url
         _currentMediaType.value = type
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(Presenting.MEDIA)
     }
 
     fun setPresentingMode(mode: Presenting) {
@@ -261,7 +268,7 @@ class PresenterManager {
             _bibleTransitionAlpha.value = 1f
             _songTransitionAlpha.value = 1f
         }
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(mode)
     }
 
     /** Request a fade-out before clearing the display. The LaunchedEffect in main.kt
@@ -275,7 +282,7 @@ class PresenterManager {
 
     fun setSelectedVerse(verse: SelectedVerse) {
         _selectedVerse.value = verse
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(Presenting.BIBLE)
     }
 
     fun setSelectedVerses(verses: List<SelectedVerse>) {
@@ -283,7 +290,7 @@ class PresenterManager {
         if (verses.isNotEmpty()) {
             _selectedVerse.value = verses.first()
         }
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(Presenting.BIBLE)
     }
 
     fun setDisplayedVerses(verses: List<SelectedVerse>) {
@@ -313,7 +320,7 @@ class PresenterManager {
     fun setLyricSection(section: LyricSection) {
         _lyricSection.value = section
         _lyricSectionVersion.value++
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(Presenting.LYRICS)
     }
 
     fun setDisplayedLyricSection(section: LyricSection) {
@@ -346,7 +353,7 @@ class PresenterManager {
 
     fun setSelectedImagePath(imagePath: String?) {
         _selectedImagePath.value = imagePath
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(Presenting.PICTURES)
     }
 
     fun setDisplayedImagePath(path: String?) {
@@ -509,7 +516,7 @@ class PresenterManager {
 
     fun setAnnouncementText(text: String) {
         _announcementText.value = text
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(Presenting.ANNOUNCEMENTS)
     }
 
     private val _websiteUrl = mutableStateOf("")
@@ -517,7 +524,7 @@ class PresenterManager {
 
     fun setWebsiteUrl(url: String) {
         _websiteUrl.value = url
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(Presenting.WEBSITE)
     }
 
     private val _webPageTitle = mutableStateOf("")
@@ -525,7 +532,7 @@ class PresenterManager {
 
     fun setWebPageTitle(title: String) {
         _webPageTitle.value = title
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(Presenting.WEBSITE)
     }
 
     // Periodically-updated screenshot of the live WebView — used by LivePreviewPanel
@@ -551,7 +558,7 @@ class PresenterManager {
 
     fun setActiveScene(scene: Scene?) {
         _activeScene.value = scene
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(Presenting.CANVAS)
     }
 
     // ── Announcements timer/clock ───────────────────────────────────────────
@@ -669,7 +676,7 @@ class PresenterManager {
 
     fun setDisplayedQuestion(question: Question?) {
         _displayedQuestion.value = question
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(Presenting.QA)
     }
 
     fun setQaTransitionAlpha(alpha: Float) {
@@ -686,6 +693,6 @@ class PresenterManager {
 
     fun setDisplayedDictionaryEntry(entry: StrongsEntry?) {
         _displayedDictionaryEntry.value = entry
-        notifyLiveStateChanged()
+        notifyLiveStateChanged(Presenting.DICTIONARY)
     }
 }

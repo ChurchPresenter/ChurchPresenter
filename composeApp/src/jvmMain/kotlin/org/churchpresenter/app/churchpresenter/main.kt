@@ -446,9 +446,9 @@ fun main() {
         // Broadcasts this instance's live content to any connected InstanceLink follower — the
         // counterpart to the remoteLiveState collector above.
         LaunchedEffect(Unit) {
-            presenterManager.onLiveStateChanged = { pm ->
+            presenterManager.onLiveStateChanged = { pm, source ->
                 companionServer.updateLiveState(
-                    mode = pm.presentingMode.value.name,
+                    mode = source.name,
                     bibleVerse = pm.selectedVerse.value,
                     lyricSection = pm.lyricSection.value,
                     pictureImagePath = pm.selectedImagePath.value,
