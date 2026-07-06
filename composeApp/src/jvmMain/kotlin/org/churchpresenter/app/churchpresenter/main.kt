@@ -67,6 +67,7 @@ import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
@@ -140,6 +141,7 @@ import org.jetbrains.compose.resources.stringResource
 import java.awt.Desktop
 import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
+import java.io.File
 import java.net.URI
 import java.util.Locale
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -186,6 +188,30 @@ fun main() {
     val startupSettings = SettingsManager().loadSettings()
     CrashReporter.initialize(startupSettings.analyticsReportingEnabled)
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
+
+    // First run only: if no Bible has been configured yet, bundle the KJV 1769
+    // into a default folder and set it as the primary Bible so the app works
+    // out of the box without requiring the user to pick a Bible folder first.
+    if (startupSettings.bibleSettings.storageDirectory.isEmpty() && startupSettings.bibleSettings.primaryBible.isEmpty()) {
+        try {
+            val defaultBibleDir = File(System.getProperty("user.home"), ".churchpresenter/Bibles")
+            defaultBibleDir.mkdirs()
+            val targetFile = File(defaultBibleDir, "kjv1769.spb")
+            if (!targetFile.exists()) {
+                targetFile.writeBytes(runBlocking { Res.readBytes("files/bible_samples/kjv1769.spb") })
+            }
+            SettingsManager().saveSettings(
+                startupSettings.copy(
+                    bibleSettings = startupSettings.bibleSettings.copy(
+                        storageDirectory = defaultBibleDir.absolutePath,
+                        primaryBible = "kjv1769.spb"
+                    )
+                )
+            )
+        } catch (e: Exception) {
+            CrashReporter.reportException(e, "Bundling default KJV Bible")
+        }
+    }
 
     // Pass the install id only when analytics is enabled, so opted-out users
     // still send an anonymous geo ping but no persistent identifier.

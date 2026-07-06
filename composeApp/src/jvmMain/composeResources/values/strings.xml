@@ -1237,6 +1237,12 @@
     <string name="add_song_samples">Add Song Samples</string>
     <string name="sps_file_not_supported">%1$s (not supported)</string>
     <string name="folder_overwrite_confirm">Folder \"%1$s\" already exists. This will overwrite existing song files.\nContinue?</string>
+
+    <!-- System Settings - Bible Samples -->
+    <string name="bible_samples">Bible Samples</string>
+    <string name="bible_samples_overwrite_confirm">A bundled Bible file already exists in this folder. This will overwrite it.\nContinue?</string>
+    <string name="bible_samples_copied">Copied %1$d sample Bible(s) and set as primary Bible.</string>
+    <string name="add_bible_samples">Add Bible Samples (KJV)</string>
     <string name="conversion_complete">Conversion Complete</string>
     <string name="conversion_complete_message">Converted %1$d songs to folder: %2$s</string>
     <string name="conversion_complete_with_errors">Converted %1$d songs.\nErrors:\n%2$s</string>

@@ -1329,24 +1329,26 @@ fun BibleTab(
                             contentColor = if (sttConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    // Swap Bibles (blue)
-                    ActionIconButton(
-                        onClick = {
-                            onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) }
-                            focusRequester.requestFocus()
-                        },
-                        tooltipText = swapBiblesStr,
-                        painter = painterResource(Res.drawable.ic_swap),
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary,
-                        tooltipContent = {
-                            Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                                Text(stringResource(Res.string.swap_bibles_hint), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
-                                Text("${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}", color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall)
-                                Text("${stringResource(Res.string.secondary_bible)} ${appSettings.bibleSettings.secondaryBible.substringBeforeLast('.').ifEmpty { "-" }}", color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall)
+                    // Swap Bibles (blue) — hidden when there's no secondary Bible to swap with
+                    if (appSettings.bibleSettings.secondaryBible.isNotEmpty()) {
+                        ActionIconButton(
+                            onClick = {
+                                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) }
+                                focusRequester.requestFocus()
+                            },
+                            tooltipText = swapBiblesStr,
+                            painter = painterResource(Res.drawable.ic_swap),
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            contentColor = MaterialTheme.colorScheme.onTertiary,
+                            tooltipContent = {
+                                Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                                    Text(stringResource(Res.string.swap_bibles_hint), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                                    Text("${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}", color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall)
+                                    Text("${stringResource(Res.string.secondary_bible)} ${appSettings.bibleSettings.secondaryBible.substringBeforeLast('.').ifEmpty { "-" }}", color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                     // Add to Schedule (teal)
                     AddToScheduleButton(
                         onClick = {
