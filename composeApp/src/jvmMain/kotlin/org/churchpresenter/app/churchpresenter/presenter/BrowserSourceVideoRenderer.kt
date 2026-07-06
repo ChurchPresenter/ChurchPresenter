@@ -22,6 +22,7 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -56,6 +57,24 @@ import javax.imageio.ImageIO
  * per-output stream far cheaper than NDI (which encodes continuously regardless of change
  * or of whether anyone is even watching).
  */
+/**
+ * One emitted delta: a PNG-encoded sub-rectangle of the full [fullWidth]x[fullHeight] frame,
+ * positioned at ([x],[y]). A full-frame delta has x=0, y=0, rectWidth=fullWidth,
+ * rectHeight=fullHeight — sent for the very first tick and whenever a new HTTP subscriber
+ * attaches, since a brand-new client's compositing canvas has nothing to apply a partial rect
+ * onto yet. Note: default `equals()`/`hashCode()` on [png] is reference-based, not content-based
+ * — harmless since nothing ever compares instances, only passes them through.
+ */
+data class BrowserSourceFrame(
+    val x: Int,
+    val y: Int,
+    val rectWidth: Int,
+    val rectHeight: Int,
+    val fullWidth: Int,
+    val fullHeight: Int,
+    val png: ByteArray,
+)
+
 @OptIn(ExperimentalComposeUiApi::class)
 class BrowserSourceVideoRenderer(
     private val presenterManager: PresenterManager,
@@ -74,8 +93,16 @@ class BrowserSourceVideoRenderer(
         const val TICK_DELAY_MS = 100L // ~10fps sampling; only changed frames are actually encoded/emitted
     }
 
-    /** Latest PNG-encoded frame, replayed to any newly-subscribed HTTP client. */
-    val frames = MutableSharedFlow<ByteArray>(replay = 1, extraBufferCapacity = 1)
+    /**
+     * Latest frame delta, replayed to any newly-subscribed HTTP client. Uses [BufferOverflow.DROP_OLDEST]
+     * (the established pattern elsewhere in this codebase) rather than the default SUSPEND — a
+     * slow network consumer must never stall the render loop itself, only skip stale frames.
+     */
+    val frames = MutableSharedFlow<BrowserSourceFrame>(
+        replay = 1,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
 
     private var job: Job? = null
 
@@ -245,6 +272,7 @@ class BrowserSourceVideoRenderer(
                 var timeNanos = 0L
                 val intBuf = IntArray(width * height)
                 var lastBuf: IntArray? = null
+                var lastSeenSubscriberCount = 0
                 while (true) {
                     timeNanos += FRAME_NANOS
                     Snapshot.sendApplyNotifications()
@@ -254,10 +282,31 @@ class BrowserSourceVideoRenderer(
                     } finally {
                         img.close()
                     }
-                    if (lastBuf == null || !intBuf.contentEquals(lastBuf)) {
-                        val png = encodePng(intBuf, width, height)
-                        frames.emit(png)
-                        lastBuf = intBuf.copyOf()
+
+                    // A newly-attached HTTP client (OBS/vMix reconnect, or a debug tab opened
+                    // mid-service) must be seeded with a full frame before any dirty-rect delta
+                    // means anything to it, so force one whenever the subscriber count rises —
+                    // even on a tick where content didn't otherwise change.
+                    val subscriberCount = frames.subscriptionCount.value
+                    val newSubscriberJoined = subscriberCount > lastSeenSubscriberCount
+                    lastSeenSubscriberCount = subscriberCount
+
+                    val previous = lastBuf
+                    val contentChanged = previous == null || !intBuf.contentEquals(previous)
+
+                    if (contentChanged || newSubscriberJoined) {
+                        val frame = if (previous == null || newSubscriberJoined) {
+                            BrowserSourceFrame(0, 0, width, height, width, height, encodePng(intBuf, width, height))
+                        } else {
+                            val rect = computeDirtyRect(intBuf, previous, width, height)
+                            val cropped = cropPixels(intBuf, width, rect.x, rect.y, rect.w, rect.h)
+                            BrowserSourceFrame(
+                                rect.x, rect.y, rect.w, rect.h, width, height,
+                                encodePng(cropped, rect.w, rect.h)
+                            )
+                        }
+                        frames.emit(frame)
+                        if (contentChanged) lastBuf = intBuf.copyOf()
                     }
                     delay(TICK_DELAY_MS)
                 }
@@ -270,6 +319,58 @@ class BrowserSourceVideoRenderer(
     fun stop() {
         job?.cancel()
         job = null
+    }
+
+    private data class DirtyRect(val x: Int, val y: Int, val w: Int, val h: Int)
+
+    /**
+     * Tight bounding box of pixels that differ between [current] and [previous] (both row-major
+     * width*height IntArrays). Only called when the buffers are already known to differ, so a
+     * diff always exists. Two-phase for cheapness: first shrink top/bottom via whole-row
+     * comparisons to skip unchanged rows cheaply (the common case — a small moving region, e.g.
+     * a blinking cursor or a Lottie lower-third, against an otherwise static frame), then scan
+     * columns only within the surviving row band. A full-screen crossfade (nearly every pixel
+     * changes) degrades to close to the full frame — expected, not a regression.
+     */
+    private fun computeDirtyRect(current: IntArray, previous: IntArray, width: Int, height: Int): DirtyRect {
+        var minRow = 0
+        while (minRow < height && rowsEqual(current, previous, minRow, width)) minRow++
+        var maxRow = height - 1
+        while (maxRow > minRow && rowsEqual(current, previous, maxRow, width)) maxRow--
+
+        var minCol = width
+        var maxCol = -1
+        for (row in minRow..maxRow) {
+            val rowStart = row * width
+            for (col in 0 until width) {
+                val idx = rowStart + col
+                if (current[idx] != previous[idx]) {
+                    if (col < minCol) minCol = col
+                    if (col > maxCol) maxCol = col
+                }
+            }
+        }
+        // Defensive fallback — the caller guarantees a diff exists, so this shouldn't trigger,
+        // but never emit an inverted rect.
+        if (minCol > maxCol) {
+            minCol = 0
+            maxCol = width - 1
+        }
+
+        return DirtyRect(x = minCol, y = minRow, w = maxCol - minCol + 1, h = maxRow - minRow + 1)
+    }
+
+    private fun rowsEqual(a: IntArray, b: IntArray, row: Int, width: Int): Boolean {
+        val start = row * width
+        return java.util.Arrays.equals(a, start, start + width, b, start, start + width)
+    }
+
+    private fun cropPixels(src: IntArray, srcWidth: Int, x: Int, y: Int, w: Int, h: Int): IntArray {
+        val out = IntArray(w * h)
+        for (row in 0 until h) {
+            System.arraycopy(src, (y + row) * srcWidth + x, out, row * w, w)
+        }
+        return out
     }
 
     private fun encodePng(argb: IntArray, w: Int, h: Int): ByteArray {

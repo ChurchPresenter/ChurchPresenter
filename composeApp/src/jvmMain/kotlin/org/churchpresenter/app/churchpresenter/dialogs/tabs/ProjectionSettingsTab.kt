@@ -39,6 +39,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -51,6 +52,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -68,6 +70,7 @@ import churchpresenter.composeapp.generated.resources.browser_source_outputs
 import churchpresenter.composeapp.generated.resources.browser_source_outputs_help
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.browser_source_confirm_remove_message
+import churchpresenter.composeapp.generated.resources.browser_source_enabled
 import churchpresenter.composeapp.generated.resources.browser_source_require_api_key
 import churchpresenter.composeapp.generated.resources.browser_source_uses_server_api_key
 import churchpresenter.composeapp.generated.resources.copy_url_transparent
@@ -982,6 +985,22 @@ fun ProjectionSettingsTab(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Switch(
+                                checked = output.browserSourceEnabled,
+                                onCheckedChange = { checked ->
+                                    val updated = output.copy(browserSourceEnabled = checked)
+                                    onSettingsChange { s ->
+                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                    }
+                                }
+                            )
+                            Text(
+                                text = stringResource(Res.string.browser_source_enabled),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                         Text(
                             text = stringResource(Res.string.browser_source_output_label, i + 1),
                             style = MaterialTheme.typography.bodyMedium
@@ -1064,6 +1083,10 @@ fun ProjectionSettingsTab(
                 }
 
                 val rowScrollState = rememberScrollState()
+                // Dim (not disable) the rest of this card's controls when the output is off, so
+                // it's obvious at a glance which outputs are inactive — the controls underneath
+                // still work normally if the output is re-enabled.
+                Column(modifier = Modifier.alpha(if (output.browserSourceEnabled) 1f else 0.5f)) {
                 Row(verticalAlignment = Alignment.Top) {
                     Row(modifier = Modifier.weight(1f).horizontalScroll(rowScrollState), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -1264,6 +1287,7 @@ fun ProjectionSettingsTab(
                     }
                     Spacer(modifier = Modifier.width(displayModeColWidth * 3))
                 }
+                } // end alpha-dimmed Column
             }
         }
 

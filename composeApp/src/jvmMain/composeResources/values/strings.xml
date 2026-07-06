@@ -587,6 +587,7 @@
     <string name="browser_source_confirm_remove_message">Are you sure you want to remove %1$s?</string>
     <string name="browser_source_require_api_key">Require API Key</string>
     <string name="browser_source_uses_server_api_key">Uses the same key as Server settings; enable there first.</string>
+    <string name="browser_source_enabled">Enabled</string>
     <string name="copy_url_transparent">Copy URL for Transparent Background</string>
     <string name="copy_url_black_bg">Copy URL for Black Background</string>
 

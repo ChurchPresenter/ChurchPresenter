@@ -26,7 +26,9 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.webSocket
+import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
+import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,9 +40,11 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -49,6 +53,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.data.settings.PresentationRemoteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
@@ -729,10 +734,16 @@ class CompanionServer {
 
     // ── Browser Source outputs (OBS/vMix overlay) ─────────────────────────────
     // Content is rendered off-screen in main.kt (BrowserSourceVideoRenderer, the same
-    // BiblePresenter/SongPresenter/etc composables used everywhere else) and streamed here
-    // as PNG frames — this class only owns HTTP serving, never PresenterManager/content state.
+    // BiblePresenter/SongPresenter/etc composables used everywhere else) and streamed here over
+    // a WebSocket as binary-framed PNG deltas — this class only owns serving, never
+    // PresenterManager/content state. (Previously HTTP multipart/x-mixed-replace; switched to
+    // WebSocket because that legacy MIME type turned out to be unreliable in both directions —
+    // Chrome's <img> support for it is inconsistent, and Safari's fetch()/ReadableStream failed
+    // outright with "Load failed" for this exact indefinitely-long streaming response pattern,
+    // even on localhost. WebSocket is what the rest of this server already uses for real-time
+    // push, and has none of that legacy baggage.)
     @Volatile private var _browserSourceOutputs: List<ScreenAssignment> = emptyList()
-    private val _browserSourceFrameFlows = java.util.concurrent.ConcurrentHashMap<Int, kotlinx.coroutines.flow.SharedFlow<ByteArray>>()
+    private val _browserSourceFrameFlows = java.util.concurrent.ConcurrentHashMap<Int, SharedFlow<BrowserSourceFrame>>()
 
     fun updateBrowserSourceOutputs(outputs: List<ScreenAssignment>) {
         _browserSourceOutputs = outputs
@@ -740,23 +751,45 @@ class CompanionServer {
 
     fun browserSourceOutput(index: Int): ScreenAssignment? = _browserSourceOutputs.getOrNull(index)
 
-    /** Registers (or replaces) the PNG frame flow a given output's renderer produces. */
-    fun registerBrowserSourceFrames(index: Int, frames: kotlinx.coroutines.flow.SharedFlow<ByteArray>) {
+    /** Registers (or replaces) the frame delta flow a given output's renderer produces. */
+    fun registerBrowserSourceFrames(index: Int, frames: SharedFlow<BrowserSourceFrame>) {
         _browserSourceFrameFlows[index] = frames
     }
 
-    /** Checks the given output's independent Browser Source API-key requirement (separate from [_apiKeyEnabled]). */
-    private suspend fun checkBrowserSourceApiKey(call: io.ktor.server.application.ApplicationCall, output: ScreenAssignment): Boolean {
+    /** Pure check for the given output's independent Browser Source API-key requirement (separate from [_apiKeyEnabled]) — no response side effects, usable from both HTTP and WebSocket routes. */
+    private fun browserSourceApiKeyValid(call: io.ktor.server.application.ApplicationCall, output: ScreenAssignment): Boolean {
         if (!output.browserSourceApiKeyRequired || _apiKey.value.isEmpty()) return true
         val provided = call.request.headers[Constants.HEADER_API_KEY]
             ?: call.request.queryParameters[Constants.QUERY_PARAM_API_KEY]
             ?: ""
-        return if (MessageDigest.isEqual(provided.toByteArray(), _apiKey.value.toByteArray())) {
-            true
-        } else {
-            call.respond(io.ktor.http.HttpStatusCode.Unauthorized, "Invalid API key")
-            false
-        }
+        return MessageDigest.isEqual(provided.toByteArray(), _apiKey.value.toByteArray())
+    }
+
+    /** Same check as [browserSourceApiKeyValid], but responds 401 on an HTTP route when invalid. */
+    private suspend fun checkBrowserSourceApiKey(call: io.ktor.server.application.ApplicationCall, output: ScreenAssignment): Boolean {
+        if (browserSourceApiKeyValid(call, output)) return true
+        call.respond(io.ktor.http.HttpStatusCode.Unauthorized, "Invalid API key")
+        return false
+    }
+
+    /**
+     * Packs one [BrowserSourceFrame] into a single WebSocket binary message: a fixed 24-byte
+     * big-endian header (x, y, rectWidth, rectHeight, fullWidth, fullHeight — six Int32s) followed
+     * by the raw PNG bytes. The client reads this with a matching `DataView`. Using WebSocket
+     * binary messages instead of HTTP multipart/x-mixed-replace means each frame's boundary is
+     * handled natively by the WebSocket protocol — no manual buffer/boundary parsing needed on
+     * either side, and no dependence on a legacy MIME type with inconsistent engine support.
+     */
+    private fun encodeBrowserSourceFrameMessage(frame: BrowserSourceFrame): ByteArray {
+        val buf = java.nio.ByteBuffer.allocate(24 + frame.png.size)
+        buf.putInt(frame.x)
+        buf.putInt(frame.y)
+        buf.putInt(frame.rectWidth)
+        buf.putInt(frame.rectHeight)
+        buf.putInt(frame.fullWidth)
+        buf.putInt(frame.fullHeight)
+        buf.put(frame.png)
+        return buf.array()
     }
 
     /** Lottie files in the configured lower-third folder. */
@@ -2960,42 +2993,84 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.NotFound, "Unknown browser source output")
                         return@get
                     }
+                    if (!output.browserSourceEnabled) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Browser source output is disabled")
+                        return@get
+                    }
                     if (!checkBrowserSourceApiKey(call, output)) return@get
                     val bgOverride = call.request.queryParameters["bg"]
+                    // OBS/browsers cache this page aggressively and won't refetch it on their own
+                    // (OBS requires an explicit "Refresh cache of current page"). no-store ensures
+                    // a client always gets JS that matches this server's current wire protocol,
+                    // rather than silently running stale JS against a since-changed stream format.
+                    call.response.headers.append(HttpHeaders.CacheControl, "no-store")
                     call.respondText(browserSourceOverlayPageHtml(displayIndex, output, bgOverride), ContentType.Text.Html)
                 }
 
-                // Continuous PNG video stream (multipart/x-mixed-replace) of this output's
-                // off-screen-rendered content — see BrowserSourceVideoRenderer in main.kt.
-                // A frame is only pushed when its pixels actually changed since the previous
-                // tick, so a static slide costs one frame, not continuous encoding.
-                get("/api${Constants.ENDPOINT_BROWSER_SOURCE}/{index}/stream") {
-                    // Same 1-based -> 0-based conversion as the overlay page route above,
-                    // since this URL is embedded inside that page using the same display index.
+                // WebSocket delta stream of this output's off-screen-rendered content — see
+                // BrowserSourceVideoRenderer in main.kt. A frame is only pushed when its pixels
+                // actually changed since the previous tick, so a static slide costs one frame,
+                // not continuous encoding. Each message is usually just the changed sub-rectangle,
+                // not the full frame — see encodeBrowserSourceFrameMessage for the binary layout.
+                // The client composites deltas onto an offscreen full-frame canvas (see
+                // browserSourceOverlayPageHtml below). Previously HTTP multipart/x-mixed-replace;
+                // see the comment above _browserSourceFrameFlows for why that was replaced.
+                webSocket("/api${Constants.ENDPOINT_BROWSER_SOURCE}/{index}/ws") {
+                    // Same 1-based -> 0-based conversion as the overlay page route above, since
+                    // this URL is embedded inside that page using the same display index. A
+                    // WebSocket route is already past the handshake by the time this block runs,
+                    // so invalid requests are rejected via close(CloseReason(...)) rather than an
+                    // HTTP status code — the client reads the close reason to show a diagnostic.
                     val displayIndex = call.parameters["index"]?.toIntOrNull()
                     val index = displayIndex?.minus(1)
                     val output = index?.let { browserSourceOutput(it) }
                     if (displayIndex == null || output == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Unknown browser source output")
-                        return@get
+                        close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "Unknown browser source output"))
+                        return@webSocket
                     }
-                    if (!checkBrowserSourceApiKey(call, output)) return@get
+                    if (!output.browserSourceEnabled) {
+                        close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "Browser source output is disabled"))
+                        return@webSocket
+                    }
+                    if (!browserSourceApiKeyValid(call, output)) {
+                        close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid API key"))
+                        return@webSocket
+                    }
                     val frames = _browserSourceFrameFlows[index]
                     if (frames == null) {
-                        call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, "Renderer not ready")
-                        return@get
+                        close(CloseReason(CloseReason.Codes.TRY_AGAIN_LATER, "Renderer not ready"))
+                        return@webSocket
                     }
-                    call.respondBytesWriter(contentType = ContentType.parse("multipart/x-mixed-replace; boundary=frame")) {
-                        try {
-                            frames.collect { png ->
-                                writeStringUtf8("--frame\r\nContent-Type: image/png\r\nContent-Length: ${png.size}\r\n\r\n")
-                                writeFully(png)
-                                writeStringUtf8("\r\n")
-                                flush()
-                            }
-                        } catch (_: Exception) {
-                            // client disconnected — collection just stops
+                    // A frame is only ever emitted on a real content change, so a static slide
+                    // can leave this connection completely silent for minutes. Safari (and
+                    // plenty of consumer routers doing NAT connection tracking) have been
+                    // observed killing an idle streaming connection after roughly 30-60s of no
+                    // data. Re-sending the last known frame on a timer keeps it alive; the client
+                    // draws it identically to before since it's the exact same bytes/rect.
+                    var lastFrame: BrowserSourceFrame? = null
+                    val frameJob = scope.launch {
+                        frames.collect { frame ->
+                            lastFrame = frame
+                            send(Frame.Binary(true, encodeBrowserSourceFrameMessage(frame)))
                         }
+                    }
+                    val heartbeatJob = scope.launch {
+                        while (true) {
+                            kotlinx.coroutines.delay(15_000)
+                            lastFrame?.let { send(Frame.Binary(true, encodeBrowserSourceFrameMessage(it))) }
+                        }
+                    }
+                    try {
+                        for (frame in incoming) {
+                            // One-way server push — inbound frames (pings/pongs aside, handled by
+                            // the engine) aren't meaningful here; just keep the session open until
+                            // the client disconnects.
+                        }
+                    } catch (_: Exception) {
+                        // client disconnected
+                    } finally {
+                        frameJob.cancel()
+                        heartbeatJob.cancel()
                     }
                 }
 
@@ -3637,13 +3712,24 @@ class CompanionServer {
      * Self-contained HTML page for an OBS/vMix Browser Source input. The actual content is
      * rendered off-screen in main.kt ([org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer],
      * using the same BiblePresenter/SongPresenter/AnnouncementsPresenter/PicturePresenter/
-     * StageMonitorScreen composables as everywhere else) and streamed as PNG frames — so
-     * styling is pixel-identical to the native output by construction, not reimplemented in
-     * CSS/JS. The page consumes the stream via `fetch()` + manual multipart-boundary parsing
-     * into a `<canvas>`, rather than relying on a plain `<img src>` pointed at the multipart
-     * response — modern Chromium's support for `multipart/x-mixed-replace` in `<img>` is
-     * legacy/inconsistent (historically JPEG-only and increasingly unreliable), which is why
-     * an `<img>`-based first pass showed a black/blank frame instead of live video.
+     * StageMonitorScreen composables as everywhere else) and streamed as binary-framed PNG
+     * deltas over a WebSocket — so styling is pixel-identical to the native output by
+     * construction, not reimplemented in CSS/JS. WebSocket was chosen after HTTP
+     * multipart/x-mixed-replace proved unreliable in both directions: Chromium's `<img>` support
+     * for that MIME type is legacy/inconsistent (historically JPEG-only), and Safari's
+     * `fetch()`/`ReadableStream` failed outright with "TypeError: Load failed" for this exact
+     * indefinitely-long streaming response pattern — reproduced even on localhost, so it wasn't
+     * a network issue. WebSocket message boundaries are handled natively by the browser, so
+     * there's no manual buffer/boundary parsing on either side anymore. Each delta is usually
+     * just the sub-rectangle that changed (not the full frame), composited onto a persistent
+     * offscreen canvas at the stream's native resolution; that offscreen canvas is what's
+     * actually drawn, scaled+centered, into the visible window-sized `<canvas>`. Served with
+     * `Cache-Control: no-store` since OBS/browsers cache a Browser Source page aggressively and
+     * otherwise won't refetch it after this wire protocol changes — a stale cached copy of this
+     * page's JS would silently misinterpret messages from a newer server. If this protocol
+     * changes again, any already-open OBS Browser Source still needs a manual "Refresh cache of
+     * current page" (OBS won't do this on its own even with no-store, since it doesn't re-request
+     * an already loaded page) — no-store only guarantees a *fresh* page load gets current JS.
      */
     private fun browserSourceOverlayPageHtml(index: Int, output: ScreenAssignment, bgOverride: String? = null): String {
         val needsKey = output.browserSourceApiKeyRequired || (_apiKeyEnabled.value && _apiKey.value.isNotEmpty())
@@ -3656,7 +3742,7 @@ class CompanionServer {
             "transparent" -> "transparent"
             else -> if (output.browserSourceTransparentBackground) "transparent" else "#000"
         }
-        val streamUrl = "/api${Constants.ENDPOINT_BROWSER_SOURCE}/$index/stream$keyParam"
+        val wsPath = "/api${Constants.ENDPOINT_BROWSER_SOURCE}/$index/ws$keyParam"
         return """
 <!DOCTYPE html>
 <html lang="en">
@@ -3668,26 +3754,49 @@ class CompanionServer {
 html,body{width:100%;height:100%;background:$bodyBg;overflow:hidden}
 #stage{position:fixed;inset:0}
 #frame{width:100%;height:100%;display:block}
+#diag{position:fixed;bottom:8px;left:8px;max-width:90%;padding:6px 10px;
+  background:rgba(200,0,0,0.85);color:#fff;font:12px/1.4 monospace;
+  border-radius:4px;display:none;z-index:9999;white-space:pre-wrap}
 </style>
 </head>
 <body>
 <div id="stage"><canvas id="frame"></canvas></div>
+<div id="diag"></div>
 <script>
-const src='$streamUrl';
+const wsUrl=(location.protocol==='https:'?'wss:':'ws:')+'//'+location.host+'$wsPath';
 const canvas=document.getElementById('frame');
 const ctx=canvas.getContext('2d');
-// Setting canvas.width/height clears its pixel buffer per spec — since frames are only
-// pushed on content change (not continuously), a resize with no content change right after
-// would otherwise leave the canvas blank until the next real change. Cache the last drawn
-// bitmap and repaint it immediately after every resize so nothing goes black in between.
-let lastBitmap=null;
+
+// Surfaces failures directly on the page instead of only in devtools — this page is normally
+// only ever looked at through OBS/vMix's embedded browser, where nobody opens a console, so a
+// silently-swallowed error here previously meant "shows nothing" with zero way to diagnose why.
+const diagEl=document.getElementById('diag');
+function showDiag(msg){
+  if(!diagEl)return;
+  diagEl.textContent=msg;
+  diagEl.style.display='block';
+}
+function clearDiag(){
+  if(diagEl)diagEl.style.display='none';
+}
+if(typeof OffscreenCanvas==='undefined'){
+  showDiag('Browser Source error: this browser/OBS version does not support OffscreenCanvas. Update your browser or OBS.');
+}
+
+// The offscreen canvas is the authoritative "current full frame" at the stream's native
+// resolution. Incoming deltas (full-frame or a changed sub-rectangle) are composited onto it;
+// the visible, window-sized canvas is then repainted scaled+centered from it. This is also why
+// a window resize with no new delta doesn't go blank — resizeCanvas() just repaints from the
+// same offscreen content at the new size.
+let offscreen=null, offscreenCtx=null, hasFullFrame=false;
+
 function paintBitmap(){
-  if(!lastBitmap)return;
-  const scale=Math.min(canvas.width/lastBitmap.width, canvas.height/lastBitmap.height);
-  const w=lastBitmap.width*scale, h=lastBitmap.height*scale;
+  if(!offscreen)return;
+  const scale=Math.min(canvas.width/offscreen.width, canvas.height/offscreen.height);
+  const w=offscreen.width*scale, h=offscreen.height*scale;
   const x=(canvas.width-w)/2, y=(canvas.height-h)/2;
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(lastBitmap,x,y,w,h);
+  ctx.drawImage(offscreen,x,y,w,h);
 }
 function resizeCanvas(){
   canvas.width=window.innerWidth;
@@ -3697,59 +3806,76 @@ function resizeCanvas(){
 window.addEventListener('resize',resizeCanvas);
 resizeCanvas();
 
-let buf=new Uint8Array(0);
-function append(chunk){
-  const merged=new Uint8Array(buf.length+chunk.length);
-  merged.set(buf,0);merged.set(chunk,buf.length);
-  buf=merged;
-}
-function indexOfSeq(hay,needle,from){
-  outer: for(let i=from;i<=hay.length-needle.length;i++){
-    for(let j=0;j<needle.length;j++){ if(hay[i+j]!==needle[j]) continue outer; }
-    return i;
-  }
-  return -1;
-}
-const HEADER_END=new TextEncoder().encode('\r\n\r\n');
-async function drawFrame(pngBytes){
+async function drawFrame(pngBytes,rx,ry,rw,rh,fullW,fullH){
+  const isFullFrame = rx===0 && ry===0 && rw===fullW && rh===fullH;
+  // A newly-connected/reconnected client has nothing to apply a partial rect onto yet — discard
+  // any delta until the first full frame arrives, so it never shows a corrupt/torn draw.
+  if(!hasFullFrame && !isFullFrame)return;
   try{
     const blob=new Blob([pngBytes],{type:'image/png'});
     const bitmap=await createImageBitmap(blob);
-    if(lastBitmap)lastBitmap.close();
-    lastBitmap=bitmap;
+    if(isFullFrame){
+      if(!offscreen || offscreen.width!==fullW || offscreen.height!==fullH){
+        offscreen=new OffscreenCanvas(fullW,fullH);
+        offscreenCtx=offscreen.getContext('2d');
+      }
+      offscreenCtx.clearRect(0,0,fullW,fullH);
+      offscreenCtx.drawImage(bitmap,0,0);
+      hasFullFrame=true;
+    }else{
+      offscreenCtx.drawImage(bitmap,rx,ry);
+    }
+    bitmap.close();
     paintBitmap();
-  }catch(e){}
-}
-async function processBuffer(){
-  while(true){
-    const headerEndIdx=indexOfSeq(buf,HEADER_END,0);
-    if(headerEndIdx===-1)return;
-    const headerText=new TextDecoder().decode(buf.slice(0,headerEndIdx));
-    const m=headerText.match(/Content-Length:\s*(\d+)/i);
-    if(!m){ buf=buf.slice(headerEndIdx+4); continue; }
-    const len=parseInt(m[1],10);
-    const bodyStart=headerEndIdx+4;
-    const bodyEnd=bodyStart+len;
-    if(buf.length<bodyEnd+2)return;
-    const pngBytes=buf.slice(bodyStart,bodyEnd);
-    await drawFrame(pngBytes);
-    buf=buf.slice(bodyEnd+2);
+    clearDiag();
+  }catch(e){
+    console.error('[BrowserSource] drawFrame failed',e);
+    showDiag('Browser Source error (rendering frame): '+e);
   }
 }
-async function streamLoop(){
-  try{
-    const resp=await fetch(src);
-    const reader=resp.body.getReader();
-    while(true){
-      const {done,value}=await reader.read();
-      if(done)break;
-      append(value);
-      await processBuffer();
-    }
-  }catch(e){}
-  setTimeout(streamLoop,2000);
+// Each WebSocket message is exactly one frame delta — a fixed 24-byte big-endian header (six
+// Int32s: x, y, rectWidth, rectHeight, fullWidth, fullHeight) followed by the raw PNG bytes. No
+// manual buffer/boundary parsing needed: the browser's WebSocket implementation already delivers
+// complete messages, unlike the old fetch()+ReadableStream+multipart approach this replaced.
+// drawFrame is async (createImageBitmap) — chain each call after the previous one so frames
+// composite in arrival order even if one decode happens to take longer than the next.
+let processingChain=Promise.resolve();
+function onSocketMessage(event){
+  const buf=event.data;
+  const view=new DataView(buf);
+  const x=view.getInt32(0);
+  const y=view.getInt32(4);
+  const w=view.getInt32(8);
+  const h=view.getInt32(12);
+  const fullW=view.getInt32(16);
+  const fullH=view.getInt32(20);
+  const pngBytes=new Uint8Array(buf,24);
+  processingChain=processingChain.then(()=>drawFrame(pngBytes,x,y,w,h,fullW,fullH));
 }
-streamLoop();
+function connect(){
+  // A fresh connection may follow a stale/dropped one — never composite a partial delta onto
+  // whatever the offscreen canvas last held until this connection's own full frame arrives.
+  hasFullFrame=false;
+  const ws=new WebSocket(wsUrl);
+  ws.binaryType='arraybuffer';
+  ws.onmessage=onSocketMessage;
+  ws.onopen=()=>clearDiag();
+  ws.onerror=(e)=>{
+    console.error('[BrowserSource] websocket error',e);
+  };
+  ws.onclose=(event)=>{
+    // A disabled/unknown output or bad API key closes with an explicit reason (see the
+    // /ws route in CompanionServer.kt) — surface it directly instead of silently retrying
+    // forever with no clue why nothing is showing up.
+    if(event.reason){
+      showDiag('Browser Source error: '+event.reason);
+    }else if(!event.wasClean){
+      showDiag('Browser Source error: connection lost, retrying...');
+    }
+    setTimeout(connect,2000);
+  };
+}
+connect();
 </script>
 </body>
 </html>
