@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -110,6 +112,10 @@ import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
 import org.churchpresenter.app.churchpresenter.tabs.PicturesTab
 import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
+import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTab
+import org.churchpresenter.app.churchpresenter.composables.CompanionConnectionChipRow
+import org.churchpresenter.app.churchpresenter.composables.CompanionSurfacePanel
+import org.churchpresenter.app.churchpresenter.models.CompanionSurfacePlacement
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
@@ -133,6 +139,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
@@ -220,6 +227,7 @@ fun MainDesktop(
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     sttManager: STTManager? = null,
     dialogDismissSignal: Int = 0,
+    companionSatelliteViewModel: CompanionSatelliteViewModel,
 ) {
     // ScheduleViewModel lives inside ScheduleTab — MainDesktop drives it via callbacks.
     // rememberUpdatedState ensures toolbar lambdas always read the latest actions without
@@ -244,9 +252,11 @@ fun MainDesktop(
 
     var showCrosswordTab by remember { mutableStateOf(false) }
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
-    val visibleTabs = remember(appSettings.hiddenTabs, showCrosswordTab) {
+    val hasCompanionTabConnections = appSettings.companionSatelliteConnections.any { it.showInTab }
+    val visibleTabs = remember(appSettings.hiddenTabs, showCrosswordTab, hasCompanionTabConnections) {
         (Tabs.entries.filter { tab ->
-            tab != Tabs.CROSSWORD && tab.name !in appSettings.hiddenTabs
+            tab != Tabs.CROSSWORD && tab.name !in appSettings.hiddenTabs &&
+                (tab != Tabs.COMPANION_SURFACE || hasCompanionTabConnections)
         } + if (showCrosswordTab) listOf(Tabs.CROSSWORD) else emptyList())
             .ifEmpty { listOf(Tabs.BIBLE) }
     }
@@ -311,6 +321,7 @@ fun MainDesktop(
 
     val presentationViewModel = remember { PresentationViewModel(appSettings) }
     DisposableEffect(Unit) { onDispose { presentationViewModel.dispose() } }
+
     LaunchedEffect(presentationViewModel.selectedSlideIndex, presentationViewModel.slideFiles.size, presentationViewModel.isPlaying) {
         val f = presentationViewModel.selectedPresentation ?: return@LaunchedEffect
         val id = f.absolutePath.hashCode().toUInt().toString(16)
@@ -841,6 +852,7 @@ fun MainDesktop(
                     exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
                 ) {
                     Column(modifier = Modifier.width(with(density) { schedulePanelPx.coerceAtMost(maxSchedulePx).toDp() }).fillMaxHeight()) {
+                    Box(modifier = Modifier.weight(1f)) {
                     ScheduleTab(
                         scheduleViewModel = scheduleViewModel,
                         onPresenting = presenting,
@@ -1061,6 +1073,42 @@ fun MainDesktop(
                         },
                         onScheduleChanged = onScheduleChanged
                     )
+                    } // end Box (ScheduleTab weight)
+                    val leftSidebarConnections = appSettings.companionSatelliteConnections.filter { it.showInLeftSidebar }
+                    if (leftSidebarConnections.isNotEmpty()) {
+                        HorizontalDivider()
+                        var selectedLeftSidebarId by remember(leftSidebarConnections.map { it.id }) {
+                            mutableStateOf(leftSidebarConnections.firstOrNull()?.id)
+                        }
+                        LaunchedEffect(leftSidebarConnections.map { it.id }) {
+                            if (leftSidebarConnections.none { it.id == selectedLeftSidebarId }) {
+                                selectedLeftSidebarId = leftSidebarConnections.firstOrNull()?.id
+                            }
+                        }
+                        val selectedLeftSidebarConnection = leftSidebarConnections.find { it.id == selectedLeftSidebarId }
+                        // No weight here — this panel sizes itself to exactly what its configured
+                        // grid needs (sizeToContent), so the ScheduleTab above (weight(1f)) gets all
+                        // the remaining space instead of being forced into a fixed 50/50 split.
+                        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                            if (leftSidebarConnections.size > 1) {
+                                CompanionConnectionChipRow(
+                                    connections = leftSidebarConnections,
+                                    selectedId = selectedLeftSidebarId,
+                                    onSelect = { selectedLeftSidebarId = it }
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                            if (selectedLeftSidebarConnection != null) {
+                                CompanionSurfacePanel(
+                                    connection = selectedLeftSidebarConnection,
+                                    placement = CompanionSurfacePlacement.LEFT_SIDEBAR,
+                                    viewModel = companionSatelliteViewModel,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    sizeToContent = true
+                                )
+                            }
+                        }
+                    }
                     } // end Column
                 } // end AnimatedVisibility
 
@@ -1404,6 +1452,12 @@ fun MainDesktop(
                                 onSettingsChange = onSettingsChange
                             )
 
+                            Tabs.COMPANION_SURFACE -> CompanionSurfaceTab(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
+                                viewModel = companionSatelliteViewModel
+                            )
+
                             Tabs.DICTIONARY -> DictionaryTab(
                                 modifier = Modifier.fillMaxSize(),
                                 viewModel = dictionaryViewModel,
@@ -1541,6 +1595,46 @@ fun MainDesktop(
                             qaDisplayUrl = qaDisplayUrl,
                             sttManager = sttManager,
                         )
+                        val rightSidebarConnections = appSettings.companionSatelliteConnections.filter { it.showInRightSidebar }
+                        if (rightSidebarConnections.isNotEmpty()) {
+                            // Pushes everything below (divider + panel) down to the bottom of this
+                            // fillMaxHeight column instead of sitting right under the live preview
+                            // with empty space left below it.
+                            Spacer(modifier = Modifier.weight(1f))
+                            Spacer(modifier = Modifier.height(8.dp))
+                            HorizontalDivider()
+                            var selectedRightSidebarId by remember(rightSidebarConnections.map { it.id }) {
+                                mutableStateOf(rightSidebarConnections.firstOrNull()?.id)
+                            }
+                            LaunchedEffect(rightSidebarConnections.map { it.id }) {
+                                if (rightSidebarConnections.none { it.id == selectedRightSidebarId }) {
+                                    selectedRightSidebarId = rightSidebarConnections.firstOrNull()?.id
+                                }
+                            }
+                            val selectedRightSidebarConnection = rightSidebarConnections.find { it.id == selectedRightSidebarId }
+                            // No weight here — sizeToContent sizes this panel to exactly what its
+                            // configured grid needs rather than stretching to fill all remaining
+                            // space below the (fixed-size) live preview above it.
+                            Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                                if (rightSidebarConnections.size > 1) {
+                                    CompanionConnectionChipRow(
+                                        connections = rightSidebarConnections,
+                                        selectedId = selectedRightSidebarId,
+                                        onSelect = { selectedRightSidebarId = it }
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+                                if (selectedRightSidebarConnection != null) {
+                                    CompanionSurfacePanel(
+                                        connection = selectedRightSidebarConnection,
+                                        placement = CompanionSurfacePlacement.RIGHT_SIDEBAR,
+                                        viewModel = companionSatelliteViewModel,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        sizeToContent = true
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

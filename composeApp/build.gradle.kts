@@ -447,6 +447,9 @@ kotlin {
             // Include Bible Lookup Engine (BLE) submodule source — runs in-process as a WebSocket
             // service started when STT connects.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-BLE/src/main/kotlin")
+            // Include Companion Satellite client submodule source — pure-Kotlin client for
+            // Bitfocus Companion's Satellite protocol, wrapped by CompanionSatelliteViewModel.
+            kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite/src/main/kotlin")
             // Include submodule resources (.properties files for localization)
             resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-Converter/src/main/resources")
             resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/resources")

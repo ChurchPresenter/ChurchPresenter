@@ -1768,6 +1768,41 @@
     <string name="atem_slot_in_use">Slot %1$d (in use)</string>
     <string name="atem_slot_empty">Slot %1$d (empty)</string>
 
+    <!-- Companion Satellite surface (ChurchPresenter as a Bitfocus Companion Satellite client) -->
+    <string name="tab_companion_surface">Companion</string>
+    <string name="companion_satellite_settings">Companion Satellite</string>
+    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
+    <string name="companion_satellite_description">Connect to a Bitfocus Companion instance on your network as a Satellite surface, and press its buttons from inside ChurchPresenter.</string>
+    <string name="companion_satellite_host">Host</string>
+    <string name="companion_satellite_host_hint">e.g. 192.168.1.50</string>
+    <string name="companion_satellite_device_id">Tab device ID</string>
+    <string name="companion_satellite_device_id_hint">Leave blank to auto-generate/derive</string>
+    <string name="companion_satellite_left_sidebar_device_id">Left sidebar device ID</string>
+    <string name="companion_satellite_right_sidebar_device_id">Right sidebar device ID</string>
+    <string name="companion_satellite_rows">Rows</string>
+    <string name="companion_satellite_columns">Columns</string>
+    <string name="companion_satellite_bitmap_size">Bitmap size (px)</string>
+    <string name="companion_satellite_max_button_size">Max button size (dp)</string>
+    <string name="companion_satellite_max_button_size_hint">0 = unlimited</string>
+    <string name="companion_satellite_companion_config_note">Which page a connection starts on, and which part of a larger grid it shows, are configured in Companion itself (Settings → Surfaces → this device) — not here.</string>
+    <string name="companion_satellite_show_in">Show in</string>
+    <string name="companion_satellite_show_in_tab">Tab</string>
+    <string name="companion_satellite_show_in_left_sidebar">Left sidebar</string>
+    <string name="companion_satellite_show_in_right_sidebar">Right sidebar</string>
+    <string name="companion_satellite_autoconnect">Connect automatically on launch</string>
+    <string name="companion_satellite_connect">Connect</string>
+    <string name="companion_satellite_disconnect">Disconnect</string>
+    <string name="companion_satellite_no_host">Set a Companion host in Settings → Companion Satellite to connect.</string>
+    <string name="companion_satellite_status_connected">Connected</string>
+    <string name="companion_satellite_status_connecting">Connecting…</string>
+    <string name="companion_satellite_status_disconnected">Disconnected</string>
+    <string name="companion_satellite_status_error">Error: %1$s</string>
+    <string name="companion_satellite_connection_name">Name</string>
+    <string name="companion_satellite_product_name">Product name</string>
+    <string name="companion_satellite_reconnect_delay">Reconnect delay (ms)</string>
+    <string name="companion_satellite_add_connection">+ Add Connection</string>
+    <string name="companion_satellite_remove_connection">Remove Connection</string>
+
     <!-- ATEM Media Upload Triggers (Server tab / Bitfocus Companion) -->
     <string name="companion_atem_triggers">ATEM media upload triggers</string>
     <string name="companion_atem_triggers_desc">Copy a URL into a Bitfocus Companion HTTP button to upload this lower third to an ATEM media slot. Add a delay in Companion before triggering the key — uploads take a few seconds.</string>

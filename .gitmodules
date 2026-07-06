@@ -10,3 +10,6 @@
 [submodule "composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE"]
 	path = composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE
 	url = https://github.com/ChurchPresenter/ChurchPresenter-BLE
+[submodule "composeApp/src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite"]
+	path = composeApp/src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite
+	url = https://github.com/ChurchPresenter/ChurchPresenter-CompanionSatellite

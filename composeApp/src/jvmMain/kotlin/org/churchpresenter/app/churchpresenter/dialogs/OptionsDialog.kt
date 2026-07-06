@@ -48,6 +48,7 @@ import churchpresenter.composeapp.generated.resources.server_settings
 import churchpresenter.composeapp.generated.resources.song
 import churchpresenter.composeapp.generated.resources.obs_settings
 import churchpresenter.composeapp.generated.resources.atem_settings
+import churchpresenter.composeapp.generated.resources.companion_satellite_settings
 import churchpresenter.composeapp.generated.resources.stage_monitor
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -55,6 +56,8 @@ import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.AtemSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.CompanionSatelliteSettingsTab
+import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.OBSSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
@@ -87,13 +90,15 @@ fun OptionsDialog(
     scenes: List<Scene> = emptyList(),
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     obsManager: OBSWebSocketManager? = null,
+    companionSatelliteViewModel: CompanionSatelliteViewModel? = null,
     initialTab: Int = 0,
     initialSettings: AppSettings? = null
 ) {
     if (!isVisible) return
 
     var currentSettings by remember { mutableStateOf(initialSettings ?: settingsManager.loadSettings()) }
-    val tabCount = if (obsManager != null) 11 else 10
+    val companionSatelliteTabIndex = if (obsManager != null) 11 else 10
+    val tabCount = companionSatelliteTabIndex + 1
     var selectedTabIndex by remember(initialTab) { mutableStateOf(initialTab) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
     val mainWindowState = LocalMainWindowState.current
@@ -177,6 +182,11 @@ fun OptionsDialog(
                                 text = { Text(stringResource(Res.string.obs_settings)) }
                             )
                         }
+                        Tab(
+                            selected = safeTabIndex == companionSatelliteTabIndex,
+                            onClick = { selectedTabIndex = companionSatelliteTabIndex },
+                            text = { Text(stringResource(Res.string.companion_satellite_settings)) }
+                        )
                     }
 
                     // Tab Content
@@ -258,12 +268,29 @@ fun OptionsDialog(
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            10 -> if (obsManager != null) OBSSettingsTab(
+                            10 -> if (obsManager != null) {
+                                OBSSettingsTab(
+                                    settings = currentSettings,
+                                    onSettingsChange = { updateFn ->
+                                        currentSettings = updateFn(currentSettings)
+                                    },
+                                    obsManager = obsManager
+                                )
+                            } else {
+                                CompanionSatelliteSettingsTab(
+                                    settings = currentSettings,
+                                    onSettingsChange = { updateFn ->
+                                        currentSettings = updateFn(currentSettings)
+                                    },
+                                    viewModel = companionSatelliteViewModel
+                                )
+                            }
+                            11 -> if (obsManager != null) CompanionSatelliteSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 },
-                                obsManager = obsManager
+                                viewModel = companionSatelliteViewModel
                             )
                         }
                     }

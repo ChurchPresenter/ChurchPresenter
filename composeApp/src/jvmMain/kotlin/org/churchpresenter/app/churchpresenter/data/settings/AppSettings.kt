@@ -43,6 +43,7 @@ data class AppSettings(
     val crosswordProgress: Map<Int, String> = emptyMap(),
     val obsSettings: OBSSettings = OBSSettings(),
     val atemSettings: AtemSettings = AtemSettings(),
+    val companionSatelliteConnections: List<CompanionSatelliteSettings> = listOf(CompanionSatelliteSettings()),
     val songFavorites: List<String> = emptyList(),
     val songFavoritesPanelHeightDp: Int = 120,
     val songBpm: Map<String, Int> = emptyMap(), // songId -> metronome BPM (0 = off), not stored in the .song file

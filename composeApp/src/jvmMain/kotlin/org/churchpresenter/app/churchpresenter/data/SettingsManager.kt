@@ -11,6 +11,10 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 
+/** The three placement-field prefixes used throughout companionSatelliteConnections[] entries
+ * (tabRows, leftSidebarRows, rightSidebarRows, etc.) — shared by the migrations below. */
+private val CompanionSurfacePlacementPrefixes = listOf("tab", "leftSidebar", "rightSidebar")
+
 class SettingsManager {
     private val userHome = System.getProperty("user.home")
     private val appDataDir = File(userHome, ".churchpresenter")
@@ -39,7 +43,9 @@ class SettingsManager {
         return try {
             if (settingsFile.exists()) {
                 val raw = settingsFile.readText()
-                val migrated = migrateProjectionSettings(migrateScreenAssignmentModes(raw))
+                val migrated = migrateCompanionSatelliteRowColumnRangeBackToCount(
+                    migrateCompanionSatelliteStartPage(migrateProjectionSettings(migrateScreenAssignmentModes(raw)))
+                )
                 try {
                     val settings = jsonFormat.decodeFromString<AppSettings>(migrated)
                     migrateHiddenTabs(settings, raw)
@@ -98,6 +104,94 @@ class SettingsManager {
         }
         val newRoot = buildJsonObject {
             root.forEach { (k, v) -> if (k == "projectionSettings") put(k, newProj) else put(k, v) }
+        }
+        return newRoot.toString()
+    }
+
+    /** Renames the old single companionSatelliteConnections[] fields (rows/columns/bitmapSize) to
+     * their tab-prefixed placement-specific equivalents, so existing users' configured values
+     * survive the placement-per-connection rework instead of silently resetting via
+     * ignoreUnknownKeys. TAB is the migration target for all of these since it was the only
+     * placement that existed before. (The old single "startPage" field has no equivalent to rename
+     * to — per-placement start page was tried and dropped again; see
+     * [migrateCompanionSatelliteRowColumnRangeBackToCount].) */
+    private fun migrateCompanionSatelliteStartPage(raw: String): String {
+        if (!raw.contains("\"companionSatelliteConnections\"")) return raw
+        val root = try { jsonFormat.parseToJsonElement(raw).jsonObject } catch (_: Exception) { return raw }
+        val connections = root["companionSatelliteConnections"]?.jsonArray ?: return raw
+        val renames = mapOf("rows" to "tabRows", "columns" to "tabColumns", "bitmapSize" to "tabBitmapSize")
+        var changed = false
+        val newConnections = buildJsonArray {
+            for (element in connections) {
+                val obj = element.jsonObject
+                val toRename = renames.filterKeys { obj.containsKey(it) && !obj.containsKey(renames.getValue(it)) }
+                if (toRename.isNotEmpty()) {
+                    changed = true
+                    add(buildJsonObject {
+                        obj.forEach { (k, v) -> if (k !in toRename) put(k, v) }
+                        toRename.forEach { (oldKey, newKey) -> put(newKey, obj.getValue(oldKey)) }
+                    })
+                } else { add(element) }
+            }
+        }
+        if (!changed) return raw
+        val newRoot = buildJsonObject {
+            root.forEach { (k, v) -> if (k == "companionSatelliteConnections") put(k, newConnections) else put(k, v) }
+        }
+        return newRoot.toString()
+    }
+
+    /** Converts each placement's briefly-introduced start/end row/column RANGE fields back into a
+     * plain rows/columns COUNT, so anyone who saved settings while that experiment was live doesn't
+     * lose their configured grid size via ignoreUnknownKeys. That start/end scheme (backed by
+     * LAYOUT_MANIFEST registration, letting a placement show an arbitrary sub-rectangle of a larger
+     * page) worked when probed directly against the protocol, but wasn't respected reliably in
+     * practice — Companion already exposes equivalent per-surface start-page/offset configuration
+     * of its own (Settings → Surfaces → device), so ChurchPresenter dropped its own version rather
+     * than keep two conflicting sources of truth. A startRow=0/endRow=N-1 range becomes plain
+     * rows=N — identical count to what was already configured, just without the (unreliable) offset. */
+    private fun migrateCompanionSatelliteRowColumnRangeBackToCount(raw: String): String {
+        if (!raw.contains("\"companionSatelliteConnections\"")) return raw
+        val root = try { jsonFormat.parseToJsonElement(raw).jsonObject } catch (_: Exception) { return raw }
+        val connections = root["companionSatelliteConnections"]?.jsonArray ?: return raw
+        var changed = false
+        val rangeKeys = CompanionSurfacePlacementPrefixes.flatMap { prefix ->
+            listOf("${prefix}StartRow", "${prefix}EndRow", "${prefix}StartColumn", "${prefix}EndColumn")
+        }.toSet()
+        val newConnections = buildJsonArray {
+            for (element in connections) {
+                val obj = element.jsonObject
+                val additions = buildJsonObject {
+                    for (prefix in CompanionSurfacePlacementPrefixes) {
+                        val startRow = (obj["${prefix}StartRow"] as? JsonPrimitive)?.content?.toIntOrNull()
+                        val endRow = (obj["${prefix}EndRow"] as? JsonPrimitive)?.content?.toIntOrNull()
+                        val startColumn = (obj["${prefix}StartColumn"] as? JsonPrimitive)?.content?.toIntOrNull()
+                        val endColumn = (obj["${prefix}EndColumn"] as? JsonPrimitive)?.content?.toIntOrNull()
+                        if (startRow != null && endRow != null && !obj.containsKey("${prefix}Rows")) {
+                            put("${prefix}Rows", JsonPrimitive((endRow - startRow + 1).coerceAtLeast(1)))
+                        }
+                        if (startColumn != null && endColumn != null && !obj.containsKey("${prefix}Columns")) {
+                            put("${prefix}Columns", JsonPrimitive((endColumn - startColumn + 1).coerceAtLeast(1)))
+                        }
+                    }
+                }
+                if (additions.isNotEmpty()) {
+                    changed = true
+                    add(buildJsonObject {
+                        obj.forEach { (k, v) -> if (k !in rangeKeys) put(k, v) }
+                        additions.forEach { (k, v) -> put(k, v) }
+                    })
+                } else if (rangeKeys.any { it in obj }) {
+                    // Stray range keys with no rows/columns to derive (shouldn't normally happen) —
+                    // still strip them so they don't linger as dead unknown keys forever.
+                    changed = true
+                    add(buildJsonObject { obj.forEach { (k, v) -> if (k !in rangeKeys) put(k, v) } })
+                } else { add(element) }
+            }
+        }
+        if (!changed) return raw
+        val newRoot = buildJsonObject {
+            root.forEach { (k, v) -> if (k == "companionSatelliteConnections") put(k, newConnections) else put(k, v) }
         }
         return newRoot.toString()
     }

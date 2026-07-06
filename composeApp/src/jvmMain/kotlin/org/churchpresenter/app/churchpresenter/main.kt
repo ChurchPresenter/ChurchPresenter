@@ -124,6 +124,7 @@ import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
+import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -357,6 +358,47 @@ fun main() {
         val qaManager = remember { QAManager() }
         val sttManager = remember { STTManager() }
         val obsManager = remember { OBSWebSocketManager() }
+        val companionSatelliteViewModel = remember { CompanionSatelliteViewModel() }
+        DisposableEffect(Unit) { onDispose { companionSatelliteViewModel.dispose() } }
+        // Auto-connect newly-added connections once; re-keying on id list (not full settings) avoids
+        // reconnecting everything whenever an unrelated field on an existing connection is edited.
+        val autoConnectedIds = remember { mutableSetOf<String>() }
+        LaunchedEffect(appSettings.companionSatelliteConnections.map { it.id }) {
+            for (connection in appSettings.companionSatelliteConnections) {
+                if (connection.autoConnect && autoConnectedIds.add(connection.id)) {
+                    // Companion requires a non-empty DEVICEID — generate + persist one if it was
+                    // cleared, same guard as the manual Connect button in settings.
+                    val effective = if (connection.deviceId.isBlank()) {
+                        val generated = java.util.UUID.randomUUID().toString()
+                        appSettings = appSettings.copy(
+                            companionSatelliteConnections = appSettings.companionSatelliteConnections.map {
+                                if (it.id == connection.id) it.copy(deviceId = generated) else it
+                            }
+                        )
+                        settingsManager.saveSettings(appSettings)
+                        connection.copy(deviceId = generated)
+                    } else connection
+                    companionSatelliteViewModel.connectAll(effective)
+                }
+            }
+        }
+        // Reconcile placement checkbox changes live for already-active connections — otherwise
+        // unchecking e.g. "Left Sidebar" would leave that slot's client running until the user
+        // manually hits Disconnect/Connect again, which is surprising since the checkbox looks
+        // like the on/off control for that placement. connectAll() is diff-based (see
+        // CompanionSatelliteViewModel), so this is a no-op for placements that aren't changing.
+        LaunchedEffect(
+            appSettings.companionSatelliteConnections.map {
+                listOf(it.id, it.showInTab, it.showInLeftSidebar, it.showInRightSidebar)
+            }
+        ) {
+            for (connection in appSettings.companionSatelliteConnections) {
+                val hasLiveSlot = companionSatelliteViewModel.connectionStates.keys.any { it.connectionId == connection.id }
+                if (hasLiveSlot || connection.autoConnect) {
+                    companionSatelliteViewModel.connectAll(connection)
+                }
+            }
+        }
         remember(qaManager) { companionServer.qaManager = qaManager; true }
         // Auto-connect OBS when settings change (or on first load if enabled)
         LaunchedEffect(
@@ -1387,7 +1429,8 @@ fun main() {
                                         }
                                     },
                                     sttManager = sttManager,
-                                    dialogDismissSignal = dialogDismissSignal
+                                    dialogDismissSignal = dialogDismissSignal,
+                                    companionSatelliteViewModel = companionSatelliteViewModel
                                 )
                                 OptionsDialog(
                                     isVisible = showOptionsDialog,
@@ -1448,7 +1491,8 @@ fun main() {
                                             )
                                         }
                                     },
-                                    obsManager = obsManager
+                                    obsManager = obsManager,
+                                    companionSatelliteViewModel = companionSatelliteViewModel
                                 )
                                 KeyboardShortcutsDialog(
                                     isVisible = showKeyboardShortcutsDialog,
