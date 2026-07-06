@@ -1578,6 +1578,8 @@ fun main() {
                                     isVisible = showInstanceLinkDialog,
                                     settings = appSettings.instanceLink,
                                     connectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
+                                    remoteLiveState = instanceLinkViewModel.remoteLiveState.collectAsState().value,
+                                    remoteScheduleCount = instanceLinkViewModel.remoteSchedule.collectAsState().value.size,
                                     onConnect = { host, port, apiKey, autoConnect, allowPushToSchedule ->
                                         appSettings = appSettings.copy(
                                             instanceLink = appSettings.instanceLink.copy(

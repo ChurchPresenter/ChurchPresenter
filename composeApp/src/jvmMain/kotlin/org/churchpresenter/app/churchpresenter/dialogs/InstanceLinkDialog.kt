@@ -44,19 +44,34 @@ import churchpresenter.composeapp.generated.resources.instance_link_autoconnect
 import churchpresenter.composeapp.generated.resources.instance_link_description
 import churchpresenter.composeapp.generated.resources.instance_link_host
 import churchpresenter.composeapp.generated.resources.instance_link_host_hint
+import churchpresenter.composeapp.generated.resources.instance_link_last_received
 import churchpresenter.composeapp.generated.resources.instance_link_port
+import churchpresenter.composeapp.generated.resources.instance_link_schedule_count
 import churchpresenter.composeapp.generated.resources.instance_link_status_connected
 import churchpresenter.composeapp.generated.resources.instance_link_status_connecting
 import churchpresenter.composeapp.generated.resources.instance_link_status_disconnected
 import churchpresenter.composeapp.generated.resources.instance_link_status_error
 import churchpresenter.composeapp.generated.resources.instance_link_title
 import churchpresenter.composeapp.generated.resources.menu_disconnect
+import churchpresenter.composeapp.generated.resources.obs_mode_announcements
+import churchpresenter.composeapp.generated.resources.obs_mode_bible
+import churchpresenter.composeapp.generated.resources.obs_mode_canvas
+import churchpresenter.composeapp.generated.resources.obs_mode_lower_third
+import churchpresenter.composeapp.generated.resources.obs_mode_media
+import churchpresenter.composeapp.generated.resources.obs_mode_none
+import churchpresenter.composeapp.generated.resources.obs_mode_pictures
+import churchpresenter.composeapp.generated.resources.obs_mode_presentation
+import churchpresenter.composeapp.generated.resources.obs_mode_qa
+import churchpresenter.composeapp.generated.resources.obs_mode_songs
+import churchpresenter.composeapp.generated.resources.obs_mode_website
+import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkSettings
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.app.churchpresenter.server.LiveStateDto
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -64,6 +79,8 @@ fun InstanceLinkDialog(
     isVisible: Boolean,
     settings: InstanceLinkSettings,
     connectionStatus: InstanceLinkStatus,
+    remoteLiveState: LiveStateDto?,
+    remoteScheduleCount: Int,
     onConnect: (host: String, port: Int, apiKey: String, autoConnect: Boolean, allowPushToSchedule: Boolean) -> Unit,
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit
@@ -122,6 +139,21 @@ fun InstanceLinkDialog(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     ConnectionStatusRow(connectionStatus)
+
+                    if (connectionStatus == InstanceLinkStatus.CONNECTED) {
+                        Text(
+                            text = stringResource(Res.string.instance_link_schedule_count, remoteScheduleCount),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        remoteLiveState?.let { state ->
+                            Text(
+                                text = stringResource(Res.string.instance_link_last_received, liveStateSummary(state)),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
 
                     SettingRow(label = stringResource(Res.string.instance_link_host)) {
                         SettingsTextField(
@@ -226,6 +258,25 @@ fun InstanceLinkDialog(
             }
         }
     }
+}
+
+/** Short human-readable summary of a [LiveStateDto] for the "Last received" readout. */
+@Composable
+private fun liveStateSummary(state: LiveStateDto): String = when (state.contentType) {
+    "BIBLE" -> state.bookName?.let { "$it ${state.chapter}:${state.verseNumber}" }
+        ?: stringResource(Res.string.obs_mode_bible)
+    "LYRICS" -> state.songTitle ?: stringResource(Res.string.obs_mode_songs)
+    "PICTURES" -> stringResource(Res.string.obs_mode_pictures)
+    "PRESENTATION" -> stringResource(Res.string.obs_mode_presentation)
+    "MEDIA" -> state.mediaUrl?.substringAfterLast('/') ?: stringResource(Res.string.obs_mode_media)
+    "ANNOUNCEMENTS" -> state.announcementText?.take(40) ?: stringResource(Res.string.obs_mode_announcements)
+    "WEBSITE" -> state.websiteTitle ?: state.websiteUrl ?: stringResource(Res.string.obs_mode_website)
+    "CANVAS" -> state.sceneName ?: stringResource(Res.string.obs_mode_canvas)
+    "QA" -> state.questionText?.take(40) ?: stringResource(Res.string.obs_mode_qa)
+    "DICTIONARY" -> state.dictionaryWord ?: stringResource(Res.string.tab_dictionary)
+    "LOWER_THIRD" -> stringResource(Res.string.obs_mode_lower_third)
+    "NONE" -> stringResource(Res.string.obs_mode_none)
+    else -> state.contentType
 }
 
 @Composable

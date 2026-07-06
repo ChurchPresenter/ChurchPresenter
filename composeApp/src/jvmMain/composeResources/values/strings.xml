@@ -123,6 +123,8 @@
     <string name="instance_link_status_connecting">Connecting…</string>
     <string name="instance_link_status_connected">Connected</string>
     <string name="instance_link_status_error">Connection failed — retrying…</string>
+    <string name="instance_link_last_received">Last received: %1$s</string>
+    <string name="instance_link_schedule_count">Primary schedule: %1$d item(s)</string>
     <string name="connect">Connect</string>
 
     <string name="menu_help">Help</string>
