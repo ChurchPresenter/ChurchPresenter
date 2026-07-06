@@ -15,6 +15,8 @@ import org.churchpresenter.app.churchpresenter.data.SongFileParser
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
+import org.churchpresenter.app.churchpresenter.server.SongDetailDto
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
@@ -111,7 +113,66 @@ class SongsViewModel(
         loadSongs()
     }
 
+    // ── Instance Link — remote song catalog ──────────────────────────────────
+    // While active, the song list comes from the primary's catalog (metadata only — number/title/
+    // tune/author) instead of local disk; full lyrics are fetched lazily per-song on selection
+    // (see fetchRemoteDetailIfNeeded) rather than upfront, since a large library could mean
+    // thousands of individual requests. Editing is disabled — see updateSong/createSong/deleteSong.
+    private var remoteModeActive = false
+    private var remoteFetchDetail: (suspend (number: String, songbook: String) -> SongDetailDto?)? = null
+
+    /** Called from the owning tab whenever Instance Link connects/disconnects or the catalog updates. */
+    fun setInstanceLinkSource(
+        active: Boolean,
+        catalog: SongCatalogResponse?,
+        fetchDetail: (suspend (number: String, songbook: String) -> SongDetailDto?)?
+    ) {
+        if (!active) {
+            if (remoteModeActive) {
+                remoteModeActive = false
+                remoteFetchDetail = null
+                loadSongs()
+            }
+            return
+        }
+        remoteModeActive = true
+        remoteFetchDetail = fetchDetail
+        loadSongsJob?.cancel()
+        songFolderWatcher.dispose()
+        val items = catalog?.songBook?.flatMap { entry ->
+            entry.songs.map { dto ->
+                SongItem(number = dto.number, title = dto.title, songbook = entry.bookName, tune = dto.tune, author = dto.author)
+            }
+        } ?: emptyList()
+        applySongList(items)
+    }
+
+    private fun fetchRemoteDetailIfNeeded(index: Int) {
+        val fetchDetail = remoteFetchDetail ?: return
+        val items = _filteredSongItems.value
+        if (index < 0 || index >= items.size) return
+        val song = items[index]
+        if (song.lyrics.isNotEmpty()) return
+        viewModelScope.launch {
+            val detail = fetchDetail(song.number, song.songbook) ?: return@launch
+            val updated = song.copy(lyrics = detail.toRawLyrics())
+            fun List<SongItem>.replaced() = map { if (it.songId == song.songId) updated else it }
+            _filteredSongItems.value = _filteredSongItems.value.replaced()
+            _allSongItems.value = _allSongItems.value.replaced()
+            _songsData.value = Songs().also { it.addSongs(_allSongItems.value) }
+        }
+    }
+
+    /** Reconstructs the raw header+line format the local parser produces, from structured sections
+     *  — lets [splitLyricsIntoSections] work unchanged on remotely-fetched songs. Original header
+     *  text (e.g. "Verse 2") isn't preserved by the API, only the section type. */
+    private fun SongDetailDto.toRawLyrics(): List<String> = sections.flatMap { section ->
+        val header = if (section.type == Constants.SECTION_TYPE_CHORUS) "{Chorus}" else "[${section.type.replaceFirstChar(Char::uppercase)}]"
+        listOf(header) + section.lines
+    }
+
     fun loadSongs() {
+        if (remoteModeActive) return
         loadSongsJob?.cancel()
         loadSongsJob = viewModelScope.launch {
             _isLoading.value = true
@@ -225,6 +286,7 @@ class SongsViewModel(
         _selectedSongIndex.value = index
         _selectedSectionIndex.value = 0
         _selectedLineIndex.value = 0
+        fetchRemoteDetailIfNeeded(index)
     }
 
     fun selectSongByDetails(songNumber: Int, title: String, songbook: String, songId: String = ""): Boolean {
@@ -255,6 +317,7 @@ class SongsViewModel(
 
         _selectedSongIndex.value = idx
         _selectedSectionIndex.value = 0
+        fetchRemoteDetailIfNeeded(idx)
         return true
     }
 
@@ -582,6 +645,7 @@ class SongsViewModel(
         oldSong: SongItem,
         newSong: SongItem
     ): Boolean {
+        if (remoteModeActive) return false
         try {
             val storageDir = appSettings.songSettings.storageDirectory
             var songToSave = newSong
@@ -648,6 +712,7 @@ class SongsViewModel(
     }
 
     fun createSong(song: SongItem): Boolean {
+        if (remoteModeActive) return false
         try {
             val storageDir = appSettings.songSettings.storageDirectory
             if (storageDir.isEmpty() || song.songbook.isBlank()) return false
@@ -673,6 +738,7 @@ class SongsViewModel(
     }
 
     fun deleteSong(song: SongItem): Boolean {
+        if (remoteModeActive) return false
         return try {
             if (song.sourceFile.isNotEmpty()) {
                 val file = File(song.sourceFile)

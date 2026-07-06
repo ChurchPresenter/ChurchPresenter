@@ -6,8 +6,12 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpMethod
+import io.ktor.http.isSuccess
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CancellationException
@@ -49,6 +53,7 @@ class InstanceLinkClient(
     private val onDisplayCleared: () -> Unit,
     private val onSongSectionSelected: (Int) -> Unit,
     private val onPresentationSlideChanged: (id: String, index: Int, total: Int, isPlaying: Boolean, isLive: Boolean) -> Unit,
+    private val onSongsUpdated: (SongCatalogResponse) -> Unit,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val httpClient = HttpClient(CIO) {
@@ -65,9 +70,18 @@ class InstanceLinkClient(
     // points, so cancellation alone isn't enough) — same guard CompanionSatelliteClient uses.
     @Volatile private var generation = 0L
 
+    // Captured on connect() so fetchSongDetail() (called on-demand, outside the connect loop) can
+    // build REST URLs against the same primary without needing its own host/port/key parameters.
+    @Volatile private var currentHost: String = ""
+    @Volatile private var currentPort: Int = 0
+    @Volatile private var currentApiKey: String = ""
+
     /** Starts (or restarts) the link to the primary instance's CompanionServer. */
     fun connect(host: String, port: Int, apiKey: String, deviceId: String, reconnectDelayMs: Long) {
         disconnect()
+        currentHost = host
+        currentPort = port
+        currentApiKey = apiKey
         val myGeneration = ++generation
         connectJob = scope.launch {
             connectLoop(host, port, apiKey, deviceId, reconnectDelayMs, myGeneration)
@@ -134,6 +148,11 @@ class InstanceLinkClient(
                     ?: return
                 onLiveStateUpdated(state)
             }
+            Constants.WS_EVENT_SONGS_UPDATED -> {
+                val catalog = runCatching { json.decodeFromString(SongCatalogResponse.serializer(), msg.payload) }.getOrNull()
+                    ?: return
+                onSongsUpdated(catalog)
+            }
             Constants.WS_EVENT_DISPLAY_CLEARED -> onDisplayCleared()
             Constants.WS_EVENT_SONG_SECTION_SELECTED -> {
                 val index = msg.payload.toIntOrNull() ?: return
@@ -171,6 +190,24 @@ class InstanceLinkClient(
                 )
             }
         }
+    }
+
+    /**
+     * Fetches full song detail (sections/lyrics) from the primary on demand — the catalog broadcast
+     * only carries metadata (title/number/tune/author), so this is called lazily when a song is
+     * actually selected rather than for the whole library upfront (which could mean thousands of
+     * requests for a large library).
+     */
+    suspend fun fetchSongDetail(number: String, songbook: String): SongDetailDto? {
+        if (currentHost.isEmpty()) return null
+        return runCatching {
+            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_SONGS}/$number") {
+                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
+                if (songbook.isNotEmpty()) parameter(Constants.QUERY_PARAM_SONGBOOK, songbook)
+            }
+            if (!response.status.isSuccess()) return null
+            json.decodeFromString(SongDetailDto.serializer(), response.bodyAsText())
+        }.getOrNull()
     }
 
     /** Stops the link without disposing the underlying HTTP client (safe to [connect] again). */

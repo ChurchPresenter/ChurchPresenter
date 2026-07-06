@@ -111,6 +111,8 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
+import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
+import org.churchpresenter.app.churchpresenter.server.SongDetailDto
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
@@ -217,6 +219,10 @@ fun MainDesktop(
     instanceLinkFollowingHost: String = "",
     /** The primary's live schedule while connected via Instance Link — mirrored into [ScheduleViewModel]. */
     instanceLinkRemoteSchedule: List<ScheduleItemDto> = emptyList(),
+    /** The primary's song catalog while connected via Instance Link — mirrored into [SongsViewModel]. */
+    instanceLinkRemoteSongCatalog: SongCatalogResponse? = null,
+    /** Fetches one song's full lyrics from the primary on demand — see SongsViewModel.setInstanceLinkSource. */
+    instanceLinkFetchSongDetail: (suspend (number: String, songbook: String) -> SongDetailDto?)? = null,
     qaManager: QAManager? = null,
     tunnelStatus: TunnelStatus = TunnelStatus.Idle,
     tunnelUrl: String = "",
@@ -378,6 +384,16 @@ fun MainDesktop(
     val currentOnSongsLoaded by rememberUpdatedState(onSongsLoaded)
     val songsViewModel = remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> currentOnSongsLoaded?.invoke(songs) }) }
     DisposableEffect(Unit) { onDispose { songsViewModel.dispose() } }
+
+    // Mirrors the primary's song catalog while connected via Instance Link — see
+    // SongsViewModel.setInstanceLinkSource for the lazy per-song lyric fetch.
+    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkRemoteSongCatalog) {
+        songsViewModel.setInstanceLinkSource(
+            active = instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED,
+            catalog = instanceLinkRemoteSongCatalog,
+            fetchDetail = instanceLinkFetchSongDetail
+        )
+    }
 
     // Sync remote section changes (e.g. from mobile) back to the songs UI
     LaunchedEffect(Unit) {

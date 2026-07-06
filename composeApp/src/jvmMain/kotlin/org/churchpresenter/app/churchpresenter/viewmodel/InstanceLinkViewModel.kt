@@ -8,6 +8,8 @@ import org.churchpresenter.app.churchpresenter.server.InstanceLinkClient
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.LiveStateDto
 import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
+import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
+import org.churchpresenter.app.churchpresenter.server.SongDetailDto
 
 /** Snapshot of the primary's `presentation_slide_changed` broadcast — see [InstanceLinkClient]. */
 data class RemotePresentationSlide(
@@ -32,6 +34,9 @@ class InstanceLinkViewModel {
     private val _remoteSchedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
     val remoteSchedule: StateFlow<List<ScheduleItemDto>> = _remoteSchedule.asStateFlow()
 
+    private val _remoteSongCatalog = MutableStateFlow<SongCatalogResponse?>(null)
+    val remoteSongCatalog: StateFlow<SongCatalogResponse?> = _remoteSongCatalog.asStateFlow()
+
     private val _remoteLiveState = MutableStateFlow<LiveStateDto?>(null)
     val remoteLiveState: StateFlow<LiveStateDto?> = _remoteLiveState.asStateFlow()
 
@@ -54,7 +59,8 @@ class InstanceLinkViewModel {
         onSongSectionSelected = { index -> _remoteSongSectionIndex.value = index },
         onPresentationSlideChanged = { id, index, total, isPlaying, isLive ->
             _remotePresentationSlide.value = RemotePresentationSlide(id, index, total, isPlaying, isLive)
-        }
+        },
+        onSongsUpdated = { catalog -> _remoteSongCatalog.value = catalog }
     )
 
     fun connect(host: String, port: Int, apiKey: String, deviceId: String, reconnectDelayMs: Long) {
@@ -69,6 +75,10 @@ class InstanceLinkViewModel {
     fun sendAddToSchedule(item: ScheduleItem) {
         client.sendAddToSchedule(item)
     }
+
+    /** Fetches one song's full lyrics from the primary on demand — see [InstanceLinkClient.fetchSongDetail]. */
+    suspend fun fetchSongDetail(number: String, songbook: String): SongDetailDto? =
+        client.fetchSongDetail(number, songbook)
 
     fun dispose() {
         client.dispose()
