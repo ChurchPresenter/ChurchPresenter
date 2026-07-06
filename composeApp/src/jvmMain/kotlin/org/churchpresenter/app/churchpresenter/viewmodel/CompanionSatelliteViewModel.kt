@@ -5,12 +5,14 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import companionsatellite.CompanionConnectionStatus
 import companionsatellite.CompanionSatelliteClient
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState
 import org.churchpresenter.app.churchpresenter.models.CompanionSurfacePlacement
 import org.churchpresenter.app.churchpresenter.models.CompanionSurfaceSlot
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Image as SkiaImage
 
@@ -163,8 +165,23 @@ class CompanionSatelliteViewModel {
     private fun clientFor(slot: CompanionSurfaceSlot): CompanionSatelliteClient = clients.getOrPut(slot) {
         CompanionSatelliteClient(
             onStatusChanged = { status, error ->
+                val previousStatus = _connectionStates[slot]?.status
                 _connectionStates[slot] = (_connectionStates[slot] ?: CompanionConnectionUiState(slot))
                     .copy(status = status, errorMessage = error ?: "")
+                if (status != previousStatus) {
+                    when (status) {
+                        CompanionConnectionStatus.CONNECTED ->
+                            CrashReporter.breadcrumb("Companion Satellite connected (${slot.connectionId}/${slot.placement})", category = "integration")
+                        CompanionConnectionStatus.DISCONNECTED ->
+                            CrashReporter.breadcrumb("Companion Satellite disconnected (${slot.connectionId}/${slot.placement})", category = "integration")
+                        CompanionConnectionStatus.ERROR ->
+                            CrashReporter.reportWarning(
+                                "Companion Satellite connection error: ${error ?: "unknown"}",
+                                tags = mapOf("subsystem" to "companion_satellite", "placement" to slot.placement.name)
+                            )
+                        CompanionConnectionStatus.CONNECTING -> {}
+                    }
+                }
             },
             onButtonUpdated = { update ->
                 val list = buttonsFor(slot)

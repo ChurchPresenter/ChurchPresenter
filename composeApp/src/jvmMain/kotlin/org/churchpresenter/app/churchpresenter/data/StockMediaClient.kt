@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.io.File
 
 /**
@@ -168,11 +169,28 @@ object StockMediaClient {
                 return@withContext SearchOutcome.RateLimited
             }
             if (response.status.value !in 200..299) {
+                CrashReporter.reportWarning(
+                    "Stock media search returned HTTP ${response.status.value} (${source.name.lowercase()})",
+                    tags = mapOf(
+                        "subsystem" to "stock_media",
+                        "source" to source.name.lowercase(),
+                        "media_type" to mediaType.name.lowercase()
+                    )
+                )
                 return@withContext SearchOutcome.Failure
             }
 
             parseSearchResponse(source, mediaType, response)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            CrashReporter.reportWarning(
+                "Stock media search failed (${source.name.lowercase()})",
+                throwable = e,
+                tags = mapOf(
+                    "subsystem" to "stock_media",
+                    "source" to source.name.lowercase(),
+                    "media_type" to mediaType.name.lowercase()
+                )
+            )
             SearchOutcome.NetworkError
         }
     }
@@ -273,6 +291,10 @@ object StockMediaClient {
         try {
             val response = http.get(item.downloadUrl)
             if (response.status.value !in 200..299) {
+                CrashReporter.reportWarning(
+                    "Stock media download returned HTTP ${response.status.value} (${item.source.name.lowercase()})",
+                    tags = mapOf("subsystem" to "stock_media", "source" to item.source.name.lowercase())
+                )
                 return@withContext DownloadOutcome.Failure
             }
             val bytes: ByteArray = response.body()
@@ -281,7 +303,12 @@ object StockMediaClient {
             val destFile = File(downloadDir, "${item.source.name.lowercase()}_${item.id}.$extension")
             destFile.writeBytes(bytes)
             DownloadOutcome.Success(destFile)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            CrashReporter.reportWarning(
+                "Stock media download failed (${item.source.name.lowercase()})",
+                throwable = e,
+                tags = mapOf("subsystem" to "stock_media", "source" to item.source.name.lowercase())
+            )
             DownloadOutcome.NetworkError
         }
     }
