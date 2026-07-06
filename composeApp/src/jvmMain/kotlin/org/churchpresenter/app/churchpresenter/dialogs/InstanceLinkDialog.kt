@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -76,9 +78,9 @@ fun InstanceLinkDialog(
 
     val mainWindowState = LocalMainWindowState.current
     val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, 460.dp, 480.dp),
+        position = centeredOnMainWindow(mainWindowState, 460.dp, 620.dp),
         width = 460.dp,
-        height = 480.dp
+        height = 620.dp
     )
 
     DialogWindow(
@@ -114,7 +116,9 @@ fun InstanceLinkDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Column(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     ConnectionStatusRow(connectionStatus)
