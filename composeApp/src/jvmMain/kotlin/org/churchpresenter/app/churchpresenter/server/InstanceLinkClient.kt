@@ -237,6 +237,21 @@ class InstanceLinkClient(
         }.getOrNull()
     }
 
+    /**
+     * Downloads the primary's raw .spb bible file bytes — the caller loads it through the same
+     * Bible.loadFromSpb() used for local files instead of reimplementing that engine against the API.
+     */
+    suspend fun fetchBibleFile(): ByteArray? {
+        if (currentHost.isEmpty()) return null
+        return runCatching {
+            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BIBLE_FILE}") {
+                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
+            }
+            if (!response.status.isSuccess()) return null
+            response.readRawBytes()
+        }.getOrNull()
+    }
+
     /** Stops the link without disposing the underlying HTTP client (safe to [connect] again). */
     fun disconnect() {
         generation++

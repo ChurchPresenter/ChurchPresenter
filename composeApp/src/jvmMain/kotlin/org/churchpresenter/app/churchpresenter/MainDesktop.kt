@@ -223,6 +223,10 @@ fun MainDesktop(
     instanceLinkRemoteSongCatalog: SongCatalogResponse? = null,
     /** Fetches one song's full lyrics from the primary on demand — see SongsViewModel.setInstanceLinkSource. */
     instanceLinkFetchSongDetail: (suspend (number: String, songbook: String) -> SongDetailDto?)? = null,
+    /** Downloads the primary's bible file while connected via Instance Link — see BibleViewModel.setInstanceLinkSource. */
+    instanceLinkFetchBibleFile: (suspend () -> ByteArray?)? = null,
+    /** Non-null while connected via Instance Link — see MediaTab's instanceLinkMediaStreamUrl. */
+    instanceLinkMediaStreamUrl: ((itemId: String) -> String)? = null,
     qaManager: QAManager? = null,
     tunnelStatus: TunnelStatus = TunnelStatus.Idle,
     tunnelUrl: String = "",
@@ -410,6 +414,14 @@ fun MainDesktop(
     val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
     val bibleViewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> currentOnBibleLoaded?.invoke(bible, translation) }) }
     DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
+
+    // Mirrors the primary's bible while connected via Instance Link — see BibleViewModel.setInstanceLinkSource.
+    LaunchedEffect(instanceLinkConnectionStatus) {
+        bibleViewModel.setInstanceLinkSource(
+            active = instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED,
+            fetchBibleFile = instanceLinkFetchBibleFile
+        )
+    }
 
     // Bible Lookup Engine client — feeds detected scripture into the Bible tab and forwards the
     // reverse-lookup level to the engine.
@@ -1377,7 +1389,8 @@ fun MainDesktop(
                                     currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
                                 },
                                 selectedMediaItem = selectedMediaItem,
-                                presenterManager = presenterManager
+                                presenterManager = presenterManager,
+                                instanceLinkMediaStreamUrl = instanceLinkMediaStreamUrl
                             )
 
                             Tabs.LOWER_THIRD -> LowerThirdTab(

@@ -180,7 +180,11 @@ fun MediaTab(
     appSettings: AppSettings = AppSettings(),
     onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
     selectedMediaItem: ScheduleItem.MediaItem? = null,
-    presenterManager: PresenterManager? = null
+    presenterManager: PresenterManager? = null,
+    /** Non-null while connected via Instance Link — builds the primary's /api/media/stream URL for
+     *  a given schedule item id, used in place of a schedule item's local file path since that path
+     *  only exists on the primary's disk. */
+    instanceLinkMediaStreamUrl: ((itemId: String) -> String)? = null
 ) {
     val scope = rememberCoroutineScope()
 
@@ -228,7 +232,14 @@ fun MediaTab(
                 Constants.MEDIA_TYPE_URL -> { selectedSourceType = Constants.MEDIA_TYPE_URL; urlInput = it.mediaUrl }
                 else -> selectedSourceType = Constants.MEDIA_TYPE_LOCAL
             }
-            viewModel.loadMediaFromSchedule(url = it.mediaUrl, title = it.mediaTitle, type = it.mediaType)
+            // A mirrored schedule item's local path only exists on the primary's disk — stream it
+            // over HTTP from there instead when following via Instance Link.
+            val effectiveUrl = if (it.mediaType == Constants.MEDIA_TYPE_LOCAL && instanceLinkMediaStreamUrl != null) {
+                instanceLinkMediaStreamUrl(it.id)
+            } else {
+                it.mediaUrl
+            }
+            viewModel.loadMediaFromSchedule(url = effectiveUrl, title = it.mediaTitle, type = it.mediaType)
             focusRequester.requestFocus()
         }
     }

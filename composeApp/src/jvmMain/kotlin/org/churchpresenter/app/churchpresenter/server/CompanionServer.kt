@@ -1002,6 +1002,8 @@ class CompanionServer {
     @Volatile private var _songs: List<SongItem> = emptyList()
     private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     private val _bible = MutableStateFlow<Bible?>(null)
+    /** Absolute path to the primary bible's .spb file — serves GET /api/bible/file for InstanceLink followers. */
+    @Volatile private var _bibleFilePath: String = ""
     private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
     /** Snapshot of whatever is currently live — see [LiveStateDto]. */
     private val _liveState = MutableStateFlow<LiveStateDto?>(null)
@@ -1316,8 +1318,9 @@ class CompanionServer {
     }
 
     /** Feed the primary Bible — builds full nested catalog and broadcasts to WS clients. */
-    fun updateBible(bible: Bible, translation: String) {
+    fun updateBible(bible: Bible, translation: String, filePath: String = "") {
         _bible.value = bible
+        _bibleFilePath = filePath
         val catalog = buildBibleCatalog(bible, translation)
         _bibleCatalog.value = catalog
         broadcast(WebSocketMessage(
@@ -2688,6 +2691,29 @@ class CompanionServer {
                     val file = File(path)
                     if (!file.exists()) {
                         call.respond(HttpStatusCode.NotFound, "Media file not found on disk")
+                        return@get
+                    }
+                    call.respondFile(file)
+                }
+
+                /**
+                 * GET /api/bible/file — streams the primary bible's raw .spb file bytes so an
+                 * InstanceLink follower can cache and load it through the same Bible.loadFromSpb()
+                 * engine used locally (search/cross-reference/numbering all work unchanged), instead
+                 * of reimplementing that engine against the API. Range requests are handled by the
+                 * PartialContent plugin. Only the primary bible is exposed — same scope the existing
+                 * mobile companion API already has (there is no secondary-bible endpoint either).
+                 */
+                get(Constants.ENDPOINT_BIBLE_FILE) {
+                    if (!checkApiKey(call)) return@get
+                    val path = _bibleFilePath
+                    if (path.isEmpty()) {
+                        call.respond(HttpStatusCode.NotFound, "No bible loaded")
+                        return@get
+                    }
+                    val file = File(path)
+                    if (!file.exists()) {
+                        call.respond(HttpStatusCode.NotFound, "Bible file not found on disk")
                         return@get
                     }
                     call.respondFile(file)

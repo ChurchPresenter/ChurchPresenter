@@ -88,6 +88,9 @@ class InstanceLinkViewModel {
     suspend fun fetchPresentationSlideBytes(id: String, index: Int): ByteArray? =
         client.fetchPresentationSlideBytes(id, index)
 
+    /** Downloads the primary's raw bible file — see [InstanceLinkClient.fetchBibleFile]. */
+    suspend fun fetchBibleFile(): ByteArray? = client.fetchBibleFile()
+
     fun dispose() {
         client.dispose()
     }

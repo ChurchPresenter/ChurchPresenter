@@ -382,6 +382,40 @@ class BibleViewModel(
         loadBibles()
     }
 
+    // ── Instance Link — remote bible ─────────────────────────────────────────
+    // Rather than reimplementing Bible's search/cross-reference/numbering engine against the API,
+    // the primary's raw .spb file is downloaded once and cached, then loaded through the exact same
+    // Bible.loadFromSpb() used for local files — everything downstream works unchanged. Only the
+    // primary bible is mirrored; the mobile companion API has no secondary-bible endpoint either.
+    private var remoteModeActive = false
+    private var remoteBibleCacheFile: File? = null
+    private val remoteBibleCacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link-cache/bibles")
+
+    /** Called from the owning tab whenever Instance Link connects/disconnects. */
+    fun setInstanceLinkSource(active: Boolean, fetchBibleFile: (suspend () -> ByteArray?)?) {
+        if (!active) {
+            if (remoteModeActive) {
+                remoteModeActive = false
+                remoteBibleCacheFile = null
+                loadBibles()
+            }
+            return
+        }
+        remoteModeActive = true
+        viewModelScope.launch {
+            val cacheFile = File(remoteBibleCacheDir, "primary.spb")
+            if (!cacheFile.exists()) {
+                val bytes = fetchBibleFile?.invoke() ?: return@launch
+                withContext(Dispatchers.IO) {
+                    remoteBibleCacheDir.mkdirs()
+                    cacheFile.writeBytes(bytes)
+                }
+            }
+            remoteBibleCacheFile = cacheFile
+            loadBibles()
+        }
+    }
+
     fun loadBibles() {
         loadChapterJob?.cancel()
         loadChapterJob = null
@@ -390,13 +424,17 @@ class BibleViewModel(
             _isLoading.value = true
             _isFullyLoadedFlow.value = false
             try {
-                val primaryPath = if (appSettings.bibleSettings.primaryBible.isNotEmpty() &&
+                val primaryPath = if (remoteModeActive) {
+                    remoteBibleCacheFile?.takeIf { it.exists() }
+                } else if (appSettings.bibleSettings.primaryBible.isNotEmpty() &&
                     appSettings.bibleSettings.storageDirectory.isNotEmpty()
                 ) File(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.primaryBible)
                     .takeIf { it.exists() }
                 else null
 
-                val secondaryPath = if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
+                // Remote mode has no secondary-bible equivalent — same scope the mobile companion API has.
+                val secondaryPath = if (remoteModeActive) null
+                else if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
                     appSettings.bibleSettings.storageDirectory.isNotEmpty()
                 ) File(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.secondaryBible)
                     .takeIf { it.exists() }

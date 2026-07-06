@@ -1407,6 +1407,16 @@ fun main() {
                                     instanceLinkRemoteSchedule = instanceLinkViewModel.remoteSchedule.collectAsState().value,
                                     instanceLinkRemoteSongCatalog = instanceLinkViewModel.remoteSongCatalog.collectAsState().value,
                                     instanceLinkFetchSongDetail = { number, songbook -> instanceLinkViewModel.fetchSongDetail(number, songbook) },
+                                    instanceLinkFetchBibleFile = { instanceLinkViewModel.fetchBibleFile() },
+                                    instanceLinkMediaStreamUrl = run {
+                                        val link = appSettings.instanceLink
+                                        if (instanceLinkViewModel.connectionStatus.collectAsState().value == InstanceLinkStatus.CONNECTED) {
+                                            ({ itemId: String ->
+                                                val keyParam = if (link.apiKey.isNotEmpty()) "?${Constants.QUERY_PARAM_API_KEY}=${link.apiKey}" else ""
+                                                "http://${link.primaryHost}:${link.primaryPort}${Constants.ENDPOINT_MEDIA_STREAM}/$itemId$keyParam"
+                                            })
+                                        } else null
+                                    },
                                     onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
                                     onSongItemSelected = { section ->
                                         presenterManager.setLyricSection(section)
@@ -1447,7 +1457,8 @@ fun main() {
                                     onBibleLoaded = { bible, translation ->
                                         companionServer.updateBible(
                                             bible,
-                                            translation
+                                            translation,
+                                            filePath = File(appSettings.bibleSettings.storageDirectory, translation).absolutePath
                                         )
                                     },
                                     onScheduleChanged = { items -> companionServer.updateSchedule(items) },
