@@ -1005,6 +1005,10 @@ class CompanionServer {
     private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
     /** Snapshot of whatever is currently live — see [LiveStateDto]. */
     private val _liveState = MutableStateFlow<LiveStateDto?>(null)
+    /** Device IDs of currently-connected WS clients that identified as an Instance Link follower
+     *  (as opposed to a regular mobile/browser companion client) — see [Constants.HEADER_CLIENT_ROLE]. */
+    private val _connectedInstanceLinkFollowers = MutableStateFlow<Set<String>>(emptySet())
+    val connectedInstanceLinkFollowers: StateFlow<Set<String>> = _connectedInstanceLinkFollowers.asStateFlow()
     /** schedule item UUID → absolute local media file path — populated by updateSchedule, serves /api/media/stream */
     private val _scheduleItemToMediaPath = ConcurrentHashMap<String, String>()
 
@@ -1947,6 +1951,7 @@ class CompanionServer {
                 allowHeader(Constants.HEADER_API_KEY)
                 allowHeader(Constants.HEADER_DEVICE_ID)
                 allowHeader(Constants.HEADER_APP_VERSION)
+                allowHeader(Constants.HEADER_CLIENT_ROLE)
                 allowHeader("X-QA-Password")
                 allowHeader(Constants.HEADER_PRESENTATION_PASSWORD)
                 exposeHeader(Constants.HEADER_SERVER_VERSION)
@@ -2823,6 +2828,11 @@ class CompanionServer {
                     val wsClientId = call.request.headers[Constants.HEADER_DEVICE_ID]
                         ?: call.request.queryParameters[Constants.HEADER_DEVICE_ID]
                         ?: ""
+                    val isInstanceLinkFollower = call.request.headers[Constants.HEADER_CLIENT_ROLE] ==
+                        Constants.CLIENT_ROLE_INSTANCE_LINK
+                    if (isInstanceLinkFollower && wsClientId.isNotEmpty()) {
+                        _connectedInstanceLinkFollowers.value = _connectedInstanceLinkFollowers.value + wsClientId
+                    }
 
                     val catalog = _catalog.value
                     val schedule = _schedule.value
@@ -2952,6 +2962,9 @@ class CompanionServer {
                     }
                     } finally {
                         broadcastJob.cancel()
+                        if (isInstanceLinkFollower && wsClientId.isNotEmpty()) {
+                            _connectedInstanceLinkFollowers.value = _connectedInstanceLinkFollowers.value - wsClientId
+                        }
                     }
                 }
 

@@ -93,6 +93,7 @@ class InstanceLinkClient(
                     request = {
                         if (apiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, apiKey)
                         header(Constants.HEADER_DEVICE_ID, deviceId)
+                        header(Constants.HEADER_CLIENT_ROLE, Constants.CLIENT_ROLE_INSTANCE_LINK)
                     }
                 ) {
                     if (generation != myGeneration) return@webSocket

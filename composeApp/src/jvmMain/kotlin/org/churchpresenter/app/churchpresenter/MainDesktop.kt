@@ -69,6 +69,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.instance_link_following_host
 import churchpresenter.composeapp.generated.resources.ic_arrow_left
 import churchpresenter.composeapp.generated.resources.ic_arrow_right
 import churchpresenter.composeapp.generated.resources.ic_settings
@@ -85,6 +86,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.toComposeImageBitmap
 
+import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
@@ -106,6 +108,7 @@ import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
@@ -208,6 +211,9 @@ fun MainDesktop(
     /** Emits a presentation [File] uploaded by a mobile client — loaded into [PresentationViewModel] automatically. */
     uploadPresentationFlow: Flow<java.io.File>? = null,
     serverUrl: String = "",
+    /** Persistent "Following <host>" badge shown above the Schedule panel while connected via Instance Link. */
+    instanceLinkConnectionStatus: InstanceLinkStatus = InstanceLinkStatus.DISCONNECTED,
+    instanceLinkFollowingHost: String = "",
     qaManager: QAManager? = null,
     tunnelStatus: TunnelStatus = TunnelStatus.Idle,
     tunnelUrl: String = "",
@@ -852,6 +858,13 @@ fun MainDesktop(
                     exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
                 ) {
                     Column(modifier = Modifier.width(with(density) { schedulePanelPx.coerceAtMost(maxSchedulePx).toDp() }).fillMaxHeight()) {
+                    if (instanceLinkConnectionStatus != InstanceLinkStatus.DISCONNECTED) {
+                        ConnectionStatusRow(
+                            status = instanceLinkConnectionStatus,
+                            connectedLabel = stringResource(Res.string.instance_link_following_host, instanceLinkFollowingHost),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
                     Box(modifier = Modifier.weight(1f)) {
                     ScheduleTab(
                         scheduleViewModel = scheduleViewModel,

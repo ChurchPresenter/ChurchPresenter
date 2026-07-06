@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,11 +7,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,8 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
@@ -47,10 +42,6 @@ import churchpresenter.composeapp.generated.resources.instance_link_host_hint
 import churchpresenter.composeapp.generated.resources.instance_link_last_received
 import churchpresenter.composeapp.generated.resources.instance_link_port
 import churchpresenter.composeapp.generated.resources.instance_link_schedule_count
-import churchpresenter.composeapp.generated.resources.instance_link_status_connected
-import churchpresenter.composeapp.generated.resources.instance_link_status_connecting
-import churchpresenter.composeapp.generated.resources.instance_link_status_disconnected
-import churchpresenter.composeapp.generated.resources.instance_link_status_error
 import churchpresenter.composeapp.generated.resources.instance_link_title
 import churchpresenter.composeapp.generated.resources.menu_disconnect
 import churchpresenter.composeapp.generated.resources.obs_mode_announcements
@@ -67,6 +58,7 @@ import churchpresenter.composeapp.generated.resources.obs_mode_website
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkSettings
@@ -279,29 +271,4 @@ private fun liveStateSummary(state: LiveStateDto): String = when (state.contentT
     else -> state.contentType
 }
 
-@Composable
-private fun ConnectionStatusRow(status: InstanceLinkStatus) {
-    val (color, labelRes) = when (status) {
-        InstanceLinkStatus.CONNECTED -> Color(0xFF4CAF50) to Res.string.instance_link_status_connected
-        InstanceLinkStatus.CONNECTING -> Color(0xFFFFC107) to Res.string.instance_link_status_connecting
-        InstanceLinkStatus.ERROR -> Color(0xFFF44336) to Res.string.instance_link_status_error
-        InstanceLinkStatus.DISCONNECTED -> Color(0xFF9E9E9E) to Res.string.instance_link_status_disconnected
-    }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Spacer(
-            modifier = Modifier
-                .size(10.dp)
-                .clip(CircleShape)
-                .background(color)
-        )
-        Text(
-            text = stringResource(labelRes),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-    }
-}
 

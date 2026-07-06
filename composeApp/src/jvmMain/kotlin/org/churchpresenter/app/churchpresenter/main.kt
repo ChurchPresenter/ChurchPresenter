@@ -1384,6 +1384,8 @@ fun main() {
                                 }
 
                                 MainDesktop(
+                                    instanceLinkConnectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
+                                    instanceLinkFollowingHost = appSettings.instanceLink.primaryHost,
                                     onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
                                     onSongItemSelected = { section ->
                                         presenterManager.setLyricSection(section)

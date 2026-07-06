@@ -297,6 +297,10 @@ object Constants {
     const val HEADER_DEVICE_ID      = "X-Device-Id"
     const val HEADER_APP_VERSION    = "X-App-Version"
     const val HEADER_SERVER_VERSION = "X-Server-Version"
+    /** Sent by InstanceLinkClient (value "instance_link") so the primary can tell a following
+     *  ChurchPresenter instance apart from a regular mobile/browser companion client. */
+    const val HEADER_CLIENT_ROLE    = "X-Client-Role"
+    const val CLIENT_ROLE_INSTANCE_LINK = "instance_link"
     const val QUERY_PARAM_API_KEY   = "apiKey"
     const val QUERY_PARAM_SONGBOOK  = "songbook"
     const val QUERY_PARAM_BOOK      = "book"
