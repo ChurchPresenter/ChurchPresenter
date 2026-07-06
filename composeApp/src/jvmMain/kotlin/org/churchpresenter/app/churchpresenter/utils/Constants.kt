@@ -250,6 +250,7 @@ object Constants {
     const val ENDPOINT_PICTURES               = "/api/pictures"
     const val ENDPOINT_WS                = "/ws"
     const val ENDPOINT_BROWSER_SOURCE    = "/browser-source"
+    const val ENDPOINT_MEDIA_STREAM      = "/api/media/stream"
 
     // WebSocket event types (server → client)
     const val WS_EVENT_SONGS_UPDATED              = "songs_updated"
@@ -266,6 +267,7 @@ object Constants {
     const val WS_EVENT_PRESENTATION_LIVE_CHANGED          = "presentation_live_changed"
     const val WS_EVENT_PRESENTATION_AUTO_SCROLL_CHANGED   = "presentation_auto_scroll_changed"
     const val WS_EVENT_PRESENTATION_LOOP_CHANGED          = "presentation_looping_changed"
+    const val WS_EVENT_LIVE_STATE_CHANGED                 = "live_state_changed"
 
     // WebSocket command types (client → server)
     const val WS_CMD_SELECT_SONG            = "select_song"

@@ -542,7 +542,12 @@ fun MediaTab(
                 }
                 if (presenterManager != null) {
                     GoLiveButton(
-                        onClick = { presenterManager.setPresentingMode(Presenting.MEDIA); presenterManager.setShowPresenterWindow(true); viewModel.play() },
+                        onClick = {
+                            presenterManager.setPresentingMode(Presenting.MEDIA)
+                            presenterManager.setShowPresenterWindow(true)
+                            presenterManager.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
+                            viewModel.play()
+                        },
                         enabled = viewModel.isLoaded,
                         tooltipText = stringResource(Res.string.go_live)
                     )

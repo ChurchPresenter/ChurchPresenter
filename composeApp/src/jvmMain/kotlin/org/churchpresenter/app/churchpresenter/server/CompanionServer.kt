@@ -15,7 +15,9 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.partialcontent.PartialContent
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.response.respondFile
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
@@ -63,6 +65,8 @@ import org.churchpresenter.app.churchpresenter.models.PresentationLoadError
 import org.churchpresenter.app.churchpresenter.models.Question
 import org.churchpresenter.app.churchpresenter.models.QuestionDto
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -216,6 +220,51 @@ data class ScheduleItemDto(
 data class ScheduleResponse(
     val items: List<ScheduleItemDto>,
     val total: Int
+)
+
+/**
+ * Snapshot of whatever is currently live, broadcast as [Constants.WS_EVENT_LIVE_STATE_CHANGED].
+ * Fills the gap left by the content types that (unlike presentations/songs) have no dedicated
+ * "now live" event — used by a following instance ([InstanceLinkClient]) to mirror local output.
+ *
+ * Presentations are intentionally NOT duplicated here — they already have their own
+ * presentation_slide_changed/freeze/live events; [contentType] == "PRESENTATION" just tells a
+ * follower to rely on those instead.
+ */
+@Serializable
+data class LiveStateDto(
+    val contentType: String, // matches presenter.Presenting enum name
+    // bible verse
+    val bookName: String? = null,
+    val chapter: Int? = null,
+    val verseNumber: Int? = null,
+    val verseRange: String? = null,
+    val verseText: String? = null,
+    // song section
+    val songTitle: String? = null,
+    val songNumber: Int? = null,
+    val sectionType: String? = null,
+    val lines: List<String>? = null,
+    // picture — resolved against a registered folder catalog when possible
+    val pictureFolderId: String? = null,
+    val pictureIndex: Int? = null,
+    // media
+    val mediaId: String? = null,
+    val mediaUrl: String? = null,
+    val mediaType: String? = null,
+    // announcement
+    val announcementText: String? = null,
+    // website
+    val websiteUrl: String? = null,
+    val websiteTitle: String? = null,
+    // canvas scene
+    val sceneId: String? = null,
+    val sceneName: String? = null,
+    // Q&A
+    val questionId: String? = null,
+    val questionText: String? = null,
+    // Strong's dictionary
+    val dictionaryWord: String? = null
 )
 
 // ── Bible DTOs ────────────────────────────────────────────────────────────────
@@ -954,6 +1003,10 @@ class CompanionServer {
     private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     private val _bible = MutableStateFlow<Bible?>(null)
     private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
+    /** Snapshot of whatever is currently live — see [LiveStateDto]. */
+    private val _liveState = MutableStateFlow<LiveStateDto?>(null)
+    /** schedule item UUID → absolute local media file path — populated by updateSchedule, serves /api/media/stream */
+    private val _scheduleItemToMediaPath = ConcurrentHashMap<String, String>()
 
     // Presentation catalog — metadata only; raw JPEG bytes stored per-slide in _slideBytes
     private val _presentationCatalog = MutableStateFlow(PresentationCatalogResponse(emptyList(), 0))
@@ -1644,10 +1697,13 @@ class CompanionServer {
                         slideCount = item.slideCount, fileType = item.fileType
                     )
                 }
-                is ScheduleItem.MediaItem -> ScheduleItemDto(
-                    id = item.id, type = "media", displayText = item.displayText,
-                    mediaUrl = item.mediaUrl, mediaTitle = item.mediaTitle, mediaType = item.mediaType
-                )
+                is ScheduleItem.MediaItem -> {
+                    if (item.mediaType == "local") _scheduleItemToMediaPath[item.id] = item.mediaUrl
+                    ScheduleItemDto(
+                        id = item.id, type = "media", displayText = item.displayText,
+                        mediaUrl = item.mediaUrl, mediaTitle = item.mediaTitle, mediaType = item.mediaType
+                    )
+                }
                 is ScheduleItem.LowerThirdItem -> ScheduleItemDto(
                     id = item.id, type = "lower_third", displayText = item.displayText,
                     presetId = item.presetId, presetLabel = item.presetLabel
@@ -1674,6 +1730,72 @@ class CompanionServer {
             type = Constants.WS_EVENT_SCHEDULE_UPDATED,
             payload = json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(dtos, dtos.size))
         ))
+    }
+
+    /**
+     * Broadcasts a snapshot of whatever is currently live — fills the gap for content types with
+     * no dedicated "now live" event (bible, songs, pictures, media, lower thirds, announcements,
+     * websites, scenes, Q&A, dictionary). Presentations rely on the existing slide-changed events
+     * instead — [mode] == "PRESENTATION" here is informational only.
+     */
+    fun updateLiveState(
+        mode: String,
+        bibleVerse: SelectedVerse?,
+        lyricSection: LyricSection?,
+        pictureImagePath: String?,
+        mediaUrl: String?,
+        mediaType: String?,
+        announcementText: String?,
+        websiteUrl: String?,
+        websiteTitle: String?,
+        sceneId: String?,
+        sceneName: String?,
+        questionId: String?,
+        questionText: String?,
+        dictionaryWord: String?
+    ) {
+        val (pictureFolderId, pictureIndex) = resolvePictureLocation(pictureImagePath)
+        val mediaId = mediaUrl?.let { url -> _scheduleItemToMediaPath.entries.find { it.value == url }?.key }
+        val dto = LiveStateDto(
+            contentType = mode,
+            bookName = bibleVerse?.bookName?.ifEmpty { null },
+            chapter = bibleVerse?.chapter,
+            verseNumber = bibleVerse?.verseNumber,
+            verseRange = bibleVerse?.verseRange?.ifEmpty { null },
+            verseText = bibleVerse?.verseText,
+            songTitle = lyricSection?.title?.ifEmpty { null },
+            songNumber = lyricSection?.songNumber,
+            sectionType = lyricSection?.type?.ifEmpty { null },
+            lines = lyricSection?.lines,
+            pictureFolderId = pictureFolderId,
+            pictureIndex = pictureIndex,
+            mediaId = mediaId,
+            mediaUrl = mediaUrl?.ifEmpty { null },
+            mediaType = mediaType?.ifEmpty { null },
+            announcementText = announcementText?.ifEmpty { null },
+            websiteUrl = websiteUrl?.ifEmpty { null },
+            websiteTitle = websiteTitle?.ifEmpty { null },
+            sceneId = sceneId,
+            sceneName = sceneName,
+            questionId = questionId,
+            questionText = questionText,
+            dictionaryWord = dictionaryWord
+        )
+        _liveState.value = dto
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_LIVE_STATE_CHANGED,
+            payload = json.encodeToString(LiveStateDto.serializer(), dto)
+        ))
+    }
+
+    /** Finds which registered picture folder (if any) contains [path], for [updateLiveState]. */
+    private fun resolvePictureLocation(path: String?): Pair<String?, Int?> {
+        if (path.isNullOrEmpty()) return null to null
+        for ((folderId, files) in _pictureFiles) {
+            val idx = files.indexOfFirst { it.absolutePath == path }
+            if (idx >= 0) return folderId to idx
+        }
+        return null to null
     }
 
     private fun buildSongDetail(song: SongItem): SongDetailDto {
@@ -1816,6 +1938,7 @@ class CompanionServer {
     private fun Application.configurePipeline() {
             install(ContentNegotiation) { json(json) }
             install(WebSockets)
+            install(PartialContent)
             install(CORS) {
                 allowMethod(HttpMethod.Get)
                 allowMethod(HttpMethod.Post)
@@ -2544,6 +2667,28 @@ class CompanionServer {
                 }
 
                 /**
+                 * GET /api/media/stream/{id} — streams a local media file's raw bytes for a schedule
+                 * item registered via [updateSchedule] (mediaType == "local"). Range requests are
+                 * handled by the PartialContent plugin so seeking works, letting an InstanceLink
+                 * follower play the file over HTTP without needing a local copy.
+                 */
+                get("${Constants.ENDPOINT_MEDIA_STREAM}/{id}") {
+                    if (!checkApiKey(call)) return@get
+                    val id = call.parameters["id"] ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val path = _scheduleItemToMediaPath[id]
+                    if (path == null) {
+                        call.respond(HttpStatusCode.NotFound, "Media item not found")
+                        return@get
+                    }
+                    val file = File(path)
+                    if (!file.exists()) {
+                        call.respond(HttpStatusCode.NotFound, "Media file not found on disk")
+                        return@get
+                    }
+                    call.respondFile(file)
+                }
+
+                /**
                  * POST /api/pictures/select
                  * Body: { "folder-id": "…", "index": 3, "file-name": "photo.jpg" }
                  * When "file-name" is provided the index is resolved by name so the correct
@@ -2708,6 +2853,11 @@ class CompanionServer {
                             type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
                             payload = """{"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"isPlaying":$_presentationIsPlaying,"isLive":$_presentationIsLive}"""
                         ))))
+                    _liveState.value?.let { state ->
+                        send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
+                            WebSocketMessage(Constants.WS_EVENT_LIVE_STATE_CHANGED,
+                                json.encodeToString(LiveStateDto.serializer(), state)))))
+                    }
 
                     val broadcastJob = scope.launch {
                         broadcastChannel.collect { message -> send(Frame.Text(message)) }

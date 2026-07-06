@@ -123,9 +123,13 @@ import org.churchpresenter.app.churchpresenter.server.AtemRenderCache
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.app.churchpresenter.server.LiveStateDto
+import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkDialog
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -408,6 +412,59 @@ fun main() {
                 lastReconciled[connection.id] = connection
             }
         }
+
+        val instanceLinkViewModel = remember { InstanceLinkViewModel() }
+        DisposableEffect(Unit) { onDispose { instanceLinkViewModel.dispose() } }
+        // Auto-connect on launch (and reconnect if the saved connection details change while enabled).
+        LaunchedEffect(
+            appSettings.instanceLink.enabled,
+            appSettings.instanceLink.autoConnect,
+            appSettings.instanceLink.primaryHost,
+            appSettings.instanceLink.primaryPort,
+            appSettings.instanceLink.apiKey
+        ) {
+            val link = appSettings.instanceLink
+            if (link.enabled && link.autoConnect && link.primaryHost.isNotBlank() && link.primaryPort > 0) {
+                instanceLinkViewModel.connect(
+                    link.primaryHost, link.primaryPort, link.apiKey, link.deviceId,
+                    link.reconnectDelayMs.toLong()
+                )
+            }
+        }
+        // Mirrors the primary's live content locally — the counterpart to onLiveStateChanged below.
+        LaunchedEffect(instanceLinkViewModel) {
+            instanceLinkViewModel.remoteLiveState.collect { state ->
+                if (state == null) return@collect
+                applyRemoteLiveState(state, presenterManager)
+            }
+        }
+        LaunchedEffect(instanceLinkViewModel) {
+            instanceLinkViewModel.displayClearedSignal.collect {
+                presenterManager.requestClearDisplay()
+            }
+        }
+        // Broadcasts this instance's live content to any connected InstanceLink follower — the
+        // counterpart to the remoteLiveState collector above.
+        LaunchedEffect(Unit) {
+            presenterManager.onLiveStateChanged = { pm ->
+                companionServer.updateLiveState(
+                    mode = pm.presentingMode.value.name,
+                    bibleVerse = pm.selectedVerse.value,
+                    lyricSection = pm.lyricSection.value,
+                    pictureImagePath = pm.selectedImagePath.value,
+                    mediaUrl = pm.currentMediaUrl.value.ifEmpty { null },
+                    mediaType = pm.currentMediaType.value.ifEmpty { null },
+                    announcementText = pm.announcementText.value.ifEmpty { null },
+                    websiteUrl = pm.websiteUrl.value.ifEmpty { null },
+                    websiteTitle = pm.webPageTitle.value.ifEmpty { null },
+                    sceneId = pm.activeScene.value?.id,
+                    sceneName = pm.activeScene.value?.name,
+                    questionId = pm.displayedQuestion.value?.id,
+                    questionText = pm.displayedQuestion.value?.text,
+                    dictionaryWord = pm.displayedDictionaryEntry.value?.word
+                )
+            }
+        }
         remember(qaManager) { companionServer.qaManager = qaManager; true }
         // Auto-connect OBS when settings change (or on first load if enabled)
         LaunchedEffect(
@@ -546,6 +603,7 @@ fun main() {
             showOptionsDialog = true
         }
         var showStatisticsDialog by remember { mutableStateOf(false) }
+        var showInstanceLinkDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var showAboutDialog by remember { mutableStateOf(false) }
         var showContactDialog by remember { mutableStateOf(false) }
@@ -1246,6 +1304,9 @@ fun main() {
                                     onContactUs = { showContactDialog = true },
                                     onGettingStarted = { showSetupWizard = true },
                                     onStatistics = { showStatisticsDialog = true },
+                                    onConnectToInstance = { showInstanceLinkDialog = true },
+                                    onDisconnectInstance = { instanceLinkViewModel.disconnect() },
+                                    isInstanceLinkConnected = instanceLinkViewModel.connectionStatus.collectAsState().value != InstanceLinkStatus.DISCONNECTED,
                                     onConverter = { showConverterWindow = true },
                                     onHelp = {
                                         Desktop.getDesktop()
@@ -1513,6 +1574,30 @@ fun main() {
                                     statisticsManager = statisticsManager,
                                     onDismiss = { showStatisticsDialog = false; dialogDismissSignal++ }
                                 )
+                                InstanceLinkDialog(
+                                    isVisible = showInstanceLinkDialog,
+                                    settings = appSettings.instanceLink,
+                                    connectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
+                                    onConnect = { host, port, apiKey, autoConnect, allowPushToSchedule ->
+                                        appSettings = appSettings.copy(
+                                            instanceLink = appSettings.instanceLink.copy(
+                                                enabled = true,
+                                                primaryHost = host,
+                                                primaryPort = port,
+                                                apiKey = apiKey,
+                                                autoConnect = autoConnect,
+                                                allowPushToSchedule = allowPushToSchedule
+                                            )
+                                        )
+                                        settingsManager.saveSettings(appSettings)
+                                        instanceLinkViewModel.connect(
+                                            host, port, apiKey, appSettings.instanceLink.deviceId,
+                                            appSettings.instanceLink.reconnectDelayMs.toLong()
+                                        )
+                                    },
+                                    onDisconnect = { instanceLinkViewModel.disconnect() },
+                                    onDismiss = { showInstanceLinkDialog = false; dialogDismissSignal++ }
+                                )
                                 AboutDialog(
                                     isVisible = showAboutDialog,
                                     onDismiss = { showAboutDialog = false; dialogDismissSignal++ },
@@ -1688,6 +1773,49 @@ fun main() {
             )
         }
     }
+}
+
+/**
+ * Applies a [LiveStateDto] received from another instance's CompanionServer to this instance's own
+ * [PresenterManager], so an InstanceLink follower mirrors the primary's output. Bible verses, song
+ * sections, announcements and website content are mirrored in full since their display text already
+ * rides the broadcast; pictures/presentations/media/scenes/Q&A/dictionary switch the presenting mode
+ * so the right output pane activates, but fetching their actual binary/rendered content over the
+ * network is not wired yet (fast-follow).
+ */
+private fun applyRemoteLiveState(state: LiveStateDto, presenterManager: PresenterManager) {
+    val mode = runCatching { Presenting.valueOf(state.contentType) }.getOrNull() ?: return
+    when (mode) {
+        Presenting.BIBLE -> if (state.bookName != null) {
+            presenterManager.setSelectedVerse(
+                SelectedVerse(
+                    bookName = state.bookName,
+                    chapter = state.chapter ?: 0,
+                    verseNumber = state.verseNumber ?: 0,
+                    verseText = state.verseText ?: "",
+                    verseRange = state.verseRange ?: ""
+                )
+            )
+        }
+        Presenting.LYRICS -> if (state.songTitle != null) {
+            presenterManager.setLyricSection(
+                LyricSection(
+                    title = state.songTitle,
+                    songNumber = state.songNumber ?: 0,
+                    type = state.sectionType ?: "",
+                    lines = state.lines ?: emptyList()
+                )
+            )
+        }
+        Presenting.ANNOUNCEMENTS -> state.announcementText?.let { presenterManager.setAnnouncementText(it) }
+        Presenting.WEBSITE -> {
+            state.websiteUrl?.let { presenterManager.setWebsiteUrl(it) }
+            state.websiteTitle?.let { presenterManager.setWebPageTitle(it) }
+        }
+        else -> { /* pictures/presentation/media/canvas/qa/dictionary: mode-only for now */ }
+    }
+    presenterManager.setPresentingMode(mode)
+    presenterManager.setShowPresenterWindow(true)
 }
 
 private fun qaActionType(action: String): RemoteEventType = when (action) {
