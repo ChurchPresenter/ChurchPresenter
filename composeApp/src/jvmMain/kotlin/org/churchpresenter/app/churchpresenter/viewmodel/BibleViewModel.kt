@@ -30,12 +30,18 @@ import java.io.File
 enum class BibleSearchMode { AUTO, REFERENCE, TEXT }
 
 /** How the Bible Lookup Engine matched a reference — shown as a row marker. */
-enum class DetectionSource { EXPLICIT, REVERSE, CONTINUATION }
+enum class DetectionSource { EXPLICIT, REVERSE, CONTINUATION, CHAPTER_SCAN, CHAPTER_HISTORY }
 
 /** Which STT track(s) corroborated a detection — a confidence signal shown as row markers. */
 enum class DetectionTrack { TRANSCRIPTION, TRANSLATION }
 
-/** Reverse-lookup (BM25) aggressiveness, sent to the engine; gates only the text-match stage. */
+/**
+ * Reverse-lookup (BM25) aggressiveness, sent to the engine. Despite the name, this is broader than
+ * just text-matching: engine.Config.applyLevel() also raises/lowers the confidence floor applied to
+ * every detection type (explicit, continuation, etc. — not only BM25 reverse matches), and changes
+ * the sticky book/chapter timeout and a couple of recall toggles. See ChurchPresenter-BLE's
+ * TRAINING_PLAN.md and Config.kt for the exact per-level values.
+ */
 enum class TextMatchLevel { OFF, CONSERVATIVE, BALANCED, AGGRESSIVE }
 
 /**
@@ -55,6 +61,20 @@ data class DetectedReference(
     val tracks: Set<DetectionTrack> = emptySet(),   // STT track(s) corroborating — confidence markers
     val verseText: String? = null,   // verse text shown History-style on the row
 )
+
+/** Label matching the engine's own matchType strings ("explicit"/"continuation"/"chapter-scan"/
+ * "chapter-history"/"reverse"), for training-log correlation — see TrainingDataLogger.logLiveReference. */
+private fun DetectionSource.toMatchTypeLabel(): String = when (this) {
+    DetectionSource.EXPLICIT -> "explicit"
+    DetectionSource.CONTINUATION -> "continuation"
+    DetectionSource.CHAPTER_SCAN -> "chapter-scan"
+    DetectionSource.CHAPTER_HISTORY -> "chapter-history"
+    DetectionSource.REVERSE -> "reverse"
+}
+
+/** All corroborating sources for this chip, joined for the training log — null when there are none. */
+private fun DetectedReference.matchTypeLabel(): String? =
+    sources.takeIf { it.isNotEmpty() }?.joinToString(",") { it.toMatchTypeLabel() }
 
 class BibleViewModel(
     private var appSettings: AppSettings,
@@ -180,13 +200,26 @@ class BibleViewModel(
     private val _autoFollowLiveSource = mutableStateOf("auto")
     val autoFollowLiveSource: State<String> get() = _autoFollowLiveSource
 
+    // Carries the triggering detection's engine matchType (see DetectedReference.matchTypeLabel())
+    // alongside the token above, so the tab can log it on TrainingDataLogger.logLiveReference — lets
+    // offline analysis measure acceptance rate per tier for auto-follow's instant-vs-staged split.
+    // Null when this go-live isn't tied to a specific detection (e.g. free browsing).
+    private val _autoFollowLiveMatchType = mutableStateOf<String?>(null)
+    val autoFollowLiveMatchType: State<String?> get() = _autoFollowLiveMatchType
+
     fun setAutoFollow(enabled: Boolean) {
         _autoFollowEnabled.value = enabled
         // Turning it on jumps to the latest detection's start verse immediately and puts it live
         // (one verse at a time, like every other auto-follow navigation).
         if (enabled) {
             _detectedReferences.value.firstOrNull()
-                ?.let { navigateToReference(SmartReference(it.bookIndex, it.chapter, it.verseStart, verseEnd = null), goLive = true) }
+                ?.let {
+                    navigateToReference(
+                        SmartReference(it.bookIndex, it.chapter, it.verseStart, verseEnd = null),
+                        goLive = true,
+                        matchType = it.matchTypeLabel(),
+                    )
+                }
         }
     }
 
@@ -640,6 +673,9 @@ class BibleViewModel(
             // go-live by the caller would race this coroutine and read the stale index 0 (verse 1).
             if (goLiveSource != null) {
                 _autoFollowLiveSource.value = goLiveSource
+                // Not tied to a detection (e.g. schedule click) — clear any stale matchType from a
+                // previous detection-driven go-live so it doesn't leak into this one's training log.
+                _autoFollowLiveMatchType.value = null
                 _autoFollowLiveToken.value++
             }
         }
@@ -1284,7 +1320,12 @@ class BibleViewModel(
      * Navigates the browse columns to [bookIndex], [chapter] and optional verse range without the
      * click debounce, so it stays responsive while the user types a reference.
      */
-    private fun navigateToReference(ref: SmartReference, goLive: Boolean = false, goLiveSource: String = "auto") {
+    private fun navigateToReference(
+        ref: SmartReference,
+        goLive: Boolean = false,
+        goLiveSource: String = "auto",
+        matchType: String? = null,
+    ) {
         val bible = _primaryBible.value ?: return
         val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)
         if (bookCount == 0) return
@@ -1327,6 +1368,7 @@ class BibleViewModel(
             // After the verses are loaded + selected, signal the tab to go live (auto-follow only).
             if (goLive) {
                 _autoFollowLiveSource.value = goLiveSource
+                _autoFollowLiveMatchType.value = matchType
                 _autoFollowLiveToken.value++
             }
             refreshFilteredLists()
@@ -1478,6 +1520,8 @@ class BibleViewModel(
         val source = when (matchType) {
             "explicit" -> DetectionSource.EXPLICIT
             "continuation" -> DetectionSource.CONTINUATION
+            "chapter-scan" -> DetectionSource.CHAPTER_SCAN
+            "chapter-history" -> DetectionSource.CHAPTER_HISTORY
             else -> DetectionSource.REVERSE
         }
         val trackSet = tracks.mapNotNull {
@@ -1506,10 +1550,24 @@ class BibleViewModel(
         )
         if (added && _autoFollowEnabled.value) {
             // Present ONE verse at a time and follow the reading: navigate to the start verse only
-            // (drop the announced range). Subsequent per-verse detections (continuation / reverse /
-            // explicit) then advance the live verse one at a time, instead of dropping the whole
-            // 19-22 block on screen at once. The chip still shows the full range.
-            navigateToReference(SmartReference(bookIndex, dispChapter, dispVerseStart, verseEnd = null), goLive = true)
+            // (drop the announced range). Subsequent per-verse detections then advance the live verse
+            // one at a time, instead of dropping the whole 19-22 block on screen at once. The chip
+            // still shows the full range.
+            //
+            // "explicit" (the reference was stated outright) and "continuation" (simply the very next
+            // verse in the passage being read) need no extra confirmation — sequential next-verse
+            // reading is the expected default case while following along, not a risky jump.
+            // "chapter-scan"/"chapter-history"/"reverse" are inferred matches with no reference
+            // actually spoken — stage them (navigate/select, same as a manual single-click on a chip)
+            // without pushing live, so a wrong guess never overwrites what the congregation sees. The
+            // operator's existing double-click accepts it, or a follow-up "continuation" detection
+            // confirms it and goes live on its own.
+            val instantGoLive = matchType == "explicit" || matchType == "continuation"
+            navigateToReference(
+                SmartReference(bookIndex, dispChapter, dispVerseStart, verseEnd = null),
+                goLive = instantGoLive,
+                matchType = matchType,
+            )
         }
     }
 
@@ -1543,18 +1601,21 @@ class BibleViewModel(
 
     /** Navigates the Bible tab to a row the operator tapped. */
     fun applyDetectedReference(ref: DetectedReference, goLiveSource: String? = null) {
+        val matchType = ref.matchTypeLabel()
         TrainingDataLogger.logSuggestionOutcome(
             suggestedBook    = ref.bookIndex + 1,
             suggestedChapter = ref.chapter,
             suggestedVerse   = ref.verseStart,
-            action           = "accepted"
+            action           = "accepted",
+            matchType        = matchType,
         )
         // One verse at a time: clicking a range chip presents the start verse; the operator (or the
         // engine, when auto-follow is on) steps through the rest from there.
         navigateToReference(
             SmartReference(ref.bookIndex, ref.chapter, ref.verseStart, verseEnd = null),
             goLive = goLiveSource != null,
-            goLiveSource = goLiveSource ?: "auto"
+            goLiveSource = goLiveSource ?: "auto",
+            matchType = matchType,
         )
     }
 
@@ -1573,7 +1634,8 @@ class BibleViewModel(
             suggestedChapter = top.chapter,
             suggestedVerse   = top.verseStart,
             action           = "corrected",
-            correctedRef     = buildDetectionLabel(shownBookIndex, shownChapter, shownVerse, null)
+            correctedRef     = buildDetectionLabel(shownBookIndex, shownChapter, shownVerse, null),
+            matchType        = top.matchTypeLabel(),
         )
     }
 
@@ -1584,7 +1646,8 @@ class BibleViewModel(
                 suggestedBook    = ref.bookIndex + 1,
                 suggestedChapter = ref.chapter,
                 suggestedVerse   = ref.verseStart,
-                action           = "dismissed"
+                action           = "dismissed",
+                matchType        = ref.matchTypeLabel(),
             )
         }
         if (_detectedReferences.value.isNotEmpty()) _detectedReferences.value = emptyList()

@@ -15,7 +15,6 @@ data class WindowLayoutSettings(
     val lowerThirdListWidthDp: Int = 240,
     val canvasLeftPanelWidthDp: Int = 200,
     val canvasRightPanelWidthDp: Int = 200,
-    val qaRightPanelWidthDp: Int = 280,
     val presentationRightPanelWidthDp: Int = 260,
     val sttRightPanelWidthDp: Int = 280,
     val announcementsPreviewPanelWidthDp: Int = 260,

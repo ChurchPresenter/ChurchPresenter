@@ -101,6 +101,10 @@ object TrainingDataLogger {
      * go-live from an engine detection), or "remote" (companion API).
      * [autoFollow] is whether auto-follow was ENABLED at the time — distinct from [source], so a
      * manual override while auto-follow is on is still distinguishable for analysis.
+     * [matchType] is the detection's engine match type ("explicit"/"continuation"/"chapter-scan"/
+     * "chapter-history"/"reverse") when this go-live traces back to a specific detection, else null
+     * (e.g. free browsing, typed reference). Lets offline analysis measure acceptance-by-tier for
+     * auto-follow's instant-vs-staged split (see AGENT.md "Bible Follow Along — Tiered Auto-Follow").
      */
     fun logLiveReference(
         book: Int,
@@ -110,6 +114,7 @@ object TrainingDataLogger {
         source: String,
         segmentId: String? = null,
         autoFollow: Boolean = false,
+        matchType: String? = null,
     ) {
         cleanupOldLogsOnce()
         val p = liveRefPath()
@@ -130,6 +135,8 @@ object TrainingDataLogger {
                 if (segmentId != null) append(",\"segmentId\":\"").append(esc(segmentId)).append("\"")
                 else append(",\"segmentId\":null")
                 append(",\"autoFollow\":").append(autoFollow)
+                if (matchType != null) append(",\"matchType\":\"").append(esc(matchType)).append("\"")
+                else append(",\"matchType\":null")
                 append(",\"source\":\"").append(source).append("\"}")
             }
             synchronized(lock) { File(p).appendText(line + "\n", Charsets.UTF_8) }
@@ -144,6 +151,8 @@ object TrainingDataLogger {
      * [suggestedBook] is the canonical 1-based book number.
      * [action] is "accepted" (chip clicked), "dismissed" (clear button), or "corrected" (a different
      * verse went live, overriding this suggestion — [correctedRef] holds what was actually shown).
+     * [matchType] is the suggested detection's engine match type (see [logLiveReference]) — lets
+     * offline analysis measure acceptance/dismissal/correction rate by tier.
      */
     fun logSuggestionOutcome(
         suggestedBook: Int,
@@ -151,6 +160,7 @@ object TrainingDataLogger {
         suggestedVerse: Int?,
         action: String,
         correctedRef: String? = null,
+        matchType: String? = null,
     ) {
         cleanupOldLogsOnce()
         val p = outcomePath()
@@ -166,6 +176,8 @@ object TrainingDataLogger {
                 else append(",\"suggestedVerse\":null")
                 append(",\"action\":\"").append(action).append("\"")
                 if (correctedRef != null) append(",\"correctedRef\":\"").append(correctedRef).append("\"")
+                if (matchType != null) append(",\"matchType\":\"").append(esc(matchType)).append("\"")
+                else append(",\"matchType\":null")
                 append("}")
             }
             synchronized(lock) { File(p).appendText(line + "\n", Charsets.UTF_8) }

@@ -84,6 +84,7 @@ import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.toComposeImageBitmap
 
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
@@ -440,11 +441,9 @@ fun MainDesktop(
     // new auto-follow detections. BibleTab is inside AnimatedContent and leaves the composition
     // on tab switch, so its own LaunchedEffect can't fire while the user is away.
     val autoFollowLiveToken by bibleViewModel.autoFollowLiveToken
-    val lastMainAutoFollowToken = remember { mutableStateOf(autoFollowLiveToken) }
+    val mainAutoFollowTokenGate = rememberTokenGate(autoFollowLiveToken)
     LaunchedEffect(autoFollowLiveToken) {
-        if (autoFollowLiveToken == 0) return@LaunchedEffect
-        if (autoFollowLiveToken == lastMainAutoFollowToken.value) return@LaunchedEffect
-        lastMainAutoFollowToken.value = autoFollowLiveToken
+        if (!mainAutoFollowTokenGate.consume()) return@LaunchedEffect
         // Defer to BibleTab's own handler (history, stats, training log) when it's active.
         if (effectiveTabIndex == visibleTabs.indexOf(Tabs.BIBLE)) return@LaunchedEffect
         // Don't steal the screen — only update verse content when Bible is already presenting.
@@ -462,6 +461,7 @@ fun MainDesktop(
                 source     = "auto",
                 segmentId  = bibleViewModel.lastDetectionSegmentId,
                 autoFollow = true,
+                matchType  = bibleViewModel.autoFollowLiveMatchType.value,
             )
         }
     }

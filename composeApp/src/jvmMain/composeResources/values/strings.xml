@@ -468,6 +468,7 @@
     <string name="tooltip_edit_label">Edit Label</string>
     <string name="tooltip_go_live">Go Live</string>
     <string name="tooltip_presentation_remote">Open Remote Control</string>
+    <string name="tooltip_qa_remote">Sharing &amp; Remote Access</string>
     <string name="tooltip_send_to_stage_monitor">Send to Stage Monitor</string>
     <string name="tooltip_hide_from_stage_monitor">Hide Announcement</string>
     <string name="tooltip_add_label">Add Label</string>
@@ -1340,11 +1341,15 @@
     <string name="qa_export_dialog_title">Export Questions</string>
     <string name="qa_import_dialog_title">Import Questions</string>
     <string name="qa_submit_questions">Submit Questions</string>
+    <string name="qa_remote_dialog_title">Sharing &amp; Remote Access</string>
+    <string name="qa_remote_dialog_description">Share the QR code below so the congregation can submit questions, and use the admin QR code to moderate from another device.</string>
     <string name="qa_hide_qr">Hide QR from Display</string>
     <string name="qa_show_qr">Show QR on Display</string>
     <string name="qa_admin_panel">Admin Panel</string>
     <string name="qa_server_hint">Start the companion server to enable Q&amp;A</string>
     <string name="qa_display_styling">Display Styling</string>
+    <string name="qa_styling_qr_group">QR Code</string>
+    <string name="qa_styling_text_group">Text &amp; Background</string>
     <string name="qa_text_color">Text Color</string>
     <string name="qa_qr_fg_color">QR Foreground</string>
     <string name="qa_qr_bg_color">QR Background</string>
@@ -1750,9 +1755,12 @@
     <string name="bible_stt_src_explicit">Spoken reference</string>
     <string name="bible_stt_src_reverse">Matched by text</string>
     <string name="bible_stt_src_continuation">Following along</string>
+    <string name="bible_stt_src_chapter_scan">Found in current chapter</string>
+    <string name="bible_stt_src_chapter_history">Matched an earlier chapter</string>
     <string name="bible_stt_track_transcription">Heard in transcription</string>
     <string name="bible_stt_track_translation">Heard in translation</string>
     <string name="bible_stt_match_label">Text match</string>
+    <string name="bible_stt_text_match_hint">Also affects overall detection confidence and how long a spoken book/chapter stays active — not just quoted-text matches</string>
     <string name="bible_stt_level_off">Off</string>
     <string name="bible_stt_level_conservative">Conservative</string>
     <string name="bible_stt_level_balanced">Balanced</string>

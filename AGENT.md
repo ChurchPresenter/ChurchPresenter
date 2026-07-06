@@ -310,6 +310,76 @@ Derived from `file.absolutePath.hashCode().toUInt().toString(16)` — stable per
 ### Key rule
 - Do **NOT** use `toAwtImage()` on `ImageBitmap` — this extension does not exist in this project. Always work with `BufferedImage` directly and convert to `ImageBitmap` via `bufferedImageToImageBitmap()`.
 
+## Bible Follow Along — Tiered Auto-Follow (July 2026)
+
+**Problem**: the BLE detection engine (`ChurchPresenter-BLE/`) reports five distinct match types —
+`explicit`, `continuation`, `chapter-scan`, `chapter-history`, `reverse` — with real, documented
+differences in false-positive risk (see the BLE module's own `TRAINING_PLAN.md` Known Engine Gaps
+table). None of that distinction reached the app: `BibleViewModel.onEngineScripture()` collapsed
+everything that wasn't literally `explicit`/`continuation` into one generic `REVERSE` bucket, and
+whenever the "Auto-follow" toggle was on, *every* accepted detection instantly pushed to the output
+screen with zero confirmation — an inferred chapter-history/reverse jump could put a wrong verse
+live with no safety net.
+
+**Fix**: no engine or transport change was needed — `Broadcaster.kt` already serializes the engine's
+full `matchType` string over the WebSocket, and `BibleEngineClient.handleMessage()` already forwarded
+it through unmodified; the app was just discarding the distinction.
+- `DetectionSource` enum (`BibleViewModel.kt`) extended from 3 to 5 values, matching the engine's
+  real match types 1:1.
+- Auto-follow's go-live decision is now tiered by `matchType`: `explicit` (reference stated outright)
+  and `continuation` (simply the next verse in the passage) still go live instantly — sequential
+  next-verse reading is the expected default case, not a risky jump. `chapter-scan`/`chapter-history`/
+  `reverse` (inferred matches with no reference actually spoken) now stage the browse view via
+  `navigateToReference(..., goLive = false)` — the same mechanism a manual single-click on a
+  detection chip already used — instead of pushing live. The operator's existing double-click
+  accepts it, or a follow-up `continuation` detection confirms and goes live on its own.
+- No new settings/config knob — the instant-vs-staged split is a fixed, documented rule based on
+  match type, not a numeric threshold.
+- `BibleTab.kt`'s detection-chip icon row gained two new markers (`CHAPTER_SCAN`, `CHAPTER_HISTORY`)
+  so the richer match type is visible, not just inferred.
+
+**Also fixed while here**:
+- `TextMatchLevel`'s KDoc claimed it "gates only the text-match stage" — false; the engine's
+  `Config.applyLevel()` also changes the confidence floor (`Stabilizer`, applies to *every* detection
+  type) and the sticky book/chapter timeout. Comment corrected; the "Text match" pill also gained a
+  tooltip (it had none, unlike the Auto-follow pill next to it).
+- Extracted the "consume this go-live token exactly once" bookkeeping — previously hand-rolled
+  identically in both `BibleTab.kt` and `MainDesktop.kt`'s tab-switch fallback — into
+  `composables/TokenGate.kt` (`rememberTokenGate`). Behavior-preserving; removes a duplication that
+  could drift (this exact pair of effects was already the site of one bug, commit `dcd5f9d`).
+- **`matchType` now flows into the training logs.** Before this, `TrainingDataLogger.logLiveReference()`/
+  `logSuggestionOutcome()` had no field recording *which* match type a live reference or suggestion
+  outcome traced back to — so there'd have been no way to later ask "did staged chapter-history
+  suggestions actually get accepted, or mostly ignored?" to validate whether the instant-vs-staged
+  split above is calibrated right. Both functions gained an optional `matchType: String?` param
+  (`DetectedReference.matchTypeLabel()` joins a chip's `sources` into the engine's own label strings).
+  Threaded through every call site that traces back to a specific detection
+  (`onEngineScripture`/`setAutoFollow`/`applyDetectedReference`/`logGoLiveCorrection`/
+  `clearDetectedReferences`, plus a new `_autoFollowLiveMatchType` state alongside the existing
+  `_autoFollowLiveSource` for the deferred go-live path); left `null` at every site with no detection
+  context (free browsing, schedule clicks, remote Companion API go-live) — `selectVerseByDetails`
+  explicitly resets it to `null` so a stale matchType from an earlier detection can't leak into an
+  unrelated go-live.
+
+**Files Modified**:
+- `viewmodel/BibleViewModel.kt` — `DetectionSource` enum, `onEngineScripture()` matchType mapping +
+  tiered go-live call, `TextMatchLevel` KDoc, `matchTypeLabel()` helper, `_autoFollowLiveMatchType`,
+  `matchType` threaded through `navigateToReference`/`setAutoFollow`/`applyDetectedReference`/
+  `logGoLiveCorrection`/`clearDetectedReferences`/`selectVerseByDetails`
+- `tabs/BibleTab.kt` — new icon/tooltip branches, Text-match tooltip, `TokenGate` adoption,
+  `goLiveWithHistory()` gained a `matchType` param
+- `MainDesktop.kt` — `TokenGate` adoption, `matchType` passed at the tab-switch fallback go-live
+- `composables/TokenGate.kt` — new
+- `utils/TrainingDataLogger.kt` — `matchType: String? = null` param on `logLiveReference()` and
+  `logSuggestionOutcome()`
+- `composeResources/values/strings.xml` — `bible_stt_src_chapter_scan`, `bible_stt_src_chapter_history`,
+  `bible_stt_text_match_hint`
+
+**Build Status**: ✅ Compiles successfully (`gradlew compileKotlinJvm`, zero warnings). Not yet
+verified against a live STT session — the tiering logic was traced by hand against the exact
+existing wiring (`navigateToReference`'s `goLive` param, `_autoFollowLiveToken` vs
+`_verseSelectionToken`) rather than run end-to-end.
+
 ## Known Issues
 
 **Issue**: Song edits not saving/updating

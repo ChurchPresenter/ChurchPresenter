@@ -1,31 +1,16 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.input.pointer.pointerInput
-import java.awt.Cursor
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.window.WindowPlacement
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import org.jetbrains.compose.resources.painterResource
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,19 +19,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.HowToVote
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.AlertDialog
@@ -79,7 +63,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -88,34 +71,21 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.qa_admin_panel
 import churchpresenter.composeapp.generated.resources.qa_add_question_hint
-import churchpresenter.composeapp.generated.resources.qa_admin_uses_api_key
-import churchpresenter.composeapp.generated.resources.qa_qr_message_default
-import churchpresenter.composeapp.generated.resources.qa_qr_message_label
-import churchpresenter.composeapp.generated.resources.qa_qr_message_reset
 import churchpresenter.composeapp.generated.resources.qa_approve
 import churchpresenter.composeapp.generated.resources.qa_back_to_incoming
-import churchpresenter.composeapp.generated.resources.qa_background_color
-import churchpresenter.composeapp.generated.resources.qa_transparent
-import churchpresenter.composeapp.generated.resources.qa_text_color
-import churchpresenter.composeapp.generated.resources.qa_qr_fg_color
-import churchpresenter.composeapp.generated.resources.qa_qr_bg_color
 import churchpresenter.composeapp.generated.resources.qa_clear_all_questions
 import churchpresenter.composeapp.generated.resources.qa_confirm_go_live
 import churchpresenter.composeapp.generated.resources.qa_confirm_go_live_prompt
-import churchpresenter.composeapp.generated.resources.qa_cooldown_label
 import churchpresenter.composeapp.generated.resources.qa_delete_all_history
 import churchpresenter.composeapp.generated.resources.qa_delete_question
 import churchpresenter.composeapp.generated.resources.qa_deny
-import churchpresenter.composeapp.generated.resources.qa_display_styling
 import churchpresenter.composeapp.generated.resources.qa_displaying
 import churchpresenter.composeapp.generated.resources.qa_done_clear
 import churchpresenter.composeapp.generated.resources.qa_edit_question_hint
 import churchpresenter.composeapp.generated.resources.qa_export_dialog_title
 import churchpresenter.composeapp.generated.resources.qa_export_to_file
 import churchpresenter.composeapp.generated.resources.qa_finished
-import churchpresenter.composeapp.generated.resources.qa_font
 import churchpresenter.composeapp.generated.resources.qa_hide_qr
 import churchpresenter.composeapp.generated.resources.qa_history
 import churchpresenter.composeapp.generated.resources.qa_import_dialog_title
@@ -127,47 +97,22 @@ import churchpresenter.composeapp.generated.resources.qa_no_approved
 import churchpresenter.composeapp.generated.resources.qa_no_denied
 import churchpresenter.composeapp.generated.resources.qa_no_finished
 import churchpresenter.composeapp.generated.resources.qa_no_history
-import churchpresenter.composeapp.generated.resources.qa_position
 import churchpresenter.composeapp.generated.resources.qa_resume
-import churchpresenter.composeapp.generated.resources.qa_server_hint
 import churchpresenter.composeapp.generated.resources.qa_server_not_running
-import churchpresenter.composeapp.generated.resources.qa_settings_section
 import churchpresenter.composeapp.generated.resources.qa_show_qr
-import churchpresenter.composeapp.generated.resources.qa_size
 import churchpresenter.composeapp.generated.resources.qa_start_session_hint
 import churchpresenter.composeapp.generated.resources.qa_stop_session
-import churchpresenter.composeapp.generated.resources.qa_submit_questions
 import churchpresenter.composeapp.generated.resources.qa_waiting
-import churchpresenter.composeapp.generated.resources.qa_public_access
-import churchpresenter.composeapp.generated.resources.qa_public_access_description
-import churchpresenter.composeapp.generated.resources.qa_enable_public_access
-import churchpresenter.composeapp.generated.resources.qa_disable_public_access
-import churchpresenter.composeapp.generated.resources.qa_downloading_tunnel
-import churchpresenter.composeapp.generated.resources.qa_starting_tunnel
-import churchpresenter.composeapp.generated.resources.qa_qr_code_shows
-import churchpresenter.composeapp.generated.resources.qa_local
-import churchpresenter.composeapp.generated.resources.qa_public
-import churchpresenter.composeapp.generated.resources.qa_retry
-import churchpresenter.composeapp.generated.resources.qa_pos_tl
-import churchpresenter.composeapp.generated.resources.qa_pos_tc
-import churchpresenter.composeapp.generated.resources.qa_pos_tr
-import churchpresenter.composeapp.generated.resources.qa_pos_cl
-import churchpresenter.composeapp.generated.resources.qa_pos_c
-import churchpresenter.composeapp.generated.resources.qa_pos_cr
-import churchpresenter.composeapp.generated.resources.qa_pos_bl
-import churchpresenter.composeapp.generated.resources.qa_pos_bc
-import churchpresenter.composeapp.generated.resources.qa_pos_br
 import churchpresenter.composeapp.generated.resources.save
 import churchpresenter.composeapp.generated.resources.qa_confirm_delete_prompt
 import churchpresenter.composeapp.generated.resources.qa_submitter_device
 import churchpresenter.composeapp.generated.resources.tooltip_clear_display
 import churchpresenter.composeapp.generated.resources.tooltip_edit
+import churchpresenter.composeapp.generated.resources.tooltip_qa_remote
 import churchpresenter.composeapp.generated.resources.qa_add
 import churchpresenter.composeapp.generated.resources.qa_clear
 import churchpresenter.composeapp.generated.resources.qa_clear_all_confirm_message
-import churchpresenter.composeapp.generated.resources.qa_copy_url
 import churchpresenter.composeapp.generated.resources.qa_export_clear
-import churchpresenter.composeapp.generated.resources.qa_opacity
 import churchpresenter.composeapp.generated.resources.qa_filter_label
 import churchpresenter.composeapp.generated.resources.qa_sort_label
 import churchpresenter.composeapp.generated.resources.qa_sort_least_votes
@@ -181,24 +126,18 @@ import churchpresenter.composeapp.generated.resources.qa_approved
 import churchpresenter.composeapp.generated.resources.qa_denied
 import churchpresenter.composeapp.generated.resources.qa_done
 import churchpresenter.composeapp.generated.resources.qa_incoming_approved
+import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.dialogs.QARemoteDialog
 import org.churchpresenter.app.churchpresenter.models.Question
 import org.churchpresenter.app.churchpresenter.models.QuestionStatus
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
-import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.jetbrains.compose.resources.stringResource
-import java.awt.GraphicsEnvironment
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -235,22 +174,13 @@ fun QATab(
         }
     }
 
-    val effectiveBaseUrl = qaDisplayUrl.ifEmpty { serverUrl }
-    val submissionUrl = if (effectiveBaseUrl.isNotEmpty()) "$effectiveBaseUrl/qa" else ""
-    var adminUseTunnel by remember { mutableStateOf(false) }
-    val adminBaseUrl = if (adminUseTunnel && tunnelUrl.isNotEmpty()) tunnelUrl else serverUrl
-    val adminDisplayUrl = if (adminBaseUrl.isNotEmpty()) "$adminBaseUrl/qa/admin" else ""
-    val adminQrUrl = if (adminBaseUrl.isNotEmpty()) {
-        val apiKey = if (appSettings.serverSettings.apiKeyEnabled) appSettings.serverSettings.apiKey else ""
-        if (apiKey.isNotEmpty()) "$adminBaseUrl/qa/admin?password=${java.net.URLEncoder.encode(apiKey, "UTF-8")}"
-        else "$adminBaseUrl/qa/admin"
-    } else ""
     val isServerRunning = serverUrl.isNotEmpty()
 
     var selectedFilter by remember { mutableStateOf(0) }
     var sortMode by remember { mutableStateOf(0) } // 0=newest, 1=oldest, 2=most votes, 3=least votes
     var showClearConfirm by remember { mutableStateOf(false) }
     var addQuestionText by remember { mutableStateOf("") }
+    var showRemoteDialog by remember { mutableStateOf(false) }
 
     val pendingCount = questions.count { it.status == QuestionStatus.PENDING }
     val approvedCount = questions.count { it.status == QuestionStatus.APPROVED }
@@ -297,38 +227,15 @@ fun QATab(
     }
 
     val qaSettings = appSettings.qaSettings
-    val availableFonts = remember {
-        GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList()
-    }
 
     // Hoist strings needed inside non-composable lambdas
     val strExportTitle = stringResource(Res.string.qa_export_dialog_title)
     val strImportTitle = stringResource(Res.string.qa_import_dialog_title)
-    val strQrMessageDefault = stringResource(Res.string.qa_qr_message_default)
 
     val coroutineScope = rememberCoroutineScope()
 
-    val density = LocalDensity.current
-    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
-    val windowState = LocalMainWindowState.current
-    val isMaximized = windowState?.placement != WindowPlacement.Floating
-    val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
-
-    var rightPanelPx by remember(currentLayout.qaRightPanelWidthDp, isMaximized) {
-        mutableStateOf(with(density) { currentLayout.qaRightPanelWidthDp.dp.toPx() })
-    }
-
-    fun saveRightPanel() {
-        val dp = with(density) { rightPanelPx.toDp().value.toInt() }
-        onSettingsChangeState.value { s ->
-            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(qaRightPanelWidthDp = dp))
-            else s.copy(windowedLayout = s.windowedLayout.copy(qaRightPanelWidthDp = dp))
-        }
-    }
-
-    Row(modifier = modifier.fillMaxSize()) {
-        // ── Left Panel: Question List ────────────────────────────────
-        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+    Column(modifier = modifier.fillMaxSize()) {
+        // ── Question List ────────────────────────────────
             // Top bar: session + clear
             Row(
                 modifier = Modifier.fillMaxWidth().padding(8.dp),
@@ -388,6 +295,43 @@ fun QATab(
                 StatBadge(stringResource(Res.string.qa_incoming), pendingCount, MaterialTheme.colorScheme.tertiary)
                 Spacer(Modifier.width(8.dp))
                 StatBadge(stringResource(Res.string.qa_finished), doneCount + deniedCount, MaterialTheme.colorScheme.secondary)
+
+                Spacer(Modifier.width(16.dp))
+
+                ActionIconButton(
+                    onClick = { showRemoteDialog = true },
+                    tooltipText = stringResource(Res.string.tooltip_qa_remote),
+                    icon = Icons.Default.SettingsRemote,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                ActionIconButton(
+                    onClick = {
+                        if (showQROnDisplay && isQALocked) return@ActionIconButton
+                        qaManager.toggleQRCodeDisplay()
+                        presenterManager.setShowQRCodeOnDisplay(qaManager.showQRCodeOnDisplay)
+                        if (qaManager.showQRCodeOnDisplay) { presenterManager.setDisplayedQuestion(null); presenting(Presenting.QA) }
+                        else if (qaManager.displayedQuestion == null) { presenting(Presenting.NONE) }
+                    },
+                    enabled = !(showQROnDisplay && isQALocked),
+                    tooltipText = stringResource(if (showQROnDisplay) Res.string.qa_hide_qr else Res.string.qa_show_qr),
+                    icon = Icons.Default.Tv,
+                    containerColor = if (showQROnDisplay) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = if (showQROnDisplay) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                ActionIconButton(
+                    onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(votingEnabled = !s.qaSettings.votingEnabled)) } },
+                    tooltipText = stringResource(if (qaSettings.votingEnabled) Res.string.qa_voting_enabled else Res.string.qa_voting_disabled),
+                    icon = Icons.Default.HowToVote,
+                    containerColor = if (qaSettings.votingEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = if (qaSettings.votingEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
+                )
 
                 Spacer(Modifier.width(16.dp))
 
@@ -659,7 +603,6 @@ fun QATab(
                     }
                 }
             }
-        }
 
         // ── Clear All Confirmation Dialog ─────────────────────────────
         if (showClearConfirm) {
@@ -720,434 +663,23 @@ fun QATab(
                 }
             )
         }
+    }
 
-        // Draggable separator
-        Box(
-            modifier = Modifier
-                .width(6.dp)
-                .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-                .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-                .draggable(
-                    orientation = Orientation.Horizontal,
-                    state = rememberDraggableState { delta ->
-                        rightPanelPx = (rightPanelPx - delta).coerceAtLeast(with(density) { 160.dp.toPx() })
-                    },
-                    onDragStopped = { saveRightPanel() }
-                )
+    if (showRemoteDialog) {
+        QARemoteDialog(
+            serverUrl = serverUrl,
+            qaDisplayUrl = qaDisplayUrl,
+            onQaDisplayUrlChanged = onQaDisplayUrlChanged,
+            apiKeyEnabled = appSettings.serverSettings.apiKeyEnabled,
+            apiKey = appSettings.serverSettings.apiKey,
+            tunnelStatus = tunnelStatus,
+            tunnelUrl = tunnelUrl,
+            onStartTunnel = onStartTunnel,
+            onStopTunnel = onStopTunnel,
+            qaSettings = qaSettings,
+            onSettingsChange = onSettingsChange,
+            onDismiss = { showRemoteDialog = false }
         )
-
-        // ── Right Panel: QR Codes, Styling & Settings ────────────────
-        Column(
-            modifier = Modifier
-                .width(with(density) { rightPanelPx.toDp() })
-                .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (isServerRunning) {
-                Text(stringResource(Res.string.qa_submit_questions), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(Modifier.height(8.dp))
-                val submissionQR = remember(submissionUrl) { generateQRCodeBitmap(submissionUrl, 256) }
-                if (submissionQR != null) {
-                    Image(bitmap = submissionQR, contentDescription = stringResource(Res.string.qa_submit_questions), modifier = Modifier.size(180.dp).clip(RoundedCornerShape(8.dp)))
-                }
-                SelectionContainer {
-                    Text(submissionUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
-                }
-                OutlinedButton(
-                    onClick = { java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(java.awt.datatransfer.StringSelection(submissionUrl), null) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                    contentPadding = ButtonDefaults.TextButtonContentPadding,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(stringResource(Res.string.qa_copy_url), fontSize = 11.sp)
-                }
-
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = {
-                        if (qaManager.showQRCodeOnDisplay && isQALocked) return@OutlinedButton
-                        qaManager.toggleQRCodeDisplay()
-                        presenterManager.setShowQRCodeOnDisplay(qaManager.showQRCodeOnDisplay)
-                        if (qaManager.showQRCodeOnDisplay) { presenterManager.setDisplayedQuestion(null); presenting(Presenting.QA) }
-                        else if (qaManager.displayedQuestion == null) { presenting(Presenting.NONE) }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Icon(Icons.Default.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text(stringResource(if (showQROnDisplay) Res.string.qa_hide_qr else Res.string.qa_show_qr), fontSize = 12.sp)
-                }
-
-                // ── Public Access (Tunnel) ──────────────────────────────
-                Spacer(Modifier.height(16.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Spacer(Modifier.height(12.dp))
-
-                Text(
-                    stringResource(Res.string.qa_public_access),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    stringResource(Res.string.qa_public_access_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.height(8.dp))
-
-                when (tunnelStatus) {
-                    TunnelStatus.Idle -> {
-                        Button(onClick = onStartTunnel, modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text(stringResource(Res.string.qa_enable_public_access), fontSize = 12.sp)
-                        }
-                    }
-                    TunnelStatus.Downloading -> {
-                        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                            Spacer(Modifier.height(4.dp))
-                            Text(stringResource(Res.string.qa_downloading_tunnel), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                        }
-                    }
-                    TunnelStatus.Starting -> {
-                        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                            Spacer(Modifier.height(4.dp))
-                            Text(stringResource(Res.string.qa_starting_tunnel), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                        }
-                    }
-                    is TunnelStatus.Connected -> {
-                        Button(
-                            onClick = {
-                                onStopTunnel()
-                                onQaDisplayUrlChanged(serverUrl)
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            ),
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text(stringResource(Res.string.qa_disable_public_access), fontSize = 12.sp)
-                        }
-
-                        Spacer(Modifier.height(8.dp))
-                        Text(stringResource(Res.string.qa_qr_code_shows), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Spacer(Modifier.height(4.dp))
-
-                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
-                            val isLocal = qaDisplayUrl.isEmpty() || qaDisplayUrl == serverUrl
-                            OutlinedButton(
-                                onClick = { onQaDisplayUrlChanged(serverUrl) },
-                                modifier = Modifier.weight(1f),
-                                colors = if (isLocal) ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                ) else ButtonDefaults.outlinedButtonColors(),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text(stringResource(Res.string.qa_local), fontSize = 11.sp)
-                            }
-                            OutlinedButton(
-                                onClick = { onQaDisplayUrlChanged(tunnelUrl) },
-                                modifier = Modifier.weight(1f),
-                                colors = if (!isLocal) ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                ) else ButtonDefaults.outlinedButtonColors(),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text(stringResource(Res.string.qa_public), fontSize = 11.sp)
-                            }
-                        }
-
-                        Spacer(Modifier.height(4.dp))
-                        SelectionContainer {
-                            Text(
-                                tunnelStatus.url,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.inverseSurface,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
-                    is TunnelStatus.Error -> {
-                        Text(
-                            tunnelStatus.message,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Button(onClick = onStartTunnel, modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text(stringResource(Res.string.qa_retry), fontSize = 12.sp)
-                        }
-                    }
-                }
-
-                // ── Admin QR Code ──────────────────────────────────────
-                Spacer(Modifier.height(16.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Spacer(Modifier.height(12.dp))
-
-                Text(stringResource(Res.string.qa_admin_panel), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    stringResource(Res.string.qa_admin_uses_api_key),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.height(8.dp))
-
-                if (tunnelStatus is TunnelStatus.Connected) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
-                        OutlinedButton(
-                            onClick = { adminUseTunnel = false },
-                            modifier = Modifier.weight(1f),
-                            colors = if (!adminUseTunnel) ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ) else ButtonDefaults.outlinedButtonColors(),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(stringResource(Res.string.qa_local), fontSize = 11.sp)
-                        }
-                        OutlinedButton(
-                            onClick = { adminUseTunnel = true },
-                            modifier = Modifier.weight(1f),
-                            colors = if (adminUseTunnel) ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ) else ButtonDefaults.outlinedButtonColors(),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(stringResource(Res.string.qa_public), fontSize = 11.sp)
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                }
-
-                val adminQR = remember(adminQrUrl) { generateQRCodeBitmap(adminQrUrl, 256) }
-                if (adminQR != null) {
-                    Image(bitmap = adminQR, contentDescription = stringResource(Res.string.qa_admin_panel), modifier = Modifier.size(140.dp).clip(RoundedCornerShape(8.dp)))
-                }
-                SelectionContainer {
-                    Text(adminQrUrl.ifEmpty { adminDisplayUrl }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
-                }
-                OutlinedButton(
-                    onClick = { java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(java.awt.datatransfer.StringSelection(adminQrUrl.ifEmpty { adminDisplayUrl }), null) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                    contentPadding = ButtonDefaults.TextButtonContentPadding,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(stringResource(Res.string.qa_copy_url), fontSize = 11.sp)
-                }
-
-                // ── Voting Toggle ─────────────────────────────────────
-                Spacer(Modifier.height(16.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Spacer(Modifier.height(12.dp))
-
-                Button(
-                    onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(votingEnabled = !s.qaSettings.votingEnabled)) } },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = if (qaSettings.votingEnabled) ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.inverseSurface,
-                        contentColor = MaterialTheme.colorScheme.inverseOnSurface
-                    ) else ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(if (qaSettings.votingEnabled) stringResource(Res.string.qa_voting_enabled) else stringResource(Res.string.qa_voting_disabled))
-                }
-
-                Spacer(Modifier.height(16.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Spacer(Modifier.height(12.dp))
-
-                Text(stringResource(Res.string.qa_display_styling), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(Modifier.height(8.dp))
-
-                Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                        BasicTextField(
-                            value = qaSettings.qrCodeMessage,
-                            onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                            decorationBox = { innerTextField ->
-                                if (qaSettings.qrCodeMessage.isEmpty()) {
-                                    Text(strQrMessageDefault, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
-                                }
-                                innerTextField()
-                            }
-                        )
-                    }
-                    FilledIconButton(
-                        onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
-                        modifier = Modifier.size(30.dp),
-                        shape = RoundedCornerShape(5.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
-                    ) {
-                        Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))
-                    }
-                }
-                Spacer(Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ColorPickerField(label = stringResource(Res.string.qa_qr_fg_color), color = qaSettings.qrForegroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrForegroundColor = it)) } }, modifier = Modifier.weight(1f))
-                    ColorPickerField(label = stringResource(Res.string.qa_qr_bg_color), color = qaSettings.qrBackgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundColor = it)) } }, modifier = Modifier.weight(1f))
-                }
-                Spacer(Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                    Spacer(Modifier.width(4.dp))
-                    androidx.compose.material3.Slider(
-                        value = qaSettings.qrBackgroundOpacity / 100f,
-                        onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundOpacity = (it * 100).toInt())) } },
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text("${qaSettings.qrBackgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
-                }
-
-                Spacer(Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ColorPickerField(label = stringResource(Res.string.qa_text_color), color = qaSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textColor = it)) } }, modifier = Modifier.weight(1f))
-                    TextStyleButtons(
-                            bold = qaSettings.bold, italic = qaSettings.italic, underline = qaSettings.underline, shadow = qaSettings.shadow,
-                            onBoldChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(bold = it)) } },
-                            onItalicChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(italic = it)) } },
-                            onUnderlineChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(underline = it)) } },
-                            onShadowChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadow = it)) } }
-                    )
-                }
-
-                AnimatedVisibility(visible = qaSettings.shadow) {
-                    ShadowDetailRow(
-                        shadowColor = qaSettings.shadowColor, shadowSize = qaSettings.shadowSize, shadowOpacity = qaSettings.shadowOpacity,
-                        onColorChange = { c -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowColor = c)) } },
-                        onSizeChange = { v -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowSize = v)) } },
-                        onOpacityChange = { v -> onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(shadowOpacity = v)) } },
-                    )
-                }
-
-                Spacer(Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    FontSettingsDropdown(label = stringResource(Res.string.qa_font), value = qaSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontType = it)) } }, modifier = Modifier.weight(1f))
-                    NumberSettingsTextField(label = stringResource(Res.string.qa_size), initialText = qaSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(fontSize = it)) } })
-                }
-
-                Spacer(Modifier.height(8.dp))
-                Column(horizontalAlignment = Alignment.Start) {
-                    val bgIsTransparent = qaSettings.backgroundColor.equals("transparent", ignoreCase = true)
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
-                        if (bgIsTransparent) {
-                            OutlinedButton(
-                                onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "#1E1E2E")) } },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(6.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
-                            ) { Text(stringResource(Res.string.qa_background_color) + " · " + stringResource(Res.string.qa_transparent), style = MaterialTheme.typography.labelSmall) }
-                        } else {
-                            ColorPickerField(label = stringResource(Res.string.qa_background_color), color = qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } }, modifier = Modifier.weight(1f))
-                            OutlinedButton(
-                                onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "transparent")) } },
-                                shape = RoundedCornerShape(6.dp)
-                            ) { Text(stringResource(Res.string.qa_transparent), style = MaterialTheme.typography.labelSmall) }
-                        }
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                        Spacer(Modifier.width(4.dp))
-                        androidx.compose.material3.Slider(
-                            value = qaSettings.backgroundOpacity / 100f,
-                            onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundOpacity = (it * 100).toInt())) } },
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text("${qaSettings.backgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
-                    }
-                }
-
-                Spacer(Modifier.height(8.dp))
-                Text(stringResource(Res.string.qa_position), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(Modifier.height(4.dp))
-                val positions = listOf(
-                    Constants.TOP_LEFT to stringResource(Res.string.qa_pos_tl),
-                    Constants.TOP_CENTER to stringResource(Res.string.qa_pos_tc),
-                    Constants.TOP_RIGHT to stringResource(Res.string.qa_pos_tr),
-                    Constants.CENTER_LEFT to stringResource(Res.string.qa_pos_cl),
-                    Constants.CENTER to stringResource(Res.string.qa_pos_c),
-                    Constants.CENTER_RIGHT to stringResource(Res.string.qa_pos_cr),
-                    Constants.BOTTOM_LEFT to stringResource(Res.string.qa_pos_bl),
-                    Constants.BOTTOM_CENTER to stringResource(Res.string.qa_pos_bc),
-                    Constants.BOTTOM_RIGHT to stringResource(Res.string.qa_pos_br),
-                )
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.fillMaxWidth()) {
-                    positions.chunked(3).forEach { rowItems ->
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                            rowItems.forEach { (posConst, posLabel) ->
-                                val isSelected = qaSettings.position == posConst
-                                Box(
-                                    modifier = Modifier.weight(1f).height(28.dp).clip(RoundedCornerShape(3.dp))
-                                        .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
-                                        .clickable { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(position = posConst)) } },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(posLabel, style = MaterialTheme.typography.labelSmall, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Spacer(Modifier.height(12.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Spacer(Modifier.height(12.dp))
-
-                Text(stringResource(Res.string.qa_settings_section), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(Modifier.height(8.dp))
-
-                NumberSettingsTextField(
-                    label = stringResource(Res.string.qa_cooldown_label),
-                    initialText = qaSettings.rateLimitCooldownSeconds,
-                    range = 0..600,
-                    onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = it)) } },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } else {
-                Text(stringResource(Res.string.qa_server_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 32.dp))
-            }
-        }
     }
 }
 

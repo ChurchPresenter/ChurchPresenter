@@ -115,7 +115,9 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ManageSearch
 import org.churchpresenter.app.churchpresenter.viewmodel.DetectionTrack
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
@@ -138,6 +140,9 @@ import churchpresenter.composeapp.generated.resources.bible_stt_clear
 import churchpresenter.composeapp.generated.resources.bible_stt_src_explicit
 import churchpresenter.composeapp.generated.resources.bible_stt_src_reverse
 import churchpresenter.composeapp.generated.resources.bible_stt_src_continuation
+import churchpresenter.composeapp.generated.resources.bible_stt_src_chapter_scan
+import churchpresenter.composeapp.generated.resources.bible_stt_src_chapter_history
+import churchpresenter.composeapp.generated.resources.bible_stt_text_match_hint
 import churchpresenter.composeapp.generated.resources.bible_stt_track_transcription
 import churchpresenter.composeapp.generated.resources.bible_stt_track_translation
 import churchpresenter.composeapp.generated.resources.bible_stt_match_label
@@ -171,6 +176,7 @@ import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
@@ -346,8 +352,9 @@ fun BibleTab(
     }
 
     // [source] is logged to the training data: "manual" for an operator action (button / double-click
-    // / Enter) or "auto" when auto-follow drove the go-live from an engine detection.
-    fun goLiveWithHistory(source: String = "manual") {
+    // / Enter) or "auto" when auto-follow drove the go-live from an engine detection. [matchType] is
+    // the triggering detection's engine match type, when this go-live traces back to one.
+    fun goLiveWithHistory(source: String = "manual", matchType: String? = null) {
         val selectedVerses = viewModel.getSelectedVerses()
         selectedVerses.firstOrNull()?.let { v ->
             if (viewModel.multiVerseEnabled.value) {
@@ -396,7 +403,8 @@ fun BibleTab(
                 verseEnd   = verseEnd,
                 source     = source,
                 segmentId  = viewModel.lastDetectionSegmentId,
-                autoFollow = viewModel.autoFollowEnabled.value
+                autoFollow = viewModel.autoFollowEnabled.value,
+                matchType  = matchType,
             )
             // If this go-live overrode the engine's top suggestion, log it as a correction (engine
             // said X, operator showed Y) — labeled training data for false positives.
@@ -413,14 +421,13 @@ fun BibleTab(
     // switch the presenter to BIBLE), not just select it. Reuses the manual go-live path so history,
     // stats and training logging happen too.
     val autoFollowLiveToken by viewModel.autoFollowLiveToken
-    // Seed with the token value at composition time so detections that happened while the tab was
-    // inactive (AnimatedContent destroys BibleTab on switch) don't re-fire go-live on re-entry.
-    val lastHandledAutoFollowToken = remember { mutableStateOf(autoFollowLiveToken) }
+    // Seeded (via rememberTokenGate) with the token value at composition time so detections that
+    // happened while the tab was inactive (AnimatedContent destroys BibleTab on switch) don't re-fire
+    // go-live on re-entry.
+    val autoFollowTokenGate = rememberTokenGate(autoFollowLiveToken)
     LaunchedEffect(autoFollowLiveToken) {
-        if (autoFollowLiveToken == 0) return@LaunchedEffect
-        if (autoFollowLiveToken == lastHandledAutoFollowToken.value) return@LaunchedEffect
-        lastHandledAutoFollowToken.value = autoFollowLiveToken
-        goLiveWithHistory(source = viewModel.autoFollowLiveSource.value)
+        if (!autoFollowTokenGate.consume()) return@LaunchedEffect
+        goLiveWithHistory(source = viewModel.autoFollowLiveSource.value, matchType = viewModel.autoFollowLiveMatchType.value)
     }
 
     // Only push to presenter when:
@@ -437,7 +444,7 @@ fun BibleTab(
                 onVerseSelected(selectedVerses)
                 // Log manual navigation while live. Skip when auto-follow also incremented the
                 // token this frame — goLiveWithHistory already logs that case with source="auto".
-                if (currentIsPresenting && autoFollowLiveToken == lastHandledAutoFollowToken.value) {
+                if (currentIsPresenting && autoFollowLiveToken == autoFollowTokenGate.lastHandled) {
                     val primary = selectedVerses.first()
                     val bookNum = viewModel.canonicalBookIdForDisplayIndex(viewModel.selectedBookIndex.value)
                     TrainingDataLogger.logLiveReference(
@@ -850,6 +857,15 @@ fun BibleTab(
                     }
                 }
                 // Text match flat button (cycles Off → Conservative → Balanced → Aggressive)
+                TooltipArea(tooltip = {
+                    Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
+                        Text(
+                            text = stringResource(Res.string.bible_stt_text_match_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }) {
                 Box(
                     modifier = Modifier
                         .height(27.dp)
@@ -897,6 +913,7 @@ fun BibleTab(
                                     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         )
                     }
+                }
                 }
                 if (detectedReferences.isNotEmpty()) {
                     IconButton(
@@ -962,6 +979,14 @@ fun BibleTab(
                                 DetectionSource.CONTINUATION -> Triple(
                                     Icons.AutoMirrored.Filled.ArrowForward, Res.string.bible_stt_src_continuation,
                                     MaterialTheme.colorScheme.secondary
+                                )
+                                DetectionSource.CHAPTER_SCAN -> Triple(
+                                    Icons.AutoMirrored.Filled.ManageSearch, Res.string.bible_stt_src_chapter_scan,
+                                    MaterialTheme.colorScheme.tertiary
+                                )
+                                DetectionSource.CHAPTER_HISTORY -> Triple(
+                                    Icons.Filled.History, Res.string.bible_stt_src_chapter_history,
+                                    MaterialTheme.colorScheme.tertiary
                                 )
                             }
                             TooltipArea(tooltip = {
