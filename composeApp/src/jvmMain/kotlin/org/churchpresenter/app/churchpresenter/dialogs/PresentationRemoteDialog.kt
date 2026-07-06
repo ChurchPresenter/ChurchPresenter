@@ -23,11 +23,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
@@ -75,18 +78,34 @@ fun PresentationRemoteDialog(
     val mainWindowState = LocalMainWindowState.current
     val dialogWidth = 400.dp
     val dialogHeight = 720.dp
+    val maxDialogHeight = 900.dp
+    val density = LocalDensity.current
+    val scrollState = rememberScrollState()
+    val dialogState = rememberDialogState(
+        position = centeredOnMainWindow(mainWindowState, dialogWidth, dialogHeight),
+        width = dialogWidth,
+        height = dialogHeight
+    )
     val copyText: (String) -> Unit = { text ->
         java.awt.Toolkit.getDefaultToolkit().systemClipboard
             .setContents(java.awt.datatransfer.StringSelection(text), null)
     }
 
+    // Grow the window (never shrink) when content overflows the current viewport, instead of
+    // relying on a single guessed-at fixed height — the scroll stays as a fallback beyond the cap.
+    LaunchedEffect(scrollState.maxValue) {
+        if (scrollState.maxValue > 0) {
+            val overflow = with(density) { scrollState.maxValue.toDp() }
+            val grown = (dialogState.size.height + overflow).coerceAtMost(maxDialogHeight)
+            if (grown > dialogState.size.height) {
+                dialogState.size = DpSize(dialogState.size.width, grown)
+            }
+        }
+    }
+
     DialogWindow(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, dialogWidth, dialogHeight),
-            width = dialogWidth,
-            height = dialogHeight
-        ),
+        state = dialogState,
         title = stringResource(Res.string.presentation_remote_control),
         resizable = false
     ) {
@@ -97,7 +116,7 @@ fun PresentationRemoteDialog(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(scrollState)
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
