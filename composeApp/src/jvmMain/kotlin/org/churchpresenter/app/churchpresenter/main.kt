@@ -1408,6 +1408,9 @@ fun main() {
                                     instanceLinkRemoteSongCatalog = instanceLinkViewModel.remoteSongCatalog.collectAsState().value,
                                     instanceLinkFetchSongDetail = { number, songbook -> instanceLinkViewModel.fetchSongDetail(number, songbook) },
                                     instanceLinkFetchBibleFile = { instanceLinkViewModel.fetchBibleFile() },
+                                    instanceLinkSendAddToSchedule = if (appSettings.instanceLink.allowPushToSchedule) {
+                                        { item -> instanceLinkViewModel.sendAddToSchedule(item) }
+                                    } else null,
                                     instanceLinkMediaStreamUrl = run {
                                         val link = appSettings.instanceLink
                                         if (instanceLinkViewModel.connectionStatus.collectAsState().value == InstanceLinkStatus.CONNECTED) {

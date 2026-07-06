@@ -60,6 +60,23 @@ class ScheduleViewModel(
         _isFollowingRemote.value = false
     }
 
+    /** Wired to InstanceLinkViewModel.sendAddToSchedule when the operator has enabled pushing items
+     *  to the primary's schedule; left null otherwise, in which case [addOrPush] below is a no-op
+     *  while following — same behavior as before this existed. */
+    var onPushToRemoteSchedule: ((ScheduleItem) -> Unit)? = null
+
+    /** Adds [item] locally, or pushes it to the primary (subject to its own approval dialog) while
+     *  following a remote schedule — the single entry point every add* method below funnels through. */
+    private fun addOrPush(item: ScheduleItem) {
+        if (_isFollowingRemote.value) {
+            onPushToRemoteSchedule?.invoke(item)
+            return
+        }
+        pushUndoSnapshot()
+        _scheduleItems.add(item)
+        notifyChanged()
+    }
+
     // ── Auto-save ─────────────────────────────────────────────────────────────
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -349,16 +366,11 @@ class ScheduleViewModel(
     // ── Existing methods ──────────────────────────────────────────────────────
 
     fun addSong(songNumber: Int, title: String, songbook: String, songId: String = "") {
-        if (_isFollowingRemote.value) return
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.SongItem(id = UUID.randomUUID().toString(), songNumber = songNumber, title = title, songbook = songbook, songId = songId))
-        notifyChanged()
+        addOrPush(ScheduleItem.SongItem(id = UUID.randomUUID().toString(), songNumber = songNumber, title = title, songbook = songbook, songId = songId))
     }
 
     fun addBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String = "") {
-        if (_isFollowingRemote.value) return
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.BibleVerseItem(
+        addOrPush(ScheduleItem.BibleVerseItem(
             id = UUID.randomUUID().toString(),
             bookName = bookName,
             chapter = chapter,
@@ -366,42 +378,26 @@ class ScheduleViewModel(
             verseText = verseText,
             verseRange = verseRange
         ))
-        notifyChanged()
     }
 
     fun addLabel(text: String, textColor: String, backgroundColor: String) {
-        if (_isFollowingRemote.value) return
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.LabelItem(id = UUID.randomUUID().toString(), text = text, textColor = textColor, backgroundColor = backgroundColor))
-        notifyChanged()
+        addOrPush(ScheduleItem.LabelItem(id = UUID.randomUUID().toString(), text = text, textColor = textColor, backgroundColor = backgroundColor))
     }
 
     fun addPicture(folderPath: String, folderName: String, imageCount: Int) {
-        if (_isFollowingRemote.value) return
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.PictureItem(id = UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))
-        notifyChanged()
+        addOrPush(ScheduleItem.PictureItem(id = UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))
     }
 
     fun addPresentation(filePath: String, fileName: String, slideCount: Int, fileType: String) {
-        if (_isFollowingRemote.value) return
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.PresentationItem(id = UUID.randomUUID().toString(), filePath = filePath, fileName = fileName, slideCount = slideCount, fileType = fileType))
-        notifyChanged()
+        addOrPush(ScheduleItem.PresentationItem(id = UUID.randomUUID().toString(), filePath = filePath, fileName = fileName, slideCount = slideCount, fileType = fileType))
     }
 
     fun addMedia(mediaUrl: String, mediaTitle: String, mediaType: String) {
-        if (_isFollowingRemote.value) return
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.MediaItem(id = UUID.randomUUID().toString(), mediaUrl = mediaUrl, mediaTitle = mediaTitle, mediaType = mediaType))
-        notifyChanged()
+        addOrPush(ScheduleItem.MediaItem(id = UUID.randomUUID().toString(), mediaUrl = mediaUrl, mediaTitle = mediaTitle, mediaType = mediaType))
     }
 
     fun addLowerThird(presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) {
-        if (_isFollowingRemote.value) return
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.LowerThirdItem(id = UUID.randomUUID().toString(), presetId = presetId, presetLabel = presetLabel, pauseAtFrame = pauseAtFrame, pauseDurationMs = pauseDurationMs))
-        notifyChanged()
+        addOrPush(ScheduleItem.LowerThirdItem(id = UUID.randomUUID().toString(), presetId = presetId, presetLabel = presetLabel, pauseAtFrame = pauseAtFrame, pauseDurationMs = pauseDurationMs))
     }
 
     fun addAnnouncement(
@@ -429,12 +425,9 @@ class ScheduleViewModel(
         targetMinute: Int = 0,
         targetSecond: Int = 0
     ) {
-        if (_isFollowingRemote.value) return
-        pushUndoSnapshot()
-        val id = UUID.randomUUID().toString()
-        _scheduleItems.add(
+        addOrPush(
             ScheduleItem.AnnouncementItem(
-                id = id,
+                id = UUID.randomUUID().toString(),
                 text = text,
                 textColor = textColor,
                 backgroundColor = backgroundColor,
@@ -460,28 +453,18 @@ class ScheduleViewModel(
                 targetSecond = targetSecond
             )
         )
-        notifyChanged()
     }
 
     fun addWebsite(url: String, title: String) {
-        if (_isFollowingRemote.value) return
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.WebsiteItem(id = UUID.randomUUID().toString(), url = url, title = title.ifBlank { url }))
-        notifyChanged()
+        addOrPush(ScheduleItem.WebsiteItem(id = UUID.randomUUID().toString(), url = url, title = title.ifBlank { url }))
     }
 
     fun addScene(sceneId: String, sceneName: String) {
-        if (_isFollowingRemote.value) return
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.SceneItem(id = UUID.randomUUID().toString(), sceneId = sceneId, sceneName = sceneName))
-        notifyChanged()
+        addOrPush(ScheduleItem.SceneItem(id = UUID.randomUUID().toString(), sceneId = sceneId, sceneName = sceneName))
     }
 
     fun addDictionary(number: String, word: String, transliteration: String, definition: String) {
-        if (_isFollowingRemote.value) return
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.DictionaryItem(id = UUID.randomUUID().toString(), number = number, word = word, transliteration = transliteration, definition = definition))
-        notifyChanged()
+        addOrPush(ScheduleItem.DictionaryItem(id = UUID.randomUUID().toString(), number = number, word = word, transliteration = transliteration, definition = definition))
     }
 
     fun updateWebsiteTitle(url: String, title: String) {

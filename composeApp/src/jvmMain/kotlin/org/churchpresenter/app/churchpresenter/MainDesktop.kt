@@ -227,6 +227,9 @@ fun MainDesktop(
     instanceLinkFetchBibleFile: (suspend () -> ByteArray?)? = null,
     /** Non-null while connected via Instance Link — see MediaTab's instanceLinkMediaStreamUrl. */
     instanceLinkMediaStreamUrl: ((itemId: String) -> String)? = null,
+    /** Non-null only when connected AND the operator has enabled pushing items to the primary's
+     *  schedule — see ScheduleViewModel.onPushToRemoteSchedule. */
+    instanceLinkSendAddToSchedule: ((ScheduleItem) -> Unit)? = null,
     qaManager: QAManager? = null,
     tunnelStatus: TunnelStatus = TunnelStatus.Idle,
     tunnelUrl: String = "",
@@ -483,6 +486,9 @@ fun MainDesktop(
         } else {
             scheduleViewModel.stopFollowingRemote()
         }
+    }
+    LaunchedEffect(instanceLinkSendAddToSchedule) {
+        scheduleViewModel.onPushToRemoteSchedule = instanceLinkSendAddToSchedule
     }
 
     val presentingMode by presenterManager.presentingMode
