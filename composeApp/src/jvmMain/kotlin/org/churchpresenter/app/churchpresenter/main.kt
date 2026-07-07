@@ -1799,6 +1799,8 @@ fun main() {
                                     queueSize = remoteEventQueue.size,
                                     isClientKnownAllowed = remoteClientManager.isAllowed(currentClientId),
                                     isClientKnownBlocked = remoteClientManager.isBlocked(currentClientId),
+                                    isInstanceLinkFollower = currentClientId.isNotBlank() &&
+                                        currentClientId in companionServer.connectedInstanceLinkFollowers.collectAsState().value,
                                     onAllow = {
                                         currentRemote?.second?.invoke()
                                         if (remoteEventQueue.isNotEmpty()) remoteEventQueue.removeAt(0)
@@ -1859,6 +1861,7 @@ fun main() {
                                 // ── Activity toast for auto-approved clients ──────────────
                                 RemoteActivityToastHost(
                                     notifications = remoteActivityNotifications,
+                                    connectedInstanceLinkFollowers = companionServer.connectedInstanceLinkFollowers.collectAsState().value,
                                     onDismiss = { n -> remoteActivityNotifications.remove(n) },
                                     onDismissAll = { remoteActivityNotifications.clear() },
                                     onBlockForSession = { n ->

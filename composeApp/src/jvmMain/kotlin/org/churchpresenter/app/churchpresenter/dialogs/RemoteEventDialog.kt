@@ -73,6 +73,7 @@ import churchpresenter.composeapp.generated.resources.remote_api_request_title
 import churchpresenter.composeapp.generated.resources.remote_api_request_title_queued
 import churchpresenter.composeapp.generated.resources.remote_client_allowed_badge
 import churchpresenter.composeapp.generated.resources.remote_client_blocked_badge
+import churchpresenter.composeapp.generated.resources.instance_link_follower_badge
 import churchpresenter.composeapp.generated.resources.remote_client_label
 import churchpresenter.composeapp.generated.resources.remote_queue_waiting_many
 import churchpresenter.composeapp.generated.resources.remote_queue_waiting_one
@@ -129,6 +130,10 @@ fun RemoteEventDialog(
     isClientKnownAllowed: Boolean = false,
     /** True when the client is already in the permanent block list. */
     isClientKnownBlocked: Boolean = false,
+    /** True when this client is currently connected as an Instance Link follower/controller, rather
+     *  than a regular mobile/browser companion — same badge already shown in ServerSettingsTab's
+     *  Remote Clients list. */
+    isInstanceLinkFollower: Boolean = false,
     onAllow: () -> Unit,
     onAllowForSession: () -> Unit,
     onAllowPermanently: () -> Unit,
@@ -293,6 +298,12 @@ fun RemoteEventDialog(
                                 Spacer(Modifier.width(4.dp))
                                 Text(stringResource(Res.string.remote_client_blocked_badge),
                                     style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                            }
+                            if (isInstanceLinkFollower) {
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringResource(Res.string.instance_link_follower_badge),
+                                    style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary)
                             }
                         }
                     }

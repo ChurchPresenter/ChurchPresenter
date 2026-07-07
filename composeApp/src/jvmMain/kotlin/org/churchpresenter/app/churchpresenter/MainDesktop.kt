@@ -845,6 +845,7 @@ fun MainDesktop(
                         keyEvent.key == Key.Escape -> {
                             mediaViewModel?.pause()
                             presenterManager.requestClearDisplay()
+                            instanceLinkSendClear?.invoke()
                             // Also release any "Send to Stage Monitor" lock (e.g. from Announcements)
                             // so the stage monitor goes back to following the main presenting mode.
                             appSettings.projectionSettings.screenAssignments.indices
@@ -1729,6 +1730,7 @@ fun MainDesktop(
                                 onClick = {
                                     mediaViewModel?.pause()
                                     presenterManager.requestClearDisplay()
+                                    instanceLinkSendClear?.invoke()
                                 },
                                 buttonSize = 36.dp,
                                 iconTint = MaterialTheme.colorScheme.error
