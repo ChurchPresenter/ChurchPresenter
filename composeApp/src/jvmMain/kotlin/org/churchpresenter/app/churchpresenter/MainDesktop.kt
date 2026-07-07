@@ -1403,6 +1403,7 @@ fun MainDesktop(
                                 },
                                 selectedVerseItem = selectedBibleVerseItem,
                                 onVerseSelected = onVerseSelected,
+                                onInstanceLinkSendVerse = instanceLinkSendVerse,
                                 onPresenting = presenting,
                                 isPresenting = presentingMode == Presenting.BIBLE,
                                 presenterManager = presenterManager,
@@ -1420,6 +1421,8 @@ fun MainDesktop(
                                 onAddToSchedule = { songNumber, title, songbook, songId ->
                                     currentScheduleActions.addSong(songNumber, title, songbook, songId)
                                 },
+                                onInstanceLinkSendProject = instanceLinkSendProject,
+                                onInstanceLinkSendSongSection = instanceLinkSendSongSection,
                                 selectedSongItem = selectedSongItem,
                                 selectedSongItemVersion = selectedSongItemVersion,
                                 onSongItemSelected = onSongItemSelected,
@@ -1439,6 +1442,7 @@ fun MainDesktop(
                                 onAddToSchedule = { folderPath, folderName, imageCount ->
                                     currentScheduleActions.addPicture(folderPath, folderName, imageCount)
                                 },
+                                onInstanceLinkSendProject = instanceLinkSendProject,
                                 selectedPictureItem = selectedPictureItem,
                                 presenterManager = presenterManager,
                                 onSettingsChange = onSettingsChange,

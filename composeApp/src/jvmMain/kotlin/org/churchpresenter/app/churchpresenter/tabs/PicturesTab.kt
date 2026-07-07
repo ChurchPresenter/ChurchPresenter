@@ -215,6 +215,9 @@ fun PicturesTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings? = null,
     onAddToSchedule: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)? = null,
+    /** Instance Link Controller mode — non-null only when connected and controlling. See
+     *  PicturesViewModel.goLive for why this always sends the whole folder via PROJECT. */
+    onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
     selectedPictureItem: ScheduleItem.PictureItem? = null,
     presenterManager: PresenterManager? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
@@ -340,7 +343,7 @@ fun PicturesTab(
             }
             if (presenterManager != null) {
                 GoLiveButton(
-                    onClick = { viewModel.goLive(presenterManager) },
+                    onClick = { viewModel.goLive(presenterManager, onInstanceLinkSendProject) },
                     enabled = viewModel.images.isNotEmpty(),
                     tooltipText = stringResource(Res.string.go_live)
                 )
@@ -859,7 +862,7 @@ fun PicturesTab(
                                     onDoubleClick = {
                                         if (!isDragActive) {
                                             viewModel.selectImage(viewModel.images.indexOf(imageFile))
-                                            if (presenterManager != null) viewModel.goLive(presenterManager)
+                                            if (presenterManager != null) viewModel.goLive(presenterManager, onInstanceLinkSendProject)
                                         }
                                     }
                                 )

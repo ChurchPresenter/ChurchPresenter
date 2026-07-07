@@ -184,6 +184,12 @@ fun SongsTab(
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((songNumber: Int, title: String, songbook: String, songId: String) -> Unit)? = null,
+    /** Instance Link Controller mode — non-null only when connected and controlling. Go-live with a
+     *  *new* song (approval-gated the first time on the primary, instant afterwards). */
+    onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
+    /** Instance Link Controller mode — section navigation *within the same already-live song*
+     *  (always instant on the primary, no approval gate). */
+    onInstanceLinkSendSongSection: ((number: String, section: Int) -> Unit)? = null,
     selectedSongItem: ScheduleItem.SongItem? = null,
     selectedSongItemVersion: Int = 0,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -259,7 +265,8 @@ fun SongsTab(
         viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it.copy(bpm = bpm)) }
         // Record song display for statistics — only when the song is actually live
         // (or being sent live), and only when a different song is presented.
-        if ((goLive || isPresenting) && idx != liveSongIndex) {
+        val isDifferentSong = idx != liveSongIndex
+        if ((goLive || isPresenting) && isDifferentSong) {
             if (idx in items.indices) {
                 val song = items[idx]
                 statisticsManager?.recordSongDisplay(
@@ -269,6 +276,26 @@ fun SongsTab(
                     songbook = song.songbook,
                     author = song.author
                 )
+            }
+        }
+        // Instance Link Controller mode: a genuine go-live with a *different* song needs the primary
+        // to actually load it first (sendProject, approval-gated the first time); a go-live that's
+        // just a section/line change on the *same* already-live song can use the lighter, always-
+        // instant sendSongSection instead — reusing the isDifferentSong condition already computed above.
+        if (goLive && idx in items.indices) {
+            val song = items[idx]
+            if (isDifferentSong) {
+                onInstanceLinkSendProject?.invoke(
+                    ScheduleItem.SongItem(
+                        id = java.util.UUID.randomUUID().toString(),
+                        songNumber = song.number.toIntOrNull() ?: 0,
+                        title = song.title,
+                        songbook = song.songbook,
+                        songId = song.songId
+                    )
+                )
+            } else {
+                onInstanceLinkSendSongSection?.invoke(song.number, viewModel.selectedSectionIndex.value)
             }
         }
         liveSongIndex = viewModel.selectedSongIndex.value
