@@ -184,7 +184,11 @@ fun MediaTab(
     /** Non-null while connected via Instance Link — builds the primary's /api/media/stream URL for
      *  a given schedule item id, used in place of a schedule item's local file path since that path
      *  only exists on the primary's disk. */
-    instanceLinkMediaStreamUrl: ((itemId: String) -> String)? = null
+    instanceLinkMediaStreamUrl: ((itemId: String) -> String)? = null,
+    /** Instance Link Controller mode — non-null only when connected and controlling. Sends via
+     *  PROJECT; only remote URLs (youtube/vimeo) will actually play on the primary — a "local" file
+     *  path only exists on this machine's disk, not the primary's, a known limitation. */
+    onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null
 ) {
     val scope = rememberCoroutineScope()
 
@@ -558,6 +562,14 @@ fun MediaTab(
                             presenterManager.setShowPresenterWindow(true)
                             presenterManager.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
                             viewModel.play()
+                            onInstanceLinkSendProject?.invoke(
+                                ScheduleItem.MediaItem(
+                                    id = java.util.UUID.randomUUID().toString(),
+                                    mediaUrl = viewModel.mediaUrl,
+                                    mediaTitle = viewModel.mediaTitle,
+                                    mediaType = viewModel.mediaType
+                                )
+                            )
                         },
                         enabled = viewModel.isLoaded,
                         tooltipText = stringResource(Res.string.go_live)

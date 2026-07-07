@@ -1455,6 +1455,7 @@ fun MainDesktop(
                                 onAddToSchedule = { filePath, fileName, slideCount, fileType ->
                                     currentScheduleActions.addPresentation(filePath, fileName, slideCount, fileType)
                                 },
+                                onInstanceLinkSendProject = instanceLinkSendProject,
                                 selectedPresentationItem = selectedPresentationItem,
                                 presenterManager = presenterManager,
                                 onSlidesLoaded = onPresentationSlidesLoaded,
@@ -1480,7 +1481,8 @@ fun MainDesktop(
                                 },
                                 selectedMediaItem = selectedMediaItem,
                                 presenterManager = presenterManager,
-                                instanceLinkMediaStreamUrl = instanceLinkMediaStreamUrl
+                                instanceLinkMediaStreamUrl = instanceLinkMediaStreamUrl,
+                                onInstanceLinkSendProject = instanceLinkSendProject
                             )
 
                             Tabs.LOWER_THIRD -> LowerThirdTab(

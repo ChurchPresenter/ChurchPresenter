@@ -170,6 +170,11 @@ fun PresentationTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
+    /** Instance Link Controller mode — non-null only when connected and controlling. Every go-live
+     *  (including slide navigation) sends via PROJECT rather than the narrower SELECT_SLIDE: the
+     *  primary only has slide bytes cached for a presentation it has itself loaded/added to its own
+     *  schedule, so a Controller has no reliable way to target an already-live presentation by id. */
+    onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
     selectedPresentationItem: ScheduleItem.PresentationItem? = null,
     presenterManager: PresenterManager? = null,
     onSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>, slideNotes: List<String>) -> Unit)? = null,
@@ -389,6 +394,17 @@ fun PresentationTab(
                         }
                         presenterManager.setPresentingMode(Presenting.PRESENTATION)
                         presenterManager.setShowPresenterWindow(true)
+                        viewModel.selectedPresentation?.let { f ->
+                            onInstanceLinkSendProject?.invoke(
+                                ScheduleItem.PresentationItem(
+                                    id = java.util.UUID.randomUUID().toString(),
+                                    filePath = f.absolutePath,
+                                    fileName = f.nameWithoutExtension,
+                                    slideCount = viewModel.slideFiles.size,
+                                    fileType = f.extension.lowercase()
+                                )
+                            )
+                        }
                     },
                     enabled = viewModel.slideFiles.isNotEmpty(),
                     tooltipText = stringResource(Res.string.go_live)
@@ -699,6 +715,17 @@ fun PresentationTab(
                                         }
                                         presenterManager.setPresentingMode(Presenting.PRESENTATION)
                                         presenterManager.setShowPresenterWindow(true)
+                                        viewModel.selectedPresentation?.let { f ->
+                                            onInstanceLinkSendProject?.invoke(
+                                                ScheduleItem.PresentationItem(
+                                                    id = java.util.UUID.randomUUID().toString(),
+                                                    filePath = f.absolutePath,
+                                                    fileName = f.nameWithoutExtension,
+                                                    slideCount = viewModel.slideFiles.size,
+                                                    fileType = f.extension.lowercase()
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                             )

@@ -2289,6 +2289,7 @@ private fun executeProjectItem(
 
         is ScheduleItem.MediaItem -> {
             scheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
+            presenterManager.setCurrentMedia(item.mediaUrl, item.mediaType)
             presenterManager.setPresentingMode(Presenting.MEDIA)
             presenterManager.setShowPresenterWindow(true)
         }
