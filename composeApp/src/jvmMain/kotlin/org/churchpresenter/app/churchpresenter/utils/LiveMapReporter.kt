@@ -65,6 +65,7 @@ object LiveMapReporter {
             append(PING_URL)
             append("?platform=desktop")
             append("&os=$os")
+            append("&version=${BuildConfig.APP_VERSION}")
             if (updateCheckInterval != null) append("&updateCheck=${updateCheckInterval.name.lowercase()}")
             if (isDevBuild) append("&src=dev")
         }
