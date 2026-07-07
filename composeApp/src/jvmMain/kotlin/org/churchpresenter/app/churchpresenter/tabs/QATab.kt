@@ -563,7 +563,7 @@ fun QATab(
                 }
 
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(filteredQuestions, key = { it.id }) { question ->
+                    items(filteredQuestions.distinctBy { it.id }, key = { it.id }) { question ->
                         QuestionRow(
                             question = question,
                             isDisplayed = displayedQuestion?.id == question.id,

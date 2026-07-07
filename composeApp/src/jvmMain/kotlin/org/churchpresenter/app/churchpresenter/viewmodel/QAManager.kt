@@ -67,14 +67,14 @@ class QAManager {
 
     // ── Actions ──────────────────────────────────────────────────────
 
-    fun submitQuestion(text: String, name: String = "", clientIp: String = "", cooldownSeconds: Int = 30, deviceId: String = ""): Question? {
-        if (!_sessionActive.value || text.isBlank()) return null
+    fun submitQuestion(text: String, name: String = "", clientIp: String = "", cooldownSeconds: Int = 30, deviceId: String = ""): Question? = synchronized(this) {
+        if (!_sessionActive.value || text.isBlank()) return@synchronized null
 
         // Cooldown check
         if (clientIp.isNotEmpty() && cooldownSeconds > 0) {
             val now = System.currentTimeMillis()
             val lastTime = _lastSubmission[clientIp]
-            if (lastTime != null && (now - lastTime) < cooldownSeconds * 1000L) return null
+            if (lastTime != null && (now - lastTime) < cooldownSeconds * 1000L) return@synchronized null
             _lastSubmission[clientIp] = now
         }
 
@@ -88,11 +88,11 @@ class QAManager {
         _questions.add(question)
         emitEvent(QAEvent.QuestionSubmitted(question))
         saveState()
-        return question
+        question
     }
 
-    fun addQuestion(text: String): Question? {
-        if (text.isBlank()) return null
+    fun addQuestion(text: String): Question? = synchronized(this) {
+        if (text.isBlank()) return@synchronized null
         val question = Question(
             id = UUID.randomUUID().toString(),
             text = text.trim(),
@@ -101,61 +101,61 @@ class QAManager {
         _questions.add(question)
         emitEvent(QAEvent.QuestionSubmitted(question))
         saveState()
-        return question
+        question
     }
 
-    fun approveQuestion(id: String): Boolean {
+    fun approveQuestion(id: String): Boolean = synchronized(this) {
         val index = _questions.indexOfFirst { it.id == id }
-        if (index < 0) return false
+        if (index < 0) return@synchronized false
         _questions[index] = _questions[index].copy(status = QuestionStatus.APPROVED)
         emitEvent(QAEvent.QuestionUpdated(_questions[index]))
         saveState()
-        return true
+        true
     }
 
-    fun denyQuestion(id: String): Boolean {
+    fun denyQuestion(id: String): Boolean = synchronized(this) {
         val index = _questions.indexOfFirst { it.id == id }
-        if (index < 0) return false
+        if (index < 0) return@synchronized false
         _questions[index] = _questions[index].copy(status = QuestionStatus.DENIED)
         if (_displayedQuestion.value?.id == id) clearDisplay()
         emitEvent(QAEvent.QuestionUpdated(_questions[index]))
         saveState()
-        return true
+        true
     }
 
-    fun markDone(id: String): Boolean {
+    fun markDone(id: String): Boolean = synchronized(this) {
         val index = _questions.indexOfFirst { it.id == id }
-        if (index < 0) return false
+        if (index < 0) return@synchronized false
         _questions[index] = _questions[index].copy(status = QuestionStatus.DONE)
         if (_displayedQuestion.value?.id == id) clearDisplay()
         emitEvent(QAEvent.QuestionUpdated(_questions[index]))
         saveState()
-        return true
+        true
     }
 
-    fun editQuestion(id: String, newText: String): Boolean {
-        if (newText.isBlank()) return false
+    fun editQuestion(id: String, newText: String): Boolean = synchronized(this) {
+        if (newText.isBlank()) return@synchronized false
         val index = _questions.indexOfFirst { it.id == id }
-        if (index < 0) return false
+        if (index < 0) return@synchronized false
         _questions[index] = _questions[index].copy(text = newText.trim())
         if (_displayedQuestion.value?.id == id) _displayedQuestion.value = _questions[index]
         emitEvent(QAEvent.QuestionUpdated(_questions[index]))
         saveState()
-        return true
+        true
     }
 
-    fun deleteQuestion(id: String): Boolean {
-        val question = _questions.firstOrNull { it.id == id } ?: return false
+    fun deleteQuestion(id: String): Boolean = synchronized(this) {
+        val question = _questions.firstOrNull { it.id == id } ?: return@synchronized false
         if (_displayedQuestion.value?.id == id) clearDisplay()
         _questions.removeAll { it.id == id }
         emitEvent(QAEvent.QuestionUpdated(question.copy(status = QuestionStatus.DENIED)))
         saveState()
-        return true
+        true
     }
 
-    fun displayQuestion(id: String): Boolean {
+    fun displayQuestion(id: String): Boolean = synchronized(this) {
         val question = _questions.firstOrNull { it.id == id && it.status == QuestionStatus.APPROVED }
-            ?: return false
+            ?: return@synchronized false
         // Auto-mark previous displayed question as done
         val prevId = _displayedQuestion.value?.id
         if (prevId != null && prevId != id) {
@@ -164,21 +164,21 @@ class QAManager {
         _displayedQuestion.value = question
         _showQRCodeOnDisplay.value = false
         emitEvent(QAEvent.DisplayChanged(question))
-        return true
+        true
     }
 
-    fun clearDisplay() {
+    fun clearDisplay(): Unit = synchronized(this) {
         _displayedQuestion.value = null
         _showQRCodeOnDisplay.value = false
         emitEvent(QAEvent.DisplayChanged(null))
     }
 
-    fun toggleQRCodeDisplay() {
+    fun toggleQRCodeDisplay(): Unit = synchronized(this) {
         _showQRCodeOnDisplay.value = !_showQRCodeOnDisplay.value
         if (_showQRCodeOnDisplay.value) _displayedQuestion.value = null
     }
 
-    fun toggleSession() {
+    fun toggleSession(): Unit = synchronized(this) {
         _sessionActive.value = !_sessionActive.value
         if (!_sessionActive.value) {
             _showQRCodeOnDisplay.value = false
@@ -192,19 +192,19 @@ class QAManager {
         saveState()
     }
 
-    fun clearAll() {
+    fun clearAll(): Unit = synchronized(this) {
         clearDisplay()
         _questions.clear()
         _votedIps.clear()
         saveState()
     }
 
-    fun clearHistory() {
+    fun clearHistory(): Unit = synchronized(this) {
         _history.clear()
         saveState()
     }
 
-    fun restoreFromHistory() {
+    fun restoreFromHistory(): Unit = synchronized(this) {
         _questions.addAll(_history)
         _history.clear()
         _sessionActive.value = true
@@ -216,11 +216,11 @@ class QAManager {
 
     // ── Voting ───────────────────────────────────────────────────────
 
-    fun voteForQuestion(questionId: String, clientIp: String, direction: String = "up"): Boolean {
+    fun voteForQuestion(questionId: String, clientIp: String, direction: String = "up"): Boolean = synchronized(this) {
         val index = _questions.indexOfFirst { it.id == questionId }
-        if (index < 0) return false
+        if (index < 0) return@synchronized false
         val question = _questions[index]
-        if (question.status != QuestionStatus.APPROVED) return false
+        if (question.status != QuestionStatus.APPROVED) return@synchronized false
         val votes = _votedIps.getOrPut(questionId) { ConcurrentHashMap() }
         val existing = votes[clientIp]
         // Calculate upvote/downvote changes
@@ -245,7 +245,7 @@ class QAManager {
         )
         emitEvent(QAEvent.QuestionUpdated(_questions[index]))
         saveState()
-        return true
+        true
     }
 
     fun getVoteDirection(questionId: String, clientIp: String): String? {

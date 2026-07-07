@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -46,6 +47,32 @@ private object JfxInit {
                     java.util.logging.Logger.getLogger("com.sun.javafx.application.PlatformImpl")
                         .level = java.util.logging.Level.SEVERE
                     JFXPanel()
+                    // Screen.notifySettingsChanged -> QuantumToolkit.assignScreensAdapters can NPE
+                    // deep inside Prism/Glass when the OS reports a display change (monitor
+                    // plugged/unplugged) while Prism's GraphicsPipeline isn't fully initialised.
+                    // The whole stack is JavaFX-internal with no app frames, so it can't be guarded
+                    // with a try/catch at a call site — install a thread-local handler instead that
+                    // downgrades just this known race to a warning and defers everything else to
+                    // the JVM's default handler.
+                    Platform.runLater {
+                        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+                        Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { thread, throwable ->
+                            val isScreenReconfigRace = throwable is NullPointerException &&
+                                throwable.stackTrace.any {
+                                    it.className.startsWith("com.sun.glass.ui.Screen") ||
+                                        it.className.startsWith("com.sun.javafx.tk.quantum.QuantumToolkit")
+                                }
+                            if (isScreenReconfigRace) {
+                                CrashReporter.reportWarning(
+                                    "JavaFX screen-reconfiguration NPE (suppressed, known Prism/Glass race)",
+                                    throwable = throwable,
+                                    tags = mapOf("subsystem" to "javafx_screen")
+                                )
+                            } else {
+                                defaultHandler?.uncaughtException(thread, throwable)
+                            }
+                        }
+                    }
                 }
             }
         }
