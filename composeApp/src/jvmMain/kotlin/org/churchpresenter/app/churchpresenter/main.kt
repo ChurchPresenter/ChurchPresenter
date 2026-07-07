@@ -1249,7 +1249,7 @@ fun main() {
                                     onConverter = { showConverterWindow = true },
                                     onHelp = {
                                         Desktop.getDesktop()
-                                            .browse(URI("https://github.com/ChurchPresenter/ChurchPresenter/"))
+                                            .browse(URI("https://churchpresenter.org/wiki"))
                                     },
                                     onHowToBlog = {
                                         Desktop.getDesktop()
