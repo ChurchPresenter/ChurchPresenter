@@ -137,6 +137,18 @@ val isVlcAvailable: Boolean get() = _vlcAvailable ?: checkVlcAvailable().also { 
 val isVlcArchMismatch: Boolean
     get() = !isVlcAvailable && "incompatible architecture" in vlcUnavailableReason.lowercase()
 
+/**
+ * True when a VLC installation was detected on disk but the native library still
+ * failed to load (e.g. a corrupted/partial install, or on Windows a missing
+ * dependency such as the Visual C++ Redistributable — LoadLibrary reports this as
+ * "The specified module could not be found" even though libvlc.dll itself exists).
+ * Distinct from "not installed" so the UI doesn't tell the user to install something
+ * that is already there.
+ */
+val isVlcLoadFailed: Boolean
+    get() = !isVlcAvailable && vlcUnavailableReason.isNotBlank() &&
+        vlcUnavailableReason != "not_found" && !isVlcArchMismatch
+
 /** Clears the cached result and re-checks VLC availability. */
 fun recheckVlcAvailability(): Boolean {
     _vlcAvailable = null

@@ -672,6 +672,7 @@
     <string name="media_vlc_required">VLC media player is required for media playback</string>
     <string name="media_vlc_install">Please install VLC from videolan.org and restart the application</string>
     <string name="media_vlc_arch_mismatch">Wrong VLC architecture. Your Mac uses Apple Silicon (arm64) but the installed VLC is Intel-only (x86_64). Download the Apple Silicon build of VLC from videolan.org and restart.</string>
+    <string name="media_vlc_load_failed">VLC was found but could not be loaded. Try reinstalling VLC from videolan.org (on Windows, also install the Microsoft Visual C++ Redistributable), then restart the application.</string>
     <string name="vlc_custom_path">Custom VLC path</string>
     <string name="vlc_browse">Browse</string>
     <string name="vlc_path_hint">Select VLC installation directory</string>
@@ -880,6 +881,7 @@
     <string name="canvas_video_loop">Loop</string>
     <string name="canvas_video_volume">Volume</string>
     <string name="canvas_video_vlc_not_found">VLC not found</string>
+    <string name="canvas_video_vlc_load_failed">VLC found but failed to load</string>
     <string name="canvas_video_no_selection">No video selected</string>
     <string name="canvas_video_file_not_found">File not found: %1$s</string>
     <string name="canvas_video_loading">Loading…</string>
@@ -1685,6 +1687,8 @@
     <string name="setup_step5_vlc_missing">VLC was not found on this system</string>
     <string name="setup_step5_vlc_wrong_arch">Wrong VLC architecture installed</string>
     <string name="setup_step5_vlc_wrong_arch_detail">Your CPU architecture differs from the installed VLC. Download the correct build below.</string>
+    <string name="setup_step5_vlc_load_failed">VLC was found but failed to load</string>
+    <string name="setup_step5_vlc_load_failed_detail">A VLC installation was detected, but it could not be loaded correctly. Try reinstalling VLC (on Windows, also install the Microsoft Visual C++ Redistributable), then recheck below.</string>
     <string name="setup_step5_download">Download VLC</string>
     <string name="setup_step5_download_silicon">Download VLC (Apple Silicon)</string>
     <string name="setup_step5_download_intel">Download VLC (Intel)</string>

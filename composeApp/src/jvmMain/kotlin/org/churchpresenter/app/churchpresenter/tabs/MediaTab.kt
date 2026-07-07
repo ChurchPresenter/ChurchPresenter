@@ -98,6 +98,7 @@ import churchpresenter.composeapp.generated.resources.media_unmute
 import churchpresenter.composeapp.generated.resources.media_url_placeholder
 import churchpresenter.composeapp.generated.resources.media_vlc_arch_mismatch
 import churchpresenter.composeapp.generated.resources.media_vlc_install
+import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
 import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
@@ -116,6 +117,7 @@ import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
@@ -188,14 +190,18 @@ fun MediaTab(
         Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(
-                    imageVector = if (isVlcArchMismatch) Icons.Default.Warning else Icons.Default.Videocam,
+                    imageVector = if (isVlcArchMismatch || isVlcLoadFailed) Icons.Default.Warning else Icons.Default.Videocam,
                     contentDescription = null,
                     modifier = Modifier.size(64.dp),
-                    tint = if (isVlcArchMismatch) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                    tint = if (isVlcArchMismatch || isVlcLoadFailed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )
                 Text(stringResource(Res.string.media_vlc_required), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = if (isVlcArchMismatch) stringResource(Res.string.media_vlc_arch_mismatch) else stringResource(Res.string.media_vlc_install),
+                    text = when {
+                        isVlcArchMismatch -> stringResource(Res.string.media_vlc_arch_mismatch)
+                        isVlcLoadFailed -> stringResource(Res.string.media_vlc_load_failed)
+                        else -> stringResource(Res.string.media_vlc_install)
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

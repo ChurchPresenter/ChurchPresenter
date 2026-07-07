@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
 import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailability
 import java.awt.Desktop
 import java.net.URI
@@ -61,7 +62,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -139,6 +139,8 @@ import churchpresenter.composeapp.generated.resources.setup_step5_linux_tip
 import churchpresenter.composeapp.generated.resources.setup_step5_recheck
 import churchpresenter.composeapp.generated.resources.setup_step5_subtitle
 import churchpresenter.composeapp.generated.resources.setup_step5_title
+import churchpresenter.composeapp.generated.resources.setup_step5_vlc_load_failed
+import churchpresenter.composeapp.generated.resources.setup_step5_vlc_load_failed_detail
 import churchpresenter.composeapp.generated.resources.setup_step5_vlc_missing
 import churchpresenter.composeapp.generated.resources.setup_step5_vlc_ok
 import churchpresenter.composeapp.generated.resources.setup_step5_vlc_wrong_arch
@@ -747,6 +749,7 @@ private fun VlcStep() {
 
     var vlcOk by remember { mutableStateOf(isVlcAvailable) }
     var archMismatch by remember { mutableStateOf(isVlcArchMismatch) }
+    var loadFailed by remember { mutableStateOf(isVlcLoadFailed) }
     var rechecking by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -793,11 +796,8 @@ private fun VlcStep() {
                     .fillMaxWidth()
                     .clip(MaterialTheme.shapes.medium)
                     .background(
-                        when {
-                            vlcOk -> Color(0xFF1B5E20).copy(alpha = 0.12f)
-                            archMismatch -> Color(0xFFE65100).copy(alpha = 0.12f)
-                            else -> MaterialTheme.colorScheme.errorContainer
-                        }
+                        if (vlcOk) MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.12f)
+                        else MaterialTheme.colorScheme.errorContainer
                     )
                     .padding(16.dp)
             ) {
@@ -807,40 +807,36 @@ private fun VlcStep() {
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Icon(
-                            imageVector = when {
-                                vlcOk -> Icons.Filled.CheckCircle
-                                archMismatch -> Icons.Filled.Warning
-                                else -> Icons.Filled.Warning
-                            },
+                            imageVector = if (vlcOk) Icons.Filled.CheckCircle else Icons.Filled.Warning,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
-                            tint = when {
-                                vlcOk -> Color(0xFF2E7D32)
-                                archMismatch -> Color(0xFFE65100)
-                                else -> MaterialTheme.colorScheme.error
-                            }
+                            tint = if (vlcOk) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.error
                         )
                         Text(
                             text = stringResource(
                                 when {
                                     vlcOk -> Res.string.setup_step5_vlc_ok
                                     archMismatch -> Res.string.setup_step5_vlc_wrong_arch
+                                    loadFailed -> Res.string.setup_step5_vlc_load_failed
                                     else -> Res.string.setup_step5_vlc_missing
                                 }
                             ),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
-                            color = when {
-                                vlcOk -> Color(0xFF2E7D32)
-                                archMismatch -> Color(0xFFE65100)
-                                else -> MaterialTheme.colorScheme.error
-                            }
+                            color = if (vlcOk) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.error
                         )
                     }
                     if (!vlcOk) {
                         if (archMismatch) {
                             Text(
                                 text = stringResource(Res.string.setup_step5_vlc_wrong_arch_detail),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
+                            )
+                        }
+                        if (loadFailed) {
+                            Text(
+                                text = stringResource(Res.string.setup_step5_vlc_load_failed_detail),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
                             )
@@ -865,6 +861,7 @@ private fun VlcStep() {
                                         val result = withContext(Dispatchers.IO) { recheckVlcAvailability() }
                                         vlcOk = result
                                         archMismatch = isVlcArchMismatch
+                                        loadFailed = isVlcLoadFailed
                                         rechecking = false
                                     }
                                 },

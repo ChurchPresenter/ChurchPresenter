@@ -98,6 +98,7 @@ import churchpresenter.composeapp.generated.resources.key_output_none
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.lower_third_height
 import churchpresenter.composeapp.generated.resources.media_vlc_install
+import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
 import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
 import churchpresenter.composeapp.generated.resources.projection_content_song_la
@@ -130,6 +131,7 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.detectVlcInstallPath
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
 import org.churchpresenter.app.churchpresenter.composables.listVlcAudioDevices
 import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailability
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
@@ -1393,7 +1395,7 @@ fun ProjectionSettingsTab(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = stringResource(Res.string.media_vlc_install),
+                        text = if (isVlcLoadFailed) stringResource(Res.string.media_vlc_load_failed) else stringResource(Res.string.media_vlc_install),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
