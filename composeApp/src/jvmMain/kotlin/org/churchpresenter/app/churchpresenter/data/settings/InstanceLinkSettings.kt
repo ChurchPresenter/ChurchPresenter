@@ -16,6 +16,19 @@ import java.util.UUID
 @Serializable
 enum class BibleSyncMode { FULL_REPLICA, REFERENCE_ONLY }
 
+/**
+ * How this instance relates to the primary while connected — mutually exclusive.
+ * - [CONTROLLED]: mirror the primary — Songs/Bible/Pictures/Presentations tabs browse the primary's
+ *   catalogs, Schedule mirrors and replaces the local one, live state mirrors to this instance's own
+ *   presenter output. This is Instance Link's original behavior.
+ * - [CONTROLLER]: stay independent — this instance keeps its own local songs/Bible/pictures/schedule,
+ *   completely separate from the primary's — but gains the ability to drive the primary's live output
+ *   (go live with a song/verse/picture/presentation/media, navigate within it, clear the display),
+ *   exactly like a trusted mobile companion device already can over the same connection.
+ */
+@Serializable
+enum class InstanceLinkRole { CONTROLLED, CONTROLLER }
+
 /** Configuration for this instance following another ChurchPresenter instance's CompanionServer
  * over the network — mirrors its live content and (optionally) contributes schedule items back. */
 @Serializable
@@ -32,11 +45,13 @@ data class InstanceLinkSettings(
     /** Whether this instance may add items to the primary's schedule (still gated by the primary
      * operator's existing approval dialog — this only controls whether the request is ever sent). */
     val allowPushToSchedule: Boolean = false,
-    /** See [BibleSyncMode]. */
+    /** See [BibleSyncMode]. Only meaningful in [InstanceLinkRole.CONTROLLED]. */
     val bibleSyncMode: BibleSyncMode = BibleSyncMode.FULL_REPLICA,
     /** When false (default), backgrounds (images/videos behind Bible/Songs and their lower-third
      * variants) always stay whatever this instance has configured locally. When true, they're
      * replaced by the primary's backgrounds while connected. Off by default since backgrounds are
-     * often venue-specific. */
-    val mirrorBackgrounds: Boolean = false
+     * often venue-specific. Only meaningful in [InstanceLinkRole.CONTROLLED]. */
+    val mirrorBackgrounds: Boolean = false,
+    /** See [InstanceLinkRole]. */
+    val role: InstanceLinkRole = InstanceLinkRole.CONTROLLED
 )

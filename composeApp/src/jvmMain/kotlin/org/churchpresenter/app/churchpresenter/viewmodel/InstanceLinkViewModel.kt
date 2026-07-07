@@ -77,6 +77,24 @@ class InstanceLinkViewModel {
         client.sendAddToSchedule(item)
     }
 
+    // ── Instance Link "Controller" mode — see InstanceLinkClient for the full doc comment on each. ──
+
+    fun sendProject(item: ScheduleItem) = client.sendProject(item)
+
+    fun sendSelectBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) =
+        client.sendSelectBibleVerse(bookName, chapter, verseNumber, verseText, verseRange)
+
+    fun sendSelectPicture(folderId: String, index: Int, fileName: String?) =
+        client.sendSelectPicture(folderId, index, fileName)
+
+    fun sendSelectSongSection(number: String, section: Int) = client.sendSelectSongSection(number, section)
+
+    fun sendSelectSlide(id: String, index: Int) = client.sendSelectSlide(id, index)
+
+    fun sendClear() = client.sendClear()
+
+    fun sendBibleHold(hold: Boolean) = client.sendBibleHold(hold)
+
     /** Fetches one song's full lyrics from the primary on demand — see [InstanceLinkClient.fetchSongDetail]. */
     suspend fun fetchSongDetail(number: String, songbook: String): SongDetailDto? =
         client.fetchSongDetail(number, songbook)

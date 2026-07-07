@@ -120,6 +120,9 @@
     <string name="instance_link_autoconnect">Connect automatically on launch</string>
     <string name="instance_link_allow_push_to_schedule">Allow adding items to the primary\'s schedule</string>
     <string name="instance_link_mirror_backgrounds">Also mirror the primary\'s backgrounds</string>
+    <string name="instance_link_role">Connection role</string>
+    <string name="instance_link_role_controlled">Controlled — mirror the primary\'s content</string>
+    <string name="instance_link_role_controller">Controller — drive the primary\'s output from here</string>
     <string name="instance_link_bible_sync_mode">Bible sync</string>
     <string name="instance_link_bible_sync_full_replica">Full replica — use the primary\'s exact Bible file(s)</string>
     <string name="instance_link_bible_sync_reference_only">Reference only — keep my own Bible(s), just follow the same verse</string>

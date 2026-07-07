@@ -46,6 +46,9 @@ import churchpresenter.composeapp.generated.resources.instance_link_bible_sync_r
 import churchpresenter.composeapp.generated.resources.instance_link_last_received
 import churchpresenter.composeapp.generated.resources.instance_link_mirror_backgrounds
 import churchpresenter.composeapp.generated.resources.instance_link_port
+import churchpresenter.composeapp.generated.resources.instance_link_role
+import churchpresenter.composeapp.generated.resources.instance_link_role_controlled
+import churchpresenter.composeapp.generated.resources.instance_link_role_controller
 import churchpresenter.composeapp.generated.resources.instance_link_schedule_count
 import churchpresenter.composeapp.generated.resources.instance_link_title
 import churchpresenter.composeapp.generated.resources.menu_disconnect
@@ -67,6 +70,7 @@ import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
+import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
 import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkSettings
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.LiveStateDto
@@ -79,7 +83,7 @@ fun InstanceLinkDialog(
     connectionStatus: InstanceLinkStatus,
     remoteLiveState: LiveStateDto?,
     remoteScheduleCount: Int,
-    onConnect: (host: String, port: Int, apiKey: String, autoConnect: Boolean, allowPushToSchedule: Boolean, bibleSyncMode: BibleSyncMode, mirrorBackgrounds: Boolean) -> Unit,
+    onConnect: (host: String, port: Int, apiKey: String, autoConnect: Boolean, allowPushToSchedule: Boolean, bibleSyncMode: BibleSyncMode, mirrorBackgrounds: Boolean, role: InstanceLinkRole) -> Unit,
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -92,6 +96,7 @@ fun InstanceLinkDialog(
     var allowPushToSchedule by remember(isVisible) { mutableStateOf(settings.allowPushToSchedule) }
     var bibleSyncMode by remember(isVisible) { mutableStateOf(settings.bibleSyncMode) }
     var mirrorBackgrounds by remember(isVisible) { mutableStateOf(settings.mirrorBackgrounds) }
+    var role by remember(isVisible) { mutableStateOf(settings.role) }
 
     val mainWindowState = LocalMainWindowState.current
     val dialogState = rememberDialogState(
@@ -208,8 +213,10 @@ fun InstanceLinkDialog(
                         )
                     }
 
+                    HorizontalDivider()
+
                     Text(
-                        stringResource(Res.string.instance_link_bible_sync_mode),
+                        stringResource(Res.string.instance_link_role),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -220,11 +227,11 @@ fun InstanceLinkDialog(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         RadioButton(
-                            selected = bibleSyncMode == BibleSyncMode.FULL_REPLICA,
-                            onClick = { bibleSyncMode = BibleSyncMode.FULL_REPLICA }
+                            selected = role == InstanceLinkRole.CONTROLLED,
+                            onClick = { role = InstanceLinkRole.CONTROLLED }
                         )
                         Text(
-                            stringResource(Res.string.instance_link_bible_sync_full_replica),
+                            stringResource(Res.string.instance_link_role_controlled),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -235,25 +242,66 @@ fun InstanceLinkDialog(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         RadioButton(
-                            selected = bibleSyncMode == BibleSyncMode.REFERENCE_ONLY,
-                            onClick = { bibleSyncMode = BibleSyncMode.REFERENCE_ONLY }
+                            selected = role == InstanceLinkRole.CONTROLLER,
+                            onClick = { role = InstanceLinkRole.CONTROLLER }
                         )
                         Text(
-                            stringResource(Res.string.instance_link_bible_sync_reference_only),
+                            stringResource(Res.string.instance_link_role_controller),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Switch(checked = mirrorBackgrounds, onCheckedChange = { mirrorBackgrounds = it })
+                    // Bible sync mode / background mirroring only matter in Controlled mode — a
+                    // Controller keeps its own local content entirely, so these settings would have
+                    // no effect there.
+                    if (role == InstanceLinkRole.CONTROLLED) {
                         Text(
-                            stringResource(Res.string.instance_link_mirror_backgrounds),
-                            style = MaterialTheme.typography.bodyMedium
+                            stringResource(Res.string.instance_link_bible_sync_mode),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            RadioButton(
+                                selected = bibleSyncMode == BibleSyncMode.FULL_REPLICA,
+                                onClick = { bibleSyncMode = BibleSyncMode.FULL_REPLICA }
+                            )
+                            Text(
+                                stringResource(Res.string.instance_link_bible_sync_full_replica),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            RadioButton(
+                                selected = bibleSyncMode == BibleSyncMode.REFERENCE_ONLY,
+                                onClick = { bibleSyncMode = BibleSyncMode.REFERENCE_ONLY }
+                            )
+                            Text(
+                                stringResource(Res.string.instance_link_bible_sync_reference_only),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Switch(checked = mirrorBackgrounds, onCheckedChange = { mirrorBackgrounds = it })
+                            Text(
+                                stringResource(Res.string.instance_link_mirror_backgrounds),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 }
 
@@ -289,7 +337,7 @@ fun InstanceLinkDialog(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             val port = portText.toIntOrNull() ?: return@Button
-                            onConnect(host.trim(), port, apiKey.trim(), autoConnect, allowPushToSchedule, bibleSyncMode, mirrorBackgrounds)
+                            onConnect(host.trim(), port, apiKey.trim(), autoConnect, allowPushToSchedule, bibleSyncMode, mirrorBackgrounds, role)
                             onDismiss()
                         },
                         enabled = host.isNotBlank() && portText.toIntOrNull() != null,

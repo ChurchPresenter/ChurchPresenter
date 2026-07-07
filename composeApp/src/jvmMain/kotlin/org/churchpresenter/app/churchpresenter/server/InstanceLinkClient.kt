@@ -233,6 +233,82 @@ class InstanceLinkClient(
         }
     }
 
+    /** Sends a generic command payload to the primary — shared by every send* method below, same
+     *  fire-and-forget shape as [sendAddToSchedule]. */
+    private fun sendCommand(type: String, payload: String) {
+        val activeSession = session ?: return
+        scope.launch {
+            InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_command_sent", mapOf("type" to type))
+            runCatching {
+                activeSession.send(
+                    Frame.Text(json.encodeToString(WebSocketMessage.serializer(), WebSocketMessage(type = type, payload = payload)))
+                )
+            }
+        }
+    }
+
+    /**
+     * Instance Link "Controller" mode — Controller mode drives the primary's live output the same
+     * way an already-trusted mobile companion device can, using the exact same WS commands the
+     * primary already fully supports for any authenticated client (no CompanionServer changes needed).
+     */
+
+    /** Universal "go live with this new item" — [Constants.WS_CMD_PROJECT], approval-gated on the
+     *  primary the first time this device is seen (same [dialogs.RemoteEventDialog] flow a mobile
+     *  client goes through), instant afterwards once trusted. Covers Bible/Songs/Pictures/
+     *  Presentations/Media alike via the primary's existing per-subtype `executeProjectItem` dispatch. */
+    fun sendProject(item: ScheduleItem) {
+        sendCommand(Constants.WS_CMD_PROJECT, json.encodeToString(ProjectRequest.serializer(), ProjectRequest(item)))
+    }
+
+    /** Instantly displays a Bible verse — [Constants.WS_CMD_SELECT_BIBLE_VERSE], no approval gate on
+     *  the primary (same as a mobile client). Used for every verse go-live in Controller mode, not
+     *  just the first — the command is already instant either way. */
+    fun sendSelectBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) {
+        sendCommand(
+            Constants.WS_CMD_SELECT_BIBLE_VERSE,
+            json.encodeToString(SelectBibleVerseRequest.serializer(), SelectBibleVerseRequest(bookName, chapter, verseNumber, verseText, verseRange))
+        )
+    }
+
+    /** Instantly displays a picture — [Constants.WS_CMD_SELECT_PICTURE], no approval gate. */
+    fun sendSelectPicture(folderId: String, index: Int, fileName: String?) {
+        sendCommand(
+            Constants.WS_CMD_SELECT_PICTURE,
+            json.encodeToString(SelectPictureRequest.serializer(), SelectPictureRequest(folderId, index, fileName))
+        )
+    }
+
+    /** Instantly navigates within an already-live song — [Constants.WS_CMD_SELECT_SONG_SECTION], no
+     *  approval gate. Picking a *different* song still needs [sendProject] first. */
+    fun sendSelectSongSection(number: String, section: Int) {
+        sendCommand(
+            Constants.WS_CMD_SELECT_SONG_SECTION,
+            json.encodeToString(SelectSongSectionRequest.serializer(), SelectSongSectionRequest(number, section))
+        )
+    }
+
+    /** Instantly navigates within an already-live presentation — [Constants.WS_CMD_SELECT_SLIDE], no
+     *  approval gate. Picking a *different* presentation still needs [sendProject] first. */
+    fun sendSelectSlide(id: String, index: Int) {
+        sendCommand(
+            Constants.WS_CMD_SELECT_SLIDE,
+            json.encodeToString(SelectSlideRequest.serializer(), SelectSlideRequest(id, index))
+        )
+    }
+
+    /** Instantly clears the primary's display — [Constants.WS_CMD_CLEAR], no payload, no approval gate. */
+    fun sendClear() {
+        sendCommand(Constants.WS_CMD_CLEAR, "")
+    }
+
+    /** Toggles Bible hold on the primary — [Constants.WS_CMD_BIBLE_HOLD]. No formal DTO exists for
+     *  this on the primary either (it parses the raw `{"hold":bool}` JSON directly), so this builds
+     *  the same ad-hoc payload rather than introducing a serializer class for a single boolean. */
+    fun sendBibleHold(hold: Boolean) {
+        sendCommand(Constants.WS_CMD_BIBLE_HOLD, """{"hold":$hold}""")
+    }
+
     /** Logs the outcome of one `fetch*` call below — [kind] identifies which one (e.g. "bible_file",
      *  "picture_bytes"), symmetric with the primary's `rest_request` log line for the same hit. */
     private fun logFetch(kind: String, success: Boolean, status: Int? = null, reason: String? = null) {

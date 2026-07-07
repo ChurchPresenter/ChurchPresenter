@@ -1707,7 +1707,7 @@ fun main() {
                                     connectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
                                     remoteLiveState = instanceLinkViewModel.remoteLiveState.collectAsState().value,
                                     remoteScheduleCount = instanceLinkViewModel.remoteSchedule.collectAsState().value.size,
-                                    onConnect = { host, port, apiKey, autoConnect, allowPushToSchedule, bibleSyncMode, mirrorBackgrounds ->
+                                    onConnect = { host, port, apiKey, autoConnect, allowPushToSchedule, bibleSyncMode, mirrorBackgrounds, role ->
                                         appSettings = appSettings.copy(
                                             instanceLink = appSettings.instanceLink.copy(
                                                 enabled = true,
@@ -1717,7 +1717,8 @@ fun main() {
                                                 autoConnect = autoConnect,
                                                 allowPushToSchedule = allowPushToSchedule,
                                                 bibleSyncMode = bibleSyncMode,
-                                                mirrorBackgrounds = mirrorBackgrounds
+                                                mirrorBackgrounds = mirrorBackgrounds,
+                                                role = role
                                             )
                                         )
                                         settingsManager.saveSettings(appSettings)
