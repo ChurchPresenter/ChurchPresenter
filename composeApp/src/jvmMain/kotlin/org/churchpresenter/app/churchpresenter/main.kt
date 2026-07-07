@@ -218,7 +218,8 @@ fun main() {
     // Pass the install id only when analytics is enabled, so opted-out users
     // still send an anonymous geo ping but no persistent identifier.
     LiveMapReporter.pingOnOpen(
-        installId = if (startupSettings.analyticsReportingEnabled) CrashReporter.installId() else null
+        installId = if (startupSettings.analyticsReportingEnabled) CrashReporter.installId() else null,
+        updateCheckInterval = startupSettings.updateCheckInterval
     )
 
     // Catch exceptions thrown inside coroutines / Compose lambdas —
@@ -554,6 +555,7 @@ fun main() {
         var lottieGenOutputDir by remember { mutableStateOf<java.io.File?>(null) }
         var lottieGenOnFileSaved by remember { mutableStateOf<(() -> Unit)?>(null) }
         var pendingUpdateResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
+        var pendingUpdateCheckWasManual by remember { mutableStateOf(false) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
         // Preload songs and bible at startup, then signal ready
@@ -584,10 +586,20 @@ fun main() {
                 }
             }
             appReady = true
-            // Check for updates in background after startup
-            val result = UpdateChecker.checkForUpdate(includePrereleases = appSettings.participateInPrereleases)
-            if (result is UpdateCheckResult.Available) {
-                pendingUpdateResult = result
+            // Check for updates in background after startup, respecting the configured interval
+            val isFirstEverUpdateCheck = appSettings.lastUpdateCheckTimestamp == 0L
+            if (appSettings.updateCheckInterval.isDueSince(appSettings.lastUpdateCheckTimestamp)) {
+                val result = UpdateChecker.checkForUpdate(includePrereleases = appSettings.participateInPrereleases)
+                appSettings = appSettings.copy(lastUpdateCheckTimestamp = System.currentTimeMillis())
+                settingsManager.saveSettings(appSettings)
+                if (isFirstEverUpdateCheck) {
+                    // Let the user pick their update-check frequency the first time it ever runs.
+                    pendingUpdateResult = result
+                    pendingUpdateCheckWasManual = true
+                } else if (result is UpdateCheckResult.Available) {
+                    pendingUpdateResult = result
+                    pendingUpdateCheckWasManual = false
+                }
             }
         }
 
@@ -1260,6 +1272,9 @@ fun main() {
                                             pendingUpdateResult = UpdateChecker.checkForUpdate(
                                                 includePrereleases = appSettings.participateInPrereleases
                                             )
+                                            pendingUpdateCheckWasManual = true
+                                            appSettings = appSettings.copy(lastUpdateCheckTimestamp = System.currentTimeMillis())
+                                            settingsManager.saveSettings(appSettings)
                                         }
                                     },
                                     onKeyboardShortcuts = { showKeyboardShortcutsDialog = true },
@@ -1537,6 +1552,7 @@ fun main() {
                                 }
                                 UpdateAvailableDialog(
                                     result = pendingUpdateResult,
+                                    isManualCheck = pendingUpdateCheckWasManual,
                                     participateInPrereleases = appSettings.participateInPrereleases,
                                     onParticipateInPrereleasesChange = { enabled ->
                                         appSettings = appSettings.copy(participateInPrereleases = enabled)
@@ -1544,6 +1560,11 @@ fun main() {
                                         coroutineScope.launch {
                                             pendingUpdateResult = UpdateChecker.checkForUpdate(includePrereleases = enabled)
                                         }
+                                    },
+                                    updateCheckInterval = appSettings.updateCheckInterval,
+                                    onUpdateCheckIntervalChange = { interval ->
+                                        appSettings = appSettings.copy(updateCheckInterval = interval)
+                                        settingsManager.saveSettings(appSettings)
                                     },
                                     onDismiss = { pendingUpdateResult = null }
                                 )

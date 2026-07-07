@@ -1569,6 +1569,14 @@
     <string name="update_dialog_up_to_date_title">You're Up to Date</string>
     <string name="update_dialog_view_on_github">View on GitHub</string>
     <string name="participate_in_prereleases">Include beta / pre-release updates</string>
+    <string name="update_dialog_check_interval">Check for updates</string>
+    <string name="update_interval_every_launch">Every launch</string>
+    <string name="update_interval_weekly">Weekly</string>
+    <string name="update_interval_monthly">Monthly</string>
+    <string name="update_interval_every_2_months">Every 2 Months</string>
+    <string name="update_interval_every_3_months">Every 3 Months</string>
+    <string name="update_interval_every_6_months">Every 6 Months</string>
+    <string name="update_interval_never">Never</string>
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>

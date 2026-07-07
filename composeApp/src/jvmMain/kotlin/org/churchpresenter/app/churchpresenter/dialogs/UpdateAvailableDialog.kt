@@ -1,17 +1,25 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -35,6 +43,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.participate_in_prereleases
 import churchpresenter.composeapp.generated.resources.update_already_latest
+import churchpresenter.composeapp.generated.resources.update_dialog_check_interval
 import churchpresenter.composeapp.generated.resources.update_dialog_dismiss
 import churchpresenter.composeapp.generated.resources.update_dialog_download_install
 import churchpresenter.composeapp.generated.resources.update_dialog_downloading
@@ -45,11 +54,19 @@ import churchpresenter.composeapp.generated.resources.update_dialog_release_note
 import churchpresenter.composeapp.generated.resources.update_dialog_title
 import churchpresenter.composeapp.generated.resources.update_dialog_up_to_date_title
 import churchpresenter.composeapp.generated.resources.update_dialog_view_on_github
+import churchpresenter.composeapp.generated.resources.update_interval_every_2_months
+import churchpresenter.composeapp.generated.resources.update_interval_every_3_months
+import churchpresenter.composeapp.generated.resources.update_interval_every_6_months
+import churchpresenter.composeapp.generated.resources.update_interval_every_launch
+import churchpresenter.composeapp.generated.resources.update_interval_monthly
+import churchpresenter.composeapp.generated.resources.update_interval_never
+import churchpresenter.composeapp.generated.resources.update_interval_weekly
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.app.churchpresenter.utils.UpdateCheckInterval
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.jetbrains.compose.resources.stringResource
@@ -87,10 +104,53 @@ private fun launchInstaller(file: File) {
 }
 
 @Composable
+private fun updateIntervalLabel(interval: UpdateCheckInterval): String = when (interval) {
+    UpdateCheckInterval.EVERY_LAUNCH -> stringResource(Res.string.update_interval_every_launch)
+    UpdateCheckInterval.WEEKLY -> stringResource(Res.string.update_interval_weekly)
+    UpdateCheckInterval.MONTHLY -> stringResource(Res.string.update_interval_monthly)
+    UpdateCheckInterval.EVERY_2_MONTHS -> stringResource(Res.string.update_interval_every_2_months)
+    UpdateCheckInterval.EVERY_3_MONTHS -> stringResource(Res.string.update_interval_every_3_months)
+    UpdateCheckInterval.EVERY_6_MONTHS -> stringResource(Res.string.update_interval_every_6_months)
+    UpdateCheckInterval.NEVER -> stringResource(Res.string.update_interval_never)
+}
+
+@Composable
+private fun UpdateIntervalDropdown(
+    selected: UpdateCheckInterval,
+    onSelected: (UpdateCheckInterval) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        OutlinedButton(
+            shape = RoundedCornerShape(6.dp),
+            onClick = { expanded = true },
+            contentPadding = PaddingValues(start = 12.dp, end = 6.dp, top = 4.dp, bottom = 4.dp)
+        ) {
+            Text(updateIntervalLabel(selected), style = MaterialTheme.typography.bodySmall)
+            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            UpdateCheckInterval.entries.forEach { interval ->
+                DropdownMenuItem(
+                    text = { Text(updateIntervalLabel(interval), style = MaterialTheme.typography.bodySmall) },
+                    onClick = {
+                        onSelected(interval)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun UpdateAvailableDialog(
     result: UpdateCheckResult?,
+    isManualCheck: Boolean,
     participateInPrereleases: Boolean,
     onParticipateInPrereleasesChange: (Boolean) -> Unit,
+    updateCheckInterval: UpdateCheckInterval,
+    onUpdateCheckIntervalChange: (UpdateCheckInterval) -> Unit,
     onDismiss: () -> Unit
 ) {
     if (result == null) return
@@ -158,12 +218,14 @@ fun UpdateAvailableDialog(
     else
         stringResource(Res.string.update_dialog_up_to_date_title)
 
+    val dialogHeight = if (isManualCheck) 468.dp else 420.dp
+
     DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 440.dp, 420.dp),
+            position = centeredOnMainWindow(mainWindowState, 440.dp, dialogHeight),
             width = 440.dp,
-            height = 420.dp
+            height = dialogHeight
         ),
         title = dialogTitle,
         resizable = false
@@ -280,6 +342,22 @@ fun UpdateAvailableDialog(
                         checked = participateInPrereleases,
                         onCheckedChange = onParticipateInPrereleasesChange
                     )
+                }
+                if (isManualCheck) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.update_dialog_check_interval),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        UpdateIntervalDropdown(
+                            selected = updateCheckInterval,
+                            onSelected = onUpdateCheckIntervalChange
+                        )
+                    }
                 }
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(8.dp))

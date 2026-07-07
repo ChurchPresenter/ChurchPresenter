@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.data.settings
 
 import kotlinx.serialization.Serializable
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.UpdateCheckInterval
 
 @Serializable
 data class AppSettings(
@@ -51,5 +52,7 @@ data class AppSettings(
     val songHiddenCols: Set<String> = setOf("tune", "play_count", "author", "composer"),
     val setupWizardShown: Boolean = false,
     val analyticsReportingEnabled: Boolean = true,
-    val participateInPrereleases: Boolean = false
+    val participateInPrereleases: Boolean = false,
+    val updateCheckInterval: UpdateCheckInterval = UpdateCheckInterval.EVERY_LAUNCH,
+    val lastUpdateCheckTimestamp: Long = 0L
 )

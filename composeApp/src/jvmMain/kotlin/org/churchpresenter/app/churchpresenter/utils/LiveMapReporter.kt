@@ -56,12 +56,16 @@ object LiveMapReporter {
      * header so the server dedupes repeat launches to one row per install. Pass
      * null (the default) to opt out — the server then falls back to a coarse
      * geo-grid dedupe. Callers should only pass an id when analytics is enabled.
+     * @param updateCheckInterval The user's configured UpdateCheckInterval
+     * setting (see UpdateChecker.kt), sent as-is — this is informational only,
+     * not tied to analytics opt-in/out.
      */
-    fun pingOnOpen(installId: String? = null) {
+    fun pingOnOpen(installId: String? = null, updateCheckInterval: UpdateCheckInterval? = null) {
         val url = buildString {
             append(PING_URL)
             append("?platform=desktop")
             append("&os=$os")
+            if (updateCheckInterval != null) append("&updateCheck=${updateCheckInterval.name.lowercase()}")
             if (isDevBuild) append("&src=dev")
         }
         scope.launch {
