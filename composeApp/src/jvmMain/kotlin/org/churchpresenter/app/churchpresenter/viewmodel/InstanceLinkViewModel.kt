@@ -91,6 +91,9 @@ class InstanceLinkViewModel {
     /** Downloads the primary's raw bible file — see [InstanceLinkClient.fetchBibleFile]. */
     suspend fun fetchBibleFile(): ByteArray? = client.fetchBibleFile()
 
+    /** Fetches one lower-third preset's Lottie JSON by name — see [InstanceLinkClient.fetchLowerThirdJson]. */
+    suspend fun fetchLowerThirdJson(name: String): ByteArray? = client.fetchLowerThirdJson(name)
+
     fun dispose() {
         client.dispose()
     }

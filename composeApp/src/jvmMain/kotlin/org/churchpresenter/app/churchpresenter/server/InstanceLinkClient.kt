@@ -252,6 +252,18 @@ class InstanceLinkClient(
         }.getOrNull()
     }
 
+    /** Fetches one lower-third preset's raw Lottie JSON by name — see [Constants.ENDPOINT_LOWER_THIRDS]. */
+    suspend fun fetchLowerThirdJson(name: String): ByteArray? {
+        if (currentHost.isEmpty()) return null
+        return runCatching {
+            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_LOWER_THIRDS}/$name/json") {
+                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
+            }
+            if (!response.status.isSuccess()) return null
+            response.readRawBytes()
+        }.getOrNull()
+    }
+
     /** Stops the link without disposing the underlying HTTP client (safe to [connect] again). */
     fun disconnect() {
         generation++

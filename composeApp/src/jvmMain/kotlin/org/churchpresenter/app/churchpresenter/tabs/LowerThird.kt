@@ -168,7 +168,7 @@ fun LowerThirdTab(
     selectedLowerThirdItem: ScheduleItem.LowerThirdItem? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
-    onGoLive: (jsonContent: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
+    onGoLive: (jsonContent: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long, presetName: String) -> Unit = { _, _, _, _, _ -> },
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> }
 ) {
     val lottieFolder = appSettings.streamingSettings.lowerThirdFolder
@@ -925,7 +925,7 @@ fun LowerThirdTab(
                                 if (keyError != null) atemError = keyError
                             }
                         } else {
-                            onGoLive(jsonContent, false, -1f, 0L)
+                            onGoLive(jsonContent, false, -1f, 0L, selectedFile?.nameWithoutExtension ?: "")
                         }
                     },
                     enabled = canPlay,

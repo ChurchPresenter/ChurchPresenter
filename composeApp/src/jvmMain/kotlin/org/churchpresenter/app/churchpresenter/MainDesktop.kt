@@ -1038,7 +1038,7 @@ fun MainDesktop(
                             }
                             if (lottieFile != null && lottieFile.exists()) {
                                 val json = lottieFile.readText()
-                                presenterManager.setLottieContent(json, item.pauseAtFrame, -1f, item.pauseDurationMs)
+                                presenterManager.setLottieContent(json, item.pauseAtFrame, -1f, item.pauseDurationMs, lottieFile.nameWithoutExtension)
                                 presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                 presenterManager.setShowPresenterWindow(true)
                             }
@@ -1443,8 +1443,8 @@ fun MainDesktop(
                                 onAddToSchedule = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
                                     scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
                                 },
-                                onGoLive = { json, pauseAtFrame, pauseFrame, pauseDurationMs ->
-                                    presenterManager.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs)
+                                onGoLive = { json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName ->
+                                    presenterManager.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName)
                                     presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                     presenterManager.setShowPresenterWindow(true)
                                 },

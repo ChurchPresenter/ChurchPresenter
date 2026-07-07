@@ -448,12 +448,21 @@ class PresenterManager {
     private val _lottieTrigger = mutableStateOf(0)
     val lottieTrigger: State<Int> = _lottieTrigger
 
-    fun setLottieContent(json: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long) {
+    // Preset filename (no extension) the current Lottie content came from — PresenterManager only
+    // ever held the rendered JSON itself before, with nothing identifying which preset it was, so
+    // there was nothing for InstanceLink's live-state broadcast to report. Purely informational
+    // (rendering only ever uses lottieJsonContent); defaults to "" for content set some other way.
+    private val _currentLowerThirdName = mutableStateOf("")
+    val currentLowerThirdName: State<String> = _currentLowerThirdName
+
+    fun setLottieContent(json: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long, presetName: String = "") {
         _lottieJsonContent.value = json
         _lottiePauseAtFrame.value = pauseAtFrame
         _lottiePauseFrame.value = pauseFrame
         _lottiePauseDurationMs.value = pauseDurationMs
         _lottieTrigger.value++
+        _currentLowerThirdName.value = presetName
+        notifyLiveStateChanged(Presenting.LOWER_THIRD)
 
         // Clear stale frames immediately so the presenter falls back to compottie
         _lottieRawFrames.value = null

@@ -252,6 +252,7 @@ object Constants {
     const val ENDPOINT_BROWSER_SOURCE    = "/browser-source"
     const val ENDPOINT_MEDIA_STREAM      = "/api/media/stream"
     const val ENDPOINT_BIBLE_FILE        = "/api/bible/file"
+    const val ENDPOINT_LOWER_THIRDS      = "/api/lowerthirds"
 
     // WebSocket event types (server → client)
     const val WS_EVENT_SONGS_UPDATED              = "songs_updated"

@@ -264,7 +264,9 @@ data class LiveStateDto(
     val questionId: String? = null,
     val questionText: String? = null,
     // Strong's dictionary
-    val dictionaryWord: String? = null
+    val dictionaryWord: String? = null,
+    // lower third — resolves to a file via the same lowerThirdFiles() lookup /api/lowerthirds/{name}/json uses
+    val lowerThirdName: String? = null
 )
 
 // ── Bible DTOs ────────────────────────────────────────────────────────────────
@@ -1759,7 +1761,8 @@ class CompanionServer {
         sceneName: String?,
         questionId: String?,
         questionText: String?,
-        dictionaryWord: String?
+        dictionaryWord: String?,
+        lowerThirdName: String? = null
     ) {
         val (pictureFolderId, pictureIndex) = resolvePictureLocation(pictureImagePath)
         val mediaId = mediaUrl?.let { url -> _scheduleItemToMediaPath.entries.find { it.value == url }?.key }
@@ -1786,7 +1789,8 @@ class CompanionServer {
             sceneName = sceneName,
             questionId = questionId,
             questionText = questionText,
-            dictionaryWord = dictionaryWord
+            dictionaryWord = dictionaryWord,
+            lowerThirdName = lowerThirdName?.ifEmpty { null }
         )
         _liveState.value = dto
         broadcast(WebSocketMessage(
@@ -3006,6 +3010,27 @@ class CompanionServer {
                         """{"name":$nameJson,"durationMs":$dur}"""
                     }
                     call.respondText("[${items.joinToString(",")}]", ContentType.Application.Json)
+                }
+
+                /**
+                 * GET /api/lowerthirds/{name}/json — returns the raw Lottie JSON for a preset by
+                 * name, so an InstanceLink follower can play the exact same animation via
+                 * PresenterManager.setLottieContent() instead of only switching presenting mode.
+                 * Reuses the same by-name file lookup as the run/show/hide endpoints above.
+                 */
+                get("/api/lowerthirds/{name}/json") {
+                    if (!checkApiKey(call)) return@get
+                    val rawName = call.parameters["name"] ?: ""
+                    val file = lowerThirdFiles().firstOrNull { it.nameWithoutExtension.equals(rawName, ignoreCase = true) }
+                    if (file == null) {
+                        call.respond(HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
+                        return@get
+                    }
+                    val ltJson = try { file.readText() } catch (_: Exception) {
+                        call.respond(HttpStatusCode.InternalServerError, """{"error":"could not read lottie file"}""")
+                        return@get
+                    }
+                    call.respondText(ltJson, ContentType.Application.Json)
                 }
 
                 post("/api/lowerthirds/{name}/run") {

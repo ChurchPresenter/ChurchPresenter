@@ -491,7 +491,8 @@ fun main() {
                     sceneName = pm.activeScene.value?.name,
                     questionId = pm.displayedQuestion.value?.id,
                     questionText = pm.displayedQuestion.value?.text,
-                    dictionaryWord = pm.displayedDictionaryEntry.value?.word
+                    dictionaryWord = pm.displayedDictionaryEntry.value?.word,
+                    lowerThirdName = pm.currentLowerThirdName.value.ifEmpty { null }
                 )
             }
         }
@@ -1149,7 +1150,7 @@ fun main() {
                                 LaunchedEffect(Unit) {
                                     LowerThirdSequencer.onShow.collect { req ->
                                         presenterManager.setLottieContent(
-                                            req.json, req.pauseAtFrame, req.pauseFrame, req.pauseDurationMs
+                                            req.json, req.pauseAtFrame, req.pauseFrame, req.pauseDurationMs, req.name
                                         )
                                         presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                         presenterManager.setShowPresenterWindow(true)
@@ -1844,11 +1845,11 @@ private val instanceLinkPictureCacheDir: File by lazy {
 /**
  * Applies a [LiveStateDto] received from another instance's CompanionServer to this instance's own
  * [PresenterManager], so an InstanceLink follower mirrors the primary's output. Bible verses, song
- * sections, announcements, website content and pictures are mirrored in full; presentations use
- * their own richer dedicated broadcast instead (see the remotePresentationSlide collector in
- * MainDesktop's caller). Media/scenes/Q&A/dictionary switch the presenting mode so the right output
- * pane activates, but fetching their actual binary/rendered content over the network is not wired
- * yet (fast-follow).
+ * sections, announcements, website content, pictures, and lower thirds (fetched by preset name via
+ * GET /api/lowerthirds/{name}/json) are mirrored in full; presentations use their own richer
+ * dedicated broadcast instead (see the remotePresentationSlide collector in MainDesktop's caller).
+ * Media/scenes/Q&A/dictionary switch the presenting mode so the right output pane activates, but
+ * fetching their actual binary/rendered content over the network is not wired yet (fast-follow).
  */
 private suspend fun applyRemoteLiveState(
     state: LiveStateDto,
@@ -1899,6 +1900,18 @@ private suspend fun applyRemoteLiveState(
                     if (bytes != null) cacheFile.writeBytes(bytes) else return
                 }
                 presenterManager.setSelectedImagePath(cacheFile.absolutePath)
+            }
+        }
+        Presenting.LOWER_THIRD -> {
+            val name = state.lowerThirdName
+            if (name != null) {
+                val bytes = instanceLinkViewModel.fetchLowerThirdJson(name)
+                if (bytes != null) {
+                    presenterManager.setLottieContent(
+                        String(bytes, Charsets.UTF_8), pauseAtFrame = false, pauseFrame = -1f,
+                        pauseDurationMs = 2000L, presetName = name
+                    )
+                }
             }
         }
         else -> { /* presentation/media/canvas/qa/dictionary: mode-only for now */ }
