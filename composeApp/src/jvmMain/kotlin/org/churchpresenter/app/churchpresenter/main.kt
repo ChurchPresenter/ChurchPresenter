@@ -141,6 +141,8 @@ import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
@@ -1916,7 +1918,14 @@ private suspend fun downloadMirroredBackgroundSettings(
         val kind = if (isVideo) "video" else "image"
         val cacheFile = File(instanceLinkBackgroundCacheDir, "$slot-$kind.$ext")
         if (!cacheFile.exists()) {
-            val bytes = instanceLinkViewModel.fetchBackgroundAsset(slot, isVideo) ?: return ""
+            val bytes = instanceLinkViewModel.fetchBackgroundAsset(slot, isVideo)
+            if (bytes == null) {
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "background_asset_fetch_failed",
+                    mapOf("slot" to slot, "isVideo" to isVideo)
+                )
+                return ""
+            }
             cacheFile.writeBytes(bytes)
         }
         return cacheFile.absolutePath
@@ -1961,7 +1970,14 @@ private suspend fun applyRemoteLiveState(
     bibleSyncMode: BibleSyncMode = BibleSyncMode.FULL_REPLICA,
     localPrimaryBible: Bible? = null
 ) {
-    val mode = runCatching { Presenting.valueOf(state.contentType) }.getOrNull() ?: return
+    val mode = runCatching { Presenting.valueOf(state.contentType) }.getOrNull()
+    if (mode == null) {
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+            mapOf("contentType" to state.contentType, "resolved" to false, "reason" to "unknown_content_type")
+        )
+        return
+    }
     when (mode) {
         Presenting.BIBLE -> {
             val codeBook = state.verseCodeBook
@@ -1973,7 +1989,8 @@ private suspend fun applyRemoteLiveState(
                 // Bible.getVerseDetailsByCode, so the follower shows its own translation's wording, not
                 // the primary's. If this Bible has no verse at that code (versification mismatch, or no
                 // local bible configured), there's nothing sensible to show — quietly no-op.
-                localPrimaryBible?.getVerseDetailsByCode(codeBook, codeChapter, codeVerse)?.let { result ->
+                val result = localPrimaryBible?.getVerseDetailsByCode(codeBook, codeChapter, codeVerse)
+                if (result != null) {
                     presenterManager.setSelectedVerses(
                         listOf(
                             SelectedVerse(
@@ -1985,6 +2002,18 @@ private suspend fun applyRemoteLiveState(
                                 verseText = result.verseText,
                                 verseRange = state.verseRange ?: ""
                             )
+                        )
+                    )
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                        mapOf("contentType" to "BIBLE", "resolved" to true, "mode" to "reference_only")
+                    )
+                } else {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                        mapOf(
+                            "contentType" to "BIBLE", "resolved" to false, "mode" to "reference_only",
+                            "reason" to if (localPrimaryBible == null) "no_local_bible_loaded" else "verse_code_not_found"
                         )
                     )
                 }
@@ -2005,6 +2034,15 @@ private suspend fun applyRemoteLiveState(
                         )
                     )
                 )
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "BIBLE", "resolved" to true, "mode" to "full_replica")
+                )
+            } else {
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "BIBLE", "resolved" to false, "reason" to "no_book_name_in_state")
+                )
             }
         }
         Presenting.LYRICS -> if (state.songTitle != null) {
@@ -2016,11 +2054,32 @@ private suspend fun applyRemoteLiveState(
                     lines = state.lines ?: emptyList()
                 )
             )
+            InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "LYRICS", "resolved" to true))
+        } else {
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                mapOf("contentType" to "LYRICS", "resolved" to false, "reason" to "no_song_title_in_state")
+            )
         }
-        Presenting.ANNOUNCEMENTS -> state.announcementText?.let { presenterManager.setAnnouncementText(it) }
+        Presenting.ANNOUNCEMENTS -> {
+            val text = state.announcementText
+            if (text != null) {
+                presenterManager.setAnnouncementText(text)
+                InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "ANNOUNCEMENTS", "resolved" to true))
+            } else {
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "ANNOUNCEMENTS", "resolved" to false, "reason" to "no_text_in_state")
+                )
+            }
+        }
         Presenting.WEBSITE -> {
             state.websiteUrl?.let { presenterManager.setWebsiteUrl(it) }
             state.websiteTitle?.let { presenterManager.setWebPageTitle(it) }
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                mapOf("contentType" to "WEBSITE", "resolved" to (state.websiteUrl != null))
+            )
         }
         Presenting.PICTURES -> {
             val folderId = state.pictureFolderId
@@ -2029,9 +2088,23 @@ private suspend fun applyRemoteLiveState(
                 val cacheFile = File(instanceLinkPictureCacheDir, "${folderId}_$index.jpg")
                 if (!cacheFile.exists()) {
                     val bytes = instanceLinkViewModel.fetchPictureImageBytes(folderId, index)
-                    if (bytes != null) cacheFile.writeBytes(bytes) else return
+                    if (bytes != null) {
+                        cacheFile.writeBytes(bytes)
+                    } else {
+                        InstanceLinkLogger.log(
+                            InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                            mapOf("contentType" to "PICTURES", "resolved" to false, "reason" to "fetch_failed")
+                        )
+                        return
+                    }
                 }
                 presenterManager.setSelectedImagePath(cacheFile.absolutePath)
+                InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "PICTURES", "resolved" to true))
+            } else {
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "PICTURES", "resolved" to false, "reason" to "missing_folder_id_or_index")
+                )
             }
         }
         Presenting.LOWER_THIRD -> {
@@ -2043,10 +2116,29 @@ private suspend fun applyRemoteLiveState(
                         String(bytes, Charsets.UTF_8), pauseAtFrame = false, pauseFrame = -1f,
                         pauseDurationMs = 2000L, presetName = name
                     )
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "LOWER_THIRD", "resolved" to true))
+                } else {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                        mapOf("contentType" to "LOWER_THIRD", "resolved" to false, "reason" to "fetch_failed")
+                    )
                 }
+            } else {
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "LOWER_THIRD", "resolved" to false, "reason" to "no_name_in_state")
+                )
             }
         }
-        else -> { /* presentation/media/canvas/qa/dictionary: mode-only for now */ }
+        else -> {
+            // presentation/media/canvas/qa/stt/dictionary: mode-only for now — the mode switch itself
+            // still happens below, but no content is fetched/restored, so the log makes that known gap
+            // visible rather than looking identical to a real success.
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                mapOf("contentType" to mode.name, "resolved" to false, "reason" to "mode_only_content_not_fetched")
+            )
+        }
     }
     presenterManager.setPresentingMode(mode)
     presenterManager.setShowPresenterWindow(true)

@@ -34,6 +34,8 @@ import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 
 enum class InstanceLinkStatus { DISCONNECTED, CONNECTING, CONNECTED, ERROR }
 
@@ -100,6 +102,10 @@ class InstanceLinkClient(
     ) {
         while (scope.isActive && generation == myGeneration) {
             onStatusChanged(InstanceLinkStatus.CONNECTING)
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "connect_attempt",
+                mapOf("host" to host, "port" to port)
+            )
             try {
                 httpClient.webSocket(
                     method = HttpMethod.Get,
@@ -115,6 +121,10 @@ class InstanceLinkClient(
                     if (generation != myGeneration) return@webSocket
                     session = this
                     onStatusChanged(InstanceLinkStatus.CONNECTED)
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "connect_result",
+                        mapOf("success" to true, "host" to host, "port" to port)
+                    )
                     for (frame in incoming) {
                         if (generation != myGeneration) break
                         if (frame is Frame.Text) handleMessage(frame.readText())
@@ -128,31 +138,56 @@ class InstanceLinkClient(
                     "InstanceLink: connection failed — ${e.message}",
                     tags = mapOf("subsystem" to "instance_link")
                 )
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "connect_result",
+                    mapOf("success" to false, "host" to host, "port" to port, "reason" to e.message)
+                )
             }
             session = null
             if (generation != myGeneration) return
             onStatusChanged(InstanceLinkStatus.ERROR)
             if (!scope.isActive) break
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "reconnecting",
+                mapOf("host" to host, "port" to port, "delayMs" to reconnectDelayMs)
+            )
             delay(reconnectDelayMs)
         }
     }
 
     private fun handleMessage(raw: String) {
-        val msg = runCatching { json.decodeFromString(WebSocketMessage.serializer(), raw) }.getOrNull() ?: return
+        val msg = runCatching { json.decodeFromString(WebSocketMessage.serializer(), raw) }.getOrNull()
+        if (msg == null) {
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "ws_message_decode_failed",
+                mapOf("context" to "envelope")
+            )
+            return
+        }
+        InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_message_received", mapOf("type" to msg.type))
         when (msg.type) {
             Constants.WS_EVENT_SCHEDULE_UPDATED -> {
                 val response = runCatching { json.decodeFromString(ScheduleResponse.serializer(), msg.payload) }.getOrNull()
-                    ?: return
+                if (response == null) {
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_message_decode_failed", mapOf("context" to "schedule"))
+                    return
+                }
                 onScheduleUpdated(response.items)
             }
             Constants.WS_EVENT_LIVE_STATE_CHANGED -> {
                 val state = runCatching { json.decodeFromString(LiveStateDto.serializer(), msg.payload) }.getOrNull()
-                    ?: return
+                if (state == null) {
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_message_decode_failed", mapOf("context" to "live_state"))
+                    return
+                }
                 onLiveStateUpdated(state)
             }
             Constants.WS_EVENT_SONGS_UPDATED -> {
                 val catalog = runCatching { json.decodeFromString(SongCatalogResponse.serializer(), msg.payload) }.getOrNull()
-                    ?: return
+                if (catalog == null) {
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_message_decode_failed", mapOf("context" to "song_catalog"))
+                    return
+                }
                 onSongsUpdated(catalog)
             }
             Constants.WS_EVENT_DISPLAY_CLEARED -> onDisplayCleared()
@@ -181,6 +216,10 @@ class InstanceLinkClient(
         val activeSession = session ?: return
         val payload = json.encodeToString(AddToScheduleRequest.serializer(), AddToScheduleRequest(item))
         scope.launch {
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "ws_command_sent",
+                mapOf("type" to Constants.WS_CMD_ADD_TO_SCHEDULE)
+            )
             runCatching {
                 activeSession.send(
                     Frame.Text(
@@ -194,6 +233,15 @@ class InstanceLinkClient(
         }
     }
 
+    /** Logs the outcome of one `fetch*` call below — [kind] identifies which one (e.g. "bible_file",
+     *  "picture_bytes"), symmetric with the primary's `rest_request` log line for the same hit. */
+    private fun logFetch(kind: String, success: Boolean, status: Int? = null, reason: String? = null) {
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.FOLLOWER, "fetch_result",
+            mapOf("kind" to kind, "success" to success, "status" to status, "reason" to reason)
+        )
+    }
+
     /**
      * Fetches full song detail (sections/lyrics) from the primary on demand — the catalog broadcast
      * only carries metadata (title/number/tune/author), so this is called lazily when a song is
@@ -201,41 +249,62 @@ class InstanceLinkClient(
      * requests for a large library).
      */
     suspend fun fetchSongDetail(number: String, songbook: String): SongDetailDto? {
-        if (currentHost.isEmpty()) return null
+        if (currentHost.isEmpty()) {
+            logFetch("song_detail", success = false, reason = "not_connected")
+            return null
+        }
         return runCatching {
             val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_SONGS}/$number") {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
                 if (songbook.isNotEmpty()) parameter(Constants.QUERY_PARAM_SONGBOOK, songbook)
             }
-            if (!response.status.isSuccess()) return null
+            if (!response.status.isSuccess()) {
+                logFetch("song_detail", success = false, status = response.status.value, reason = "http_status")
+                return null
+            }
+            logFetch("song_detail", success = true, status = response.status.value)
             json.decodeFromString(SongDetailDto.serializer(), response.bodyAsText())
-        }.getOrNull()
+        }.onFailure { e -> logFetch("song_detail", success = false, reason = e.message) }.getOrNull()
     }
 
     /** Fetches one picture's raw bytes from the primary — used to mirror a live picture (resolved
      *  via [LiveStateDto.pictureFolderId]/[LiveStateDto.pictureIndex]) without a local copy of it. */
     suspend fun fetchPictureImageBytes(folderId: String, index: Int): ByteArray? {
-        if (currentHost.isEmpty()) return null
+        if (currentHost.isEmpty()) {
+            logFetch("picture_bytes", success = false, reason = "not_connected")
+            return null
+        }
         return runCatching {
             val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_PICTURES}/$folderId/images/$index") {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
-            if (!response.status.isSuccess()) return null
+            if (!response.status.isSuccess()) {
+                logFetch("picture_bytes", success = false, status = response.status.value, reason = "http_status")
+                return null
+            }
+            logFetch("picture_bytes", success = true, status = response.status.value)
             response.readRawBytes()
-        }.getOrNull()
+        }.onFailure { e -> logFetch("picture_bytes", success = false, reason = e.message) }.getOrNull()
     }
 
     /** Fetches one presentation slide's raw bytes from the primary — mirrors [RemotePresentationSlide]
      *  (from the existing presentation_slide_changed broadcast) without a local copy of the file. */
     suspend fun fetchPresentationSlideBytes(id: String, index: Int): ByteArray? {
-        if (currentHost.isEmpty()) return null
+        if (currentHost.isEmpty()) {
+            logFetch("presentation_slide", success = false, reason = "not_connected")
+            return null
+        }
         return runCatching {
             val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_PRESENTATIONS}/$id/slides/$index") {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
-            if (!response.status.isSuccess()) return null
+            if (!response.status.isSuccess()) {
+                logFetch("presentation_slide", success = false, status = response.status.value, reason = "http_status")
+                return null
+            }
+            logFetch("presentation_slide", success = true, status = response.status.value)
             response.readRawBytes()
-        }.getOrNull()
+        }.onFailure { e -> logFetch("presentation_slide", success = false, reason = e.message) }.getOrNull()
     }
 
     /**
@@ -243,32 +312,49 @@ class InstanceLinkClient(
      * Bible.loadFromSpb() used for local files instead of reimplementing that engine against the API.
      */
     suspend fun fetchBibleFile(): ByteArray? {
-        if (currentHost.isEmpty()) return null
+        if (currentHost.isEmpty()) {
+            logFetch("bible_file", success = false, reason = "not_connected")
+            return null
+        }
         return runCatching {
             val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BIBLE_FILE}") {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
-            if (!response.status.isSuccess()) return null
+            if (!response.status.isSuccess()) {
+                logFetch("bible_file", success = false, status = response.status.value, reason = "http_status")
+                return null
+            }
+            logFetch("bible_file", success = true, status = response.status.value)
             response.readRawBytes()
-        }.getOrNull()
+        }.onFailure { e -> logFetch("bible_file", success = false, reason = e.message) }.getOrNull()
     }
 
     /** Downloads the primary's raw secondary .spb bible file — only used when the follower opted in
      *  to mirroring the primary's secondary bible instead of keeping its own local one. */
     suspend fun fetchSecondaryBibleFile(): ByteArray? {
-        if (currentHost.isEmpty()) return null
+        if (currentHost.isEmpty()) {
+            logFetch("secondary_bible_file", success = false, reason = "not_connected")
+            return null
+        }
         return runCatching {
             val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BIBLE_FILE}/secondary") {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
-            if (!response.status.isSuccess()) return null
+            if (!response.status.isSuccess()) {
+                logFetch("secondary_bible_file", success = false, status = response.status.value, reason = "http_status")
+                return null
+            }
+            logFetch("secondary_bible_file", success = true, status = response.status.value)
             response.readRawBytes()
-        }.getOrNull()
+        }.onFailure { e -> logFetch("secondary_bible_file", success = false, reason = e.message) }.getOrNull()
     }
 
     /** Fetches one lower-third preset's raw Lottie JSON by name — see [Constants.ENDPOINT_LOWER_THIRDS]. */
     suspend fun fetchLowerThirdJson(name: String): ByteArray? {
-        if (currentHost.isEmpty()) return null
+        if (currentHost.isEmpty()) {
+            logFetch("lower_third_json", success = false, reason = "not_connected")
+            return null
+        }
         // Path segment, not a query param: URLEncoder turns spaces into "+", which Ktor's route
         // parameter decoding does NOT turn back into a space (that only happens for query/form
         // encoding) — swap it for "%20" so a name with spaces still resolves on the server.
@@ -277,37 +363,55 @@ class InstanceLinkClient(
             val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_LOWER_THIRDS}/$encodedName/json") {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
-            if (!response.status.isSuccess()) return null
+            if (!response.status.isSuccess()) {
+                logFetch("lower_third_json", success = false, status = response.status.value, reason = "http_status")
+                return null
+            }
+            logFetch("lower_third_json", success = true, status = response.status.value)
             response.readRawBytes()
-        }.getOrNull()
+        }.onFailure { e -> logFetch("lower_third_json", success = false, reason = e.message) }.getOrNull()
     }
 
     /** Fetches the primary's current background settings — only used when the follower opted in to
      *  mirroring backgrounds (InstanceLinkSettings.mirrorBackgrounds). Image/video fields are still
      *  the primary's own local file paths; use [fetchBackgroundAsset] (keyed by slot) for bytes. */
     suspend fun fetchBackgroundSettings(): BackgroundSettings? {
-        if (currentHost.isEmpty()) return null
+        if (currentHost.isEmpty()) {
+            logFetch("background_settings", success = false, reason = "not_connected")
+            return null
+        }
         return runCatching {
             val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BACKGROUNDS}") {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
-            if (!response.status.isSuccess()) return null
+            if (!response.status.isSuccess()) {
+                logFetch("background_settings", success = false, status = response.status.value, reason = "http_status")
+                return null
+            }
+            logFetch("background_settings", success = true, status = response.status.value)
             json.decodeFromString(BackgroundSettings.serializer(), response.bodyAsText())
-        }.getOrNull()
+        }.onFailure { e -> logFetch("background_settings", success = false, reason = e.message) }.getOrNull()
     }
 
     /** Fetches one background slot's raw image/video bytes by slot name — see
      *  [Constants.BACKGROUND_SLOT_DEFAULT] and siblings for the shared slot vocabulary. */
     suspend fun fetchBackgroundAsset(slot: String, isVideo: Boolean): ByteArray? {
-        if (currentHost.isEmpty()) return null
+        if (currentHost.isEmpty()) {
+            logFetch("background_asset", success = false, reason = "not_connected")
+            return null
+        }
         return runCatching {
             val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BACKGROUNDS}/asset/$slot") {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
                 parameter("type", if (isVideo) "video" else "image")
             }
-            if (!response.status.isSuccess()) return null
+            if (!response.status.isSuccess()) {
+                logFetch("background_asset", success = false, status = response.status.value, reason = "http_status")
+                return null
+            }
+            logFetch("background_asset", success = true, status = response.status.value)
             response.readRawBytes()
-        }.getOrNull()
+        }.onFailure { e -> logFetch("background_asset", success = false, reason = e.message) }.getOrNull()
     }
 
     /** Stops the link without disposing the underlying HTTP client (safe to [connect] again). */

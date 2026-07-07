@@ -21,6 +21,8 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
 import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
 import org.churchpresenter.app.churchpresenter.data.BibleSearch
@@ -425,23 +427,37 @@ class BibleViewModel(
             // disconnected, so the follower's own translation(s) keep working independently.
             remoteBibleCacheFile = null
             remoteSecondaryBibleCacheFile = null
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "bible_sync_result",
+                mapOf("mode" to mode.name, "primaryDownloaded" to false, "secondaryDownloaded" to false)
+            )
             loadBibles()
             return
         }
         viewModelScope.launch {
             val cacheFile = File(remoteBibleCacheDir, "primary.spb")
+            var primaryDownloaded = cacheFile.exists()
             if (!cacheFile.exists()) {
-                val bytes = fetchBibleFile?.invoke() ?: return@launch
+                val bytes = fetchBibleFile?.invoke()
+                if (bytes == null) {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "bible_sync_result",
+                        mapOf("mode" to mode.name, "primaryDownloaded" to false, "secondaryDownloaded" to false, "reason" to "primary_fetch_failed")
+                    )
+                    return@launch
+                }
                 withContext(Dispatchers.IO) {
                     remoteBibleCacheDir.mkdirs()
                     cacheFile.writeBytes(bytes)
                 }
+                primaryDownloaded = true
             }
             remoteBibleCacheFile = cacheFile
 
             // Full replica always mirrors the secondary too, whenever the primary has one configured
             // — no separate opt-in boolean anymore, replaced by the sync mode itself.
             val secondaryCacheFile = File(remoteBibleCacheDir, "secondary.spb")
+            var secondaryDownloaded = secondaryCacheFile.exists()
             if (!secondaryCacheFile.exists()) {
                 val bytes = fetchSecondaryBibleFile?.invoke()
                 if (bytes != null) {
@@ -449,10 +465,15 @@ class BibleViewModel(
                         remoteBibleCacheDir.mkdirs()
                         secondaryCacheFile.writeBytes(bytes)
                     }
+                    secondaryDownloaded = true
                 }
             }
             remoteSecondaryBibleCacheFile = secondaryCacheFile.takeIf { it.exists() }
 
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "bible_sync_result",
+                mapOf("mode" to mode.name, "primaryDownloaded" to primaryDownloaded, "secondaryDownloaded" to secondaryDownloaded)
+            )
             loadBibles()
         }
     }
@@ -526,6 +547,20 @@ class BibleViewModel(
 
                 val primary = primaryDeferred?.await()
                 val secondary = secondaryDeferred?.await()
+
+                // Only relevant while following another instance — a purely local load (not connected)
+                // has nothing to compare against a primary's log, so it's not logged here.
+                if (remoteModeActive) {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "bible_load_result",
+                        mapOf(
+                            "primaryPath" to primaryPath?.absolutePath,
+                            "secondaryPath" to secondaryPath?.absolutePath,
+                            "primaryLoaded" to (primary != null),
+                            "secondaryLoaded" to (secondary != null)
+                        )
+                    )
+                }
 
                 // ── Phase 3: update state with full data and load first chapter ─────
                 _primaryBible.value = primary
