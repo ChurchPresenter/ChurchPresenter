@@ -1430,6 +1430,9 @@ fun main() {
                                     instanceLinkRemoteSongCatalog = instanceLinkViewModel.remoteSongCatalog.collectAsState().value,
                                     instanceLinkFetchSongDetail = { number, songbook -> instanceLinkViewModel.fetchSongDetail(number, songbook) },
                                     instanceLinkFetchBibleFile = { instanceLinkViewModel.fetchBibleFile() },
+                                    instanceLinkMirrorSecondaryBible = appSettings.instanceLink.mirrorSecondaryBible,
+                                    instanceLinkFetchSecondaryBibleFile = { instanceLinkViewModel.fetchSecondaryBibleFile() },
+                                    instanceLinkOnSecondaryBibleFilePathChanged = { path -> companionServer.updateSecondaryBibleFilePath(path) },
                                     instanceLinkSendAddToSchedule = if (appSettings.instanceLink.allowPushToSchedule) {
                                         { item -> instanceLinkViewModel.sendAddToSchedule(item) }
                                     } else null,
@@ -1639,7 +1642,7 @@ fun main() {
                                     connectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
                                     remoteLiveState = instanceLinkViewModel.remoteLiveState.collectAsState().value,
                                     remoteScheduleCount = instanceLinkViewModel.remoteSchedule.collectAsState().value.size,
-                                    onConnect = { host, port, apiKey, autoConnect, allowPushToSchedule ->
+                                    onConnect = { host, port, apiKey, autoConnect, allowPushToSchedule, mirrorSecondaryBible ->
                                         appSettings = appSettings.copy(
                                             instanceLink = appSettings.instanceLink.copy(
                                                 enabled = true,
@@ -1647,7 +1650,8 @@ fun main() {
                                                 primaryPort = port,
                                                 apiKey = apiKey,
                                                 autoConnect = autoConnect,
-                                                allowPushToSchedule = allowPushToSchedule
+                                                allowPushToSchedule = allowPushToSchedule,
+                                                mirrorSecondaryBible = mirrorSecondaryBible
                                             )
                                         )
                                         settingsManager.saveSettings(appSettings)

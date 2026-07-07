@@ -78,7 +78,10 @@ private fun DetectedReference.matchTypeLabel(): String? =
 
 class BibleViewModel(
     private var appSettings: AppSettings,
-    private val onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null
+    private val onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null,
+    /** Reports the secondary bible's file path to CompanionServer — no companion catalog exists for
+     *  it (mobile clients never browse a secondary bible), it's only used by Instance Link. */
+    private val onSecondaryBibleFilePathChanged: ((filePath: String) -> Unit)? = null
 ) {
     private val _primaryBible = mutableStateOf<Bible?>(null)
     val primaryBible: State<Bible?> = _primaryBible
@@ -385,23 +388,37 @@ class BibleViewModel(
     // ── Instance Link — remote bible ─────────────────────────────────────────
     // Rather than reimplementing Bible's search/cross-reference/numbering engine against the API,
     // the primary's raw .spb file is downloaded once and cached, then loaded through the exact same
-    // Bible.loadFromSpb() used for local files — everything downstream works unchanged. Only the
-    // primary bible is mirrored; the mobile companion API has no secondary-bible endpoint either.
+    // Bible.loadFromSpb() used for local files — everything downstream works unchanged. The primary
+    // bible always mirrors; the secondary bible only does when the operator opts in (mirrorSecondary)
+    // — by default it stays whatever this instance has configured locally, independent of the
+    // connection, since there's no reason a follower's own secondary translation needs to go away
+    // just because it's following someone else's primary.
     private var remoteModeActive = false
+    private var mirrorSecondaryActive = false
     private var remoteBibleCacheFile: File? = null
+    private var remoteSecondaryBibleCacheFile: File? = null
     private val remoteBibleCacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link-cache/bibles")
 
-    /** Called from the owning tab whenever Instance Link connects/disconnects. */
-    fun setInstanceLinkSource(active: Boolean, fetchBibleFile: (suspend () -> ByteArray?)?) {
+    /** Called from the owning tab whenever Instance Link connects/disconnects, or the "mirror
+     *  secondary too" setting changes. */
+    fun setInstanceLinkSource(
+        active: Boolean,
+        mirrorSecondary: Boolean,
+        fetchBibleFile: (suspend () -> ByteArray?)?,
+        fetchSecondaryBibleFile: (suspend () -> ByteArray?)?
+    ) {
         if (!active) {
             if (remoteModeActive) {
                 remoteModeActive = false
+                mirrorSecondaryActive = false
                 remoteBibleCacheFile = null
+                remoteSecondaryBibleCacheFile = null
                 loadBibles()
             }
             return
         }
         remoteModeActive = true
+        mirrorSecondaryActive = mirrorSecondary
         viewModelScope.launch {
             val cacheFile = File(remoteBibleCacheDir, "primary.spb")
             if (!cacheFile.exists()) {
@@ -412,6 +429,23 @@ class BibleViewModel(
                 }
             }
             remoteBibleCacheFile = cacheFile
+
+            if (mirrorSecondary) {
+                val secondaryCacheFile = File(remoteBibleCacheDir, "secondary.spb")
+                if (!secondaryCacheFile.exists()) {
+                    val bytes = fetchSecondaryBibleFile?.invoke()
+                    if (bytes != null) {
+                        withContext(Dispatchers.IO) {
+                            remoteBibleCacheDir.mkdirs()
+                            secondaryCacheFile.writeBytes(bytes)
+                        }
+                    }
+                }
+                if (secondaryCacheFile.exists()) remoteSecondaryBibleCacheFile = secondaryCacheFile
+            } else {
+                remoteSecondaryBibleCacheFile = null
+            }
+
             loadBibles()
         }
     }
@@ -432,9 +466,13 @@ class BibleViewModel(
                     .takeIf { it.exists() }
                 else null
 
-                // Remote mode has no secondary-bible equivalent — same scope the mobile companion API has.
-                val secondaryPath = if (remoteModeActive) null
-                else if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
+                // Only overridden when the operator opted in to mirroring the primary's secondary
+                // bible too (mirrorSecondaryActive) — otherwise this always resolves from local
+                // settings regardless of remoteModeActive, so a follower's own secondary translation
+                // keeps working independently of the connection.
+                val secondaryPath = if (remoteModeActive && mirrorSecondaryActive) {
+                    remoteSecondaryBibleCacheFile?.takeIf { it.exists() }
+                } else if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
                     appSettings.bibleSettings.storageDirectory.isNotEmpty()
                 ) File(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.secondaryBible)
                     .takeIf { it.exists() }
@@ -485,6 +523,7 @@ class BibleViewModel(
                 // ── Phase 3: update state with full data and load first chapter ─────
                 _primaryBible.value = primary
                 _secondaryBible.value = secondary
+                if (secondary != null) onSecondaryBibleFilePathChanged?.invoke(secondaryPath.absolutePath)
 
                 if (primary != null) {
                     _books.value = primary.getCanonicalBooks()

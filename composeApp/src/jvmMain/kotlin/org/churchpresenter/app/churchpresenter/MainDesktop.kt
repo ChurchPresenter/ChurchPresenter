@@ -235,6 +235,11 @@ fun MainDesktop(
     instanceLinkFetchSongDetail: (suspend (number: String, songbook: String) -> SongDetailDto?)? = null,
     /** Downloads the primary's bible file while connected via Instance Link — see BibleViewModel.setInstanceLinkSource. */
     instanceLinkFetchBibleFile: (suspend () -> ByteArray?)? = null,
+    /** Whether the operator has opted in to also mirroring the primary's secondary bible. */
+    instanceLinkMirrorSecondaryBible: Boolean = false,
+    instanceLinkFetchSecondaryBibleFile: (suspend () -> ByteArray?)? = null,
+    /** Reports the secondary bible's local file path to CompanionServer (for GET /api/bible/file/secondary). */
+    instanceLinkOnSecondaryBibleFilePathChanged: ((filePath: String) -> Unit)? = null,
     /** Non-null while connected via Instance Link — see MediaTab's instanceLinkMediaStreamUrl. */
     instanceLinkMediaStreamUrl: ((itemId: String) -> String)? = null,
     /** Non-null only when connected AND the operator has enabled pushing items to the primary's
@@ -425,14 +430,23 @@ fun MainDesktop(
 
     val currentOnPicturesLoaded by rememberUpdatedState(onPicturesLoaded)
     val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
-    val bibleViewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> currentOnBibleLoaded?.invoke(bible, translation) }) }
+    val currentOnSecondaryBibleFilePathChanged by rememberUpdatedState(instanceLinkOnSecondaryBibleFilePathChanged)
+    val bibleViewModel = remember {
+        BibleViewModel(
+            appSettings,
+            onBibleLoaded = { bible, translation -> currentOnBibleLoaded?.invoke(bible, translation) },
+            onSecondaryBibleFilePathChanged = { path -> currentOnSecondaryBibleFilePathChanged?.invoke(path) }
+        )
+    }
     DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
 
     // Mirrors the primary's bible while connected via Instance Link — see BibleViewModel.setInstanceLinkSource.
-    LaunchedEffect(instanceLinkConnectionStatus) {
+    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkMirrorSecondaryBible) {
         bibleViewModel.setInstanceLinkSource(
             active = instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED,
-            fetchBibleFile = instanceLinkFetchBibleFile
+            mirrorSecondary = instanceLinkMirrorSecondaryBible,
+            fetchBibleFile = instanceLinkFetchBibleFile,
+            fetchSecondaryBibleFile = instanceLinkFetchSecondaryBibleFile
         )
     }
 

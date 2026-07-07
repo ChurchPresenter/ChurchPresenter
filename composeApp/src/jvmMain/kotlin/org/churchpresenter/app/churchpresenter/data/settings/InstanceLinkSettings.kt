@@ -18,5 +18,9 @@ data class InstanceLinkSettings(
     val reconnectDelayMs: Int = 2000,
     /** Whether this instance may add items to the primary's schedule (still gated by the primary
      * operator's existing approval dialog — this only controls whether the request is ever sent). */
-    val allowPushToSchedule: Boolean = false
+    val allowPushToSchedule: Boolean = false,
+    /** When false (default), the secondary bible always stays whatever this instance has configured
+     * locally, independent of the connection. When true, it's replaced by the primary's secondary
+     * bible too, matching primary-bible replica behavior. */
+    val mirrorSecondaryBible: Boolean = false
 )

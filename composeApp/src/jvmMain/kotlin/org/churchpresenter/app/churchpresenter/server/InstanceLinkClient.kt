@@ -252,6 +252,19 @@ class InstanceLinkClient(
         }.getOrNull()
     }
 
+    /** Downloads the primary's raw secondary .spb bible file — only used when the follower opted in
+     *  to mirroring the primary's secondary bible instead of keeping its own local one. */
+    suspend fun fetchSecondaryBibleFile(): ByteArray? {
+        if (currentHost.isEmpty()) return null
+        return runCatching {
+            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BIBLE_FILE}/secondary") {
+                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
+            }
+            if (!response.status.isSuccess()) return null
+            response.readRawBytes()
+        }.getOrNull()
+    }
+
     /** Fetches one lower-third preset's raw Lottie JSON by name — see [Constants.ENDPOINT_LOWER_THIRDS]. */
     suspend fun fetchLowerThirdJson(name: String): ByteArray? {
         if (currentHost.isEmpty()) return null

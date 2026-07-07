@@ -119,6 +119,7 @@
     <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Connect automatically on launch</string>
     <string name="instance_link_allow_push_to_schedule">Allow adding items to the primary\'s schedule</string>
+    <string name="instance_link_mirror_secondary_bible">Also mirror the primary\'s secondary bible</string>
     <string name="instance_link_status_disconnected">Disconnected</string>
     <string name="instance_link_status_connecting">Connecting…</string>
     <string name="instance_link_status_connected">Connected</string>

@@ -1006,6 +1006,9 @@ class CompanionServer {
     private val _bible = MutableStateFlow<Bible?>(null)
     /** Absolute path to the primary bible's .spb file — serves GET /api/bible/file for InstanceLink followers. */
     @Volatile private var _bibleFilePath: String = ""
+    /** Same as [_bibleFilePath] but for the secondary bible — serves GET /api/bible/file/secondary,
+     *  only used when a follower opts in to mirroring the secondary too (most don't). */
+    @Volatile private var _secondaryBibleFilePath: String = ""
     private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
     /** Snapshot of whatever is currently live — see [LiveStateDto]. */
     private val _liveState = MutableStateFlow<LiveStateDto?>(null)
@@ -1329,6 +1332,12 @@ class CompanionServer {
             type = Constants.WS_EVENT_BIBLE_UPDATED,
             payload = json.encodeToString(BibleCatalogResponse.serializer(), catalog)
         ))
+    }
+
+    /** Records the secondary bible's file path for GET /api/bible/file/secondary — no mobile
+     *  companion catalog/broadcast exists for the secondary bible, only InstanceLink uses this. */
+    fun updateSecondaryBibleFilePath(filePath: String) {
+        _secondaryBibleFilePath = filePath
     }
 
     /**
@@ -2705,8 +2714,8 @@ class CompanionServer {
                  * InstanceLink follower can cache and load it through the same Bible.loadFromSpb()
                  * engine used locally (search/cross-reference/numbering all work unchanged), instead
                  * of reimplementing that engine against the API. Range requests are handled by the
-                 * PartialContent plugin. Only the primary bible is exposed — same scope the existing
-                 * mobile companion API already has (there is no secondary-bible endpoint either).
+                 * PartialContent plugin. The mobile companion API only ever exposed the primary bible;
+                 * GET /api/bible/file/secondary below extends that scope for InstanceLink only.
                  */
                 get(Constants.ENDPOINT_BIBLE_FILE) {
                     if (!checkApiKey(call)) return@get
@@ -2718,6 +2727,23 @@ class CompanionServer {
                     val file = File(path)
                     if (!file.exists()) {
                         call.respond(HttpStatusCode.NotFound, "Bible file not found on disk")
+                        return@get
+                    }
+                    call.respondFile(file)
+                }
+
+                /** GET /api/bible/file/secondary — same as above, for a follower that opted in to
+                 *  mirroring the primary's secondary bible instead of keeping its own. */
+                get("${Constants.ENDPOINT_BIBLE_FILE}/secondary") {
+                    if (!checkApiKey(call)) return@get
+                    val path = _secondaryBibleFilePath
+                    if (path.isEmpty()) {
+                        call.respond(HttpStatusCode.NotFound, "No secondary bible loaded")
+                        return@get
+                    }
+                    val file = File(path)
+                    if (!file.exists()) {
+                        call.respond(HttpStatusCode.NotFound, "Secondary bible file not found on disk")
                         return@get
                     }
                     call.respondFile(file)

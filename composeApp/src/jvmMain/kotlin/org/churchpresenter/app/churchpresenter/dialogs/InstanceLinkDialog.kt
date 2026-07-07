@@ -40,6 +40,7 @@ import churchpresenter.composeapp.generated.resources.instance_link_description
 import churchpresenter.composeapp.generated.resources.instance_link_host
 import churchpresenter.composeapp.generated.resources.instance_link_host_hint
 import churchpresenter.composeapp.generated.resources.instance_link_last_received
+import churchpresenter.composeapp.generated.resources.instance_link_mirror_secondary_bible
 import churchpresenter.composeapp.generated.resources.instance_link_port
 import churchpresenter.composeapp.generated.resources.instance_link_schedule_count
 import churchpresenter.composeapp.generated.resources.instance_link_title
@@ -73,7 +74,7 @@ fun InstanceLinkDialog(
     connectionStatus: InstanceLinkStatus,
     remoteLiveState: LiveStateDto?,
     remoteScheduleCount: Int,
-    onConnect: (host: String, port: Int, apiKey: String, autoConnect: Boolean, allowPushToSchedule: Boolean) -> Unit,
+    onConnect: (host: String, port: Int, apiKey: String, autoConnect: Boolean, allowPushToSchedule: Boolean, mirrorSecondaryBible: Boolean) -> Unit,
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -84,6 +85,7 @@ fun InstanceLinkDialog(
     var apiKey by remember(isVisible) { mutableStateOf(settings.apiKey) }
     var autoConnect by remember(isVisible) { mutableStateOf(settings.autoConnect) }
     var allowPushToSchedule by remember(isVisible) { mutableStateOf(settings.allowPushToSchedule) }
+    var mirrorSecondaryBible by remember(isVisible) { mutableStateOf(settings.mirrorSecondaryBible) }
 
     val mainWindowState = LocalMainWindowState.current
     val dialogState = rememberDialogState(
@@ -199,6 +201,18 @@ fun InstanceLinkDialog(
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Switch(checked = mirrorSecondaryBible, onCheckedChange = { mirrorSecondaryBible = it })
+                        Text(
+                            stringResource(Res.string.instance_link_mirror_secondary_bible),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -233,7 +247,7 @@ fun InstanceLinkDialog(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             val port = portText.toIntOrNull() ?: return@Button
-                            onConnect(host.trim(), port, apiKey.trim(), autoConnect, allowPushToSchedule)
+                            onConnect(host.trim(), port, apiKey.trim(), autoConnect, allowPushToSchedule, mirrorSecondaryBible)
                             onDismiss()
                         },
                         enabled = host.isNotBlank() && portText.toIntOrNull() != null,
