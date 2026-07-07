@@ -253,6 +253,17 @@ object Constants {
     const val ENDPOINT_MEDIA_STREAM      = "/api/media/stream"
     const val ENDPOINT_BIBLE_FILE        = "/api/bible/file"
     const val ENDPOINT_LOWER_THIRDS      = "/api/lowerthirds"
+    const val ENDPOINT_BACKGROUNDS       = "/api/backgrounds"
+
+    // Background asset slot names — shared vocabulary between CompanionServer's
+    // GET /api/backgrounds/asset/{slot} and InstanceLinkClient's fetchBackgroundAsset(), since a
+    // slot key (not a raw local file path) is what crosses the wire.
+    const val BACKGROUND_SLOT_DEFAULT             = "default"
+    const val BACKGROUND_SLOT_DEFAULT_LOWER_THIRD = "defaultLowerThird"
+    const val BACKGROUND_SLOT_BIBLE               = "bible"
+    const val BACKGROUND_SLOT_BIBLE_LOWER_THIRD   = "bibleLowerThird"
+    const val BACKGROUND_SLOT_SONG                = "song"
+    const val BACKGROUND_SLOT_SONG_LOWER_THIRD    = "songLowerThird"
 
     // WebSocket event types (server → client)
     const val WS_EVENT_SONGS_UPDATED              = "songs_updated"

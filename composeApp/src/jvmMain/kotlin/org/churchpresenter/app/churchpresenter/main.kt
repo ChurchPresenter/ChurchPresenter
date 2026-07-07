@@ -72,6 +72,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.data.Language
@@ -473,6 +474,27 @@ fun main() {
                 presenterManager.requestClearDisplay()
             }
         }
+        // Backgrounds change rarely (initial setup, not per-service) so this fetches once per
+        // connection rather than needing a live WS push, same as the Bible file fetch — only when
+        // the follower opted in via InstanceLinkSettings.mirrorBackgrounds (off by default, since
+        // backgrounds are often venue-specific).
+        var mirroredBackgroundSettings by remember { mutableStateOf<BackgroundSettings?>(null) }
+        val instanceLinkConnectionStatusForBackgrounds by instanceLinkViewModel.connectionStatus.collectAsState()
+        LaunchedEffect(instanceLinkConnectionStatusForBackgrounds, appSettings.instanceLink.mirrorBackgrounds) {
+            if (instanceLinkConnectionStatusForBackgrounds != InstanceLinkStatus.CONNECTED || !appSettings.instanceLink.mirrorBackgrounds) {
+                mirroredBackgroundSettings = null
+                return@LaunchedEffect
+            }
+            val remote = instanceLinkViewModel.fetchBackgroundSettings() ?: return@LaunchedEffect
+            mirroredBackgroundSettings = downloadMirroredBackgroundSettings(remote, instanceLinkViewModel)
+        }
+        // The single override point for rendering paths (PresenterWindows, BrowserSourceVideoRenderer,
+        // and MainDesktop's live preview) — everywhere else appSettings is used as-is (editing,
+        // persistence, general settings), since those should never show the mirrored backgrounds as
+        // if they were this instance's own configuration.
+        val effectiveAppSettings = remember(appSettings, mirroredBackgroundSettings) {
+            mirroredBackgroundSettings?.let { appSettings.copy(backgroundSettings = it) } ?: appSettings
+        }
         // Broadcasts this instance's live content to any connected InstanceLink follower — the
         // counterpart to the remoteLiveState collector above.
         LaunchedEffect(Unit) {
@@ -578,6 +600,9 @@ fun main() {
         LaunchedEffect(appSettings.projectionSettings.browserSourceOutputs) {
             companionServer.updateBrowserSourceOutputs(appSettings.projectionSettings.browserSourceOutputs)
         }
+        LaunchedEffect(appSettings.backgroundSettings) {
+            companionServer.updateBackgroundSettings(appSettings.backgroundSettings)
+        }
         val browserSourceServerUrlState = companionServer.serverUrl.collectAsState()
         appSettings.projectionSettings.browserSourceOutputs.indices.forEach { i ->
             composeKey(i) {
@@ -591,7 +616,7 @@ fun main() {
                 // which is why a background image change only took effect after restarting the
                 // app. effectiveModeState is unaffected since it genuinely reads presenterManager
                 // State objects (.value), which derivedStateOf tracks correctly.
-                val appSettingsState = rememberUpdatedState(appSettings)
+                val appSettingsState = rememberUpdatedState(effectiveAppSettings)
                 val screenAssignmentState = rememberUpdatedState(
                     appSettings.projectionSettings.browserSourceOutputs.getOrNull(i) ?: ScreenAssignment()
                 )
@@ -1466,6 +1491,7 @@ fun main() {
                                     onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
                                     onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
                                     appSettings = appSettings,
+                                    livePreviewAppSettings = effectiveAppSettings,
                                     presenterManager = presenterManager,
                                     statisticsManager = statisticsManager,
                                     onScheduleActionsReady = { scheduleActions = it },
@@ -1642,7 +1668,7 @@ fun main() {
                                     connectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
                                     remoteLiveState = instanceLinkViewModel.remoteLiveState.collectAsState().value,
                                     remoteScheduleCount = instanceLinkViewModel.remoteSchedule.collectAsState().value.size,
-                                    onConnect = { host, port, apiKey, autoConnect, allowPushToSchedule, mirrorSecondaryBible ->
+                                    onConnect = { host, port, apiKey, autoConnect, allowPushToSchedule, mirrorSecondaryBible, mirrorBackgrounds ->
                                         appSettings = appSettings.copy(
                                             instanceLink = appSettings.instanceLink.copy(
                                                 enabled = true,
@@ -1651,7 +1677,8 @@ fun main() {
                                                 apiKey = apiKey,
                                                 autoConnect = autoConnect,
                                                 allowPushToSchedule = allowPushToSchedule,
-                                                mirrorSecondaryBible = mirrorSecondaryBible
+                                                mirrorSecondaryBible = mirrorSecondaryBible,
+                                                mirrorBackgrounds = mirrorBackgrounds
                                             )
                                         )
                                         settingsManager.saveSettings(appSettings)
@@ -1792,7 +1819,7 @@ fun main() {
                 screens = screens,
                 presenterManager = presenterManager,
                 mediaViewModel = mediaViewModel,
-                appSettings = appSettings,
+                appSettings = effectiveAppSettings,
                 identifyingScreen = identifyingScreen,
                 serverUrl = companionServer.serverUrl.collectAsState().value,
                 qaDisplayUrl = qaDisplayUrl,
@@ -1844,6 +1871,59 @@ fun main() {
  *  local path, not bytes) can display them like any other local file. */
 private val instanceLinkPictureCacheDir: File by lazy {
     File(System.getProperty("user.home"), ".churchpresenter/instance-link-cache/pictures").apply { mkdirs() }
+}
+
+/** Where fetched background image/video bytes are cached, keyed by slot — BackgroundConfig's
+ *  image/video fields need a local path, not bytes, same reasoning as [instanceLinkPictureCacheDir]. */
+private val instanceLinkBackgroundCacheDir: File by lazy {
+    File(System.getProperty("user.home"), ".churchpresenter/instance-link-cache/backgrounds").apply { mkdirs() }
+}
+
+/**
+ * Downloads the primary's configured background image/video assets (only for slots it actually has
+ * set — most churches only use one or two) into a local cache, then returns a [BackgroundSettings]
+ * copy with every image/video path rewritten to the cached file. BiblePresenter/SongPresenter then
+ * render it exactly like a local background — no changes needed in either presenter. Only called
+ * when the follower opted in via InstanceLinkSettings.mirrorBackgrounds; colors/gradients/opacity/
+ * type are plain values already carried by [remote] as-is, no transfer needed for those.
+ */
+private suspend fun downloadMirroredBackgroundSettings(
+    remote: BackgroundSettings,
+    instanceLinkViewModel: InstanceLinkViewModel
+): BackgroundSettings {
+    suspend fun cache(slot: String, path: String, isVideo: Boolean): String {
+        if (path.isBlank()) return path
+        val ext = File(path).extension.ifBlank { if (isVideo) "mp4" else "jpg" }
+        val kind = if (isVideo) "video" else "image"
+        val cacheFile = File(instanceLinkBackgroundCacheDir, "$slot-$kind.$ext")
+        if (!cacheFile.exists()) {
+            val bytes = instanceLinkViewModel.fetchBackgroundAsset(slot, isVideo) ?: return ""
+            cacheFile.writeBytes(bytes)
+        }
+        return cacheFile.absolutePath
+    }
+    return remote.copy(
+        defaultBackgroundImage = cache(Constants.BACKGROUND_SLOT_DEFAULT, remote.defaultBackgroundImage, false),
+        defaultBackgroundVideo = cache(Constants.BACKGROUND_SLOT_DEFAULT, remote.defaultBackgroundVideo, true),
+        defaultLowerThirdBackgroundImage = cache(Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD, remote.defaultLowerThirdBackgroundImage, false),
+        defaultLowerThirdBackgroundVideo = cache(Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD, remote.defaultLowerThirdBackgroundVideo, true),
+        bibleBackground = remote.bibleBackground.copy(
+            backgroundImage = cache(Constants.BACKGROUND_SLOT_BIBLE, remote.bibleBackground.backgroundImage, false),
+            backgroundVideo = cache(Constants.BACKGROUND_SLOT_BIBLE, remote.bibleBackground.backgroundVideo, true)
+        ),
+        bibleLowerThirdBackground = remote.bibleLowerThirdBackground.copy(
+            backgroundImage = cache(Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD, remote.bibleLowerThirdBackground.backgroundImage, false),
+            backgroundVideo = cache(Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD, remote.bibleLowerThirdBackground.backgroundVideo, true)
+        ),
+        songBackground = remote.songBackground.copy(
+            backgroundImage = cache(Constants.BACKGROUND_SLOT_SONG, remote.songBackground.backgroundImage, false),
+            backgroundVideo = cache(Constants.BACKGROUND_SLOT_SONG, remote.songBackground.backgroundVideo, true)
+        ),
+        songLowerThirdBackground = remote.songLowerThirdBackground.copy(
+            backgroundImage = cache(Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD, remote.songLowerThirdBackground.backgroundImage, false),
+            backgroundVideo = cache(Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD, remote.songLowerThirdBackground.backgroundVideo, true)
+        )
+    )
 }
 
 /**

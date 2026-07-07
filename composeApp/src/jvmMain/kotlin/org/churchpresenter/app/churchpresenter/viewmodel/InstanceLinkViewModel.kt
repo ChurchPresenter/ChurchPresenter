@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkClient
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
@@ -96,6 +97,13 @@ class InstanceLinkViewModel {
 
     /** Fetches one lower-third preset's Lottie JSON by name — see [InstanceLinkClient.fetchLowerThirdJson]. */
     suspend fun fetchLowerThirdJson(name: String): ByteArray? = client.fetchLowerThirdJson(name)
+
+    /** Fetches the primary's current background settings — see [InstanceLinkClient.fetchBackgroundSettings]. */
+    suspend fun fetchBackgroundSettings(): BackgroundSettings? = client.fetchBackgroundSettings()
+
+    /** Fetches one background slot's raw asset bytes — see [InstanceLinkClient.fetchBackgroundAsset]. */
+    suspend fun fetchBackgroundAsset(slot: String, isVideo: Boolean): ByteArray? =
+        client.fetchBackgroundAsset(slot, isVideo)
 
     fun dispose() {
         client.dispose()

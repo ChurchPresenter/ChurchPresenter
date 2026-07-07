@@ -58,6 +58,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.data.settings.PresentationRemoteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
@@ -1009,6 +1010,10 @@ class CompanionServer {
     /** Same as [_bibleFilePath] but for the secondary bible — serves GET /api/bible/file/secondary,
      *  only used when a follower opts in to mirroring the secondary too (most don't). */
     @Volatile private var _secondaryBibleFilePath: String = ""
+    /** Current background settings — serves GET /api/backgrounds for a follower that opted in to
+     *  mirroring backgrounds. The image/video fields are still local file paths on this machine;
+     *  GET /api/backgrounds/asset/{slot} resolves the current path for a given slot on demand. */
+    private val _backgroundSettings = MutableStateFlow(BackgroundSettings())
     private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
     /** Snapshot of whatever is currently live — see [LiveStateDto]. */
     private val _liveState = MutableStateFlow<LiveStateDto?>(null)
@@ -1338,6 +1343,12 @@ class CompanionServer {
      *  companion catalog/broadcast exists for the secondary bible, only InstanceLink uses this. */
     fun updateSecondaryBibleFilePath(filePath: String) {
         _secondaryBibleFilePath = filePath
+    }
+
+    /** Records the current background settings for GET /api/backgrounds — only consumed by a
+     *  follower that opted in to mirroring backgrounds (see InstanceLinkSettings.mirrorBackgrounds). */
+    fun updateBackgroundSettings(settings: BackgroundSettings) {
+        _backgroundSettings.value = settings
     }
 
     /**
@@ -2744,6 +2755,53 @@ class CompanionServer {
                     val file = File(path)
                     if (!file.exists()) {
                         call.respond(HttpStatusCode.NotFound, "Secondary bible file not found on disk")
+                        return@get
+                    }
+                    call.respondFile(file)
+                }
+
+                /** GET /api/backgrounds — current BackgroundSettings as JSON. Image/video fields are
+                 *  still local file paths on this machine; a follower resolves the actual bytes via
+                 *  GET /api/backgrounds/asset/{slot} below, keyed by slot rather than raw path. */
+                get(Constants.ENDPOINT_BACKGROUNDS) {
+                    if (!checkApiKey(call)) return@get
+                    call.respond(_backgroundSettings.value)
+                }
+
+                /**
+                 * GET /api/backgrounds/asset/{slot}?type=image|video — streams the background
+                 * image/video file currently configured for one slot (default, defaultLowerThird,
+                 * bible, bibleLowerThird, song, songLowerThird). Keyed by slot name rather than a raw
+                 * path, same reasoning as the lower-third-by-name endpoint above. Range requests are
+                 * handled by the PartialContent plugin via respondFile.
+                 */
+                get("${Constants.ENDPOINT_BACKGROUNDS}/asset/{slot}") {
+                    if (!checkApiKey(call)) return@get
+                    val slot = call.parameters["slot"] ?: ""
+                    val isVideo = call.request.queryParameters["type"] == "video"
+                    val settings = _backgroundSettings.value
+                    val path = when (slot) {
+                        Constants.BACKGROUND_SLOT_DEFAULT ->
+                            if (isVideo) settings.defaultBackgroundVideo else settings.defaultBackgroundImage
+                        Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD ->
+                            if (isVideo) settings.defaultLowerThirdBackgroundVideo else settings.defaultLowerThirdBackgroundImage
+                        Constants.BACKGROUND_SLOT_BIBLE ->
+                            if (isVideo) settings.bibleBackground.backgroundVideo else settings.bibleBackground.backgroundImage
+                        Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD ->
+                            if (isVideo) settings.bibleLowerThirdBackground.backgroundVideo else settings.bibleLowerThirdBackground.backgroundImage
+                        Constants.BACKGROUND_SLOT_SONG ->
+                            if (isVideo) settings.songBackground.backgroundVideo else settings.songBackground.backgroundImage
+                        Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD ->
+                            if (isVideo) settings.songLowerThirdBackground.backgroundVideo else settings.songLowerThirdBackground.backgroundImage
+                        else -> ""
+                    }
+                    if (path.isBlank()) {
+                        call.respond(HttpStatusCode.NotFound, "No asset configured for slot")
+                        return@get
+                    }
+                    val file = File(path)
+                    if (!file.exists()) {
+                        call.respond(HttpStatusCode.NotFound, "Background asset not found on disk")
                         return@get
                     }
                     call.respondFile(file)

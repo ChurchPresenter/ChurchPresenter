@@ -30,6 +30,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
@@ -275,6 +276,34 @@ class InstanceLinkClient(
         return runCatching {
             val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_LOWER_THIRDS}/$encodedName/json") {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
+            }
+            if (!response.status.isSuccess()) return null
+            response.readRawBytes()
+        }.getOrNull()
+    }
+
+    /** Fetches the primary's current background settings — only used when the follower opted in to
+     *  mirroring backgrounds (InstanceLinkSettings.mirrorBackgrounds). Image/video fields are still
+     *  the primary's own local file paths; use [fetchBackgroundAsset] (keyed by slot) for bytes. */
+    suspend fun fetchBackgroundSettings(): BackgroundSettings? {
+        if (currentHost.isEmpty()) return null
+        return runCatching {
+            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BACKGROUNDS}") {
+                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
+            }
+            if (!response.status.isSuccess()) return null
+            json.decodeFromString(BackgroundSettings.serializer(), response.bodyAsText())
+        }.getOrNull()
+    }
+
+    /** Fetches one background slot's raw image/video bytes by slot name — see
+     *  [Constants.BACKGROUND_SLOT_DEFAULT] and siblings for the shared slot vocabulary. */
+    suspend fun fetchBackgroundAsset(slot: String, isVideo: Boolean): ByteArray? {
+        if (currentHost.isEmpty()) return null
+        return runCatching {
+            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BACKGROUNDS}/asset/$slot") {
+                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
+                parameter("type", if (isVideo) "video" else "image")
             }
             if (!response.status.isSuccess()) return null
             response.readRawBytes()

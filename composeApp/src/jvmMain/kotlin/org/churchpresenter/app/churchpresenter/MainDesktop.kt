@@ -182,6 +182,10 @@ data class ScheduleActions(
 fun MainDesktop(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
+    // Same as appSettings except backgroundSettings may be swapped for a mirrored-from-primary copy
+    // (Instance Link) — used ONLY at the live-preview render call site below, never for editing/
+    // persistence, so the Options dialog still shows this instance's own local background settings.
+    livePreviewAppSettings: AppSettings = appSettings,
     presenterManager: PresenterManager,
     statisticsManager: StatisticsManager? = null,
     presenting: (Presenting) -> Unit,
@@ -1700,7 +1704,7 @@ fun MainDesktop(
                         }
                         LivePreviewPanel(
                             presenterManager = presenterManager,
-                            appSettings = appSettings,
+                            appSettings = livePreviewAppSettings,
                             modifier = Modifier.fillMaxWidth(),
                             serverUrl = serverUrl,
                             qaDisplayUrl = qaDisplayUrl,

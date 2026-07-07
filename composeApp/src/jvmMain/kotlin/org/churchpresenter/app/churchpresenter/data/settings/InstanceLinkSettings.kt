@@ -22,5 +22,10 @@ data class InstanceLinkSettings(
     /** When false (default), the secondary bible always stays whatever this instance has configured
      * locally, independent of the connection. When true, it's replaced by the primary's secondary
      * bible too, matching primary-bible replica behavior. */
-    val mirrorSecondaryBible: Boolean = false
+    val mirrorSecondaryBible: Boolean = false,
+    /** When false (default), backgrounds (images/videos behind Bible/Songs and their lower-third
+     * variants) always stay whatever this instance has configured locally. When true, they're
+     * replaced by the primary's backgrounds while connected. Off by default since backgrounds are
+     * often venue-specific. */
+    val mirrorBackgrounds: Boolean = false
 )
