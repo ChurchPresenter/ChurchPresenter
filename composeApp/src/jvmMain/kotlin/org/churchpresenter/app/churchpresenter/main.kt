@@ -470,15 +470,33 @@ fun main() {
         LaunchedEffect(instanceLinkViewModel) {
             instanceLinkViewModel.remotePresentationSlide.collect { slide ->
                 if (slide == null) return@collect
-                val bytes = instanceLinkViewModel.fetchPresentationSlideBytes(slide.id, slide.index) ?: return@collect
+                val bytes = instanceLinkViewModel.fetchPresentationSlideBytes(slide.id, slide.index)
+                if (bytes == null) {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                        mapOf("contentType" to "PRESENTATION", "resolved" to false, "reason" to "fetch_failed")
+                    )
+                    return@collect
+                }
                 val bitmap = runCatching {
                     Image.makeFromEncoded(bytes).toComposeImageBitmap()
-                }.getOrNull() ?: return@collect
+                }.getOrNull()
+                if (bitmap == null) {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                        mapOf("contentType" to "PRESENTATION", "resolved" to false, "reason" to "decode_failed")
+                    )
+                    return@collect
+                }
                 presenterManager.setSelectedSlide(bitmap)
                 if (slide.isLive) {
                     presenterManager.setPresentingMode(Presenting.PRESENTATION)
                     presenterManager.setShowPresenterWindow(true)
                 }
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "PRESENTATION", "resolved" to true, "isLive" to slide.isLive)
+                )
             }
         }
         LaunchedEffect(instanceLinkViewModel) {

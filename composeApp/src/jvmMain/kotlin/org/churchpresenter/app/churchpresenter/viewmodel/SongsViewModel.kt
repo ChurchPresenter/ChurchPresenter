@@ -18,6 +18,8 @@ import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
 import org.churchpresenter.app.churchpresenter.server.SongDetailDto
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
 import java.io.File
@@ -152,6 +154,10 @@ class SongsViewModel(
             }
         } ?: emptyList()
         applySongList(items)
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.FOLLOWER, "songs_sync_result",
+            mapOf("catalogPresent" to (catalog != null), "songCount" to items.size)
+        )
     }
 
     private fun fetchRemoteDetailIfNeeded(index: Int) {
@@ -161,7 +167,18 @@ class SongsViewModel(
         val song = items[index]
         if (song.lyrics.isNotEmpty()) return
         viewModelScope.launch {
-            val detail = fetchDetail(song.number, song.songbook) ?: return@launch
+            val detail = fetchDetail(song.number, song.songbook)
+            if (detail == null) {
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "song_detail_fetch_result",
+                    mapOf("number" to song.number, "songbook" to song.songbook, "success" to false)
+                )
+                return@launch
+            }
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "song_detail_fetch_result",
+                mapOf("number" to song.number, "songbook" to song.songbook, "success" to true)
+            )
             val updated = song.copy(lyrics = detail.toRawLyrics())
             fun List<SongItem>.replaced() = map { if (it.songId == song.songId) updated else it }
             _filteredSongItems.value = _filteredSongItems.value.replaced()

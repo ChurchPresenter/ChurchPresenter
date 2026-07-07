@@ -9,6 +9,8 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import java.io.File
 import java.security.SecureRandom
 import java.util.Base64
@@ -51,8 +53,13 @@ class ScheduleViewModel(
     fun applyRemoteSchedule(dtos: List<ScheduleItemDto>) {
         _isFollowingRemote.value = true
         _scheduleItems.clear()
-        _scheduleItems.addAll(dtos.mapNotNull { it.toScheduleItem() })
+        val mapped = dtos.mapNotNull { it.toScheduleItem() }
+        _scheduleItems.addAll(mapped)
         notifyChanged()
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.FOLLOWER, "schedule_sync_result",
+            mapOf("receivedCount" to dtos.size, "mappedCount" to mapped.size)
+        )
     }
 
     /** Called on Instance Link disconnect — hands local editing back to the operator. */
