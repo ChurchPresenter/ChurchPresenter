@@ -34,6 +34,15 @@ class PresenterManager {
         // Output windows render pre-rendered frames with ContentScale.Fit, so a canvas
         // larger than the app's default render resolution wastes memory with no visual benefit.
         private const val MAX_CANVAS_DIMENSION = 1920
+
+        // Floors tried, in order, before giving up on pre-rendering a clip that doesn't fit
+        // MAX_PRERENDER_BYTES at full quality. Resolution is spent first since it has no effect
+        // on motion smoothness for a lower-third overlay; frame rate is the last resort since
+        // that's what "smooth" actually depends on — pre-rendering exists specifically because
+        // live/GPU-driven playback was unreliable on some hardware, so a clip should almost never
+        // fall back to that path just for being long or large.
+        private const val MIN_CANVAS_DIMENSION = 720
+        private const val MIN_PRERENDER_FPS = 15
     }
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -213,6 +222,12 @@ class PresenterManager {
 
     private val _lottieRawFrameSize = mutableStateOf<Pair<Int, Int>?>(null)
     val lottieRawFrameSize: State<Pair<Int, Int>?> = _lottieRawFrameSize
+
+    // The frame rate the current _lottieRawFrames were actually rendered at — may be below
+    // PRERENDER_FPS when a clip was degraded to fit MAX_PRERENDER_BYTES. main.kt's playback loop
+    // must pace itself off this, not the PRERENDER_FPS constant, or a degraded clip plays too fast.
+    private val _lottiePrerenderFps = mutableStateOf(PRERENDER_FPS)
+    val lottiePrerenderFps: State<Int> = _lottiePrerenderFps
 
     private val _lottieCurrentFrameIndex = mutableStateOf(0)
     val lottieCurrentFrameIndex: State<Int> = _lottieCurrentFrameIndex
@@ -423,6 +438,7 @@ class PresenterManager {
         // Clear stale frames immediately so the presenter falls back to compottie
         _lottieRawFrames.value = null
         _lottieRawFrameSize.value = null
+        _lottiePrerenderFps.value = PRERENDER_FPS
         _lottieCurrentFrameIndex.value = 0
         preRenderJob?.cancel()
 
@@ -430,29 +446,58 @@ class PresenterManager {
             preRenderJob = preRenderScope.launch {
                 try {
                     val (rawW, rawH) = AtemRenderCache.lottieCanvasSize(json) ?: (1920 to 1080)
-                    val (w, h) = clampCanvasSize(rawW, rawH)
-                    val frameCount = AtemRenderCache.clipFrameCount(json, PRERENDER_FPS.toDouble())
-                        ?: return@launch
+                    val (clampedW, clampedH) = clampCanvasSize(rawW, rawH)
+                    var w = clampedW
+                    var h = clampedH
+                    var fps = PRERENDER_FPS
+                    var frameCount = AtemRenderCache.clipFrameCount(json, fps.toDouble()) ?: return@launch
+                    var estimatedBytes = frameCount.toLong() * w.toLong() * h.toLong() * 4L
 
-                    val estimatedBytes = frameCount.toLong() * w.toLong() * h.toLong() * 4L
+                    // 1. Shrink resolution first — it's free quality to spend, since it has no
+                    // effect on motion smoothness for a lower-third overlay.
+                    while (estimatedBytes > MAX_PRERENDER_BYTES && maxOf(w, h) > MIN_CANVAS_DIMENSION) {
+                        w = (w * 0.85).toInt().coerceAtLeast(1)
+                        h = (h * 0.85).toInt().coerceAtLeast(1)
+                        estimatedBytes = frameCount.toLong() * w.toLong() * h.toLong() * 4L
+                    }
+
+                    // 2. Only reduce frame rate if the resolution floor alone wasn't enough — fps
+                    // is what "smooth" actually depends on, so it's the last resort before giving up.
+                    if (estimatedBytes > MAX_PRERENDER_BYTES && fps > MIN_PRERENDER_FPS) {
+                        fps = MIN_PRERENDER_FPS
+                        frameCount = AtemRenderCache.clipFrameCount(json, fps.toDouble()) ?: return@launch
+                        estimatedBytes = frameCount.toLong() * w.toLong() * h.toLong() * 4L
+                    }
+
                     if (estimatedBytes > MAX_PRERENDER_BYTES) {
+                        // Still too big even at minimum quality (an extreme, e.g. multi-minute,
+                        // clip) — fall back to live rendering, same as before this change.
                         CrashReporter.reportWarning(
-                            "Lottie pre-render skipped: estimated size exceeds budget",
+                            "Lottie pre-render skipped even at minimum quality: estimated size exceeds budget",
                             tags = mapOf(
                                 "subsystem" to "lower_third",
                                 "estimatedBytes" to estimatedBytes.toString(),
                                 "frameCount" to frameCount.toString(),
                                 "width" to w.toString(),
-                                "height" to h.toString()
+                                "height" to h.toString(),
+                                "fps" to fps.toString()
                             )
                         )
                         return@launch
+                    }
+
+                    if (w != clampedW || h != clampedH || fps != PRERENDER_FPS) {
+                        CrashReporter.breadcrumb(
+                            "Lottie pre-render degraded to fit budget: ${w}x$h @ ${fps}fps",
+                            category = "lower_third"
+                        )
                     }
 
                     val renderer = LowerThirdOffscreenRenderer(w, h)
                     val frames = renderer.renderAllFrames(json, frameCount)
                     withContext(Dispatchers.Main) {
                         _lottieRawFrameSize.value = w to h
+                        _lottiePrerenderFps.value = fps
                         _lottieRawFrames.value = frames
                         _lottieCurrentFrameIndex.value = 0
                     }

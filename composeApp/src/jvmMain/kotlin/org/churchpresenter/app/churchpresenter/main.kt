@@ -2146,9 +2146,13 @@ private fun PresenterWindows(
         // Snapshot pre-rendered frames at trigger time — intentionally NOT a key so the
         // effect does not restart when pre-rendering finishes mid-animation.
         val frames = presenterManager.lottieRawFrames.value
+        // Snapshotted alongside frames — a clip degraded to fit the pre-render memory budget may
+        // have been rendered below PRERENDER_FPS, and pacing off the fixed constant instead of the
+        // fps it was actually rendered at would play it back faster than its real duration.
+        val prerenderFps = presenterManager.lottiePrerenderFps.value
 
         if (frames != null) {
-            // Pre-rendered path: advance frame index at PRERENDER_FPS
+            // Pre-rendered path: advance frame index at the fps these frames were rendered at
             val hasPause = lottiePauseAtFrame && lottiePauseFrame in 0f..1f
             val pauseIdx = if (hasPause)
                 (frames.size * lottiePauseFrame).toInt().coerceIn(0, frames.size - 1) else -1
@@ -2157,7 +2161,7 @@ private fun PresenterWindows(
             for (i in frames.indices) {
                 presenterManager.setLottieCurrentFrameIndex(i)
                 if (i == pauseIdx) delay(lottiePauseDurationMs)
-                delay(1000L / PresenterManager.PRERENDER_FPS)
+                delay(1000L / prerenderFps)
             }
             presenterManager.setLottieCurrentFrameIndex(frames.size - 1)
         } else {
