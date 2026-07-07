@@ -760,7 +760,8 @@ fun BibleTab(
             val sttConnectError = sttManager.connectError.value == true
             val sttReconnecting = sttManager.reconnecting.value == true
             val noBibleSelected = appSettings.bibleSettings.primaryBible.isBlank() &&
-                appSettings.bibleSettings.secondaryBible.isBlank()
+                appSettings.bibleSettings.secondaryBible.isBlank() &&
+                viewModel.primaryBible.value == null
             val sttReceiving = sttManager.inProgressText.value.isNotBlank() || sttManager.segments.isNotEmpty()
             val statusIsError = engineStartFailed || noBibleSelected || sttConnectError
             val statusText = when {
@@ -1062,7 +1063,7 @@ fun BibleTab(
         }
 
         // ── Main content ─────────────────────────────────────────────
-        if (appSettings.bibleSettings.primaryBible.isBlank()) {
+        if (appSettings.bibleSettings.primaryBible.isBlank() && viewModel.primaryBible.value == null) {
             // ── Empty state: primary bible not configured ─────────────
             Box(
                 modifier = Modifier.fillMaxWidth().weight(1f).padding(32.dp),

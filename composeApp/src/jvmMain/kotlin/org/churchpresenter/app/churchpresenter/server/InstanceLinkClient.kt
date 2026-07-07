@@ -268,8 +268,12 @@ class InstanceLinkClient(
     /** Fetches one lower-third preset's raw Lottie JSON by name — see [Constants.ENDPOINT_LOWER_THIRDS]. */
     suspend fun fetchLowerThirdJson(name: String): ByteArray? {
         if (currentHost.isEmpty()) return null
+        // Path segment, not a query param: URLEncoder turns spaces into "+", which Ktor's route
+        // parameter decoding does NOT turn back into a space (that only happens for query/form
+        // encoding) — swap it for "%20" so a name with spaces still resolves on the server.
+        val encodedName = java.net.URLEncoder.encode(name, "UTF-8").replace("+", "%20")
         return runCatching {
-            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_LOWER_THIRDS}/$name/json") {
+            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_LOWER_THIRDS}/$encodedName/json") {
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
             if (!response.status.isSuccess()) return null

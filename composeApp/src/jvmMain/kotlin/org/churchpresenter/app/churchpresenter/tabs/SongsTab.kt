@@ -218,6 +218,7 @@ fun SongsTab(
     val filterType by viewModel.filterType
     val selectedSongIndex by viewModel.selectedSongIndex
     val selectedSectionIndex by viewModel.selectedSectionIndex
+    val remoteLyricsUpdated by viewModel.remoteLyricsUpdated
     val filteredSongs by viewModel.filteredSongItems
     val isLoading by viewModel.isLoading
     val currentSortColumn by viewModel.sortColumn
@@ -291,6 +292,15 @@ fun SongsTab(
                 sendToPresenter()
                 tabFocusRequester.requestFocus()
             }
+        }
+    }
+
+    // Remote (Instance Link) songs fetch their lyrics lazily after selection — sendToPresenter()
+    // above may have already run against empty lyrics before the fetch resolved, so re-push once
+    // it lands (viewModel only bumps this when it's still for the currently selected song).
+    LaunchedEffect(remoteLyricsUpdated) {
+        if (remoteLyricsUpdated > 0) {
+            sendToPresenter()
         }
     }
 

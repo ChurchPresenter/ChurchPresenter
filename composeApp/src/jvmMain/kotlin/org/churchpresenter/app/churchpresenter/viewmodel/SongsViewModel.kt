@@ -121,6 +121,13 @@ class SongsViewModel(
     private var remoteModeActive = false
     private var remoteFetchDetail: (suspend (number: String, songbook: String) -> SongDetailDto?)? = null
 
+    // Bumped whenever a lazily-fetched remote song's lyrics arrive for the song still selected at
+    // that time — the tab observes this to re-push to the presenter (look-ahead, current section)
+    // once data actually exists, since the fetch in fetchRemoteDetailIfNeeded races the initial
+    // selection and can't push synchronously.
+    private val _remoteLyricsUpdated = mutableStateOf(0)
+    val remoteLyricsUpdated: State<Int> = _remoteLyricsUpdated
+
     /** Called from the owning tab whenever Instance Link connects/disconnects or the catalog updates. */
     fun setInstanceLinkSource(
         active: Boolean,
@@ -160,6 +167,13 @@ class SongsViewModel(
             _filteredSongItems.value = _filteredSongItems.value.replaced()
             _allSongItems.value = _allSongItems.value.replaced()
             _songsData.value = Songs().also { it.addSongs(_allSongItems.value) }
+            // Only nudge the presenter if this song is still the one selected — the operator may
+            // have already moved on to a different song by the time this fetch resolves.
+            val currentIdx = _selectedSongIndex.value
+            val current = _filteredSongItems.value.getOrNull(currentIdx)
+            if (current?.songId == song.songId) {
+                _remoteLyricsUpdated.value++
+            }
         }
     }
 
