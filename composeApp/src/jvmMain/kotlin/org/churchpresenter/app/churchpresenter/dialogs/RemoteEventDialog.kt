@@ -59,6 +59,7 @@ import churchpresenter.composeapp.generated.resources.remote_api_add_to_schedule
 import churchpresenter.composeapp.generated.resources.remote_api_presentation_connect
 import churchpresenter.composeapp.generated.resources.remote_api_presentation_connect_detail
 import churchpresenter.composeapp.generated.resources.remote_api_project
+import churchpresenter.composeapp.generated.resources.remote_api_remove_from_schedule
 import churchpresenter.composeapp.generated.resources.remote_api_qa_add
 import churchpresenter.composeapp.generated.resources.remote_api_qa_edit
 import churchpresenter.composeapp.generated.resources.remote_api_qa_delete
@@ -94,6 +95,7 @@ data class RemoteEvent(
 
 enum class RemoteEventType {
     ADD_TO_SCHEDULE,
+    REMOVE_FROM_SCHEDULE,
     PROJECT,
     PRESENTATION_CONNECT,
     PRESENT,    // instant: select_song_section / select_picture / select_slide / select_bible_verse
@@ -145,6 +147,7 @@ fun RemoteEventDialog(
 
     val actionLabel = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> stringResource(Res.string.remote_api_add_to_schedule)
+        RemoteEventType.REMOVE_FROM_SCHEDULE -> stringResource(Res.string.remote_api_remove_from_schedule)
         RemoteEventType.PROJECT         -> stringResource(Res.string.remote_api_project)
         RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_api_presentation_connect)
         RemoteEventType.QA_ADD          -> stringResource(Res.string.remote_api_qa_add)
@@ -160,6 +163,7 @@ fun RemoteEventDialog(
     }
     val icon = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
+        RemoteEventType.REMOVE_FROM_SCHEDULE -> "🗑️"
         RemoteEventType.PROJECT         -> "📡"
         RemoteEventType.PRESENTATION_CONNECT -> "📱"
         RemoteEventType.QA_ADMIN_CONNECT -> "📱"

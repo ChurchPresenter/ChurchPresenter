@@ -77,6 +77,11 @@ class InstanceLinkViewModel {
         client.sendAddToSchedule(item)
     }
 
+    /** Removes an item from the primary's schedule — still gated by its own operator-approval dialog. */
+    fun sendRemoveFromSchedule(id: String) {
+        client.sendRemoveFromSchedule(id)
+    }
+
     // ── Instance Link "Controller" mode — see InstanceLinkClient for the full doc comment on each. ──
 
     fun sendProject(item: ScheduleItem) = client.sendProject(item)

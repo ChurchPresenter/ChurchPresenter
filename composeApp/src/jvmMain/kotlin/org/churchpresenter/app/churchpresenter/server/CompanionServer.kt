@@ -616,6 +616,11 @@ data class AddToScheduleRequest(val item: ScheduleItem)
 @Serializable
 data class ProjectRequest(val item: ScheduleItem)
 
+/** Payload for WS "remove_from_schedule" — removes the schedule item with this id, subject to the
+ *  same approval flow as add_to_schedule/project. */
+@Serializable
+data class RemoveFromScheduleRequest(val id: String)
+
 /**
  * Wraps an incoming remote request with a [CompletableDeferred] that the UI
  * resolves once the user clicks Allow (true) or Deny/Block (false).
@@ -634,6 +639,15 @@ data class PendingRemoteRequest(
  */
 data class PendingBatchRequest(
     val items: List<ScheduleItem>,
+    val clientId: String = "",
+    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+)
+
+/** Same shape as [PendingRemoteRequest] but for a remove request — carries just the target id and a
+ *  human-readable label (resolved from the current schedule, if still present) for the approval UI. */
+data class PendingRemoveRequest(
+    val id: String,
+    val label: String,
     val clientId: String = "",
     val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
 )
@@ -1118,6 +1132,13 @@ class CompanionServer {
     /** Emitted when a remote client requests multiple items to be added to the schedule in one call. */
     val onAddBatchToSchedule = MutableSharedFlow<PendingBatchRequest>(
         extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when a remote client requests an item to be removed from the schedule — same
+     *  approval flow as [onAddToSchedule], just the reverse operation. */
+    val onRemoveFromSchedule = MutableSharedFlow<PendingRemoveRequest>(
+        extraBufferCapacity = 16,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -3124,6 +3145,17 @@ class CompanionServer {
                                         val pending = PendingRemoteRequest(item, wsClientId)
                                         scope.launch {
                                             onProject.emit(pending)
+                                            val allowed = try { pending.decision.await() } catch (_: Exception) { false }
+                                            val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                            try { send(Frame.Text(response)) } catch (_: Exception) { }
+                                        }
+                                    }
+                                    Constants.WS_CMD_REMOVE_FROM_SCHEDULE -> {
+                                        val req = json.decodeFromString(RemoveFromScheduleRequest.serializer(), msg.payload)
+                                        val label = _schedule.value.firstOrNull { it.id == req.id }?.displayText ?: req.id
+                                        val pending = PendingRemoveRequest(req.id, label, wsClientId)
+                                        scope.launch {
+                                            onRemoveFromSchedule.emit(pending)
                                             val allowed = try { pending.decision.await() } catch (_: Exception) { false }
                                             val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
                                             try { send(Frame.Text(response)) } catch (_: Exception) { }

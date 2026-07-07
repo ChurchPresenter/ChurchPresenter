@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.remote_activity_added_to_schedule
+import churchpresenter.composeapp.generated.resources.remote_activity_removed_from_schedule
 import churchpresenter.composeapp.generated.resources.remote_activity_by
 import churchpresenter.composeapp.generated.resources.remote_activity_dismiss
 import churchpresenter.composeapp.generated.resources.remote_activity_dismiss_all
@@ -129,6 +130,7 @@ private fun RemoteActivityToast(
 ) {
     val actionLabel = when (notification.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> stringResource(Res.string.remote_activity_added_to_schedule)
+        RemoteEventType.REMOVE_FROM_SCHEDULE -> stringResource(Res.string.remote_activity_removed_from_schedule)
         RemoteEventType.PROJECT         -> stringResource(Res.string.remote_activity_projected)
         RemoteEventType.PRESENT         -> stringResource(Res.string.remote_activity_presented)
         RemoteEventType.UPLOAD          -> stringResource(Res.string.remote_activity_uploaded)
@@ -146,6 +148,7 @@ private fun RemoteActivityToast(
     }
     val icon = when (notification.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
+        RemoteEventType.REMOVE_FROM_SCHEDULE -> "🗑️"
         RemoteEventType.PROJECT         -> "📡"
         RemoteEventType.PRESENTATION_CONNECT -> "📱"
         RemoteEventType.QA_ADMIN_CONNECT -> "📱"

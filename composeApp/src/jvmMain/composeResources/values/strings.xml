@@ -1185,6 +1185,7 @@
 
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Add to Schedule</string>
+    <string name="remote_api_remove_from_schedule">Remove from Schedule</string>
     <string name="remote_api_project">Project (Go Live)</string>
     <string name="remote_api_presentation_connect">Connect to Presentation Remote</string>
     <string name="remote_api_presentation_connect_detail">A phone or tablet wants to browse and control your presentation slides.</string>
@@ -1206,6 +1207,7 @@
     <string name="remote_queue_waiting_one">1 more request waiting in queue</string>
     <string name="remote_queue_waiting_many">%1$d more requests waiting in queue</string>
     <string name="remote_activity_added_to_schedule">Added to Schedule</string>
+    <string name="remote_activity_removed_from_schedule">Removed from Schedule</string>
     <string name="remote_activity_projected">Projected (Go Live)</string>
     <string name="remote_activity_presentation_connect">Connected to Presentation Remote</string>
     <string name="remote_activity_presentation_connect_detail">Now connected</string>

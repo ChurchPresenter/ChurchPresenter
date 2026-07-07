@@ -133,6 +133,9 @@ data class ScheduleTabActions(
     val saveSchedule: () -> Unit = {},
     val saveScheduleAs: () -> Unit = {},
     val removeSelected: () -> Unit = {},
+    /** Removes a specific item by id, regardless of current UI selection — used to apply an
+     *  approved remote "remove from schedule" request (mobile companion or Instance Link). */
+    val removeById: (id: String) -> Unit = {},
     val clearSchedule: () -> Unit = {},
     val moveSelectedToTop: () -> Unit = {},
     val moveSelectedUp: () -> Unit = {},
@@ -228,6 +231,7 @@ fun ScheduleTab(
                 saveSchedule     = { scope.launch { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) } },
                 saveScheduleAs   = { scope.launch { viewModel.saveScheduleAs(strSaveScheduleAs.value, strFileFilter.value) } },
                 removeSelected   = { viewModel.selectedItemId?.let { viewModel.removeItem(it) } },
+                removeById       = { id -> viewModel.removeItem(id) },
                 clearSchedule    = { viewModel.clearSchedule() },
                 moveSelectedToTop    = { viewModel.selectedItemId?.let { viewModel.moveItemToTop(it) } },
                 moveSelectedUp       = { viewModel.selectedItemId?.let { viewModel.moveItemUp(it) } },

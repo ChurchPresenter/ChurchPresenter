@@ -290,6 +290,7 @@ object Constants {
     const val WS_CMD_SELECT_BIBLE_VERSE     = "select_bible_verse"
     const val WS_CMD_ADD_TO_SCHEDULE        = "add_to_schedule"
     const val WS_CMD_ADD_BATCH_TO_SCHEDULE  = "add_batch_to_schedule"
+    const val WS_CMD_REMOVE_FROM_SCHEDULE   = "remove_from_schedule"
     const val WS_CMD_PROJECT                = "project"
     const val WS_CMD_CLEAR                  = "clear"
     const val WS_CMD_BIBLE_HOLD             = "bible_hold"

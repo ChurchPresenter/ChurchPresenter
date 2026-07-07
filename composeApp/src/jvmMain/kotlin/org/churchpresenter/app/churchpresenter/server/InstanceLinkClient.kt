@@ -233,6 +233,16 @@ class InstanceLinkClient(
         }
     }
 
+    /**
+     * Requests removal of an item from the primary's schedule — subject to the same
+     * approval flow as [sendAddToSchedule] (same [Constants.WS_CMD_REMOVE_FROM_SCHEDULE] gate a
+     * mobile client would go through). Fire-and-forget: approval/denial is observed indirectly via
+     * the next schedule_updated broadcast.
+     */
+    fun sendRemoveFromSchedule(id: String) {
+        sendCommand(Constants.WS_CMD_REMOVE_FROM_SCHEDULE, json.encodeToString(RemoveFromScheduleRequest.serializer(), RemoveFromScheduleRequest(id)))
+    }
+
     /** Sends a generic command payload to the primary — shared by every send* method below, same
      *  fire-and-forget shape as [sendAddToSchedule]. */
     private fun sendCommand(type: String, payload: String) {

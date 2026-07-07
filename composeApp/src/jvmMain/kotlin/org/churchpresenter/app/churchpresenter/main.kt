@@ -961,6 +961,50 @@ fun main() {
                                     }
                                 }
 
+                                // ── Remote remove-from-schedule requests ──────────────────────────────────────
+                                LaunchedEffect(Unit) {
+                                    companionServer.onRemoveFromSchedule.collect { pending ->
+                                        val clientId = pending.clientId
+                                        // Permanent block → auto-reject
+                                        if (remoteClientManager.isBlocked(clientId)) {
+                                            pending.decision.complete(false)
+                                            return@collect
+                                        }
+                                        // Session block → auto-reject
+                                        if (clientId.isNotBlank() && sessionBlockedClients.contains(clientId)) {
+                                            pending.decision.complete(false)
+                                            return@collect
+                                        }
+                                        // Permanent allow or session allow → auto-approve
+                                        if (remoteClientManager.isAllowed(clientId) ||
+                                            (clientId.isNotBlank() && sessionAllowedClients.contains(clientId))
+                                        ) {
+                                            currentScheduleActions.removeById(pending.id)
+                                            pending.decision.complete(true)
+                                            // Show activity toast so operator is aware
+                                            remoteActivityNotifications.add(RemoteActivityNotification(
+                                                type = RemoteEventType.REMOVE_FROM_SCHEDULE,
+                                                title = pending.label,
+                                                clientId = clientId,
+                                                clientLabel = remoteClientManager.getLabel(clientId)
+                                            ))
+                                            return@collect
+                                        }
+                                        val event = RemoteEvent(
+                                            type = RemoteEventType.REMOVE_FROM_SCHEDULE,
+                                            title = pending.label,
+                                            clientId = clientId,
+                                            clientLabel = remoteClientManager.getLabel(clientId)
+                                        )
+                                        val allow: () -> Unit = {
+                                            currentScheduleActions.removeById(pending.id)
+                                            pending.decision.complete(true)
+                                        }
+                                        val deny: () -> Unit = { pending.decision.complete(false) }
+                                        remoteEventQueue.add(Triple(event, allow, deny))
+                                    }
+                                }
+
                                 // ── Remote add-batch-to-schedule requests ─────────────────────────────────────
                                 LaunchedEffect(Unit) {
                                     companionServer.onAddBatchToSchedule.collect { pending ->
@@ -1507,6 +1551,9 @@ fun main() {
                                     instanceLinkOnSecondaryBibleFilePathChanged = { path -> companionServer.updateSecondaryBibleFilePath(path) },
                                     instanceLinkSendAddToSchedule = if (appSettings.instanceLink.allowPushToSchedule) {
                                         { item -> instanceLinkViewModel.sendAddToSchedule(item) }
+                                    } else null,
+                                    instanceLinkSendRemoveFromSchedule = if (appSettings.instanceLink.allowPushToSchedule) {
+                                        { id -> instanceLinkViewModel.sendRemoveFromSchedule(id) }
                                     } else null,
                                     instanceLinkRole = appSettings.instanceLink.role,
                                     instanceLinkSendProject = if (instanceLinkIsControllerConnected) {

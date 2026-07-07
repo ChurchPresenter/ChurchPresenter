@@ -498,8 +498,17 @@ class ScheduleViewModel(
         }
     }
 
+    /** Wired to InstanceLinkViewModel.sendRemoveFromSchedule when the operator has enabled pushing
+     *  items to the primary's schedule (same allowPushToSchedule gate as [onPushToRemoteSchedule]) —
+     *  left null otherwise, in which case [removeItem] below is a no-op while following, same as
+     *  before this existed. */
+    var onRemoveFromRemoteSchedule: ((id: String) -> Unit)? = null
+
     fun removeItem(id: String) {
-        if (_isFollowingRemote.value) return
+        if (_isFollowingRemote.value) {
+            onRemoveFromRemoteSchedule?.invoke(id)
+            return
+        }
         pushUndoSnapshot()
         _scheduleItems.removeAll { it.id == id }
         _notes.remove(id)

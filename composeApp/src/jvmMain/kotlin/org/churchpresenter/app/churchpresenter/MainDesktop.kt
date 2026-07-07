@@ -170,6 +170,8 @@ data class ScheduleActions(
     val saveSchedule: () -> Unit = {},
     val saveScheduleAs: () -> Unit = {},
     val removeSelected: () -> Unit = {},
+    /** Removes a specific item by id — used to apply an approved remote "remove from schedule". */
+    val removeById: (id: String) -> Unit = {},
     val clearSchedule: () -> Unit = {},
     // Remote-API add helpers (populated from ScheduleTabActions)
     val addSong: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit = { _, _, _, _ -> },
@@ -252,6 +254,10 @@ fun MainDesktop(
     /** Non-null only when connected AND the operator has enabled pushing items to the primary's
      *  schedule — see ScheduleViewModel.onPushToRemoteSchedule. */
     instanceLinkSendAddToSchedule: ((ScheduleItem) -> Unit)? = null,
+    /** Non-null only when connected AND the operator has enabled pushing items to the primary's
+     *  schedule (same gate as [instanceLinkSendAddToSchedule]) — see
+     *  ScheduleViewModel.onRemoveFromRemoteSchedule. */
+    instanceLinkSendRemoveFromSchedule: ((id: String) -> Unit)? = null,
     /** See InstanceLinkRole — CONTROLLED (default, mirror the primary) or CONTROLLER (drive it). */
     instanceLinkRole: InstanceLinkRole = InstanceLinkRole.CONTROLLED,
     /** Controller mode "go live with a new item" — approval-gated the first time on the primary,
@@ -540,6 +546,9 @@ fun MainDesktop(
     }
     LaunchedEffect(instanceLinkSendAddToSchedule) {
         scheduleViewModel.onPushToRemoteSchedule = instanceLinkSendAddToSchedule
+    }
+    LaunchedEffect(instanceLinkSendRemoveFromSchedule) {
+        scheduleViewModel.onRemoveFromRemoteSchedule = instanceLinkSendRemoveFromSchedule
     }
 
     val presentingMode by presenterManager.presentingMode
@@ -1198,6 +1207,7 @@ fun MainDesktop(
                                     saveSchedule = actions.saveSchedule,
                                     saveScheduleAs = actions.saveScheduleAs,
                                     removeSelected = actions.removeSelected,
+                                    removeById = actions.removeById,
                                     clearSchedule = actions.clearSchedule,
                                     addSong = actions.addSong,
                                     addBibleVerse = actions.addBibleVerse,
