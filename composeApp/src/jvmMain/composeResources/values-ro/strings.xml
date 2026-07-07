@@ -376,6 +376,7 @@
     <string name="projection_content_background">Fundal</string>
     <string name="projection_content_lt_background">Fundal Lower Third</string>
     <string name="projection_web_decklink_tooltip">Browserul web nu poate randa pe ieșirile DeckLink</string>
+    <string name="browser_source_content_unavailable_tooltip">Încă nu este disponibil pentru ieșirea Browser Source</string>
     <string name="projection_web_go_live_tooltip">Necesită un ecran obișnuit (non-DeckLink) cu Web activat în setările de proiecție</string>
 
     <!-- Bible Tab -->
@@ -449,6 +450,7 @@
     <string name="tooltip_edit_label">Editează Etichetă</string>
     <string name="tooltip_go_live">Proiectează</string>
     <string name="tooltip_presentation_remote">Deschide telecomanda</string>
+    <string name="tooltip_qa_remote">Partajare și Acces la Distanță</string>
     <string name="tooltip_send_to_stage_monitor">Trimite la Monitorul de Scenă</string>
     <string name="tooltip_hide_from_stage_monitor">Ascunde Anunțul</string>
     <string name="tooltip_add_label">Adaugă Etichetă</string>
@@ -513,6 +515,10 @@
     <string name="select_presentation_file">Selectați un fișier de prezentare pentru a vedea slide-urile</string>
     <string name="supported_formats">Suportate: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Slide-urile sunt redate ca imagini statice — animațiile, tranzițiile, videoclipurile și sunetul nu sunt acceptate.</string>
+    <string name="presentation_error_password_protected">Acest PDF este protejat prin parolă și nu poate fi deschis. Eliminați parola și încercați din nou.</string>
+    <string name="presentation_error_empty_document">Acest fișier nu are pagini de afișat.</string>
+    <string name="presentation_error_library_missing">Suportul pentru PDF nu este disponibil în această versiune.</string>
+    <string name="presentation_error_render_failed">Acest fișier nu a putut fi citit — poate fi corupt sau într-un format neacceptat.</string>
     <string name="slide_number">Slide-ul %1$d</string>
     <string name="remove">Elimină</string>
     <string name="select_presentation_file_button">Selectează Fișier</string>
@@ -547,6 +553,9 @@
     <string name="presenter_windows_count">Ferestre prezentator: %1$d</string>
     <string name="content_bible">Biblie</string>
     <string name="content_songs">Cântări</string>
+    <string name="content_bible_background">Fundal Biblie</string>
+    <string name="content_songs_background">Fundal cântări</string>
+    <string name="content_background_layered_tooltip">Are efect doar atunci când caseta generală Fundal (sau Fundal subtitlu inferior) de mai sus este de asemenea bifată.</string>
     <string name="content_pictures">Imagini/Prezentare</string>
     <string name="content_media">Media</string>
     <string name="content_streaming">Lower Third</string>
@@ -561,6 +570,7 @@
     <string name="projection_target_display">Monitor</string>
     <string name="projection_auto_display">Auto</string>
     <string name="projection_display_label">Monitorul %1$d (%2$dx%3$d)</string>
+    <string name="browser_source_outputs">Ieșiri Browser Source</string>
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Fundal Implicit</string>
@@ -635,6 +645,7 @@
     <string name="media_vlc_required">VLC media player este necesar pentru redarea media</string>
     <string name="media_vlc_install">Instalați VLC de pe videolan.org și reporniți aplicația</string>
     <string name="media_vlc_arch_mismatch">Arhitectură VLC incorectă. Mac-ul dvs. folosește Apple Silicon (arm64), dar VLC instalat este numai Intel (x86_64). Descărcați versiunea Apple Silicon a VLC de pe videolan.org și reporniți.</string>
+    <string name="media_vlc_load_failed">VLC a fost găsit, dar nu a putut fi încărcat. Încercați să reinstalați VLC de pe videolan.org (pe Windows, instalați și Microsoft Visual C++ Redistributable), apoi reporniți aplicația.</string>
     <string name="vlc_custom_path">Cale VLC personalizată</string>
     <string name="vlc_browse">Răsfoire</string>
     <string name="vlc_path_hint">Selectați directorul de instalare VLC</string>
@@ -802,6 +813,8 @@
     <string name="web_bookmark_add">Adaugă Marcaj</string>
     <string name="web_bookmark_remove">Elimină Marcaj</string>
     <string name="web_preview_hint">Introduceți un URL mai sus și apăsați Proiectează</string>
+    <string name="web_engine_unavailable_title">Browser web indisponibil</string>
+    <string name="web_engine_unavailable_body">Motorul browserului nu a putut porni. Instalați Microsoft Visual C++ Redistributable (x64) și reporniți aplicația.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Scrieți pe pagină</string>
     <string name="web_type_to_page_placeholder">Faceți clic pe un câmp de pe pagina live mai întâi</string>
@@ -843,6 +856,7 @@
     <string name="canvas_video_loop">Buclă</string>
     <string name="canvas_video_volume">Volum</string>
     <string name="canvas_video_vlc_not_found">VLC nu a fost găsit</string>
+    <string name="canvas_video_vlc_load_failed">VLC a fost găsit, dar încărcarea a eșuat</string>
     <string name="canvas_video_no_selection">Niciun video selectat</string>
     <string name="canvas_video_file_not_found">Fișier negăsit: %1$s</string>
     <string name="canvas_video_loading">Se încarcă…</string>
@@ -994,6 +1008,7 @@
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Schimbați portul înainte de a porni serverul.</string>
     <string name="api_key_protection">Protecție prin Cheie API</string>
+    <string name="browser_source_note_in_server_settings">Ieșirile individuale Browser Source (setările de Proiecție) pot solicita această cheie în mod independent.</string>
     <string name="allow_file_upload">Permite Încărcarea Fișierelor</string>
     <string name="allow_file_upload_description">Permite dispozitivelor mobile să încarce fișiere (fotografii și prezentări) pe acest computer.</string>
     <string name="api_key_label">Cheie API</string>
@@ -1196,6 +1211,10 @@
     <string name="add_song_samples">Adaugă Mostre de Cântări</string>
     <string name="sps_file_not_supported">%1$s (nesuportat)</string>
     <string name="folder_overwrite_confirm">Dosarul „%1$s" există deja. Aceasta va suprascrie fișierele de cântări existente.\nContinuați?</string>
+    <string name="bible_samples">Biblii Mostră</string>
+    <string name="bible_samples_overwrite_confirm">Există deja un fișier Biblie inclus în acest folder. Aceasta îl va suprascrie.\nContinuați?</string>
+    <string name="bible_samples_copied">S-au copiat %1$d Biblii mostră și au fost setate ca Biblie principală.</string>
+    <string name="add_bible_samples">Adaugă Biblii Mostră (KJV)</string>
     <string name="conversion_complete">Conversie Completă</string>
     <string name="conversion_complete_message">Convertite %1$d cântări în dosarul: %2$s</string>
     <string name="conversion_complete_with_errors">Convertite %1$d cântări.\nErori:\n%2$s</string>
@@ -1327,11 +1346,15 @@
     <string name="qa_export_dialog_title">Exportă Întrebări</string>
     <string name="qa_import_dialog_title">Importă Întrebări</string>
     <string name="qa_submit_questions">Trimite Întrebări</string>
+    <string name="qa_remote_dialog_title">Partajare și Acces la Distanță</string>
+    <string name="qa_remote_dialog_description">Distribuiți codul QR de mai jos pentru ca adunarea să poată trimite întrebări, și folosiți codul QR de administrator pentru a modera de pe alt dispozitiv.</string>
     <string name="qa_hide_qr">Ascunde QR de pe Ecran</string>
     <string name="qa_show_qr">Afișează QR pe Ecran</string>
     <string name="qa_admin_panel">Panou Admin</string>
     <string name="qa_server_hint">Porniți serverul companion pentru a activa Î&amp;R</string>
     <string name="qa_display_styling">Stilizare Afișaj</string>
+    <string name="qa_styling_qr_group">Cod QR</string>
+    <string name="qa_styling_text_group">Text și Fundal</string>
     <string name="qa_text_color">Culoare Text</string>
     <string name="qa_qr_fg_color">Prim-plan QR</string>
     <string name="qa_qr_bg_color">Fundal QR</string>
@@ -1511,6 +1534,17 @@
     <string name="update_dialog_open_page">Deschide pagina de descărcare</string>
     <string name="update_check_menu">Verifică Actualizări…</string>
     <string name="update_already_latest">Folosiți cea mai recentă versiune.</string>
+    <string name="update_dialog_up_to_date_title">Sunteți la Zi</string>
+    <string name="update_dialog_view_on_github">Vezi pe GitHub</string>
+    <string name="participate_in_prereleases">Include actualizări beta / preliminare</string>
+    <string name="update_dialog_check_interval">Verifică actualizări</string>
+    <string name="update_interval_every_launch">La fiecare lansare</string>
+    <string name="update_interval_weekly">Săptămânal</string>
+    <string name="update_interval_monthly">Lunar</string>
+    <string name="update_interval_every_2_months">La fiecare 2 luni</string>
+    <string name="update_interval_every_3_months">La fiecare 3 luni</string>
+    <string name="update_interval_every_6_months">La fiecare 6 luni</string>
+    <string name="update_interval_never">Niciodată</string>
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>
@@ -1569,6 +1603,7 @@
     <string name="language_romanian">Română</string>
     <string name="language_dutch">Olandeză</string>
     <string name="language_slovak">Slovacă</string>
+    <string name="language_estonian">Estonă</string>
     <string name="tab_dictionary">Dicționar</string>
     <string name="dictionary_search_hint">Căutați după număr, cuvânt sau definiție…</string>
     <string name="dictionary_filter_all">Toate</string>
@@ -1618,6 +1653,8 @@
     <string name="setup_step5_vlc_missing">VLC nu a fost găsit pe acest sistem</string>
     <string name="setup_step5_vlc_wrong_arch">Arhitectură VLC incorectă instalată</string>
     <string name="setup_step5_vlc_wrong_arch_detail">Arhitectura procesorului diferă de cea a VLC-ului instalat. Descărcați versiunea corectă mai jos.</string>
+    <string name="setup_step5_vlc_load_failed">VLC a fost găsit, dar încărcarea a eșuat</string>
+    <string name="setup_step5_vlc_load_failed_detail">A fost detectată o instalare VLC, dar nu a putut fi încărcată corect. Încercați să reinstalați VLC (pe Windows, instalați și Microsoft Visual C++ Redistributable), apoi verificați din nou mai jos.</string>
     <string name="setup_step5_download_silicon">Descărcați VLC (Apple Silicon)</string>
     <string name="setup_step5_download_intel">Descărcați VLC (Intel)</string>
     <string name="setup_step5_download">Descărcați VLC</string>
@@ -1686,6 +1723,39 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (utilizat)</string>
     <string name="atem_slot_empty">Slot %1$d (gol)</string>
+    <string name="tab_companion_surface">Companion</string>
+    <string name="companion_satellite_settings">Companion Satellite</string>
+    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
+    <string name="companion_satellite_description">Conectați-vă la o instanță Bitfocus Companion din rețeaua dvs. ca suprafață Satellite și apăsați butoanele acesteia direct din ChurchPresenter.</string>
+    <string name="companion_satellite_host">Gazdă</string>
+    <string name="companion_satellite_host_hint">ex. 192.168.1.50</string>
+    <string name="companion_satellite_device_id">ID dispozitiv filă</string>
+    <string name="companion_satellite_device_id_hint">Lăsați gol pentru generare/derivare automată</string>
+    <string name="companion_satellite_left_sidebar_device_id">ID dispozitiv bară laterală stânga</string>
+    <string name="companion_satellite_right_sidebar_device_id">ID dispozitiv bară laterală dreapta</string>
+    <string name="companion_satellite_rows">Rânduri</string>
+    <string name="companion_satellite_columns">Coloane</string>
+    <string name="companion_satellite_bitmap_size">Dimensiune bitmap (px)</string>
+    <string name="companion_satellite_max_button_size">Dimensiune maximă buton (dp)</string>
+    <string name="companion_satellite_max_button_size_hint">0 = nelimitat</string>
+    <string name="companion_satellite_companion_config_note">Pagina de la care pornește o conexiune și partea dintr-o grilă mai mare pe care o afișează se configurează chiar în Companion (Setări → Surfaces → acest dispozitiv) — nu aici.</string>
+    <string name="companion_satellite_show_in">Afișare în</string>
+    <string name="companion_satellite_show_in_tab">Filă</string>
+    <string name="companion_satellite_show_in_left_sidebar">Bară laterală stânga</string>
+    <string name="companion_satellite_show_in_right_sidebar">Bară laterală dreapta</string>
+    <string name="companion_satellite_autoconnect">Conectare automată la lansare</string>
+    <string name="companion_satellite_connect">Conectare</string>
+    <string name="companion_satellite_disconnect">Deconectare</string>
+    <string name="companion_satellite_no_host">Setați o gazdă Companion în Setări → Companion Satellite pentru a vă conecta.</string>
+    <string name="companion_satellite_status_connected">Conectat</string>
+    <string name="companion_satellite_status_connecting">Se conectează…</string>
+    <string name="companion_satellite_status_disconnected">Deconectat</string>
+    <string name="companion_satellite_status_error">Eroare: %1$s</string>
+    <string name="companion_satellite_connection_name">Nume</string>
+    <string name="companion_satellite_product_name">Nume produs</string>
+    <string name="companion_satellite_reconnect_delay">Întârziere reconectare (ms)</string>
+    <string name="companion_satellite_add_connection">+ Adaugă Conexiune</string>
+    <string name="companion_satellite_remove_connection">Elimină Conexiunea</string>
     <string name="atem_unreachable">ATEM inaccesibil la %1$s</string>
     <string name="atem_capacity_equal">Capacitate clipuri: %1$d bănci, fiecare până la %2$d cadre (≈%3$s s) la %4$s fps</string>
     <string name="atem_capacity_mixed">Capacitate clipuri: %1$d bănci, până la %2$s cadre la %3$s fps</string>
@@ -1771,9 +1841,12 @@
     <string name="bible_stt_src_explicit">Referință rostită</string>
     <string name="bible_stt_src_reverse">Găsit prin text</string>
     <string name="bible_stt_src_continuation">Urmărire</string>
+    <string name="bible_stt_src_chapter_scan">Găsit în capitolul curent</string>
+    <string name="bible_stt_src_chapter_history">Potrivit cu un capitol anterior</string>
     <string name="bible_stt_track_transcription">Auzit în transcriere</string>
     <string name="bible_stt_track_translation">Auzit în traducere</string>
     <string name="bible_stt_match_label">Potrivire text</string>
+    <string name="bible_stt_text_match_hint">Afectează și încrederea generală de detectare și cât timp rămâne activă o carte/capitol rostit — nu doar potrivirile de text citat</string>
     <string name="bible_stt_level_off">Dezactivat</string>
     <string name="bible_stt_level_conservative">Conservator</string>
     <string name="bible_stt_level_balanced">Echilibrat</string>
@@ -1809,4 +1882,12 @@
     <string name="contact_network_error">Serverul nu a putut fi contactat. Verifică conexiunea la internet și încearcă din nou.</string>
     <string name="contact_open_browser">Deschide în Browser</string>
     <string name="browser_source_outputs_help">Ieșiri virtuale livrate ca pagină web — inserați URL-ul într-o Browser Source pentru a suprapune conținut live, fundal transparent acceptat.</string>
+    <string name="add_browser_source_output">Adaugă Ieșire</string>
+    <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_confirm_remove_message">Sigur doriți să eliminați %1$s?</string>
+    <string name="browser_source_require_api_key">Necesită Cheie API</string>
+    <string name="browser_source_uses_server_api_key">Folosește aceeași cheie ca setările Serverului; activați-o mai întâi acolo.</string>
+    <string name="browser_source_enabled">Activat</string>
+    <string name="copy_url_transparent">Copiază URL pentru fundal transparent</string>
+    <string name="copy_url_black_bg">Copiază URL pentru fundal negru</string>
 </resources>

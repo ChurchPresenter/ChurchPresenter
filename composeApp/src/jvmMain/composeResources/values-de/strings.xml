@@ -281,6 +281,7 @@
     <string name="language_portuguese">Portugiesisch</string>
     <string name="language_romanian">Rumänisch</string>
     <string name="language_slovak">Slowakisch</string>
+    <string name="language_estonian">Estnisch</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Keine Ergebnisse gefunden für "%1$s"</string>
@@ -320,6 +321,7 @@
     <string name="tooltip_settings">Einstellungen</string>
     <string name="tooltip_go_live">Live gehen</string>
     <string name="tooltip_presentation_remote">Fernsteuerung öffnen</string>
+    <string name="tooltip_qa_remote">Freigabe &amp; Fernzugriff</string>
     <string name="tooltip_send_to_stage_monitor">An Bühnenmonitor senden</string>
     <string name="tooltip_hide_from_stage_monitor">Ankündigung ausblenden</string>
     <string name="tooltip_remove">Entfernen</string>
@@ -380,6 +382,10 @@
     <string name="select_presentation_file">Wählen Sie eine Präsentationsdatei aus, um Folien anzuzeigen</string>
     <string name="supported_formats">Unterstützt: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Folien werden als statische Bilder dargestellt — Animationen, Übergänge, Videos und Audio werden nicht unterstützt.</string>
+    <string name="presentation_error_password_protected">Diese PDF ist passwortgeschützt und kann nicht geöffnet werden. Entfernen Sie das Passwort und versuchen Sie es erneut.</string>
+    <string name="presentation_error_empty_document">Diese Datei enthält keine anzuzeigenden Seiten.</string>
+    <string name="presentation_error_library_missing">PDF-Unterstützung ist in dieser Build nicht verfügbar.</string>
+    <string name="presentation_error_render_failed">Diese Datei konnte nicht gelesen werden — sie ist möglicherweise beschädigt oder hat ein nicht unterstütztes Format.</string>
     <string name="slide_number">Folie %1$d</string>
     <string name="remove">Entfernen</string>
     <string name="select_presentation_file_button">Datei auswählen</string>
@@ -467,6 +473,9 @@
     <string name="show_in_lower_third">Im unteren Drittel anzeigen</string>
     <string name="content_bible">Bibel</string>
     <string name="content_songs">Lieder</string>
+    <string name="content_bible_background">Bibel-Hintergrund</string>
+    <string name="content_songs_background">Lieder-Hintergrund</string>
+    <string name="content_background_layered_tooltip">Wirkt sich nur aus, wenn das allgemeine Kontrollkästchen Hintergrund (oder Untertitel-Hintergrund) oben ebenfalls aktiviert ist.</string>
     <string name="content_pictures">Fotos/Präsentation</string>
     <string name="content_media">Medien</string>
     <string name="content_streaming">Unteres Drittel</string>
@@ -632,6 +641,7 @@
     <string name="api_key_hint">Geheimschlüssel eingeben…</string>
     <string name="api_key_label">API-Schlüssel</string>
     <string name="api_key_protection">API-Schlüssel-Schutz</string>
+    <string name="browser_source_note_in_server_settings">Einzelne Browser-Source-Ausgaben (Projektionseinstellungen) können diesen Schlüssel unabhängig davon erfordern.</string>
     <string name="allow_file_upload">Datei-Upload erlauben</string>
     <string name="allow_file_upload_description">Mobilgerate duerfen Dateien (Fotos und Prasentationen) auf diesen Computer hochladen.</string>
     <string name="appearance">System</string>
@@ -722,6 +732,7 @@
     <string name="presentation_storage_directory">Präsentations-Speicherverzeichnis</string>
     <string name="projection_auto_display">Automatisch</string>
     <string name="projection_display_label">Anzeige %1$d (%2$dx%3$d)</string>
+    <string name="browser_source_outputs">Browser-Source-Ausgaben</string>
     <string name="projection_target_display">Anzeige</string>
     <string name="reset_settings">Alle Einstellungen zurücksetzen</string>
     <string name="reset_settings_confirm">Sind Sie sicher, dass Sie alle Einstellungen auf die Standardwerte zurücksetzen möchten?\n\nDie Anwendung wird neu gestartet.</string>
@@ -801,6 +812,8 @@
     <string name="web_go_live">Live gehen</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_preview_hint">Geben Sie oben eine URL ein und tippen Sie auf Live gehen</string>
+    <string name="web_engine_unavailable_title">Webbrowser nicht verfügbar</string>
+    <string name="web_engine_unavailable_body">Die Browser-Engine konnte nicht gestartet werden. Installieren Sie das Microsoft Visual C++ Redistributable (x64) und starten Sie die Anwendung neu.</string>
     <string name="web_under_construction">Diese Funktion befindet sich in Entwicklung.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -909,6 +922,10 @@
     <string name="add_song_samples">Liedbeispiele hinzufügen</string>
     <string name="sps_file_not_supported">%1$s (nicht unterstützt)</string>
     <string name="folder_overwrite_confirm">Ordner \"%1$s\" existiert bereits. Vorhandene Liederdateien werden überschrieben.\nFortfahren?</string>
+    <string name="bible_samples">Bibelbeispiele</string>
+    <string name="bible_samples_overwrite_confirm">In diesem Ordner ist bereits eine mitgelieferte Bibeldatei vorhanden. Diese wird überschrieben.\nFortfahren?</string>
+    <string name="bible_samples_copied">%1$d Beispiel-Bibel(n) kopiert und als primäre Bibel festgelegt.</string>
+    <string name="add_bible_samples">Bibelbeispiele hinzufügen (KJV)</string>
     <string name="conversion_complete">Konvertierung abgeschlossen</string>
     <string name="conversion_complete_message">%1$d Lieder in Ordner konvertiert: %2$s</string>
     <string name="conversion_complete_with_errors">%1$d Lieder konvertiert.\nFehler:\n%2$s</string>
@@ -978,6 +995,7 @@
     <string name="canvas_video_loop">Schleife</string>
     <string name="canvas_video_volume">Lautstärke</string>
     <string name="canvas_video_vlc_not_found">VLC nicht gefunden</string>
+    <string name="canvas_video_vlc_load_failed">VLC gefunden, aber Laden fehlgeschlagen</string>
     <string name="canvas_video_no_selection">Kein Video ausgewählt</string>
     <string name="canvas_video_file_not_found">Datei nicht gefunden: %1$s</string>
     <string name="canvas_video_loading">Wird geladen…</string>
@@ -1140,6 +1158,17 @@
     <string name="update_dialog_open_page">Download-Seite öffnen</string>
     <string name="update_check_menu">Nach Updates suchen…</string>
     <string name="update_already_latest">Sie verwenden die neueste Version.</string>
+    <string name="update_dialog_up_to_date_title">Sie sind auf dem neuesten Stand</string>
+    <string name="update_dialog_view_on_github">Auf GitHub ansehen</string>
+    <string name="participate_in_prereleases">Beta-/Vorabversionen einbeziehen</string>
+    <string name="update_dialog_check_interval">Nach Updates suchen</string>
+    <string name="update_interval_every_launch">Bei jedem Start</string>
+    <string name="update_interval_weekly">Wöchentlich</string>
+    <string name="update_interval_monthly">Monatlich</string>
+    <string name="update_interval_every_2_months">Alle 2 Monate</string>
+    <string name="update_interval_every_3_months">Alle 3 Monate</string>
+    <string name="update_interval_every_6_months">Alle 6 Monate</string>
+    <string name="update_interval_never">Nie</string>
 
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Bühnenmonitor</string>
@@ -1220,11 +1249,15 @@
     <string name="qa_export_dialog_title">Fragen exportieren</string>
     <string name="qa_import_dialog_title">Fragen importieren</string>
     <string name="qa_submit_questions">Fragen senden</string>
+    <string name="qa_remote_dialog_title">Freigabe &amp; Fernzugriff</string>
+    <string name="qa_remote_dialog_description">Teilen Sie den QR-Code unten, damit die Gemeinde Fragen einreichen kann, und verwenden Sie den Admin-QR-Code, um von einem anderen Gerät aus zu moderieren.</string>
     <string name="qa_hide_qr">QR von Anzeige ausblenden</string>
     <string name="qa_show_qr">QR auf Anzeige zeigen</string>
     <string name="qa_admin_panel">Admin-Bereich</string>
     <string name="qa_server_hint">Starten Sie den Companion-Server, um Q&amp;A zu aktivieren</string>
     <string name="qa_display_styling">Anzeigegestaltung</string>
+    <string name="qa_styling_qr_group">QR-Code</string>
+    <string name="qa_styling_text_group">Text &amp; Hintergrund</string>
     <string name="qa_text_color">Text Color</string>
     <string name="qa_qr_fg_color">QR Foreground</string>
     <string name="qa_qr_bg_color">QR Background</string>
@@ -1470,11 +1503,13 @@
     <string name="deny_all">Alle ablehnen</string>
     <string name="lottie_select_json_file">Lottie-JSON-Datei auswählen</string>
     <string name="media_vlc_arch_mismatch">Falsche VLC-Architektur. Dein Mac verwendet Apple Silicon (arm64), aber das installierte VLC ist nur für Intel (x86_64). Lade den Apple Silicon-Build von VLC auf videolan.org herunter und starte neu.</string>
+    <string name="media_vlc_load_failed">VLC wurde gefunden, konnte aber nicht geladen werden. Versuchen Sie, VLC von videolan.org neu zu installieren (installieren Sie unter Windows auch das Microsoft Visual C++ Redistributable) und starten Sie die Anwendung dann neu.</string>
     <string name="open_converter">Konverter</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Hintergrund</string>
     <string name="projection_content_lt_background">Lower-Third-Hintergrund</string>
     <string name="projection_web_decklink_tooltip">Webbrowser kann nicht auf DeckLink-Ausgängen rendern</string>
+    <string name="browser_source_content_unavailable_tooltip">Für die Browser-Source-Ausgabe noch nicht verfügbar</string>
     <string name="projection_web_go_live_tooltip">Erfordert einen normalen Display (kein DeckLink) mit aktiviertem Web in den Projektionseinstellungen</string>
     <string name="qa_add_question_hint">Frage hinzufügen…</string>
     <string name="remote_activity_added_to_schedule">Zum Ablaufplan hinzugefügt</string>
@@ -1588,6 +1623,8 @@
     <string name="setup_step5_vlc_missing">VLC wurde auf diesem System nicht gefunden</string>
     <string name="setup_step5_vlc_wrong_arch">Falsche VLC-Architektur installiert</string>
     <string name="setup_step5_vlc_wrong_arch_detail">Ihre CPU-Architektur unterscheidet sich von der installierten VLC-Version. Laden Sie den richtigen Build unten herunter.</string>
+    <string name="setup_step5_vlc_load_failed">VLC gefunden, aber Laden fehlgeschlagen</string>
+    <string name="setup_step5_vlc_load_failed_detail">Eine VLC-Installation wurde erkannt, konnte aber nicht korrekt geladen werden. Versuchen Sie, VLC neu zu installieren (installieren Sie unter Windows auch das Microsoft Visual C++ Redistributable) und prüfen Sie es dann unten erneut.</string>
     <string name="setup_step5_download_silicon">VLC herunterladen (Apple Silicon)</string>
     <string name="setup_step5_download_intel">VLC herunterladen (Intel)</string>
     <string name="setup_step5_download">VLC herunterladen</string>
@@ -1656,6 +1693,39 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (belegt)</string>
     <string name="atem_slot_empty">Slot %1$d (leer)</string>
+    <string name="tab_companion_surface">Companion</string>
+    <string name="companion_satellite_settings">Companion Satellite</string>
+    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
+    <string name="companion_satellite_description">Verbinden Sie sich mit einer Bitfocus-Companion-Instanz in Ihrem Netzwerk als Satellite-Surface und drücken Sie deren Tasten direkt aus ChurchPresenter heraus.</string>
+    <string name="companion_satellite_host">Host</string>
+    <string name="companion_satellite_host_hint">z. B. 192.168.1.50</string>
+    <string name="companion_satellite_device_id">Geräte-ID (Tab)</string>
+    <string name="companion_satellite_device_id_hint">Leer lassen zum automatischen Generieren/Ableiten</string>
+    <string name="companion_satellite_left_sidebar_device_id">Geräte-ID (linke Seitenleiste)</string>
+    <string name="companion_satellite_right_sidebar_device_id">Geräte-ID (rechte Seitenleiste)</string>
+    <string name="companion_satellite_rows">Zeilen</string>
+    <string name="companion_satellite_columns">Spalten</string>
+    <string name="companion_satellite_bitmap_size">Bitmap-Größe (px)</string>
+    <string name="companion_satellite_max_button_size">Maximale Tastengröße (dp)</string>
+    <string name="companion_satellite_max_button_size_hint">0 = unbegrenzt</string>
+    <string name="companion_satellite_companion_config_note">Auf welcher Seite eine Verbindung startet und welchen Teil eines größeren Rasters sie anzeigt, wird in Companion selbst konfiguriert (Einstellungen → Surfaces → dieses Gerät) — nicht hier.</string>
+    <string name="companion_satellite_show_in">Anzeigen in</string>
+    <string name="companion_satellite_show_in_tab">Tab</string>
+    <string name="companion_satellite_show_in_left_sidebar">Linke Seitenleiste</string>
+    <string name="companion_satellite_show_in_right_sidebar">Rechte Seitenleiste</string>
+    <string name="companion_satellite_autoconnect">Beim Start automatisch verbinden</string>
+    <string name="companion_satellite_connect">Verbinden</string>
+    <string name="companion_satellite_disconnect">Trennen</string>
+    <string name="companion_satellite_no_host">Legen Sie unter Einstellungen → Companion Satellite einen Companion-Host fest, um sich zu verbinden.</string>
+    <string name="companion_satellite_status_connected">Verbunden</string>
+    <string name="companion_satellite_status_connecting">Verbinde…</string>
+    <string name="companion_satellite_status_disconnected">Getrennt</string>
+    <string name="companion_satellite_status_error">Fehler: %1$s</string>
+    <string name="companion_satellite_connection_name">Name</string>
+    <string name="companion_satellite_product_name">Produktname</string>
+    <string name="companion_satellite_reconnect_delay">Verzögerung bis Wiederverbindung (ms)</string>
+    <string name="companion_satellite_add_connection">+ Verbindung hinzufügen</string>
+    <string name="companion_satellite_remove_connection">Verbindung entfernen</string>
     <string name="atem_unreachable">ATEM unter %1$s nicht erreichbar</string>
     <string name="atem_capacity_equal">Clip-Kapazität: %1$d Bänke, je bis zu %2$d Frames (≈%3$s s) bei %4$s fps</string>
     <string name="atem_capacity_mixed">Clip-Kapazität: %1$d Bänke, bis zu %2$s Frames bei %3$s fps</string>
@@ -1741,9 +1811,12 @@
     <string name="bible_stt_src_explicit">Gesprochene Referenz</string>
     <string name="bible_stt_src_reverse">Per Text gefunden</string>
     <string name="bible_stt_src_continuation">Mitverfolgen</string>
+    <string name="bible_stt_src_chapter_scan">Im aktuellen Kapitel gefunden</string>
+    <string name="bible_stt_src_chapter_history">Mit einem früheren Kapitel abgeglichen</string>
     <string name="bible_stt_track_transcription">In der Transkription gehört</string>
     <string name="bible_stt_track_translation">In der Übersetzung gehört</string>
     <string name="bible_stt_match_label">Textübereinstimmung</string>
+    <string name="bible_stt_text_match_hint">Beeinflusst auch die allgemeine Erkennungssicherheit und wie lange ein gesprochenes Buch/Kapitel aktiv bleibt — nicht nur Übereinstimmungen mit zitiertem Text</string>
     <string name="bible_stt_level_off">Aus</string>
     <string name="bible_stt_level_conservative">Konservativ</string>
     <string name="bible_stt_level_balanced">Ausgewogen</string>
@@ -1779,5 +1852,13 @@
     <string name="contact_network_error">Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.</string>
     <string name="contact_open_browser">Im Browser öffnen</string>
     <string name="browser_source_outputs_help">Virtuelle Ausgaben, die als Webseite bereitgestellt werden – fügen Sie die URL in eine Browser Source ein, um Live-Inhalte einzublenden, transparenter Hintergrund wird unterstützt.</string>
+    <string name="add_browser_source_output">Ausgabe hinzufügen</string>
+    <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_confirm_remove_message">Möchten Sie %1$s wirklich entfernen?</string>
+    <string name="browser_source_require_api_key">API-Schlüssel erforderlich</string>
+    <string name="browser_source_uses_server_api_key">Verwendet denselben Schlüssel wie die Servereinstellungen; aktivieren Sie ihn zuerst dort.</string>
+    <string name="browser_source_enabled">Aktiviert</string>
+    <string name="copy_url_transparent">URL für transparenten Hintergrund kopieren</string>
+    <string name="copy_url_black_bg">URL für schwarzen Hintergrund kopieren</string>
 </resources>
 

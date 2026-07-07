@@ -281,6 +281,7 @@
     <string name="language_portuguese">Португальська</string>
     <string name="language_romanian">Румунська</string>
     <string name="language_slovak">Словацька</string>
+    <string name="language_estonian">Естонська</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Результати не знайдені для "%1$s"</string>
@@ -320,6 +321,7 @@
     <string name="tooltip_settings">Налаштування</string>
     <string name="tooltip_go_live">В ефір</string>
     <string name="tooltip_presentation_remote">Відкрити дистанційне керування</string>
+    <string name="tooltip_qa_remote">Спільний доступ та віддалене підключення</string>
     <string name="tooltip_send_to_stage_monitor">Надіслати на монітор сцени</string>
     <string name="tooltip_hide_from_stage_monitor">Приховати оголошення</string>
     <string name="tooltip_remove">Видалити</string>
@@ -380,6 +382,10 @@
     <string name="select_presentation_file">Виберіть файл презентації для перегляду слайдів</string>
     <string name="supported_formats">Підтримується: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Слайди відображаються як статичні зображення — анімації, переходи, відео та аудіо не підтримуються.</string>
+    <string name="presentation_error_password_protected">Цей PDF захищений паролем і не може бути відкритий. Видаліть пароль і спробуйте ще раз.</string>
+    <string name="presentation_error_empty_document">У цьому файлі немає сторінок для показу.</string>
+    <string name="presentation_error_library_missing">Підтримка PDF недоступна в цій збірці.</string>
+    <string name="presentation_error_render_failed">Не вдалося прочитати цей файл — можливо, він пошкоджений або має непідтримуваний формат.</string>
     <string name="slide_number">Слайд %1$d</string>
     <string name="remove">Видалити</string>
     <string name="select_presentation_file_button">Вибрати файл</string>
@@ -405,6 +411,9 @@
     <string name="screen_assignment">Призначення екрану</string>
     <string name="content_bible">Біблія</string>
     <string name="content_songs">Пісні</string>
+    <string name="content_bible_background">Фон Біблії</string>
+    <string name="content_songs_background">Фон пісень</string>
+    <string name="content_background_layered_tooltip">Діє лише тоді, коли також увімкнено загальний прапорець «Фон» (або «Фон нижнього титру») вище.</string>
     <string name="content_announcements">Оголошення</string>
     <string name="content_media">Медіа</string>
     <string name="display_lower_third">Нижня третина</string>
@@ -632,6 +641,7 @@
     <string name="api_key_hint">Введіть секретний ключ…</string>
     <string name="api_key_label">API-ключ</string>
     <string name="api_key_protection">Захист API-ключа</string>
+    <string name="browser_source_note_in_server_settings">Окремі виходи Browser Source (налаштування проєкції) можуть незалежно вимагати цей ключ.</string>
     <string name="allow_file_upload">Дозволити завантаження файлів</string>
     <string name="allow_file_upload_description">Дозволити мобільним пристроям завантажувати файли (фото та презентації) на цей комп'ютер.</string>
     <string name="appearance">Система</string>
@@ -722,6 +732,7 @@
     <string name="presentation_storage_directory">Папка зберігання презентацій</string>
     <string name="projection_auto_display">Авто</string>
     <string name="projection_display_label">Дисплей %1$d (%2$dx%3$d)</string>
+    <string name="browser_source_outputs">Виходи Browser Source</string>
     <string name="projection_target_display">Дисплей</string>
     <string name="reset_settings">Скинути всі налаштування</string>
     <string name="reset_settings_confirm">Ви впевнені, що хочете скинути всі налаштування до значень за замовчуванням?\n\nПрограма буде перезапущена.</string>
@@ -801,6 +812,8 @@
     <string name="web_go_live">В ефір</string>
     <string name="web_live_badge">ЕФІР</string>
     <string name="web_preview_hint">Введіть URL вище та натисніть «В ефір»</string>
+    <string name="web_engine_unavailable_title">Веб-браузер недоступний</string>
+    <string name="web_engine_unavailable_body">Не вдалося запустити рушій браузера. Встановіть Microsoft Visual C++ Redistributable (x64) і перезапустіть застосунок.</string>
     <string name="web_under_construction">Ця функція в розробці.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -909,6 +922,10 @@
     <string name="add_song_samples">Додати зразки пісень</string>
     <string name="sps_file_not_supported">%1$s (не підтримується)</string>
     <string name="folder_overwrite_confirm">Папка \"%1$s\" вже існує. Це перезапише існуючі файли пісень.\nПродовжити?</string>
+    <string name="bible_samples">Зразки Біблії</string>
+    <string name="bible_samples_overwrite_confirm">У цій папці вже є вбудований файл Біблії. Його буде перезаписано.\nПродовжити?</string>
+    <string name="bible_samples_copied">Скопійовано %1$d зразок(и) Біблії та встановлено як основну Біблію.</string>
+    <string name="add_bible_samples">Додати зразки Біблії (KJV)</string>
     <string name="conversion_complete">Конвертацію завершено</string>
     <string name="conversion_complete_message">Конвертовано %1$d пісень у папку: %2$s</string>
     <string name="conversion_complete_with_errors">Конвертовано %1$d пісень.\nПомилки:\n%2$s</string>
@@ -978,6 +995,7 @@
     <string name="canvas_video_loop">Повтор</string>
     <string name="canvas_video_volume">Гучність</string>
     <string name="canvas_video_vlc_not_found">VLC не знайдено</string>
+    <string name="canvas_video_vlc_load_failed">VLC знайдено, але не вдалося завантажити</string>
     <string name="canvas_video_no_selection">Відео не вибрано</string>
     <string name="canvas_video_file_not_found">Файл не знайдено: %1$s</string>
     <string name="canvas_video_loading">Завантаження…</string>
@@ -1140,6 +1158,17 @@
     <string name="update_dialog_open_page">Відкрити сторінку завантаження</string>
     <string name="update_check_menu">Перевірити оновлення…</string>
     <string name="update_already_latest">У вас встановлена остання версія.</string>
+    <string name="update_dialog_up_to_date_title">У вас остання версія</string>
+    <string name="update_dialog_view_on_github">Переглянути на GitHub</string>
+    <string name="participate_in_prereleases">Включати бета- та попередні оновлення</string>
+    <string name="update_dialog_check_interval">Перевіряти оновлення</string>
+    <string name="update_interval_every_launch">При кожному запуску</string>
+    <string name="update_interval_weekly">Щотижня</string>
+    <string name="update_interval_monthly">Щомісяця</string>
+    <string name="update_interval_every_2_months">Кожні 2 місяці</string>
+    <string name="update_interval_every_3_months">Кожні 3 місяці</string>
+    <string name="update_interval_every_6_months">Кожні 6 місяців</string>
+    <string name="update_interval_never">Ніколи</string>
 
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Монітор сцени</string>
@@ -1220,11 +1249,15 @@
     <string name="qa_export_dialog_title">Експорт запитань</string>
     <string name="qa_import_dialog_title">Імпорт запитань</string>
     <string name="qa_submit_questions">Надіслати запитання</string>
+    <string name="qa_remote_dialog_title">Спільний доступ та віддалене підключення</string>
+    <string name="qa_remote_dialog_description">Поділіться QR-кодом нижче, щоб громада могла надсилати запитання, і використовуйте QR-код адміністратора для модерації з іншого пристрою.</string>
     <string name="qa_hide_qr">Приховати QR з екрана</string>
     <string name="qa_show_qr">Показати QR на екрані</string>
     <string name="qa_admin_panel">Панель адміністратора</string>
     <string name="qa_server_hint">Запустіть companion-сервер для включення Q&amp;A</string>
     <string name="qa_display_styling">Оформлення відображення</string>
+    <string name="qa_styling_qr_group">QR-код</string>
+    <string name="qa_styling_text_group">Текст і фон</string>
     <string name="qa_text_color">Text Color</string>
     <string name="qa_qr_fg_color">QR Foreground</string>
     <string name="qa_qr_bg_color">QR Background</string>
@@ -1470,11 +1503,13 @@
     <string name="deny_all">Відхилити всі</string>
     <string name="lottie_select_json_file">Вибрати JSON-файл Lottie</string>
     <string name="media_vlc_arch_mismatch">Неправильна архітектура VLC. Ваш Mac використовує Apple Silicon (arm64), а встановлений VLC підтримує лише Intel (x86_64). Завантажте версію VLC для Apple Silicon з сайту videolan.org та перезапустіть програму.</string>
+    <string name="media_vlc_load_failed">VLC знайдено, але не вдалося завантажити. Спробуйте перевстановити VLC з videolan.org (у Windows також встановіть Microsoft Visual C++ Redistributable), потім перезапустіть застосунок.</string>
     <string name="open_converter">Конвертер</string>
     <string name="projection_content_web">Веб</string>
     <string name="projection_content_background">Фон</string>
     <string name="projection_content_lt_background">Фон нижньої третини</string>
     <string name="projection_web_decklink_tooltip">Веб-браузер не може відображати на виходах DeckLink</string>
+    <string name="browser_source_content_unavailable_tooltip">Поки що недоступно для виходу Browser Source</string>
     <string name="projection_web_go_live_tooltip">Потрібен звичайний дисплей (не DeckLink) з увімкненим веб-режимом у налаштуваннях проєкції</string>
     <string name="qa_add_question_hint">Додати запитання…</string>
     <string name="remote_activity_added_to_schedule">Додано до програми</string>
@@ -1588,6 +1623,8 @@
     <string name="setup_step5_vlc_missing">VLC не знайдено на цьому комп'ютері</string>
     <string name="setup_step5_vlc_wrong_arch">Встановлено несумісну версію VLC (невідповідна архітектура)</string>
     <string name="setup_step5_vlc_wrong_arch_detail">Архітектура процесора відрізняється від тієї, під яку зібрано встановлений VLC. Завантажте відповідну версію нижче.</string>
+    <string name="setup_step5_vlc_load_failed">VLC знайдено, але не вдалося завантажити</string>
+    <string name="setup_step5_vlc_load_failed_detail">Виявлено встановлений VLC, але не вдалося коректно його завантажити. Спробуйте перевстановити VLC (у Windows також встановіть Microsoft Visual C++ Redistributable), потім перевірте ще раз нижче.</string>
     <string name="setup_step5_download_silicon">Завантажити VLC (Apple Silicon)</string>
     <string name="setup_step5_download_intel">Завантажити VLC (Intel)</string>
     <string name="setup_step5_download">Завантажити VLC</string>
@@ -1656,6 +1693,39 @@
     <string name="atem_slot_named">Слот %1$d – %2$s</string>
     <string name="atem_slot_in_use">Слот %1$d (використовується)</string>
     <string name="atem_slot_empty">Слот %1$d (порожній)</string>
+    <string name="tab_companion_surface">Companion</string>
+    <string name="companion_satellite_settings">Companion Satellite</string>
+    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
+    <string name="companion_satellite_description">Підключіться до екземпляра Bitfocus Companion у вашій мережі як поверхня Satellite і натискайте його кнопки прямо з ChurchPresenter.</string>
+    <string name="companion_satellite_host">Хост</string>
+    <string name="companion_satellite_host_hint">напр. 192.168.1.50</string>
+    <string name="companion_satellite_device_id">ID пристрою вкладки</string>
+    <string name="companion_satellite_device_id_hint">Залиште порожнім для автогенерації/визначення</string>
+    <string name="companion_satellite_left_sidebar_device_id">ID пристрою лівої бічної панелі</string>
+    <string name="companion_satellite_right_sidebar_device_id">ID пристрою правої бічної панелі</string>
+    <string name="companion_satellite_rows">Рядки</string>
+    <string name="companion_satellite_columns">Стовпці</string>
+    <string name="companion_satellite_bitmap_size">Розмір зображення (px)</string>
+    <string name="companion_satellite_max_button_size">Максимальний розмір кнопки (dp)</string>
+    <string name="companion_satellite_max_button_size_hint">0 = без обмежень</string>
+    <string name="companion_satellite_companion_config_note">На якій сторінці починається з'єднання і яку частину більшої сітки воно показує, налаштовується в самому Companion (Налаштування → Surfaces → цей пристрій), а не тут.</string>
+    <string name="companion_satellite_show_in">Показувати в</string>
+    <string name="companion_satellite_show_in_tab">Вкладка</string>
+    <string name="companion_satellite_show_in_left_sidebar">Ліва бічна панель</string>
+    <string name="companion_satellite_show_in_right_sidebar">Права бічна панель</string>
+    <string name="companion_satellite_autoconnect">Підключатися автоматично при запуску</string>
+    <string name="companion_satellite_connect">Підключити</string>
+    <string name="companion_satellite_disconnect">Відключити</string>
+    <string name="companion_satellite_no_host">Вкажіть хост Companion у Налаштування → Companion Satellite, щоб підключитися.</string>
+    <string name="companion_satellite_status_connected">Підключено</string>
+    <string name="companion_satellite_status_connecting">Підключення…</string>
+    <string name="companion_satellite_status_disconnected">Відключено</string>
+    <string name="companion_satellite_status_error">Помилка: %1$s</string>
+    <string name="companion_satellite_connection_name">Назва</string>
+    <string name="companion_satellite_product_name">Назва продукту</string>
+    <string name="companion_satellite_reconnect_delay">Затримка перепідключення (мс)</string>
+    <string name="companion_satellite_add_connection">+ Додати з'єднання</string>
+    <string name="companion_satellite_remove_connection">Видалити з'єднання</string>
     <string name="atem_unreachable">ATEM недоступний за адресою %1$s</string>
     <string name="atem_capacity_equal">Ємність кліпів: %1$d банки, кожен до %2$d кадрів (≈%3$s с) при %4$s fps</string>
     <string name="atem_capacity_mixed">Ємність кліпів: %1$d банки, до %2$s кадрів при %3$s fps</string>
@@ -1741,9 +1811,12 @@
     <string name="bible_stt_src_explicit">Озвучене посилання</string>
     <string name="bible_stt_src_reverse">Знайдено за текстом</string>
     <string name="bible_stt_src_continuation">Відстеження</string>
+    <string name="bible_stt_src_chapter_scan">Знайдено в поточному розділі</string>
+    <string name="bible_stt_src_chapter_history">Збіг із попереднім розділом</string>
     <string name="bible_stt_track_transcription">Почуто в транскрипції</string>
     <string name="bible_stt_track_translation">Почуто в перекладі</string>
     <string name="bible_stt_match_label">Збіг тексту</string>
+    <string name="bible_stt_text_match_hint">Також впливає на загальну впевненість розпізнавання та на те, як довго вимовлена книга/розділ залишається активною — не лише на збіги цитованого тексту</string>
     <string name="bible_stt_level_off">Вимк.</string>
     <string name="bible_stt_level_conservative">Консервативний</string>
     <string name="bible_stt_level_balanced">Збалансований</string>
@@ -1779,5 +1852,13 @@
     <string name="contact_network_error">Не вдалося зв’язатися із сервером. Перевірте підключення до інтернету та повторіть спробу.</string>
     <string name="contact_open_browser">Відкрити у браузері</string>
     <string name="browser_source_outputs_help">Віртуальні виходи, що подаються як веб-сторінка — вставте URL-адресу в Browser Source, щоб накласти живий вміст, підтримується прозорий фон.</string>
+    <string name="add_browser_source_output">Додати вихід</string>
+    <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_confirm_remove_message">Ви впевнені, що хочете видалити %1$s?</string>
+    <string name="browser_source_require_api_key">Вимагати API-ключ</string>
+    <string name="browser_source_uses_server_api_key">Використовує той самий ключ, що й налаштування сервера; спершу увімкніть його там.</string>
+    <string name="browser_source_enabled">Увімкнено</string>
+    <string name="copy_url_transparent">Скопіювати URL для прозорого фону</string>
+    <string name="copy_url_black_bg">Скопіювати URL для чорного фону</string>
 </resources>
 

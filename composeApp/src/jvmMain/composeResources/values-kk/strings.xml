@@ -281,6 +281,7 @@
     <string name="language_portuguese">Португал</string>
     <string name="language_romanian">Румын</string>
     <string name="language_slovak">Словак</string>
+    <string name="language_estonian">Эстон тілі</string>
 
     <!-- Search Results -->
     <string name="no_results_found">"%1$s" үшін нәтижелер табылмады</string>
@@ -320,6 +321,7 @@
     <string name="tooltip_settings">Параметрлер</string>
     <string name="tooltip_go_live">Эфирге</string>
     <string name="tooltip_presentation_remote">Қашықтан басқаруды ашу</string>
+    <string name="tooltip_qa_remote">Бөлісу және қашықтан қатынау</string>
     <string name="tooltip_send_to_stage_monitor">Сахна мониторына жіберу</string>
     <string name="tooltip_hide_from_stage_monitor">Хабарландыруды жасыру</string>
     <string name="tooltip_remove">Жою</string>
@@ -380,6 +382,10 @@
     <string name="select_presentation_file">Слайдтарды көру үшін презентация файлын таңдаңыз</string>
     <string name="supported_formats">Қолдау көрсетілетін форматтар: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Слайдтар статикалық суреттер ретінде көрсетіледі — анимациялар, өтулер, бейнелер мен аудио қолдау көрсетілмейді.</string>
+    <string name="presentation_error_password_protected">Бұл PDF құпия сөзбен қорғалған және оны ашу мүмкін емес. Құпия сөзді алып тастап, қайта көріңіз.</string>
+    <string name="presentation_error_empty_document">Бұл файлда көрсетуге беттер жоқ.</string>
+    <string name="presentation_error_library_missing">Бұл құрастырылымда PDF қолдауы жоқ.</string>
+    <string name="presentation_error_render_failed">Бұл файлды оқу мүмкін болмады — ол зақымдалған немесе қолдау көрсетілмейтін пішімде болуы мүмкін.</string>
     <string name="slide_number">Слайд %1$d</string>
     <string name="remove">Жою</string>
     <string name="select_presentation_file_button">Файл таңдау</string>
@@ -467,6 +473,9 @@
     <string name="show_in_lower_third">Төменгі үштен бірде көрсету</string>
     <string name="content_bible">Киелі кітап</string>
     <string name="content_songs">Әндер</string>
+    <string name="content_bible_background">Библия фоны</string>
+    <string name="content_songs_background">Ән фоны</string>
+    <string name="content_background_layered_tooltip">Тек жоғарыдағы жалпы Фон (немесе Төменгі жолақ фоны) құсбелгісі де қосулы болғанда әсер етеді.</string>
     <string name="content_pictures">Суреттер/Презентация</string>
     <string name="content_media">Медиа</string>
     <string name="content_streaming">Төменгі үштен бір</string>
@@ -632,6 +641,7 @@
     <string name="api_key_hint">Құпия кілтті енгізіңіз…</string>
     <string name="api_key_label">API кілті</string>
     <string name="api_key_protection">API кілтін қорғау</string>
+    <string name="browser_source_note_in_server_settings">Жеке Browser Source шығыстары (Проекция параметрлері) бұл кілтті тәуелсіз түрде талап ете алады.</string>
     <string name="allow_file_upload">Файл жуктеуге рухсат беру</string>
     <string name="allow_file_upload_description">Мобильдi куралдарга файлдарды (фотосуреттер мен презентациялар) осы компьютерге жуктеуге рухсат бeру.</string>
     <string name="appearance">Жүйелік</string>
@@ -722,6 +732,7 @@
     <string name="presentation_storage_directory">Презентация сақтау қалтасы</string>
     <string name="projection_auto_display">Авто</string>
     <string name="projection_display_label">Дисплей %1$d (%2$dx%3$d)</string>
+    <string name="browser_source_outputs">Browser Source шығыстары</string>
     <string name="projection_target_display">Дисплей</string>
     <string name="reset_settings">Барлық параметрлерді қалпына келтіру</string>
     <string name="reset_settings_confirm">Барлық параметрлерді әдепкі мәндерге қалпына келтіргіңіз келетініне сенімдісіз бе?\n\nҚосымша қайта іске қосылады.</string>
@@ -801,6 +812,8 @@
     <string name="web_go_live">Эфирге</string>
     <string name="web_live_badge">ЭФИР</string>
     <string name="web_preview_hint">Жоғарыда URL енгізіп, Эфирге түймесін басыңыз</string>
+    <string name="web_engine_unavailable_title">Веб-браузер қолжетімсіз</string>
+    <string name="web_engine_unavailable_body">Браузер қозғалтқышын іске қосу мүмкін болмады. Microsoft Visual C++ Redistributable (x64) орнатып, қолданбаны қайта іске қосыңыз.</string>
     <string name="web_under_construction">Бұл мүмкіндік әзірленуде.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -909,6 +922,10 @@
     <string name="add_song_samples">Ән үлгілерін қосу</string>
     <string name="sps_file_not_supported">%1$s (қолданылмайды)</string>
     <string name="folder_overwrite_confirm">\"%1$s\" қалтасы бар. Бұл бар ән файлдарын қайта жазады.\nЖалғастыру ма?</string>
+    <string name="bible_samples">Библия үлгілері</string>
+    <string name="bible_samples_overwrite_confirm">Бұл қалтада қосымшамен бірге келетін Библия файлы бұрыннан бар. Ол қайта жазылады.\nЖалғастыру керек пе?</string>
+    <string name="bible_samples_copied">%1$d Библия үлгісі көшірілді және негізгі Библия ретінде орнатылды.</string>
+    <string name="add_bible_samples">Библия үлгілерін қосу (KJV)</string>
     <string name="conversion_complete">Түрлендіру аяқталды</string>
     <string name="conversion_complete_message">%1$d ән қалтаға түрлендірілді: %2$s</string>
     <string name="conversion_complete_with_errors">%1$d ән түрлендірілді.\nҚателер:\n%2$s</string>
@@ -978,6 +995,7 @@
     <string name="canvas_video_loop">Қайталау</string>
     <string name="canvas_video_volume">Дыбыс деңгейі</string>
     <string name="canvas_video_vlc_not_found">VLC табылмады</string>
+    <string name="canvas_video_vlc_load_failed">VLC табылды, бірақ жүктелмеді</string>
     <string name="canvas_video_no_selection">Бейне таңдалмаған</string>
     <string name="canvas_video_file_not_found">Файл табылмады: %1$s</string>
     <string name="canvas_video_loading">Жүктелуде…</string>
@@ -1140,6 +1158,17 @@
     <string name="update_dialog_open_page">Жүктеу бетін ашу</string>
     <string name="update_check_menu">Жаңартуларды тексеру…</string>
     <string name="update_already_latest">Сізде ең соңғы нұсқа орнатылған.</string>
+    <string name="update_dialog_up_to_date_title">Сізде ең соңғы нұсқа бар</string>
+    <string name="update_dialog_view_on_github">GitHub-та қарау</string>
+    <string name="participate_in_prereleases">Бета/алдын ала шығарылымдарды қосу</string>
+    <string name="update_dialog_check_interval">Жаңартуларды тексеру</string>
+    <string name="update_interval_every_launch">Әр іске қосылғанда</string>
+    <string name="update_interval_weekly">Апта сайын</string>
+    <string name="update_interval_monthly">Ай сайын</string>
+    <string name="update_interval_every_2_months">Әр 2 айда</string>
+    <string name="update_interval_every_3_months">Әр 3 айда</string>
+    <string name="update_interval_every_6_months">Әр 6 айда</string>
+    <string name="update_interval_never">Ешқашан</string>
 
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Сахна мониторы</string>
@@ -1220,11 +1249,15 @@
     <string name="qa_export_dialog_title">Сұрақтарды экспорттау</string>
     <string name="qa_import_dialog_title">Сұрақтарды импорттау</string>
     <string name="qa_submit_questions">Сұрақтарды жіберу</string>
+    <string name="qa_remote_dialog_title">Бөлісу және қашықтан қатынау</string>
+    <string name="qa_remote_dialog_description">Қауым сұрақтар жібере алуы үшін төмендегі QR кодымен бөлісіңіз, ал басқа құрылғыдан модерациялау үшін әкімші QR кодын пайдаланыңыз.</string>
     <string name="qa_hide_qr">QR-ды экраннан жасыру</string>
     <string name="qa_show_qr">QR-ды экранда көрсету</string>
     <string name="qa_admin_panel">Әкімші панелі</string>
     <string name="qa_server_hint">Q&amp;A қосу үшін companion серверін іске қосыңыз</string>
     <string name="qa_display_styling">Дисплей стилі</string>
+    <string name="qa_styling_qr_group">QR коды</string>
+    <string name="qa_styling_text_group">Мәтін және фон</string>
     <string name="qa_text_color">Text Color</string>
     <string name="qa_qr_fg_color">QR Foreground</string>
     <string name="qa_qr_bg_color">QR Background</string>
@@ -1470,11 +1503,13 @@
     <string name="deny_all">Барлығын қабылдамау</string>
     <string name="lottie_select_json_file">Lottie JSON файлын таңдаңыз</string>
     <string name="media_vlc_arch_mismatch">VLC архитектурасы сәйкес емес. Сіздің Mac Apple Silicon (arm64) пайдаланады, бірақ орнатылған VLC тек Intel (x86_64) үшін. videolan.org сайтынан Apple Silicon нұсқасын жүктеп, қайта іске қосыңыз.</string>
+    <string name="media_vlc_load_failed">VLC табылды, бірақ жүктелмеді. VLC бағдарламасын videolan.org сайтынан қайта орнатып көріңіз (Windows жүйесінде Microsoft Visual C++ Redistributable де орнатыңыз), содан кейін қолданбаны қайта іске қосыңыз.</string>
     <string name="open_converter">Конвертер</string>
     <string name="projection_content_web">Веб</string>
     <string name="projection_content_background">Фон</string>
     <string name="projection_content_lt_background">Төменгі үштен бір фоны</string>
     <string name="projection_web_decklink_tooltip">Веб-браузер DeckLink шығыстарында көрсете алмайды</string>
+    <string name="browser_source_content_unavailable_tooltip">Browser Source шығысы үшін әлі қолжетімсіз</string>
     <string name="projection_web_go_live_tooltip">Проекция параметрлерінде Веб қосылған қалыпты дисплей (DeckLink емес) қажет</string>
     <string name="qa_add_question_hint">Сұрақ қосу…</string>
     <string name="remote_activity_added_to_schedule">Кестеге қосылды</string>
@@ -1588,6 +1623,8 @@
     <string name="setup_step5_vlc_missing">VLC осы жүйеде табылмады</string>
     <string name="setup_step5_vlc_wrong_arch">VLC-тің қате архитектурасы орнатылған</string>
     <string name="setup_step5_vlc_wrong_arch_detail">Процессор архитектурасы орнатылған VLC-тен ерекшеленеді. Төменде дұрыс нұсқаны жүктеп алыңыз.</string>
+    <string name="setup_step5_vlc_load_failed">VLC табылды, бірақ жүктелмеді</string>
+    <string name="setup_step5_vlc_load_failed_detail">VLC орнатылғаны анықталды, бірақ ол дұрыс жүктелмеді. VLC бағдарламасын қайта орнатып көріңіз (Windows жүйесінде Microsoft Visual C++ Redistributable де орнатыңыз), содан кейін төменде қайта тексеріңіз.</string>
     <string name="setup_step5_download_silicon">VLC жүктеп алу (Apple Silicon)</string>
     <string name="setup_step5_download_intel">VLC жүктеп алу (Intel)</string>
     <string name="setup_step5_download">VLC жүктеп алу</string>
@@ -1656,6 +1693,39 @@
     <string name="atem_slot_named">Слот %1$d – %2$s</string>
     <string name="atem_slot_in_use">Слот %1$d (пайдаланылуда)</string>
     <string name="atem_slot_empty">Слот %1$d (бос)</string>
+    <string name="tab_companion_surface">Companion</string>
+    <string name="companion_satellite_settings">Companion Satellite</string>
+    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
+    <string name="companion_satellite_description">Желіңіздегі Bitfocus Companion данасына Satellite беті ретінде қосылып, оның түймелерін ChurchPresenter ішінен басыңыз.</string>
+    <string name="companion_satellite_host">Хост</string>
+    <string name="companion_satellite_host_hint">мыс. 192.168.1.50</string>
+    <string name="companion_satellite_device_id">Қойынды құрылғы идентификаторы</string>
+    <string name="companion_satellite_device_id_hint">Автоматты жасау/анықтау үшін бос қалдырыңыз</string>
+    <string name="companion_satellite_left_sidebar_device_id">Сол жақ бүйір панелінің құрылғы идентификаторы</string>
+    <string name="companion_satellite_right_sidebar_device_id">Оң жақ бүйір панелінің құрылғы идентификаторы</string>
+    <string name="companion_satellite_rows">Жолдар</string>
+    <string name="companion_satellite_columns">Бағандар</string>
+    <string name="companion_satellite_bitmap_size">Растр өлшемі (px)</string>
+    <string name="companion_satellite_max_button_size">Ең үлкен түйме өлшемі (dp)</string>
+    <string name="companion_satellite_max_button_size_hint">0 = шексіз</string>
+    <string name="companion_satellite_companion_config_note">Байланыс қай беттен басталатыны және үлкенірек тордың қай бөлігін көрсететіні Companion бағдарламасының өзінде (Параметрлер → Surfaces → осы құрылғы) реттеледі — мұнда емес.</string>
+    <string name="companion_satellite_show_in">Мұнда көрсету</string>
+    <string name="companion_satellite_show_in_tab">Қойынды</string>
+    <string name="companion_satellite_show_in_left_sidebar">Сол жақ бүйір панелі</string>
+    <string name="companion_satellite_show_in_right_sidebar">Оң жақ бүйір панелі</string>
+    <string name="companion_satellite_autoconnect">Іске қосылғанда автоматты түрде қосылу</string>
+    <string name="companion_satellite_connect">Қосу</string>
+    <string name="companion_satellite_disconnect">Ажырату</string>
+    <string name="companion_satellite_no_host">Қосылу үшін Параметрлер → Companion Satellite бөлімінде Companion хостын орнатыңыз.</string>
+    <string name="companion_satellite_status_connected">Қосылды</string>
+    <string name="companion_satellite_status_connecting">Қосылуда…</string>
+    <string name="companion_satellite_status_disconnected">Ажыратылды</string>
+    <string name="companion_satellite_status_error">Қате: %1$s</string>
+    <string name="companion_satellite_connection_name">Атауы</string>
+    <string name="companion_satellite_product_name">Өнім атауы</string>
+    <string name="companion_satellite_reconnect_delay">Қайта қосылу кідірісі (мс)</string>
+    <string name="companion_satellite_add_connection">+ Байланыс қосу</string>
+    <string name="companion_satellite_remove_connection">Байланысты жою</string>
     <string name="atem_unreachable">%1$s мекенжайындағы ATEM қолжетімсіз</string>
     <string name="atem_capacity_equal">Клип сыйымдылығы: %1$d банк, әрқайсысы %2$d кадрға дейін (≈%3$s с), %4$s fps</string>
     <string name="atem_capacity_mixed">Клип сыйымдылығы: %1$d банк, %2$s кадрға дейін, %3$s fps</string>
@@ -1741,9 +1811,12 @@
     <string name="bible_stt_src_explicit">Айтылған сілтеме</string>
     <string name="bible_stt_src_reverse">Мәтін арқылы табылды</string>
     <string name="bible_stt_src_continuation">Бақылауда</string>
+    <string name="bible_stt_src_chapter_scan">Ағымдағы тараудан табылды</string>
+    <string name="bible_stt_src_chapter_history">Алдыңғы тараумен сәйкес келді</string>
     <string name="bible_stt_track_transcription">Транскрипцияда естілді</string>
     <string name="bible_stt_track_translation">Аудармада естілді</string>
     <string name="bible_stt_match_label">Мәтін сәйкестігі</string>
+    <string name="bible_stt_text_match_hint">Бұл сондай-ақ жалпы анықтау сенімділігіне және айтылған кітап/тараудың қаншалықты уақыт белсенді болып қалатынына әсер етеді — тек келтірілген мәтін сәйкестігіне ғана емес</string>
     <string name="bible_stt_level_off">Өшірулі</string>
     <string name="bible_stt_level_conservative">Консервативті</string>
     <string name="bible_stt_level_balanced">Теңгерімді</string>
@@ -1779,5 +1852,13 @@
     <string name="contact_network_error">Серверге қосылу мүмкін болмады. Интернет байланысын тексеріп, қайталап көріңіз.</string>
     <string name="contact_open_browser">Браузерде ашу</string>
     <string name="browser_source_outputs_help">Веб-бет ретінде берілетін виртуалды шығыстар — тікелей эфир мазмұнын қабаттастыру үшін URL мекенжайын Browser Source көзіне қойыңыз, мөлдір фон қолдау көрсетіледі.</string>
+    <string name="add_browser_source_output">Шығысты қосу</string>
+    <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_confirm_remove_message">%1$s жойғыңыз келетініне сенімдісіз бе?</string>
+    <string name="browser_source_require_api_key">API кілтін талап ету</string>
+    <string name="browser_source_uses_server_api_key">Сервер параметрлеріндегі кілтпен бірдей кілт қолданылады; алдымен сол жерде қосыңыз.</string>
+    <string name="browser_source_enabled">Қосулы</string>
+    <string name="copy_url_transparent">Мөлдір фон үшін URL көшіру</string>
+    <string name="copy_url_black_bg">Қара фон үшін URL көшіру</string>
 </resources>
 

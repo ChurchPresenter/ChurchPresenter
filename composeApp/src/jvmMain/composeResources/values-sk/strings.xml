@@ -360,6 +360,7 @@
     <string name="projection_content_background">Pozadie</string>
     <string name="projection_content_lt_background">Pozadie lower third</string>
     <string name="projection_web_decklink_tooltip">Webový prehliadač nemôže vykresľovať na výstupoch DeckLink</string>
+    <string name="browser_source_content_unavailable_tooltip">Zatiaľ nie je k dispozícii pre výstup Browser Source</string>
     <string name="projection_web_go_live_tooltip">Vyžaduje bežný displej (nie DeckLink) s povoleným Webom v nastaveniach projekcie</string>
 
     <!-- Bible Tab -->
@@ -433,6 +434,7 @@
     <string name="tooltip_edit_label">Upraviť štítok</string>
     <string name="tooltip_go_live">Spustiť naživo</string>
     <string name="tooltip_presentation_remote">Otvoriť diaľkové ovládanie</string>
+    <string name="tooltip_qa_remote">Zdieľanie a vzdialený prístup</string>
     <string name="tooltip_send_to_stage_monitor">Odoslať na monitor javiska</string>
     <string name="tooltip_hide_from_stage_monitor">Skryť oznámenie</string>
     <string name="tooltip_add_label">Pridať štítok</string>
@@ -496,6 +498,10 @@
     <string name="select_presentation_file">Vyberte súbor prezentácie na zobrazenie snímkov</string>
     <string name="supported_formats">Podporované: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Snímky sú vykreslené ako statické obrázky — animácie, prechody, videá a zvuk nie sú podporované.</string>
+    <string name="presentation_error_password_protected">Toto PDF je chránené heslom a nedá sa otvoriť. Odstráňte heslo a skúste to znova.</string>
+    <string name="presentation_error_empty_document">Tento súbor nemá žiadne stránky na zobrazenie.</string>
+    <string name="presentation_error_library_missing">Podpora PDF nie je v tejto verzii k dispozícii.</string>
+    <string name="presentation_error_render_failed">Tento súbor sa nepodarilo prečítať — môže byť poškodený alebo v nepodporovanom formáte.</string>
     <string name="slide_number">Snímok %1$d</string>
     <string name="remove">Odstrániť</string>
     <string name="select_presentation_file_button">Vybrať súbor</string>
@@ -530,6 +536,9 @@
     <string name="presenter_windows_count">Okná prezentátora: %1$d</string>
     <string name="content_bible">Biblia</string>
     <string name="content_songs">Piesne</string>
+    <string name="content_bible_background">Pozadie Biblie</string>
+    <string name="content_songs_background">Pozadie piesní</string>
+    <string name="content_background_layered_tooltip">Prejaví sa iba vtedy, keď je vyššie zaškrtnuté aj všeobecné pole Pozadie (alebo Pozadie titulkového pruhu).</string>
     <string name="content_pictures">Obrázky/Prezentácia</string>
     <string name="content_media">Médiá</string>
     <string name="content_streaming">Lower Third</string>
@@ -544,6 +553,7 @@
     <string name="projection_target_display">Displej</string>
     <string name="projection_auto_display">Automaticky</string>
     <string name="projection_display_label">Displej %1$d (%2$dx%3$d)</string>
+    <string name="browser_source_outputs">Výstupy Browser Source</string>
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Predvolené pozadie</string>
@@ -618,6 +628,7 @@
     <string name="media_vlc_required">Pre prehrávanie médií je potrebný VLC media player</string>
     <string name="media_vlc_install">Nainštalujte VLC z videolan.org a reštartujte aplikáciu</string>
     <string name="media_vlc_arch_mismatch">Nesprávna architektúra VLC. Váš Mac používa Apple Silicon (arm64), ale nainštalovaný VLC je len pre Intel (x86_64). Stiahnite si verziu VLC pre Apple Silicon z videolan.org a reštartujte.</string>
+    <string name="media_vlc_load_failed">VLC bolo nájdené, ale nepodarilo sa ho načítať. Skúste VLC preinštalovať z videolan.org (vo Windows nainštalujte aj Microsoft Visual C++ Redistributable) a potom aplikáciu reštartujte.</string>
     <string name="vlc_custom_path">Vlastná cesta VLC</string>
     <string name="vlc_browse">Prehľadávať</string>
     <string name="vlc_path_hint">Vyberte inštalačný priečinok VLC</string>
@@ -777,6 +788,8 @@
     <string name="web_bookmark_add">Pridať záložku</string>
     <string name="web_bookmark_remove">Odstrániť záložku</string>
     <string name="web_preview_hint">Zadajte URL vyššie a klepnite na Spustiť naživo</string>
+    <string name="web_engine_unavailable_title">Webový prehliadač nie je k dispozícii</string>
+    <string name="web_engine_unavailable_body">Prehliadačové jadro sa nepodarilo spustiť. Nainštalujte Microsoft Visual C++ Redistributable (x64) a reštartujte aplikáciu.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Písanie na stránku</string>
     <string name="web_type_to_page_placeholder">Najprv kliknite na vstupné pole na živej stránke</string>
@@ -816,6 +829,7 @@
     <string name="canvas_video_loop">Slučka</string>
     <string name="canvas_video_volume">Hlasitosť</string>
     <string name="canvas_video_vlc_not_found">VLC sa nenašlo</string>
+    <string name="canvas_video_vlc_load_failed">VLC nájdené, ale nepodarilo sa ho načítať</string>
     <string name="canvas_video_no_selection">Nie je vybrané žiadne video</string>
     <string name="canvas_video_file_not_found">Súbor sa nenašiel: %1$s</string>
     <string name="canvas_video_loading">Načítavam…</string>
@@ -967,6 +981,7 @@
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Zmeňte port pred spustením servera.</string>
     <string name="api_key_protection">Ochrana API kľúčom</string>
+    <string name="browser_source_note_in_server_settings">Jednotlivé výstupy Browser Source (nastavenia Projekcie) môžu tento kľúč vyžadovať nezávisle.</string>
     <string name="allow_file_upload">Povoliť nahrávanie súborov</string>
     <string name="allow_file_upload_description">Povoliť mobilným zariadeniam nahrávať súbory (fotky a prezentácie) na tento počítač.</string>
     <string name="api_key_label">API kľúč</string>
@@ -1169,6 +1184,10 @@
     <string name="add_song_samples">Pridať ukážkové piesne</string>
     <string name="sps_file_not_supported">%1$s (nie je podporované)</string>
     <string name="folder_overwrite_confirm">Priečinok "%1$s" už existuje. Prepíšu sa existujúce súbory piesní.\nPokračovať?</string>
+    <string name="bible_samples">Ukážkové Biblie</string>
+    <string name="bible_samples_overwrite_confirm">V tomto priečinku už existuje priložený súbor Biblie. Týmto ho prepíšete.\nPokračovať?</string>
+    <string name="bible_samples_copied">Skopírovaných %1$d ukážkových Biblií a nastavených ako primárna Biblia.</string>
+    <string name="add_bible_samples">Pridať ukážkové Biblie (KJV)</string>
     <string name="conversion_complete">Konverzia dokončená</string>
     <string name="conversion_complete_message">%1$d piesní skonvertovaných do priečinka: %2$s</string>
     <string name="conversion_complete_with_errors">%1$d piesní skonvertovaných.\nChyby:\n%2$s</string>
@@ -1298,11 +1317,15 @@
     <string name="qa_export_dialog_title">Exportovať otázky</string>
     <string name="qa_import_dialog_title">Importovať otázky</string>
     <string name="qa_submit_questions">Odoslať otázky</string>
+    <string name="qa_remote_dialog_title">Zdieľanie a vzdialený prístup</string>
+    <string name="qa_remote_dialog_description">Zdieľajte QR kód nižšie, aby zhromaždenie mohlo posielať otázky, a použite administrátorský QR kód na moderovanie z iného zariadenia.</string>
     <string name="qa_hide_qr">Skryť QR z displeja</string>
     <string name="qa_show_qr">Zobraziť QR na displeji</string>
     <string name="qa_admin_panel">Administrátorský panel</string>
     <string name="qa_server_hint">Spustite sprievodný server na povolenie Q&amp;A</string>
     <string name="qa_display_styling">Štýl zobrazenia</string>
+    <string name="qa_styling_qr_group">QR kód</string>
+    <string name="qa_styling_text_group">Text a pozadie</string>
     <string name="qa_font">Písmo</string>
     <string name="qa_size">Veľkosť</string>
     <string name="qa_background_color">Farba pozadia</string>
@@ -1475,6 +1498,17 @@
     <string name="update_dialog_open_page">Otvoriť stránku na stiahnutie</string>
     <string name="update_check_menu">Skontrolovať aktualizácie…</string>
     <string name="update_already_latest">Máte nainštalovanú najnovšiu verziu.</string>
+    <string name="update_dialog_up_to_date_title">Máte najnovšiu verziu</string>
+    <string name="update_dialog_view_on_github">Zobraziť na GitHube</string>
+    <string name="participate_in_prereleases">Zahrnúť beta / predbežné verzie aktualizácií</string>
+    <string name="update_dialog_check_interval">Kontrolovať aktualizácie</string>
+    <string name="update_interval_every_launch">Pri každom spustení</string>
+    <string name="update_interval_weekly">Týždenne</string>
+    <string name="update_interval_monthly">Mesačne</string>
+    <string name="update_interval_every_2_months">Každé 2 mesiace</string>
+    <string name="update_interval_every_3_months">Každé 3 mesiace</string>
+    <string name="update_interval_every_6_months">Každých 6 mesiacov</string>
+    <string name="update_interval_never">Nikdy</string>
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>
@@ -1532,6 +1566,7 @@
     <string name="language_romanian">Rumunčina</string>
     <string name="language_dutch">Holandčina</string>
     <string name="language_slovak">Slovenčina</string>
+    <string name="language_estonian">Estónčina</string>
     <string name="tab_dictionary">Slovník</string>
     <string name="dictionary_search_hint">Hľadať podľa čísla, slova alebo definície…</string>
     <string name="dictionary_filter_all">Všetko</string>
@@ -1610,6 +1645,8 @@
     <string name="setup_step5_vlc_missing">VLC sa nenašlo na tomto systéme</string>
     <string name="setup_step5_vlc_wrong_arch">Nainštalovaná nesprávna architektúra VLC</string>
     <string name="setup_step5_vlc_wrong_arch_detail">Architektúra vášho procesora sa líši od nainštalovaného VLC. Stiahnite správnu verziu nižšie.</string>
+    <string name="setup_step5_vlc_load_failed">VLC nájdené, ale nepodarilo sa ho načítať</string>
+    <string name="setup_step5_vlc_load_failed_detail">Bola zistená inštalácia VLC, ale nepodarilo sa ju správne načítať. Skúste VLC preinštalovať (vo Windows nainštalujte aj Microsoft Visual C++ Redistributable) a potom to nižšie znova skontrolujte.</string>
     <string name="setup_step5_download_silicon">Stiahnuť VLC (Apple Silicon)</string>
     <string name="setup_step5_download_intel">Stiahnuť VLC (Intel)</string>
     <string name="setup_step5_download">Stiahnuť VLC</string>
@@ -1678,6 +1715,39 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (používa sa)</string>
     <string name="atem_slot_empty">Slot %1$d (prázdny)</string>
+    <string name="tab_companion_surface">Companion</string>
+    <string name="companion_satellite_settings">Companion Satellite</string>
+    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
+    <string name="companion_satellite_description">Pripojte sa k inštancii Bitfocus Companion vo vašej sieti ako povrch Satellite a stláčajte jej tlačidlá priamo z ChurchPresenter.</string>
+    <string name="companion_satellite_host">Hostiteľ</string>
+    <string name="companion_satellite_host_hint">napr. 192.168.1.50</string>
+    <string name="companion_satellite_device_id">ID zariadenia karty</string>
+    <string name="companion_satellite_device_id_hint">Ponechajte prázdne pre automatické vygenerovanie/odvodenie</string>
+    <string name="companion_satellite_left_sidebar_device_id">ID zariadenia ľavého bočného panela</string>
+    <string name="companion_satellite_right_sidebar_device_id">ID zariadenia pravého bočného panela</string>
+    <string name="companion_satellite_rows">Riadky</string>
+    <string name="companion_satellite_columns">Stĺpce</string>
+    <string name="companion_satellite_bitmap_size">Veľkosť bitmapy (px)</string>
+    <string name="companion_satellite_max_button_size">Maximálna veľkosť tlačidla (dp)</string>
+    <string name="companion_satellite_max_button_size_hint">0 = neobmedzené</string>
+    <string name="companion_satellite_companion_config_note">Na ktorej stránke pripojenie začína a ktorú časť väčšej mriežky zobrazuje, sa nastavuje priamo v aplikácii Companion (Nastavenia → Surfaces → toto zariadenie) — nie tu.</string>
+    <string name="companion_satellite_show_in">Zobraziť v</string>
+    <string name="companion_satellite_show_in_tab">Karta</string>
+    <string name="companion_satellite_show_in_left_sidebar">Ľavý bočný panel</string>
+    <string name="companion_satellite_show_in_right_sidebar">Pravý bočný panel</string>
+    <string name="companion_satellite_autoconnect">Automaticky pripojiť pri spustení</string>
+    <string name="companion_satellite_connect">Pripojiť</string>
+    <string name="companion_satellite_disconnect">Odpojiť</string>
+    <string name="companion_satellite_no_host">Nastavte hostiteľa Companion v Nastavenia → Companion Satellite na pripojenie.</string>
+    <string name="companion_satellite_status_connected">Pripojené</string>
+    <string name="companion_satellite_status_connecting">Pripájanie…</string>
+    <string name="companion_satellite_status_disconnected">Odpojené</string>
+    <string name="companion_satellite_status_error">Chyba: %1$s</string>
+    <string name="companion_satellite_connection_name">Názov</string>
+    <string name="companion_satellite_product_name">Názov produktu</string>
+    <string name="companion_satellite_reconnect_delay">Oneskorenie opätovného pripojenia (ms)</string>
+    <string name="companion_satellite_add_connection">+ Pridať pripojenie</string>
+    <string name="companion_satellite_remove_connection">Odstrániť pripojenie</string>
     <string name="atem_unreachable">ATEM nie je dostupný na %1$s</string>
     <string name="atem_capacity_equal">Kapacita klipov: %1$d banky, každá až %2$d snímok (≈%3$s s) pri %4$s fps</string>
     <string name="atem_capacity_mixed">Kapacita klipov: %1$d banky, až %2$s snímok pri %3$s fps</string>
@@ -1763,9 +1833,12 @@
     <string name="bible_stt_src_explicit">Vyslovený odkaz</string>
     <string name="bible_stt_src_reverse">Nájdené textom</string>
     <string name="bible_stt_src_continuation">Sledovanie</string>
+    <string name="bible_stt_src_chapter_scan">Nájdené v aktuálnej kapitole</string>
+    <string name="bible_stt_src_chapter_history">Zhoda s predchádzajúcou kapitolou</string>
     <string name="bible_stt_track_transcription">Počuté v prepise</string>
     <string name="bible_stt_track_translation">Počuté v preklade</string>
     <string name="bible_stt_match_label">Zhoda textu</string>
+    <string name="bible_stt_text_match_hint">Ovplyvňuje tiež celkovú spoľahlivosť detekcie a to, ako dlho zostáva vyslovená kniha/kapitola aktívna — nielen zhody citovaného textu</string>
     <string name="bible_stt_level_off">Vypnuté</string>
     <string name="bible_stt_level_conservative">Konzervatívny</string>
     <string name="bible_stt_level_balanced">Vyvážený</string>
@@ -1807,4 +1880,12 @@
     <string name="contact_network_error">Server sa nepodarilo kontaktovať. Skontrolujte pripojenie na internet a skúste to znova.</string>
     <string name="contact_open_browser">Otvoriť v prehliadači</string>
     <string name="browser_source_outputs_help">Virtuálne výstupy poskytované ako webová stránka — vložte adresu URL do Browser Source na prekrytie živého obsahu, priehľadné pozadie je podporované.</string>
+    <string name="add_browser_source_output">Pridať výstup</string>
+    <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_confirm_remove_message">Naozaj chcete odstrániť %1$s?</string>
+    <string name="browser_source_require_api_key">Vyžadovať API kľúč</string>
+    <string name="browser_source_uses_server_api_key">Používa rovnaký kľúč ako nastavenia Servera; najprv ho povoľte tam.</string>
+    <string name="browser_source_enabled">Povolené</string>
+    <string name="copy_url_transparent">Kopírovať URL pre priehľadné pozadie</string>
+    <string name="copy_url_black_bg">Kopírovať URL pre čierne pozadie</string>
 </resources>

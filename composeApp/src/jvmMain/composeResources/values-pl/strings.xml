@@ -281,6 +281,7 @@
     <string name="language_portuguese">Portugalski</string>
     <string name="language_romanian">Rumuński</string>
     <string name="language_slovak">Słowacki</string>
+    <string name="language_estonian">Estoński</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Nie znaleziono wyników dla "%1$s"</string>
@@ -320,6 +321,7 @@
     <string name="tooltip_settings">Ustawienia</string>
     <string name="tooltip_go_live">Na żywo</string>
     <string name="tooltip_presentation_remote">Otwórz zdalne sterowanie</string>
+    <string name="tooltip_qa_remote">Udostępnianie i dostęp zdalny</string>
     <string name="tooltip_send_to_stage_monitor">Wyślij do monitora sceny</string>
     <string name="tooltip_hide_from_stage_monitor">Ukryj ogłoszenie</string>
     <string name="tooltip_remove">Usuń</string>
@@ -380,6 +382,10 @@
     <string name="select_presentation_file">Wybierz plik prezentacji, aby wyświetlić slajdy</string>
     <string name="supported_formats">Obsługiwane: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Slajdy są renderowane jako obrazy statyczne — animacje, przejścia, wideo i dźwięk nie są obsługiwane.</string>
+    <string name="presentation_error_password_protected">Ten plik PDF jest chroniony hasłem i nie można go otworzyć. Usuń hasło i spróbuj ponownie.</string>
+    <string name="presentation_error_empty_document">Ten plik nie ma stron do wyświetlenia.</string>
+    <string name="presentation_error_library_missing">Obsługa PDF nie jest dostępna w tej wersji.</string>
+    <string name="presentation_error_render_failed">Nie można odczytać tego pliku — może być uszkodzony lub mieć nieobsługiwany format.</string>
     <string name="slide_number">Slajd %1$d</string>
     <string name="remove">Usuń</string>
     <string name="select_presentation_file_button">Wybierz plik</string>
@@ -467,6 +473,9 @@
     <string name="show_in_lower_third">Pokaż w dolnej trzeciej</string>
     <string name="content_bible">Biblia</string>
     <string name="content_songs">Pieśni</string>
+    <string name="content_bible_background">Tło Biblii</string>
+    <string name="content_songs_background">Tło pieśni</string>
+    <string name="content_background_layered_tooltip">Działa tylko wtedy, gdy powyższe ogólne pole wyboru Tło (lub Tło dolnego paska) jest również zaznaczone.</string>
     <string name="content_pictures">Zdjęcia/Prezentacja</string>
     <string name="content_media">Media</string>
     <string name="content_streaming">Dolna trzecia</string>
@@ -632,6 +641,7 @@
     <string name="api_key_hint">Wprowadź tajny klucz…</string>
     <string name="api_key_label">Klucz API</string>
     <string name="api_key_protection">Ochrona klucza API</string>
+    <string name="browser_source_note_in_server_settings">Poszczególne wyjścia Browser Source (ustawienia Projekcji) mogą niezależnie wymagać tego klucza.</string>
     <string name="allow_file_upload">Zezwól na przesyłanie plików</string>
     <string name="allow_file_upload_description">Zezwól urządzeniom mobilnym na przesyłanie plików (zdjęć i prezentacji) na ten komputer.</string>
     <string name="apply">Zastosuj</string>
@@ -721,6 +731,7 @@
     <string name="presentation_storage_directory">Katalog przechowywania prezentacji</string>
     <string name="projection_auto_display">Auto</string>
     <string name="projection_display_label">Wyświetlacz %1$d (%2$dx%3$d)</string>
+    <string name="browser_source_outputs">Wyjścia Browser Source</string>
     <string name="projection_target_display">Wyświetlacz</string>
     <string name="reset_settings">Resetuj wszystkie ustawienia</string>
     <string name="reset_settings_confirm">Czy na pewno chcesz zresetować wszystkie ustawienia do wartości domyślnych?\n\nAplikacja zostanie ponownie uruchomiona.</string>
@@ -800,6 +811,8 @@
     <string name="web_go_live">Na żywo</string>
     <string name="web_live_badge">NA ŻYWO</string>
     <string name="web_preview_hint">Wprowadź URL powyżej i naciśnij Na żywo</string>
+    <string name="web_engine_unavailable_title">Przeglądarka internetowa niedostępna</string>
+    <string name="web_engine_unavailable_body">Nie udało się uruchomić silnika przeglądarki. Zainstaluj Microsoft Visual C++ Redistributable (x64) i uruchom ponownie aplikację.</string>
     <string name="web_under_construction">Ta funkcja jest w trakcie budowy.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -908,6 +921,10 @@
     <string name="add_song_samples">Dodaj przykładowe piosenki</string>
     <string name="sps_file_not_supported">%1$s (nieobsługiwany)</string>
     <string name="folder_overwrite_confirm">Folder \"%1$s\" już istnieje. Spowoduje to nadpisanie istniejących plików piosenek.\nKontynuować?</string>
+    <string name="bible_samples">Przykładowe Biblie</string>
+    <string name="bible_samples_overwrite_confirm">W tym folderze już istnieje dołączony plik Biblii. Zostanie on nadpisany.\nKontynuować?</string>
+    <string name="bible_samples_copied">Skopiowano %1$d przykładową(e) Biblię(e) i ustawiono jako główną Biblię.</string>
+    <string name="add_bible_samples">Dodaj przykładowe Biblie (KJV)</string>
     <string name="conversion_complete">Konwersja zakończona</string>
     <string name="conversion_complete_message">Skonwertowano %1$d piosenek do folderu: %2$s</string>
     <string name="conversion_complete_with_errors">Skonwertowano %1$d piosenek.\nBłędy:\n%2$s</string>
@@ -977,6 +994,7 @@
     <string name="canvas_video_loop">Pętla</string>
     <string name="canvas_video_volume">Głośność</string>
     <string name="canvas_video_vlc_not_found">Nie znaleziono VLC</string>
+    <string name="canvas_video_vlc_load_failed">Znaleziono VLC, ale nie udało się go załadować</string>
     <string name="canvas_video_no_selection">Nie wybrano wideo</string>
     <string name="canvas_video_file_not_found">Nie znaleziono pliku: %1$s</string>
     <string name="canvas_video_loading">Ładowanie…</string>
@@ -1139,6 +1157,17 @@
     <string name="update_dialog_open_page">Otwórz stronę pobierania</string>
     <string name="update_check_menu">Sprawdź aktualizacje…</string>
     <string name="update_already_latest">Masz zainstalowaną najnowszą wersję.</string>
+    <string name="update_dialog_up_to_date_title">Masz najnowszą wersję</string>
+    <string name="update_dialog_view_on_github">Zobacz na GitHubie</string>
+    <string name="participate_in_prereleases">Uwzględnij aktualizacje beta / przedpremierowe</string>
+    <string name="update_dialog_check_interval">Sprawdzaj dostępność aktualizacji</string>
+    <string name="update_interval_every_launch">Przy każdym uruchomieniu</string>
+    <string name="update_interval_weekly">Co tydzień</string>
+    <string name="update_interval_monthly">Co miesiąc</string>
+    <string name="update_interval_every_2_months">Co 2 miesiące</string>
+    <string name="update_interval_every_3_months">Co 3 miesiące</string>
+    <string name="update_interval_every_6_months">Co 6 miesięcy</string>
+    <string name="update_interval_never">Nigdy</string>
 
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Monitor sceny</string>
@@ -1219,11 +1248,15 @@
     <string name="qa_export_dialog_title">Eksportuj pytania</string>
     <string name="qa_import_dialog_title">Importuj pytania</string>
     <string name="qa_submit_questions">Prześlij pytania</string>
+    <string name="qa_remote_dialog_title">Udostępnianie i dostęp zdalny</string>
+    <string name="qa_remote_dialog_description">Udostępnij poniższy kod QR, aby zbór mógł zadawać pytania, i użyj kodu QR administratora, aby moderować z innego urządzenia.</string>
     <string name="qa_hide_qr">Ukryj QR z wyświetlacza</string>
     <string name="qa_show_qr">Pokaż QR na wyświetlaczu</string>
     <string name="qa_admin_panel">Panel administratora</string>
     <string name="qa_server_hint">Uruchom serwer companion, aby włączyć Q&amp;A</string>
     <string name="qa_display_styling">Styl wyświetlania</string>
+    <string name="qa_styling_qr_group">Kod QR</string>
+    <string name="qa_styling_text_group">Tekst i tło</string>
     <string name="qa_text_color">Text Color</string>
     <string name="qa_qr_fg_color">QR Foreground</string>
     <string name="qa_qr_bg_color">QR Background</string>
@@ -1470,11 +1503,13 @@
     <string name="deny_all">Odrzuć wszystkie</string>
     <string name="lottie_select_json_file">Wybierz plik JSON Lottie</string>
     <string name="media_vlc_arch_mismatch">Zła architektura VLC. Twój Mac używa Apple Silicon (arm64), ale zainstalowany VLC obsługuje tylko Intel (x86_64). Pobierz wersję VLC dla Apple Silicon ze strony videolan.org i uruchom ponownie.</string>
+    <string name="media_vlc_load_failed">Znaleziono VLC, ale nie udało się go załadować. Spróbuj ponownie zainstalować VLC ze strony videolan.org (w systemie Windows zainstaluj też Microsoft Visual C++ Redistributable), a następnie uruchom ponownie aplikację.</string>
     <string name="open_converter">Konwerter</string>
     <string name="projection_content_web">Sieć</string>
     <string name="projection_content_background">Tło</string>
     <string name="projection_content_lt_background">Tło dolnej trzeciej</string>
     <string name="projection_web_decklink_tooltip">Przeglądarka internetowa nie może renderować na wyjściach DeckLink</string>
+    <string name="browser_source_content_unavailable_tooltip">Jeszcze niedostępne dla wyjścia Browser Source</string>
     <string name="projection_web_go_live_tooltip">Wymaga zwykłego wyświetlacza (bez DeckLink) z włączoną opcją Web w ustawieniach projekcji</string>
     <string name="qa_add_question_hint">Dodaj pytanie…</string>
     <string name="remote_activity_added_to_schedule">Dodano do harmonogramu</string>
@@ -1588,6 +1623,8 @@
     <string name="setup_step5_vlc_missing">VLC nie został znaleziony w tym systemie</string>
     <string name="setup_step5_vlc_wrong_arch">Zainstalowana nieprawidłowa architektura VLC</string>
     <string name="setup_step5_vlc_wrong_arch_detail">Architektura procesora różni się od zainstalowanego VLC. Pobierz właściwą wersję poniżej.</string>
+    <string name="setup_step5_vlc_load_failed">Znaleziono VLC, ale nie udało się go załadować</string>
+    <string name="setup_step5_vlc_load_failed_detail">Wykryto instalację VLC, ale nie udało się jej poprawnie załadować. Spróbuj ponownie zainstalować VLC (w systemie Windows zainstaluj też Microsoft Visual C++ Redistributable), a następnie sprawdź ponownie poniżej.</string>
     <string name="setup_step5_download_silicon">Pobierz VLC (Apple Silicon)</string>
     <string name="setup_step5_download_intel">Pobierz VLC (Intel)</string>
     <string name="setup_step5_download">Pobierz VLC</string>
@@ -1656,6 +1693,39 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (w użyciu)</string>
     <string name="atem_slot_empty">Slot %1$d (pusty)</string>
+    <string name="tab_companion_surface">Companion</string>
+    <string name="companion_satellite_settings">Companion Satellite</string>
+    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
+    <string name="companion_satellite_description">Połącz się z instancją Bitfocus Companion w Twojej sieci jako powierzchnia Satellite i naciskaj jej przyciski z poziomu ChurchPresenter.</string>
+    <string name="companion_satellite_host">Host</string>
+    <string name="companion_satellite_host_hint">np. 192.168.1.50</string>
+    <string name="companion_satellite_device_id">ID urządzenia karty</string>
+    <string name="companion_satellite_device_id_hint">Pozostaw puste, aby wygenerować/wyznaczyć automatycznie</string>
+    <string name="companion_satellite_left_sidebar_device_id">ID urządzenia lewego paska bocznego</string>
+    <string name="companion_satellite_right_sidebar_device_id">ID urządzenia prawego paska bocznego</string>
+    <string name="companion_satellite_rows">Wiersze</string>
+    <string name="companion_satellite_columns">Kolumny</string>
+    <string name="companion_satellite_bitmap_size">Rozmiar bitmapy (px)</string>
+    <string name="companion_satellite_max_button_size">Maksymalny rozmiar przycisku (dp)</string>
+    <string name="companion_satellite_max_button_size_hint">0 = bez limitu</string>
+    <string name="companion_satellite_companion_config_note">Na której stronie zaczyna się połączenie i którą część większej siatki pokazuje, konfiguruje się w samym Companion (Ustawienia → Surfaces → to urządzenie) — nie tutaj.</string>
+    <string name="companion_satellite_show_in">Pokaż w</string>
+    <string name="companion_satellite_show_in_tab">Karta</string>
+    <string name="companion_satellite_show_in_left_sidebar">Lewy pasek boczny</string>
+    <string name="companion_satellite_show_in_right_sidebar">Prawy pasek boczny</string>
+    <string name="companion_satellite_autoconnect">Łącz automatycznie przy uruchomieniu</string>
+    <string name="companion_satellite_connect">Połącz</string>
+    <string name="companion_satellite_disconnect">Rozłącz</string>
+    <string name="companion_satellite_no_host">Ustaw hosta Companion w Ustawienia → Companion Satellite, aby się połączyć.</string>
+    <string name="companion_satellite_status_connected">Połączono</string>
+    <string name="companion_satellite_status_connecting">Łączenie…</string>
+    <string name="companion_satellite_status_disconnected">Rozłączono</string>
+    <string name="companion_satellite_status_error">Błąd: %1$s</string>
+    <string name="companion_satellite_connection_name">Nazwa</string>
+    <string name="companion_satellite_product_name">Nazwa produktu</string>
+    <string name="companion_satellite_reconnect_delay">Opóźnienie ponownego łączenia (ms)</string>
+    <string name="companion_satellite_add_connection">+ Dodaj połączenie</string>
+    <string name="companion_satellite_remove_connection">Usuń połączenie</string>
     <string name="atem_unreachable">ATEM nieosiągalny pod adresem %1$s</string>
     <string name="atem_capacity_equal">Pojemność klipów: %1$d banki, każdy do %2$d klatek (≈%3$s s) przy %4$s fps</string>
     <string name="atem_capacity_mixed">Pojemność klipów: %1$d banki, do %2$s klatek przy %3$s fps</string>
@@ -1741,9 +1811,12 @@
     <string name="bible_stt_src_explicit">Wypowiedziane odwołanie</string>
     <string name="bible_stt_src_reverse">Znaleziono przez tekst</string>
     <string name="bible_stt_src_continuation">Śledzenie</string>
+    <string name="bible_stt_src_chapter_scan">Znaleziono w bieżącym rozdziale</string>
+    <string name="bible_stt_src_chapter_history">Dopasowano do wcześniejszego rozdziału</string>
     <string name="bible_stt_track_transcription">Usłyszano w transkrypcji</string>
     <string name="bible_stt_track_translation">Usłyszano w tłumaczeniu</string>
     <string name="bible_stt_match_label">Dopasowanie tekstu</string>
+    <string name="bible_stt_text_match_hint">Wpływa również na ogólną pewność wykrywania i na to, jak długo wypowiedziana księga/rozdział pozostaje aktywna — nie tylko na dopasowania cytowanego tekstu</string>
     <string name="bible_stt_level_off">Wyłączone</string>
     <string name="bible_stt_level_conservative">Konserwatywny</string>
     <string name="bible_stt_level_balanced">Zrównoważony</string>
@@ -1779,5 +1852,13 @@
     <string name="contact_network_error">Nie można połączyć się z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.</string>
     <string name="contact_open_browser">Otwórz w przeglądarce</string>
     <string name="browser_source_outputs_help">Wirtualne wyjścia udostępniane jako strona internetowa — wklej adres URL do Browser Source, aby nakładać treści na żywo, obsługiwane jest przezroczyste tło.</string>
+    <string name="add_browser_source_output">Dodaj wyjście</string>
+    <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_confirm_remove_message">Czy na pewno chcesz usunąć %1$s?</string>
+    <string name="browser_source_require_api_key">Wymagaj klucza API</string>
+    <string name="browser_source_uses_server_api_key">Używa tego samego klucza co ustawienia Serwera; najpierw włącz go tam.</string>
+    <string name="browser_source_enabled">Włączone</string>
+    <string name="copy_url_transparent">Kopiuj URL dla przezroczystego tła</string>
+    <string name="copy_url_black_bg">Kopiuj URL dla czarnego tła</string>
 </resources>
 

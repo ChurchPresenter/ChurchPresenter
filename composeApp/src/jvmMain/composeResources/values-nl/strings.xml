@@ -360,6 +360,7 @@
     <string name="projection_content_background">Achtergrond</string>
     <string name="projection_content_lt_background">Lower Third achtergrond</string>
     <string name="projection_web_decklink_tooltip">Webbrowser kan niet renderen op DeckLink-uitgangen</string>
+    <string name="browser_source_content_unavailable_tooltip">Nog niet beschikbaar voor Browser Source-uitvoer</string>
     <string name="projection_web_go_live_tooltip">Vereist een gewoon beeldscherm (geen DeckLink) met Web ingeschakeld in projectie-instellingen</string>
 
     <!-- Bible Tab -->
@@ -433,6 +434,7 @@
     <string name="tooltip_edit_label">Label bewerken</string>
     <string name="tooltip_go_live">Live gaan</string>
     <string name="tooltip_presentation_remote">Afstandsbediening openen</string>
+    <string name="tooltip_qa_remote">Delen &amp; Externe Toegang</string>
     <string name="tooltip_send_to_stage_monitor">Naar stage monitor sturen</string>
     <string name="tooltip_hide_from_stage_monitor">Aankondiging verbergen</string>
     <string name="tooltip_add_label">Label toevoegen</string>
@@ -496,6 +498,10 @@
     <string name="select_presentation_file">Selecteer een presentatiebestand om dia's te bekijken</string>
     <string name="supported_formats">Ondersteund: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Dia\'s worden weergegeven als statische afbeeldingen — animaties, overgangen, video\'s en audio worden niet ondersteund.</string>
+    <string name="presentation_error_password_protected">Deze PDF is met een wachtwoord beveiligd en kan niet worden geopend. Verwijder het wachtwoord en probeer het opnieuw.</string>
+    <string name="presentation_error_empty_document">Dit bestand heeft geen pagina's om weer te geven.</string>
+    <string name="presentation_error_library_missing">PDF-ondersteuning is niet beschikbaar in deze build.</string>
+    <string name="presentation_error_render_failed">Kan dit bestand niet lezen — het is mogelijk beschadigd of heeft een niet-ondersteund formaat.</string>
     <string name="slide_number">Dia %1$d</string>
     <string name="remove">Verwijderen</string>
     <string name="select_presentation_file_button">Bestand selecteren</string>
@@ -530,6 +536,9 @@
     <string name="presenter_windows_count">Presentatievensters: %1$d</string>
     <string name="content_bible">Bijbel</string>
     <string name="content_songs">Liederen</string>
+    <string name="content_bible_background">Bijbelachtergrond</string>
+    <string name="content_songs_background">Liedachtergrond</string>
+    <string name="content_background_layered_tooltip">Heeft alleen effect als het algemene selectievakje Achtergrond (of Ondertitel-achtergrond) hierboven ook is ingeschakeld.</string>
     <string name="content_pictures">Afbeeldingen/Presentatie</string>
     <string name="content_media">Media</string>
     <string name="content_streaming">Lower Third</string>
@@ -544,6 +553,7 @@
     <string name="projection_target_display">Scherm</string>
     <string name="projection_auto_display">Automatisch</string>
     <string name="projection_display_label">Scherm %1$d (%2$dx%3$d)</string>
+    <string name="browser_source_outputs">Browser Source-uitvoeren</string>
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Standaard achtergrond</string>
@@ -618,6 +628,7 @@
     <string name="media_vlc_required">VLC media player is vereist voor mediaweergave</string>
     <string name="media_vlc_install">Installeer VLC van videolan.org en start de toepassing opnieuw</string>
     <string name="media_vlc_arch_mismatch">Verkeerde VLC-architectuur. Uw Mac gebruikt Apple Silicon (arm64) maar de geïnstalleerde VLC is alleen Intel (x86_64). Download de Apple Silicon-versie van VLC van videolan.org en start opnieuw.</string>
+    <string name="media_vlc_load_failed">VLC is gevonden maar kon niet worden geladen. Probeer VLC opnieuw te installeren vanaf videolan.org (installeer op Windows ook de Microsoft Visual C++ Redistributable) en start de toepassing daarna opnieuw.</string>
     <string name="vlc_custom_path">Aangepast VLC-pad</string>
     <string name="vlc_browse">Bladeren</string>
     <string name="vlc_path_hint">Selecteer VLC-installatiemap</string>
@@ -777,6 +788,8 @@
     <string name="web_bookmark_add">Bladwijzer toevoegen</string>
     <string name="web_bookmark_remove">Bladwijzer verwijderen</string>
     <string name="web_preview_hint">Voer een URL in en tik op Live gaan</string>
+    <string name="web_engine_unavailable_title">Webbrowser niet beschikbaar</string>
+    <string name="web_engine_unavailable_body">De browserengine kon niet worden gestart. Installeer de Microsoft Visual C++ Redistributable (x64) en start de toepassing opnieuw.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Typen naar pagina</string>
     <string name="web_type_to_page_placeholder">Klik eerst op een invoerveld op de live pagina</string>
@@ -816,6 +829,7 @@
     <string name="canvas_video_loop">Herhalen</string>
     <string name="canvas_video_volume">Volume</string>
     <string name="canvas_video_vlc_not_found">VLC niet gevonden</string>
+    <string name="canvas_video_vlc_load_failed">VLC gevonden maar laden mislukt</string>
     <string name="canvas_video_no_selection">Geen video geselecteerd</string>
     <string name="canvas_video_file_not_found">Bestand niet gevonden: %1$s</string>
     <string name="canvas_video_loading">Laden…</string>
@@ -967,6 +981,7 @@
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Wijzig de poort voordat u de server start.</string>
     <string name="api_key_protection">API-sleutelbeveiliging</string>
+    <string name="browser_source_note_in_server_settings">Individuele Browser Source-uitvoeren (Projectie-instellingen) kunnen deze sleutel onafhankelijk vereisen.</string>
     <string name="allow_file_upload">Bestandsupload toestaan</string>
     <string name="allow_file_upload_description">Mobiele apparaten toestaan bestanden (foto's en presentaties) naar deze computer te uploaden.</string>
     <string name="api_key_label">API-sleutel</string>
@@ -1169,6 +1184,10 @@
     <string name="add_song_samples">Liedvoorbeelden toevoegen</string>
     <string name="sps_file_not_supported">%1$s (niet ondersteund)</string>
     <string name="folder_overwrite_confirm">Map "%1$s" bestaat al. Dit overschrijft bestaande liedenbestanden.\nDoorgaan?</string>
+    <string name="bible_samples">Bijbelvoorbeelden</string>
+    <string name="bible_samples_overwrite_confirm">Er bestaat al een meegeleverd Bijbelbestand in deze map. Dit wordt overschreven.\nDoorgaan?</string>
+    <string name="bible_samples_copied">%1$d voorbeeldbijbel(s) gekopieerd en ingesteld als primaire Bijbel.</string>
+    <string name="add_bible_samples">Bijbelvoorbeelden toevoegen (KJV)</string>
     <string name="conversion_complete">Conversie voltooid</string>
     <string name="conversion_complete_message">%1$d liederen geconverteerd naar map: %2$s</string>
     <string name="conversion_complete_with_errors">%1$d liederen geconverteerd.\nFouten:\n%2$s</string>
@@ -1298,11 +1317,15 @@
     <string name="qa_export_dialog_title">Vragen exporteren</string>
     <string name="qa_import_dialog_title">Vragen importeren</string>
     <string name="qa_submit_questions">Vragen indienen</string>
+    <string name="qa_remote_dialog_title">Delen &amp; Externe Toegang</string>
+    <string name="qa_remote_dialog_description">Deel de QR-code hieronder zodat de gemeente vragen kan indienen, en gebruik de beheer-QR-code om vanaf een ander apparaat te modereren.</string>
     <string name="qa_hide_qr">QR verbergen van scherm</string>
     <string name="qa_show_qr">QR tonen op scherm</string>
     <string name="qa_admin_panel">Beheerderspaneel</string>
     <string name="qa_server_hint">Start de companion server om V&amp;A in te schakelen</string>
     <string name="qa_display_styling">Weergavestijl</string>
+    <string name="qa_styling_qr_group">QR-code</string>
+    <string name="qa_styling_text_group">Tekst &amp; Achtergrond</string>
     <string name="qa_font">Lettertype</string>
     <string name="qa_size">Grootte</string>
     <string name="qa_background_color">Achtergrondkleur</string>
@@ -1475,6 +1498,17 @@
     <string name="update_dialog_open_page">Downloadpagina openen</string>
     <string name="update_check_menu">Controleer op updates…</string>
     <string name="update_already_latest">U gebruikt de nieuwste versie.</string>
+    <string name="update_dialog_up_to_date_title">U bent up-to-date</string>
+    <string name="update_dialog_view_on_github">Bekijk op GitHub</string>
+    <string name="participate_in_prereleases">Bèta-/pre-releaseversies opnemen</string>
+    <string name="update_dialog_check_interval">Controleren op updates</string>
+    <string name="update_interval_every_launch">Bij elke start</string>
+    <string name="update_interval_weekly">Wekelijks</string>
+    <string name="update_interval_monthly">Maandelijks</string>
+    <string name="update_interval_every_2_months">Elke 2 maanden</string>
+    <string name="update_interval_every_3_months">Elke 3 maanden</string>
+    <string name="update_interval_every_6_months">Elke 6 maanden</string>
+    <string name="update_interval_never">Nooit</string>
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>
@@ -1532,6 +1566,7 @@
     <string name="language_romanian">Roemeens</string>
     <string name="language_dutch">Nederlands</string>
     <string name="language_slovak">Slowaaks</string>
+    <string name="language_estonian">Ests</string>
     <string name="tab_dictionary">Woordenboek</string>
     <string name="dictionary_search_hint">Zoek op nummer, woord of definitie…</string>
     <string name="dictionary_filter_all">Alles</string>
@@ -1610,6 +1645,8 @@
     <string name="setup_step5_vlc_missing">VLC is niet gevonden op dit systeem</string>
     <string name="setup_step5_vlc_wrong_arch">Verkeerde VLC-architectuur geïnstalleerd</string>
     <string name="setup_step5_vlc_wrong_arch_detail">Uw CPU-architectuur verschilt van de geïnstalleerde VLC. Download de juiste versie hieronder.</string>
+    <string name="setup_step5_vlc_load_failed">VLC gevonden maar laden mislukt</string>
+    <string name="setup_step5_vlc_load_failed_detail">Er is een VLC-installatie gevonden, maar deze kon niet correct worden geladen. Probeer VLC opnieuw te installeren (installeer op Windows ook de Microsoft Visual C++ Redistributable) en controleer hieronder opnieuw.</string>
     <string name="setup_step5_download_silicon">VLC downloaden (Apple Silicon)</string>
     <string name="setup_step5_download_intel">VLC downloaden (Intel)</string>
     <string name="setup_step5_download">VLC downloaden</string>
@@ -1678,6 +1715,39 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (in gebruik)</string>
     <string name="atem_slot_empty">Slot %1$d (leeg)</string>
+    <string name="tab_companion_surface">Companion</string>
+    <string name="companion_satellite_settings">Companion Satellite</string>
+    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
+    <string name="companion_satellite_description">Maak verbinding met een Bitfocus Companion-instantie op uw netwerk als Satellite-oppervlak en druk op de knoppen ervan vanuit ChurchPresenter.</string>
+    <string name="companion_satellite_host">Host</string>
+    <string name="companion_satellite_host_hint">bijv. 192.168.1.50</string>
+    <string name="companion_satellite_device_id">Apparaat-ID (tabblad)</string>
+    <string name="companion_satellite_device_id_hint">Laat leeg om automatisch te genereren/afleiden</string>
+    <string name="companion_satellite_left_sidebar_device_id">Apparaat-ID linkerzijbalk</string>
+    <string name="companion_satellite_right_sidebar_device_id">Apparaat-ID rechterzijbalk</string>
+    <string name="companion_satellite_rows">Rijen</string>
+    <string name="companion_satellite_columns">Kolommen</string>
+    <string name="companion_satellite_bitmap_size">Bitmapgrootte (px)</string>
+    <string name="companion_satellite_max_button_size">Maximale knopgrootte (dp)</string>
+    <string name="companion_satellite_max_button_size_hint">0 = onbeperkt</string>
+    <string name="companion_satellite_companion_config_note">Op welke pagina een verbinding start en welk deel van een groter raster deze toont, wordt in Companion zelf ingesteld (Instellingen → Surfaces → dit apparaat) — niet hier.</string>
+    <string name="companion_satellite_show_in">Weergeven in</string>
+    <string name="companion_satellite_show_in_tab">Tabblad</string>
+    <string name="companion_satellite_show_in_left_sidebar">Linkerzijbalk</string>
+    <string name="companion_satellite_show_in_right_sidebar">Rechterzijbalk</string>
+    <string name="companion_satellite_autoconnect">Automatisch verbinden bij opstarten</string>
+    <string name="companion_satellite_connect">Verbinden</string>
+    <string name="companion_satellite_disconnect">Verbinding verbreken</string>
+    <string name="companion_satellite_no_host">Stel een Companion-host in bij Instellingen → Companion Satellite om verbinding te maken.</string>
+    <string name="companion_satellite_status_connected">Verbonden</string>
+    <string name="companion_satellite_status_connecting">Verbinden…</string>
+    <string name="companion_satellite_status_disconnected">Niet verbonden</string>
+    <string name="companion_satellite_status_error">Fout: %1$s</string>
+    <string name="companion_satellite_connection_name">Naam</string>
+    <string name="companion_satellite_product_name">Productnaam</string>
+    <string name="companion_satellite_reconnect_delay">Vertraging opnieuw verbinden (ms)</string>
+    <string name="companion_satellite_add_connection">+ Verbinding toevoegen</string>
+    <string name="companion_satellite_remove_connection">Verbinding verwijderen</string>
     <string name="atem_unreachable">ATEM niet bereikbaar op %1$s</string>
     <string name="atem_capacity_equal">Clipcapaciteit: %1$d banken, elk tot %2$d frames (≈%3$s s) bij %4$s fps</string>
     <string name="atem_capacity_mixed">Clipcapaciteit: %1$d banken, tot %2$s frames bij %3$s fps</string>
@@ -1763,9 +1833,12 @@
     <string name="bible_stt_src_explicit">Uitgesproken referentie</string>
     <string name="bible_stt_src_reverse">Gevonden via tekst</string>
     <string name="bible_stt_src_continuation">Volgen</string>
+    <string name="bible_stt_src_chapter_scan">Gevonden in huidig hoofdstuk</string>
+    <string name="bible_stt_src_chapter_history">Overeenkomst met eerder hoofdstuk</string>
     <string name="bible_stt_track_transcription">Gehoord in transcriptie</string>
     <string name="bible_stt_track_translation">Gehoord in vertaling</string>
     <string name="bible_stt_match_label">Tekstovereenkomst</string>
+    <string name="bible_stt_text_match_hint">Beïnvloedt ook de algehele detectiebetrouwbaarheid en hoe lang een gesproken boek/hoofdstuk actief blijft — niet alleen overeenkomsten met geciteerde tekst</string>
     <string name="bible_stt_level_off">Uit</string>
     <string name="bible_stt_level_conservative">Conservatief</string>
     <string name="bible_stt_level_balanced">Gebalanceerd</string>
@@ -1807,4 +1880,12 @@
     <string name="contact_network_error">Kan de server niet bereiken. Controleer je internetverbinding en probeer het opnieuw.</string>
     <string name="contact_open_browser">Openen in browser</string>
     <string name="browser_source_outputs_help">Virtuele uitgangen aangeboden als webpagina — plak de URL in een Browser Source om live content te overlayen, transparante achtergrond wordt ondersteund.</string>
+    <string name="add_browser_source_output">Uitvoer toevoegen</string>
+    <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_confirm_remove_message">Weet u zeker dat u %1$s wilt verwijderen?</string>
+    <string name="browser_source_require_api_key">API-sleutel vereisen</string>
+    <string name="browser_source_uses_server_api_key">Gebruikt dezelfde sleutel als de Serverinstellingen; schakel deze daar eerst in.</string>
+    <string name="browser_source_enabled">Ingeschakeld</string>
+    <string name="copy_url_transparent">URL kopiëren voor transparante achtergrond</string>
+    <string name="copy_url_black_bg">URL kopiëren voor zwarte achtergrond</string>
 </resources>

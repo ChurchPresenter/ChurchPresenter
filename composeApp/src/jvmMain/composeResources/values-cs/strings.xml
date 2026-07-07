@@ -183,6 +183,7 @@
     <string name="language_portuguese">Portugalština</string>
     <string name="language_romanian">Rumunština</string>
     <string name="language_slovak">Slovenština</string>
+    <string name="language_estonian">Estonština</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Pro "%1$s" nebyly nalezeny žádné výsledky</string>
@@ -226,6 +227,7 @@
     <string name="tooltip_remove">Odebrat</string>
     <string name="tooltip_go_live">Zobrazit</string>
     <string name="tooltip_presentation_remote">Otevřít dálkové ovládání</string>
+    <string name="tooltip_qa_remote">Sdílení a vzdálený přístup</string>
     <string name="tooltip_send_to_stage_monitor">Odeslat na monitor scény</string>
     <string name="tooltip_hide_from_stage_monitor">Skrýt oznámení</string>
 
@@ -408,6 +410,10 @@
     <string name="select_presentation_file">Vyberte soubor prezentace pro zobrazení snímků</string>
     <string name="supported_formats">Podporováno: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Snímky jsou vykresleny jako statické obrázky — animace, přechody, videa a zvuk nejsou podporovány.</string>
+    <string name="presentation_error_password_protected">Toto PDF je chráněno heslem a nelze jej otevřít. Odstraňte heslo a zkuste to znovu.</string>
+    <string name="presentation_error_empty_document">Tento soubor nemá žádné stránky k zobrazení.</string>
+    <string name="presentation_error_library_missing">Podpora PDF není v této verzi k dispozici.</string>
+    <string name="presentation_error_render_failed">Tento soubor se nepodařilo přečíst — může být poškozený nebo v nepodporovaném formátu.</string>
     <string name="slide_number">Snímek %1$d</string>
     <string name="remove">Odstranit</string>
     <string name="select_presentation_file_button">Vybrat soubor</string>
@@ -496,6 +502,9 @@
     <string name="show_in_lower_third">Zobrazit ve spodní třetině</string>
     <string name="content_bible">Bible</string>
     <string name="content_songs">Písně</string>
+    <string name="content_bible_background">Pozadí Bible</string>
+    <string name="content_songs_background">Pozadí písní</string>
+    <string name="content_background_layered_tooltip">Projeví se pouze tehdy, když je výše zaškrtnuto i obecné pole Pozadí (nebo Pozadí titulkového pruhu).</string>
     <string name="content_pictures">Fotky/Prezentace</string>
     <string name="content_media">Média</string>
     <string name="content_streaming">Spodní třetina</string>
@@ -661,6 +670,7 @@
     <string name="api_key_hint">Zadejte tajný klíč…</string>
     <string name="api_key_label">API klíč</string>
     <string name="api_key_protection">Ochrana API klíče</string>
+    <string name="browser_source_note_in_server_settings">Jednotlivé výstupy Browser Source (nastavení Projekce) mohou tento klíč vyžadovat nezávisle.</string>
     <string name="allow_file_upload">Povolit nahravani souboru</string>
     <string name="allow_file_upload_description">Povolit mobilnim zariizenim nahravat soubory (fotografie a prezentace) do tohoto pocitace.</string>
     <string name="appearance">Systém</string>
@@ -756,6 +766,7 @@
     <string name="presentation_storage_directory">Adresář úložiště prezentací</string>
     <string name="projection_auto_display">Automaticky</string>
     <string name="projection_display_label">Displej %1$d (%2$dx%3$d)</string>
+    <string name="browser_source_outputs">Výstupy Browser Source</string>
     <string name="projection_target_display">Displej</string>
     <string name="reset_settings">Obnovit všechna nastavení</string>
     <string name="reset_settings_confirm">Opravdu chcete obnovit všechna nastavení na výchozí hodnoty?\n\nAplikace se restartuje.</string>
@@ -838,6 +849,8 @@
     <string name="web_go_live">Zobrazit živě</string>
     <string name="web_live_badge">ŽIVĚ</string>
     <string name="web_preview_hint">Zadejte URL výše a klepněte na Zobrazit živě</string>
+    <string name="web_engine_unavailable_title">Webový prohlížeč není k dispozici</string>
+    <string name="web_engine_unavailable_body">Prohlížečové jádro se nepodařilo spustit. Nainstalujte Microsoft Visual C++ Redistributable (x64) a restartujte aplikaci.</string>
     <string name="web_under_construction">Tato funkce je ve vývoji.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
@@ -946,6 +959,10 @@
     <string name="add_song_samples">Přidat ukázkové písně</string>
     <string name="sps_file_not_supported">%1$s (není podporováno)</string>
     <string name="folder_overwrite_confirm">Složka \"%1$s\" již existuje. Tím se přepíší existující soubory písní.\nPokračovat?</string>
+    <string name="bible_samples">Ukázkové Bible</string>
+    <string name="bible_samples_overwrite_confirm">V této složce už existuje přibalený soubor Bible. Tímto ho přepíšete.\nPokračovat?</string>
+    <string name="bible_samples_copied">Zkopírováno %1$d ukázkových Biblí a nastaveno jako primární Bible.</string>
+    <string name="add_bible_samples">Přidat ukázkové Bible (KJV)</string>
     <string name="conversion_complete">Převod dokončen</string>
     <string name="conversion_complete_message">Převedeno %1$d písní do složky: %2$s</string>
     <string name="conversion_complete_with_errors">Převedeno %1$d písní.\nChyby:\n%2$s</string>
@@ -1009,6 +1026,7 @@
     <string name="canvas_video_loop">Smyčka</string>
     <string name="canvas_video_volume">Hlasitost</string>
     <string name="canvas_video_vlc_not_found">VLC nenalezeno</string>
+    <string name="canvas_video_vlc_load_failed">VLC nalezeno, ale nepodařilo se jej načíst</string>
     <string name="canvas_video_no_selection">Žádné video nevybráno</string>
     <string name="canvas_video_file_not_found">Soubor nenalezen: %1$s</string>
     <string name="canvas_video_loading">Načítání…</string>
@@ -1171,6 +1189,17 @@
     <string name="update_dialog_open_page">Otevřít stránku ke stažení</string>
     <string name="update_check_menu">Zkontrolovat aktualizace…</string>
     <string name="update_already_latest">Máte nainstalovanou nejnovější verzi.</string>
+    <string name="update_dialog_up_to_date_title">Máte nejnovější verzi</string>
+    <string name="update_dialog_view_on_github">Zobrazit na GitHubu</string>
+    <string name="participate_in_prereleases">Zahrnout beta / předběžné verze aktualizací</string>
+    <string name="update_dialog_check_interval">Kontrolovat aktualizace</string>
+    <string name="update_interval_every_launch">Při každém spuštění</string>
+    <string name="update_interval_weekly">Týdně</string>
+    <string name="update_interval_monthly">Měsíčně</string>
+    <string name="update_interval_every_2_months">Každé 2 měsíce</string>
+    <string name="update_interval_every_3_months">Každé 3 měsíce</string>
+    <string name="update_interval_every_6_months">Každých 6 měsíců</string>
+    <string name="update_interval_never">Nikdy</string>
 
     <!-- Stage Monitor Settings -->
     <string name="stage_monitor">Monitor scény</string>
@@ -1253,11 +1282,15 @@
     <string name="qa_export_dialog_title">Exportovat otázky</string>
     <string name="qa_import_dialog_title">Importovat otázky</string>
     <string name="qa_submit_questions">Odeslat otázky</string>
+    <string name="qa_remote_dialog_title">Sdílení a vzdálený přístup</string>
+    <string name="qa_remote_dialog_description">Sdílejte QR kód níže, aby shromáždění mohlo posílat otázky, a použijte administrátorský QR kód k moderování z jiného zařízení.</string>
     <string name="qa_hide_qr">Skrýt QR z displeje</string>
     <string name="qa_show_qr">Zobrazit QR na displeji</string>
     <string name="qa_admin_panel">Administrační panel</string>
     <string name="qa_server_hint">Spusťte companion server pro aktivaci Q&amp;A</string>
     <string name="qa_display_styling">Styl zobrazení</string>
+    <string name="qa_styling_qr_group">QR kód</string>
+    <string name="qa_styling_text_group">Text a pozadí</string>
     <string name="qa_text_color">Barva textu</string>
     <string name="qa_qr_fg_color">Popředí QR</string>
     <string name="qa_qr_bg_color">Pozadí QR</string>
@@ -1509,11 +1542,13 @@
     <string name="label_hex">Hex</string>
     <string name="lottie_select_json_file">Vybrat soubor Lottie JSON</string>
     <string name="media_vlc_arch_mismatch">Špatná architektura VLC. Tvůj Mac používá Apple Silicon (arm64), ale nainstalované VLC je pouze pro Intel (x86_64). Stáhni verzi VLC pro Apple Silicon z videolan.org a restartuj.</string>
+    <string name="media_vlc_load_failed">VLC bylo nalezeno, ale nepodařilo se jej načíst. Zkuste VLC přeinstalovat z videolan.org (ve Windows nainstalujte také Microsoft Visual C++ Redistributable) a poté aplikaci restartujte.</string>
     <string name="open_converter">Konvertor</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Pozadí</string>
     <string name="projection_content_lt_background">Pozadí spodní třetiny</string>
     <string name="projection_web_decklink_tooltip">Webový prohlížeč nemůže renderovat na výstupech DeckLink</string>
+    <string name="browser_source_content_unavailable_tooltip">Zatím není k dispozici pro výstup Browser Source</string>
     <string name="projection_web_go_live_tooltip">Vyžaduje běžný displej (ne DeckLink) s povoleným webem v nastavení projekce</string>
     <string name="qa_add_question_hint">Přidat otázku…</string>
     <string name="remote_activity_added_to_schedule">Přidáno do programu</string>
@@ -1598,6 +1633,8 @@
     <string name="setup_step5_vlc_missing">VLC nebylo nalezeno na tomto systému</string>
     <string name="setup_step5_vlc_wrong_arch">Nainstalována nesprávná architektura VLC</string>
     <string name="setup_step5_vlc_wrong_arch_detail">Architektura vašeho procesoru se liší od nainstalovaného VLC. Stáhněte správnou verzi níže.</string>
+    <string name="setup_step5_vlc_load_failed">VLC nalezeno, ale nepodařilo se jej načíst</string>
+    <string name="setup_step5_vlc_load_failed_detail">Byla zjištěna instalace VLC, ale nepodařilo se ji správně načíst. Zkuste VLC přeinstalovat (ve Windows nainstalujte také Microsoft Visual C++ Redistributable) a poté to níže zkontrolujte znovu.</string>
     <string name="setup_step5_download_silicon">Stáhnout VLC (Apple Silicon)</string>
     <string name="setup_step5_download_intel">Stáhnout VLC (Intel)</string>
     <string name="setup_step5_download">Stáhnout VLC</string>
@@ -1666,6 +1703,39 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (použit)</string>
     <string name="atem_slot_empty">Slot %1$d (prázdný)</string>
+    <string name="tab_companion_surface">Companion</string>
+    <string name="companion_satellite_settings">Companion Satellite</string>
+    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
+    <string name="companion_satellite_description">Připojte se k instanci Bitfocus Companion ve své síti jako povrch Satellite a mačkejte její tlačítka přímo z ChurchPresenter.</string>
+    <string name="companion_satellite_host">Hostitel</string>
+    <string name="companion_satellite_host_hint">např. 192.168.1.50</string>
+    <string name="companion_satellite_device_id">ID zařízení karty</string>
+    <string name="companion_satellite_device_id_hint">Ponechte prázdné pro automatické vygenerování/odvození</string>
+    <string name="companion_satellite_left_sidebar_device_id">ID zařízení levého postranního panelu</string>
+    <string name="companion_satellite_right_sidebar_device_id">ID zařízení pravého postranního panelu</string>
+    <string name="companion_satellite_rows">Řádky</string>
+    <string name="companion_satellite_columns">Sloupce</string>
+    <string name="companion_satellite_bitmap_size">Velikost bitmapy (px)</string>
+    <string name="companion_satellite_max_button_size">Maximální velikost tlačítka (dp)</string>
+    <string name="companion_satellite_max_button_size_hint">0 = neomezeno</string>
+    <string name="companion_satellite_companion_config_note">Na které stránce připojení začíná a kterou část větší mřížky zobrazuje, se nastavuje přímo v aplikaci Companion (Nastavení → Surfaces → toto zařízení) — ne zde.</string>
+    <string name="companion_satellite_show_in">Zobrazit v</string>
+    <string name="companion_satellite_show_in_tab">Karta</string>
+    <string name="companion_satellite_show_in_left_sidebar">Levý postranní panel</string>
+    <string name="companion_satellite_show_in_right_sidebar">Pravý postranní panel</string>
+    <string name="companion_satellite_autoconnect">Automaticky připojit při spuštění</string>
+    <string name="companion_satellite_connect">Připojit</string>
+    <string name="companion_satellite_disconnect">Odpojit</string>
+    <string name="companion_satellite_no_host">Nastavte hostitele Companion v Nastavení → Companion Satellite pro připojení.</string>
+    <string name="companion_satellite_status_connected">Připojeno</string>
+    <string name="companion_satellite_status_connecting">Připojování…</string>
+    <string name="companion_satellite_status_disconnected">Odpojeno</string>
+    <string name="companion_satellite_status_error">Chyba: %1$s</string>
+    <string name="companion_satellite_connection_name">Název</string>
+    <string name="companion_satellite_product_name">Název produktu</string>
+    <string name="companion_satellite_reconnect_delay">Prodleva opětovného připojení (ms)</string>
+    <string name="companion_satellite_add_connection">+ Přidat připojení</string>
+    <string name="companion_satellite_remove_connection">Odstranit připojení</string>
     <string name="atem_unreachable">ATEM není dostupný na %1$s</string>
     <string name="atem_capacity_equal">Kapacita klipů: %1$d banky, každá až %2$d snímků (≈%3$s s) při %4$s fps</string>
     <string name="atem_capacity_mixed">Kapacita klipů: %1$d banky, až %2$s snímků při %3$s fps</string>
@@ -1751,9 +1821,12 @@
     <string name="bible_stt_src_explicit">Vyslovený odkaz</string>
     <string name="bible_stt_src_reverse">Nalezeno textem</string>
     <string name="bible_stt_src_continuation">Sledování</string>
+    <string name="bible_stt_src_chapter_scan">Nalezeno v aktuální kapitole</string>
+    <string name="bible_stt_src_chapter_history">Shoda s dřívější kapitolou</string>
     <string name="bible_stt_track_transcription">Slyšeno v přepisu</string>
     <string name="bible_stt_track_translation">Slyšeno v překladu</string>
     <string name="bible_stt_match_label">Shoda textu</string>
+    <string name="bible_stt_text_match_hint">Ovlivňuje také celkovou spolehlivost detekce a to, jak dlouho zůstává vyřčená kniha/kapitola aktivní — nejen shody citovaného textu</string>
     <string name="bible_stt_level_off">Vypnuto</string>
     <string name="bible_stt_level_conservative">Konzervativní</string>
     <string name="bible_stt_level_balanced">Vyvážený</string>
@@ -1789,5 +1862,13 @@
     <string name="contact_network_error">Server se nepodařilo kontaktovat. Zkontrolujte připojení k internetu a zkuste to znovu.</string>
     <string name="contact_open_browser">Otevřít v prohlížeči</string>
     <string name="browser_source_outputs_help">Virtuální výstupy poskytované jako webová stránka — vložte adresu URL do Browser Source pro překrytí živého obsahu, průhledné pozadí je podporováno.</string>
+    <string name="add_browser_source_output">Přidat výstup</string>
+    <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_confirm_remove_message">Opravdu chcete odstranit %1$s?</string>
+    <string name="browser_source_require_api_key">Vyžadovat API klíč</string>
+    <string name="browser_source_uses_server_api_key">Používá stejný klíč jako nastavení Serveru; nejprve jej povolte tam.</string>
+    <string name="browser_source_enabled">Povoleno</string>
+    <string name="copy_url_transparent">Kopírovat URL pro průhledné pozadí</string>
+    <string name="copy_url_black_bg">Kopírovat URL pro černé pozadí</string>
 </resources>
 

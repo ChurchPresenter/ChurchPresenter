@@ -468,6 +468,7 @@
     <string name="tooltip_edit_label">Muuda silti</string>
     <string name="tooltip_go_live">Mine eetrisse</string>
     <string name="tooltip_presentation_remote">Ava kaugjuhtimine</string>
+    <string name="tooltip_qa_remote">Jagamine ja kaugjuurdepääs</string>
     <string name="tooltip_send_to_stage_monitor">Saada lavamonitorile</string>
     <string name="tooltip_hide_from_stage_monitor">Peida teade</string>
     <string name="tooltip_add_label">Lisa silt</string>
@@ -530,6 +531,10 @@
     <string name="select_presentation_file">Vali esitlusfail slaidide vaatamiseks</string>
     <string name="supported_formats">Toetatud: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Slaidid kuvatakse staatiliste piltidena — animatsioonid, üleminekud, videod ja heli ei ole toetatud.</string>
+    <string name="presentation_error_password_protected">See PDF on parooliga kaitstud ja seda ei saa avada. Eemalda parool ja proovi uuesti.</string>
+    <string name="presentation_error_empty_document">Selles failis ei ole näidatavaid lehekülgi.</string>
+    <string name="presentation_error_library_missing">PDF-i tugi ei ole selles versioonis saadaval.</string>
+    <string name="presentation_error_render_failed">Seda faili ei õnnestunud lugeda — see võib olla rikutud või toetamata vormingus.</string>
     <string name="slide_number">Slaid %1$d</string>
     <string name="remove">Eemalda</string>
     <string name="select_presentation_file_button">Vali fail</string>
@@ -564,6 +569,9 @@
     <string name="presenter_windows_count">Esitlusaknad: %1$d</string>
     <string name="content_bible">Piibel</string>
     <string name="content_songs">Laulud</string>
+    <string name="content_bible_background">Piibli taust</string>
+    <string name="content_songs_background">Laulude taust</string>
+    <string name="content_background_layered_tooltip">Kehtib ainult siis, kui ka ülalolev üldine Tausta (või Alumise kolmandiku tausta) märkeruut on samuti sees.</string>
     <string name="content_pictures">Pildid/Esitlus</string>
     <string name="content_media">Meedia</string>
     <string name="content_streaming">Alumine kolmandik</string>
@@ -587,6 +595,7 @@
     <string name="browser_source_confirm_remove_message">Kas oled kindel, et soovid eemaldada %1$s?</string>
     <string name="browser_source_require_api_key">Nõua API-võtit</string>
     <string name="browser_source_uses_server_api_key">Kasutab sama võtit kui serveri seaded; luba see seal esmalt.</string>
+    <string name="browser_source_enabled">Lubatud</string>
     <string name="copy_url_transparent">Kopeeri URL läbipaistva tausta jaoks</string>
     <string name="copy_url_black_bg">Kopeeri URL musta tausta jaoks</string>
 
@@ -663,6 +672,7 @@
     <string name="media_vlc_required">Meedia esitamiseks on vaja VLC meediapleierit</string>
     <string name="media_vlc_install">Palun paigalda VLC lehelt videolan.org ja taaskäivita rakendus</string>
     <string name="media_vlc_arch_mismatch">Vale VLC arhitektuur. Su Mac kasutab Apple Silicon (arm64) protsessorit, kuid paigaldatud VLC on ainult Inteli (x86_64) jaoks. Laadi lehelt videolan.org alla Apple Silicon versioon VLC-st ja taaskäivita.</string>
+    <string name="media_vlc_load_failed">VLC leiti, kuid seda ei õnnestunud laadida. Proovi VLC uuesti installida veebisaidilt videolan.org (Windowsis installi ka Microsoft Visual C++ Redistributable) ja taaskäivita seejärel rakendus.</string>
     <string name="vlc_custom_path">Kohandatud VLC asukoht</string>
     <string name="vlc_browse">Sirvi</string>
     <string name="vlc_path_hint">Vali VLC paigalduskaust</string>
@@ -871,6 +881,7 @@
     <string name="canvas_video_loop">Kordamine</string>
     <string name="canvas_video_volume">Helitugevus</string>
     <string name="canvas_video_vlc_not_found">VLC-d ei leitud</string>
+    <string name="canvas_video_vlc_load_failed">VLC leiti, kuid laadimine ebaõnnestus</string>
     <string name="canvas_video_no_selection">Videot pole valitud</string>
     <string name="canvas_video_file_not_found">Faili ei leitud: %1$s</string>
     <string name="canvas_video_loading">Laadimine…</string>
@@ -1228,6 +1239,10 @@
     <string name="add_song_samples">Lisa laulunäidised</string>
     <string name="sps_file_not_supported">%1$s (ei ole toetatud)</string>
     <string name="folder_overwrite_confirm">Kaust "%1$s" on juba olemas. See kirjutab olemasolevad laulufailid üle.\nKas jätkata?</string>
+    <string name="bible_samples">Piibli näidised</string>
+    <string name="bible_samples_overwrite_confirm">Selles kaustas on juba kaasasolev Piiblifail. See kirjutatakse üle.\nKas jätkata?</string>
+    <string name="bible_samples_copied">Kopeeriti %1$d näidispiibel(it) ja määrati esmaseks Piibliks.</string>
+    <string name="add_bible_samples">Lisa Piibli näidised (KJV)</string>
     <string name="conversion_complete">Teisendamine lõpetatud</string>
     <string name="conversion_complete_message">%1$d laulu teisendati kausta: %2$s</string>
     <string name="conversion_complete_with_errors">%1$d laulu teisendatud.\nVead:\n%2$s</string>
@@ -1363,11 +1378,15 @@
     <string name="qa_export_dialog_title">Ekspordi küsimused</string>
     <string name="qa_import_dialog_title">Impordi küsimused</string>
     <string name="qa_submit_questions">Esita küsimused</string>
+    <string name="qa_remote_dialog_title">Jagamine ja kaugjuurdepääs</string>
+    <string name="qa_remote_dialog_description">Jaga allolevat QR-koodi, et kogudus saaks küsimusi esitada, ja kasuta administraatori QR-koodi teisest seadmest modereerimiseks.</string>
     <string name="qa_hide_qr">Peida QR kuvalt</string>
     <string name="qa_show_qr">Näita QR-i kuval</string>
     <string name="qa_admin_panel">Administraatoripaneel</string>
     <string name="qa_server_hint">K&amp;V lubamiseks käivita kaasserver</string>
     <string name="qa_display_styling">Kuva kujundus</string>
+    <string name="qa_styling_qr_group">QR-kood</string>
+    <string name="qa_styling_text_group">Tekst ja taust</string>
     <string name="qa_text_color">Teksti värv</string>
     <string name="qa_qr_fg_color">QR esiplaan</string>
     <string name="qa_qr_bg_color">QR taust</string>
@@ -1547,6 +1566,17 @@
     <string name="update_dialog_open_page">Ava allalaadimislehekülg</string>
     <string name="update_check_menu">Kontrolli uuendusi…</string>
     <string name="update_already_latest">Kasutad juba uusimat versiooni.</string>
+    <string name="update_dialog_up_to_date_title">Oled ajakohane</string>
+    <string name="update_dialog_view_on_github">Vaata GitHubis</string>
+    <string name="participate_in_prereleases">Kaasa beeta- ja eelväljalasked</string>
+    <string name="update_dialog_check_interval">Kontrolli uuendusi</string>
+    <string name="update_interval_every_launch">Iga käivitamise järel</string>
+    <string name="update_interval_weekly">Iganädalaselt</string>
+    <string name="update_interval_monthly">Igakuiselt</string>
+    <string name="update_interval_every_2_months">Iga 2 kuu tagant</string>
+    <string name="update_interval_every_3_months">Iga 3 kuu tagant</string>
+    <string name="update_interval_every_6_months">Iga 6 kuu tagant</string>
+    <string name="update_interval_never">Mitte kunagi</string>
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>
@@ -1655,6 +1685,8 @@
     <string name="setup_step5_vlc_missing">VLC-d selles süsteemis ei leitud</string>
     <string name="setup_step5_vlc_wrong_arch">Paigaldatud on vale VLC arhitektuur</string>
     <string name="setup_step5_vlc_wrong_arch_detail">Su protsessori arhitektuur erineb paigaldatud VLC omast. Laadi alla õige versioon allpool.</string>
+    <string name="setup_step5_vlc_load_failed">VLC leiti, kuid laadimine ebaõnnestus</string>
+    <string name="setup_step5_vlc_load_failed_detail">Tuvastati VLC install, kuid seda ei õnnestunud korrektselt laadida. Proovi VLC uuesti installida (Windowsis installi ka Microsoft Visual C++ Redistributable) ja kontrolli seejärel allpool uuesti.</string>
     <string name="setup_step5_download">Laadi alla VLC</string>
     <string name="setup_step5_download_silicon">Laadi alla VLC (Apple Silicon)</string>
     <string name="setup_step5_download_intel">Laadi alla VLC (Intel)</string>
@@ -1748,6 +1780,39 @@
     <string name="atem_slot_named">Pesa %1$d – %2$s</string>
     <string name="atem_slot_in_use">Pesa %1$d (kasutusel)</string>
     <string name="atem_slot_empty">Pesa %1$d (tühi)</string>
+    <string name="tab_companion_surface">Companion</string>
+    <string name="companion_satellite_settings">Companion Satellite</string>
+    <string name="companion_satellite_section_connection">Bitfocus Companion Satellite</string>
+    <string name="companion_satellite_description">Ühenda oma võrgus asuva Bitfocus Companioni eksemplariga Satellite pinnana ja vajuta selle nuppe otse ChurchPresenterist.</string>
+    <string name="companion_satellite_host">Host</string>
+    <string name="companion_satellite_host_hint">nt 192.168.1.50</string>
+    <string name="companion_satellite_device_id">Vahekaardi seadme ID</string>
+    <string name="companion_satellite_device_id_hint">Automaatseks loomiseks/tuletamiseks jäta tühjaks</string>
+    <string name="companion_satellite_left_sidebar_device_id">Vasaku külgriba seadme ID</string>
+    <string name="companion_satellite_right_sidebar_device_id">Parema külgriba seadme ID</string>
+    <string name="companion_satellite_rows">Read</string>
+    <string name="companion_satellite_columns">Veerud</string>
+    <string name="companion_satellite_bitmap_size">Bitmapi suurus (px)</string>
+    <string name="companion_satellite_max_button_size">Suurim nupu suurus (dp)</string>
+    <string name="companion_satellite_max_button_size_hint">0 = piiramatu</string>
+    <string name="companion_satellite_companion_config_note">Millise lehega ühendus algab ja millist osa suuremast ruudustikust see näitab, seadistatakse Companionis endas (Seaded → Surfaces → see seade) — mitte siin.</string>
+    <string name="companion_satellite_show_in">Näita kohas</string>
+    <string name="companion_satellite_show_in_tab">Vahekaart</string>
+    <string name="companion_satellite_show_in_left_sidebar">Vasak külgriba</string>
+    <string name="companion_satellite_show_in_right_sidebar">Parem külgriba</string>
+    <string name="companion_satellite_autoconnect">Ühenda automaatselt käivitamisel</string>
+    <string name="companion_satellite_connect">Ühenda</string>
+    <string name="companion_satellite_disconnect">Katkesta ühendus</string>
+    <string name="companion_satellite_no_host">Ühenduse loomiseks määra Companioni host jaotises Seaded → Companion Satellite.</string>
+    <string name="companion_satellite_status_connected">Ühendatud</string>
+    <string name="companion_satellite_status_connecting">Ühendamine…</string>
+    <string name="companion_satellite_status_disconnected">Ühendus katkestatud</string>
+    <string name="companion_satellite_status_error">Viga: %1$s</string>
+    <string name="companion_satellite_connection_name">Nimi</string>
+    <string name="companion_satellite_product_name">Toote nimi</string>
+    <string name="companion_satellite_reconnect_delay">Taasühendamise viivitus (ms)</string>
+    <string name="companion_satellite_add_connection">+ Lisa ühendus</string>
+    <string name="companion_satellite_remove_connection">Eemalda ühendus</string>
 
     <!-- ATEM Media Upload Triggers (Server tab / Bitfocus Companion) -->
     <string name="companion_atem_triggers">ATEM meedia üleslaadimise päästikud</string>
@@ -1773,9 +1838,12 @@
     <string name="bible_stt_src_explicit">Räägitud viide</string>
     <string name="bible_stt_src_reverse">Vastas teksti järgi</string>
     <string name="bible_stt_src_continuation">Kaasa minemine</string>
+    <string name="bible_stt_src_chapter_scan">Leiti praegusest peatükist</string>
+    <string name="bible_stt_src_chapter_history">Vastas varasemale peatükile</string>
     <string name="bible_stt_track_transcription">Kuuldud transkriptsioonis</string>
     <string name="bible_stt_track_translation">Kuuldud tõlkes</string>
     <string name="bible_stt_match_label">Teksti vaste</string>
+    <string name="bible_stt_text_match_hint">Mõjutab ka üldist tuvastuskindlust ja seda, kui kaua räägitud raamat/peatükk aktiivsena püsib — mitte ainult tsiteeritud teksti vasteid</string>
     <string name="bible_stt_level_off">Väljas</string>
     <string name="bible_stt_level_conservative">Ettevaatlik</string>
     <string name="bible_stt_level_balanced">Tasakaalustatud</string>
