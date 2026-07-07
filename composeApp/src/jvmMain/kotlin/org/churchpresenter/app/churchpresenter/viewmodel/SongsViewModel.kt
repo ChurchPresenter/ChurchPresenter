@@ -294,9 +294,14 @@ class SongsViewModel(
 
         // 1. Primary: stable songId "songbook::number" — unambiguous across songbooks
         val songData = allSongs.find { songId.isNotBlank() && it.songId == songId }
-        // 2. Fallback: songbook + number (old saved schedules without songId)
+        // 2. Fallback: songbook + number (old saved schedules without songId, and every mirrored
+        // Instance Link schedule item — the wire protocol has no songId field at all, only a plain
+        // Int songNumber). Compare numerically, not as raw strings: a catalog entry's number may be
+        // zero-padded (e.g. "0042") while songNumber is always a plain Int (42) with no way to
+        // recover the original padding, so a string comparison would silently never match.
             ?: allSongs.find {
-                it.songbook.equals(songbook, ignoreCase = true) && it.number == songNumber.toString()
+                it.songbook.equals(songbook, ignoreCase = true) &&
+                    (it.number.toIntOrNull()?.let { n -> n == songNumber } ?: (it.number == songNumber.toString()))
             }
         // 3. Last resort: title only
             ?: allSongs.find { it.title.equals(title, ignoreCase = true) }
