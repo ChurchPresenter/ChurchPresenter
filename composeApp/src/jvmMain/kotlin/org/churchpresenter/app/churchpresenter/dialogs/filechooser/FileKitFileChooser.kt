@@ -11,6 +11,8 @@ import io.github.vinceglb.filekit.dialogs.openFileSaver
 import kotlinx.coroutines.CancellationException
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.awt.KeyboardFocusManager
+import java.io.File
+import java.nio.file.InvalidPathException
 import java.nio.file.Path
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -39,19 +41,19 @@ object FileKitFileChooser : FileChooser() {
         when {
             // No call site selects multiple directories, so a single pick is sufficient
             selectDirectory -> FileKit.openDirectoryPicker(directory = directory, dialogSettings = settings)
-                ?.let { listOf(it.file.toPath()) }
+                ?.file?.toPathOrNull()?.let { listOf(it) }
             multiple -> FileKit.openFilePicker(
                 type = filters.toFileKitType(),
                 mode = FileKitMode.Multiple(),
                 directory = directory,
                 dialogSettings = settings
-            )?.map { it.file.toPath() }
+            )?.mapNotNull { it.file.toPathOrNull() }?.takeIf { it.isNotEmpty() }
             else -> FileKit.openFilePicker(
                 type = filters.toFileKitType(),
                 mode = FileKitMode.Single,
                 directory = directory,
                 dialogSettings = settings
-            )?.let { listOf(it.file.toPath()) }
+            )?.file?.toPathOrNull()?.let { listOf(it) }
         }
     } catch (e: CancellationException) {
         throw e
@@ -80,7 +82,7 @@ object FileKitFileChooser : FileChooser() {
             allowedExtensions = extensions.takeIf { it.isNotEmpty() }?.toSet(),
             directory = PlatformFile(location.toFile()),
             dialogSettings = FileKitDialogSettings(title = title, parentWindow = parentWindow())
-        )?.file?.toPath()
+        )?.file?.toPathOrNull()
     } catch (e: CancellationException) {
         throw e
     } catch (t: Throwable) {
@@ -119,4 +121,17 @@ object FileKitFileChooser : FileChooser() {
             .takeIf { it.isNotEmpty() }
             ?.let { FileKitType.File(it) }
             ?: FileKitType.File()
+
+    /**
+     * Windows can hand back a virtual shell item (e.g. the "This PC" node,
+     * `::{20D04FE0-3AEA-1069-A2D8-08002B30309D}`) when a user selects a special
+     * folder in the native picker's navigation pane. Such paths have no real
+     * filesystem representation, so [File.toPath] throws; treat that as no
+     * selection rather than letting it bubble up as a "native dialogs broken" crash.
+     */
+    private fun File.toPathOrNull(): Path? = try {
+        toPath()
+    } catch (_: InvalidPathException) {
+        null
+    }
 }
