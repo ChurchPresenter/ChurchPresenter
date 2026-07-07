@@ -100,6 +100,10 @@ class InstanceLinkClient(
         reconnectDelayMs: Long,
         myGeneration: Long
     ) {
+        // A peer that's simply offline (not started yet, or closed) is an expected, benign state —
+        // don't let a fixed ~2s retry cadence flood Sentry with one warning per attempt. Report the
+        // first failure of a streak, then only every 10th thereafter; reset once connected again.
+        var consecutiveFailures = 0
         while (scope.isActive && generation == myGeneration) {
             onStatusChanged(InstanceLinkStatus.CONNECTING)
             InstanceLinkLogger.log(
@@ -120,6 +124,7 @@ class InstanceLinkClient(
                 ) {
                     if (generation != myGeneration) return@webSocket
                     session = this
+                    consecutiveFailures = 0
                     onStatusChanged(InstanceLinkStatus.CONNECTED)
                     InstanceLinkLogger.log(
                         InstanceLinkLogSide.FOLLOWER, "connect_result",
@@ -133,11 +138,17 @@ class InstanceLinkClient(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                consecutiveFailures++
                 System.err.println("InstanceLink: connect to ws://$host:$port${Constants.ENDPOINT_WS} failed — ${e.message}")
-                CrashReporter.reportWarning(
-                    "InstanceLink: connection failed — ${e.message}",
-                    tags = mapOf("subsystem" to "instance_link")
-                )
+                if (consecutiveFailures == 1 || consecutiveFailures % 10 == 0) {
+                    CrashReporter.reportWarning(
+                        "InstanceLink: connection failed — ${e.message}",
+                        tags = mapOf(
+                            "subsystem" to "instance_link",
+                            "consecutive_failures" to consecutiveFailures.toString()
+                        )
+                    )
+                }
                 InstanceLinkLogger.log(
                     InstanceLinkLogSide.FOLLOWER, "connect_result",
                     mapOf("success" to false, "host" to host, "port" to port, "reason" to e.message)
