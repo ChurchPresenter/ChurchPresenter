@@ -70,6 +70,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.instance_link_following_host
+import churchpresenter.composeapp.generated.resources.instance_link_primary_badge
 import churchpresenter.composeapp.generated.resources.ic_arrow_left
 import churchpresenter.composeapp.generated.resources.ic_arrow_right
 import churchpresenter.composeapp.generated.resources.ic_settings
@@ -217,6 +218,8 @@ fun MainDesktop(
     /** Persistent "Following <host>" badge shown above the Schedule panel while connected via Instance Link. */
     instanceLinkConnectionStatus: InstanceLinkStatus = InstanceLinkStatus.DISCONNECTED,
     instanceLinkFollowingHost: String = "",
+    /** Persistent "Primary — N follower(s) connected" badge — the symmetric primary-side counterpart. */
+    connectedInstanceLinkFollowerCount: Int = 0,
     /** The primary's live schedule while connected via Instance Link — mirrored into [ScheduleViewModel]. */
     instanceLinkRemoteSchedule: List<ScheduleItemDto> = emptyList(),
     /** The primary's song catalog while connected via Instance Link — mirrored into [SongsViewModel]. */
@@ -909,6 +912,13 @@ fun MainDesktop(
                         ConnectionStatusRow(
                             status = instanceLinkConnectionStatus,
                             connectedLabel = stringResource(Res.string.instance_link_following_host, instanceLinkFollowingHost),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                    if (connectedInstanceLinkFollowerCount > 0) {
+                        ConnectionStatusRow(
+                            status = InstanceLinkStatus.CONNECTED,
+                            connectedLabel = stringResource(Res.string.instance_link_primary_badge, connectedInstanceLinkFollowerCount),
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
