@@ -19,11 +19,16 @@ data class UpdateInfo(
     val downloadUrl: String? = null
 )
 
+sealed class UpdateCheckResult {
+    data class Available(val info: UpdateInfo) : UpdateCheckResult()
+    object UpToDate : UpdateCheckResult()
+}
+
 object UpdateChecker {
 
     private const val RELEASES_API_URL =
         "https://api.github.com/repos/ChurchPresenter/ChurchPresenter/releases?per_page=50"
-    private const val RELEASES_URL =
+    const val RELEASES_URL =
         "https://github.com/ChurchPresenter/ChurchPresenter/releases/latest"
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -33,11 +38,17 @@ object UpdateChecker {
      *
      * Walks releases newest→oldest and stops at the first one that contains a
      * download for the detected platform — i.e. the latest build available for this
-     * OS, skipping newer releases that omit it. Returns [UpdateInfo] (with a non-null
-     * [UpdateInfo.downloadUrl]) only when that build is newer than the running app,
-     * so users are never prompted toward a release they can't actually install.
+     * OS, skipping newer releases that omit it. Returns [UpdateCheckResult.Available]
+     * (with a non-null [UpdateInfo.downloadUrl]) only when that build is newer than the
+     * running app, so users are never prompted toward a release they can't actually
+     * install. [UpdateCheckResult.UpToDate] covers both "genuinely up to date" and
+     * "request/parse failed" — this mirrors the previous nullable return and is
+     * intentional, since there's no user-facing distinction between the two today.
+     *
+     * When [includePrereleases] is true, releases flagged `prerelease` on GitHub are
+     * eligible too; otherwise they're skipped exactly like drafts.
      */
-    suspend fun checkForUpdate(): UpdateInfo? = withContext(Dispatchers.IO) {
+    suspend fun checkForUpdate(includePrereleases: Boolean): UpdateCheckResult = withContext(Dispatchers.IO) {
         try {
             val url = URI(RELEASES_API_URL).toURL()
             val connection = url.openConnection() as HttpURLConnection
@@ -47,7 +58,7 @@ object UpdateChecker {
             connection.connectTimeout = 5_000
             connection.readTimeout = 5_000
 
-            if (connection.responseCode != 200) return@withContext null
+            if (connection.responseCode != 200) return@withContext UpdateCheckResult.UpToDate
 
             val body = connection.inputStream.bufferedReader().readText()
             connection.disconnect()
@@ -57,7 +68,8 @@ object UpdateChecker {
             for (rel in releases) {
                 val obj = rel.jsonObject
                 if (obj["draft"]?.jsonPrimitive?.booleanOrNull == true) continue
-                if (obj["prerelease"]?.jsonPrimitive?.booleanOrNull == true) continue
+                val isPrerelease = obj["prerelease"]?.jsonPrimitive?.booleanOrNull == true
+                if (isPrerelease && !includePrereleases) continue
 
                 val urls = (obj["assets"]?.jsonArray ?: continue)
                     .mapNotNull { it.jsonObject["browser_download_url"]?.jsonPrimitive?.contentOrNull }
@@ -68,19 +80,21 @@ object UpdateChecker {
                 val latestVersion = (obj["tag_name"]?.jsonPrimitive?.contentOrNull ?: continue)
                     .removePrefix("v")
                 return@withContext if (isNewerVersion(latestVersion, BuildConfig.APP_VERSION)) {
-                    UpdateInfo(
-                        latestVersion = latestVersion,
-                        releaseUrl = obj["html_url"]?.jsonPrimitive?.contentOrNull ?: RELEASES_URL,
-                        releaseNotes = (obj["body"]?.jsonPrimitive?.contentOrNull ?: "").take(500),
-                        downloadUrl = downloadUrl
+                    UpdateCheckResult.Available(
+                        UpdateInfo(
+                            latestVersion = latestVersion,
+                            releaseUrl = obj["html_url"]?.jsonPrimitive?.contentOrNull ?: RELEASES_URL,
+                            releaseNotes = (obj["body"]?.jsonPrimitive?.contentOrNull ?: "").take(500),
+                            downloadUrl = downloadUrl
+                        )
                     )
                 } else {
-                    null
+                    UpdateCheckResult.UpToDate
                 }
             }
-            null
+            UpdateCheckResult.UpToDate
         } catch (_: Exception) {
-            null
+            UpdateCheckResult.UpToDate
         }
     }
 

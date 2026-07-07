@@ -135,8 +135,8 @@ import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
+import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
-import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
 import org.churchpresenter.app.churchpresenter.dialogs.StatisticsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.UpdateAvailableDialog
 import org.jetbrains.compose.resources.stringResource
@@ -553,7 +553,7 @@ fun main() {
         var showLottieGenWindow by remember { mutableStateOf(false) }
         var lottieGenOutputDir by remember { mutableStateOf<java.io.File?>(null) }
         var lottieGenOnFileSaved by remember { mutableStateOf<(() -> Unit)?>(null) }
-        var pendingUpdateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
+        var pendingUpdateResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
         // Preload songs and bible at startup, then signal ready
@@ -585,9 +585,9 @@ fun main() {
             }
             appReady = true
             // Check for updates in background after startup
-            val updateInfo = UpdateChecker.checkForUpdate()
-            if (updateInfo != null) {
-                pendingUpdateInfo = updateInfo
+            val result = UpdateChecker.checkForUpdate(includePrereleases = appSettings.participateInPrereleases)
+            if (result is UpdateCheckResult.Available) {
+                pendingUpdateResult = result
             }
         }
 
@@ -1257,13 +1257,9 @@ fun main() {
                                     },
                                     onCheckForUpdates = {
                                         coroutineScope.launch {
-                                            val info = UpdateChecker.checkForUpdate()
-                                            if (info != null) {
-                                                pendingUpdateInfo = info
-                                            } else {
-                                                Desktop.getDesktop()
-                                                    .browse(URI("https://github.com/ChurchPresenter/ChurchPresenter/releases/latest"))
-                                            }
+                                            pendingUpdateResult = UpdateChecker.checkForUpdate(
+                                                includePrereleases = appSettings.participateInPrereleases
+                                            )
                                         }
                                     },
                                     onKeyboardShortcuts = { showKeyboardShortcutsDialog = true },
@@ -1540,8 +1536,16 @@ fun main() {
                                     )
                                 }
                                 UpdateAvailableDialog(
-                                    updateInfo = pendingUpdateInfo,
-                                    onDismiss = { pendingUpdateInfo = null }
+                                    result = pendingUpdateResult,
+                                    participateInPrereleases = appSettings.participateInPrereleases,
+                                    onParticipateInPrereleasesChange = { enabled ->
+                                        appSettings = appSettings.copy(participateInPrereleases = enabled)
+                                        settingsManager.saveSettings(appSettings)
+                                        coroutineScope.launch {
+                                            pendingUpdateResult = UpdateChecker.checkForUpdate(includePrereleases = enabled)
+                                        }
+                                    },
+                                    onDismiss = { pendingUpdateResult = null }
                                 )
 
                                 // ── Remote API event dialog ───────────────────────

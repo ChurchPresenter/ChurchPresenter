@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +32,9 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ok
+import churchpresenter.composeapp.generated.resources.participate_in_prereleases
+import churchpresenter.composeapp.generated.resources.update_already_latest
 import churchpresenter.composeapp.generated.resources.update_dialog_dismiss
 import churchpresenter.composeapp.generated.resources.update_dialog_download_install
 import churchpresenter.composeapp.generated.resources.update_dialog_downloading
@@ -38,12 +43,15 @@ import churchpresenter.composeapp.generated.resources.update_dialog_message
 import churchpresenter.composeapp.generated.resources.update_dialog_open_page
 import churchpresenter.composeapp.generated.resources.update_dialog_release_notes
 import churchpresenter.composeapp.generated.resources.update_dialog_title
+import churchpresenter.composeapp.generated.resources.update_dialog_up_to_date_title
+import churchpresenter.composeapp.generated.resources.update_dialog_view_on_github
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
+import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
+import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Desktop
 import java.io.File
@@ -80,19 +88,23 @@ private fun launchInstaller(file: File) {
 
 @Composable
 fun UpdateAvailableDialog(
-    updateInfo: UpdateInfo?,
+    result: UpdateCheckResult?,
+    participateInPrereleases: Boolean,
+    onParticipateInPrereleasesChange: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
-    if (updateInfo == null) return
+    if (result == null) return
 
     val mainWindowState = LocalMainWindowState.current
     val scope = rememberCoroutineScope()
-    var downloadState by remember { mutableStateOf<DownloadState>(DownloadState.Idle) }
+    var downloadState by remember(result) { mutableStateOf<DownloadState>(DownloadState.Idle) }
+
+    val updateInfo = (result as? UpdateCheckResult.Available)?.info
 
     val startDownload: () -> Unit = {
         scope.launch(Dispatchers.IO) {
             try {
-                val url = URI(updateInfo.downloadUrl!!).toURL()
+                val url = URI(updateInfo!!.downloadUrl!!).toURL()
                 val connection = url.openConnection() as HttpURLConnection
                 connection.instanceFollowRedirects = true
                 connection.requestMethod = "GET"
@@ -141,14 +153,19 @@ fun UpdateAvailableDialog(
         }
     }
 
+    val dialogTitle = if (updateInfo != null)
+        stringResource(Res.string.update_dialog_title)
+    else
+        stringResource(Res.string.update_dialog_up_to_date_title)
+
     DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 440.dp, 380.dp),
+            position = centeredOnMainWindow(mainWindowState, 440.dp, 420.dp),
             width = 440.dp,
-            height = 380.dp
+            height = 420.dp
         ),
-        title = stringResource(Res.string.update_dialog_title),
+        title = dialogTitle,
         resizable = false
     ) {
         Surface(
@@ -159,123 +176,178 @@ fun UpdateAvailableDialog(
                 modifier = Modifier.fillMaxSize().padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = stringResource(Res.string.update_dialog_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(Res.string.update_dialog_message, updateInfo.latestVersion),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (updateInfo.releaseNotes.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(12.dp))
+                if (updateInfo != null) {
                     Text(
-                        text = stringResource(Res.string.update_dialog_release_notes),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        text = stringResource(Res.string.update_dialog_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Surface(
-                        modifier = Modifier.fillMaxWidth().weight(1f),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = MaterialTheme.shapes.small
-                    ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(Res.string.update_dialog_message, updateInfo.latestVersion),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (updateInfo.releaseNotes.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = updateInfo.releaseNotes,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .verticalScroll(rememberScrollState())
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                } else {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                // Progress area
-                when (val state = downloadState) {
-                    is DownloadState.Downloading -> {
-                        val progressText = if (state.progress >= 0f)
-                            "${(state.progress * 100).toInt()}%"
-                        else
-                            stringResource(Res.string.update_dialog_downloading)
-                        Text(
-                            text = progressText,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = stringResource(Res.string.update_dialog_release_notes),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        if (state.progress >= 0f) {
-                            LinearProgressIndicator(
-                                progress = { state.progress },
-                                modifier = Modifier.fillMaxWidth()
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            shape = MaterialTheme.shapes.small
+                        ) {
+                            Text(
+                                text = updateInfo.releaseNotes,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .verticalScroll(rememberScrollState())
                             )
-                        } else {
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
+                    } else {
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
-                    is DownloadState.Error -> {
-                        Text(
-                            text = state.message,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
+
+                    // Progress area
+                    when (val state = downloadState) {
+                        is DownloadState.Downloading -> {
+                            val progressText = if (state.progress >= 0f)
+                                "${(state.progress * 100).toInt()}%"
+                            else
+                                stringResource(Res.string.update_dialog_downloading)
+                            Text(
+                                text = progressText,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            if (state.progress >= 0f) {
+                                LinearProgressIndicator(
+                                    progress = { state.progress },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            } else {
+                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        is DownloadState.Error -> {
+                            Text(
+                                text = state.message,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
+                        else -> {}
                     }
-                    else -> {}
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(Res.string.update_dialog_up_to_date_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(Res.string.update_already_latest),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider()
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
-                        Text(stringResource(Res.string.update_dialog_dismiss))
-                    }
-                    when {
-                        downloadState is DownloadState.Done -> {
-                            Button(
-                                shape = RoundedCornerShape(6.dp),
-                                onClick = {
-                                val file = (downloadState as DownloadState.Done).file
-                                try {
-                                    launchInstaller(file)
-                                    exitProcess(0)
-                                } catch (e: Exception) {
-                                    downloadState = DownloadState.Error(
-                                        e.message ?: "Failed to launch installer"
-                                    )
+                    Text(
+                        text = stringResource(Res.string.participate_in_prereleases),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = participateInPrereleases,
+                        onCheckedChange = onParticipateInPrereleasesChange
+                    )
+                }
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (updateInfo != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    ) {
+                        OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                            Text(stringResource(Res.string.update_dialog_dismiss))
+                        }
+                        when {
+                            downloadState is DownloadState.Done -> {
+                                Button(
+                                    shape = RoundedCornerShape(6.dp),
+                                    onClick = {
+                                    val file = (downloadState as DownloadState.Done).file
+                                    try {
+                                        launchInstaller(file)
+                                        exitProcess(0)
+                                    } catch (e: Exception) {
+                                        downloadState = DownloadState.Error(
+                                            e.message ?: "Failed to launch installer"
+                                        )
+                                    }
+                                }) {
+                                    Text(stringResource(Res.string.update_dialog_install_now))
                                 }
-                            }) {
-                                Text(stringResource(Res.string.update_dialog_install_now))
+                            }
+                            downloadState is DownloadState.Downloading -> {
+                                Button(shape = RoundedCornerShape(6.dp), onClick = {}, enabled = false) {
+                                    Text(stringResource(Res.string.update_dialog_downloading))
+                                }
+                            }
+                            downloadState is DownloadState.Error || updateInfo.downloadUrl == null -> {
+                                Button(
+                                    shape = RoundedCornerShape(6.dp),
+                                    onClick = {
+                                    Desktop.getDesktop().browse(URI(updateInfo.releaseUrl))
+                                    onDismiss()
+                                }) {
+                                    Text(stringResource(Res.string.update_dialog_open_page))
+                                }
+                            }
+                            else -> {
+                                Button(shape = RoundedCornerShape(6.dp), onClick = startDownload) {
+                                    Text(stringResource(Res.string.update_dialog_download_install))
+                                }
                             }
                         }
-                        downloadState is DownloadState.Downloading -> {
-                            Button(shape = RoundedCornerShape(6.dp), onClick = {}, enabled = false) {
-                                Text(stringResource(Res.string.update_dialog_downloading))
-                            }
-                        }
-                        downloadState is DownloadState.Error || updateInfo.downloadUrl == null -> {
-                            Button(
-                                shape = RoundedCornerShape(6.dp),
-                                onClick = {
-                                Desktop.getDesktop().browse(URI(updateInfo.releaseUrl))
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    ) {
+                        OutlinedButton(
+                            shape = RoundedCornerShape(6.dp),
+                            onClick = {
+                                Desktop.getDesktop().browse(URI(UpdateChecker.RELEASES_URL))
                                 onDismiss()
-                            }) {
-                                Text(stringResource(Res.string.update_dialog_open_page))
                             }
+                        ) {
+                            Text(stringResource(Res.string.update_dialog_view_on_github))
                         }
-                        else -> {
-                            Button(shape = RoundedCornerShape(6.dp), onClick = startDownload) {
-                                Text(stringResource(Res.string.update_dialog_download_install))
-                            }
+                        Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                            Text(stringResource(Res.string.ok))
                         }
                     }
                 }

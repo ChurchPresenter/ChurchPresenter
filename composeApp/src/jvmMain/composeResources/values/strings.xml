@@ -1566,6 +1566,9 @@
     <string name="update_dialog_open_page">Open Download Page</string>
     <string name="update_check_menu">Check for Updates…</string>
     <string name="update_already_latest">You are running the latest version.</string>
+    <string name="update_dialog_up_to_date_title">You're Up to Date</string>
+    <string name="update_dialog_view_on_github">View on GitHub</string>
+    <string name="participate_in_prereleases">Include beta / pre-release updates</string>
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>

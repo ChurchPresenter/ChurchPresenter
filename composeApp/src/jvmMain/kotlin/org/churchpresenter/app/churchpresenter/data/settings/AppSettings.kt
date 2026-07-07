@@ -50,5 +50,6 @@ data class AppSettings(
     val songColOrder: List<String> = emptyList(),
     val songHiddenCols: Set<String> = setOf("tune", "play_count", "author", "composer"),
     val setupWizardShown: Boolean = false,
-    val analyticsReportingEnabled: Boolean = true
+    val analyticsReportingEnabled: Boolean = true,
+    val participateInPrereleases: Boolean = false
 )
