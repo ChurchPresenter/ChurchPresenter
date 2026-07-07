@@ -433,6 +433,18 @@ fun main() {
                 )
             }
         }
+        // Once a connection actually succeeds, remember to auto-reconnect on the next launch —
+        // the operator shouldn't need to re-tick "connect automatically" after it's already worked once.
+        LaunchedEffect(instanceLinkViewModel) {
+            instanceLinkViewModel.connectionStatus.collect { status ->
+                if (status == InstanceLinkStatus.CONNECTED && !appSettings.instanceLink.autoConnect) {
+                    appSettings = appSettings.copy(
+                        instanceLink = appSettings.instanceLink.copy(enabled = true, autoConnect = true)
+                    )
+                    settingsManager.saveSettings(appSettings)
+                }
+            }
+        }
         // Mirrors the primary's live content locally — the counterpart to onLiveStateChanged below.
         LaunchedEffect(instanceLinkViewModel) {
             instanceLinkViewModel.remoteLiveState.collect { state ->
@@ -1405,6 +1417,14 @@ fun main() {
                                     instanceLinkConnectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
                                     instanceLinkFollowingHost = appSettings.instanceLink.primaryHost,
                                     connectedInstanceLinkFollowerCount = companionServer.connectedInstanceLinkFollowers.collectAsState().value.size,
+                                    onInstanceLinkConnect = {
+                                        val link = appSettings.instanceLink
+                                        instanceLinkViewModel.connect(
+                                            link.primaryHost, link.primaryPort, link.apiKey, link.deviceId,
+                                            link.reconnectDelayMs.toLong()
+                                        )
+                                    },
+                                    onInstanceLinkDisconnect = { instanceLinkViewModel.disconnect() },
                                     instanceLinkRemoteSchedule = instanceLinkViewModel.remoteSchedule.collectAsState().value,
                                     instanceLinkRemoteSongCatalog = instanceLinkViewModel.remoteSongCatalog.collectAsState().value,
                                     instanceLinkFetchSongDetail = { number, songbook -> instanceLinkViewModel.fetchSongDetail(number, songbook) },

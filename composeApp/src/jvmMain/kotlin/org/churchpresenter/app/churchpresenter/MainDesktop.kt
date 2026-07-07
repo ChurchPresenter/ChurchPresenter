@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -69,8 +70,10 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.connect
 import churchpresenter.composeapp.generated.resources.instance_link_following_host
 import churchpresenter.composeapp.generated.resources.instance_link_primary_badge
+import churchpresenter.composeapp.generated.resources.menu_disconnect
 import churchpresenter.composeapp.generated.resources.ic_arrow_left
 import churchpresenter.composeapp.generated.resources.ic_arrow_right
 import churchpresenter.composeapp.generated.resources.ic_settings
@@ -220,6 +223,10 @@ fun MainDesktop(
     instanceLinkFollowingHost: String = "",
     /** Persistent "Primary — N follower(s) connected" badge — the symmetric primary-side counterpart. */
     connectedInstanceLinkFollowerCount: Int = 0,
+    /** Reconnects using the last-saved Instance Link settings — lets the Connect/Disconnect button
+     *  next to the badge work without reopening the Connect dialog. */
+    onInstanceLinkConnect: () -> Unit = {},
+    onInstanceLinkDisconnect: () -> Unit = {},
     /** The primary's live schedule while connected via Instance Link — mirrored into [ScheduleViewModel]. */
     instanceLinkRemoteSchedule: List<ScheduleItemDto> = emptyList(),
     /** The primary's song catalog while connected via Instance Link — mirrored into [SongsViewModel]. */
@@ -908,12 +915,31 @@ fun MainDesktop(
                     exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
                 ) {
                     Column(modifier = Modifier.width(with(density) { schedulePanelPx.coerceAtMost(maxSchedulePx).toDp() }).fillMaxHeight()) {
-                    if (instanceLinkConnectionStatus != InstanceLinkStatus.DISCONNECTED) {
-                        ConnectionStatusRow(
-                            status = instanceLinkConnectionStatus,
-                            connectedLabel = stringResource(Res.string.instance_link_following_host, instanceLinkFollowingHost),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
+                    // Shown once a host has ever been configured — not just while actively connected —
+                    // so the operator can always see the last-known status and reconnect/disconnect
+                    // without reopening the Connect dialog.
+                    if (instanceLinkFollowingHost.isNotBlank()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            ConnectionStatusRow(
+                                status = instanceLinkConnectionStatus,
+                                connectedLabel = stringResource(Res.string.instance_link_following_host, instanceLinkFollowingHost)
+                            )
+                            if (instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED ||
+                                instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTING
+                            ) {
+                                TextButton(onClick = onInstanceLinkDisconnect) {
+                                    Text(stringResource(Res.string.menu_disconnect), style = MaterialTheme.typography.labelSmall)
+                                }
+                            } else {
+                                TextButton(onClick = onInstanceLinkConnect) {
+                                    Text(stringResource(Res.string.connect), style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                        }
                     }
                     if (connectedInstanceLinkFollowerCount > 0) {
                         ConnectionStatusRow(
