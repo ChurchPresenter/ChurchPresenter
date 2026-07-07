@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
@@ -386,31 +387,30 @@ class BibleViewModel(
     }
 
     // ── Instance Link — remote bible ─────────────────────────────────────────
-    // Rather than reimplementing Bible's search/cross-reference/numbering engine against the API,
-    // the primary's raw .spb file is downloaded once and cached, then loaded through the exact same
-    // Bible.loadFromSpb() used for local files — everything downstream works unchanged. The primary
-    // bible always mirrors; the secondary bible only does when the operator opts in (mirrorSecondary)
-    // — by default it stays whatever this instance has configured locally, independent of the
-    // connection, since there's no reason a follower's own secondary translation needs to go away
-    // just because it's following someone else's primary.
+    // Two sync modes (BibleSyncMode): FULL_REPLICA downloads the primary's raw .spb file(s) once and
+    // caches them, then loads through the exact same Bible.loadFromSpb() used for local files — no
+    // reimplementing the search/cross-reference/numbering engine against the API. Both primary and
+    // secondary mirror whenever the primary has one configured, unconditionally. REFERENCE_ONLY
+    // downloads nothing — this instance keeps its own locally-configured Bible(s) exactly as set up
+    // (any language/translation); only the live verse *reference* is synced, via the canonical code
+    // both instances' Bible objects resolve independently (see applyRemoteLiveState in main.kt).
     private var remoteModeActive = false
-    private var mirrorSecondaryActive = false
+    private var syncMode = BibleSyncMode.FULL_REPLICA
     private var remoteBibleCacheFile: File? = null
     private var remoteSecondaryBibleCacheFile: File? = null
     private val remoteBibleCacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link-cache/bibles")
 
-    /** Called from the owning tab whenever Instance Link connects/disconnects, or the "mirror
-     *  secondary too" setting changes. */
+    /** Called from the owning tab whenever Instance Link connects/disconnects, or the sync mode changes. */
     fun setInstanceLinkSource(
         active: Boolean,
-        mirrorSecondary: Boolean,
+        mode: BibleSyncMode,
         fetchBibleFile: (suspend () -> ByteArray?)?,
         fetchSecondaryBibleFile: (suspend () -> ByteArray?)?
     ) {
         if (!active) {
             if (remoteModeActive) {
                 remoteModeActive = false
-                mirrorSecondaryActive = false
+                syncMode = BibleSyncMode.FULL_REPLICA
                 remoteBibleCacheFile = null
                 remoteSecondaryBibleCacheFile = null
                 loadBibles()
@@ -418,7 +418,16 @@ class BibleViewModel(
             return
         }
         remoteModeActive = true
-        mirrorSecondaryActive = mirrorSecondary
+        syncMode = mode
+        if (mode == BibleSyncMode.REFERENCE_ONLY) {
+            // Nothing to download — loadBibles() resolves both primaryPath/secondaryPath from this
+            // instance's own local settings whenever syncMode isn't FULL_REPLICA, same as when
+            // disconnected, so the follower's own translation(s) keep working independently.
+            remoteBibleCacheFile = null
+            remoteSecondaryBibleCacheFile = null
+            loadBibles()
+            return
+        }
         viewModelScope.launch {
             val cacheFile = File(remoteBibleCacheDir, "primary.spb")
             if (!cacheFile.exists()) {
@@ -430,21 +439,19 @@ class BibleViewModel(
             }
             remoteBibleCacheFile = cacheFile
 
-            if (mirrorSecondary) {
-                val secondaryCacheFile = File(remoteBibleCacheDir, "secondary.spb")
-                if (!secondaryCacheFile.exists()) {
-                    val bytes = fetchSecondaryBibleFile?.invoke()
-                    if (bytes != null) {
-                        withContext(Dispatchers.IO) {
-                            remoteBibleCacheDir.mkdirs()
-                            secondaryCacheFile.writeBytes(bytes)
-                        }
+            // Full replica always mirrors the secondary too, whenever the primary has one configured
+            // — no separate opt-in boolean anymore, replaced by the sync mode itself.
+            val secondaryCacheFile = File(remoteBibleCacheDir, "secondary.spb")
+            if (!secondaryCacheFile.exists()) {
+                val bytes = fetchSecondaryBibleFile?.invoke()
+                if (bytes != null) {
+                    withContext(Dispatchers.IO) {
+                        remoteBibleCacheDir.mkdirs()
+                        secondaryCacheFile.writeBytes(bytes)
                     }
                 }
-                if (secondaryCacheFile.exists()) remoteSecondaryBibleCacheFile = secondaryCacheFile
-            } else {
-                remoteSecondaryBibleCacheFile = null
             }
+            remoteSecondaryBibleCacheFile = secondaryCacheFile.takeIf { it.exists() }
 
             loadBibles()
         }
@@ -458,7 +465,8 @@ class BibleViewModel(
             _isLoading.value = true
             _isFullyLoadedFlow.value = false
             try {
-                val primaryPath = if (remoteModeActive) {
+                val useReplica = remoteModeActive && syncMode == BibleSyncMode.FULL_REPLICA
+                val primaryPath = if (useReplica) {
                     remoteBibleCacheFile?.takeIf { it.exists() }
                 } else if (appSettings.bibleSettings.primaryBible.isNotEmpty() &&
                     appSettings.bibleSettings.storageDirectory.isNotEmpty()
@@ -466,11 +474,10 @@ class BibleViewModel(
                     .takeIf { it.exists() }
                 else null
 
-                // Only overridden when the operator opted in to mirroring the primary's secondary
-                // bible too (mirrorSecondaryActive) — otherwise this always resolves from local
-                // settings regardless of remoteModeActive, so a follower's own secondary translation
+                // Only overridden in FULL_REPLICA mode — REFERENCE_ONLY (like being disconnected)
+                // always resolves from local settings, so the follower's own secondary translation
                 // keeps working independently of the connection.
-                val secondaryPath = if (remoteModeActive && mirrorSecondaryActive) {
+                val secondaryPath = if (useReplica) {
                     remoteSecondaryBibleCacheFile?.takeIf { it.exists() }
                 } else if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
                     appSettings.bibleSettings.storageDirectory.isNotEmpty()

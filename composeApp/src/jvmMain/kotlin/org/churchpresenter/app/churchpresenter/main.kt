@@ -73,6 +73,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
+import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.data.Language
@@ -418,6 +419,11 @@ fun main() {
 
         val instanceLinkViewModel = remember { InstanceLinkViewModel() }
         DisposableEffect(Unit) { onDispose { instanceLinkViewModel.dispose() } }
+        // Captured from the existing onBibleLoaded callback below (BibleViewModel itself stays owned
+        // by MainDesktop — only the plain Bible object it already hands out crosses here, same as
+        // onBibleLoaded already does for companionServer.updateBible). Used to compute a canonical
+        // verse code when broadcasting a live Bible verse, for followers in BibleSyncMode.REFERENCE_ONLY.
+        var primaryBibleForInstanceLink by remember { mutableStateOf<Bible?>(null) }
         // Auto-connect on launch (and reconnect if the saved connection details change while enabled).
         LaunchedEffect(
             appSettings.instanceLink.enabled,
@@ -450,7 +456,11 @@ fun main() {
         LaunchedEffect(instanceLinkViewModel) {
             instanceLinkViewModel.remoteLiveState.collect { state ->
                 if (state == null) return@collect
-                applyRemoteLiveState(state, presenterManager, instanceLinkViewModel)
+                applyRemoteLiveState(
+                    state, presenterManager, instanceLinkViewModel,
+                    bibleSyncMode = appSettings.instanceLink.bibleSyncMode,
+                    localPrimaryBible = primaryBibleForInstanceLink
+                )
             }
         }
         // Presentations have their own dedicated broadcast (richer than LiveStateDto's mode-only
@@ -499,6 +509,13 @@ fun main() {
         // counterpart to the remoteLiveState collector above.
         LaunchedEffect(Unit) {
             presenterManager.onLiveStateChanged = { pm, source ->
+                val verseCode = if (source == Presenting.BIBLE) {
+                    pm.selectedVerse.value.takeIf { it.bookName.isNotEmpty() }?.let { v ->
+                        primaryBibleForInstanceLink?.getBookIdByName(v.bookName)?.let { bookId ->
+                            primaryBibleForInstanceLink?.getCodeReference(bookId, v.chapter, v.verseNumber)
+                        }
+                    }
+                } else null
                 companionServer.updateLiveState(
                     mode = source.name,
                     bibleVerse = pm.selectedVerse.value,
@@ -514,7 +531,8 @@ fun main() {
                     questionId = pm.displayedQuestion.value?.id,
                     questionText = pm.displayedQuestion.value?.text,
                     dictionaryWord = pm.displayedDictionaryEntry.value?.word,
-                    lowerThirdName = pm.currentLowerThirdName.value.ifEmpty { null }
+                    lowerThirdName = pm.currentLowerThirdName.value.ifEmpty { null },
+                    verseCode = verseCode
                 )
             }
         }
@@ -1455,7 +1473,7 @@ fun main() {
                                     instanceLinkRemoteSongCatalog = instanceLinkViewModel.remoteSongCatalog.collectAsState().value,
                                     instanceLinkFetchSongDetail = { number, songbook -> instanceLinkViewModel.fetchSongDetail(number, songbook) },
                                     instanceLinkFetchBibleFile = { instanceLinkViewModel.fetchBibleFile() },
-                                    instanceLinkMirrorSecondaryBible = appSettings.instanceLink.mirrorSecondaryBible,
+                                    instanceLinkBibleSyncMode = appSettings.instanceLink.bibleSyncMode,
                                     instanceLinkFetchSecondaryBibleFile = { instanceLinkViewModel.fetchSecondaryBibleFile() },
                                     instanceLinkOnSecondaryBibleFilePathChanged = { path -> companionServer.updateSecondaryBibleFilePath(path) },
                                     instanceLinkSendAddToSchedule = if (appSettings.instanceLink.allowPushToSchedule) {
@@ -1509,6 +1527,7 @@ fun main() {
                                     theme = theme,
                                     onSongsLoaded = { songs -> companionServer.updateSongs(songs) },
                                     onBibleLoaded = { bible, translation ->
+                                        primaryBibleForInstanceLink = bible
                                         companionServer.updateBible(
                                             bible,
                                             translation,
@@ -1668,7 +1687,7 @@ fun main() {
                                     connectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
                                     remoteLiveState = instanceLinkViewModel.remoteLiveState.collectAsState().value,
                                     remoteScheduleCount = instanceLinkViewModel.remoteSchedule.collectAsState().value.size,
-                                    onConnect = { host, port, apiKey, autoConnect, allowPushToSchedule, mirrorSecondaryBible, mirrorBackgrounds ->
+                                    onConnect = { host, port, apiKey, autoConnect, allowPushToSchedule, bibleSyncMode, mirrorBackgrounds ->
                                         appSettings = appSettings.copy(
                                             instanceLink = appSettings.instanceLink.copy(
                                                 enabled = true,
@@ -1677,7 +1696,7 @@ fun main() {
                                                 apiKey = apiKey,
                                                 autoConnect = autoConnect,
                                                 allowPushToSchedule = allowPushToSchedule,
-                                                mirrorSecondaryBible = mirrorSecondaryBible,
+                                                bibleSyncMode = bibleSyncMode,
                                                 mirrorBackgrounds = mirrorBackgrounds
                                             )
                                         )
@@ -1938,26 +1957,55 @@ private suspend fun downloadMirroredBackgroundSettings(
 private suspend fun applyRemoteLiveState(
     state: LiveStateDto,
     presenterManager: PresenterManager,
-    instanceLinkViewModel: InstanceLinkViewModel
+    instanceLinkViewModel: InstanceLinkViewModel,
+    bibleSyncMode: BibleSyncMode = BibleSyncMode.FULL_REPLICA,
+    localPrimaryBible: Bible? = null
 ) {
     val mode = runCatching { Presenting.valueOf(state.contentType) }.getOrNull() ?: return
     when (mode) {
-        Presenting.BIBLE -> if (state.bookName != null) {
-            // setSelectedVerses (plural), not setSelectedVerse — only the plural setter feeds the
-            // selectedVerses -> displayedVerses bridging LaunchedEffect that BiblePresenter actually
-            // renders from; the singular setter alone leaves the screen blank despite the mode
-            // correctly switching to BIBLE.
-            presenterManager.setSelectedVerses(
-                listOf(
-                    SelectedVerse(
-                        bookName = state.bookName,
-                        chapter = state.chapter ?: 0,
-                        verseNumber = state.verseNumber ?: 0,
-                        verseText = state.verseText ?: "",
-                        verseRange = state.verseRange ?: ""
+        Presenting.BIBLE -> {
+            val codeBook = state.verseCodeBook
+            val codeChapter = state.verseCodeChapter
+            val codeVerse = state.verseCodeVerse
+            if (bibleSyncMode == BibleSyncMode.REFERENCE_ONLY && codeBook != null && codeChapter != null && codeVerse != null) {
+                // Reference-only: never touch a downloaded file — resolve the SAME canonical verse in
+                // this instance's own independently-configured (possibly different-language) Bible via
+                // Bible.getVerseDetailsByCode, so the follower shows its own translation's wording, not
+                // the primary's. If this Bible has no verse at that code (versification mismatch, or no
+                // local bible configured), there's nothing sensible to show — quietly no-op.
+                localPrimaryBible?.getVerseDetailsByCode(codeBook, codeChapter, codeVerse)?.let { result ->
+                    presenterManager.setSelectedVerses(
+                        listOf(
+                            SelectedVerse(
+                                bibleAbbreviation = localPrimaryBible.getBibleAbbreviation(),
+                                bibleName = localPrimaryBible.getBibleTitle(),
+                                bookName = result.bookName,
+                                chapter = result.displayChapter,
+                                verseNumber = result.displayVerse,
+                                verseText = result.verseText,
+                                verseRange = state.verseRange ?: ""
+                            )
+                        )
+                    )
+                }
+            } else if (state.bookName != null) {
+                // Full replica: the primary's own wording, verbatim.
+                // setSelectedVerses (plural), not setSelectedVerse — only the plural setter feeds the
+                // selectedVerses -> displayedVerses bridging LaunchedEffect that BiblePresenter actually
+                // renders from; the singular setter alone leaves the screen blank despite the mode
+                // correctly switching to BIBLE.
+                presenterManager.setSelectedVerses(
+                    listOf(
+                        SelectedVerse(
+                            bookName = state.bookName,
+                            chapter = state.chapter ?: 0,
+                            verseNumber = state.verseNumber ?: 0,
+                            verseText = state.verseText ?: "",
+                            verseRange = state.verseRange ?: ""
+                        )
                     )
                 )
-            )
+            }
         }
         Presenting.LYRICS -> if (state.songTitle != null) {
             presenterManager.setLyricSection(

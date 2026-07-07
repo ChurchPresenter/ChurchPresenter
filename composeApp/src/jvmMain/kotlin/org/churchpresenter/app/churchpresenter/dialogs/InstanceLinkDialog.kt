@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -39,9 +40,11 @@ import churchpresenter.composeapp.generated.resources.instance_link_autoconnect
 import churchpresenter.composeapp.generated.resources.instance_link_description
 import churchpresenter.composeapp.generated.resources.instance_link_host
 import churchpresenter.composeapp.generated.resources.instance_link_host_hint
+import churchpresenter.composeapp.generated.resources.instance_link_bible_sync_full_replica
+import churchpresenter.composeapp.generated.resources.instance_link_bible_sync_mode
+import churchpresenter.composeapp.generated.resources.instance_link_bible_sync_reference_only
 import churchpresenter.composeapp.generated.resources.instance_link_last_received
 import churchpresenter.composeapp.generated.resources.instance_link_mirror_backgrounds
-import churchpresenter.composeapp.generated.resources.instance_link_mirror_secondary_bible
 import churchpresenter.composeapp.generated.resources.instance_link_port
 import churchpresenter.composeapp.generated.resources.instance_link_schedule_count
 import churchpresenter.composeapp.generated.resources.instance_link_title
@@ -63,6 +66,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
+import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
 import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkSettings
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.LiveStateDto
@@ -75,7 +79,7 @@ fun InstanceLinkDialog(
     connectionStatus: InstanceLinkStatus,
     remoteLiveState: LiveStateDto?,
     remoteScheduleCount: Int,
-    onConnect: (host: String, port: Int, apiKey: String, autoConnect: Boolean, allowPushToSchedule: Boolean, mirrorSecondaryBible: Boolean, mirrorBackgrounds: Boolean) -> Unit,
+    onConnect: (host: String, port: Int, apiKey: String, autoConnect: Boolean, allowPushToSchedule: Boolean, bibleSyncMode: BibleSyncMode, mirrorBackgrounds: Boolean) -> Unit,
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -86,7 +90,7 @@ fun InstanceLinkDialog(
     var apiKey by remember(isVisible) { mutableStateOf(settings.apiKey) }
     var autoConnect by remember(isVisible) { mutableStateOf(settings.autoConnect) }
     var allowPushToSchedule by remember(isVisible) { mutableStateOf(settings.allowPushToSchedule) }
-    var mirrorSecondaryBible by remember(isVisible) { mutableStateOf(settings.mirrorSecondaryBible) }
+    var bibleSyncMode by remember(isVisible) { mutableStateOf(settings.bibleSyncMode) }
     var mirrorBackgrounds by remember(isVisible) { mutableStateOf(settings.mirrorBackgrounds) }
 
     val mainWindowState = LocalMainWindowState.current
@@ -204,14 +208,38 @@ fun InstanceLinkDialog(
                         )
                     }
 
+                    Text(
+                        stringResource(Res.string.instance_link_bible_sync_mode),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Switch(checked = mirrorSecondaryBible, onCheckedChange = { mirrorSecondaryBible = it })
+                        RadioButton(
+                            selected = bibleSyncMode == BibleSyncMode.FULL_REPLICA,
+                            onClick = { bibleSyncMode = BibleSyncMode.FULL_REPLICA }
+                        )
                         Text(
-                            stringResource(Res.string.instance_link_mirror_secondary_bible),
+                            stringResource(Res.string.instance_link_bible_sync_full_replica),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        RadioButton(
+                            selected = bibleSyncMode == BibleSyncMode.REFERENCE_ONLY,
+                            onClick = { bibleSyncMode = BibleSyncMode.REFERENCE_ONLY }
+                        )
+                        Text(
+                            stringResource(Res.string.instance_link_bible_sync_reference_only),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -261,7 +289,7 @@ fun InstanceLinkDialog(
                         shape = RoundedCornerShape(6.dp),
                         onClick = {
                             val port = portText.toIntOrNull() ?: return@Button
-                            onConnect(host.trim(), port, apiKey.trim(), autoConnect, allowPushToSchedule, mirrorSecondaryBible, mirrorBackgrounds)
+                            onConnect(host.trim(), port, apiKey.trim(), autoConnect, allowPushToSchedule, bibleSyncMode, mirrorBackgrounds)
                             onDismiss()
                         },
                         enabled = host.isNotBlank() && portText.toIntOrNull() != null,

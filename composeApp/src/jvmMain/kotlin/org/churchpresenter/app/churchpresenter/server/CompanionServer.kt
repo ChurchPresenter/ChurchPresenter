@@ -241,6 +241,13 @@ data class LiveStateDto(
     val verseNumber: Int? = null,
     val verseRange: String? = null,
     val verseText: String? = null,
+    // Canonical (numbering-independent) verse code — see Bible.getCodeReference/getVerseDetailsByCode.
+    // Lets a follower in "reference-only" Bible sync mode (InstanceLinkSettings.BibleSyncMode) resolve
+    // the same verse in its own independently-configured (possibly different-language) Bible, instead
+    // of downloading the primary's file. Null when the primary has no bible loaded to compute it from.
+    val verseCodeBook: Int? = null,
+    val verseCodeChapter: Int? = null,
+    val verseCodeVerse: Int? = null,
     // song section
     val songTitle: String? = null,
     val songNumber: Int? = null,
@@ -1782,7 +1789,10 @@ class CompanionServer {
         questionId: String?,
         questionText: String?,
         dictionaryWord: String?,
-        lowerThirdName: String? = null
+        lowerThirdName: String? = null,
+        // Canonical verse code (book, chapter, verse) computed from this instance's OWN loaded bible —
+        // see LiveStateDto.verseCodeBook and BibleSyncMode.REFERENCE_ONLY. Null when not applicable.
+        verseCode: Triple<Int, Int, Int>? = null
     ) {
         val (pictureFolderId, pictureIndex) = resolvePictureLocation(pictureImagePath)
         val mediaId = mediaUrl?.let { url -> _scheduleItemToMediaPath.entries.find { it.value == url }?.key }
@@ -1793,6 +1803,9 @@ class CompanionServer {
             verseNumber = bibleVerse?.verseNumber,
             verseRange = bibleVerse?.verseRange?.ifEmpty { null },
             verseText = bibleVerse?.verseText,
+            verseCodeBook = verseCode?.first,
+            verseCodeChapter = verseCode?.second,
+            verseCodeVerse = verseCode?.third,
             songTitle = lyricSection?.title?.ifEmpty { null },
             songNumber = lyricSection?.songNumber,
             sectionType = lyricSection?.type?.ifEmpty { null },

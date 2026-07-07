@@ -100,6 +100,7 @@ import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.app.churchpresenter.data.SongItem
@@ -239,8 +240,8 @@ fun MainDesktop(
     instanceLinkFetchSongDetail: (suspend (number: String, songbook: String) -> SongDetailDto?)? = null,
     /** Downloads the primary's bible file while connected via Instance Link — see BibleViewModel.setInstanceLinkSource. */
     instanceLinkFetchBibleFile: (suspend () -> ByteArray?)? = null,
-    /** Whether the operator has opted in to also mirroring the primary's secondary bible. */
-    instanceLinkMirrorSecondaryBible: Boolean = false,
+    /** How the Bible tab tracks the primary while connected — see BibleSyncMode. */
+    instanceLinkBibleSyncMode: BibleSyncMode = BibleSyncMode.FULL_REPLICA,
     instanceLinkFetchSecondaryBibleFile: (suspend () -> ByteArray?)? = null,
     /** Reports the secondary bible's local file path to CompanionServer (for GET /api/bible/file/secondary). */
     instanceLinkOnSecondaryBibleFilePathChanged: ((filePath: String) -> Unit)? = null,
@@ -445,10 +446,10 @@ fun MainDesktop(
     DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
 
     // Mirrors the primary's bible while connected via Instance Link — see BibleViewModel.setInstanceLinkSource.
-    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkMirrorSecondaryBible) {
+    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkBibleSyncMode) {
         bibleViewModel.setInstanceLinkSource(
             active = instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED,
-            mirrorSecondary = instanceLinkMirrorSecondaryBible,
+            mode = instanceLinkBibleSyncMode,
             fetchBibleFile = instanceLinkFetchBibleFile,
             fetchSecondaryBibleFile = instanceLinkFetchSecondaryBibleFile
         )
