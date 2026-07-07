@@ -1889,13 +1889,13 @@ fun main() {
 /** Where fetched picture bytes are cached so PresenterManager.setSelectedImagePath (which needs a
  *  local path, not bytes) can display them like any other local file. */
 private val instanceLinkPictureCacheDir: File by lazy {
-    File(System.getProperty("user.home"), ".churchpresenter/instance-link-cache/pictures").apply { mkdirs() }
+    File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/pictures").apply { mkdirs() }
 }
 
 /** Where fetched background image/video bytes are cached, keyed by slot — BackgroundConfig's
  *  image/video fields need a local path, not bytes, same reasoning as [instanceLinkPictureCacheDir]. */
 private val instanceLinkBackgroundCacheDir: File by lazy {
-    File(System.getProperty("user.home"), ".churchpresenter/instance-link-cache/backgrounds").apply { mkdirs() }
+    File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/backgrounds").apply { mkdirs() }
 }
 
 /**

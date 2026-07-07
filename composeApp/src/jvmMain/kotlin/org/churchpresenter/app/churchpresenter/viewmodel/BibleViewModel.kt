@@ -398,7 +398,7 @@ class BibleViewModel(
     private var syncMode = BibleSyncMode.FULL_REPLICA
     private var remoteBibleCacheFile: File? = null
     private var remoteSecondaryBibleCacheFile: File? = null
-    private val remoteBibleCacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link-cache/bibles")
+    private val remoteBibleCacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/bibles")
 
     /** Called from the owning tab whenever Instance Link connects/disconnects, or the sync mode changes. */
     fun setInstanceLinkSource(
