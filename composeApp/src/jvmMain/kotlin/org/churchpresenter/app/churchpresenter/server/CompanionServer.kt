@@ -73,6 +73,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
 import org.churchpresenter.app.churchpresenter.data.Bible
@@ -698,6 +700,10 @@ class CompanionServer {
         presentationRemoteEnabled = settings.remoteControlEnabled
         presentationRemotePassword = apiKey
         if (wasEnabled && !presentationRemoteEnabled) clearPresentationState()
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.PRIMARY, "state_updated",
+            mapOf("type" to "presentation_remote_settings", "remoteControlEnabled" to settings.remoteControlEnabled)
+        )
     }
 
     fun updateAutoScrollInterval(secs: Int) {
@@ -800,6 +806,7 @@ class CompanionServer {
         }
         _atemSettings = atem
         _lowerThirdFolder = lowerThirdFolder
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "atem_config"))
     }
 
     // ── Browser Source outputs (OBS/vMix overlay) ─────────────────────────────
@@ -817,6 +824,7 @@ class CompanionServer {
 
     fun updateBrowserSourceOutputs(outputs: List<ScreenAssignment>) {
         _browserSourceOutputs = outputs
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "browser_source_outputs", "count" to outputs.size))
     }
 
     fun browserSourceOutput(index: Int): ScreenAssignment? = _browserSourceOutputs.getOrNull(index)
@@ -1258,6 +1266,7 @@ class CompanionServer {
     /** Allow or disallow file uploads from mobile devices without restarting the server. */
     fun updateFileUploadEnabled(enabled: Boolean) {
         _fileUploadEnabled.value = enabled
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "file_upload_enabled", "enabled" to enabled))
     }
 
     /**
@@ -1350,12 +1359,14 @@ class CompanionServer {
      *  companion catalog/broadcast exists for the secondary bible, only InstanceLink uses this. */
     fun updateSecondaryBibleFilePath(filePath: String) {
         _secondaryBibleFilePath = filePath
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "secondary_bible_file_path", "filePath" to filePath))
     }
 
     /** Records the current background settings for GET /api/backgrounds — only consumed by a
      *  follower that opted in to mirroring backgrounds (see InstanceLinkSettings.mirrorBackgrounds). */
     fun updateBackgroundSettings(settings: BackgroundSettings) {
         _backgroundSettings.value = settings
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "background_settings"))
     }
 
     /**
@@ -2121,6 +2132,7 @@ class CompanionServer {
                 get("${Constants.ENDPOINT_SONGS}/{identifier}") {
                     if (!checkApiKey(call)) return@get
                     val identifier = call.parameters["identifier"] ?: run {
+                        logRest("/api/songs/{identifier}", 400, "missing_identifier")
                         call.respond(HttpStatusCode.BadRequest, """{"error":"missing identifier"}""")
                         return@get
                     }
@@ -2141,9 +2153,11 @@ class CompanionServer {
                         }
                     }
                     if (song == null) {
+                        logRest("/api/songs/{identifier}", 404, "song_not_found")
                         call.respond(HttpStatusCode.NotFound, """{"error":"song not found"}""")
                         return@get
                     }
+                    logRest("/api/songs/{identifier}", 200)
                     call.respond(buildSongDetail(song))
                 }
 
@@ -2421,9 +2435,11 @@ class CompanionServer {
                     val resolvedId = _scheduleItemToPresentationId[id] ?: id
                     val dto = _presentationCatalogs[resolvedId]
                     if (dto == null) {
+                        logRest("/api/presentations/{id}", 404, "not_found_or_not_yet_rendered")
                         call.respond(HttpStatusCode.NotFound, "Presentation not found or not yet rendered")
                         return@get
                     }
+                    logRest("/api/presentations/{id}", 200)
                     call.respond(dto)
                 }
 
@@ -2438,13 +2454,16 @@ class CompanionServer {
                     val resolvedId = _scheduleItemToPresentationId[id] ?: id
                     val slides = _slideBytes[resolvedId]
                     if (slides == null) {
+                        logRest("/api/presentations/{id}/slides/{index}", 404, "presentation_not_found")
                         call.respond(HttpStatusCode.NotFound, "Presentation not found")
                         return@get
                     }
                     if (index < 0 || index >= slides.size) {
+                        logRest("/api/presentations/{id}/slides/{index}", 404, "slide_index_out_of_range")
                         call.respond(HttpStatusCode.NotFound, "Slide index out of range")
                         return@get
                     }
+                    logRest("/api/presentations/{id}/slides/{index}", 200)
                     call.respondBytes(slides[index], ContentType.Image.JPEG)
                 }
 
@@ -2669,9 +2688,11 @@ class CompanionServer {
                     val id = call.parameters["id"] ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
                     val catalog = _pictureCatalogs[id]
                     if (catalog == null) {
+                        logRest("/api/pictures/{id}", 404, "folder_not_found")
                         call.respond(HttpStatusCode.NotFound, "Picture folder not found")
                         return@get
                     }
+                    logRest("/api/pictures/{id}", 200)
                     call.respond(catalog)
                 }
 
@@ -2685,15 +2706,18 @@ class CompanionServer {
                     val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(HttpStatusCode.BadRequest, "Invalid index"); return@get }
                     val files = _pictureFiles[id]
                     if (files == null) {
+                        logRest("/api/pictures/{id}/images/{index}", 404, "folder_not_found")
                         call.respond(HttpStatusCode.NotFound, "Picture folder not found")
                         return@get
                     }
                     if (index < 0 || index >= files.size) {
+                        logRest("/api/pictures/{id}/images/{index}", 404, "index_out_of_range")
                         call.respond(HttpStatusCode.NotFound, "Image index out of range")
                         return@get
                     }
                     val file = files[index]
                     if (!file.exists()) {
+                        logRest("/api/pictures/{id}/images/{index}", 404, "file_not_found_on_disk")
                         call.respond(HttpStatusCode.NotFound, "Image file not found on disk")
                         return@get
                     }
@@ -2702,11 +2726,14 @@ class CompanionServer {
                     if (ext == "heic" || ext == "heif") {
                         val jpegBytes = HeicDecoder.toJpegBytes(file)
                         if (jpegBytes != null) {
+                            logRest("/api/pictures/{id}/images/{index}", 200)
                             call.respondBytes(jpegBytes, ContentType.Image.JPEG)
                         } else {
+                            logRest("/api/pictures/{id}/images/{index}", 500, "heic_conversion_failed")
                             call.respond(HttpStatusCode.InternalServerError, "Failed to convert HEIC image")
                         }
                     } else {
+                        logRest("/api/pictures/{id}/images/{index}", 200)
                         call.respondBytes(file.readBytes(), contentTypeForExtension(ext))
                     }
                 }
@@ -2722,14 +2749,17 @@ class CompanionServer {
                     val id = call.parameters["id"] ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
                     val path = _scheduleItemToMediaPath[id]
                     if (path == null) {
+                        logRest("/api/media/stream/{id}", 404, "media_item_not_found")
                         call.respond(HttpStatusCode.NotFound, "Media item not found")
                         return@get
                     }
                     val file = File(path)
                     if (!file.exists()) {
+                        logRest("/api/media/stream/{id}", 404, "file_not_found_on_disk")
                         call.respond(HttpStatusCode.NotFound, "Media file not found on disk")
                         return@get
                     }
+                    logRest("/api/media/stream/{id}", 200)
                     call.respondFile(file)
                 }
 
@@ -2745,14 +2775,17 @@ class CompanionServer {
                     if (!checkApiKey(call)) return@get
                     val path = _bibleFilePath
                     if (path.isEmpty()) {
+                        logRest("/api/bible/file", 404, "no_bible_loaded")
                         call.respond(HttpStatusCode.NotFound, "No bible loaded")
                         return@get
                     }
                     val file = File(path)
                     if (!file.exists()) {
+                        logRest("/api/bible/file", 404, "file_not_found_on_disk")
                         call.respond(HttpStatusCode.NotFound, "Bible file not found on disk")
                         return@get
                     }
+                    logRest("/api/bible/file", 200)
                     call.respondFile(file)
                 }
 
@@ -2762,14 +2795,17 @@ class CompanionServer {
                     if (!checkApiKey(call)) return@get
                     val path = _secondaryBibleFilePath
                     if (path.isEmpty()) {
+                        logRest("/api/bible/file/secondary", 404, "no_secondary_bible_loaded")
                         call.respond(HttpStatusCode.NotFound, "No secondary bible loaded")
                         return@get
                     }
                     val file = File(path)
                     if (!file.exists()) {
+                        logRest("/api/bible/file/secondary", 404, "file_not_found_on_disk")
                         call.respond(HttpStatusCode.NotFound, "Secondary bible file not found on disk")
                         return@get
                     }
+                    logRest("/api/bible/file/secondary", 200)
                     call.respondFile(file)
                 }
 
@@ -2778,6 +2814,7 @@ class CompanionServer {
                  *  GET /api/backgrounds/asset/{slot} below, keyed by slot rather than raw path. */
                 get(Constants.ENDPOINT_BACKGROUNDS) {
                     if (!checkApiKey(call)) return@get
+                    logRest("/api/backgrounds", 200)
                     call.respond(_backgroundSettings.value)
                 }
 
@@ -2809,14 +2846,17 @@ class CompanionServer {
                         else -> ""
                     }
                     if (path.isBlank()) {
+                        logRest("/api/backgrounds/asset/{slot}", 404, "no_asset_configured_for_slot")
                         call.respond(HttpStatusCode.NotFound, "No asset configured for slot")
                         return@get
                     }
                     val file = File(path)
                     if (!file.exists()) {
+                        logRest("/api/backgrounds/asset/{slot}", 404, "file_not_found_on_disk")
                         call.respond(HttpStatusCode.NotFound, "Background asset not found on disk")
                         return@get
                     }
+                    logRest("/api/backgrounds/asset/{slot}", 200)
                     call.respondFile(file)
                 }
 
@@ -2948,6 +2988,7 @@ class CompanionServer {
                     if (_apiKeyEnabled.value && _apiKey.value.isNotEmpty()) {
                         val provided = queryKey ?: headerKey ?: ""
                         if (provided != _apiKey.value) {
+                            InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_unauthorized", mapOf("reason" to "bad_api_key"))
                             send(Frame.Text("{\"error\":\"Unauthorized\"}"))
                             return@webSocket
                         }
@@ -2959,6 +3000,7 @@ class CompanionServer {
                         Constants.CLIENT_ROLE_INSTANCE_LINK
                     if (isInstanceLinkFollower && wsClientId.isNotEmpty()) {
                         _connectedInstanceLinkFollowers.value = _connectedInstanceLinkFollowers.value + wsClientId
+                        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_connected", mapOf("deviceId" to wsClientId))
                     }
 
                     val catalog = _catalog.value
@@ -3005,6 +3047,10 @@ class CompanionServer {
                         if (frame is Frame.Text) {
                             try {
                                 val msg = json.decodeFromString(WebSocketMessage.serializer(), frame.readText())
+                                InstanceLinkLogger.log(
+                                    InstanceLinkLogSide.PRIMARY, "ws_command_received",
+                                    mapOf("type" to msg.type, "deviceId" to wsClientId)
+                                )
                                 when (msg.type) {
                                     Constants.WS_CMD_SELECT_SONG -> {
                                         val song = json.decodeFromString(ScheduleSongDto.serializer(), msg.payload)
@@ -3084,13 +3130,19 @@ class CompanionServer {
                                         }
                                     }
                                 }
-                            } catch (_: Exception) { /* ignore malformed frames */ }
+                            } catch (e: Exception) {
+                                InstanceLinkLogger.log(
+                                    InstanceLinkLogSide.PRIMARY, "ws_frame_malformed",
+                                    mapOf("deviceId" to wsClientId, "reason" to e.message)
+                                )
+                            }
                         }
                     }
                     } finally {
                         broadcastJob.cancel()
                         if (isInstanceLinkFollower && wsClientId.isNotEmpty()) {
                             _connectedInstanceLinkFollowers.value = _connectedInstanceLinkFollowers.value - wsClientId
+                            InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_disconnected", mapOf("deviceId" to wsClientId))
                         }
                     }
                 }
@@ -3120,13 +3172,16 @@ class CompanionServer {
                     val rawName = call.parameters["name"] ?: ""
                     val file = lowerThirdFiles().firstOrNull { it.nameWithoutExtension.equals(rawName, ignoreCase = true) }
                     if (file == null) {
+                        logRest("/api/lowerthirds/{name}/json", 404, "lower_third_not_found")
                         call.respond(HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
                         return@get
                     }
                     val ltJson = try { file.readText() } catch (_: Exception) {
+                        logRest("/api/lowerthirds/{name}/json", 500, "could_not_read_lottie_file")
                         call.respond(HttpStatusCode.InternalServerError, """{"error":"could not read lottie file"}""")
                         return@get
                     }
+                    logRest("/api/lowerthirds/{name}/json", 200)
                     call.respondText(ltJson, ContentType.Application.Json)
                 }
 
@@ -4009,9 +4064,20 @@ class CompanionServer {
 
 
     private fun broadcast(msg: WebSocketMessage) {
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "broadcast", mapOf("type" to msg.type))
         scope.launch {
             broadcastChannel.emit(json.encodeToString(WebSocketMessage.serializer(), msg))
         }
+    }
+
+    /** Logs one REST hit on an Instance-Link-relevant endpoint — success and failure alike, so the
+     *  primary's own log shows exactly what it served without needing to infer it from a follower's
+     *  fetch_result. [status] is the HTTP status code actually sent. */
+    private fun logRest(endpoint: String, status: Int, reason: String? = null) {
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.PRIMARY, "rest_request",
+            mapOf("endpoint" to endpoint, "status" to status, "reason" to reason)
+        )
     }
 
     /** Broadcasts a display_cleared event to all connected mobile clients. */
