@@ -1858,13 +1858,19 @@ private suspend fun applyRemoteLiveState(
     val mode = runCatching { Presenting.valueOf(state.contentType) }.getOrNull() ?: return
     when (mode) {
         Presenting.BIBLE -> if (state.bookName != null) {
-            presenterManager.setSelectedVerse(
-                SelectedVerse(
-                    bookName = state.bookName,
-                    chapter = state.chapter ?: 0,
-                    verseNumber = state.verseNumber ?: 0,
-                    verseText = state.verseText ?: "",
-                    verseRange = state.verseRange ?: ""
+            // setSelectedVerses (plural), not setSelectedVerse — only the plural setter feeds the
+            // selectedVerses -> displayedVerses bridging LaunchedEffect that BiblePresenter actually
+            // renders from; the singular setter alone leaves the screen blank despite the mode
+            // correctly switching to BIBLE.
+            presenterManager.setSelectedVerses(
+                listOf(
+                    SelectedVerse(
+                        bookName = state.bookName,
+                        chapter = state.chapter ?: 0,
+                        verseNumber = state.verseNumber ?: 0,
+                        verseText = state.verseText ?: "",
+                        verseRange = state.verseRange ?: ""
+                    )
                 )
             )
         }
