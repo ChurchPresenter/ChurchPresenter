@@ -71,6 +71,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.connect
+import churchpresenter.composeapp.generated.resources.instance_link_controlling_host
 import churchpresenter.composeapp.generated.resources.instance_link_following_host
 import churchpresenter.composeapp.generated.resources.instance_link_primary_badge
 import churchpresenter.composeapp.generated.resources.menu_disconnect
@@ -101,6 +102,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
+import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.app.churchpresenter.data.SongItem
@@ -250,6 +252,23 @@ fun MainDesktop(
     /** Non-null only when connected AND the operator has enabled pushing items to the primary's
      *  schedule — see ScheduleViewModel.onPushToRemoteSchedule. */
     instanceLinkSendAddToSchedule: ((ScheduleItem) -> Unit)? = null,
+    /** See InstanceLinkRole — CONTROLLED (default, mirror the primary) or CONTROLLER (drive it). */
+    instanceLinkRole: InstanceLinkRole = InstanceLinkRole.CONTROLLED,
+    /** Controller mode "go live with a new item" — approval-gated the first time on the primary,
+     *  instant afterwards. Non-null only when connected AND in Controller mode. */
+    instanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
+    /** Controller mode instant Bible verse display — non-null only when connected AND controlling. */
+    instanceLinkSendVerse: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit)? = null,
+    /** Controller mode instant picture display — non-null only when connected AND controlling. */
+    instanceLinkSendPicture: ((folderId: String, index: Int, fileName: String?) -> Unit)? = null,
+    /** Controller mode instant song-section navigation (within an already-live song) — non-null only
+     *  when connected AND controlling. */
+    instanceLinkSendSongSection: ((number: String, section: Int) -> Unit)? = null,
+    /** Controller mode instant slide navigation (within an already-live presentation) — non-null only
+     *  when connected AND controlling. */
+    instanceLinkSendSlide: ((id: String, index: Int) -> Unit)? = null,
+    /** Controller mode instant clear — non-null only when connected AND controlling. */
+    instanceLinkSendClear: (() -> Unit)? = null,
     qaManager: QAManager? = null,
     tunnelStatus: TunnelStatus = TunnelStatus.Idle,
     tunnelUrl: String = "",
@@ -413,10 +432,11 @@ fun MainDesktop(
     DisposableEffect(Unit) { onDispose { songsViewModel.dispose() } }
 
     // Mirrors the primary's song catalog while connected via Instance Link — see
-    // SongsViewModel.setInstanceLinkSource for the lazy per-song lyric fetch.
-    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkRemoteSongCatalog) {
+    // SongsViewModel.setInstanceLinkSource for the lazy per-song lyric fetch. Only in Controlled
+    // mode — a Controller keeps browsing its own local song library and drives the primary instead.
+    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkRemoteSongCatalog, instanceLinkRole) {
         songsViewModel.setInstanceLinkSource(
-            active = instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED,
+            active = instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED && instanceLinkRole == InstanceLinkRole.CONTROLLED,
             catalog = instanceLinkRemoteSongCatalog,
             fetchDetail = instanceLinkFetchSongDetail
         )
@@ -445,10 +465,11 @@ fun MainDesktop(
     }
     DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
 
-    // Mirrors the primary's bible while connected via Instance Link — see BibleViewModel.setInstanceLinkSource.
-    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkBibleSyncMode) {
+    // Mirrors the primary's bible while connected via Instance Link — see
+    // BibleViewModel.setInstanceLinkSource. Only in Controlled mode, same reasoning as Songs above.
+    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkBibleSyncMode, instanceLinkRole) {
         bibleViewModel.setInstanceLinkSource(
-            active = instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED,
+            active = instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED && instanceLinkRole == InstanceLinkRole.CONTROLLED,
             mode = instanceLinkBibleSyncMode,
             fetchBibleFile = instanceLinkFetchBibleFile,
             fetchSecondaryBibleFile = instanceLinkFetchSecondaryBibleFile
@@ -509,8 +530,9 @@ fun MainDesktop(
 
     // Mirrors the primary's schedule while connected via Instance Link, handing local editing
     // back to the operator on disconnect (see ScheduleViewModel.applyRemoteSchedule/stopFollowingRemote).
-    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkRemoteSchedule) {
-        if (instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED) {
+    // Only in Controlled mode — a Controller keeps its own local schedule, same reasoning as above.
+    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkRemoteSchedule, instanceLinkRole) {
+        if (instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED && instanceLinkRole == InstanceLinkRole.CONTROLLED) {
             scheduleViewModel.applyRemoteSchedule(instanceLinkRemoteSchedule)
         } else {
             scheduleViewModel.stopFollowingRemote()
@@ -945,7 +967,10 @@ fun MainDesktop(
                         ) {
                             ConnectionStatusRow(
                                 status = instanceLinkConnectionStatus,
-                                connectedLabel = stringResource(Res.string.instance_link_following_host, instanceLinkFollowingHost)
+                                connectedLabel = if (instanceLinkRole == InstanceLinkRole.CONTROLLER)
+                                    stringResource(Res.string.instance_link_controlling_host, instanceLinkFollowingHost)
+                                else
+                                    stringResource(Res.string.instance_link_following_host, instanceLinkFollowingHost)
                             )
                             if (instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED ||
                                 instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTING

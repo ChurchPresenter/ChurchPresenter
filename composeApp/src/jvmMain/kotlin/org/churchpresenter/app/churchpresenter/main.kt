@@ -75,6 +75,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
+import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
@@ -510,8 +511,13 @@ fun main() {
         // backgrounds are often venue-specific).
         var mirroredBackgroundSettings by remember { mutableStateOf<BackgroundSettings?>(null) }
         val instanceLinkConnectionStatusForBackgrounds by instanceLinkViewModel.connectionStatus.collectAsState()
-        LaunchedEffect(instanceLinkConnectionStatusForBackgrounds, appSettings.instanceLink.mirrorBackgrounds) {
-            if (instanceLinkConnectionStatusForBackgrounds != InstanceLinkStatus.CONNECTED || !appSettings.instanceLink.mirrorBackgrounds) {
+        LaunchedEffect(instanceLinkConnectionStatusForBackgrounds, appSettings.instanceLink.mirrorBackgrounds, appSettings.instanceLink.role) {
+            // Only in Controlled mode — a Controller keeps its own local backgrounds, same reasoning
+            // as the Bible/Songs/Schedule mirror gating in MainDesktop.kt.
+            if (instanceLinkConnectionStatusForBackgrounds != InstanceLinkStatus.CONNECTED ||
+                !appSettings.instanceLink.mirrorBackgrounds ||
+                appSettings.instanceLink.role != InstanceLinkRole.CONTROLLED
+            ) {
                 mirroredBackgroundSettings = null
                 return@LaunchedEffect
             }
@@ -1477,6 +1483,9 @@ fun main() {
                                     }
                                 }
 
+                                val instanceLinkIsControllerConnected =
+                                    instanceLinkViewModel.connectionStatus.collectAsState().value == InstanceLinkStatus.CONNECTED &&
+                                        appSettings.instanceLink.role == InstanceLinkRole.CONTROLLER
                                 MainDesktop(
                                     instanceLinkConnectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
                                     instanceLinkFollowingHost = appSettings.instanceLink.primaryHost,
@@ -1498,6 +1507,27 @@ fun main() {
                                     instanceLinkOnSecondaryBibleFilePathChanged = { path -> companionServer.updateSecondaryBibleFilePath(path) },
                                     instanceLinkSendAddToSchedule = if (appSettings.instanceLink.allowPushToSchedule) {
                                         { item -> instanceLinkViewModel.sendAddToSchedule(item) }
+                                    } else null,
+                                    instanceLinkRole = appSettings.instanceLink.role,
+                                    instanceLinkSendProject = if (instanceLinkIsControllerConnected) {
+                                        { item -> instanceLinkViewModel.sendProject(item) }
+                                    } else null,
+                                    instanceLinkSendVerse = if (instanceLinkIsControllerConnected) {
+                                        { bookName, chapter, verseNumber, verseText, verseRange ->
+                                            instanceLinkViewModel.sendSelectBibleVerse(bookName, chapter, verseNumber, verseText, verseRange)
+                                        }
+                                    } else null,
+                                    instanceLinkSendPicture = if (instanceLinkIsControllerConnected) {
+                                        { folderId, index, fileName -> instanceLinkViewModel.sendSelectPicture(folderId, index, fileName) }
+                                    } else null,
+                                    instanceLinkSendSongSection = if (instanceLinkIsControllerConnected) {
+                                        { number, section -> instanceLinkViewModel.sendSelectSongSection(number, section) }
+                                    } else null,
+                                    instanceLinkSendSlide = if (instanceLinkIsControllerConnected) {
+                                        { id, index -> instanceLinkViewModel.sendSelectSlide(id, index) }
+                                    } else null,
+                                    instanceLinkSendClear = if (instanceLinkIsControllerConnected) {
+                                        { instanceLinkViewModel.sendClear() }
                                     } else null,
                                     instanceLinkMediaStreamUrl = run {
                                         val link = appSettings.instanceLink

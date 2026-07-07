@@ -1245,6 +1245,7 @@
     <string name="instance_link_follower_badge">Instance Link — currently connected</string>
     <string name="instance_link_followers_connected_count">%1$d Instance Link follower(s) currently connected</string>
     <string name="instance_link_following_host">Following %1$s</string>
+    <string name="instance_link_controlling_host">Controlling %1$s</string>
     <string name="instance_link_primary_badge">Primary — %1$d follower(s) connected</string>
     <string name="client_label_placeholder">Enter a friendly name…</string>
     <string name="client_label_edit_tooltip">Set friendly name</string>
