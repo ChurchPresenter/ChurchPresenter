@@ -56,6 +56,15 @@ class CompanionSatelliteViewModel {
     private val _connectionStates = mutableStateMapOf<CompanionSurfaceSlot, CompanionConnectionUiState>()
     val connectionStates: Map<CompanionSurfaceSlot, CompanionConnectionUiState> get() = _connectionStates
 
+    /** Last *settled* (non-[CompanionConnectionStatus.CONNECTING]) status per slot — used to dedupe
+     * repeated failure telemetry. Companion's reconnect loop cycles CONNECTING/ERROR every
+     * [CompanionSatelliteSettings.reconnectDelayMs] while a host stays unreachable, and CONNECTING
+     * is written into [_connectionStates] on every cycle, so comparing against the raw previous
+     * state would treat every retry's ERROR as "new". Comparing against this map instead means a
+     * failure episode is reported once, stays silent through retries, and reports again only after
+     * a genuine recovery (CONNECTED) precedes the next failure. */
+    private val _lastSettledStatus = mutableMapOf<CompanionSurfaceSlot, CompanionConnectionStatus>()
+
     // ConcurrentHashMap because entries are both read from Compose's main thread during
     // composition and inserted/removed from each connection's own background socket-read thread
     // (see clientFor's callbacks below) — a plain HashMap is not safe for that concurrent
@@ -122,6 +131,7 @@ class CompanionSatelliteViewModel {
         clients.remove(slot)?.dispose()
         activeParams.remove(slot)
         _connectionStates.remove(slot)
+        _lastSettledStatus.remove(slot)
         _buttons.remove(slot)
     }
 
@@ -135,6 +145,7 @@ class CompanionSatelliteViewModel {
         clients.clear()
         activeParams.clear()
         _connectionStates.clear()
+        _lastSettledStatus.clear()
         _buttons.clear()
     }
 
@@ -170,22 +181,25 @@ class CompanionSatelliteViewModel {
     private fun clientFor(slot: CompanionSurfaceSlot): CompanionSatelliteClient = clients.getOrPut(slot) {
         CompanionSatelliteClient(
             onStatusChanged = { status, error ->
-                val previousStatus = _connectionStates[slot]?.status
                 _connectionStates[slot] = (_connectionStates[slot] ?: CompanionConnectionUiState(slot))
                     .copy(status = status, errorMessage = error ?: "")
-                if (status != previousStatus) {
-                    when (status) {
-                        CompanionConnectionStatus.CONNECTED ->
-                            CrashReporter.breadcrumb("Companion Satellite connected (${slot.connectionId}/${slot.placement})", category = "integration")
-                        CompanionConnectionStatus.DISCONNECTED ->
-                            CrashReporter.breadcrumb("Companion Satellite disconnected (${slot.connectionId}/${slot.placement})", category = "integration")
-                        CompanionConnectionStatus.ERROR ->
-                            CrashReporter.reportWarning(
-                                "Companion Satellite connection error: ${error ?: "unknown"}",
-                                tags = mapOf("subsystem" to "companion_satellite", "placement" to slot.placement.name)
-                            )
-                        CompanionConnectionStatus.CONNECTING -> {}
+                if (status != CompanionConnectionStatus.CONNECTING) {
+                    val previousSettled = _lastSettledStatus[slot]
+                    if (status != previousSettled) {
+                        when (status) {
+                            CompanionConnectionStatus.CONNECTED ->
+                                CrashReporter.breadcrumb("Companion Satellite connected (${slot.connectionId}/${slot.placement})", category = "integration")
+                            CompanionConnectionStatus.DISCONNECTED ->
+                                CrashReporter.breadcrumb("Companion Satellite disconnected (${slot.connectionId}/${slot.placement})", category = "integration")
+                            CompanionConnectionStatus.ERROR ->
+                                CrashReporter.reportWarning(
+                                    "Companion Satellite connection error: ${error ?: "unknown"}",
+                                    tags = mapOf("subsystem" to "companion_satellite", "placement" to slot.placement.name)
+                                )
+                            CompanionConnectionStatus.CONNECTING -> {}
+                        }
                     }
+                    _lastSettledStatus[slot] = status
                 }
             },
             onButtonUpdated = { update ->
