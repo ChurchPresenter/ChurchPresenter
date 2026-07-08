@@ -20,6 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -100,8 +101,8 @@ fun InstanceLinkDialog(
 
     val mainWindowState = LocalMainWindowState.current
     val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, 460.dp, 620.dp),
-        width = 460.dp,
+        position = centeredOnMainWindow(mainWindowState, 760.dp, 620.dp),
+        width = 760.dp,
         height = 620.dp
     )
 
@@ -137,126 +138,97 @@ fun InstanceLinkDialog(
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    ConnectionStatusRow(connectionStatus)
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        ConnectionStatusRow(connectionStatus)
 
-                    if (connectionStatus == InstanceLinkStatus.CONNECTED) {
-                        Text(
-                            text = stringResource(Res.string.instance_link_schedule_count, remoteScheduleCount),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        remoteLiveState?.let { state ->
+                        if (connectionStatus == InstanceLinkStatus.CONNECTED) {
                             Text(
-                                text = stringResource(Res.string.instance_link_last_received, liveStateSummary(state)),
+                                text = stringResource(Res.string.instance_link_schedule_count, remoteScheduleCount),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            remoteLiveState?.let { state ->
+                                Text(
+                                    text = stringResource(Res.string.instance_link_last_received, liveStateSummary(state)),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        SettingRow(label = stringResource(Res.string.instance_link_host)) {
+                            SettingsTextField(
+                                value = host,
+                                onValueChange = { host = it },
+                                placeholder = { Text(stringResource(Res.string.instance_link_host_hint)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true
+                            )
+                        }
+
+                        SettingRow(label = stringResource(Res.string.instance_link_port)) {
+                            SettingsTextField(
+                                value = portText,
+                                onValueChange = { new -> if (new.all(Char::isDigit)) portText = new },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true
+                            )
+                        }
+
+                        SettingRow(label = stringResource(Res.string.api_key_label)) {
+                            SettingsTextField(
+                                value = apiKey,
+                                onValueChange = { apiKey = it },
+                                placeholder = { Text(stringResource(Res.string.api_key_hint)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Switch(checked = autoConnect, onCheckedChange = { autoConnect = it })
+                            Text(
+                                stringResource(Res.string.instance_link_autoconnect),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Switch(checked = allowPushToSchedule, onCheckedChange = { allowPushToSchedule = it })
+                            Text(
+                                stringResource(Res.string.instance_link_allow_push_to_schedule),
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
 
-                    SettingRow(label = stringResource(Res.string.instance_link_host)) {
-                        SettingsTextField(
-                            value = host,
-                            onValueChange = { host = it },
-                            placeholder = { Text(stringResource(Res.string.instance_link_host_hint)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-                    }
+                    VerticalDivider()
 
-                    SettingRow(label = stringResource(Res.string.instance_link_port)) {
-                        SettingsTextField(
-                            value = portText,
-                            onValueChange = { new -> if (new.all(Char::isDigit)) portText = new },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-                    }
-
-                    SettingRow(label = stringResource(Res.string.api_key_label)) {
-                        SettingsTextField(
-                            value = apiKey,
-                            onValueChange = { apiKey = it },
-                            placeholder = { Text(stringResource(Res.string.api_key_hint)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Switch(checked = autoConnect, onCheckedChange = { autoConnect = it })
                         Text(
-                            stringResource(Res.string.instance_link_autoconnect),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Switch(checked = allowPushToSchedule, onCheckedChange = { allowPushToSchedule = it })
-                        Text(
-                            stringResource(Res.string.instance_link_allow_push_to_schedule),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                    HorizontalDivider()
-
-                    Text(
-                        stringResource(Res.string.instance_link_role),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        RadioButton(
-                            selected = role == InstanceLinkRole.CONTROLLED,
-                            onClick = { role = InstanceLinkRole.CONTROLLED }
-                        )
-                        Text(
-                            stringResource(Res.string.instance_link_role_controlled),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        RadioButton(
-                            selected = role == InstanceLinkRole.CONTROLLER,
-                            onClick = { role = InstanceLinkRole.CONTROLLER }
-                        )
-                        Text(
-                            stringResource(Res.string.instance_link_role_controller),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                    // Bible sync mode / background mirroring only matter in Controlled mode — a
-                    // Controller keeps its own local content entirely, so these settings would have
-                    // no effect there.
-                    if (role == InstanceLinkRole.CONTROLLED) {
-                        Text(
-                            stringResource(Res.string.instance_link_bible_sync_mode),
+                            stringResource(Res.string.instance_link_role),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -267,11 +239,11 @@ fun InstanceLinkDialog(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             RadioButton(
-                                selected = bibleSyncMode == BibleSyncMode.FULL_REPLICA,
-                                onClick = { bibleSyncMode = BibleSyncMode.FULL_REPLICA }
+                                selected = role == InstanceLinkRole.CONTROLLED,
+                                onClick = { role = InstanceLinkRole.CONTROLLED }
                             )
                             Text(
-                                stringResource(Res.string.instance_link_bible_sync_full_replica),
+                                stringResource(Res.string.instance_link_role_controlled),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -282,25 +254,66 @@ fun InstanceLinkDialog(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             RadioButton(
-                                selected = bibleSyncMode == BibleSyncMode.REFERENCE_ONLY,
-                                onClick = { bibleSyncMode = BibleSyncMode.REFERENCE_ONLY }
+                                selected = role == InstanceLinkRole.CONTROLLER,
+                                onClick = { role = InstanceLinkRole.CONTROLLER }
                             )
                             Text(
-                                stringResource(Res.string.instance_link_bible_sync_reference_only),
+                                stringResource(Res.string.instance_link_role_controller),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Switch(checked = mirrorBackgrounds, onCheckedChange = { mirrorBackgrounds = it })
+                        // Bible sync mode / background mirroring only matter in Controlled mode — a
+                        // Controller keeps its own local content entirely, so these settings would
+                        // have no effect there.
+                        if (role == InstanceLinkRole.CONTROLLED) {
                             Text(
-                                stringResource(Res.string.instance_link_mirror_backgrounds),
-                                style = MaterialTheme.typography.bodyMedium
+                                stringResource(Res.string.instance_link_bible_sync_mode),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                RadioButton(
+                                    selected = bibleSyncMode == BibleSyncMode.FULL_REPLICA,
+                                    onClick = { bibleSyncMode = BibleSyncMode.FULL_REPLICA }
+                                )
+                                Text(
+                                    stringResource(Res.string.instance_link_bible_sync_full_replica),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                RadioButton(
+                                    selected = bibleSyncMode == BibleSyncMode.REFERENCE_ONLY,
+                                    onClick = { bibleSyncMode = BibleSyncMode.REFERENCE_ONLY }
+                                )
+                                Text(
+                                    stringResource(Res.string.instance_link_bible_sync_reference_only),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Switch(checked = mirrorBackgrounds, onCheckedChange = { mirrorBackgrounds = it })
+                                Text(
+                                    stringResource(Res.string.instance_link_mirror_backgrounds),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
                     }
                 }
