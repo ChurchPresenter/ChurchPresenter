@@ -790,6 +790,8 @@
     <string name="web_preview_hint">Zadajte URL vyššie a klepnite na Spustiť naživo</string>
     <string name="web_engine_unavailable_title">Webový prehliadač nie je k dispozícii</string>
     <string name="web_engine_unavailable_body">Prehliadačové jadro sa nepodarilo spustiť. Nainštalujte Microsoft Visual C++ Redistributable (x64) a reštartujte aplikáciu.</string>
+    <string name="web_engine_unavailable_macos_title">Webový prehliadač vyžaduje novší macOS</string>
+    <string name="web_engine_unavailable_macos_body">Prehliadačové jadro ChurchPresenter už túto verziu macOS nepodporuje. Aktualizujte na macOS 12 (Monterey) alebo novší, aby ste mohli používať kartu Web a zdroje prehliadača.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Písanie na stránku</string>
     <string name="web_type_to_page_placeholder">Najprv kliknite na vstupné pole na živej stránke</string>

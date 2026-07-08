@@ -814,6 +814,8 @@
     <string name="web_preview_hint">Введіть URL вище та натисніть «В ефір»</string>
     <string name="web_engine_unavailable_title">Веб-браузер недоступний</string>
     <string name="web_engine_unavailable_body">Не вдалося запустити рушій браузера. Встановіть Microsoft Visual C++ Redistributable (x64) і перезапустіть застосунок.</string>
+    <string name="web_engine_unavailable_macos_title">Веб-браузеру потрібна новіша macOS</string>
+    <string name="web_engine_unavailable_macos_body">Рушій браузера ChurchPresenter більше не підтримує цю версію macOS. Оновіть до macOS 12 (Monterey) або новішої, щоб користуватися вкладкою "Веб" і джерелами браузера.</string>
     <string name="web_under_construction">Ця функція в розробці.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>

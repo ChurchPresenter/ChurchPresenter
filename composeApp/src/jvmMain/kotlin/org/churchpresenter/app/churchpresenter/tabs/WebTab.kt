@@ -72,6 +72,8 @@ import churchpresenter.composeapp.generated.resources.web_add_to_schedule
 import churchpresenter.composeapp.generated.resources.web_back
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_body
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_title
+import churchpresenter.composeapp.generated.resources.web_engine_unavailable_macos_body
+import churchpresenter.composeapp.generated.resources.web_engine_unavailable_macos_title
 import churchpresenter.composeapp.generated.resources.web_clear_cache
 import churchpresenter.composeapp.generated.resources.web_forward
 import androidx.compose.material.icons.Icons
@@ -866,14 +868,20 @@ private fun WebEngineUnavailable(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = stringResource(Res.string.web_engine_unavailable_title),
+            text = stringResource(
+                if (CefManager.macOsUnsupported) Res.string.web_engine_unavailable_macos_title
+                else Res.string.web_engine_unavailable_title
+            ),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = stringResource(Res.string.web_engine_unavailable_body),
+            text = stringResource(
+                if (CefManager.macOsUnsupported) Res.string.web_engine_unavailable_macos_body
+                else Res.string.web_engine_unavailable_body
+            ),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

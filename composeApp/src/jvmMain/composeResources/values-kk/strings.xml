@@ -814,6 +814,8 @@
     <string name="web_preview_hint">Жоғарыда URL енгізіп, Эфирге түймесін басыңыз</string>
     <string name="web_engine_unavailable_title">Веб-браузер қолжетімсіз</string>
     <string name="web_engine_unavailable_body">Браузер қозғалтқышын іске қосу мүмкін болмады. Microsoft Visual C++ Redistributable (x64) орнатып, қолданбаны қайта іске қосыңыз.</string>
+    <string name="web_engine_unavailable_macos_title">Веб-браузерге жаңарақ macOS қажет</string>
+    <string name="web_engine_unavailable_macos_body">ChurchPresenter браузер қозғалтқышы бұл macOS нұсқасын енді қолдамайды. "Веб" қойындысы мен браузер көздерін пайдалану үшін macOS 12 (Monterey) немесе жаңарақ нұсқаға жаңартыңыз.</string>
     <string name="web_under_construction">Бұл мүмкіндік әзірленуде.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>

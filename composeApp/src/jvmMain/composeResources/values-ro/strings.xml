@@ -815,6 +815,8 @@
     <string name="web_preview_hint">Introduceți un URL mai sus și apăsați Proiectează</string>
     <string name="web_engine_unavailable_title">Browser web indisponibil</string>
     <string name="web_engine_unavailable_body">Motorul browserului nu a putut porni. Instalați Microsoft Visual C++ Redistributable (x64) și reporniți aplicația.</string>
+    <string name="web_engine_unavailable_macos_title">Browserul web necesită o versiune mai nouă de macOS</string>
+    <string name="web_engine_unavailable_macos_body">Motorul de browser ChurchPresenter nu mai acceptă această versiune de macOS. Actualizați la macOS 12 (Monterey) sau o versiune ulterioară pentru a utiliza fila Web și sursele de browser.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Scrieți pe pagină</string>
     <string name="web_type_to_page_placeholder">Faceți clic pe un câmp de pe pagina live mai întâi</string>

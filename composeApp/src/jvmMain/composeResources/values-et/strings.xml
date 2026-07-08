@@ -842,6 +842,8 @@
     <string name="web_preview_hint">Sisesta ülal URL ja puuduta Mine eetrisse</string>
     <string name="web_engine_unavailable_title">Veebibrauser pole saadaval</string>
     <string name="web_engine_unavailable_body">Brauseri mootorit ei õnnestunud käivitada. Paigalda Microsoft Visual C++ Redistributable (x64) ja taaskäivita rakendus.</string>
+    <string name="web_engine_unavailable_macos_title">Veebibrauser vajab uuemat macOS-i</string>
+    <string name="web_engine_unavailable_macos_body">ChurchPresenteri brauseri mootor ei toeta enam seda macOS-i versiooni. Veebisakk ja brauseriallikate kasutamiseks uuenda macOS 12 (Monterey) või uuemale versioonile.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Kirjuta lehele</string>
     <string name="web_type_to_page_placeholder">Klõpsa esmalt sisendväljal live-lehel</string>

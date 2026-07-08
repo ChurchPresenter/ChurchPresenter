@@ -44,6 +44,26 @@ object CefManager {
     var initialized = false
         private set
 
+    /** True when [init] was skipped because the running macOS version is below [MIN_MACOS_MAJOR]. */
+    var macOsUnsupported = false
+        private set
+
+    /**
+     * Chromium 139+ (bundled here as CEF 143, see build.gradle.kts) dropped support for
+     * macOS 11 (Big Sur) — Chrome 138 was the last version to run there. CefApp.startup()
+     * fails on unsupported macOS versions with no exception cause (just returns false deep in
+     * native code), so detect this ahead of time instead of attempting init and reporting a
+     * misleading "JCef did not initialize correctly!" crash to Sentry for a known, unfixable case.
+     */
+    private const val MIN_MACOS_MAJOR = 12
+
+    private fun isUnsupportedMacOS(): Boolean {
+        val osName = System.getProperty("os.name", "").lowercase()
+        if (!osName.contains("mac")) return false
+        val major = System.getProperty("os.version", "").substringBefore('.').toIntOrNull() ?: return false
+        return major < MIN_MACOS_MAJOR
+    }
+
     /**
      * Programmatically export internal java.desktop packages required by JCEF on macOS.
      *
@@ -148,6 +168,10 @@ object CefManager {
 
     fun init() {
         if (initialized) return
+        if (isUnsupportedMacOS()) {
+            macOsUnsupported = true
+            return
+        }
         // Must run before any JCEF class is loaded — CefBrowserWindowMac.getWindowHandle()
         // directly references sun.awt.AWTAccessor which the JVM module system blocks by default.
         patchJcefModuleAccess()

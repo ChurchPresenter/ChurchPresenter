@@ -790,6 +790,8 @@
     <string name="web_preview_hint">Introduzca una URL y toque Presentar en vivo</string>
     <string name="web_engine_unavailable_title">Navegador web no disponible</string>
     <string name="web_engine_unavailable_body">El motor del navegador no pudo iniciarse. Instale el Microsoft Visual C++ Redistributable (x64) y reinicie la aplicación.</string>
+    <string name="web_engine_unavailable_macos_title">El navegador web requiere una versión más reciente de macOS</string>
+    <string name="web_engine_unavailable_macos_body">El motor del navegador de ChurchPresenter ya no admite esta versión de macOS. Actualice a macOS 12 (Monterey) o posterior para usar la pestaña Web y las fuentes de navegador.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Escribir en la página</string>
     <string name="web_type_to_page_placeholder">Haga clic primero en un campo de la página en vivo</string>

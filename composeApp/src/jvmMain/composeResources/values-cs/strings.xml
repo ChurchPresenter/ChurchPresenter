@@ -851,6 +851,8 @@
     <string name="web_preview_hint">Zadejte URL výše a klepněte na Zobrazit živě</string>
     <string name="web_engine_unavailable_title">Webový prohlížeč není k dispozici</string>
     <string name="web_engine_unavailable_body">Prohlížečové jádro se nepodařilo spustit. Nainstalujte Microsoft Visual C++ Redistributable (x64) a restartujte aplikaci.</string>
+    <string name="web_engine_unavailable_macos_title">Webový prohlížeč vyžaduje novější macOS</string>
+    <string name="web_engine_unavailable_macos_body">Prohlížečové jádro ChurchPresenter už tuto verzi macOS nepodporuje. Aktualizujte na macOS 12 (Monterey) nebo novější, abyste mohli používat záložku Web a zdroje prohlížeče.</string>
     <string name="web_under_construction">Tato funkce je ve vývoji.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>

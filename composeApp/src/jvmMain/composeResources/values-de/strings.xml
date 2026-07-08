@@ -814,6 +814,8 @@
     <string name="web_preview_hint">Geben Sie oben eine URL ein und tippen Sie auf Live gehen</string>
     <string name="web_engine_unavailable_title">Webbrowser nicht verfügbar</string>
     <string name="web_engine_unavailable_body">Die Browser-Engine konnte nicht gestartet werden. Installieren Sie das Microsoft Visual C++ Redistributable (x64) und starten Sie die Anwendung neu.</string>
+    <string name="web_engine_unavailable_macos_title">Webbrowser erfordert eine neuere macOS-Version</string>
+    <string name="web_engine_unavailable_macos_body">Die Browser-Engine von ChurchPresenter unterstützt diese macOS-Version nicht mehr. Aktualisieren Sie auf macOS 12 (Monterey) oder neuer, um den Web-Tab und Browserquellen zu nutzen.</string>
     <string name="web_under_construction">Diese Funktion befindet sich in Entwicklung.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>

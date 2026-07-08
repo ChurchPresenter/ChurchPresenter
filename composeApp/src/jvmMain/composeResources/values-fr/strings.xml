@@ -790,6 +790,8 @@
     <string name="web_preview_hint">Saisissez une URL et appuyez sur Diffuser en direct</string>
     <string name="web_engine_unavailable_title">Navigateur web indisponible</string>
     <string name="web_engine_unavailable_body">Le moteur du navigateur n'a pas pu démarrer. Installez le Microsoft Visual C++ Redistributable (x64) et redémarrez l'application.</string>
+    <string name="web_engine_unavailable_macos_title">Le navigateur web nécessite une version plus récente de macOS</string>
+    <string name="web_engine_unavailable_macos_body">Le moteur de navigateur de ChurchPresenter ne prend plus en charge cette version de macOS. Mettez à jour vers macOS 12 (Monterey) ou version ultérieure pour utiliser l'onglet Web et les sources de navigateur.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Écrire sur la page</string>
     <string name="web_type_to_page_placeholder">Cliquez d'abord sur un champ de la page en direct</string>

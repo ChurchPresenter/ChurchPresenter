@@ -813,6 +813,8 @@
     <string name="web_preview_hint">Wprowadź URL powyżej i naciśnij Na żywo</string>
     <string name="web_engine_unavailable_title">Przeglądarka internetowa niedostępna</string>
     <string name="web_engine_unavailable_body">Nie udało się uruchomić silnika przeglądarki. Zainstaluj Microsoft Visual C++ Redistributable (x64) i uruchom ponownie aplikację.</string>
+    <string name="web_engine_unavailable_macos_title">Przeglądarka internetowa wymaga nowszej wersji macOS</string>
+    <string name="web_engine_unavailable_macos_body">Silnik przeglądarki ChurchPresenter nie obsługuje już tej wersji macOS. Zaktualizuj do macOS 12 (Monterey) lub nowszego, aby korzystać z karty Web i źródeł przeglądarki.</string>
     <string name="web_under_construction">Ta funkcja jest w trakcie budowy.</string>
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>

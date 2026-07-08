@@ -790,6 +790,8 @@
     <string name="web_preview_hint">Voer een URL in en tik op Live gaan</string>
     <string name="web_engine_unavailable_title">Webbrowser niet beschikbaar</string>
     <string name="web_engine_unavailable_body">De browserengine kon niet worden gestart. Installeer de Microsoft Visual C++ Redistributable (x64) en start de toepassing opnieuw.</string>
+    <string name="web_engine_unavailable_macos_title">Webbrowser vereist een nieuwere macOS-versie</string>
+    <string name="web_engine_unavailable_macos_body">De browserengine van ChurchPresenter ondersteunt deze macOS-versie niet meer. Werk bij naar macOS 12 (Monterey) of nieuwer om het tabblad Web en browserbronnen te gebruiken.</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Typen naar pagina</string>
     <string name="web_type_to_page_placeholder">Klik eerst op een invoerveld op de live pagina</string>

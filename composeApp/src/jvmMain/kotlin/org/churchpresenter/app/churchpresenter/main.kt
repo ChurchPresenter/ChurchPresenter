@@ -246,6 +246,7 @@ fun main() {
     CefManager.init()
     // Startup config tag: whether the embedded browser engine loaded (aids triage of web errors).
     CrashReporter.setTag("jcef.available", CefManager.initialized.toString())
+    if (CefManager.macOsUnsupported) CrashReporter.setTag("jcef.macos_unsupported", "true")
 
     // Initialize FileKit so native file dialogs can resolve app directories
     io.github.vinceglb.filekit.FileKit.init(appId = "ChurchPresenter")
