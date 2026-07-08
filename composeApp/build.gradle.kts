@@ -261,6 +261,9 @@ compose.desktop {
             // Rendering hints (renderApi is set per-platform in the blocks below / jvmArgs above)
             "-Dawt.useSystemAAFontSettings=on",
             "-Dswing.aatext=true",
+            // Dev-mode has no .app bundle to source CFBundleName from, so macOS falls back to
+            // the main class name ("MainKt") in the menu bar without this.
+            "-Xdock:name=Church Presenter",
             // Reflective access needed by Apache POI, PDFBox, and JavaFX internals
             "--add-opens=java.base/java.lang=ALL-UNNAMED",
             "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
