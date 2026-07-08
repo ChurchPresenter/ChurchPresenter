@@ -305,9 +305,6 @@ compose.desktop {
             // Rendering hints (renderApi is set per-platform in the blocks below / jvmArgs above)
             "-Dawt.useSystemAAFontSettings=on",
             "-Dswing.aatext=true",
-            // Dev-mode has no .app bundle to source CFBundleName from, so macOS falls back to
-            // the main class name ("MainKt") in the menu bar without this.
-            "-Xdock:name=Church Presenter",
             // Reflective access needed by Apache POI, PDFBox, and JavaFX internals
             "--add-opens=java.base/java.lang=ALL-UNNAMED",
             "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
@@ -329,7 +326,13 @@ compose.desktop {
         // Explicitly set Skiko GPU backend to prevent software fallback
         val osName = System.getProperty("os.name").lowercase()
         when {
-            osName.contains("mac") -> jvmArgs("-Dskiko.renderApi=METAL")
+            osName.contains("mac") -> jvmArgs(
+                "-Dskiko.renderApi=METAL",
+                // Dev-mode has no .app bundle to source CFBundleName from, so macOS falls back to
+                // the main class name ("MainKt") in the menu bar without this. macOS-only: an
+                // unrecognized -Xdock option on other platforms aborts JVM startup entirely.
+                "-Xdock:name=Church Presenter"
+            )
             osName.contains("win") -> jvmArgs("-Dskiko.renderApi=OPENGL")
             else -> jvmArgs("-Dskiko.renderApi=OPENGL")
         }
