@@ -8,8 +8,11 @@ import io.ktor.client.request.header
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Sends an anonymous, city-level ping to the ChurchPresenter live world map
@@ -31,6 +34,14 @@ object LiveMapReporter {
     }
 
     private const val PING_URL = "https://www.churchpresenter.org/api/ping"
+
+    // If the first ping fails (e.g. network isn't up yet at launch), retry a
+    // few times in quick succession, then fall back to a slow, long-running
+    // retry rather than giving up until the next app launch.
+    private const val QUICK_ATTEMPTS = 3
+    private val QUICK_RETRY_DELAY = 5.seconds
+    private const val SLOW_ATTEMPTS = 15
+    private val SLOW_RETRY_DELAY = 10.minutes
 
     // BuildConfig.IS_RELEASE is true only for packaged installer builds (see the
     // generateBuildConfig task in build.gradle.kts). A `run`/IDE launch is a
@@ -70,12 +81,24 @@ object LiveMapReporter {
             if (isDevBuild) append("&src=dev")
         }
         scope.launch {
-            try {
+            suspend fun tryPing(): Boolean = try {
                 http.get(url) {
                     if (!installId.isNullOrBlank()) header("X-Install-Id", installId)
                 }
+                true
             } catch (_: Exception) {
                 // Non-fatal — silently ignore network errors.
+                false
+            }
+
+            repeat(QUICK_ATTEMPTS) { attempt ->
+                if (tryPing()) return@launch
+                if (attempt < QUICK_ATTEMPTS - 1) delay(QUICK_RETRY_DELAY)
+            }
+
+            repeat(SLOW_ATTEMPTS) {
+                delay(SLOW_RETRY_DELAY)
+                if (tryPing()) return@launch
             }
         }
     }
