@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
@@ -213,14 +214,26 @@ class PicturesViewModel(
 
     /**
      * Presents the current image in the presenter window.
+     *
+     * [onInstanceLinkSendProject] — Instance Link Controller mode, non-null only when connected and
+     * controlling. Always sends the whole folder via WS_CMD_PROJECT (never the narrower
+     * WS_CMD_SELECT_PICTURE): unlike Bible/Songs, the primary only recognizes a `folderId` it
+     * assigned itself when the folder was added to *its own* schedule — since `addPicture` there
+     * generates a fresh id rather than preserving one a client sent, a Controller has no reliable way
+     * to predict it, so every go-live goes through the schedule-add-and-present path instead.
      */
-    fun goLive(presenterManager: PresenterManager) {
+    fun goLive(presenterManager: PresenterManager, onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null) {
         val currentImage = getCurrentImageFile() ?: return
         presenterManager.setSelectedImagePath(currentImage.absolutePath)
         val nextIndex = _selectedImageIndex.value + 1
         presenterManager.setNextImagePath(_images.getOrNull(nextIndex)?.absolutePath)
         presenterManager.setPresentingMode(Presenting.PICTURES)
         presenterManager.setShowPresenterWindow(true)
+        onInstanceLinkSendProject?.let { send ->
+            getScheduleData()?.let { (folderPath, folderName, imageCount) ->
+                send(ScheduleItem.PictureItem(id = java.util.UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))
+            }
+        }
     }
 
     /**

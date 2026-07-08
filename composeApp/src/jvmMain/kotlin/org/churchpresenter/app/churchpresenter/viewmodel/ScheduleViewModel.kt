@@ -7,7 +7,10 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import java.io.File
 import java.security.SecureRandom
 import java.util.Base64
@@ -38,6 +41,48 @@ class ScheduleViewModel(
 ) {
     private val _scheduleItems: SnapshotStateList<ScheduleItem> = mutableStateListOf()
     val scheduleItems: List<ScheduleItem> get() = _scheduleItems
+
+    // ── Instance Link — remote schedule mirroring ────────────────────────────
+    // True whenever this instance is following another instance's schedule via Instance Link.
+    // While true, local mutation methods below are no-ops — the schedule is driven entirely by
+    // applyRemoteSchedule(), called from main.kt whenever InstanceLinkViewModel.remoteSchedule updates.
+    private val _isFollowingRemote = mutableStateOf(false)
+    val isFollowingRemote: Boolean get() = _isFollowingRemote.value
+
+    /** Replaces the schedule with [dtos] mapped from the primary's `schedule_updated` broadcast. */
+    fun applyRemoteSchedule(dtos: List<ScheduleItemDto>) {
+        _isFollowingRemote.value = true
+        _scheduleItems.clear()
+        val mapped = dtos.mapNotNull { it.toScheduleItem() }
+        _scheduleItems.addAll(mapped)
+        notifyChanged()
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.FOLLOWER, "schedule_sync_result",
+            mapOf("receivedCount" to dtos.size, "mappedCount" to mapped.size)
+        )
+    }
+
+    /** Called on Instance Link disconnect — hands local editing back to the operator. */
+    fun stopFollowingRemote() {
+        _isFollowingRemote.value = false
+    }
+
+    /** Wired to InstanceLinkViewModel.sendAddToSchedule when the operator has enabled pushing items
+     *  to the primary's schedule; left null otherwise, in which case [addOrPush] below is a no-op
+     *  while following — same behavior as before this existed. */
+    var onPushToRemoteSchedule: ((ScheduleItem) -> Unit)? = null
+
+    /** Adds [item] locally, or pushes it to the primary (subject to its own approval dialog) while
+     *  following a remote schedule — the single entry point every add* method below funnels through. */
+    private fun addOrPush(item: ScheduleItem) {
+        if (_isFollowingRemote.value) {
+            onPushToRemoteSchedule?.invoke(item)
+            return
+        }
+        pushUndoSnapshot()
+        _scheduleItems.add(item)
+        notifyChanged()
+    }
 
     // ── Auto-save ─────────────────────────────────────────────────────────────
 
@@ -82,7 +127,7 @@ class ScheduleViewModel(
 
     /** Loads the autosave into the current schedule. Returns true on success. */
     fun restoreAutoSave(): Boolean {
-        if (!autoSaveFile.exists()) return false
+        if (_isFollowingRemote.value || !autoSaveFile.exists()) return false
         return try {
             val raw = autoSaveFile.readText()
             val jsonText = try { decrypt(raw) } catch (_: Exception) { raw }
@@ -150,7 +195,7 @@ class ScheduleViewModel(
     }
 
     fun undo() {
-        if (undoStack.isEmpty()) return
+        if (_isFollowingRemote.value || undoStack.isEmpty()) return
         redoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap()))
         val snapshot = undoStack.removeLast()
         _scheduleItems.clear()
@@ -163,7 +208,7 @@ class ScheduleViewModel(
     }
 
     fun redo() {
-        if (redoStack.isEmpty()) return
+        if (_isFollowingRemote.value || redoStack.isEmpty()) return
         undoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap()))
         val snapshot = redoStack.removeLast()
         _scheduleItems.clear()
@@ -270,6 +315,7 @@ class ScheduleViewModel(
         dialogTitle: String = "Open Schedule",
         fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
     ) {
+        if (_isFollowingRemote.value) return
         val file = FileChooser.platformInstance.chooseSingle(
             path = null,
             filters = listOf(FileNameExtensionFilter(fileFilterDescription, "cps")),
@@ -312,6 +358,7 @@ class ScheduleViewModel(
 
     /** Clears the schedule and forgets the current file path. */
     fun newSchedule() {
+        if (_isFollowingRemote.value) return
         _scheduleItems.clear()
         _notes.clear()
         currentFilePath = null
@@ -326,14 +373,11 @@ class ScheduleViewModel(
     // ── Existing methods ──────────────────────────────────────────────────────
 
     fun addSong(songNumber: Int, title: String, songbook: String, songId: String = "") {
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.SongItem(id = UUID.randomUUID().toString(), songNumber = songNumber, title = title, songbook = songbook, songId = songId))
-        notifyChanged()
+        addOrPush(ScheduleItem.SongItem(id = UUID.randomUUID().toString(), songNumber = songNumber, title = title, songbook = songbook, songId = songId))
     }
 
     fun addBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String = "") {
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.BibleVerseItem(
+        addOrPush(ScheduleItem.BibleVerseItem(
             id = UUID.randomUUID().toString(),
             bookName = bookName,
             chapter = chapter,
@@ -341,37 +385,26 @@ class ScheduleViewModel(
             verseText = verseText,
             verseRange = verseRange
         ))
-        notifyChanged()
     }
 
     fun addLabel(text: String, textColor: String, backgroundColor: String) {
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.LabelItem(id = UUID.randomUUID().toString(), text = text, textColor = textColor, backgroundColor = backgroundColor))
-        notifyChanged()
+        addOrPush(ScheduleItem.LabelItem(id = UUID.randomUUID().toString(), text = text, textColor = textColor, backgroundColor = backgroundColor))
     }
 
     fun addPicture(folderPath: String, folderName: String, imageCount: Int) {
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.PictureItem(id = UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))
-        notifyChanged()
+        addOrPush(ScheduleItem.PictureItem(id = UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))
     }
 
     fun addPresentation(filePath: String, fileName: String, slideCount: Int, fileType: String) {
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.PresentationItem(id = UUID.randomUUID().toString(), filePath = filePath, fileName = fileName, slideCount = slideCount, fileType = fileType))
-        notifyChanged()
+        addOrPush(ScheduleItem.PresentationItem(id = UUID.randomUUID().toString(), filePath = filePath, fileName = fileName, slideCount = slideCount, fileType = fileType))
     }
 
     fun addMedia(mediaUrl: String, mediaTitle: String, mediaType: String) {
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.MediaItem(id = UUID.randomUUID().toString(), mediaUrl = mediaUrl, mediaTitle = mediaTitle, mediaType = mediaType))
-        notifyChanged()
+        addOrPush(ScheduleItem.MediaItem(id = UUID.randomUUID().toString(), mediaUrl = mediaUrl, mediaTitle = mediaTitle, mediaType = mediaType))
     }
 
     fun addLowerThird(presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) {
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.LowerThirdItem(id = UUID.randomUUID().toString(), presetId = presetId, presetLabel = presetLabel, pauseAtFrame = pauseAtFrame, pauseDurationMs = pauseDurationMs))
-        notifyChanged()
+        addOrPush(ScheduleItem.LowerThirdItem(id = UUID.randomUUID().toString(), presetId = presetId, presetLabel = presetLabel, pauseAtFrame = pauseAtFrame, pauseDurationMs = pauseDurationMs))
     }
 
     fun addAnnouncement(
@@ -399,11 +432,9 @@ class ScheduleViewModel(
         targetMinute: Int = 0,
         targetSecond: Int = 0
     ) {
-        pushUndoSnapshot()
-        val id = UUID.randomUUID().toString()
-        _scheduleItems.add(
+        addOrPush(
             ScheduleItem.AnnouncementItem(
-                id = id,
+                id = UUID.randomUUID().toString(),
                 text = text,
                 textColor = textColor,
                 backgroundColor = backgroundColor,
@@ -429,29 +460,22 @@ class ScheduleViewModel(
                 targetSecond = targetSecond
             )
         )
-        notifyChanged()
     }
 
     fun addWebsite(url: String, title: String) {
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.WebsiteItem(id = UUID.randomUUID().toString(), url = url, title = title.ifBlank { url }))
-        notifyChanged()
+        addOrPush(ScheduleItem.WebsiteItem(id = UUID.randomUUID().toString(), url = url, title = title.ifBlank { url }))
     }
 
     fun addScene(sceneId: String, sceneName: String) {
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.SceneItem(id = UUID.randomUUID().toString(), sceneId = sceneId, sceneName = sceneName))
-        notifyChanged()
+        addOrPush(ScheduleItem.SceneItem(id = UUID.randomUUID().toString(), sceneId = sceneId, sceneName = sceneName))
     }
 
     fun addDictionary(number: String, word: String, transliteration: String, definition: String) {
-        pushUndoSnapshot()
-        _scheduleItems.add(ScheduleItem.DictionaryItem(id = UUID.randomUUID().toString(), number = number, word = word, transliteration = transliteration, definition = definition))
-        notifyChanged()
+        addOrPush(ScheduleItem.DictionaryItem(id = UUID.randomUUID().toString(), number = number, word = word, transliteration = transliteration, definition = definition))
     }
 
     fun updateWebsiteTitle(url: String, title: String) {
-        if (title.isBlank()) return
+        if (_isFollowingRemote.value || title.isBlank()) return
         val index = _scheduleItems.indexOfFirst { it is ScheduleItem.WebsiteItem && it.url == url }
         if (index >= 0) {
             val existing = _scheduleItems[index] as ScheduleItem.WebsiteItem
@@ -465,6 +489,7 @@ class ScheduleViewModel(
     }
 
     fun updateLabel(id: String, text: String, textColor: String, backgroundColor: String) {
+        if (_isFollowingRemote.value) return
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {
             pushUndoSnapshot()
@@ -473,7 +498,17 @@ class ScheduleViewModel(
         }
     }
 
+    /** Wired to InstanceLinkViewModel.sendRemoveFromSchedule when the operator has enabled pushing
+     *  items to the primary's schedule (same allowPushToSchedule gate as [onPushToRemoteSchedule]) —
+     *  left null otherwise, in which case [removeItem] below is a no-op while following, same as
+     *  before this existed. */
+    var onRemoveFromRemoteSchedule: ((id: String) -> Unit)? = null
+
     fun removeItem(id: String) {
+        if (_isFollowingRemote.value) {
+            onRemoveFromRemoteSchedule?.invoke(id)
+            return
+        }
         pushUndoSnapshot()
         _scheduleItems.removeAll { it.id == id }
         _notes.remove(id)
@@ -481,6 +516,7 @@ class ScheduleViewModel(
     }
 
     fun moveItemUp(id: String): Int {
+        if (_isFollowingRemote.value) return -1
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index > 0) {
             pushUndoSnapshot()
@@ -493,6 +529,7 @@ class ScheduleViewModel(
     }
 
     fun moveItemDown(id: String): Int {
+        if (_isFollowingRemote.value) return -1
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && index < _scheduleItems.size - 1) {
             pushUndoSnapshot()
@@ -505,6 +542,7 @@ class ScheduleViewModel(
     }
 
     fun moveItemToTop(id: String): Int {
+        if (_isFollowingRemote.value) return -1
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index > 0) {
             pushUndoSnapshot()
@@ -517,6 +555,7 @@ class ScheduleViewModel(
     }
 
     fun moveItemToBottom(id: String): Int {
+        if (_isFollowingRemote.value) return -1
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && index < _scheduleItems.size - 1) {
             pushUndoSnapshot()
@@ -529,6 +568,7 @@ class ScheduleViewModel(
     }
 
     fun moveItem(from: Int, to: Int) {
+        if (_isFollowingRemote.value) return
         if (from < 0 || to < 0 || from >= _scheduleItems.size || to >= _scheduleItems.size || from == to) return
         pushUndoSnapshot()
         val item = _scheduleItems.removeAt(from)
@@ -537,6 +577,7 @@ class ScheduleViewModel(
     }
 
     fun clearSchedule() {
+        if (_isFollowingRemote.value) return
         pushUndoSnapshot()
         _scheduleItems.clear()
         _notes.clear()
@@ -582,6 +623,35 @@ class ScheduleViewModel(
             is ScheduleItem.SceneItem -> onPresentScene?.invoke(item) ?: onPresenting(Presenting.CANVAS)
             is ScheduleItem.DictionaryItem -> onPresentDictionary?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)
         }
+    }
+
+    /**
+     * Inverse of [org.churchpresenter.app.churchpresenter.server.CompanionServer.updateSchedule]'s
+     * ScheduleItem → ScheduleItemDto mapping. Some fields the DTO doesn't carry (extra announcement
+     * formatting/timer options, lower-third pause settings, scene id, dictionary detail beyond the
+     * word) fall back to defaults — a known limitation of mirroring through the flat companion DTO
+     * shape rather than the full sealed [ScheduleItem].
+     */
+    private fun ScheduleItemDto.toScheduleItem(): ScheduleItem? = when (type) {
+        "song" -> ScheduleItem.SongItem(id = id, songNumber = songNumber ?: 0, title = title ?: "", songbook = songbook ?: "")
+        "bible" -> ScheduleItem.BibleVerseItem(
+            id = id, bookName = bookName ?: "", chapter = chapter ?: 0, verseNumber = verseNumber ?: 0,
+            verseText = text ?: "", verseRange = verseRange ?: ""
+        )
+        "label" -> ScheduleItem.LabelItem(id = id, text = text ?: "", textColor = textColor ?: "#FFFFFF", backgroundColor = backgroundColor ?: "#2196F3")
+        "picture" -> ScheduleItem.PictureItem(id = id, folderPath = folderPath ?: "", folderName = folderName ?: "", imageCount = imageCount ?: 0)
+        "presentation" -> ScheduleItem.PresentationItem(
+            id = id, filePath = filePath ?: "", fileName = fileName ?: "", slideCount = slideCount ?: 0, fileType = fileType ?: ""
+        )
+        "media" -> ScheduleItem.MediaItem(id = id, mediaUrl = mediaUrl ?: "", mediaTitle = mediaTitle ?: "", mediaType = mediaType ?: "")
+        "lower_third" -> ScheduleItem.LowerThirdItem(
+            id = id, presetId = presetId ?: "", presetLabel = presetLabel ?: "", pauseAtFrame = false, pauseDurationMs = 2000L
+        )
+        "announcement" -> ScheduleItem.AnnouncementItem(id = id, text = text ?: "", textColor = textColor ?: "#FFFFFF", backgroundColor = backgroundColor ?: "#000000")
+        "website" -> ScheduleItem.WebsiteItem(id = id, url = url ?: "", title = title ?: url ?: "")
+        "scene" -> ScheduleItem.SceneItem(id = id, sceneId = "", sceneName = displayText)
+        "dictionary" -> ScheduleItem.DictionaryItem(id = id, number = "", word = displayText, transliteration = "", definition = "")
+        else -> null
     }
 }
 

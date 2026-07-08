@@ -250,6 +250,20 @@ object Constants {
     const val ENDPOINT_PICTURES               = "/api/pictures"
     const val ENDPOINT_WS                = "/ws"
     const val ENDPOINT_BROWSER_SOURCE    = "/browser-source"
+    const val ENDPOINT_MEDIA_STREAM      = "/api/media/stream"
+    const val ENDPOINT_BIBLE_FILE        = "/api/bible/file"
+    const val ENDPOINT_LOWER_THIRDS      = "/api/lowerthirds"
+    const val ENDPOINT_BACKGROUNDS       = "/api/backgrounds"
+
+    // Background asset slot names — shared vocabulary between CompanionServer's
+    // GET /api/backgrounds/asset/{slot} and InstanceLinkClient's fetchBackgroundAsset(), since a
+    // slot key (not a raw local file path) is what crosses the wire.
+    const val BACKGROUND_SLOT_DEFAULT             = "default"
+    const val BACKGROUND_SLOT_DEFAULT_LOWER_THIRD = "defaultLowerThird"
+    const val BACKGROUND_SLOT_BIBLE               = "bible"
+    const val BACKGROUND_SLOT_BIBLE_LOWER_THIRD   = "bibleLowerThird"
+    const val BACKGROUND_SLOT_SONG                = "song"
+    const val BACKGROUND_SLOT_SONG_LOWER_THIRD    = "songLowerThird"
 
     // WebSocket event types (server → client)
     const val WS_EVENT_SONGS_UPDATED              = "songs_updated"
@@ -266,6 +280,7 @@ object Constants {
     const val WS_EVENT_PRESENTATION_LIVE_CHANGED          = "presentation_live_changed"
     const val WS_EVENT_PRESENTATION_AUTO_SCROLL_CHANGED   = "presentation_auto_scroll_changed"
     const val WS_EVENT_PRESENTATION_LOOP_CHANGED          = "presentation_looping_changed"
+    const val WS_EVENT_LIVE_STATE_CHANGED                 = "live_state_changed"
 
     // WebSocket command types (client → server)
     const val WS_CMD_SELECT_SONG            = "select_song"
@@ -275,6 +290,7 @@ object Constants {
     const val WS_CMD_SELECT_BIBLE_VERSE     = "select_bible_verse"
     const val WS_CMD_ADD_TO_SCHEDULE        = "add_to_schedule"
     const val WS_CMD_ADD_BATCH_TO_SCHEDULE  = "add_batch_to_schedule"
+    const val WS_CMD_REMOVE_FROM_SCHEDULE   = "remove_from_schedule"
     const val WS_CMD_PROJECT                = "project"
     const val WS_CMD_CLEAR                  = "clear"
     const val WS_CMD_BIBLE_HOLD             = "bible_hold"
@@ -295,6 +311,10 @@ object Constants {
     const val HEADER_DEVICE_ID      = "X-Device-Id"
     const val HEADER_APP_VERSION    = "X-App-Version"
     const val HEADER_SERVER_VERSION = "X-Server-Version"
+    /** Sent by InstanceLinkClient (value "instance_link") so the primary can tell a following
+     *  ChurchPresenter instance apart from a regular mobile/browser companion client. */
+    const val HEADER_CLIENT_ROLE    = "X-Client-Role"
+    const val CLIENT_ROLE_INSTANCE_LINK = "instance_link"
     const val QUERY_PARAM_API_KEY   = "apiKey"
     const val QUERY_PARAM_SONGBOOK  = "songbook"
     const val QUERY_PARAM_BOOK      = "book"

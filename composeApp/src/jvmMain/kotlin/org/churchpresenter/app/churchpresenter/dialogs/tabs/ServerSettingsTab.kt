@@ -107,6 +107,8 @@ import churchpresenter.composeapp.generated.resources.enable_server
 import churchpresenter.composeapp.generated.resources.generate_api_key
 import churchpresenter.composeapp.generated.resources.no_allowed_clients
 import churchpresenter.composeapp.generated.resources.no_blocked_clients
+import churchpresenter.composeapp.generated.resources.instance_link_follower_badge
+import churchpresenter.composeapp.generated.resources.instance_link_followers_connected_count
 import churchpresenter.composeapp.generated.resources.remote_clients_description
 import churchpresenter.composeapp.generated.resources.remote_clients_title
 import churchpresenter.composeapp.generated.resources.remove
@@ -443,6 +445,21 @@ fun ServerSettingsTab(
 
                 Spacer(Modifier.height(4.dp))
 
+                val connectedInstanceLinkFollowers by companionServer.connectedInstanceLinkFollowers
+                    .collectAsState()
+                if (connectedInstanceLinkFollowers.isNotEmpty()) {
+                    Text(
+                        text = stringResource(
+                            Res.string.instance_link_followers_connected_count,
+                            connectedInstanceLinkFollowers.size
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.height(4.dp))
+                }
+
                 // ── Allowed clients list ──────────────────────────────────────
                 Text(
                     text = stringResource(Res.string.allowed_clients),
@@ -473,7 +490,8 @@ fun ServerSettingsTab(
                                 onSetLabel = { remoteClientManager.setLabel(clientId, it) },
                                 statusColor = MaterialTheme.colorScheme.primary,
                                 statusLabel = stringResource(Res.string.allowed_clients),
-                                onRemove = { remoteClientManager.removeAllowed(clientId) }
+                                onRemove = { remoteClientManager.removeAllowed(clientId) },
+                                isInstanceLinkFollower = clientId in connectedInstanceLinkFollowers
                             )
                         }
                     }
@@ -511,7 +529,8 @@ fun ServerSettingsTab(
                                 onSetLabel = { remoteClientManager.setLabel(clientId, it) },
                                 statusColor = MaterialTheme.colorScheme.error,
                                 statusLabel = stringResource(Res.string.blocked_clients),
-                                onRemove = { remoteClientManager.removeBlocked(clientId) }
+                                onRemove = { remoteClientManager.removeBlocked(clientId) },
+                                isInstanceLinkFollower = clientId in connectedInstanceLinkFollowers
                             )
                         }
                     }
@@ -761,7 +780,8 @@ private fun ClientRow(
     onSetLabel: (String) -> Unit,
     statusColor: Color,
     statusLabel: String,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    isInstanceLinkFollower: Boolean = false
 ) {
     var editing by remember { mutableStateOf(false) }
     var editText by remember(label) { mutableStateOf(label) }
@@ -806,6 +826,14 @@ private fun ClientRow(
                     style = MaterialTheme.typography.labelSmall,
                     color = statusColor
                 )
+                if (isInstanceLinkFollower) {
+                    Text(
+                        text = stringResource(Res.string.instance_link_follower_badge),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
             Spacer(Modifier.width(8.dp))
             // Edit (pencil) button

@@ -19,7 +19,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
 import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
 import org.churchpresenter.app.churchpresenter.data.BibleSearch
@@ -78,7 +81,10 @@ private fun DetectedReference.matchTypeLabel(): String? =
 
 class BibleViewModel(
     private var appSettings: AppSettings,
-    private val onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null
+    private val onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null,
+    /** Reports the secondary bible's file path to CompanionServer — no companion catalog exists for
+     *  it (mobile clients never browse a secondary bible), it's only used by Instance Link. */
+    private val onSecondaryBibleFilePathChanged: ((filePath: String) -> Unit)? = null
 ) {
     private val _primaryBible = mutableStateOf<Bible?>(null)
     val primaryBible: State<Bible?> = _primaryBible
@@ -382,6 +388,96 @@ class BibleViewModel(
         loadBibles()
     }
 
+    // ── Instance Link — remote bible ─────────────────────────────────────────
+    // Two sync modes (BibleSyncMode): FULL_REPLICA downloads the primary's raw .spb file(s) once and
+    // caches them, then loads through the exact same Bible.loadFromSpb() used for local files — no
+    // reimplementing the search/cross-reference/numbering engine against the API. Both primary and
+    // secondary mirror whenever the primary has one configured, unconditionally. REFERENCE_ONLY
+    // downloads nothing — this instance keeps its own locally-configured Bible(s) exactly as set up
+    // (any language/translation); only the live verse *reference* is synced, via the canonical code
+    // both instances' Bible objects resolve independently (see applyRemoteLiveState in main.kt).
+    private var remoteModeActive = false
+    private var syncMode = BibleSyncMode.FULL_REPLICA
+    private var remoteBibleCacheFile: File? = null
+    private var remoteSecondaryBibleCacheFile: File? = null
+    private val remoteBibleCacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/bibles")
+
+    /** Called from the owning tab whenever Instance Link connects/disconnects, or the sync mode changes. */
+    fun setInstanceLinkSource(
+        active: Boolean,
+        mode: BibleSyncMode,
+        fetchBibleFile: (suspend () -> ByteArray?)?,
+        fetchSecondaryBibleFile: (suspend () -> ByteArray?)?
+    ) {
+        if (!active) {
+            if (remoteModeActive) {
+                remoteModeActive = false
+                syncMode = BibleSyncMode.FULL_REPLICA
+                remoteBibleCacheFile = null
+                remoteSecondaryBibleCacheFile = null
+                loadBibles()
+            }
+            return
+        }
+        remoteModeActive = true
+        syncMode = mode
+        if (mode == BibleSyncMode.REFERENCE_ONLY) {
+            // Nothing to download — loadBibles() resolves both primaryPath/secondaryPath from this
+            // instance's own local settings whenever syncMode isn't FULL_REPLICA, same as when
+            // disconnected, so the follower's own translation(s) keep working independently.
+            remoteBibleCacheFile = null
+            remoteSecondaryBibleCacheFile = null
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "bible_sync_result",
+                mapOf("mode" to mode.name, "primaryDownloaded" to false, "secondaryDownloaded" to false)
+            )
+            loadBibles()
+            return
+        }
+        viewModelScope.launch {
+            val cacheFile = File(remoteBibleCacheDir, "primary.spb")
+            var primaryDownloaded = cacheFile.exists()
+            if (!cacheFile.exists()) {
+                val bytes = fetchBibleFile?.invoke()
+                if (bytes == null) {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "bible_sync_result",
+                        mapOf("mode" to mode.name, "primaryDownloaded" to false, "secondaryDownloaded" to false, "reason" to "primary_fetch_failed")
+                    )
+                    return@launch
+                }
+                withContext(Dispatchers.IO) {
+                    remoteBibleCacheDir.mkdirs()
+                    cacheFile.writeBytes(bytes)
+                }
+                primaryDownloaded = true
+            }
+            remoteBibleCacheFile = cacheFile
+
+            // Full replica always mirrors the secondary too, whenever the primary has one configured
+            // — no separate opt-in boolean anymore, replaced by the sync mode itself.
+            val secondaryCacheFile = File(remoteBibleCacheDir, "secondary.spb")
+            var secondaryDownloaded = secondaryCacheFile.exists()
+            if (!secondaryCacheFile.exists()) {
+                val bytes = fetchSecondaryBibleFile?.invoke()
+                if (bytes != null) {
+                    withContext(Dispatchers.IO) {
+                        remoteBibleCacheDir.mkdirs()
+                        secondaryCacheFile.writeBytes(bytes)
+                    }
+                    secondaryDownloaded = true
+                }
+            }
+            remoteSecondaryBibleCacheFile = secondaryCacheFile.takeIf { it.exists() }
+
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "bible_sync_result",
+                mapOf("mode" to mode.name, "primaryDownloaded" to primaryDownloaded, "secondaryDownloaded" to secondaryDownloaded)
+            )
+            loadBibles()
+        }
+    }
+
     fun loadBibles() {
         loadChapterJob?.cancel()
         loadChapterJob = null
@@ -390,13 +486,21 @@ class BibleViewModel(
             _isLoading.value = true
             _isFullyLoadedFlow.value = false
             try {
-                val primaryPath = if (appSettings.bibleSettings.primaryBible.isNotEmpty() &&
+                val useReplica = remoteModeActive && syncMode == BibleSyncMode.FULL_REPLICA
+                val primaryPath = if (useReplica) {
+                    remoteBibleCacheFile?.takeIf { it.exists() }
+                } else if (appSettings.bibleSettings.primaryBible.isNotEmpty() &&
                     appSettings.bibleSettings.storageDirectory.isNotEmpty()
                 ) File(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.primaryBible)
                     .takeIf { it.exists() }
                 else null
 
-                val secondaryPath = if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
+                // Only overridden in FULL_REPLICA mode — REFERENCE_ONLY (like being disconnected)
+                // always resolves from local settings, so the follower's own secondary translation
+                // keeps working independently of the connection.
+                val secondaryPath = if (useReplica) {
+                    remoteSecondaryBibleCacheFile?.takeIf { it.exists() }
+                } else if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
                     appSettings.bibleSettings.storageDirectory.isNotEmpty()
                 ) File(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.secondaryBible)
                     .takeIf { it.exists() }
@@ -444,9 +548,24 @@ class BibleViewModel(
                 val primary = primaryDeferred?.await()
                 val secondary = secondaryDeferred?.await()
 
+                // Only relevant while following another instance — a purely local load (not connected)
+                // has nothing to compare against a primary's log, so it's not logged here.
+                if (remoteModeActive) {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "bible_load_result",
+                        mapOf(
+                            "primaryPath" to primaryPath?.absolutePath,
+                            "secondaryPath" to secondaryPath?.absolutePath,
+                            "primaryLoaded" to (primary != null),
+                            "secondaryLoaded" to (secondary != null)
+                        )
+                    )
+                }
+
                 // ── Phase 3: update state with full data and load first chapter ─────
                 _primaryBible.value = primary
                 _secondaryBible.value = secondary
+                if (secondary != null) onSecondaryBibleFilePathChanged?.invoke(secondaryPath.absolutePath)
 
                 if (primary != null) {
                     _books.value = primary.getCanonicalBooks()

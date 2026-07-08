@@ -33,6 +33,8 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toComposeImageBitmap
+import org.jetbrains.skia.Image
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -70,7 +72,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
+import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
+import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
@@ -123,9 +128,13 @@ import org.churchpresenter.app.churchpresenter.server.AtemRenderCache
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.app.churchpresenter.server.LiveStateDto
+import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkDialog
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -133,6 +142,8 @@ import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
@@ -409,6 +420,149 @@ fun main() {
                 lastReconciled[connection.id] = connection
             }
         }
+
+        val instanceLinkViewModel = remember { InstanceLinkViewModel() }
+        DisposableEffect(Unit) { onDispose { instanceLinkViewModel.dispose() } }
+        // Captured from the existing onBibleLoaded callback below (BibleViewModel itself stays owned
+        // by MainDesktop — only the plain Bible object it already hands out crosses here, same as
+        // onBibleLoaded already does for companionServer.updateBible). Used to compute a canonical
+        // verse code when broadcasting a live Bible verse, for followers in BibleSyncMode.REFERENCE_ONLY.
+        var primaryBibleForInstanceLink by remember { mutableStateOf<Bible?>(null) }
+        // Auto-connect on launch (and reconnect if the saved connection details change while enabled).
+        LaunchedEffect(
+            appSettings.instanceLink.enabled,
+            appSettings.instanceLink.autoConnect,
+            appSettings.instanceLink.primaryHost,
+            appSettings.instanceLink.primaryPort,
+            appSettings.instanceLink.apiKey
+        ) {
+            val link = appSettings.instanceLink
+            if (link.enabled && link.autoConnect && link.primaryHost.isNotBlank() && link.primaryPort > 0) {
+                instanceLinkViewModel.connect(
+                    link.primaryHost, link.primaryPort, link.apiKey, link.deviceId,
+                    link.reconnectDelayMs.toLong()
+                )
+            }
+        }
+        // Once a connection actually succeeds, remember to auto-reconnect on the next launch —
+        // the operator shouldn't need to re-tick "connect automatically" after it's already worked once.
+        LaunchedEffect(instanceLinkViewModel) {
+            instanceLinkViewModel.connectionStatus.collect { status ->
+                if (status == InstanceLinkStatus.CONNECTED && !appSettings.instanceLink.autoConnect) {
+                    appSettings = appSettings.copy(
+                        instanceLink = appSettings.instanceLink.copy(enabled = true, autoConnect = true)
+                    )
+                    settingsManager.saveSettings(appSettings)
+                }
+            }
+        }
+        // Mirrors the primary's live content locally — the counterpart to onLiveStateChanged below.
+        LaunchedEffect(instanceLinkViewModel) {
+            instanceLinkViewModel.remoteLiveState.collect { state ->
+                if (state == null) return@collect
+                applyRemoteLiveState(
+                    state, presenterManager, instanceLinkViewModel,
+                    bibleSyncMode = appSettings.instanceLink.bibleSyncMode,
+                    localPrimaryBible = primaryBibleForInstanceLink
+                )
+            }
+        }
+        // Presentations have their own dedicated broadcast (richer than LiveStateDto's mode-only
+        // PRESENTATION entry) — fetch and mirror whichever slide the primary is currently showing.
+        LaunchedEffect(instanceLinkViewModel) {
+            instanceLinkViewModel.remotePresentationSlide.collect { slide ->
+                if (slide == null) return@collect
+                val bytes = instanceLinkViewModel.fetchPresentationSlideBytes(slide.id, slide.index)
+                if (bytes == null) {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                        mapOf("contentType" to "PRESENTATION", "resolved" to false, "reason" to "fetch_failed")
+                    )
+                    return@collect
+                }
+                val bitmap = runCatching {
+                    Image.makeFromEncoded(bytes).toComposeImageBitmap()
+                }.getOrNull()
+                if (bitmap == null) {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                        mapOf("contentType" to "PRESENTATION", "resolved" to false, "reason" to "decode_failed")
+                    )
+                    return@collect
+                }
+                presenterManager.setSelectedSlide(bitmap)
+                if (slide.isLive) {
+                    presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                    presenterManager.setShowPresenterWindow(true)
+                }
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "PRESENTATION", "resolved" to true, "isLive" to slide.isLive)
+                )
+            }
+        }
+        LaunchedEffect(instanceLinkViewModel) {
+            instanceLinkViewModel.displayClearedSignal.collect {
+                presenterManager.requestClearDisplay()
+            }
+        }
+        // Backgrounds change rarely (initial setup, not per-service) so this fetches once per
+        // connection rather than needing a live WS push, same as the Bible file fetch — only when
+        // the follower opted in via InstanceLinkSettings.mirrorBackgrounds (off by default, since
+        // backgrounds are often venue-specific).
+        var mirroredBackgroundSettings by remember { mutableStateOf<BackgroundSettings?>(null) }
+        val instanceLinkConnectionStatusForBackgrounds by instanceLinkViewModel.connectionStatus.collectAsState()
+        LaunchedEffect(instanceLinkConnectionStatusForBackgrounds, appSettings.instanceLink.mirrorBackgrounds, appSettings.instanceLink.role) {
+            // Only in Controlled mode — a Controller keeps its own local backgrounds, same reasoning
+            // as the Bible/Songs/Schedule mirror gating in MainDesktop.kt.
+            if (instanceLinkConnectionStatusForBackgrounds != InstanceLinkStatus.CONNECTED ||
+                !appSettings.instanceLink.mirrorBackgrounds ||
+                appSettings.instanceLink.role != InstanceLinkRole.CONTROLLED
+            ) {
+                mirroredBackgroundSettings = null
+                return@LaunchedEffect
+            }
+            val remote = instanceLinkViewModel.fetchBackgroundSettings() ?: return@LaunchedEffect
+            mirroredBackgroundSettings = downloadMirroredBackgroundSettings(remote, instanceLinkViewModel)
+        }
+        // The single override point for rendering paths (PresenterWindows, BrowserSourceVideoRenderer,
+        // and MainDesktop's live preview) — everywhere else appSettings is used as-is (editing,
+        // persistence, general settings), since those should never show the mirrored backgrounds as
+        // if they were this instance's own configuration.
+        val effectiveAppSettings = remember(appSettings, mirroredBackgroundSettings) {
+            mirroredBackgroundSettings?.let { appSettings.copy(backgroundSettings = it) } ?: appSettings
+        }
+        // Broadcasts this instance's live content to any connected InstanceLink follower — the
+        // counterpart to the remoteLiveState collector above.
+        LaunchedEffect(Unit) {
+            presenterManager.onLiveStateChanged = { pm, source ->
+                val verseCode = if (source == Presenting.BIBLE) {
+                    pm.selectedVerse.value.takeIf { it.bookName.isNotEmpty() }?.let { v ->
+                        primaryBibleForInstanceLink?.getBookIdByName(v.bookName)?.let { bookId ->
+                            primaryBibleForInstanceLink?.getCodeReference(bookId, v.chapter, v.verseNumber)
+                        }
+                    }
+                } else null
+                companionServer.updateLiveState(
+                    mode = source.name,
+                    bibleVerse = pm.selectedVerse.value,
+                    lyricSection = pm.lyricSection.value,
+                    pictureImagePath = pm.selectedImagePath.value,
+                    mediaUrl = pm.currentMediaUrl.value.ifEmpty { null },
+                    mediaType = pm.currentMediaType.value.ifEmpty { null },
+                    announcementText = pm.announcementText.value.ifEmpty { null },
+                    websiteUrl = pm.websiteUrl.value.ifEmpty { null },
+                    websiteTitle = pm.webPageTitle.value.ifEmpty { null },
+                    sceneId = pm.activeScene.value?.id,
+                    sceneName = pm.activeScene.value?.name,
+                    questionId = pm.displayedQuestion.value?.id,
+                    questionText = pm.displayedQuestion.value?.text,
+                    dictionaryWord = pm.displayedDictionaryEntry.value?.word,
+                    lowerThirdName = pm.currentLowerThirdName.value.ifEmpty { null },
+                    verseCode = verseCode
+                )
+            }
+        }
         remember(qaManager) { companionServer.qaManager = qaManager; true }
         // Auto-connect OBS when settings change (or on first load if enabled)
         LaunchedEffect(
@@ -491,6 +645,9 @@ fun main() {
         LaunchedEffect(appSettings.projectionSettings.browserSourceOutputs) {
             companionServer.updateBrowserSourceOutputs(appSettings.projectionSettings.browserSourceOutputs)
         }
+        LaunchedEffect(appSettings.backgroundSettings) {
+            companionServer.updateBackgroundSettings(appSettings.backgroundSettings)
+        }
         val browserSourceServerUrlState = companionServer.serverUrl.collectAsState()
         appSettings.projectionSettings.browserSourceOutputs.indices.forEach { i ->
             composeKey(i) {
@@ -504,7 +661,7 @@ fun main() {
                 // which is why a background image change only took effect after restarting the
                 // app. effectiveModeState is unaffected since it genuinely reads presenterManager
                 // State objects (.value), which derivedStateOf tracks correctly.
-                val appSettingsState = rememberUpdatedState(appSettings)
+                val appSettingsState = rememberUpdatedState(effectiveAppSettings)
                 val screenAssignmentState = rememberUpdatedState(
                     appSettings.projectionSettings.browserSourceOutputs.getOrNull(i) ?: ScreenAssignment()
                 )
@@ -547,6 +704,7 @@ fun main() {
             showOptionsDialog = true
         }
         var showStatisticsDialog by remember { mutableStateOf(false) }
+        var showInstanceLinkDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var showAboutDialog by remember { mutableStateOf(false) }
         var showContactDialog by remember { mutableStateOf(false) }
@@ -815,6 +973,50 @@ fun main() {
                                     }
                                 }
 
+                                // ── Remote remove-from-schedule requests ──────────────────────────────────────
+                                LaunchedEffect(Unit) {
+                                    companionServer.onRemoveFromSchedule.collect { pending ->
+                                        val clientId = pending.clientId
+                                        // Permanent block → auto-reject
+                                        if (remoteClientManager.isBlocked(clientId)) {
+                                            pending.decision.complete(false)
+                                            return@collect
+                                        }
+                                        // Session block → auto-reject
+                                        if (clientId.isNotBlank() && sessionBlockedClients.contains(clientId)) {
+                                            pending.decision.complete(false)
+                                            return@collect
+                                        }
+                                        // Permanent allow or session allow → auto-approve
+                                        if (remoteClientManager.isAllowed(clientId) ||
+                                            (clientId.isNotBlank() && sessionAllowedClients.contains(clientId))
+                                        ) {
+                                            currentScheduleActions.removeById(pending.id)
+                                            pending.decision.complete(true)
+                                            // Show activity toast so operator is aware
+                                            remoteActivityNotifications.add(RemoteActivityNotification(
+                                                type = RemoteEventType.REMOVE_FROM_SCHEDULE,
+                                                title = pending.label,
+                                                clientId = clientId,
+                                                clientLabel = remoteClientManager.getLabel(clientId)
+                                            ))
+                                            return@collect
+                                        }
+                                        val event = RemoteEvent(
+                                            type = RemoteEventType.REMOVE_FROM_SCHEDULE,
+                                            title = pending.label,
+                                            clientId = clientId,
+                                            clientLabel = remoteClientManager.getLabel(clientId)
+                                        )
+                                        val allow: () -> Unit = {
+                                            currentScheduleActions.removeById(pending.id)
+                                            pending.decision.complete(true)
+                                        }
+                                        val deny: () -> Unit = { pending.decision.complete(false) }
+                                        remoteEventQueue.add(Triple(event, allow, deny))
+                                    }
+                                }
+
                                 // ── Remote add-batch-to-schedule requests ─────────────────────────────────────
                                 LaunchedEffect(Unit) {
                                     companionServer.onAddBatchToSchedule.collect { pending ->
@@ -1073,7 +1275,7 @@ fun main() {
                                 LaunchedEffect(Unit) {
                                     LowerThirdSequencer.onShow.collect { req ->
                                         presenterManager.setLottieContent(
-                                            req.json, req.pauseAtFrame, req.pauseFrame, req.pauseDurationMs
+                                            req.json, req.pauseAtFrame, req.pauseFrame, req.pauseDurationMs, req.name
                                         )
                                         presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                         presenterManager.setShowPresenterWindow(true)
@@ -1258,6 +1460,9 @@ fun main() {
                                     onContactUs = { showContactDialog = true },
                                     onGettingStarted = { showSetupWizard = true },
                                     onStatistics = { showStatisticsDialog = true },
+                                    onConnectToInstance = { showInstanceLinkDialog = true },
+                                    onDisconnectInstance = { instanceLinkViewModel.disconnect() },
+                                    isInstanceLinkConnected = instanceLinkViewModel.connectionStatus.collectAsState().value != InstanceLinkStatus.DISCONNECTED,
                                     onConverter = { showConverterWindow = true },
                                     onHelp = {
                                         Desktop.getDesktop()
@@ -1333,7 +1538,64 @@ fun main() {
                                     }
                                 }
 
+                                val instanceLinkIsControllerConnected =
+                                    instanceLinkViewModel.connectionStatus.collectAsState().value == InstanceLinkStatus.CONNECTED &&
+                                        appSettings.instanceLink.role == InstanceLinkRole.CONTROLLER
                                 MainDesktop(
+                                    instanceLinkConnectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
+                                    instanceLinkFollowingHost = appSettings.instanceLink.primaryHost,
+                                    connectedInstanceLinkFollowerCount = companionServer.connectedInstanceLinkFollowers.collectAsState().value.size,
+                                    onInstanceLinkConnect = {
+                                        val link = appSettings.instanceLink
+                                        instanceLinkViewModel.connect(
+                                            link.primaryHost, link.primaryPort, link.apiKey, link.deviceId,
+                                            link.reconnectDelayMs.toLong()
+                                        )
+                                    },
+                                    onInstanceLinkDisconnect = { instanceLinkViewModel.disconnect() },
+                                    instanceLinkRemoteSchedule = instanceLinkViewModel.remoteSchedule.collectAsState().value,
+                                    instanceLinkRemoteSongCatalog = instanceLinkViewModel.remoteSongCatalog.collectAsState().value,
+                                    instanceLinkFetchSongDetail = { number, songbook -> instanceLinkViewModel.fetchSongDetail(number, songbook) },
+                                    instanceLinkFetchBibleFile = { instanceLinkViewModel.fetchBibleFile() },
+                                    instanceLinkBibleSyncMode = appSettings.instanceLink.bibleSyncMode,
+                                    instanceLinkFetchSecondaryBibleFile = { instanceLinkViewModel.fetchSecondaryBibleFile() },
+                                    instanceLinkOnSecondaryBibleFilePathChanged = { path -> companionServer.updateSecondaryBibleFilePath(path) },
+                                    instanceLinkSendAddToSchedule = if (appSettings.instanceLink.allowPushToSchedule) {
+                                        { item -> instanceLinkViewModel.sendAddToSchedule(item) }
+                                    } else null,
+                                    instanceLinkSendRemoveFromSchedule = if (appSettings.instanceLink.allowPushToSchedule) {
+                                        { id -> instanceLinkViewModel.sendRemoveFromSchedule(id) }
+                                    } else null,
+                                    instanceLinkRole = appSettings.instanceLink.role,
+                                    instanceLinkSendProject = if (instanceLinkIsControllerConnected) {
+                                        { item -> instanceLinkViewModel.sendProject(item) }
+                                    } else null,
+                                    instanceLinkSendVerse = if (instanceLinkIsControllerConnected) {
+                                        { bookName, chapter, verseNumber, verseText, verseRange ->
+                                            instanceLinkViewModel.sendSelectBibleVerse(bookName, chapter, verseNumber, verseText, verseRange)
+                                        }
+                                    } else null,
+                                    instanceLinkSendPicture = if (instanceLinkIsControllerConnected) {
+                                        { folderId, index, fileName -> instanceLinkViewModel.sendSelectPicture(folderId, index, fileName) }
+                                    } else null,
+                                    instanceLinkSendSongSection = if (instanceLinkIsControllerConnected) {
+                                        { number, section -> instanceLinkViewModel.sendSelectSongSection(number, section) }
+                                    } else null,
+                                    instanceLinkSendSlide = if (instanceLinkIsControllerConnected) {
+                                        { id, index -> instanceLinkViewModel.sendSelectSlide(id, index) }
+                                    } else null,
+                                    instanceLinkSendClear = if (instanceLinkIsControllerConnected) {
+                                        { instanceLinkViewModel.sendClear() }
+                                    } else null,
+                                    instanceLinkMediaStreamUrl = run {
+                                        val link = appSettings.instanceLink
+                                        if (instanceLinkViewModel.connectionStatus.collectAsState().value == InstanceLinkStatus.CONNECTED) {
+                                            ({ itemId: String ->
+                                                val keyParam = if (link.apiKey.isNotEmpty()) "?${Constants.QUERY_PARAM_API_KEY}=${link.apiKey}" else ""
+                                                "http://${link.primaryHost}:${link.primaryPort}${Constants.ENDPOINT_MEDIA_STREAM}/$itemId$keyParam"
+                                            })
+                                        } else null
+                                    },
                                     onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
                                     onSongItemSelected = { section ->
                                         presenterManager.setLyricSection(section)
@@ -1355,6 +1617,7 @@ fun main() {
                                     onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
                                     onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
                                     appSettings = appSettings,
+                                    livePreviewAppSettings = effectiveAppSettings,
                                     presenterManager = presenterManager,
                                     statisticsManager = statisticsManager,
                                     onScheduleActionsReady = { scheduleActions = it },
@@ -1372,9 +1635,11 @@ fun main() {
                                     theme = theme,
                                     onSongsLoaded = { songs -> companionServer.updateSongs(songs) },
                                     onBibleLoaded = { bible, translation ->
+                                        primaryBibleForInstanceLink = bible
                                         companionServer.updateBible(
                                             bible,
-                                            translation
+                                            translation,
+                                            filePath = File(appSettings.bibleSettings.storageDirectory, translation).absolutePath
                                         )
                                     },
                                     onScheduleChanged = { items -> companionServer.updateSchedule(items) },
@@ -1524,6 +1789,35 @@ fun main() {
                                     statisticsManager = statisticsManager,
                                     onDismiss = { showStatisticsDialog = false; dialogDismissSignal++ }
                                 )
+                                InstanceLinkDialog(
+                                    isVisible = showInstanceLinkDialog,
+                                    settings = appSettings.instanceLink,
+                                    connectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
+                                    remoteLiveState = instanceLinkViewModel.remoteLiveState.collectAsState().value,
+                                    remoteScheduleCount = instanceLinkViewModel.remoteSchedule.collectAsState().value.size,
+                                    onConnect = { host, port, apiKey, autoConnect, allowPushToSchedule, bibleSyncMode, mirrorBackgrounds, role ->
+                                        appSettings = appSettings.copy(
+                                            instanceLink = appSettings.instanceLink.copy(
+                                                enabled = true,
+                                                primaryHost = host,
+                                                primaryPort = port,
+                                                apiKey = apiKey,
+                                                autoConnect = autoConnect,
+                                                allowPushToSchedule = allowPushToSchedule,
+                                                bibleSyncMode = bibleSyncMode,
+                                                mirrorBackgrounds = mirrorBackgrounds,
+                                                role = role
+                                            )
+                                        )
+                                        settingsManager.saveSettings(appSettings)
+                                        instanceLinkViewModel.connect(
+                                            host, port, apiKey, appSettings.instanceLink.deviceId,
+                                            appSettings.instanceLink.reconnectDelayMs.toLong()
+                                        )
+                                    },
+                                    onDisconnect = { instanceLinkViewModel.disconnect() },
+                                    onDismiss = { showInstanceLinkDialog = false; dialogDismissSignal++ }
+                                )
                                 AboutDialog(
                                     isVisible = showAboutDialog,
                                     onDismiss = { showAboutDialog = false; dialogDismissSignal++ },
@@ -1577,6 +1871,8 @@ fun main() {
                                     queueSize = remoteEventQueue.size,
                                     isClientKnownAllowed = remoteClientManager.isAllowed(currentClientId),
                                     isClientKnownBlocked = remoteClientManager.isBlocked(currentClientId),
+                                    isInstanceLinkFollower = currentClientId.isNotBlank() &&
+                                        currentClientId in companionServer.connectedInstanceLinkFollowers.collectAsState().value,
                                     onAllow = {
                                         currentRemote?.second?.invoke()
                                         if (remoteEventQueue.isNotEmpty()) remoteEventQueue.removeAt(0)
@@ -1637,6 +1933,7 @@ fun main() {
                                 // ── Activity toast for auto-approved clients ──────────────
                                 RemoteActivityToastHost(
                                     notifications = remoteActivityNotifications,
+                                    connectedInstanceLinkFollowers = companionServer.connectedInstanceLinkFollowers.collectAsState().value,
                                     onDismiss = { n -> remoteActivityNotifications.remove(n) },
                                     onDismissAll = { remoteActivityNotifications.clear() },
                                     onBlockForSession = { n ->
@@ -1667,7 +1964,7 @@ fun main() {
                 screens = screens,
                 presenterManager = presenterManager,
                 mediaViewModel = mediaViewModel,
-                appSettings = appSettings,
+                appSettings = effectiveAppSettings,
                 identifyingScreen = identifyingScreen,
                 serverUrl = companionServer.serverUrl.collectAsState().value,
                 qaDisplayUrl = qaDisplayUrl,
@@ -1713,6 +2010,262 @@ fun main() {
             )
         }
     }
+}
+
+/** Where fetched picture bytes are cached so PresenterManager.setSelectedImagePath (which needs a
+ *  local path, not bytes) can display them like any other local file. */
+private val instanceLinkPictureCacheDir: File by lazy {
+    File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/pictures").apply { mkdirs() }
+}
+
+/** Where fetched background image/video bytes are cached, keyed by slot — BackgroundConfig's
+ *  image/video fields need a local path, not bytes, same reasoning as [instanceLinkPictureCacheDir]. */
+private val instanceLinkBackgroundCacheDir: File by lazy {
+    File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/backgrounds").apply { mkdirs() }
+}
+
+/**
+ * Downloads the primary's configured background image/video assets (only for slots it actually has
+ * set — most churches only use one or two) into a local cache, then returns a [BackgroundSettings]
+ * copy with every image/video path rewritten to the cached file. BiblePresenter/SongPresenter then
+ * render it exactly like a local background — no changes needed in either presenter. Only called
+ * when the follower opted in via InstanceLinkSettings.mirrorBackgrounds; colors/gradients/opacity/
+ * type are plain values already carried by [remote] as-is, no transfer needed for those.
+ */
+private suspend fun downloadMirroredBackgroundSettings(
+    remote: BackgroundSettings,
+    instanceLinkViewModel: InstanceLinkViewModel
+): BackgroundSettings {
+    suspend fun cache(slot: String, path: String, isVideo: Boolean): String {
+        if (path.isBlank()) return path
+        val ext = File(path).extension.ifBlank { if (isVideo) "mp4" else "jpg" }
+        val kind = if (isVideo) "video" else "image"
+        val cacheFile = File(instanceLinkBackgroundCacheDir, "$slot-$kind.$ext")
+        if (!cacheFile.exists()) {
+            val bytes = instanceLinkViewModel.fetchBackgroundAsset(slot, isVideo)
+            if (bytes == null) {
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "background_asset_fetch_failed",
+                    mapOf("slot" to slot, "isVideo" to isVideo)
+                )
+                return ""
+            }
+            cacheFile.writeBytes(bytes)
+        }
+        return cacheFile.absolutePath
+    }
+    return remote.copy(
+        defaultBackgroundImage = cache(Constants.BACKGROUND_SLOT_DEFAULT, remote.defaultBackgroundImage, false),
+        defaultBackgroundVideo = cache(Constants.BACKGROUND_SLOT_DEFAULT, remote.defaultBackgroundVideo, true),
+        defaultLowerThirdBackgroundImage = cache(Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD, remote.defaultLowerThirdBackgroundImage, false),
+        defaultLowerThirdBackgroundVideo = cache(Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD, remote.defaultLowerThirdBackgroundVideo, true),
+        bibleBackground = remote.bibleBackground.copy(
+            backgroundImage = cache(Constants.BACKGROUND_SLOT_BIBLE, remote.bibleBackground.backgroundImage, false),
+            backgroundVideo = cache(Constants.BACKGROUND_SLOT_BIBLE, remote.bibleBackground.backgroundVideo, true)
+        ),
+        bibleLowerThirdBackground = remote.bibleLowerThirdBackground.copy(
+            backgroundImage = cache(Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD, remote.bibleLowerThirdBackground.backgroundImage, false),
+            backgroundVideo = cache(Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD, remote.bibleLowerThirdBackground.backgroundVideo, true)
+        ),
+        songBackground = remote.songBackground.copy(
+            backgroundImage = cache(Constants.BACKGROUND_SLOT_SONG, remote.songBackground.backgroundImage, false),
+            backgroundVideo = cache(Constants.BACKGROUND_SLOT_SONG, remote.songBackground.backgroundVideo, true)
+        ),
+        songLowerThirdBackground = remote.songLowerThirdBackground.copy(
+            backgroundImage = cache(Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD, remote.songLowerThirdBackground.backgroundImage, false),
+            backgroundVideo = cache(Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD, remote.songLowerThirdBackground.backgroundVideo, true)
+        )
+    )
+}
+
+/**
+ * Applies a [LiveStateDto] received from another instance's CompanionServer to this instance's own
+ * [PresenterManager], so an InstanceLink follower mirrors the primary's output. Bible verses, song
+ * sections, announcements, website content, pictures, and lower thirds (fetched by preset name via
+ * GET /api/lowerthirds/{name}/json) are mirrored in full; presentations use their own richer
+ * dedicated broadcast instead (see the remotePresentationSlide collector in MainDesktop's caller).
+ * Media/scenes/Q&A/dictionary switch the presenting mode so the right output pane activates, but
+ * fetching their actual binary/rendered content over the network is not wired yet (fast-follow).
+ */
+private suspend fun applyRemoteLiveState(
+    state: LiveStateDto,
+    presenterManager: PresenterManager,
+    instanceLinkViewModel: InstanceLinkViewModel,
+    bibleSyncMode: BibleSyncMode = BibleSyncMode.FULL_REPLICA,
+    localPrimaryBible: Bible? = null
+) {
+    val mode = runCatching { Presenting.valueOf(state.contentType) }.getOrNull()
+    if (mode == null) {
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+            mapOf("contentType" to state.contentType, "resolved" to false, "reason" to "unknown_content_type")
+        )
+        return
+    }
+    when (mode) {
+        Presenting.BIBLE -> {
+            val codeBook = state.verseCodeBook
+            val codeChapter = state.verseCodeChapter
+            val codeVerse = state.verseCodeVerse
+            if (bibleSyncMode == BibleSyncMode.REFERENCE_ONLY && codeBook != null && codeChapter != null && codeVerse != null) {
+                // Reference-only: never touch a downloaded file — resolve the SAME canonical verse in
+                // this instance's own independently-configured (possibly different-language) Bible via
+                // Bible.getVerseDetailsByCode, so the follower shows its own translation's wording, not
+                // the primary's. If this Bible has no verse at that code (versification mismatch, or no
+                // local bible configured), there's nothing sensible to show — quietly no-op.
+                val result = localPrimaryBible?.getVerseDetailsByCode(codeBook, codeChapter, codeVerse)
+                if (result != null) {
+                    presenterManager.setSelectedVerses(
+                        listOf(
+                            SelectedVerse(
+                                bibleAbbreviation = localPrimaryBible.getBibleAbbreviation(),
+                                bibleName = localPrimaryBible.getBibleTitle(),
+                                bookName = result.bookName,
+                                chapter = result.displayChapter,
+                                verseNumber = result.displayVerse,
+                                verseText = result.verseText,
+                                verseRange = state.verseRange ?: ""
+                            )
+                        )
+                    )
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                        mapOf("contentType" to "BIBLE", "resolved" to true, "mode" to "reference_only")
+                    )
+                } else {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                        mapOf(
+                            "contentType" to "BIBLE", "resolved" to false, "mode" to "reference_only",
+                            "reason" to if (localPrimaryBible == null) "no_local_bible_loaded" else "verse_code_not_found"
+                        )
+                    )
+                }
+            } else if (state.bookName != null) {
+                // Full replica: the primary's own wording, verbatim.
+                // setSelectedVerses (plural), not setSelectedVerse — only the plural setter feeds the
+                // selectedVerses -> displayedVerses bridging LaunchedEffect that BiblePresenter actually
+                // renders from; the singular setter alone leaves the screen blank despite the mode
+                // correctly switching to BIBLE.
+                presenterManager.setSelectedVerses(
+                    listOf(
+                        SelectedVerse(
+                            bookName = state.bookName,
+                            chapter = state.chapter ?: 0,
+                            verseNumber = state.verseNumber ?: 0,
+                            verseText = state.verseText ?: "",
+                            verseRange = state.verseRange ?: ""
+                        )
+                    )
+                )
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "BIBLE", "resolved" to true, "mode" to "full_replica")
+                )
+            } else {
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "BIBLE", "resolved" to false, "reason" to "no_book_name_in_state")
+                )
+            }
+        }
+        Presenting.LYRICS -> if (state.songTitle != null) {
+            presenterManager.setLyricSection(
+                LyricSection(
+                    title = state.songTitle,
+                    songNumber = state.songNumber ?: 0,
+                    type = state.sectionType ?: "",
+                    lines = state.lines ?: emptyList()
+                )
+            )
+            InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "LYRICS", "resolved" to true))
+        } else {
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                mapOf("contentType" to "LYRICS", "resolved" to false, "reason" to "no_song_title_in_state")
+            )
+        }
+        Presenting.ANNOUNCEMENTS -> {
+            val text = state.announcementText
+            if (text != null) {
+                presenterManager.setAnnouncementText(text)
+                InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "ANNOUNCEMENTS", "resolved" to true))
+            } else {
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "ANNOUNCEMENTS", "resolved" to false, "reason" to "no_text_in_state")
+                )
+            }
+        }
+        Presenting.WEBSITE -> {
+            state.websiteUrl?.let { presenterManager.setWebsiteUrl(it) }
+            state.websiteTitle?.let { presenterManager.setWebPageTitle(it) }
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                mapOf("contentType" to "WEBSITE", "resolved" to (state.websiteUrl != null))
+            )
+        }
+        Presenting.PICTURES -> {
+            val folderId = state.pictureFolderId
+            val index = state.pictureIndex
+            if (folderId != null && index != null) {
+                val cacheFile = File(instanceLinkPictureCacheDir, "${folderId}_$index.jpg")
+                if (!cacheFile.exists()) {
+                    val bytes = instanceLinkViewModel.fetchPictureImageBytes(folderId, index)
+                    if (bytes != null) {
+                        cacheFile.writeBytes(bytes)
+                    } else {
+                        InstanceLinkLogger.log(
+                            InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                            mapOf("contentType" to "PICTURES", "resolved" to false, "reason" to "fetch_failed")
+                        )
+                        return
+                    }
+                }
+                presenterManager.setSelectedImagePath(cacheFile.absolutePath)
+                InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "PICTURES", "resolved" to true))
+            } else {
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "PICTURES", "resolved" to false, "reason" to "missing_folder_id_or_index")
+                )
+            }
+        }
+        Presenting.LOWER_THIRD -> {
+            val name = state.lowerThirdName
+            if (name != null) {
+                val bytes = instanceLinkViewModel.fetchLowerThirdJson(name)
+                if (bytes != null) {
+                    presenterManager.setLottieContent(
+                        String(bytes, Charsets.UTF_8), pauseAtFrame = false, pauseFrame = -1f,
+                        pauseDurationMs = 2000L, presetName = name
+                    )
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "LOWER_THIRD", "resolved" to true))
+                } else {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                        mapOf("contentType" to "LOWER_THIRD", "resolved" to false, "reason" to "fetch_failed")
+                    )
+                }
+            } else {
+                InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                    mapOf("contentType" to "LOWER_THIRD", "resolved" to false, "reason" to "no_name_in_state")
+                )
+            }
+        }
+        else -> {
+            // presentation/media/canvas/qa/stt/dictionary: mode-only for now — the mode switch itself
+            // still happens below, but no content is fetched/restored, so the log makes that known gap
+            // visible rather than looking identical to a real success.
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "apply_live_state",
+                mapOf("contentType" to mode.name, "resolved" to false, "reason" to "mode_only_content_not_fetched")
+            )
+        }
+    }
+    presenterManager.setPresentingMode(mode)
+    presenterManager.setShowPresenterWindow(true)
 }
 
 private fun qaActionType(action: String): RemoteEventType = when (action) {
@@ -1811,6 +2364,7 @@ private fun executeProjectItem(
 
         is ScheduleItem.MediaItem -> {
             scheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
+            presenterManager.setCurrentMedia(item.mediaUrl, item.mediaType)
             presenterManager.setPresentingMode(Presenting.MEDIA)
             presenterManager.setShowPresenterWindow(true)
         }

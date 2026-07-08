@@ -36,6 +36,9 @@ import churchpresenter.composeapp.generated.resources.menu_add_to_schedule
 import churchpresenter.composeapp.generated.resources.menu_keyboard_shortcuts
 import churchpresenter.composeapp.generated.resources.menu_clear_schedule
 import churchpresenter.composeapp.generated.resources.menu_close_schedule
+import churchpresenter.composeapp.generated.resources.menu_connect
+import churchpresenter.composeapp.generated.resources.menu_connect_to_instance
+import churchpresenter.composeapp.generated.resources.menu_disconnect
 import churchpresenter.composeapp.generated.resources.menu_edit
 import churchpresenter.composeapp.generated.resources.menu_exit
 import churchpresenter.composeapp.generated.resources.menu_file
@@ -76,6 +79,9 @@ fun FrameWindowScope.NavigationTopBar(
     onClearSchedule: () -> Unit = {},
     onSettings: () -> Unit = {},
     onStatistics: () -> Unit = {},
+    onConnectToInstance: () -> Unit = {},
+    onDisconnectInstance: () -> Unit = {},
+    isInstanceLinkConnected: Boolean = false,
     onAbout: () -> Unit = {},
     onHelp: () -> Unit = {},
     onHowToBlog: () -> Unit = {},
@@ -154,6 +160,18 @@ fun FrameWindowScope.NavigationTopBar(
             Item(
                 stringResource(Res.string.menu_statistics),
                 onClick = onStatistics
+            )
+        }
+
+        Menu(stringResource(Res.string.menu_connect), mnemonic = 'C') {
+            Item(
+                stringResource(Res.string.menu_connect_to_instance),
+                onClick = onConnectToInstance
+            )
+            Item(
+                stringResource(Res.string.menu_disconnect),
+                onClick = onDisconnectInstance,
+                enabled = isInstanceLinkConnected
             )
         }
 

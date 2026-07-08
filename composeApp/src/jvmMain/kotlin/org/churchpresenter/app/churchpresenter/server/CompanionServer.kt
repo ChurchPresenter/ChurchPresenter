@@ -15,7 +15,9 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.partialcontent.PartialContent
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.response.respondFile
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
@@ -56,6 +58,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.data.settings.PresentationRemoteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
@@ -63,11 +66,15 @@ import org.churchpresenter.app.churchpresenter.models.PresentationLoadError
 import org.churchpresenter.app.churchpresenter.models.Question
 import org.churchpresenter.app.churchpresenter.models.QuestionDto
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
 import org.churchpresenter.app.churchpresenter.data.Bible
@@ -216,6 +223,60 @@ data class ScheduleItemDto(
 data class ScheduleResponse(
     val items: List<ScheduleItemDto>,
     val total: Int
+)
+
+/**
+ * Snapshot of whatever is currently live, broadcast as [Constants.WS_EVENT_LIVE_STATE_CHANGED].
+ * Fills the gap left by the content types that (unlike presentations/songs) have no dedicated
+ * "now live" event — used by a following instance ([InstanceLinkClient]) to mirror local output.
+ *
+ * Presentations are intentionally NOT duplicated here — they already have their own
+ * presentation_slide_changed/freeze/live events; [contentType] == "PRESENTATION" just tells a
+ * follower to rely on those instead.
+ */
+@Serializable
+data class LiveStateDto(
+    val contentType: String, // matches presenter.Presenting enum name
+    // bible verse
+    val bookName: String? = null,
+    val chapter: Int? = null,
+    val verseNumber: Int? = null,
+    val verseRange: String? = null,
+    val verseText: String? = null,
+    // Canonical (numbering-independent) verse code — see Bible.getCodeReference/getVerseDetailsByCode.
+    // Lets a follower in "reference-only" Bible sync mode (InstanceLinkSettings.BibleSyncMode) resolve
+    // the same verse in its own independently-configured (possibly different-language) Bible, instead
+    // of downloading the primary's file. Null when the primary has no bible loaded to compute it from.
+    val verseCodeBook: Int? = null,
+    val verseCodeChapter: Int? = null,
+    val verseCodeVerse: Int? = null,
+    // song section
+    val songTitle: String? = null,
+    val songNumber: Int? = null,
+    val sectionType: String? = null,
+    val lines: List<String>? = null,
+    // picture — resolved against a registered folder catalog when possible
+    val pictureFolderId: String? = null,
+    val pictureIndex: Int? = null,
+    // media
+    val mediaId: String? = null,
+    val mediaUrl: String? = null,
+    val mediaType: String? = null,
+    // announcement
+    val announcementText: String? = null,
+    // website
+    val websiteUrl: String? = null,
+    val websiteTitle: String? = null,
+    // canvas scene
+    val sceneId: String? = null,
+    val sceneName: String? = null,
+    // Q&A
+    val questionId: String? = null,
+    val questionText: String? = null,
+    // Strong's dictionary
+    val dictionaryWord: String? = null,
+    // lower third — resolves to a file via the same lowerThirdFiles() lookup /api/lowerthirds/{name}/json uses
+    val lowerThirdName: String? = null
 )
 
 // ── Bible DTOs ────────────────────────────────────────────────────────────────
@@ -555,6 +616,11 @@ data class AddToScheduleRequest(val item: ScheduleItem)
 @Serializable
 data class ProjectRequest(val item: ScheduleItem)
 
+/** Payload for WS "remove_from_schedule" — removes the schedule item with this id, subject to the
+ *  same approval flow as add_to_schedule/project. */
+@Serializable
+data class RemoveFromScheduleRequest(val id: String)
+
 /**
  * Wraps an incoming remote request with a [CompletableDeferred] that the UI
  * resolves once the user clicks Allow (true) or Deny/Block (false).
@@ -573,6 +639,15 @@ data class PendingRemoteRequest(
  */
 data class PendingBatchRequest(
     val items: List<ScheduleItem>,
+    val clientId: String = "",
+    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+)
+
+/** Same shape as [PendingRemoteRequest] but for a remove request — carries just the target id and a
+ *  human-readable label (resolved from the current schedule, if still present) for the approval UI. */
+data class PendingRemoveRequest(
+    val id: String,
+    val label: String,
     val clientId: String = "",
     val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
 )
@@ -639,6 +714,10 @@ class CompanionServer {
         presentationRemoteEnabled = settings.remoteControlEnabled
         presentationRemotePassword = apiKey
         if (wasEnabled && !presentationRemoteEnabled) clearPresentationState()
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.PRIMARY, "state_updated",
+            mapOf("type" to "presentation_remote_settings", "remoteControlEnabled" to settings.remoteControlEnabled)
+        )
     }
 
     fun updateAutoScrollInterval(secs: Int) {
@@ -741,6 +820,7 @@ class CompanionServer {
         }
         _atemSettings = atem
         _lowerThirdFolder = lowerThirdFolder
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "atem_config"))
     }
 
     // ── Browser Source outputs (OBS/vMix overlay) ─────────────────────────────
@@ -758,6 +838,7 @@ class CompanionServer {
 
     fun updateBrowserSourceOutputs(outputs: List<ScreenAssignment>) {
         _browserSourceOutputs = outputs
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "browser_source_outputs", "count" to outputs.size))
     }
 
     fun browserSourceOutput(index: Int): ScreenAssignment? = _browserSourceOutputs.getOrNull(index)
@@ -953,7 +1034,24 @@ class CompanionServer {
     @Volatile private var _songs: List<SongItem> = emptyList()
     private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     private val _bible = MutableStateFlow<Bible?>(null)
+    /** Absolute path to the primary bible's .spb file — serves GET /api/bible/file for InstanceLink followers. */
+    @Volatile private var _bibleFilePath: String = ""
+    /** Same as [_bibleFilePath] but for the secondary bible — serves GET /api/bible/file/secondary,
+     *  only used when a follower opts in to mirroring the secondary too (most don't). */
+    @Volatile private var _secondaryBibleFilePath: String = ""
+    /** Current background settings — serves GET /api/backgrounds for a follower that opted in to
+     *  mirroring backgrounds. The image/video fields are still local file paths on this machine;
+     *  GET /api/backgrounds/asset/{slot} resolves the current path for a given slot on demand. */
+    private val _backgroundSettings = MutableStateFlow(BackgroundSettings())
     private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
+    /** Snapshot of whatever is currently live — see [LiveStateDto]. */
+    private val _liveState = MutableStateFlow<LiveStateDto?>(null)
+    /** Device IDs of currently-connected WS clients that identified as an Instance Link follower
+     *  (as opposed to a regular mobile/browser companion client) — see [Constants.HEADER_CLIENT_ROLE]. */
+    private val _connectedInstanceLinkFollowers = MutableStateFlow<Set<String>>(emptySet())
+    val connectedInstanceLinkFollowers: StateFlow<Set<String>> = _connectedInstanceLinkFollowers.asStateFlow()
+    /** schedule item UUID → absolute local media file path — populated by updateSchedule, serves /api/media/stream */
+    private val _scheduleItemToMediaPath = ConcurrentHashMap<String, String>()
 
     // Presentation catalog — metadata only; raw JPEG bytes stored per-slide in _slideBytes
     private val _presentationCatalog = MutableStateFlow(PresentationCatalogResponse(emptyList(), 0))
@@ -1034,6 +1132,13 @@ class CompanionServer {
     /** Emitted when a remote client requests multiple items to be added to the schedule in one call. */
     val onAddBatchToSchedule = MutableSharedFlow<PendingBatchRequest>(
         extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when a remote client requests an item to be removed from the schedule — same
+     *  approval flow as [onAddToSchedule], just the reverse operation. */
+    val onRemoveFromSchedule = MutableSharedFlow<PendingRemoveRequest>(
+        extraBufferCapacity = 16,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -1182,6 +1287,7 @@ class CompanionServer {
     /** Allow or disallow file uploads from mobile devices without restarting the server. */
     fun updateFileUploadEnabled(enabled: Boolean) {
         _fileUploadEnabled.value = enabled
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "file_upload_enabled", "enabled" to enabled))
     }
 
     /**
@@ -1259,14 +1365,29 @@ class CompanionServer {
     }
 
     /** Feed the primary Bible — builds full nested catalog and broadcasts to WS clients. */
-    fun updateBible(bible: Bible, translation: String) {
+    fun updateBible(bible: Bible, translation: String, filePath: String = "") {
         _bible.value = bible
+        _bibleFilePath = filePath
         val catalog = buildBibleCatalog(bible, translation)
         _bibleCatalog.value = catalog
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_BIBLE_UPDATED,
             payload = json.encodeToString(BibleCatalogResponse.serializer(), catalog)
         ))
+    }
+
+    /** Records the secondary bible's file path for GET /api/bible/file/secondary — no mobile
+     *  companion catalog/broadcast exists for the secondary bible, only InstanceLink uses this. */
+    fun updateSecondaryBibleFilePath(filePath: String) {
+        _secondaryBibleFilePath = filePath
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "secondary_bible_file_path", "filePath" to filePath))
+    }
+
+    /** Records the current background settings for GET /api/backgrounds — only consumed by a
+     *  follower that opted in to mirroring backgrounds (see InstanceLinkSettings.mirrorBackgrounds). */
+    fun updateBackgroundSettings(settings: BackgroundSettings) {
+        _backgroundSettings.value = settings
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "background_settings"))
     }
 
     /**
@@ -1644,10 +1765,13 @@ class CompanionServer {
                         slideCount = item.slideCount, fileType = item.fileType
                     )
                 }
-                is ScheduleItem.MediaItem -> ScheduleItemDto(
-                    id = item.id, type = "media", displayText = item.displayText,
-                    mediaUrl = item.mediaUrl, mediaTitle = item.mediaTitle, mediaType = item.mediaType
-                )
+                is ScheduleItem.MediaItem -> {
+                    if (item.mediaType == "local") _scheduleItemToMediaPath[item.id] = item.mediaUrl
+                    ScheduleItemDto(
+                        id = item.id, type = "media", displayText = item.displayText,
+                        mediaUrl = item.mediaUrl, mediaTitle = item.mediaTitle, mediaType = item.mediaType
+                    )
+                }
                 is ScheduleItem.LowerThirdItem -> ScheduleItemDto(
                     id = item.id, type = "lower_third", displayText = item.displayText,
                     presetId = item.presetId, presetLabel = item.presetLabel
@@ -1674,6 +1798,80 @@ class CompanionServer {
             type = Constants.WS_EVENT_SCHEDULE_UPDATED,
             payload = json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(dtos, dtos.size))
         ))
+    }
+
+    /**
+     * Broadcasts a snapshot of whatever is currently live — fills the gap for content types with
+     * no dedicated "now live" event (bible, songs, pictures, media, lower thirds, announcements,
+     * websites, scenes, Q&A, dictionary). Presentations rely on the existing slide-changed events
+     * instead — [mode] == "PRESENTATION" here is informational only.
+     */
+    fun updateLiveState(
+        mode: String,
+        bibleVerse: SelectedVerse?,
+        lyricSection: LyricSection?,
+        pictureImagePath: String?,
+        mediaUrl: String?,
+        mediaType: String?,
+        announcementText: String?,
+        websiteUrl: String?,
+        websiteTitle: String?,
+        sceneId: String?,
+        sceneName: String?,
+        questionId: String?,
+        questionText: String?,
+        dictionaryWord: String?,
+        lowerThirdName: String? = null,
+        // Canonical verse code (book, chapter, verse) computed from this instance's OWN loaded bible —
+        // see LiveStateDto.verseCodeBook and BibleSyncMode.REFERENCE_ONLY. Null when not applicable.
+        verseCode: Triple<Int, Int, Int>? = null
+    ) {
+        val (pictureFolderId, pictureIndex) = resolvePictureLocation(pictureImagePath)
+        val mediaId = mediaUrl?.let { url -> _scheduleItemToMediaPath.entries.find { it.value == url }?.key }
+        val dto = LiveStateDto(
+            contentType = mode,
+            bookName = bibleVerse?.bookName?.ifEmpty { null },
+            chapter = bibleVerse?.chapter,
+            verseNumber = bibleVerse?.verseNumber,
+            verseRange = bibleVerse?.verseRange?.ifEmpty { null },
+            verseText = bibleVerse?.verseText,
+            verseCodeBook = verseCode?.first,
+            verseCodeChapter = verseCode?.second,
+            verseCodeVerse = verseCode?.third,
+            songTitle = lyricSection?.title?.ifEmpty { null },
+            songNumber = lyricSection?.songNumber,
+            sectionType = lyricSection?.type?.ifEmpty { null },
+            lines = lyricSection?.lines,
+            pictureFolderId = pictureFolderId,
+            pictureIndex = pictureIndex,
+            mediaId = mediaId,
+            mediaUrl = mediaUrl?.ifEmpty { null },
+            mediaType = mediaType?.ifEmpty { null },
+            announcementText = announcementText?.ifEmpty { null },
+            websiteUrl = websiteUrl?.ifEmpty { null },
+            websiteTitle = websiteTitle?.ifEmpty { null },
+            sceneId = sceneId,
+            sceneName = sceneName,
+            questionId = questionId,
+            questionText = questionText,
+            dictionaryWord = dictionaryWord,
+            lowerThirdName = lowerThirdName?.ifEmpty { null }
+        )
+        _liveState.value = dto
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_LIVE_STATE_CHANGED,
+            payload = json.encodeToString(LiveStateDto.serializer(), dto)
+        ))
+    }
+
+    /** Finds which registered picture folder (if any) contains [path], for [updateLiveState]. */
+    private fun resolvePictureLocation(path: String?): Pair<String?, Int?> {
+        if (path.isNullOrEmpty()) return null to null
+        for ((folderId, files) in _pictureFiles) {
+            val idx = files.indexOfFirst { it.absolutePath == path }
+            if (idx >= 0) return folderId to idx
+        }
+        return null to null
     }
 
     private fun buildSongDetail(song: SongItem): SongDetailDto {
@@ -1816,6 +2014,7 @@ class CompanionServer {
     private fun Application.configurePipeline() {
             install(ContentNegotiation) { json(json) }
             install(WebSockets)
+            install(PartialContent)
             install(CORS) {
                 allowMethod(HttpMethod.Get)
                 allowMethod(HttpMethod.Post)
@@ -1824,6 +2023,7 @@ class CompanionServer {
                 allowHeader(Constants.HEADER_API_KEY)
                 allowHeader(Constants.HEADER_DEVICE_ID)
                 allowHeader(Constants.HEADER_APP_VERSION)
+                allowHeader(Constants.HEADER_CLIENT_ROLE)
                 allowHeader("X-QA-Password")
                 allowHeader(Constants.HEADER_PRESENTATION_PASSWORD)
                 exposeHeader(Constants.HEADER_SERVER_VERSION)
@@ -1953,6 +2153,7 @@ class CompanionServer {
                 get("${Constants.ENDPOINT_SONGS}/{identifier}") {
                     if (!checkApiKey(call)) return@get
                     val identifier = call.parameters["identifier"] ?: run {
+                        logRest("/api/songs/{identifier}", 400, "missing_identifier")
                         call.respond(HttpStatusCode.BadRequest, """{"error":"missing identifier"}""")
                         return@get
                     }
@@ -1973,9 +2174,11 @@ class CompanionServer {
                         }
                     }
                     if (song == null) {
+                        logRest("/api/songs/{identifier}", 404, "song_not_found")
                         call.respond(HttpStatusCode.NotFound, """{"error":"song not found"}""")
                         return@get
                     }
+                    logRest("/api/songs/{identifier}", 200)
                     call.respond(buildSongDetail(song))
                 }
 
@@ -2253,9 +2456,11 @@ class CompanionServer {
                     val resolvedId = _scheduleItemToPresentationId[id] ?: id
                     val dto = _presentationCatalogs[resolvedId]
                     if (dto == null) {
+                        logRest("/api/presentations/{id}", 404, "not_found_or_not_yet_rendered")
                         call.respond(HttpStatusCode.NotFound, "Presentation not found or not yet rendered")
                         return@get
                     }
+                    logRest("/api/presentations/{id}", 200)
                     call.respond(dto)
                 }
 
@@ -2270,13 +2475,16 @@ class CompanionServer {
                     val resolvedId = _scheduleItemToPresentationId[id] ?: id
                     val slides = _slideBytes[resolvedId]
                     if (slides == null) {
+                        logRest("/api/presentations/{id}/slides/{index}", 404, "presentation_not_found")
                         call.respond(HttpStatusCode.NotFound, "Presentation not found")
                         return@get
                     }
                     if (index < 0 || index >= slides.size) {
+                        logRest("/api/presentations/{id}/slides/{index}", 404, "slide_index_out_of_range")
                         call.respond(HttpStatusCode.NotFound, "Slide index out of range")
                         return@get
                     }
+                    logRest("/api/presentations/{id}/slides/{index}", 200)
                     call.respondBytes(slides[index], ContentType.Image.JPEG)
                 }
 
@@ -2501,9 +2709,11 @@ class CompanionServer {
                     val id = call.parameters["id"] ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
                     val catalog = _pictureCatalogs[id]
                     if (catalog == null) {
+                        logRest("/api/pictures/{id}", 404, "folder_not_found")
                         call.respond(HttpStatusCode.NotFound, "Picture folder not found")
                         return@get
                     }
+                    logRest("/api/pictures/{id}", 200)
                     call.respond(catalog)
                 }
 
@@ -2517,15 +2727,18 @@ class CompanionServer {
                     val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(HttpStatusCode.BadRequest, "Invalid index"); return@get }
                     val files = _pictureFiles[id]
                     if (files == null) {
+                        logRest("/api/pictures/{id}/images/{index}", 404, "folder_not_found")
                         call.respond(HttpStatusCode.NotFound, "Picture folder not found")
                         return@get
                     }
                     if (index < 0 || index >= files.size) {
+                        logRest("/api/pictures/{id}/images/{index}", 404, "index_out_of_range")
                         call.respond(HttpStatusCode.NotFound, "Image index out of range")
                         return@get
                     }
                     val file = files[index]
                     if (!file.exists()) {
+                        logRest("/api/pictures/{id}/images/{index}", 404, "file_not_found_on_disk")
                         call.respond(HttpStatusCode.NotFound, "Image file not found on disk")
                         return@get
                     }
@@ -2534,13 +2747,138 @@ class CompanionServer {
                     if (ext == "heic" || ext == "heif") {
                         val jpegBytes = HeicDecoder.toJpegBytes(file)
                         if (jpegBytes != null) {
+                            logRest("/api/pictures/{id}/images/{index}", 200)
                             call.respondBytes(jpegBytes, ContentType.Image.JPEG)
                         } else {
+                            logRest("/api/pictures/{id}/images/{index}", 500, "heic_conversion_failed")
                             call.respond(HttpStatusCode.InternalServerError, "Failed to convert HEIC image")
                         }
                     } else {
+                        logRest("/api/pictures/{id}/images/{index}", 200)
                         call.respondBytes(file.readBytes(), contentTypeForExtension(ext))
                     }
+                }
+
+                /**
+                 * GET /api/media/stream/{id} — streams a local media file's raw bytes for a schedule
+                 * item registered via [updateSchedule] (mediaType == "local"). Range requests are
+                 * handled by the PartialContent plugin so seeking works, letting an InstanceLink
+                 * follower play the file over HTTP without needing a local copy.
+                 */
+                get("${Constants.ENDPOINT_MEDIA_STREAM}/{id}") {
+                    if (!checkApiKey(call)) return@get
+                    val id = call.parameters["id"] ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val path = _scheduleItemToMediaPath[id]
+                    if (path == null) {
+                        logRest("/api/media/stream/{id}", 404, "media_item_not_found")
+                        call.respond(HttpStatusCode.NotFound, "Media item not found")
+                        return@get
+                    }
+                    val file = File(path)
+                    if (!file.exists()) {
+                        logRest("/api/media/stream/{id}", 404, "file_not_found_on_disk")
+                        call.respond(HttpStatusCode.NotFound, "Media file not found on disk")
+                        return@get
+                    }
+                    logRest("/api/media/stream/{id}", 200)
+                    call.respondFile(file)
+                }
+
+                /**
+                 * GET /api/bible/file — streams the primary bible's raw .spb file bytes so an
+                 * InstanceLink follower can cache and load it through the same Bible.loadFromSpb()
+                 * engine used locally (search/cross-reference/numbering all work unchanged), instead
+                 * of reimplementing that engine against the API. Range requests are handled by the
+                 * PartialContent plugin. The mobile companion API only ever exposed the primary bible;
+                 * GET /api/bible/file/secondary below extends that scope for InstanceLink only.
+                 */
+                get(Constants.ENDPOINT_BIBLE_FILE) {
+                    if (!checkApiKey(call)) return@get
+                    val path = _bibleFilePath
+                    if (path.isEmpty()) {
+                        logRest("/api/bible/file", 404, "no_bible_loaded")
+                        call.respond(HttpStatusCode.NotFound, "No bible loaded")
+                        return@get
+                    }
+                    val file = File(path)
+                    if (!file.exists()) {
+                        logRest("/api/bible/file", 404, "file_not_found_on_disk")
+                        call.respond(HttpStatusCode.NotFound, "Bible file not found on disk")
+                        return@get
+                    }
+                    logRest("/api/bible/file", 200)
+                    call.respondFile(file)
+                }
+
+                /** GET /api/bible/file/secondary — same as above, for a follower that opted in to
+                 *  mirroring the primary's secondary bible instead of keeping its own. */
+                get("${Constants.ENDPOINT_BIBLE_FILE}/secondary") {
+                    if (!checkApiKey(call)) return@get
+                    val path = _secondaryBibleFilePath
+                    if (path.isEmpty()) {
+                        logRest("/api/bible/file/secondary", 404, "no_secondary_bible_loaded")
+                        call.respond(HttpStatusCode.NotFound, "No secondary bible loaded")
+                        return@get
+                    }
+                    val file = File(path)
+                    if (!file.exists()) {
+                        logRest("/api/bible/file/secondary", 404, "file_not_found_on_disk")
+                        call.respond(HttpStatusCode.NotFound, "Secondary bible file not found on disk")
+                        return@get
+                    }
+                    logRest("/api/bible/file/secondary", 200)
+                    call.respondFile(file)
+                }
+
+                /** GET /api/backgrounds — current BackgroundSettings as JSON. Image/video fields are
+                 *  still local file paths on this machine; a follower resolves the actual bytes via
+                 *  GET /api/backgrounds/asset/{slot} below, keyed by slot rather than raw path. */
+                get(Constants.ENDPOINT_BACKGROUNDS) {
+                    if (!checkApiKey(call)) return@get
+                    logRest("/api/backgrounds", 200)
+                    call.respond(_backgroundSettings.value)
+                }
+
+                /**
+                 * GET /api/backgrounds/asset/{slot}?type=image|video — streams the background
+                 * image/video file currently configured for one slot (default, defaultLowerThird,
+                 * bible, bibleLowerThird, song, songLowerThird). Keyed by slot name rather than a raw
+                 * path, same reasoning as the lower-third-by-name endpoint above. Range requests are
+                 * handled by the PartialContent plugin via respondFile.
+                 */
+                get("${Constants.ENDPOINT_BACKGROUNDS}/asset/{slot}") {
+                    if (!checkApiKey(call)) return@get
+                    val slot = call.parameters["slot"] ?: ""
+                    val isVideo = call.request.queryParameters["type"] == "video"
+                    val settings = _backgroundSettings.value
+                    val path = when (slot) {
+                        Constants.BACKGROUND_SLOT_DEFAULT ->
+                            if (isVideo) settings.defaultBackgroundVideo else settings.defaultBackgroundImage
+                        Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD ->
+                            if (isVideo) settings.defaultLowerThirdBackgroundVideo else settings.defaultLowerThirdBackgroundImage
+                        Constants.BACKGROUND_SLOT_BIBLE ->
+                            if (isVideo) settings.bibleBackground.backgroundVideo else settings.bibleBackground.backgroundImage
+                        Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD ->
+                            if (isVideo) settings.bibleLowerThirdBackground.backgroundVideo else settings.bibleLowerThirdBackground.backgroundImage
+                        Constants.BACKGROUND_SLOT_SONG ->
+                            if (isVideo) settings.songBackground.backgroundVideo else settings.songBackground.backgroundImage
+                        Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD ->
+                            if (isVideo) settings.songLowerThirdBackground.backgroundVideo else settings.songLowerThirdBackground.backgroundImage
+                        else -> ""
+                    }
+                    if (path.isBlank()) {
+                        logRest("/api/backgrounds/asset/{slot}", 404, "no_asset_configured_for_slot")
+                        call.respond(HttpStatusCode.NotFound, "No asset configured for slot")
+                        return@get
+                    }
+                    val file = File(path)
+                    if (!file.exists()) {
+                        logRest("/api/backgrounds/asset/{slot}", 404, "file_not_found_on_disk")
+                        call.respond(HttpStatusCode.NotFound, "Background asset not found on disk")
+                        return@get
+                    }
+                    logRest("/api/backgrounds/asset/{slot}", 200)
+                    call.respondFile(file)
                 }
 
                 /**
@@ -2671,6 +3009,7 @@ class CompanionServer {
                     if (_apiKeyEnabled.value && _apiKey.value.isNotEmpty()) {
                         val provided = queryKey ?: headerKey ?: ""
                         if (provided != _apiKey.value) {
+                            InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_unauthorized", mapOf("reason" to "bad_api_key"))
                             send(Frame.Text("{\"error\":\"Unauthorized\"}"))
                             return@webSocket
                         }
@@ -2678,6 +3017,12 @@ class CompanionServer {
                     val wsClientId = call.request.headers[Constants.HEADER_DEVICE_ID]
                         ?: call.request.queryParameters[Constants.HEADER_DEVICE_ID]
                         ?: ""
+                    val isInstanceLinkFollower = call.request.headers[Constants.HEADER_CLIENT_ROLE] ==
+                        Constants.CLIENT_ROLE_INSTANCE_LINK
+                    if (isInstanceLinkFollower && wsClientId.isNotEmpty()) {
+                        _connectedInstanceLinkFollowers.value = _connectedInstanceLinkFollowers.value + wsClientId
+                        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_connected", mapOf("deviceId" to wsClientId))
+                    }
 
                     val catalog = _catalog.value
                     val schedule = _schedule.value
@@ -2708,6 +3053,11 @@ class CompanionServer {
                             type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
                             payload = """{"id":"$_currentPresentationId","index":$_currentSlideIndex,"total":$_currentSlideTotalCount,"isPlaying":$_presentationIsPlaying,"isLive":$_presentationIsLive}"""
                         ))))
+                    _liveState.value?.let { state ->
+                        send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
+                            WebSocketMessage(Constants.WS_EVENT_LIVE_STATE_CHANGED,
+                                json.encodeToString(LiveStateDto.serializer(), state)))))
+                    }
 
                     val broadcastJob = scope.launch {
                         broadcastChannel.collect { message -> send(Frame.Text(message)) }
@@ -2718,6 +3068,10 @@ class CompanionServer {
                         if (frame is Frame.Text) {
                             try {
                                 val msg = json.decodeFromString(WebSocketMessage.serializer(), frame.readText())
+                                InstanceLinkLogger.log(
+                                    InstanceLinkLogSide.PRIMARY, "ws_command_received",
+                                    mapOf("type" to msg.type, "deviceId" to wsClientId)
+                                )
                                 when (msg.type) {
                                     Constants.WS_CMD_SELECT_SONG -> {
                                         val song = json.decodeFromString(ScheduleSongDto.serializer(), msg.payload)
@@ -2796,12 +3150,32 @@ class CompanionServer {
                                             try { send(Frame.Text(response)) } catch (_: Exception) { }
                                         }
                                     }
+                                    Constants.WS_CMD_REMOVE_FROM_SCHEDULE -> {
+                                        val req = json.decodeFromString(RemoveFromScheduleRequest.serializer(), msg.payload)
+                                        val label = _schedule.value.firstOrNull { it.id == req.id }?.displayText ?: req.id
+                                        val pending = PendingRemoveRequest(req.id, label, wsClientId)
+                                        scope.launch {
+                                            onRemoveFromSchedule.emit(pending)
+                                            val allowed = try { pending.decision.await() } catch (_: Exception) { false }
+                                            val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                            try { send(Frame.Text(response)) } catch (_: Exception) { }
+                                        }
+                                    }
                                 }
-                            } catch (_: Exception) { /* ignore malformed frames */ }
+                            } catch (e: Exception) {
+                                InstanceLinkLogger.log(
+                                    InstanceLinkLogSide.PRIMARY, "ws_frame_malformed",
+                                    mapOf("deviceId" to wsClientId, "reason" to e.message)
+                                )
+                            }
                         }
                     }
                     } finally {
                         broadcastJob.cancel()
+                        if (isInstanceLinkFollower && wsClientId.isNotEmpty()) {
+                            _connectedInstanceLinkFollowers.value = _connectedInstanceLinkFollowers.value - wsClientId
+                            InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_disconnected", mapOf("deviceId" to wsClientId))
+                        }
                     }
                 }
 
@@ -2817,6 +3191,30 @@ class CompanionServer {
                         """{"name":$nameJson,"durationMs":$dur}"""
                     }
                     call.respondText("[${items.joinToString(",")}]", ContentType.Application.Json)
+                }
+
+                /**
+                 * GET /api/lowerthirds/{name}/json — returns the raw Lottie JSON for a preset by
+                 * name, so an InstanceLink follower can play the exact same animation via
+                 * PresenterManager.setLottieContent() instead of only switching presenting mode.
+                 * Reuses the same by-name file lookup as the run/show/hide endpoints above.
+                 */
+                get("/api/lowerthirds/{name}/json") {
+                    if (!checkApiKey(call)) return@get
+                    val rawName = call.parameters["name"] ?: ""
+                    val file = lowerThirdFiles().firstOrNull { it.nameWithoutExtension.equals(rawName, ignoreCase = true) }
+                    if (file == null) {
+                        logRest("/api/lowerthirds/{name}/json", 404, "lower_third_not_found")
+                        call.respond(HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
+                        return@get
+                    }
+                    val ltJson = try { file.readText() } catch (_: Exception) {
+                        logRest("/api/lowerthirds/{name}/json", 500, "could_not_read_lottie_file")
+                        call.respond(HttpStatusCode.InternalServerError, """{"error":"could not read lottie file"}""")
+                        return@get
+                    }
+                    logRest("/api/lowerthirds/{name}/json", 200)
+                    call.respondText(ltJson, ContentType.Application.Json)
                 }
 
                 post("/api/lowerthirds/{name}/run") {
@@ -3698,9 +4096,20 @@ class CompanionServer {
 
 
     private fun broadcast(msg: WebSocketMessage) {
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "broadcast", mapOf("type" to msg.type))
         scope.launch {
             broadcastChannel.emit(json.encodeToString(WebSocketMessage.serializer(), msg))
         }
+    }
+
+    /** Logs one REST hit on an Instance-Link-relevant endpoint — success and failure alike, so the
+     *  primary's own log shows exactly what it served without needing to infer it from a follower's
+     *  fetch_result. [status] is the HTTP status code actually sent. */
+    private fun logRest(endpoint: String, status: Int, reason: String? = null) {
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.PRIMARY, "rest_request",
+            mapOf("endpoint" to endpoint, "status" to status, "reason" to reason)
+        )
     }
 
     /** Broadcasts a display_cleared event to all connected mobile clients. */

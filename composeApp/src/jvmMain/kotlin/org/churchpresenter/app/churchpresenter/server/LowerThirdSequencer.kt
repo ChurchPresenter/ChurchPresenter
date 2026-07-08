@@ -35,7 +35,8 @@ object LowerThirdSequencer {
         val json: String,
         val pauseAtFrame: Boolean,
         val pauseFrame: Float,
-        val pauseDurationMs: Long
+        val pauseDurationMs: Long,
+        val name: String = ""
     )
 
     val onShow = MutableSharedFlow<ShowRequest>(extraBufferCapacity = 4)
@@ -117,7 +118,7 @@ object LowerThirdSequencer {
         job = scope.launch {
             try {
                 delay(atem.keyPreRollMs.toLong())
-                onShow.emit(ShowRequest(json, pauseAtFrame, pauseFrame = -1f, pauseDurationMs = pauseDurationMs))
+                onShow.emit(ShowRequest(json, pauseAtFrame, pauseFrame = -1f, pauseDurationMs = pauseDurationMs, name = name))
                 if (autoEnd) delay(totalMs + atem.keyPostRollMs)
                 else delay(Long.MAX_VALUE)   // "show" mode: on air until stop()
             } finally {

@@ -524,6 +524,14 @@ class Bible {
         books.getOrNull(displayIndex)?.bookId?.toIntOrNull() ?: (displayIndex + 1)
 
     /**
+     * Returns the SPB book ID for the given book name (as returned by [getBookName]/[getCanonicalBooks]),
+     * or null if not found. Used to compute a canonical code reference (see [getCodeReference]) from a
+     * plain book name — e.g. when broadcasting a live verse over Instance Link, where only the name
+     * crosses the wire, not this Bible's internal book ID.
+     */
+    fun getBookIdByName(name: String): Int? = books.firstOrNull { it.book == name }?.bookId?.toIntOrNull()
+
+    /**
      * Returns the 0-based display index for the given canonical book ID, or -1 if not found.
      * Falls back to (bookId - 1) for Bibles where the internal numbering matches canonical order.
      */

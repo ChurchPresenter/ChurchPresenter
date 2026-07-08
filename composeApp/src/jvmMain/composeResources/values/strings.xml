@@ -108,6 +108,32 @@
     <string name="menu_edit">Edit</string>
     <string name="menu_settings">Settings</string>
 
+    <string name="menu_connect">Connect</string>
+    <string name="menu_connect_to_instance">Connect to Instance…</string>
+    <string name="menu_disconnect">Disconnect</string>
+
+    <string name="instance_link_title">Instance Link</string>
+    <string name="instance_link_description">Follow another ChurchPresenter instance on your network — mirror its live content here, and optionally add items to its schedule.</string>
+    <string name="instance_link_host">Host</string>
+    <string name="instance_link_host_hint">e.g. 192.168.1.10</string>
+    <string name="instance_link_port">Port</string>
+    <string name="instance_link_autoconnect">Connect automatically on launch</string>
+    <string name="instance_link_allow_push_to_schedule">Allow adding items to the primary\'s schedule</string>
+    <string name="instance_link_mirror_backgrounds">Also mirror the primary\'s backgrounds</string>
+    <string name="instance_link_role">Connection role</string>
+    <string name="instance_link_role_controlled">Controlled — mirror the primary\'s content</string>
+    <string name="instance_link_role_controller">Controller — drive the primary\'s output from here</string>
+    <string name="instance_link_bible_sync_mode">Bible sync</string>
+    <string name="instance_link_bible_sync_full_replica">Full replica — use the primary\'s exact Bible file(s)</string>
+    <string name="instance_link_bible_sync_reference_only">Reference only — keep my own Bible(s), just follow the same verse</string>
+    <string name="instance_link_status_disconnected">Disconnected</string>
+    <string name="instance_link_status_connecting">Connecting…</string>
+    <string name="instance_link_status_connected">Connected</string>
+    <string name="instance_link_status_error">Connection failed — retrying…</string>
+    <string name="instance_link_last_received">Last received: %1$s</string>
+    <string name="instance_link_schedule_count">Primary schedule: %1$d item(s)</string>
+    <string name="connect">Connect</string>
+
     <string name="menu_help">Help</string>
     <string name="menu_getting_started">Getting Started…</string>
     <string name="menu_about">About</string>
@@ -1161,6 +1187,7 @@
 
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Add to Schedule</string>
+    <string name="remote_api_remove_from_schedule">Remove from Schedule</string>
     <string name="remote_api_project">Project (Go Live)</string>
     <string name="remote_api_presentation_connect">Connect to Presentation Remote</string>
     <string name="remote_api_presentation_connect_detail">A phone or tablet wants to browse and control your presentation slides.</string>
@@ -1182,6 +1209,7 @@
     <string name="remote_queue_waiting_one">1 more request waiting in queue</string>
     <string name="remote_queue_waiting_many">%1$d more requests waiting in queue</string>
     <string name="remote_activity_added_to_schedule">Added to Schedule</string>
+    <string name="remote_activity_removed_from_schedule">Removed from Schedule</string>
     <string name="remote_activity_projected">Projected (Go Live)</string>
     <string name="remote_activity_presentation_connect">Connected to Presentation Remote</string>
     <string name="remote_activity_presentation_connect_detail">Now connected</string>
@@ -1218,6 +1246,11 @@
     <string name="blocked_clients_description">Requests from these clients are automatically rejected without showing a dialog.</string>
     <string name="no_allowed_clients">No permanently allowed clients.</string>
     <string name="no_blocked_clients">No permanently blocked clients.</string>
+    <string name="instance_link_follower_badge">Instance Link — currently connected</string>
+    <string name="instance_link_followers_connected_count">%1$d Instance Link follower(s) currently connected</string>
+    <string name="instance_link_following_host">Following %1$s</string>
+    <string name="instance_link_controlling_host">Controlling %1$s</string>
+    <string name="instance_link_primary_badge">Primary — %1$d follower(s) connected</string>
     <string name="client_label_placeholder">Enter a friendly name…</string>
     <string name="client_label_edit_tooltip">Set friendly name</string>
     <string name="client_label_save">Save</string>

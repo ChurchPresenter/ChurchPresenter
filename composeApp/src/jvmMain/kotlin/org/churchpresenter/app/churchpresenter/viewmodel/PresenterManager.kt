@@ -50,6 +50,22 @@ class PresenterManager {
     private val _presentingMode = mutableStateOf(Presenting.NONE)
     val presentingMode: State<Presenting> = _presentingMode
 
+    /** Notified whenever live-content state changes (mode, verse, lyric section, picture, media,
+     *  announcement, website, scene, Q&A, dictionary) — wired in main.kt to broadcast an
+     *  InstanceLink live-state update via CompanionServer.updateLiveState(). Excludes purely
+     *  visual transition/animation state (alphas, offsets) so it doesn't fire on every frame.
+     *
+     *  The second parameter is the content type THIS specific change belongs to — e.g. setSelectedVerse
+     *  always reports [Presenting.BIBLE], regardless of what [presentingMode] currently holds. Content
+     *  setters and [setPresentingMode] are independent calls from application code, so deriving the
+     *  reported type from the live (possibly not-yet-updated) [presentingMode] value instead would let
+     *  a broadcast pair the wrong mode with fresh content, or the right mode with stale content,
+     *  whichever setter happened to run first. */
+    var onLiveStateChanged: ((PresenterManager, Presenting) -> Unit)? = null
+    private fun notifyLiveStateChanged(source: Presenting) {
+        onLiveStateChanged?.invoke(this, source)
+    }
+
     // Flag to request fade-out before clearing display
     private val _clearDisplayRequested = mutableStateOf(false)
     val clearDisplayRequested: State<Boolean> = _clearDisplayRequested
@@ -240,6 +256,20 @@ class PresenterManager {
     private val _mediaTransitionAlpha = mutableStateOf(1f)
     val mediaTransitionAlpha: State<Float> = _mediaTransitionAlpha
 
+    // Currently playing media — not driven by MediaViewModel's own state, so it's tracked here
+    // purely to report "what's live" (e.g. to an InstanceLink follower).
+    private val _currentMediaUrl = mutableStateOf("")
+    val currentMediaUrl: State<String> = _currentMediaUrl
+
+    private val _currentMediaType = mutableStateOf("")
+    val currentMediaType: State<String> = _currentMediaType
+
+    fun setCurrentMedia(url: String, type: String) {
+        _currentMediaUrl.value = url
+        _currentMediaType.value = type
+        notifyLiveStateChanged(Presenting.MEDIA)
+    }
+
     fun setPresentingMode(mode: Presenting) {
         if (_presentingMode.value != mode) {
             CrashReporter.setTag("presenting", mode.name)
@@ -253,6 +283,7 @@ class PresenterManager {
             _bibleTransitionAlpha.value = 1f
             _songTransitionAlpha.value = 1f
         }
+        notifyLiveStateChanged(mode)
     }
 
     /** Request a fade-out before clearing the display. The LaunchedEffect in main.kt
@@ -266,6 +297,7 @@ class PresenterManager {
 
     fun setSelectedVerse(verse: SelectedVerse) {
         _selectedVerse.value = verse
+        notifyLiveStateChanged(Presenting.BIBLE)
     }
 
     fun setSelectedVerses(verses: List<SelectedVerse>) {
@@ -273,6 +305,7 @@ class PresenterManager {
         if (verses.isNotEmpty()) {
             _selectedVerse.value = verses.first()
         }
+        notifyLiveStateChanged(Presenting.BIBLE)
     }
 
     fun setDisplayedVerses(verses: List<SelectedVerse>) {
@@ -302,6 +335,7 @@ class PresenterManager {
     fun setLyricSection(section: LyricSection) {
         _lyricSection.value = section
         _lyricSectionVersion.value++
+        notifyLiveStateChanged(Presenting.LYRICS)
     }
 
     fun setDisplayedLyricSection(section: LyricSection) {
@@ -334,6 +368,7 @@ class PresenterManager {
 
     fun setSelectedImagePath(imagePath: String?) {
         _selectedImagePath.value = imagePath
+        notifyLiveStateChanged(Presenting.PICTURES)
     }
 
     fun setDisplayedImagePath(path: String?) {
@@ -428,12 +463,21 @@ class PresenterManager {
     private val _lottieTrigger = mutableStateOf(0)
     val lottieTrigger: State<Int> = _lottieTrigger
 
-    fun setLottieContent(json: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long) {
+    // Preset filename (no extension) the current Lottie content came from — PresenterManager only
+    // ever held the rendered JSON itself before, with nothing identifying which preset it was, so
+    // there was nothing for InstanceLink's live-state broadcast to report. Purely informational
+    // (rendering only ever uses lottieJsonContent); defaults to "" for content set some other way.
+    private val _currentLowerThirdName = mutableStateOf("")
+    val currentLowerThirdName: State<String> = _currentLowerThirdName
+
+    fun setLottieContent(json: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long, presetName: String = "") {
         _lottieJsonContent.value = json
         _lottiePauseAtFrame.value = pauseAtFrame
         _lottiePauseFrame.value = pauseFrame
         _lottiePauseDurationMs.value = pauseDurationMs
         _lottieTrigger.value++
+        _currentLowerThirdName.value = presetName
+        notifyLiveStateChanged(Presenting.LOWER_THIRD)
 
         // Clear stale frames immediately so the presenter falls back to compottie
         _lottieRawFrames.value = null
@@ -526,6 +570,7 @@ class PresenterManager {
 
     fun setAnnouncementText(text: String) {
         _announcementText.value = text
+        notifyLiveStateChanged(Presenting.ANNOUNCEMENTS)
     }
 
     private val _websiteUrl = mutableStateOf("")
@@ -533,6 +578,7 @@ class PresenterManager {
 
     fun setWebsiteUrl(url: String) {
         _websiteUrl.value = url
+        notifyLiveStateChanged(Presenting.WEBSITE)
     }
 
     private val _webPageTitle = mutableStateOf("")
@@ -540,6 +586,7 @@ class PresenterManager {
 
     fun setWebPageTitle(title: String) {
         _webPageTitle.value = title
+        notifyLiveStateChanged(Presenting.WEBSITE)
     }
 
     // Periodically-updated screenshot of the live WebView — used by LivePreviewPanel
@@ -565,6 +612,7 @@ class PresenterManager {
 
     fun setActiveScene(scene: Scene?) {
         _activeScene.value = scene
+        notifyLiveStateChanged(Presenting.CANVAS)
     }
 
     // ── Announcements timer/clock ───────────────────────────────────────────
@@ -682,6 +730,7 @@ class PresenterManager {
 
     fun setDisplayedQuestion(question: Question?) {
         _displayedQuestion.value = question
+        notifyLiveStateChanged(Presenting.QA)
     }
 
     fun setQaTransitionAlpha(alpha: Float) {
@@ -698,5 +747,6 @@ class PresenterManager {
 
     fun setDisplayedDictionaryEntry(entry: StrongsEntry?) {
         _displayedDictionaryEntry.value = entry
+        notifyLiveStateChanged(Presenting.DICTIONARY)
     }
 }

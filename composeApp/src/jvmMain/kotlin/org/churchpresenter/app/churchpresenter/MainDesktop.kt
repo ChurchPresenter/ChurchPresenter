@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -69,6 +70,11 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.connect
+import churchpresenter.composeapp.generated.resources.instance_link_controlling_host
+import churchpresenter.composeapp.generated.resources.instance_link_following_host
+import churchpresenter.composeapp.generated.resources.instance_link_primary_badge
+import churchpresenter.composeapp.generated.resources.menu_disconnect
 import churchpresenter.composeapp.generated.resources.ic_arrow_left
 import churchpresenter.composeapp.generated.resources.ic_arrow_right
 import churchpresenter.composeapp.generated.resources.ic_settings
@@ -85,6 +91,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.toComposeImageBitmap
 
+import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
@@ -94,6 +101,8 @@ import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
+import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.app.churchpresenter.data.SongItem
@@ -106,7 +115,11 @@ import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
+import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
+import org.churchpresenter.app.churchpresenter.server.SongDetailDto
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
@@ -157,6 +170,8 @@ data class ScheduleActions(
     val saveSchedule: () -> Unit = {},
     val saveScheduleAs: () -> Unit = {},
     val removeSelected: () -> Unit = {},
+    /** Removes a specific item by id — used to apply an approved remote "remove from schedule". */
+    val removeById: (id: String) -> Unit = {},
     val clearSchedule: () -> Unit = {},
     // Remote-API add helpers (populated from ScheduleTabActions)
     val addSong: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit = { _, _, _, _ -> },
@@ -172,6 +187,10 @@ data class ScheduleActions(
 fun MainDesktop(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
+    // Same as appSettings except backgroundSettings may be swapped for a mirrored-from-primary copy
+    // (Instance Link) — used ONLY at the live-preview render call site below, never for editing/
+    // persistence, so the Options dialog still shows this instance's own local background settings.
+    livePreviewAppSettings: AppSettings = appSettings,
     presenterManager: PresenterManager,
     statisticsManager: StatisticsManager? = null,
     presenting: (Presenting) -> Unit,
@@ -208,6 +227,54 @@ fun MainDesktop(
     /** Emits a presentation [File] uploaded by a mobile client — loaded into [PresentationViewModel] automatically. */
     uploadPresentationFlow: Flow<java.io.File>? = null,
     serverUrl: String = "",
+    /** Persistent "Following <host>" badge shown above the Schedule panel while connected via Instance Link. */
+    instanceLinkConnectionStatus: InstanceLinkStatus = InstanceLinkStatus.DISCONNECTED,
+    instanceLinkFollowingHost: String = "",
+    /** Persistent "Primary — N follower(s) connected" badge — the symmetric primary-side counterpart. */
+    connectedInstanceLinkFollowerCount: Int = 0,
+    /** Reconnects using the last-saved Instance Link settings — lets the Connect/Disconnect button
+     *  next to the badge work without reopening the Connect dialog. */
+    onInstanceLinkConnect: () -> Unit = {},
+    onInstanceLinkDisconnect: () -> Unit = {},
+    /** The primary's live schedule while connected via Instance Link — mirrored into [ScheduleViewModel]. */
+    instanceLinkRemoteSchedule: List<ScheduleItemDto> = emptyList(),
+    /** The primary's song catalog while connected via Instance Link — mirrored into [SongsViewModel]. */
+    instanceLinkRemoteSongCatalog: SongCatalogResponse? = null,
+    /** Fetches one song's full lyrics from the primary on demand — see SongsViewModel.setInstanceLinkSource. */
+    instanceLinkFetchSongDetail: (suspend (number: String, songbook: String) -> SongDetailDto?)? = null,
+    /** Downloads the primary's bible file while connected via Instance Link — see BibleViewModel.setInstanceLinkSource. */
+    instanceLinkFetchBibleFile: (suspend () -> ByteArray?)? = null,
+    /** How the Bible tab tracks the primary while connected — see BibleSyncMode. */
+    instanceLinkBibleSyncMode: BibleSyncMode = BibleSyncMode.FULL_REPLICA,
+    instanceLinkFetchSecondaryBibleFile: (suspend () -> ByteArray?)? = null,
+    /** Reports the secondary bible's local file path to CompanionServer (for GET /api/bible/file/secondary). */
+    instanceLinkOnSecondaryBibleFilePathChanged: ((filePath: String) -> Unit)? = null,
+    /** Non-null while connected via Instance Link — see MediaTab's instanceLinkMediaStreamUrl. */
+    instanceLinkMediaStreamUrl: ((itemId: String) -> String)? = null,
+    /** Non-null only when connected AND the operator has enabled pushing items to the primary's
+     *  schedule — see ScheduleViewModel.onPushToRemoteSchedule. */
+    instanceLinkSendAddToSchedule: ((ScheduleItem) -> Unit)? = null,
+    /** Non-null only when connected AND the operator has enabled pushing items to the primary's
+     *  schedule (same gate as [instanceLinkSendAddToSchedule]) — see
+     *  ScheduleViewModel.onRemoveFromRemoteSchedule. */
+    instanceLinkSendRemoveFromSchedule: ((id: String) -> Unit)? = null,
+    /** See InstanceLinkRole — CONTROLLED (default, mirror the primary) or CONTROLLER (drive it). */
+    instanceLinkRole: InstanceLinkRole = InstanceLinkRole.CONTROLLED,
+    /** Controller mode "go live with a new item" — approval-gated the first time on the primary,
+     *  instant afterwards. Non-null only when connected AND in Controller mode. */
+    instanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
+    /** Controller mode instant Bible verse display — non-null only when connected AND controlling. */
+    instanceLinkSendVerse: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit)? = null,
+    /** Controller mode instant picture display — non-null only when connected AND controlling. */
+    instanceLinkSendPicture: ((folderId: String, index: Int, fileName: String?) -> Unit)? = null,
+    /** Controller mode instant song-section navigation (within an already-live song) — non-null only
+     *  when connected AND controlling. */
+    instanceLinkSendSongSection: ((number: String, section: Int) -> Unit)? = null,
+    /** Controller mode instant slide navigation (within an already-live presentation) — non-null only
+     *  when connected AND controlling. */
+    instanceLinkSendSlide: ((id: String, index: Int) -> Unit)? = null,
+    /** Controller mode instant clear — non-null only when connected AND controlling. */
+    instanceLinkSendClear: (() -> Unit)? = null,
     qaManager: QAManager? = null,
     tunnelStatus: TunnelStatus = TunnelStatus.Idle,
     tunnelUrl: String = "",
@@ -370,6 +437,17 @@ fun MainDesktop(
     val songsViewModel = remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> currentOnSongsLoaded?.invoke(songs) }) }
     DisposableEffect(Unit) { onDispose { songsViewModel.dispose() } }
 
+    // Mirrors the primary's song catalog while connected via Instance Link — see
+    // SongsViewModel.setInstanceLinkSource for the lazy per-song lyric fetch. Only in Controlled
+    // mode — a Controller keeps browsing its own local song library and drives the primary instead.
+    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkRemoteSongCatalog, instanceLinkRole) {
+        songsViewModel.setInstanceLinkSource(
+            active = instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED && instanceLinkRole == InstanceLinkRole.CONTROLLED,
+            catalog = instanceLinkRemoteSongCatalog,
+            fetchDetail = instanceLinkFetchSongDetail
+        )
+    }
+
     // Sync remote section changes (e.g. from mobile) back to the songs UI
     LaunchedEffect(Unit) {
         snapshotFlow { presenterManager.songDisplaySectionIndex.value }
@@ -383,8 +461,26 @@ fun MainDesktop(
 
     val currentOnPicturesLoaded by rememberUpdatedState(onPicturesLoaded)
     val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
-    val bibleViewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> currentOnBibleLoaded?.invoke(bible, translation) }) }
+    val currentOnSecondaryBibleFilePathChanged by rememberUpdatedState(instanceLinkOnSecondaryBibleFilePathChanged)
+    val bibleViewModel = remember {
+        BibleViewModel(
+            appSettings,
+            onBibleLoaded = { bible, translation -> currentOnBibleLoaded?.invoke(bible, translation) },
+            onSecondaryBibleFilePathChanged = { path -> currentOnSecondaryBibleFilePathChanged?.invoke(path) }
+        )
+    }
     DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
+
+    // Mirrors the primary's bible while connected via Instance Link — see
+    // BibleViewModel.setInstanceLinkSource. Only in Controlled mode, same reasoning as Songs above.
+    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkBibleSyncMode, instanceLinkRole) {
+        bibleViewModel.setInstanceLinkSource(
+            active = instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED && instanceLinkRole == InstanceLinkRole.CONTROLLED,
+            mode = instanceLinkBibleSyncMode,
+            fetchBibleFile = instanceLinkFetchBibleFile,
+            fetchSecondaryBibleFile = instanceLinkFetchSecondaryBibleFile
+        )
+    }
 
     // Bible Lookup Engine client — feeds detected scripture into the Bible tab and forwards the
     // reverse-lookup level to the engine.
@@ -437,6 +533,23 @@ fun MainDesktop(
     val onScheduleChangedState = rememberUpdatedState(onScheduleChanged)
     val scheduleViewModel = remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
     DisposableEffect(Unit) { onDispose { scheduleViewModel.dispose() } }
+
+    // Mirrors the primary's schedule while connected via Instance Link, handing local editing
+    // back to the operator on disconnect (see ScheduleViewModel.applyRemoteSchedule/stopFollowingRemote).
+    // Only in Controlled mode — a Controller keeps its own local schedule, same reasoning as above.
+    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkRemoteSchedule, instanceLinkRole) {
+        if (instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED && instanceLinkRole == InstanceLinkRole.CONTROLLED) {
+            scheduleViewModel.applyRemoteSchedule(instanceLinkRemoteSchedule)
+        } else {
+            scheduleViewModel.stopFollowingRemote()
+        }
+    }
+    LaunchedEffect(instanceLinkSendAddToSchedule) {
+        scheduleViewModel.onPushToRemoteSchedule = instanceLinkSendAddToSchedule
+    }
+    LaunchedEffect(instanceLinkSendRemoveFromSchedule) {
+        scheduleViewModel.onRemoveFromRemoteSchedule = instanceLinkSendRemoveFromSchedule
+    }
 
     val presentingMode by presenterManager.presentingMode
 
@@ -741,6 +854,7 @@ fun MainDesktop(
                         keyEvent.key == Key.Escape -> {
                             mediaViewModel?.pause()
                             presenterManager.requestClearDisplay()
+                            instanceLinkSendClear?.invoke()
                             // Also release any "Send to Stage Monitor" lock (e.g. from Announcements)
                             // so the stage monitor goes back to following the main presenting mode.
                             appSettings.projectionSettings.screenAssignments.indices
@@ -852,6 +966,42 @@ fun MainDesktop(
                     exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
                 ) {
                     Column(modifier = Modifier.width(with(density) { schedulePanelPx.coerceAtMost(maxSchedulePx).toDp() }).fillMaxHeight()) {
+                    // Shown once a host has ever been configured — not just while actively connected —
+                    // so the operator can always see the last-known status and reconnect/disconnect
+                    // without reopening the Connect dialog.
+                    if (instanceLinkFollowingHost.isNotBlank()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            ConnectionStatusRow(
+                                status = instanceLinkConnectionStatus,
+                                connectedLabel = if (instanceLinkRole == InstanceLinkRole.CONTROLLER)
+                                    stringResource(Res.string.instance_link_controlling_host, instanceLinkFollowingHost)
+                                else
+                                    stringResource(Res.string.instance_link_following_host, instanceLinkFollowingHost)
+                            )
+                            if (instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED ||
+                                instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTING
+                            ) {
+                                TextButton(onClick = onInstanceLinkDisconnect) {
+                                    Text(stringResource(Res.string.menu_disconnect), style = MaterialTheme.typography.labelSmall)
+                                }
+                            } else {
+                                TextButton(onClick = onInstanceLinkConnect) {
+                                    Text(stringResource(Res.string.connect), style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                        }
+                    }
+                    if (connectedInstanceLinkFollowerCount > 0) {
+                        ConnectionStatusRow(
+                            status = InstanceLinkStatus.CONNECTED,
+                            connectedLabel = stringResource(Res.string.instance_link_primary_badge, connectedInstanceLinkFollowerCount),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
                     Box(modifier = Modifier.weight(1f)) {
                     ScheduleTab(
                         scheduleViewModel = scheduleViewModel,
@@ -942,7 +1092,7 @@ fun MainDesktop(
                             }
                             if (lottieFile != null && lottieFile.exists()) {
                                 val json = lottieFile.readText()
-                                presenterManager.setLottieContent(json, item.pauseAtFrame, -1f, item.pauseDurationMs)
+                                presenterManager.setLottieContent(json, item.pauseAtFrame, -1f, item.pauseDurationMs, lottieFile.nameWithoutExtension)
                                 presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                 presenterManager.setShowPresenterWindow(true)
                             }
@@ -1057,6 +1207,7 @@ fun MainDesktop(
                                     saveSchedule = actions.saveSchedule,
                                     saveScheduleAs = actions.saveScheduleAs,
                                     removeSelected = actions.removeSelected,
+                                    removeById = actions.removeById,
                                     clearSchedule = actions.clearSchedule,
                                     addSong = actions.addSong,
                                     addBibleVerse = actions.addBibleVerse,
@@ -1263,6 +1414,7 @@ fun MainDesktop(
                                 },
                                 selectedVerseItem = selectedBibleVerseItem,
                                 onVerseSelected = onVerseSelected,
+                                onInstanceLinkSendVerse = instanceLinkSendVerse,
                                 onPresenting = presenting,
                                 isPresenting = presentingMode == Presenting.BIBLE,
                                 presenterManager = presenterManager,
@@ -1280,6 +1432,8 @@ fun MainDesktop(
                                 onAddToSchedule = { songNumber, title, songbook, songId ->
                                     currentScheduleActions.addSong(songNumber, title, songbook, songId)
                                 },
+                                onInstanceLinkSendProject = instanceLinkSendProject,
+                                onInstanceLinkSendSongSection = instanceLinkSendSongSection,
                                 selectedSongItem = selectedSongItem,
                                 selectedSongItemVersion = selectedSongItemVersion,
                                 onSongItemSelected = onSongItemSelected,
@@ -1299,6 +1453,7 @@ fun MainDesktop(
                                 onAddToSchedule = { folderPath, folderName, imageCount ->
                                     currentScheduleActions.addPicture(folderPath, folderName, imageCount)
                                 },
+                                onInstanceLinkSendProject = instanceLinkSendProject,
                                 selectedPictureItem = selectedPictureItem,
                                 presenterManager = presenterManager,
                                 onSettingsChange = onSettingsChange,
@@ -1311,6 +1466,7 @@ fun MainDesktop(
                                 onAddToSchedule = { filePath, fileName, slideCount, fileType ->
                                     currentScheduleActions.addPresentation(filePath, fileName, slideCount, fileType)
                                 },
+                                onInstanceLinkSendProject = instanceLinkSendProject,
                                 selectedPresentationItem = selectedPresentationItem,
                                 presenterManager = presenterManager,
                                 onSlidesLoaded = onPresentationSlidesLoaded,
@@ -1335,7 +1491,9 @@ fun MainDesktop(
                                     currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
                                 },
                                 selectedMediaItem = selectedMediaItem,
-                                presenterManager = presenterManager
+                                presenterManager = presenterManager,
+                                instanceLinkMediaStreamUrl = instanceLinkMediaStreamUrl,
+                                onInstanceLinkSendProject = instanceLinkSendProject
                             )
 
                             Tabs.LOWER_THIRD -> LowerThirdTab(
@@ -1346,8 +1504,8 @@ fun MainDesktop(
                                 onAddToSchedule = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
                                     scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
                                 },
-                                onGoLive = { json, pauseAtFrame, pauseFrame, pauseDurationMs ->
-                                    presenterManager.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs)
+                                onGoLive = { json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName ->
+                                    presenterManager.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName)
                                     presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                     presenterManager.setShowPresenterWindow(true)
                                 },
@@ -1582,6 +1740,7 @@ fun MainDesktop(
                                 onClick = {
                                     mediaViewModel?.pause()
                                     presenterManager.requestClearDisplay()
+                                    instanceLinkSendClear?.invoke()
                                 },
                                 buttonSize = 36.dp,
                                 iconTint = MaterialTheme.colorScheme.error
@@ -1589,7 +1748,7 @@ fun MainDesktop(
                         }
                         LivePreviewPanel(
                             presenterManager = presenterManager,
-                            appSettings = appSettings,
+                            appSettings = livePreviewAppSettings,
                             modifier = Modifier.fillMaxWidth(),
                             serverUrl = serverUrl,
                             qaDisplayUrl = qaDisplayUrl,

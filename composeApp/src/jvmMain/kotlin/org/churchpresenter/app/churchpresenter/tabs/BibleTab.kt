@@ -210,6 +210,9 @@ fun BibleTab(
     onAddToSchedule: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit)? = null,
     selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
+    /** Instance Link Controller mode — non-null only when connected and controlling. Sends every
+     *  verse go-live to the primary (always instant on the primary's side, no approval gate). */
+    onInstanceLinkSendVerse: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit)? = null,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
     presenterManager: PresenterManager? = null,
@@ -338,6 +341,7 @@ fun BibleTab(
                 primary.bibleName, primary.bookName, primary.chapter, primary.verseNumber
             )
             onVerseSelected(verses)
+            onInstanceLinkSendVerse?.invoke(primary.bookName, primary.chapter, primary.verseNumber, primary.verseText, primary.verseRange)
             presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
             onPresenting(Presenting.BIBLE)
             TrainingDataLogger.logLiveReference(
@@ -380,6 +384,9 @@ fun BibleTab(
         // Always push verse content so the output updates immediately
         if (selectedVerses.isNotEmpty()) {
             onVerseSelected(selectedVerses)
+        }
+        primaryVerse?.let { v ->
+            onInstanceLinkSendVerse?.invoke(v.bookName, v.chapter, v.verseNumber, v.verseText, v.verseRange)
         }
         if (primaryVerse != null) {
             // Canonical book id (not the raw display position) so the ground-truth log is comparable
@@ -760,7 +767,8 @@ fun BibleTab(
             val sttConnectError = sttManager.connectError.value == true
             val sttReconnecting = sttManager.reconnecting.value == true
             val noBibleSelected = appSettings.bibleSettings.primaryBible.isBlank() &&
-                appSettings.bibleSettings.secondaryBible.isBlank()
+                appSettings.bibleSettings.secondaryBible.isBlank() &&
+                viewModel.primaryBible.value == null
             val sttReceiving = sttManager.inProgressText.value.isNotBlank() || sttManager.segments.isNotEmpty()
             val statusIsError = engineStartFailed || noBibleSelected || sttConnectError
             val statusText = when {
@@ -1062,7 +1070,7 @@ fun BibleTab(
         }
 
         // ── Main content ─────────────────────────────────────────────
-        if (appSettings.bibleSettings.primaryBible.isBlank()) {
+        if (appSettings.bibleSettings.primaryBible.isBlank() && viewModel.primaryBible.value == null) {
             // ── Empty state: primary bible not configured ─────────────
             Box(
                 modifier = Modifier.fillMaxWidth().weight(1f).padding(32.dp),
@@ -1548,6 +1556,7 @@ fun BibleTab(
                                                 val primary = verses.first()
                                                 statisticsManager?.recordVerseDisplay(primary.bibleName, primary.bookName, primary.chapter, primary.verseNumber)
                                                 onVerseSelected(verses)
+                                                onInstanceLinkSendVerse?.invoke(primary.bookName, primary.chapter, primary.verseNumber, primary.verseText, primary.verseRange)
                                                 presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
                                                 onPresenting(Presenting.BIBLE)
                                                 TrainingDataLogger.logLiveReference(

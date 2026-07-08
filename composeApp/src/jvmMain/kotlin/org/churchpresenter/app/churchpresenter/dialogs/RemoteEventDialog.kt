@@ -59,6 +59,7 @@ import churchpresenter.composeapp.generated.resources.remote_api_add_to_schedule
 import churchpresenter.composeapp.generated.resources.remote_api_presentation_connect
 import churchpresenter.composeapp.generated.resources.remote_api_presentation_connect_detail
 import churchpresenter.composeapp.generated.resources.remote_api_project
+import churchpresenter.composeapp.generated.resources.remote_api_remove_from_schedule
 import churchpresenter.composeapp.generated.resources.remote_api_qa_add
 import churchpresenter.composeapp.generated.resources.remote_api_qa_edit
 import churchpresenter.composeapp.generated.resources.remote_api_qa_delete
@@ -73,6 +74,7 @@ import churchpresenter.composeapp.generated.resources.remote_api_request_title
 import churchpresenter.composeapp.generated.resources.remote_api_request_title_queued
 import churchpresenter.composeapp.generated.resources.remote_client_allowed_badge
 import churchpresenter.composeapp.generated.resources.remote_client_blocked_badge
+import churchpresenter.composeapp.generated.resources.instance_link_follower_badge
 import churchpresenter.composeapp.generated.resources.remote_client_label
 import churchpresenter.composeapp.generated.resources.remote_queue_waiting_many
 import churchpresenter.composeapp.generated.resources.remote_queue_waiting_one
@@ -93,6 +95,7 @@ data class RemoteEvent(
 
 enum class RemoteEventType {
     ADD_TO_SCHEDULE,
+    REMOVE_FROM_SCHEDULE,
     PROJECT,
     PRESENTATION_CONNECT,
     PRESENT,    // instant: select_song_section / select_picture / select_slide / select_bible_verse
@@ -129,6 +132,10 @@ fun RemoteEventDialog(
     isClientKnownAllowed: Boolean = false,
     /** True when the client is already in the permanent block list. */
     isClientKnownBlocked: Boolean = false,
+    /** True when this client is currently connected as an Instance Link follower/controller, rather
+     *  than a regular mobile/browser companion — same badge already shown in ServerSettingsTab's
+     *  Remote Clients list. */
+    isInstanceLinkFollower: Boolean = false,
     onAllow: () -> Unit,
     onAllowForSession: () -> Unit,
     onAllowPermanently: () -> Unit,
@@ -140,6 +147,7 @@ fun RemoteEventDialog(
 
     val actionLabel = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> stringResource(Res.string.remote_api_add_to_schedule)
+        RemoteEventType.REMOVE_FROM_SCHEDULE -> stringResource(Res.string.remote_api_remove_from_schedule)
         RemoteEventType.PROJECT         -> stringResource(Res.string.remote_api_project)
         RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_api_presentation_connect)
         RemoteEventType.QA_ADD          -> stringResource(Res.string.remote_api_qa_add)
@@ -155,6 +163,7 @@ fun RemoteEventDialog(
     }
     val icon = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
+        RemoteEventType.REMOVE_FROM_SCHEDULE -> "🗑️"
         RemoteEventType.PROJECT         -> "📡"
         RemoteEventType.PRESENTATION_CONNECT -> "📱"
         RemoteEventType.QA_ADMIN_CONNECT -> "📱"
@@ -293,6 +302,12 @@ fun RemoteEventDialog(
                                 Spacer(Modifier.width(4.dp))
                                 Text(stringResource(Res.string.remote_client_blocked_badge),
                                     style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                            }
+                            if (isInstanceLinkFollower) {
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringResource(Res.string.instance_link_follower_badge),
+                                    style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary)
                             }
                         }
                     }

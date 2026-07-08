@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.remote_activity_added_to_schedule
+import churchpresenter.composeapp.generated.resources.remote_activity_removed_from_schedule
 import churchpresenter.composeapp.generated.resources.remote_activity_by
 import churchpresenter.composeapp.generated.resources.remote_activity_dismiss
 import churchpresenter.composeapp.generated.resources.remote_activity_dismiss_all
@@ -54,6 +55,7 @@ import churchpresenter.composeapp.generated.resources.remote_activity_presentati
 import churchpresenter.composeapp.generated.resources.remote_activity_presentation_connect_detail
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_admin_connect
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_admin_connect_detail
+import churchpresenter.composeapp.generated.resources.instance_link_follower_badge
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 
@@ -86,6 +88,9 @@ fun RemoteActivityToastHost(
     onDismiss: (RemoteActivityNotification) -> Unit,
     onDismissAll: () -> Unit,
     onBlockForSession: (RemoteActivityNotification) -> Unit,
+    /** Device ids currently connected as an Instance Link follower/controller — same set
+     *  ServerSettingsTab's Remote Clients list uses for its badge (companionServer.connectedInstanceLinkFollowers). */
+    connectedInstanceLinkFollowers: Set<String> = emptySet(),
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
         val current = notifications.lastOrNull()
@@ -98,6 +103,7 @@ fun RemoteActivityToastHost(
                 RemoteActivityToast(
                     notification = current,
                     remaining = notifications.size - 1,
+                    isInstanceLinkFollower = current.clientId.isNotBlank() && current.clientId in connectedInstanceLinkFollowers,
                     onDismiss = { onDismiss(current) },
                     onDismissAll = onDismissAll,
                     onBlockForSession = { onBlockForSession(current) }
@@ -117,12 +123,14 @@ fun RemoteActivityToastHost(
 private fun RemoteActivityToast(
     notification: RemoteActivityNotification,
     remaining: Int,
+    isInstanceLinkFollower: Boolean = false,
     onDismiss: () -> Unit,
     onDismissAll: () -> Unit,
     onBlockForSession: () -> Unit,
 ) {
     val actionLabel = when (notification.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> stringResource(Res.string.remote_activity_added_to_schedule)
+        RemoteEventType.REMOVE_FROM_SCHEDULE -> stringResource(Res.string.remote_activity_removed_from_schedule)
         RemoteEventType.PROJECT         -> stringResource(Res.string.remote_activity_projected)
         RemoteEventType.PRESENT         -> stringResource(Res.string.remote_activity_presented)
         RemoteEventType.UPLOAD          -> stringResource(Res.string.remote_activity_uploaded)
@@ -140,6 +148,7 @@ private fun RemoteActivityToast(
     }
     val icon = when (notification.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
+        RemoteEventType.REMOVE_FROM_SCHEDULE -> "🗑️"
         RemoteEventType.PROJECT         -> "📡"
         RemoteEventType.PRESENTATION_CONNECT -> "📱"
         RemoteEventType.QA_ADMIN_CONNECT -> "📱"
@@ -203,6 +212,17 @@ private fun RemoteActivityToast(
                             text = stringResource(Res.string.remote_activity_by, clientDisplay),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    if (isInstanceLinkFollower) {
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(Res.string.instance_link_follower_badge),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
