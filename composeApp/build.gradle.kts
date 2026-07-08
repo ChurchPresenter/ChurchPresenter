@@ -30,6 +30,49 @@ fun gitCommitHash(): String {
     } catch (_: Exception) { "unknown" }
 }
 
+// ── macOS DMG volume icon ──────────────────────────────────────────────────────
+// jpackage sets the icon for the .app bundle it creates, but has no support for
+// setting a custom icon on the .dmg container itself — Finder shows the generic
+// Java icon for the closed .dmg file until this runs. Baking the icon into the
+// dmg's own volume data (rather than an external resource-fork attribute on the
+// finished file) is what survives zip/artifact-upload/HTTP transport intact.
+fun runCommand(vararg args: String) {
+    val process = ProcessBuilder(*args).redirectErrorStream(true).start()
+    val output = process.inputStream.bufferedReader().readText()
+    check(process.waitFor() == 0) { "Command failed (${args.joinToString(" ")}): $output" }
+}
+
+fun setDmgVolumeIcon(dmg: File, iconIcns: File) {
+    val writableDmg = File(dmg.parentFile, "${dmg.nameWithoutExtension}-writable.dmg")
+    writableDmg.delete()
+    runCommand("hdiutil", "convert", dmg.absolutePath, "-format", "UDRW", "-o", writableDmg.absolutePath)
+
+    val attachOutput = ProcessBuilder("hdiutil", "attach", writableDmg.absolutePath, "-nobrowse", "-readwrite", "-noautoopen")
+        .redirectErrorStream(true)
+        .start()
+        .let { process ->
+            val out = process.inputStream.bufferedReader().readText()
+            check(process.waitFor() == 0) { "hdiutil attach failed: $out" }
+            out
+        }
+    val deviceLine = attachOutput.lineSequence().first { it.startsWith("/dev/") }
+    val device = deviceLine.substringBefore('\t').trim()
+    val mountPoint = attachOutput.lineSequence().last { it.contains("/Volumes/") }
+        .substringAfterLast('\t').trim()
+
+    try {
+        iconIcns.copyTo(File(mountPoint, ".VolumeIcon.icns"), overwrite = true)
+        runCommand("SetFile", "-c", "icnC", "$mountPoint/.VolumeIcon.icns")
+        runCommand("SetFile", "-a", "C", mountPoint)
+    } finally {
+        runCommand("hdiutil", "detach", device)
+    }
+
+    dmg.delete()
+    runCommand("hdiutil", "convert", writableDmg.absolutePath, "-format", "UDZO", "-o", dmg.absolutePath)
+    writableDmg.delete()
+}
+
 // ── Desktop Signing helpers ───────────────────────────────────────────────────
 // Signing credentials are stored in the private ChurchPresenter-Signing repo.
 // The path to that repo's desktop/ folder is configured in local.properties:
@@ -377,6 +420,25 @@ compose.desktop {
             }
         }
     }
+}
+
+val fixDmgIcon by tasks.registering {
+    group = "compose desktop"
+    description = "Bakes the app icon into the DMG's own volume (jpackage doesn't set this) so it survives real distribution."
+    onlyIf { org.gradle.internal.os.OperatingSystem.current().isMacOsX }
+    doLast {
+        val dmgDir = file("build/compose/binaries/main/dmg")
+        val iconIcns = file("src/jvmMain/appResources/macos/icon.icns")
+        check(iconIcns.exists()) { "fixDmgIcon: icon file not found at $iconIcns" }
+        dmgDir.listFiles { f -> f.extension == "dmg" }?.forEach { dmg ->
+            logger.lifecycle("Baking volume icon into ${dmg.name}")
+            setDmgVolumeIcon(dmg, iconIcns)
+        }
+    }
+}
+
+afterEvaluate {
+    tasks.findByName("packageDmg")?.finalizedBy(fixDmgIcon)
 }
 
 // Apply JCEF-required JVM args to every JavaExec task in this subproject.

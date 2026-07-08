@@ -33,6 +33,8 @@ This guide explains how to build DMG (macOS), EXE (Windows), and other installer
 The DMG file will be created in:
 `composeApp/build/compose/binaries/main/dmg/`
 
+`packageDmg` automatically bakes the app icon into the DMG's own volume afterward (jpackage only sets the icon for the `.app` bundle inside, not the DMG container itself — without this, Finder shows a generic/fallback icon for the closed `.dmg` file). This uses `hdiutil`/`SetFile`, which ship with Xcode Command Line Tools — no extra setup needed.
+
 ### Build EXE (Windows only)
 ```bash
 ./gradlew packageExe
