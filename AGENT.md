@@ -423,6 +423,70 @@ diagnose, and then fully removed once the fix was confirmed — per the debuggin
 
 **Build Status**: ✅ Compiles successfully. Confirmed fixed by the user on both Windows and macOS.
 
+## Unified Lottie Render Pipeline (July 2026)
+
+**Problem**: lower thirds were choppy (fixed 33 ms `delay()` playback clock + an ~8 MB
+per-frame `installPixels` on the composition thread **per output window**), had blocky
+letters (no TTFs anywhere in the repo and no `fontManager` passed to Compottie, so text fell
+back to a default typeface; plus the in-RAM pre-render degraded long clips to 720p/15fps under
+a 1.2 GB budget and upscaled), and the same lottie was fully rendered **twice** — once into
+`List<IntArray>` RAM (~750 MB for 3 s @1080p30) for desktop, once into a YUVA `.acpc` disk
+cache for ATEM.
+
+**Architecture now** (one render pass, shared by everything):
+- **`server/LottieRenderCache.kt`** — replaces `AtemRenderCache` (deleted). Disk cache at
+  `~/.churchpresenter/lottie_render_cache/*.lrcc` of raw **RLE-compressed ARGB frames**
+  (format documented in the file header; footer offset table gives random access). RLE runs
+  over whole 32-bit pixels — the `0xFEFE…` sentinel trick used for YUVA is NOT safe in ARGB.
+  Mostly-transparent lower thirds shrink >99% (verified: 330-frame 11 s 1080p clip = 5.4 MB
+  vs 2.7 GB raw). Variant policy: desktop and ATEM share one entry when the ATEM raster has
+  the same aspect (per-axis max of clamped lottie canvas and raster; default 1920×1080@30
+  for both). ATEM uploads convert ARGB → YUVA+RLE **at upload time** via
+  `Reader.nextAtemFrame(rasterW, rasterH)` (bilinear scale only when sizes differ);
+  `AtemFrameEncoder` unchanged. Startup warm-up (`ensureForFolder`, main.kt) now also runs
+  with no ATEM configured, so playback caches are ready before first Go Live.
+- **`presenter/LottieFrameStream.kt`** — per-play streaming decoder owned by
+  `PresenterManager`. One worker decodes the requested frame index off the UI thread into a
+  Skia bitmap **once for all windows** and publishes `PresenterManager.lottieFrame`
+  (a `LottieFrame`); superseded bitmaps are closed after 3 newer publishes. RAM is a few
+  frames flat regardless of clip length — the degradation ladder is gone, clips always render
+  at full resolution. Blank-render guard: samples 4 decoded frames; a blank cache entry is
+  deleted (so it re-renders next time) and playback stays on the live Compottie fallback.
+- **Playback clock** (`main.kt` central Lottie `LaunchedEffect`): `withFrameNanos`-driven —
+  elapsed time from real frame timestamps, so missed frames self-correct instead of drifting.
+  Polls `lottieFrameCount` live each tick (raw-vs-live switchover mid-play preserved). The
+  KEY-role output and the LivePreview/BrowserSource presenters now receive `frame` too
+  (previously they silently froze once raw frames took over — `lottieProgress` stops updating).
+- **Fonts** (`utils/LottieFonts.kt` + `resources/fonts/*.ttf`): a `LottieFontManager` passed
+  at **every** `rememberLottiePainter` call site (presenter, offscreen renderer, tab preview,
+  settings preview). Resolves the 11 LottieGen families from bundled TTFs (which also fixes
+  LottieGen's own AWT text measurement — same classpath), then falls back to installed system
+  fonts found by filename in platform font dirs (covers e.g. Verdana). ⚠️ When adding a painter
+  call site that can draw text, pass `fontManager = LottieFonts` or text renders wrong.
+- **LottieGen glyph embedding** (`lottie/GlyphExtractor.kt` in the submodule): exports now
+  embed vector outlines (`chars`) for the characters actually used, so files render crisp text
+  in ANY player with no fonts installed (verified in lottie-web/Safari). In-app rendering still
+  prefers the resolved real font. Limitation: runtime search-replace text substitution can
+  introduce characters that weren't embedded — external players then miss those glyphs;
+  in-app rendering is unaffected (real fonts).
+
+**Key invariants**:
+- Cache pixels are canonical ARGB ints; the decode path installs them little-endian
+  (= BGRA bytes = Skia N32).
+- ATEM media MUST be uploaded at the switcher raster (`AtemSettings.renderWidth/Height`) —
+  any other size gives a stride/chroma-shifted image. The cache may store a larger same-aspect
+  size; `nextAtemFrame` scales down at upload.
+- Bump `LottieRenderCache.VERSION` when rendered pixels or the file format change — the
+  version is part of the filename, old entries age out via LRU (4 GB / 60 entries).
+
+**Verified**: RLE codec fuzz-tested (308 round-trip cases); real 330-frame render validated
+on disk byte-for-byte (offset chain, per-frame decode, alpha coverage); cached mid-frame
+decoded to PNG shows crisp full-res Verdana; glyph-embedded export renders correctly in
+lottie-web. Not yet verified: an actual ATEM upload (no device configured on the dev machine)
+— the YUVA encoder is unchanged, only its input source moved.
+
+**Build Status**: ✅ Compiles successfully, zero warnings.
+
 ## Known Issues
 
 **Issue**: Song edits not saving/updating

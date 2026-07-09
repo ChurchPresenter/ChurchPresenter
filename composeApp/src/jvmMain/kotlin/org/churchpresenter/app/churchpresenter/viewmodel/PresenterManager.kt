@@ -14,36 +14,17 @@ import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.cef.browser.CefBrowser
 import org.churchpresenter.app.churchpresenter.models.Scene
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
+import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
+import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.models.Question
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.server.AtemRenderCache
+import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 
 class PresenterManager {
-
-    companion object {
-        const val PRERENDER_FPS = 30
-
-        // Held simultaneously as raw ARGB frames for the lifetime of the lower third —
-        // must stay well under the heap ceiling alongside everything else the app needs.
-        private const val MAX_PRERENDER_BYTES = 1_200_000_000L
-
-        // Output windows render pre-rendered frames with ContentScale.Fit, so a canvas
-        // larger than the app's default render resolution wastes memory with no visual benefit.
-        private const val MAX_CANVAS_DIMENSION = 1920
-
-        // Floors tried, in order, before giving up on pre-rendering a clip that doesn't fit
-        // MAX_PRERENDER_BYTES at full quality. Resolution is spent first since it has no effect
-        // on motion smoothness for a lower-third overlay; frame rate is the last resort since
-        // that's what "smooth" actually depends on — pre-rendering exists specifically because
-        // live/GPU-driven playback was unreliable on some hardware, so a clip should almost never
-        // fall back to that path just for being long or large.
-        private const val MIN_CANVAS_DIMENSION = 720
-        private const val MIN_PRERENDER_FPS = 15
-    }
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var preRenderJob: Job? = null
@@ -232,24 +213,39 @@ class PresenterManager {
     private val _lottieProgress = mutableStateOf(0f)
     val lottieProgress: State<Float> = _lottieProgress
 
-    // Pre-rendered ARGB frames for display — populated in background when content is set
-    private val _lottieRawFrames = mutableStateOf<List<IntArray>?>(null)
-    val lottieRawFrames: State<List<IntArray>?> = _lottieRawFrames
+    // Pre-rendered playback: once the LottieRenderCache entry for the current content is
+    // ready, a LottieFrameStream serves decoded frames here and lottieFrameCount flips
+    // non-null — main.kt's playback clock switches from lottieProgress to frame indices.
+    private val _lottieFrame = mutableStateOf<LottieFrame?>(null)
+    val lottieFrame: State<LottieFrame?> = _lottieFrame
 
-    private val _lottieRawFrameSize = mutableStateOf<Pair<Int, Int>?>(null)
-    val lottieRawFrameSize: State<Pair<Int, Int>?> = _lottieRawFrameSize
+    private val _lottieFrameCount = mutableStateOf<Int?>(null)
+    val lottieFrameCount: State<Int?> = _lottieFrameCount
 
-    // The frame rate the current _lottieRawFrames were actually rendered at — may be below
-    // PRERENDER_FPS when a clip was degraded to fit MAX_PRERENDER_BYTES. main.kt's playback loop
-    // must pace itself off this, not the PRERENDER_FPS constant, or a degraded clip plays too fast.
-    private val _lottiePrerenderFps = mutableStateOf(PRERENDER_FPS)
+    // The frame rate the current cache entry was rendered at — main.kt's playback loop
+    // paces itself off this.
+    private val _lottiePrerenderFps = mutableStateOf(LottieRenderCache.PLAYBACK_FPS)
     val lottiePrerenderFps: State<Int> = _lottiePrerenderFps
 
     private val _lottieCurrentFrameIndex = mutableStateOf(0)
     val lottieCurrentFrameIndex: State<Int> = _lottieCurrentFrameIndex
 
+    // Read from the decode worker thread (frame-publish identity guard) — volatile so a
+    // Main-thread clear is seen there promptly.
+    @Volatile
+    private var lottieFrameStream: LottieFrameStream? = null
+
+    // ATEM settings snapshot (kept current from main.kt) so pre-renders pick the shared
+    // render size and playback + ATEM uploads hit one cache entry.
+    private var atemRenderSettings: AtemSettings? = null
+
+    fun setAtemRenderSettings(atem: AtemSettings?) {
+        atemRenderSettings = atem
+    }
+
     fun setLottieCurrentFrameIndex(index: Int) {
         _lottieCurrentFrameIndex.value = index
+        lottieFrameStream?.requestFrame(index)
     }
 
     // Shared Media transition alpha
@@ -480,130 +476,68 @@ class PresenterManager {
         notifyLiveStateChanged(Presenting.LOWER_THIRD)
 
         // Clear stale frames immediately so the presenter falls back to compottie
-        _lottieRawFrames.value = null
-        _lottieRawFrameSize.value = null
-        _lottiePrerenderFps.value = PRERENDER_FPS
-        _lottieCurrentFrameIndex.value = 0
         preRenderJob?.cancel()
+        _lottieFrameCount.value = null
+        _lottieFrame.value = null
+        _lottiePrerenderFps.value = LottieRenderCache.PLAYBACK_FPS
+        _lottieCurrentFrameIndex.value = 0
+        lottieFrameStream?.close()
+        lottieFrameStream = null
 
         if (json.isNotBlank()) {
             preRenderJob = preRenderScope.launch {
+                var stream: LottieFrameStream? = null
+                var published = false
                 try {
-                    val (rawW, rawH) = AtemRenderCache.lottieCanvasSize(json) ?: (1920 to 1080)
-                    val (clampedW, clampedH) = clampCanvasSize(rawW, rawH)
-                    var w = clampedW
-                    var h = clampedH
-                    var fps = PRERENDER_FPS
-                    var frameCount = AtemRenderCache.clipFrameCount(json, fps.toDouble()) ?: return@launch
-                    var estimatedBytes = frameCount.toLong() * w.toLong() * h.toLong() * 4L
-
-                    // 1. Shrink resolution first — it's free quality to spend, since it has no
-                    // effect on motion smoothness for a lower-third overlay.
-                    while (estimatedBytes > MAX_PRERENDER_BYTES && maxOf(w, h) > MIN_CANVAS_DIMENSION) {
-                        w = (w * 0.85).toInt().coerceAtLeast(1)
-                        h = (h * 0.85).toInt().coerceAtLeast(1)
-                        estimatedBytes = frameCount.toLong() * w.toLong() * h.toLong() * 4L
+                    val variant = LottieRenderCache.desktopVariant(json, atemRenderSettings)
+                        ?: return@launch // JSON has no timing — stay on the live renderer
+                    // Instant on a cache hit; renders in the background otherwise
+                    val cached = LottieRenderCache.prepare(json, variant).await()
+                    stream = LottieFrameStream(file = cached, scope = preRenderScope) { frame ->
+                        // Identity guard: a decode already in flight when newer content replaced
+                        // this stream must not publish into the new content's cleared state (the
+                        // stale bitmap would be closed by this stream's teardown while displayed).
+                        if (lottieFrameStream === stream) _lottieFrame.value = frame
                     }
-
-                    // 2. Only reduce frame rate if the resolution floor alone wasn't enough — fps
-                    // is what "smooth" actually depends on, so it's the last resort before giving up.
-                    if (estimatedBytes > MAX_PRERENDER_BYTES && fps > MIN_PRERENDER_FPS) {
-                        fps = MIN_PRERENDER_FPS
-                        frameCount = AtemRenderCache.clipFrameCount(json, fps.toDouble()) ?: return@launch
-                        estimatedBytes = frameCount.toLong() * w.toLong() * h.toLong() * 4L
-                    }
-
-                    if (estimatedBytes > MAX_PRERENDER_BYTES) {
-                        // Still too big even at minimum quality (an extreme, e.g. multi-minute,
-                        // clip) — fall back to live rendering, same as before this change.
+                    if (!stream.open()) {
+                        // A silently-blank off-screen render: discard the cache file (so a later
+                        // play re-renders instead of re-reading the blank entry) and keep using
+                        // the live renderer — better than switching to bitmaps of nothing.
+                        stream.close()
+                        cached.delete()
                         CrashReporter.reportWarning(
-                            "Lottie pre-render skipped even at minimum quality: estimated size exceeds budget",
-                            tags = mapOf(
-                                "subsystem" to "lower_third",
-                                "estimatedBytes" to estimatedBytes.toString(),
-                                "frameCount" to frameCount.toString(),
-                                "width" to w.toString(),
-                                "height" to h.toString(),
-                                "fps" to fps.toString()
-                            )
+                            "Lottie pre-render produced blank frames, discarded",
+                            tags = mapOf("subsystem" to "lower_third")
                         )
                         return@launch
                     }
-
-                    if (w != clampedW || h != clampedH || fps != PRERENDER_FPS) {
-                        CrashReporter.breadcrumb(
-                            "Lottie pre-render degraded to fit budget: ${w}x$h @ ${fps}fps",
-                            category = "lower_third"
-                        )
+                    withContext(Dispatchers.Main) {
+                        // Do NOT reset _lottieCurrentFrameIndex here — main.kt's playback loop
+                        // may already be partway through this play (it switches to raw frames
+                        // the instant they're ready, not just at play start) and derives the
+                        // correct index from real elapsed time on its very next tick. Resetting
+                        // to 0 here raced that loop and caused a visible flash back to frame 0
+                        // right at the switchover moment.
+                        lottieFrameStream = stream
+                        _lottiePrerenderFps.value = variant.fps.toInt()
+                        _lottieFrameCount.value = stream.frameCount
+                        published = true
                     }
-
-                    val renderer = LowerThirdOffscreenRenderer(w, h)
-                    val frames = renderer.renderAllFrames(json, frameCount)
-
-                    // Discard a pre-render that silently rendered (near-)blank frames instead of
-                    // publishing it — better to keep using the live renderer for the whole clip
-                    // than to switch playback over to bitmaps of nothing.
-                    val sampleIndices = listOf(frames.size / 4, frames.size / 2, frames.size * 3 / 4, frames.size - 1)
-                        .map { it.coerceIn(0, frames.size - 1) }
-                        .distinct()
-                    val blankCount = sampleIndices.count { isFrameBlank(frames[it]) }
-                    if (blankCount > sampleIndices.size / 2) {
-                        CrashReporter.reportWarning(
-                            "Lottie pre-render produced blank frames, discarded",
-                            tags = mapOf(
-                                "subsystem" to "lower_third",
-                                "blankCount" to blankCount.toString(),
-                                "sampled" to sampleIndices.size.toString()
-                            )
-                        )
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            _lottieRawFrameSize.value = w to h
-                            _lottiePrerenderFps.value = fps
-                            // Do NOT reset _lottieCurrentFrameIndex here — main.kt's playback loop
-                            // may already be partway through this play (it switches to raw frames
-                            // the instant they're ready, not just at play start) and derives the
-                            // correct index from real elapsed time on its very next tick. Resetting
-                            // to 0 here raced that loop and caused a visible flash back to frame 0
-                            // right at the switchover moment.
-                            _lottieRawFrames.value = frames
-                        }
-                    }
+                    // Serve the current playhead position immediately so the switchover from the
+                    // live renderer has a frame to draw on its very first tick.
+                    stream.requestFrame(_lottieCurrentFrameIndex.value)
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
                 } catch (e: Exception) {
                     System.err.println("[PresenterManager] Lottie pre-render failed: ${e.message}")
                     CrashReporter.reportException(e, "Lottie pre-render")
+                } finally {
+                    // Newer content cancelled this job after the stream was opened but before
+                    // it was adopted — release it, it will never be drawn.
+                    if (!published) stream?.close()
                 }
             }
         }
-    }
-
-    /**
-     * Roughly estimates whether a rendered frame is meaningfully blank (near-fully transparent) —
-     * used to detect a pre-render that silently produced nothing instead of the intended content.
-     * Samples pixels at a stride rather than scanning the whole frame to stay cheap.
-     */
-    private fun isFrameBlank(frame: IntArray): Boolean {
-        if (frame.isEmpty()) return true
-        val sampleStep = maxOf(1, frame.size / 500)
-        var sampled = 0
-        var opaqueCount = 0
-        var i = 0
-        while (i < frame.size) {
-            sampled++
-            if ((frame[i] ushr 24) and 0xFF > 8) opaqueCount++
-            i += sampleStep
-        }
-        return opaqueCount.toFloat() / sampled < 0.01f
-    }
-
-    /** Scales (w, h) down proportionally so neither side exceeds [MAX_CANVAS_DIMENSION]. */
-    private fun clampCanvasSize(w: Int, h: Int): Pair<Int, Int> {
-        val longestSide = maxOf(w, h)
-        if (longestSide <= MAX_CANVAS_DIMENSION) return w to h
-        val scale = MAX_CANVAS_DIMENSION.toDouble() / longestSide
-        return (w * scale).toInt().coerceAtLeast(1) to (h * scale).toInt().coerceAtLeast(1)
     }
 
     private val _lottiePauseFrame = mutableStateOf(-1f)

@@ -144,10 +144,11 @@ import javax.swing.JOptionPane
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.formatAtemFps
 import org.churchpresenter.app.churchpresenter.server.AtemClient
-import org.churchpresenter.app.churchpresenter.server.AtemRenderCache
+import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.app.churchpresenter.server.AtemUploadStatus
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
@@ -219,7 +220,7 @@ fun LowerThirdTab(
     // Pre-render ATEM uploads in the background for every lottie file as soon as it
     // appears (generator save, file drop, edit) — Send to ATEM then streams a ready file
     LaunchedEffect(lottieFiles, appSettings.atemSettings) {
-        lottieFiles.forEach { AtemRenderCache.ensureForFile(it, appSettings.atemSettings) }
+        lottieFiles.forEach { LottieRenderCache.ensureForFile(it, appSettings.atemSettings) }
     }
 
     val scope = rememberCoroutineScope()
@@ -347,14 +348,11 @@ fun LowerThirdTab(
     // Cache variant for an ATEM upload. Frame count comes from the lottie JSON itself
     // (same source as background pre-generation) so both hit the same key.
     // Quick upload passes useDetectedFps=false so it always hits the pre-generated cache.
-    fun atemVariant(isClip: Boolean, useDetectedFps: Boolean = true): AtemRenderCache.Variant {
+    fun atemVariant(isClip: Boolean, useDetectedFps: Boolean = true): LottieRenderCache.Variant {
         val s = appSettings.atemSettings
-        val (w, h) = AtemRenderCache.renderSize(s)
-        if (!isClip) return AtemRenderCache.Variant(clip = false, width = w, height = h)
         val fps = (if (useDetectedFps) atemDetectedFps else null) ?: s.clipFps
-        val frames = AtemRenderCache.clipFrameCount(jsonContent, fps)
-            ?: ((totalDurationMs() / 1000.0) * fps).toInt().coerceAtLeast(1)
-        return AtemRenderCache.Variant(true, w, h, fps, frames)
+        val fallbackFrames = ((totalDurationMs() / 1000.0) * fps).toInt().coerceAtLeast(1)
+        return LottieRenderCache.atemVariant(jsonContent, s, isClip, fps, fallbackFrames)
     }
 
     // Kick off (or attach to) cache preparation when the dialog opens or its mode changes,
@@ -362,15 +360,15 @@ fun LowerThirdTab(
     LaunchedEffect(showAtemDialog, atemIsClip, jsonContent, atemDetectedFps) {
         if (!showAtemDialog || jsonContent.isBlank()) return@LaunchedEffect
         val variant = atemVariant(atemIsClip)
-        AtemRenderCache.prepare(jsonContent, variant)
-        AtemRenderCache.progressFlow(jsonContent, variant).collect { atemPrepareProgress = it }
+        LottieRenderCache.prepare(jsonContent, variant)
+        LottieRenderCache.progressFlow(jsonContent, variant).collect { atemPrepareProgress = it }
     }
 
     /**
      * Render-from-cache + upload, shared by the dialog's Upload button and the
      * quick-upload buttons. [variant] decides still vs clip and the fps/frame count.
      */
-    fun startAtemUpload(variant: AtemRenderCache.Variant, slot: Int, closeDialogOnSuccess: Boolean) {
+    fun startAtemUpload(variant: LottieRenderCache.Variant, slot: Int, closeDialogOnSuccess: Boolean) {
         val presetName = selectedFile?.nameWithoutExtension ?: ""
         val atemSettings = appSettings.atemSettings
         atemBusy = true
@@ -380,7 +378,7 @@ fun LowerThirdTab(
             try {
                 // Awaits the background render when it isn't done yet;
                 // instant when the cache file already exists
-                val cached = AtemRenderCache.prepare(jsonContent, variant).await()
+                val cached = LottieRenderCache.prepare(jsonContent, variant).await()
                 atemProgress = 0f
                 // Publish to the shared status so the tab's upload bar shows the file +
                 // slot for in-app uploads too (same source the API uploads use)
@@ -390,16 +388,18 @@ fun LowerThirdTab(
                 withContext(Dispatchers.IO) { client.connect() }
                 try {
                     withContext(Dispatchers.IO) {
-                        AtemRenderCache.Reader(cached).use { reader ->
+                        LottieRenderCache.Reader(cached).use { reader ->
+                            val rasterW = atemSettings.renderWidth
+                            val rasterH = atemSettings.renderHeight
                             if (!variant.clip) {
-                                client.uploadStillEncoded(slot, reader.nextFrame(), presetName) { p ->
+                                client.uploadStillEncoded(slot, reader.nextAtemFrame(rasterW, rasterH), presetName) { p ->
                                     atemProgress = p
                                     AtemUploadStatus.progress(id, p)
                                 }
                             } else {
                                 client.uploadClipEncoded(
                                     slot, reader.frameCount, presetName,
-                                    nextFrame = { reader.nextFrame() }
+                                    nextFrame = { reader.nextAtemFrame(rasterW, rasterH) }
                                 ) { p -> atemProgress = p; AtemUploadStatus.progress(id, p) }
                                 // Wait for the ATEM to finish ingesting the clip (surfaced as the
                                 // "processing" phase) so the bar only completes once it's truly ready.
@@ -518,7 +518,7 @@ fun LowerThirdTab(
 
                     // Warn when the design doesn't match the ATEM frame: aspect mismatches
                     // get centered with side bars, smaller designs get upscaled (soft look)
-                    val canvasSize = remember(jsonContent) { AtemRenderCache.lottieCanvasSize(jsonContent) }
+                    val canvasSize = remember(jsonContent) { LottieRenderCache.lottieCanvasSize(jsonContent) }
                     if (canvasSize != null) {
                         val (cw, ch) = canvasSize
                         val s = appSettings.atemSettings
@@ -911,7 +911,7 @@ fun LowerThirdTab(
                     onClick = {
                         val atemSettings = appSettings.atemSettings
                         if (atemSettings.goLiveKey && atemConfigured) {
-                            val durationMs = AtemRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
+                            val durationMs = LottieRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
                             val name = selectedFile?.nameWithoutExtension ?: ""
                             val useDsk = atemSettings.useDownstreamKey
                             scope.launch {
@@ -1020,7 +1020,7 @@ fun LowerThirdTab(
                     contentAlignment = Alignment.Center
                 ) {
                     if (canPlay) {
-                        Image(painter = rememberLottiePainter(composition = composition, progress = { animatedProgress.value }), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
+                        Image(painter = rememberLottiePainter(composition = composition, progress = { animatedProgress.value }, fontManager = LottieFonts), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
                     } else if (selectedFile != null && isCompositionLoading) {
                         CircularProgressIndicator(modifier = Modifier.size(36.dp))
                     } else if (selectedFile != null) {

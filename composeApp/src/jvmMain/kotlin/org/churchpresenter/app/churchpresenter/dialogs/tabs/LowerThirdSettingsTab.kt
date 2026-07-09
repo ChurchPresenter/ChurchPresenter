@@ -65,6 +65,7 @@ import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextFie
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.delay
@@ -245,7 +246,8 @@ fun LowerThirdSettingsTab(
                     Image(
                         painter = rememberLottiePainter(
                             composition = composition,
-                            progress = { progress }
+                            progress = { progress },
+                            fontManager = LottieFonts
                         ),
                         contentDescription = null,
                         contentScale = ContentScale.Fit,

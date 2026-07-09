@@ -248,7 +248,8 @@ class BrowserSourceVideoRenderer(
                                         composition = lottieComposition,
                                         progress = { presenterManager.lottieProgress.value },
                                         appSettings = appSettings,
-                                        outputRole = outputRole
+                                        outputRole = outputRole,
+                                        frame = presenterManager.lottieFrame.value
                                     )
                                 }
                                 Presenting.CANVAS -> ScenePresenter(scene = presenterManager.activeScene.value)

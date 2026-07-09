@@ -908,7 +908,7 @@ class CompanionServer {
             call.respond(HttpStatusCode.InternalServerError, """{"error":"could not read lottie file"}""")
             return
         }
-        val durationMs = AtemRenderCache.lottieDurationMs(ltJson)
+        val durationMs = LottieRenderCache.lottieDurationMs(ltJson)
         if (durationMs == null) {
             call.respond(HttpStatusCode.UnprocessableEntity, """{"error":"lottie has no timing information"}""")
             return
@@ -3186,7 +3186,7 @@ class CompanionServer {
                 get("/api/lowerthirds") {
                     if (!checkApiKey(call)) return@get
                     val items = lowerThirdFiles().map { f ->
-                        val dur = try { AtemRenderCache.lottieDurationMs(f.readText()) ?: 0L } catch (_: Exception) { 0L }
+                        val dur = try { LottieRenderCache.lottieDurationMs(f.readText()) ?: 0L } catch (_: Exception) { 0L }
                         val nameJson = json.encodeToString(kotlinx.serialization.serializer<String>(), f.nameWithoutExtension)
                         """{"name":$nameJson,"durationMs":$dur}"""
                     }
@@ -3274,12 +3274,14 @@ class CompanionServer {
                         val uploadId = AtemUploadStatus.begin(file.nameWithoutExtension, clip = false, slot = slot + 1)
                         try {
                             val lottieJson = file.readText()
-                            val (w, h) = AtemRenderCache.renderSize(atem)
-                            val variant = AtemRenderCache.Variant(clip = false, width = w, height = h, frameCount = 1)
-                            val cached = AtemRenderCache.prepare(lottieJson, variant).await()
+                            val variant = LottieRenderCache.atemVariant(lottieJson, atem, clip = false)
+                            val cached = LottieRenderCache.prepare(lottieJson, variant).await()
                             AtemConnectionManager.use(atem.host, atem.port, needsState = true) { client ->
-                                AtemRenderCache.Reader(cached).use { reader ->
-                                    client.uploadStillEncoded(slot, reader.nextFrame(), file.nameWithoutExtension) { p ->
+                                LottieRenderCache.Reader(cached).use { reader ->
+                                    client.uploadStillEncoded(
+                                        slot, reader.nextAtemFrame(atem.renderWidth, atem.renderHeight),
+                                        file.nameWithoutExtension
+                                    ) { p ->
                                         AtemUploadStatus.progress(uploadId, p)
                                     }
                                 }
@@ -3345,7 +3347,7 @@ class CompanionServer {
                     }
                     val lottieJson = file.readText()
                     val fps = atem.clipFps
-                    val frameCount = AtemRenderCache.clipFrameCount(lottieJson, fps) ?: 1
+                    val frameCount = LottieRenderCache.clipFrameCount(lottieJson, fps) ?: 1
                     // Capacity pre-flight (mirrors the Lower Third UI): block a clip that can't
                     // fit the slot before responding "uploading", so the caller gets a real error.
                     val clipCapacity = atem.detectedClipMaxFrames.getOrNull(slot)
@@ -3360,13 +3362,13 @@ class CompanionServer {
                     scope.launch {
                         val uploadId = AtemUploadStatus.begin(file.nameWithoutExtension, clip = true, slot = slot + 1)
                         try {
-                            val (w, h) = AtemRenderCache.renderSize(atem)
-                            val variant = AtemRenderCache.Variant(clip = true, width = w, height = h, fps = fps, frameCount = frameCount)
-                            val cached = AtemRenderCache.prepare(lottieJson, variant).await()
+                            val variant = LottieRenderCache.atemVariant(lottieJson, atem, clip = true, fps = fps)
+                            val cached = LottieRenderCache.prepare(lottieJson, variant).await()
                             AtemConnectionManager.use(atem.host, atem.port, needsState = true) { client ->
-                                AtemRenderCache.Reader(cached).use { reader ->
+                                LottieRenderCache.Reader(cached).use { reader ->
                                     client.uploadClipEncoded(slot, reader.frameCount, file.nameWithoutExtension,
-                                        nextFrame = { reader.nextFrame() }) { p -> AtemUploadStatus.progress(uploadId, p) }
+                                        nextFrame = { reader.nextAtemFrame(atem.renderWidth, atem.renderHeight) }
+                                    ) { p -> AtemUploadStatus.progress(uploadId, p) }
                                 }
                                 // Wait for the ATEM to finish ingesting the clip before keying, so
                                 // the key never fires over a half-processed clip. Best-effort: key

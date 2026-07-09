@@ -19,6 +19,7 @@ import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 
 /**
  * Renders a Lottie animation to ARGB pixel frames off-screen.
@@ -94,7 +95,8 @@ class LowerThirdOffscreenRenderer(
             Image(
                 painter = rememberLottiePainter(
                     composition = composition,
-                    progress = { currentProgress }
+                    progress = { currentProgress },
+                    fontManager = LottieFonts
                 ),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
