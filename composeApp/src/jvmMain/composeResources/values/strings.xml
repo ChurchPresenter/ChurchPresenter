@@ -1896,6 +1896,7 @@
     <string name="bible_stt_level_aggressive">Aggressive</string>
     <string name="bible_stt_engine_connecting">Starting engine…</string>
     <string name="bible_stt_engine_unavailable">Engine unavailable</string>
+    <string name="bible_stt_engine_stt_down">Engine lost its connection to the STT server</string>
     <string name="bible_stt_no_bible">No Bible configured</string>
     <string name="bible_stt_waiting_for_stt">Running — waiting for STT</string>
     <!-- Shared STT connection-status labels (used by both the Bible detection strip and the STT tab) -->

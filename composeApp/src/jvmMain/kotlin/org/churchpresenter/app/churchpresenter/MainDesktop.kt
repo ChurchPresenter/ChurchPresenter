@@ -544,7 +544,7 @@ fun MainDesktop(
             )
         } else {
             bibleEngineClient.stop()
-            bibleViewModel.clearDetectedReferences()
+            bibleViewModel.clearDetectedReferences(reason = "expired")
         }
     }
 
