@@ -559,11 +559,33 @@ class PresenterManager {
                     val renderer = LowerThirdOffscreenRenderer(w, h)
                     val frames = renderer.renderAllFrames(json, frameCount)
                     LowerThirdDebugLog.log("Lottie pre-render finished: ${frames.size} frames, ${LowerThirdDebugLog.heapStats()}")
-                    withContext(Dispatchers.Main) {
-                        _lottieRawFrameSize.value = w to h
-                        _lottiePrerenderFps.value = fps
-                        _lottieRawFrames.value = frames
-                        _lottieCurrentFrameIndex.value = 0
+
+                    // Discard a pre-render that silently rendered (near-)blank frames instead of
+                    // publishing it — better to keep using the live renderer for the whole clip
+                    // than to switch playback over to bitmaps of nothing.
+                    val sampleIndices = listOf(frames.size / 4, frames.size / 2, frames.size * 3 / 4, frames.size - 1)
+                        .map { it.coerceIn(0, frames.size - 1) }
+                        .distinct()
+                    val blankCount = sampleIndices.count { isFrameBlank(frames[it]) }
+                    if (blankCount > sampleIndices.size / 2) {
+                        LowerThirdDebugLog.log(
+                            "Lottie pre-render discarded: $blankCount/${sampleIndices.size} sampled frames blank"
+                        )
+                        CrashReporter.reportWarning(
+                            "Lottie pre-render produced blank frames, discarded",
+                            tags = mapOf(
+                                "subsystem" to "lower_third",
+                                "blankCount" to blankCount.toString(),
+                                "sampled" to sampleIndices.size.toString()
+                            )
+                        )
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            _lottieRawFrameSize.value = w to h
+                            _lottiePrerenderFps.value = fps
+                            _lottieRawFrames.value = frames
+                            _lottieCurrentFrameIndex.value = 0
+                        }
                     }
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
@@ -574,6 +596,25 @@ class PresenterManager {
                 }
             }
         }
+    }
+
+    /**
+     * Roughly estimates whether a rendered frame is meaningfully blank (near-fully transparent) —
+     * used to detect a pre-render that silently produced nothing instead of the intended content.
+     * Samples pixels at a stride rather than scanning the whole frame to stay cheap.
+     */
+    private fun isFrameBlank(frame: IntArray): Boolean {
+        if (frame.isEmpty()) return true
+        val sampleStep = maxOf(1, frame.size / 500)
+        var sampled = 0
+        var opaqueCount = 0
+        var i = 0
+        while (i < frame.size) {
+            sampled++
+            if ((frame[i] ushr 24) and 0xFF > 8) opaqueCount++
+            i += sampleStep
+        }
+        return opaqueCount.toFloat() / sampled < 0.01f
     }
 
     /** Scales (w, h) down proportionally so neither side exceeds [MAX_CANVAS_DIMENSION]. */
