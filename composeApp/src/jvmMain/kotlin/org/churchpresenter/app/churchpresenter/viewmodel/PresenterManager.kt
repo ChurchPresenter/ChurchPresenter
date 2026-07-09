@@ -560,8 +560,13 @@ class PresenterManager {
                         withContext(Dispatchers.Main) {
                             _lottieRawFrameSize.value = w to h
                             _lottiePrerenderFps.value = fps
+                            // Do NOT reset _lottieCurrentFrameIndex here — main.kt's playback loop
+                            // may already be partway through this play (it switches to raw frames
+                            // the instant they're ready, not just at play start) and derives the
+                            // correct index from real elapsed time on its very next tick. Resetting
+                            // to 0 here raced that loop and caused a visible flash back to frame 0
+                            // right at the switchover moment.
                             _lottieRawFrames.value = frames
-                            _lottieCurrentFrameIndex.value = 0
                         }
                     }
                 } catch (e: kotlinx.coroutines.CancellationException) {

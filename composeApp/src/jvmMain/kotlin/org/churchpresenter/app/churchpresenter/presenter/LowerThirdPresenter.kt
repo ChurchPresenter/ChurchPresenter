@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,6 +53,42 @@ private fun frameToDisposableBitmap(pixels: IntArray, width: Int, height: Int): 
     return DisposableFrameBitmap(bitmap, bitmap.asComposeImageBitmap())
 }
 
+/** Decodes the current raw frame (if any), falling back to the last successfully-decoded
+ *  frame on a native allocation failure rather than crashing composition for one frame. */
+@Composable
+private fun rememberRawFrame(
+    rawFrames: List<IntArray>?,
+    currentFrameIndex: Int,
+    frameWidth: Int,
+    frameHeight: Int
+): DisposableFrameBitmap? {
+    var lastGoodFrame by remember(rawFrames) { mutableStateOf<DisposableFrameBitmap?>(null) }
+    return remember(rawFrames, currentFrameIndex) {
+        rawFrames?.let { frames ->
+            val safeIdx = currentFrameIndex.coerceIn(0, frames.size - 1)
+            try {
+                frameToDisposableBitmap(frames[safeIdx], frameWidth, frameHeight).also {
+                    lastGoodFrame = it
+                }
+            } catch (e: Exception) {
+                CrashReporter.reportException(e, "Lower third frame render")
+                lastGoodFrame
+            }
+        }
+    }
+}
+
+@Composable
+private fun RawFrameImage(frame: DisposableFrameBitmap, isKey: Boolean, contentModifier: Modifier) {
+    Image(
+        bitmap = frame.imageBitmap,
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        colorFilter = if (isKey) keyColorFilter else null,
+        modifier = contentModifier
+    )
+}
+
 /**
  * Displays a Lottie animation in the presenter window.
  *
@@ -92,44 +127,31 @@ fun LowerThirdPresenter(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
-        // key() forces a fresh composable subtree when switching between the two paths,
-        // preventing hook-ordering issues when rawFrames transitions null ↔ non-null.
-        key(rawFrames != null) {
-            if (rawFrames != null) {
-                val safeIdx = currentFrameIndex.coerceIn(0, rawFrames.size - 1)
-                var lastGoodFrame by remember(rawFrames) { mutableStateOf<DisposableFrameBitmap?>(null) }
-                val frame = remember(rawFrames, safeIdx) {
-                    try {
-                        frameToDisposableBitmap(rawFrames[safeIdx], frameWidth, frameHeight).also {
-                            lastGoodFrame = it
-                        }
-                    } catch (e: Exception) {
-                        // Reuse the last successfully-decoded frame instead of crashing
-                        // composition on a native allocation failure for this one frame.
-                        CrashReporter.reportException(e, "Lower third frame render")
-                        lastGoodFrame
-                    }
-                }
-                if (frame != null) {
-                    Image(
-                        bitmap = frame.imageBitmap,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        colorFilter = if (isKey) keyColorFilter else null,
-                        modifier = contentModifier
-                    )
-                }
-            } else if (composition != null) {
+        if (composition != null) {
+            // Keep the live Compottie painter mounted for the whole play once composition has
+            // loaded (its identity is stable for an entire play — it only changes between
+            // distinct plays), and pick which bitmap to actually draw via a plain value check
+            // rather than a key()-forced subtree swap. main.kt's playback loop switches to raw
+            // frames mid-play as soon as they're ready; tearing down and remounting the live
+            // painter at that exact moment caused a visible hitch.
+            val painter = rememberLottiePainter(composition = composition, progress = progress)
+            val frame = rememberRawFrame(rawFrames, currentFrameIndex, frameWidth, frameHeight)
+            if (frame != null) {
+                RawFrameImage(frame, isKey, contentModifier)
+            } else {
                 Image(
-                    painter = rememberLottiePainter(
-                        composition = composition,
-                        progress = progress
-                    ),
+                    painter = painter,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     colorFilter = if (isKey) keyColorFilter else null,
                     modifier = contentModifier
                 )
+            }
+        } else if (rawFrames != null) {
+            // Rare: raw frames finished rendering before Compottie's own composition parse did.
+            val frame = rememberRawFrame(rawFrames, currentFrameIndex, frameWidth, frameHeight)
+            if (frame != null) {
+                RawFrameImage(frame, isKey, contentModifier)
             }
         }
     }
