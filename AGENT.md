@@ -380,6 +380,49 @@ verified against a live STT session — the tiering logic was traced by hand aga
 existing wiring (`navigateToReference`'s `goLive` param, `_autoFollowLiveToken` vs
 `_verseSelectionToken`) rather than run end-to-end.
 
+## Lower Third Disappearing Mid-Playback (July 2026)
+
+**Problem**: a Lottie lower-third animation, triggered via the plain in-app "Go Live" button,
+would start playing and then vanish partway through — reproduced on both Windows and macOS,
+whole graphic gone at once (not just masked text layers), same point every time for a given clip.
+
+**Investigation** (see full history in git log around commits `f5ea47fe`..`ad9c5405` if useful):
+1. First hypothesis — a native/GPU memory leak in `LowerThirdPresenter.kt`'s raw-frame playback
+   path (`intArrayToImageBitmap()` created 4 unclosed native Skia objects per frame, up to 30fps).
+   This was real and worth fixing (see below) but **did not** resolve the reported bug.
+2. Added temporary diagnostic logging (state machine timing, composable-level `composition`/
+   `rawFrames` heartbeats, `requestClearDisplay()`/`setPresentingMode()` callers) and had the user
+   reproduce on both platforms while confirming the bug occurred in that exact run. The logs came
+   back **completely clean** every time: correct timing, no early clear, no exception, no stale
+   composable inputs, right through a normal end-of-clip teardown — twice, on both platforms.
+3. This proved the bug lives inside Compottie's own live/vector renderer (`rememberLottiePainter`,
+   used whenever pre-rendered raw frames aren't ready yet) — a silent rendering failure inside
+   third-party library code, invisible to any of our own state.
+
+**Fix**: rather than chase a bug inside third-party rendering internals, stop relying on that
+renderer for longer than necessary. `main.kt`'s central Lottie `LaunchedEffect` was rewritten from
+"commit to whichever path (live vs pre-rendered) was ready at effect-start" to a single elapsed-time
+loop that polls `presenterManager.lottieRawFrames` live on every tick and switches over to the
+pre-rendered raw-frame path — continuing from the same elapsed-time position, no visible jump — the
+instant it's ready, since observed pre-render times (2.5–5.6s) are well within typical clip lengths.
+Confirmed fixed by the user on both platforms after this change.
+
+**Also fixed along the way**:
+- `LowerThirdPresenter.kt`'s raw-frame path now explicitly closes its native Skia `Bitmap` via
+  `RememberObserver` the instant a frame is superseded (previously leaked ~8MB/frame, up to 30fps,
+  relying only on GC/Cleaner timing), and skips a wasteful `Image`+`Canvas` round-trip by calling
+  `Bitmap.asComposeImageBitmap()` directly instead of `SkiaImage.makeFromBitmap(...).toComposeImageBitmap()`.
+- `PresenterManager.kt`'s pre-render step now discards a pre-render that comes back (near-)blank
+  (`isFrameBlank()`, samples a few frames for near-zero alpha) instead of publishing it, falling
+  back to live rendering the same way an actual render failure already did.
+
+**Files Modified**: `presenter/LowerThirdPresenter.kt`, `main.kt` (central Lottie effect),
+`viewmodel/PresenterManager.kt`. All temporary diagnostic logging (a `LowerThirdDebugLog` utility,
+composable-level heartbeats, caller-tracking on `requestClearDisplay()`) was added, used to
+diagnose, and then fully removed once the fix was confirmed — per the debugging guidelines below.
+
+**Build Status**: ✅ Compiles successfully. Confirmed fixed by the user on both Windows and macOS.
+
 ## Known Issues
 
 **Issue**: Song edits not saving/updating

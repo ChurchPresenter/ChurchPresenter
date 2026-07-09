@@ -148,7 +148,6 @@ import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
-import org.churchpresenter.app.churchpresenter.utils.LowerThirdDebugLog
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
@@ -2728,15 +2727,13 @@ private fun PresenterWindows(
     }
     LaunchedEffect(lottieComposition, lottiePauseAtFrame, lottiePauseFrame, lottiePauseDurationMs, lottieTrigger) {
         // The live Compottie GPU-vector renderer (used below whenever pre-rendered frames aren't
-        // ready yet) has been proven, via prior diagnostic logging, to sometimes silently render
-        // nothing partway through a clip even though this effect's own timing/state is correct —
-        // the whole graphic vanishes while our state keeps counting normally. Pre-rendered raw
-        // frames don't share that failure mode (each is a static bitmap, independently rendered
-        // ahead of time). So this loop polls presenterManager.lottieRawFrames LIVE on every tick
-        // (not just once at effect-start) and switches over to raw-frame playback the instant
-        // frames become available — continuing from the same elapsed-time position, so there's no
-        // visible jump — instead of committing to whichever path was ready first for the whole clip.
-        val playId = lottieTrigger
+        // ready yet) can silently render nothing partway through a clip on some GPU/driver
+        // combinations. Pre-rendered raw frames don't share that failure mode (each is a static
+        // bitmap, independently rendered ahead of time). So this loop polls
+        // presenterManager.lottieRawFrames LIVE on every tick (not just once at effect-start) and
+        // switches over to raw-frame playback the instant frames become available — continuing
+        // from the same elapsed-time position, so there's no visible jump — instead of committing
+        // to whichever path was ready first for the whole clip.
         try {
             val comp = lottieComposition
             val initialFrames = presenterManager.lottieRawFrames.value
@@ -2762,38 +2759,16 @@ private fun PresenterWindows(
                 }
             }
 
-            LowerThirdDebugLog.log(
-                "play#$playId START unified loop: totalDurMs=$totalDurMs hasPause=$hasPause " +
-                    "grandTotalMs=$grandTotalMs startedWithRawFrames=${initialFrames != null}, " +
-                    LowerThirdDebugLog.heapStats()
-            )
-
-            var usingRawFrames = false
             var elapsedMs = 0L
-            var lastHeartbeatMs = 0L
             val tickMs = 33L
             while (elapsedMs < grandTotalMs) {
                 val frames = presenterManager.lottieRawFrames.value
                 val progress = progressAt(elapsedMs)
                 if (frames != null) {
-                    if (!usingRawFrames) {
-                        usingRawFrames = true
-                        LowerThirdDebugLog.log(
-                            "play#$playId switching to raw-frame playback at elapsedMs=$elapsedMs " +
-                                "(${frames.size} frames), ${LowerThirdDebugLog.heapStats()}"
-                        )
-                    }
                     val idx = (progress * (frames.size - 1)).roundToInt().coerceIn(0, frames.size - 1)
                     presenterManager.setLottieCurrentFrameIndex(idx)
                 } else {
                     presenterManager.setLottieProgress(progress)
-                }
-                if (elapsedMs - lastHeartbeatMs >= 500L) {
-                    lastHeartbeatMs = elapsedMs
-                    LowerThirdDebugLog.log(
-                        "play#$playId elapsedMs=$elapsedMs/$grandTotalMs progress=$progress " +
-                            "usingRawFrames=$usingRawFrames ${LowerThirdDebugLog.heapStats()}"
-                    )
                 }
                 delay(tickMs)
                 elapsedMs += tickMs
@@ -2805,17 +2780,10 @@ private fun PresenterWindows(
             } else {
                 presenterManager.setLottieProgress(1f)
             }
-            LowerThirdDebugLog.log(
-                "play#$playId natural completion -> requestClearDisplay(), usingRawFrames=$usingRawFrames, " +
-                    LowerThirdDebugLog.heapStats()
-            )
             presenterManager.requestClearDisplay()
         } catch (e: CancellationException) {
-            // Normal restart (a key changed, e.g. composition finished loading) — not a failure.
-            LowerThirdDebugLog.log("play#$playId cancelled (restarted or superseded)")
             throw e
         } catch (e: Exception) {
-            LowerThirdDebugLog.logException("play#$playId Lottie playback LaunchedEffect (${LowerThirdDebugLog.heapStats()})", e)
             CrashReporter.reportException(e, "Lottie playback LaunchedEffect")
             throw e
         }
