@@ -17,6 +17,7 @@ import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.app.churchpresenter.utils.LowerThirdDebugLog
 import org.churchpresenter.app.churchpresenter.models.Question
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
@@ -274,6 +275,10 @@ class PresenterManager {
         if (_presentingMode.value != mode) {
             CrashReporter.setTag("presenting", mode.name)
             CrashReporter.breadcrumb("Presenting: ${mode.name}", category = "presenter")
+            // DIAGNOSTIC (temporary — see AGENT.md "lower third disappears mid-playback")
+            if (_presentingMode.value == Presenting.LOWER_THIRD || mode == Presenting.LOWER_THIRD) {
+                LowerThirdDebugLog.log("setPresentingMode: ${_presentingMode.value} -> $mode")
+            }
         }
         _presentingMode.value = mode
         if (mode != Presenting.NONE) {
@@ -291,6 +296,12 @@ class PresenterManager {
      *  then sets presentingMode to NONE. */
     fun requestClearDisplay() {
         if (_presentingMode.value != Presenting.NONE) {
+            // DIAGNOSTIC (temporary — see AGENT.md "lower third disappears mid-playback")
+            if (_presentingMode.value == Presenting.LOWER_THIRD) {
+                val caller = Thread.currentThread().stackTrace
+                    .firstOrNull { it.className.startsWith("org.churchpresenter") && !it.methodName.contains("requestClearDisplay") }
+                LowerThirdDebugLog.log("requestClearDisplay() called while presenting LOWER_THIRD, caller=${caller?.className}.${caller?.methodName}:${caller?.lineNumber}")
+            }
             _clearDisplayRequested.value = true
         }
     }
@@ -537,8 +548,17 @@ class PresenterManager {
                         )
                     }
 
+                    // DIAGNOSTIC (temporary — see AGENT.md "lower third disappears mid-playback"):
+                    // this is where a large, long clip materializes as a single JVM-heap-resident
+                    // List<IntArray> — log the size decision and heap before/after to check whether
+                    // this allocation is approaching the -Xmx ceiling.
+                    LowerThirdDebugLog.log(
+                        "Lottie pre-render starting: ${frameCount} frames @ ${w}x$h @ ${fps}fps, " +
+                            "estimated ${estimatedBytes / 1_000_000}MB, ${LowerThirdDebugLog.heapStats()}"
+                    )
                     val renderer = LowerThirdOffscreenRenderer(w, h)
                     val frames = renderer.renderAllFrames(json, frameCount)
+                    LowerThirdDebugLog.log("Lottie pre-render finished: ${frames.size} frames, ${LowerThirdDebugLog.heapStats()}")
                     withContext(Dispatchers.Main) {
                         _lottieRawFrameSize.value = w to h
                         _lottiePrerenderFps.value = fps
@@ -549,6 +569,8 @@ class PresenterManager {
                     throw e
                 } catch (e: Exception) {
                     System.err.println("[PresenterManager] Lottie pre-render failed: ${e.message}")
+                    LowerThirdDebugLog.logException("Lottie pre-render (${LowerThirdDebugLog.heapStats()})", e)
+                    CrashReporter.reportException(e, "Lottie pre-render")
                 }
             }
         }

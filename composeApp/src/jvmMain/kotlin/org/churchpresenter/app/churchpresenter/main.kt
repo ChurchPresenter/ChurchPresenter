@@ -67,6 +67,7 @@ import churchpresenter.composeapp.generated.resources.presenter_view_title
 import churchpresenter.composeapp.generated.resources.key_output_title
 import churchpresenter.composeapp.generated.resources.screen_number
 import org.jetbrains.compose.resources.painterResource
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -146,6 +147,7 @@ import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
+import org.churchpresenter.app.churchpresenter.utils.LowerThirdDebugLog
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
@@ -2724,68 +2726,96 @@ private fun PresenterWindows(
         LottieCompositionSpec.JsonString(lottieJsonContent)
     }
     LaunchedEffect(lottieComposition, lottiePauseAtFrame, lottiePauseFrame, lottiePauseDurationMs, lottieTrigger) {
-        // Snapshot pre-rendered frames at trigger time — intentionally NOT a key so the
-        // effect does not restart when pre-rendering finishes mid-animation.
-        val frames = presenterManager.lottieRawFrames.value
-        // Snapshotted alongside frames — a clip degraded to fit the pre-render memory budget may
-        // have been rendered below PRERENDER_FPS, and pacing off the fixed constant instead of the
-        // fps it was actually rendered at would play it back faster than its real duration.
-        val prerenderFps = presenterManager.lottiePrerenderFps.value
+        // DIAGNOSTIC (temporary — see AGENT.md "lower third disappears mid-playback"): the whole
+        // body is wrapped so a silent exception here (which would otherwise just vanish the
+        // display with no trace) gets logged with a real stack trace before propagating.
+        val playId = lottieTrigger
+        try {
+            // Snapshot pre-rendered frames at trigger time — intentionally NOT a key so the
+            // effect does not restart when pre-rendering finishes mid-animation.
+            val frames = presenterManager.lottieRawFrames.value
+            // Snapshotted alongside frames — a clip degraded to fit the pre-render memory budget may
+            // have been rendered below PRERENDER_FPS, and pacing off the fixed constant instead of the
+            // fps it was actually rendered at would play it back faster than its real duration.
+            val prerenderFps = presenterManager.lottiePrerenderFps.value
 
-        if (frames != null) {
-            // Pre-rendered path: advance frame index at the fps these frames were rendered at
-            val hasPause = lottiePauseAtFrame && lottiePauseFrame in 0f..1f
-            val pauseIdx = if (hasPause)
-                (frames.size * lottiePauseFrame).toInt().coerceIn(0, frames.size - 1) else -1
+            if (frames != null) {
+                // Pre-rendered path: advance frame index at the fps these frames were rendered at
+                val hasPause = lottiePauseAtFrame && lottiePauseFrame in 0f..1f
+                val pauseIdx = if (hasPause)
+                    (frames.size * lottiePauseFrame).toInt().coerceIn(0, frames.size - 1) else -1
 
-            presenterManager.setLottieCurrentFrameIndex(0)
-            for (i in frames.indices) {
-                presenterManager.setLottieCurrentFrameIndex(i)
-                if (i == pauseIdx) delay(lottiePauseDurationMs)
-                delay(1000L / prerenderFps)
-            }
-            presenterManager.setLottieCurrentFrameIndex(frames.size - 1)
-        } else {
-            // Compottie fallback — used while pre-rendering is in progress
-            val comp = lottieComposition ?: return@LaunchedEffect
-            val totalDurMs = ((comp.durationFrames / comp.frameRate) * 1000f).toLong().coerceAtLeast(1L)
-            val hasPause = lottiePauseAtFrame && lottiePauseFrame in 0f..1f
+                LowerThirdDebugLog.log(
+                    "play#$playId START raw-frame path: ${frames.size} frames @ ${prerenderFps}fps " +
+                        "(~${frames.size * 1000L / prerenderFps}ms), ${LowerThirdDebugLog.heapStats()}"
+                )
+                presenterManager.setLottieCurrentFrameIndex(0)
+                for (i in frames.indices) {
+                    presenterManager.setLottieCurrentFrameIndex(i)
+                    if (i % 15 == 0) {
+                        LowerThirdDebugLog.log("play#$playId frame $i/${frames.size} ${LowerThirdDebugLog.heapStats()}")
+                    }
+                    if (i == pauseIdx) delay(lottiePauseDurationMs)
+                    delay(1000L / prerenderFps)
+                }
+                presenterManager.setLottieCurrentFrameIndex(frames.size - 1)
+                LowerThirdDebugLog.log("play#$playId reached last frame (${frames.size - 1}/${frames.size})")
+            } else {
+                // Compottie fallback — used while pre-rendering is in progress
+                val comp = lottieComposition ?: return@LaunchedEffect
+                val totalDurMs = ((comp.durationFrames / comp.frameRate) * 1000f).toLong().coerceAtLeast(1L)
+                val hasPause = lottiePauseAtFrame && lottiePauseFrame in 0f..1f
 
-            presenterManager.setLottieProgress(0f)
+                LowerThirdDebugLog.log(
+                    "play#$playId START compottie fallback path: durationFrames=${comp.durationFrames} " +
+                        "frameRate=${comp.frameRate} totalDurMs=$totalDurMs, ${LowerThirdDebugLog.heapStats()}"
+                )
+                presenterManager.setLottieProgress(0f)
 
-            if (hasPause) {
-                val toPauseDur = (totalDurMs * lottiePauseFrame).toInt().coerceAtLeast(1)
-                val anim = Animatable(0f)
-                anim.animateTo(
-                    targetValue = lottiePauseFrame,
-                    animationSpec = tween(
-                        durationMillis = toPauseDur,
-                        easing = LinearEasing
-                    )
-                ) { presenterManager.setLottieProgress(value) }
-                if (lottiePauseDurationMs > 0) {
-                    delay(lottiePauseDurationMs)
-                    val remainDur = (totalDurMs * (1f - lottiePauseFrame)).toInt().coerceAtLeast(1)
+                if (hasPause) {
+                    val toPauseDur = (totalDurMs * lottiePauseFrame).toInt().coerceAtLeast(1)
+                    val anim = Animatable(0f)
+                    anim.animateTo(
+                        targetValue = lottiePauseFrame,
+                        animationSpec = tween(
+                            durationMillis = toPauseDur,
+                            easing = LinearEasing
+                        )
+                    ) { presenterManager.setLottieProgress(value) }
+                    if (lottiePauseDurationMs > 0) {
+                        delay(lottiePauseDurationMs)
+                        val remainDur = (totalDurMs * (1f - lottiePauseFrame)).toInt().coerceAtLeast(1)
+                        anim.animateTo(
+                            targetValue = 1f,
+                            animationSpec = tween(
+                                durationMillis = remainDur,
+                                easing = LinearEasing
+                            )
+                        ) { presenterManager.setLottieProgress(value) }
+                    }
+                } else {
+                    val anim = Animatable(0f)
                     anim.animateTo(
                         targetValue = 1f,
                         animationSpec = tween(
-                            durationMillis = remainDur,
+                            durationMillis = totalDurMs.toInt(),
                             easing = LinearEasing
                         )
                     ) { presenterManager.setLottieProgress(value) }
                 }
-            } else {
-                val anim = Animatable(0f)
-                anim.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(
-                        durationMillis = totalDurMs.toInt(),
-                        easing = LinearEasing
-                    )
-                ) { presenterManager.setLottieProgress(value) }
+                LowerThirdDebugLog.log("play#$playId compottie fallback reached progress=1f")
             }
+            LowerThirdDebugLog.log("play#$playId natural completion -> requestClearDisplay(), ${LowerThirdDebugLog.heapStats()}")
+            presenterManager.requestClearDisplay()
+        } catch (e: CancellationException) {
+            // Normal restart (a key changed, e.g. composition finished loading) — not a failure.
+            LowerThirdDebugLog.log("play#$playId cancelled (restarted or superseded)")
+            throw e
+        } catch (e: Exception) {
+            LowerThirdDebugLog.logException("play#$playId Lottie playback LaunchedEffect (${LowerThirdDebugLog.heapStats()})", e)
+            CrashReporter.reportException(e, "Lottie playback LaunchedEffect")
+            throw e
         }
-        presenterManager.requestClearDisplay()
     }
 
     // Shared primary/normal output content — driven by a ScreenAssignment so behavior (crossfade,

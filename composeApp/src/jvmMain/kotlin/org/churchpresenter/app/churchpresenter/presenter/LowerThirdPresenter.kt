@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.RememberObserver
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -19,6 +22,8 @@ import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.app.churchpresenter.utils.LowerThirdDebugLog
 import org.jetbrains.skia.Bitmap
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -93,16 +98,33 @@ fun LowerThirdPresenter(
         key(rawFrames != null) {
             if (rawFrames != null) {
                 val safeIdx = currentFrameIndex.coerceIn(0, rawFrames.size - 1)
+                var lastGoodFrame by remember(rawFrames) { mutableStateOf<DisposableFrameBitmap?>(null) }
                 val frame = remember(rawFrames, safeIdx) {
-                    frameToDisposableBitmap(rawFrames[safeIdx], frameWidth, frameHeight)
+                    try {
+                        frameToDisposableBitmap(rawFrames[safeIdx], frameWidth, frameHeight).also {
+                            lastGoodFrame = it
+                        }
+                    } catch (e: Exception) {
+                        // DIAGNOSTIC (temporary — see AGENT.md "lower third disappears mid-playback"):
+                        // catch instead of letting this crash composition silently, and log it so a
+                        // Windows/macOS repro captures the real failure instead of a blank output.
+                        LowerThirdDebugLog.logException(
+                            "Lower third frame render (frame $safeIdx/${rawFrames.size}, ${frameWidth}x$frameHeight, ${LowerThirdDebugLog.heapStats()})",
+                            e
+                        )
+                        CrashReporter.reportException(e, "Lower third frame render")
+                        lastGoodFrame
+                    }
                 }
-                Image(
-                    bitmap = frame.imageBitmap,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    colorFilter = if (isKey) keyColorFilter else null,
-                    modifier = contentModifier
-                )
+                if (frame != null) {
+                    Image(
+                        bitmap = frame.imageBitmap,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        colorFilter = if (isKey) keyColorFilter else null,
+                        modifier = contentModifier
+                    )
+                }
             } else if (composition != null) {
                 Image(
                     painter = rememberLottiePainter(
