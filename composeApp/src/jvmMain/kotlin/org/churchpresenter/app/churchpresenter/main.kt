@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
+import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.utils.findScreenIndexByBounds
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
@@ -2787,13 +2788,261 @@ private fun PresenterWindows(
         presenterManager.requestClearDisplay()
     }
 
+    // Shared primary/normal output content — driven by a ScreenAssignment so behavior (crossfade,
+    // lower-third layout, per-type visibility, language mode, backgrounds) is identical whether the
+    // caller is a real per-screen output window or the developer-only windowed test output below.
+    // screenNumber is null when there's no physical screen to label (e.g. the test window).
+    val presenterOutputContent: @Composable (screenAssignment: ScreenAssignment, effectiveMode: Presenting, screenNumber: Int?) -> Unit = { screenAssignment, effectiveMode, screenNumber ->
+        val primaryRole = screenAssignment.primaryOutputRole
+        val showBg = if (screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
+        CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+            if (screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
+                // Stage monitor: dedicated presenter-confidence layout
+                StageMonitorScreen(
+                    sm = appSettings.stageMonitorSettings,
+                    presentingMode = presentingMode,
+                    announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
+                    currentLyricSection = displayedLyricSection,
+                    allLyricSections = allLyricSections,
+                    songDisplaySectionIndex = songDisplaySectionIndex,
+                    displayedVerses = displayedVerses,
+                    nextVerses = nextVerses,
+                    announcementText = displayedAnnouncementText,
+                    displayedImagePath = displayedImagePath,
+                    displayedSlide = displayedSlide,
+                    presenterNotes = presenterNotes,
+                    activeScene = activeScene,
+                    displayedQuestion = displayedQuestion,
+                    qaSettings = appSettings.qaSettings,
+                    displayedDictionaryEntry = displayedDictionaryEntry,
+                    dictionarySettings = appSettings.dictionarySettings,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                PresenterScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    appSettings = appSettings,
+                    outputRole = primaryRole,
+                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                    showBackground = showBg
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .onPreviewKeyEvent { keyEvent ->
+                                if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                    mediaViewModel.pause()
+                                    presenterManager.requestClearDisplay()
+                                    true
+                                } else false
+                            }
+                    ) {
+                        var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
+                        val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) && effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
+                        if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
+                        Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                            when (mode) {
+                                Presenting.BIBLE ->
+                                    if (screenAssignment.showBible) {
+                                        BiblePresenter(
+                                            selectedVerses = displayedVerses,
+                                            appSettings = appSettings,
+                                            isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                            outputRole = primaryRole,
+                                            transitionAlpha = bibleTransitionAlpha,
+                                            showBackground = showBg && screenAssignment.showBibleBackground,
+                                            crossfadeEnabled = appSettings.bibleSettings.crossfade,
+                                            languageMode = screenAssignment.bibleMode
+                                        )
+                                    }
+
+                                Presenting.LYRICS ->
+                                    if (screenAssignment.showSongs) {
+                                        SongPresenter(
+                                            lyricSection = displayedLyricSection,
+                                            appSettings = appSettings,
+                                            isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                            outputRole = primaryRole,
+                                            transitionAlpha = songTransitionAlpha,
+                                            displayLineIndex = songDisplayLineIndex,
+                                            lookAheadEnabled = screenAssignment.songLookAhead,
+                                            allLyricSections = allLyricSections,
+                                            displaySectionIndex = songDisplaySectionIndex,
+                                            showBackground = showBg && screenAssignment.showSongsBackground,
+                                            crossfadeEnabled = appSettings.songSettings.crossfade,
+                                            languageOverride = screenAssignment.songMode
+                                        )
+                                    }
+
+                                Presenting.PICTURES ->
+                                    if (screenAssignment.showPictures)
+                                        PicturePresenter(
+                                            imagePath = displayedImagePath,
+                                            previousImagePath = previousDisplayedImagePath,
+                                            transitionAlpha = pictureTransitionAlpha,
+                                            slideOffset = pictureSlideOffset,
+                                            animationType = animationType
+                                        )
+
+                                Presenting.PRESENTATION ->
+                                    if (screenAssignment.showPictures)
+                                        SlidePresenter(
+                                            slide = if (slideFrozen) null else displayedSlide,
+                                            previousSlide = if (slideFrozen) null else previousDisplayedSlide,
+                                            transitionAlpha = slideTransitionAlpha,
+                                            slideOffset = slideSlideOffset,
+                                            animationType = animationType
+                                        )
+
+                                Presenting.MEDIA ->
+                                    if (screenAssignment.showMedia) {
+                                        if (mediaViewModel.isAudioFile) {
+                                            // Audio: playback handled by hidden VideoPlayer in MainDesktop
+                                            // Projection shows background only
+                                        } else {
+                                            MediaPresenter(
+                                                modifier = Modifier.fillMaxSize(),
+                                                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                                transitionAlpha = mediaTransitionAlpha
+                                            )
+                                        }
+                                    }
+
+                                Presenting.LOWER_THIRD ->
+                                    if (screenAssignment.showStreaming)
+                                        LowerThirdPresenter(
+                                            composition = lottieComposition,
+                                            progress = { presenterManager.lottieProgress.value },
+                                            appSettings = appSettings,
+                                            rawFrames = lottieRawFrames,
+                                            currentFrameIndex = lottieCurrentFrameIndex,
+                                            frameWidth = lottieRawFrameSize?.first ?: 1920,
+                                            frameHeight = lottieRawFrameSize?.second ?: 1080
+                                        )
+
+                                Presenting.ANNOUNCEMENTS ->
+                                    if (screenAssignment.showAnnouncements)
+                                        AnnouncementsPresenter(
+                                            text = displayedAnnouncementText,
+                                            appSettings = appSettings,
+                                            outputRole = primaryRole,
+                                            transitionAlpha = announcementTransitionAlpha,
+                                            onFinished = clearAnnouncementOnFinish,
+                                            showBackground = showBg
+                                        )
+
+                                Presenting.WEBSITE ->
+                                    if (screenAssignment.showWebsite) WebsitePresenter(
+                                        url = websiteUrl,
+                                        modifier = Modifier.fillMaxSize(),
+                                        onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
+                                        onBrowserCreated = { browser -> presenterManager.setLiveBrowser(browser) },
+                                        onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
+                                        onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
+                                        audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
+                                    )
+
+                                Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+
+                                Presenting.QA ->
+                                    if (screenAssignment.showQA) {
+                                        if (showQRCodeOnDisplay) {
+                                            QAQRCodePresenter(
+                                                url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
+                                                qaSettings = appSettings.qaSettings,
+                                                transitionAlpha = qaTransitionAlpha,
+                                            )
+                                        } else {
+                                            QAPresenter(
+                                                question = displayedQuestion,
+                                                qaSettings = appSettings.qaSettings,
+                                                transitionAlpha = qaTransitionAlpha,
+                                            )
+                                        }
+                                    }
+
+                                Presenting.STT ->
+                                    if (screenAssignment.showSTT) {
+                                        STTPresenter(
+                                            segments = sttManager.segments,
+                                            inProgressText = sttManager.inProgressText.value,
+                                            translationSegments = sttManager.translationSegments,
+                                            inProgressTranslation = sttManager.inProgressTranslation.value,
+                                            highlightedWords = sttManager.highlightedWords,
+                                            sttSettings = appSettings.sttSettings,
+                                        )
+                                    }
+                                Presenting.DICTIONARY ->
+                                    if (screenAssignment.showDictionary)
+                                        DictionaryPresenter(
+                                            dictionarySettings = appSettings.dictionarySettings,
+                                            entry = displayedDictionaryEntry,
+                                            outputRole = primaryRole,
+                                            transitionAlpha = 1f
+                                        )
+                                Presenting.NONE -> { /* nothing */
+                                }
+                            }
+                        }
+
+                        // Clear live browser ref when leaving WEBSITE mode
+                        LaunchedEffect(presentingMode) {
+                            if (presentingMode != Presenting.WEBSITE) {
+                                presenterManager.setLiveBrowser(null)
+                            }
+                        }
+
+                        if (screenNumber != null && identifyingScreen) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.75f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.screen_number, screenNumber),
+                                    color = Color.White,
+                                    fontSize = 96.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Identify the OS primary monitor and build list of non-primary screens
     val defaultDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
     val availableScreens = screens.indices.filter { screens[it] != defaultDevice }
 
     val deckLinkDeviceCount = if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0
     val windowCount = availableScreens.size + deckLinkDeviceCount
-    for (i in 0 until windowCount) {
+    // Dev convenience: on a single-monitor dev machine there's no non-primary monitor or DeckLink
+    // device to open a real output window on. Show Output 1 as an ordinary window instead of not
+    // rendering at all, driven by the same "Toggle Presenter Displays" button/state.
+    val devWindowedFallback = !BuildConfig.IS_RELEASE && windowCount == 0
+    for (i in 0 until (windowCount + if (devWindowedFallback) 1 else 0)) {
+        if (devWindowedFallback && i >= windowCount) {
+            val screenAssignment = proj.getAssignment(0)
+            val effectiveMode = screenLocks[0] ?: presentingMode
+            val fallbackWindowState = remember { WindowState(width = 960.dp, height = 540.dp) }
+            Window(
+                visible = showPresenterWindow,
+                title = stringResource(Res.string.presenter_view_title, 1),
+                icon = painterResource(Res.drawable.ic_app_icon),
+                onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
+                state = fallbackWindowState,
+                undecorated = false,
+                resizable = true,
+                alwaysOnTop = false,
+            ) {
+                presenterOutputContent(screenAssignment, effectiveMode, null)
+            }
+            continue
+        }
         val screenAssignment = proj.getAssignment(i)
         val effectiveMode = screenLocks[i] ?: presentingMode
 
@@ -3368,224 +3617,7 @@ private fun PresenterWindows(
             resizable = false,
             alwaysOnTop = true,
         ) {
-            CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
-                if (screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
-                    // Stage monitor: dedicated presenter-confidence layout
-                    StageMonitorScreen(
-                        sm = appSettings.stageMonitorSettings,
-                        presentingMode = presentingMode,
-                        announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
-                        currentLyricSection = displayedLyricSection,
-                        allLyricSections = allLyricSections,
-                        songDisplaySectionIndex = songDisplaySectionIndex,
-                        displayedVerses = displayedVerses,
-                        nextVerses = nextVerses,
-                        announcementText = displayedAnnouncementText,
-                        displayedImagePath = displayedImagePath,
-                        displayedSlide = displayedSlide,
-                        presenterNotes = presenterNotes,
-                        activeScene = activeScene,
-                        displayedQuestion = displayedQuestion,
-                        qaSettings = appSettings.qaSettings,
-                        displayedDictionaryEntry = displayedDictionaryEntry,
-                        dictionarySettings = appSettings.dictionarySettings,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                PresenterScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    appSettings = appSettings,
-                    outputRole = primaryRole,
-                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
-                    showBackground = if (screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .onPreviewKeyEvent { keyEvent ->
-                                if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
-                                    mediaViewModel.pause()
-                                    presenterManager.requestClearDisplay()
-                                    true
-                                } else false
-                            }
-                    ) {
-                        var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
-                        val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) && effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
-                        if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                        Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
-                    when (mode) {
-                            Presenting.BIBLE ->
-                                if (screenAssignment.showBible) {
-                                    BiblePresenter(
-                                        selectedVerses = displayedVerses,
-                                        appSettings = appSettings,
-                                        isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
-                                        outputRole = primaryRole,
-                                        transitionAlpha = bibleTransitionAlpha,
-                                        showBackground = showBg && screenAssignment.showBibleBackground,
-                                        crossfadeEnabled = appSettings.bibleSettings.crossfade,
-                                        languageMode = screenAssignment.bibleMode
-                                    )
-                                }
-
-                            Presenting.LYRICS ->
-                                if (screenAssignment.showSongs) {
-                                    SongPresenter(
-                                        lyricSection = displayedLyricSection,
-                                        appSettings = appSettings,
-                                        isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
-                                        outputRole = primaryRole,
-                                        transitionAlpha = songTransitionAlpha,
-                                        displayLineIndex = songDisplayLineIndex,
-                                        lookAheadEnabled = screenAssignment.songLookAhead,
-                                        allLyricSections = allLyricSections,
-                                        displaySectionIndex = songDisplaySectionIndex,
-                                        showBackground = showBg && screenAssignment.showSongsBackground,
-                                        crossfadeEnabled = appSettings.songSettings.crossfade,
-                                        languageOverride = screenAssignment.songMode
-                                    )
-                                }
-
-                            Presenting.PICTURES ->
-                                if (screenAssignment.showPictures)
-                                    PicturePresenter(
-                                        imagePath = displayedImagePath,
-                                        previousImagePath = previousDisplayedImagePath,
-                                        transitionAlpha = pictureTransitionAlpha,
-                                        slideOffset = pictureSlideOffset,
-                                        animationType = animationType
-                                    )
-
-                            Presenting.PRESENTATION ->
-                                if (screenAssignment.showPictures)
-                                    SlidePresenter(
-                                    slide = if (slideFrozen) null else displayedSlide,
-                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
-                                    transitionAlpha = slideTransitionAlpha,
-                                    slideOffset = slideSlideOffset,
-                                    animationType = animationType
-                                )
-
-                            Presenting.MEDIA ->
-                                if (screenAssignment.showMedia) {
-                                    if (mediaViewModel.isAudioFile) {
-                                        // Audio: playback handled by hidden VideoPlayer in MainDesktop
-                                        // Projection shows background only
-                                    } else {
-                                        MediaPresenter(
-                                            modifier = Modifier.fillMaxSize(),
-                                            audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
-                                            transitionAlpha = mediaTransitionAlpha
-                                        )
-                                    }
-                                }
-
-                            Presenting.LOWER_THIRD ->
-                                if (screenAssignment.showStreaming)
-                                    LowerThirdPresenter(
-                                        composition = lottieComposition,
-                                        progress = { presenterManager.lottieProgress.value },
-                                        appSettings = appSettings,
-                                        rawFrames = lottieRawFrames,
-                                        currentFrameIndex = lottieCurrentFrameIndex,
-                                        frameWidth = lottieRawFrameSize?.first ?: 1920,
-                                        frameHeight = lottieRawFrameSize?.second ?: 1080
-                                    )
-
-                            Presenting.ANNOUNCEMENTS ->
-                                if (screenAssignment.showAnnouncements)
-                                    AnnouncementsPresenter(
-                                        text = displayedAnnouncementText,
-                                        appSettings = appSettings,
-                                        outputRole = primaryRole,
-                                        transitionAlpha = announcementTransitionAlpha,
-                                        onFinished = clearAnnouncementOnFinish,
-                                        showBackground = showBg
-                                    )
-
-                            Presenting.WEBSITE ->
-                                if (screenAssignment.showWebsite) WebsitePresenter(
-                                    url = websiteUrl,
-                                    modifier = Modifier.fillMaxSize(),
-                                    onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
-                                    onBrowserCreated = { browser -> presenterManager.setLiveBrowser(browser) },
-                                    onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
-                                    onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
-                                    audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
-                                )
-
-                            Presenting.CANVAS -> ScenePresenter(scene = activeScene)
-
-                            Presenting.QA ->
-                                if (screenAssignment.showQA) {
-                                    if (showQRCodeOnDisplay) {
-                                        QAQRCodePresenter(
-                                            url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
-                                            qaSettings = appSettings.qaSettings,
-                                            transitionAlpha = qaTransitionAlpha,
-                                        )
-                                    } else {
-                                        QAPresenter(
-                                            question = displayedQuestion,
-                                            qaSettings = appSettings.qaSettings,
-                                            transitionAlpha = qaTransitionAlpha,
-                                        )
-                                    }
-                                }
-
-
-                            Presenting.STT ->
-                                if (screenAssignment.showSTT) {
-                                    STTPresenter(
-                                        segments = sttManager.segments,
-                                        inProgressText = sttManager.inProgressText.value,
-                                        translationSegments = sttManager.translationSegments,
-                                        inProgressTranslation = sttManager.inProgressTranslation.value,
-                                        highlightedWords = sttManager.highlightedWords,
-                                        sttSettings = appSettings.sttSettings,
-                                    )
-                                }
-                            Presenting.DICTIONARY ->
-                                if (screenAssignment.showDictionary)
-                                    DictionaryPresenter(
-                                        dictionarySettings = appSettings.dictionarySettings,
-                                        entry = displayedDictionaryEntry,
-                                        outputRole = primaryRole,
-                                        transitionAlpha = 1f
-                                    )
-                            Presenting.NONE -> { /* nothing */
-                            }
-                        }
-                        }
-
-                        // Clear live browser ref when leaving WEBSITE mode
-                        LaunchedEffect(presentingMode) {
-                            if (presentingMode != Presenting.WEBSITE) {
-                                presenterManager.setLiveBrowser(null)
-                            }
-                        }
-
-                        if (identifyingScreen) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = 0.75f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = stringResource(Res.string.screen_number, i + 1),
-                                    color = Color.White,
-                                    fontSize = 96.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
-                    }
-                } // end else (non-stage-monitor)
-            }
+            presenterOutputContent(screenAssignment, effectiveMode, i + 1)
         }
 
         // Key output window — spawned when a key target is configured
