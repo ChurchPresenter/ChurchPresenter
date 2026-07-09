@@ -1710,6 +1710,12 @@ class BibleViewModel(
      * markers into it (so late-arriving corroboration like the delayed English translation appears
      * on the existing chip). Returns true only when a brand-new chip was added.
      */
+    // Detection keys the operator (or auto-follow) actually acted on — accepted or corrected.
+    // Lets the eviction/clear paths below log un-acted chips as "ignored"/"dismissed"/"expired"
+    // without double-labeling ones that already produced an outcome row, so acceptance-by-tier
+    // is computable from suggestion-outcomes alone (the July tiering work's open question).
+    private val actedDetectionKeys = HashSet<String>()
+
     private fun addDetection(ref: DetectedReference): Boolean {
         val list = _detectedReferences.value
         val idx = list.indexOfFirst { it.key == ref.key }
@@ -1729,13 +1735,29 @@ class BibleViewModel(
         if (recentDetectionKeys.contains(ref.key)) return false   // shown earlier, scrolled off
         recentDetectionKeys.addLast(ref.key)
         while (recentDetectionKeys.size > DETECTION_DEDUPE_WINDOW) recentDetectionKeys.removeFirst()
-        _detectedReferences.value = (listOf(ref) + list).take(MAX_DETECTED)
+        val next = listOf(ref) + list
+        // Chips scrolled off the end without ever being clicked are staged suggestions the
+        // operator implicitly ignored — the outcome that was previously never recorded.
+        next.drop(MAX_DETECTED).forEach { evicted ->
+            if (evicted.key !in actedDetectionKeys) {
+                TrainingDataLogger.logSuggestionOutcome(
+                    suggestedBook    = evicted.bookIndex + 1,
+                    suggestedChapter = evicted.chapter,
+                    suggestedVerse   = evicted.verseStart,
+                    action           = "ignored",
+                    matchType        = evicted.matchTypeLabel(),
+                )
+            }
+            actedDetectionKeys.remove(evicted.key)
+        }
+        _detectedReferences.value = next.take(MAX_DETECTED)
         return true
     }
 
     /** Navigates the Bible tab to a row the operator tapped. */
     fun applyDetectedReference(ref: DetectedReference, goLiveSource: String? = null) {
         val matchType = ref.matchTypeLabel()
+        actedDetectionKeys.add(ref.key)
         TrainingDataLogger.logSuggestionOutcome(
             suggestedBook    = ref.bookIndex + 1,
             suggestedChapter = ref.chapter,
@@ -1763,6 +1785,7 @@ class BibleViewModel(
         val top = _detectedReferences.value.firstOrNull() ?: return
         val matches = top.bookIndex == shownBookIndex && top.chapter == shownChapter && top.verseStart == shownVerse
         if (matches) return
+        actedDetectionKeys.add(top.key)
         TrainingDataLogger.logSuggestionOutcome(
             suggestedBook    = top.bookIndex + 1,
             suggestedChapter = top.chapter,
@@ -1773,19 +1796,25 @@ class BibleViewModel(
         )
     }
 
-    /** Clears the detected rows (e.g. when STT / the engine disconnects). */
-    fun clearDetectedReferences() {
+    /**
+     * Clears the detected rows. [reason] labels un-acted chips in the suggestion-outcomes log:
+     * "dismissed" for an operator-initiated clear, "expired" when the engine/STT link stopped.
+     * Chips that already produced an accepted/corrected outcome are not double-labeled.
+     */
+    fun clearDetectedReferences(reason: String = "dismissed") {
         _detectedReferences.value.forEach { ref ->
+            if (ref.key in actedDetectionKeys) return@forEach
             TrainingDataLogger.logSuggestionOutcome(
                 suggestedBook    = ref.bookIndex + 1,
                 suggestedChapter = ref.chapter,
                 suggestedVerse   = ref.verseStart,
-                action           = "dismissed",
+                action           = reason,
                 matchType        = ref.matchTypeLabel(),
             )
         }
         if (_detectedReferences.value.isNotEmpty()) _detectedReferences.value = emptyList()
         recentDetectionKeys.clear()
+        actedDetectionKeys.clear()
     }
 
     /** Verse text for the detection row (History-style display). Null for chapter-only references. */

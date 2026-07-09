@@ -149,8 +149,11 @@ object TrainingDataLogger {
     /**
      * Call when the operator acts on a suggestion chip shown by the detection engine.
      * [suggestedBook] is the canonical 1-based book number.
-     * [action] is "accepted" (chip clicked), "dismissed" (clear button), or "corrected" (a different
-     * verse went live, overriding this suggestion — [correctedRef] holds what was actually shown).
+     * [action] is "accepted" (chip clicked), "dismissed" (operator clear), "corrected" (a different
+     * verse went live, overriding this suggestion — [correctedRef] holds what was actually shown),
+     * "ignored" (the chip scrolled off the list without ever being clicked), or "expired" (the
+     * engine/STT link stopped while the chip was still showing). Every staged suggestion now
+     * produces exactly one outcome row, so acceptance-by-tier is computable from this log alone.
      * [matchType] is the suggested detection's engine match type (see [logLiveReference]) — lets
      * offline analysis measure acceptance/dismissal/correction rate by tier.
      */

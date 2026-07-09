@@ -22,6 +22,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 import java.io.File
 import java.time.Instant
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
@@ -61,6 +62,12 @@ class BibleEngineClient(
     // forever. Cleared on each (re)start attempt.
     private val _startFailed = mutableStateOf(false)
     val startFailed: State<Boolean> = _startFailed
+
+    // The engine's OWN upstream STT link, from its engine_status broadcasts. Null = unknown
+    // (older engine that never sends the message, or not yet received) — callers keep their
+    // previous proxy inference in that case. Reset on disconnect/stop.
+    private val _engineSttConnected = mutableStateOf<Boolean?>(null)
+    val engineSttConnected: State<Boolean?> = _engineSttConnected
 
     private var engineHandle: EngineHandle? = null
     private var wsJob: Job? = null
@@ -114,11 +121,15 @@ class BibleEngineClient(
     }
 
     private suspend fun connectLoop(host: String, port: Int) {
+        // Exponential backoff (floor 2s, cap 30s, ±20% jitter — same shape as InstanceLinkClient)
+        // instead of a fixed 2s hammer; reset on every successful connection.
+        var attempt = 0
         while (scope.isActive) {
             try {
                 httpClient.webSocket(host = host, port = port, path = "/bible-engine") {
                     session = this
                     _connected.value = true
+                    attempt = 0
                     runCatching { send(Frame.Text(levelMessage(currentLevel))) }
                     for (frame in incoming) {
                         if (frame is Frame.Text) handleMessage(frame.readText())
@@ -132,14 +143,26 @@ class BibleEngineClient(
             }
             session = null
             _connected.value = false
+            _engineSttConnected.value = null
             if (!scope.isActive) break
-            delay(2000)
+            val base = (2_000L shl attempt.coerceAtMost(4)).coerceAtMost(30_000L)
+            attempt++
+            delay((base * Random.nextDouble(0.8, 1.2)).toLong().coerceAtLeast(2_000L))
         }
     }
 
     private fun handleMessage(raw: String) {
         val obj = runCatching { JSONObject(raw) }.getOrNull() ?: return
-        if (!obj.optString("type").startsWith("scripture.")) return
+        val type = obj.optString("type")
+        if (type == "engine_status") {
+            // The engine's real upstream STT health (broadcast on transitions and replayed to
+            // late joiners). sttConfigured=false means a deliberate WS-input-only engine — treat
+            // its STT link as fine so the UI doesn't flag a non-error.
+            val configured = obj.optBoolean("sttConfigured", true)
+            _engineSttConnected.value = if (!configured) true else obj.optBoolean("sttConnected", false)
+            return
+        }
+        if (!type.startsWith("scripture.")) return
         val ref = obj.optJSONObject("reference") ?: return
         val bookId = ref.optInt("bookId", -1)
         if (bookId < 0) return
@@ -180,6 +203,7 @@ class BibleEngineClient(
         session = null
         _connected.value = false
         _startFailed.value = false
+        _engineSttConnected.value = null
         engineHandle?.stop()
         engineHandle = null
     }

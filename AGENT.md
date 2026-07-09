@@ -380,6 +380,74 @@ verified against a live STT session — the tiering logic was traced by hand aga
 existing wiring (`navigateToReference`'s `goLive` param, `_autoFollowLiveToken` vs
 `_verseSelectionToken`) rather than run end-to-end.
 
+## BLE Engine Improvements (July 2026)
+
+**Scope**: the Bible Lookup Engine submodule (`ChurchPresenter-BLE/`) + its app integration.
+Grounded in a real recorded session (recorded 2026-07-08, ~1.5 h Russian
+service + matching engine/operator logs).
+
+**Engine (submodule commits a81bb7a, 6dca169, d492197, 7b41dce)**:
+- **Replay harness** (the docs promised one that never existed): `DetectionEngine` takes an
+  injectable clock (threaded into Stabilizer/ContinuationEngine), so `DbReplayTest` replays a
+  recorded STT `.db` deterministically against a committed golden JSONL (refs/scores only —
+  privacy-safe). `replayEval` gradle task scores a replay per matchType against the operator's
+  live-references/suggestion-outcomes (±90 s window). STT payload parsing + the
+  last-2-segments window rule moved to `SttPayload.kt`, shared by live socket and replay.
+  Regenerate goldens ONLY with an intentional behavior change: `-Dreplay.updateGolden=true`,
+  summarize the diff in the commit.
+- **FP fixes** (the Known Engine Gaps rows, now marked resolved): over-extension gate (token
+  ≥3 chars past its matched stem needs digit/marker corroboration) + short-alias gate
+  (single-token exact aliases ≤4 chars need the same). Replay diff on the real session:
+  125→116 events, all removals verified prose FPs, zero TP loss. `buildRefEvent` fails closed
+  (no fabricated verse 1, no first-verse substitution — it auto-goes-live at 0.95).
+  `pickTranslation` matches the citing track's dominant script against each bible's
+  content-derived `Script` instead of hardcoded ids (which were live-broken: filename-derived
+  language junk sent KJV text for Russian citations).
+- **Concurrency**: all detection-state mutation confined to one named dispatcher; Broadcaster
+  gives each WS client a bounded drop-oldest channel (slow clients can't stall STT ingest —
+  removed both `runBlocking` sites); utterances map LRU-bounded; new additive `engine_status`
+  message (`sttConnected`/`sttConfigured`) broadcast on STT transitions + replayed to late
+  joiners. Golden byte-identical → behavior-preserving.
+- **Hygiene**: legacy `ExplicitParser` retired (tests ported to ReferenceWatcher); README/
+  TRAINING_PLAN made truthful (replay section real, dangling REFERENCE_DETECTION_PLAN refs
+  gone, gap table updated incl. a NEW gap found while testing: EN keyword-after-number
+  citations "Job chapter 3 verse 2" mis-parse chapter/verse; RU unaffected); DetectionLogger
+  disk writes moved to a background thread; BibleIndex sized from actual load.
+
+**App side (main repo)**:
+- `BibleEngineClient` handles `engine_status` → `engineSttConnected: State<Boolean?>` (null =
+  older engine → BibleTab keeps its proxy inference); BibleTab shows the error-tinted
+  `bible_stt_engine_stt_down` status when the engine is reachable but ITS STT socket is down
+  (previously the UI said "Listening" off the app's own separate STT connection). Reconnect
+  loop gained exponential backoff (2 s floor, 30 s cap, jitter).
+- **Staged-suggestion outcomes**: detection chips that scroll off unclicked log `"ignored"`;
+  `clearDetectedReferences(reason)` labels un-acted chips `"dismissed"` (operator) or
+  `"expired"` (engine stop); accepted/corrected chips aren't double-labeled. Every staged
+  suggestion now produces exactly one suggestion-outcomes row → acceptance-by-tier (the open
+  question from the July tiering work) is computable from that log alone.
+
+**Recall/noise round (July 2026, submodule commits 9c16216, 55b683e, 9dc70f3, 67f96e1)**:
+- Sequential continuation scores VERSE-side coverage (`Config.continuationMinCoverage`) — the
+  old query-normalized overlap was diluted by the 2-segment window and missed verbatim
+  verse-by-verse reading.
+- Keyword-first citations bind correctly ("глава 26 стих 3" parsed inverted before; the EN
+  translation track was emitting wrong 0.95 explicits like Matthew 9:9 / Genesis 24:2).
+- chapter-history spam cut 94 → ~2 emissions with structural gates: candidate pool = sticky +
+  5 most-recent chapters, verse-coverage floors (0.45 scan / 0.6 history), agreement 0.20 —
+  values documented as provisional in Config.
+- Reverse lookup: fuzzy stem expansion for garbled STT tokens ("туждающие"→"труждающиеся" —
+  1 edit on stems, 3 raw), per-track windows (the concatenated query's tail-25 cut Russian out
+  whenever translation was active), different-chapter ambiguity competitor, passage-start
+  backtracking (a straddled window favors the newest verse; step back while the previous verse
+  is covered).
+
+**Final eval on the recorded 2026-07-08 session: 7/7 ground-truth references detected (was
+4/7 before this work began), total emissions 31 (was 125), zero labeled reverse FPs.**
+
+**Verification**: engine suite green (145+ tests incl. golden replay + determinism guard);
+app compiles zero-warning. Not verified live: an end-to-end STT session through the patched
+engine (needs the STT server) — the replay harness is the regression net until then.
+
 ## Lower Third Disappearing Mid-Playback (July 2026)
 
 **Problem**: a Lottie lower-third animation, triggered via the plain in-app "Go Live" button,

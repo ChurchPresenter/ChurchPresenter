@@ -126,6 +126,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
 import churchpresenter.composeapp.generated.resources.bible_stt_listening
 import churchpresenter.composeapp.generated.resources.bible_stt_engine_connecting
 import churchpresenter.composeapp.generated.resources.bible_stt_engine_unavailable
+import churchpresenter.composeapp.generated.resources.bible_stt_engine_stt_down
 import churchpresenter.composeapp.generated.resources.bible_stt_no_bible
 import churchpresenter.composeapp.generated.resources.bible_stt_waiting_for_stt
 import churchpresenter.composeapp.generated.resources.stt_status_reconnecting
@@ -763,6 +764,9 @@ fun BibleTab(
             // ── Controls row: status + auto-follow + reverse-lookup level + clear ──
             val engineStartFailed = bibleEngineClient?.startFailed?.value == true
             val engineConnected = bibleEngineClient?.connected?.value == true
+            // The engine's OWN upstream STT link (engine_status broadcasts). Null = older engine /
+            // not yet received — the proxy inference below stays authoritative in that case.
+            val engineSttDown = bibleEngineClient?.engineSttConnected?.value == false
             val sttConnecting = sttManager.connecting.value == true
             val sttConnectError = sttManager.connectError.value == true
             val sttReconnecting = sttManager.reconnecting.value == true
@@ -770,11 +774,15 @@ fun BibleTab(
                 appSettings.bibleSettings.secondaryBible.isBlank() &&
                 viewModel.primaryBible.value == null
             val sttReceiving = sttManager.inProgressText.value.isNotBlank() || sttManager.segments.isNotEmpty()
-            val statusIsError = engineStartFailed || noBibleSelected || sttConnectError
+            val statusIsError = engineStartFailed || noBibleSelected || sttConnectError || engineSttDown
             val statusText = when {
                 engineStartFailed -> stringResource(Res.string.bible_stt_engine_unavailable)
                 noBibleSelected -> stringResource(Res.string.bible_stt_no_bible)
                 sttConnected && !engineConnected -> stringResource(Res.string.bible_stt_engine_connecting)
+                // Engine reachable but ITS STT socket is down — previously invisible: the app's own
+                // separate STT connection made the UI say "Listening" while no transcript reached
+                // the engine at all.
+                engineConnected && engineSttDown -> stringResource(Res.string.bible_stt_engine_stt_down)
                 sttConnected && !sttReceiving && detectedReferences.isEmpty() ->
                     stringResource(Res.string.bible_stt_waiting_for_stt)
                 sttConnected -> stringResource(Res.string.bible_stt_listening)
