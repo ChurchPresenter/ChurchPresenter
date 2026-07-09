@@ -5,12 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.graphics.asComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.compottie.LottieComposition
@@ -19,18 +20,34 @@ import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.skia.Bitmap
-import org.jetbrains.skia.Image as SkiaImage
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-private fun intArrayToImageBitmap(pixels: IntArray, width: Int, height: Int): ImageBitmap {
+/**
+ * Wraps a native Skia Bitmap so Compose's `remember` slot table releases the underlying off-heap
+ * pixel buffer (~8MB @1080p) the instant this value is superseded by the next frame or the
+ * composable leaves composition — instead of relying on GC/Cleaner timing, which native-backed
+ * wrappers don't drive promptly since their Java-side footprint is tiny. Without this, raw-frame
+ * playback (up to 30fps) leaks native/GPU memory every frame until rendering fails.
+ */
+private class DisposableFrameBitmap(
+    val skiaBitmap: Bitmap,
+    val imageBitmap: ImageBitmap
+) : RememberObserver {
+    override fun onRemembered() {}
+    override fun onForgotten() = skiaBitmap.close()
+    override fun onAbandoned() = skiaBitmap.close()
+}
+
+private fun frameToDisposableBitmap(pixels: IntArray, width: Int, height: Int): DisposableFrameBitmap {
     // ARGB int written as little-endian 32-bit value = BGRA bytes = N32 on Windows/Linux
     val bytes = ByteArray(pixels.size * 4)
     ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(pixels)
     val bitmap = Bitmap()
     bitmap.allocN32Pixels(width, height)
     bitmap.installPixels(bytes)
-    return SkiaImage.makeFromBitmap(bitmap).toComposeImageBitmap()
+    bitmap.setImmutable()
+    return DisposableFrameBitmap(bitmap, bitmap.asComposeImageBitmap())
 }
 
 /**
@@ -76,11 +93,11 @@ fun LowerThirdPresenter(
         key(rawFrames != null) {
             if (rawFrames != null) {
                 val safeIdx = currentFrameIndex.coerceIn(0, rawFrames.size - 1)
-                val bitmap = remember(rawFrames, safeIdx) {
-                    intArrayToImageBitmap(rawFrames[safeIdx], frameWidth, frameHeight)
+                val frame = remember(rawFrames, safeIdx) {
+                    frameToDisposableBitmap(rawFrames[safeIdx], frameWidth, frameHeight)
                 }
                 Image(
-                    bitmap = bitmap,
+                    bitmap = frame.imageBitmap,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     colorFilter = if (isKey) keyColorFilter else null,
