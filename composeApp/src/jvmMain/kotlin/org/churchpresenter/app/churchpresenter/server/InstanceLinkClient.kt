@@ -16,6 +16,7 @@ import io.ktor.http.isSuccess
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,6 +25,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
@@ -36,6 +38,9 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.random.Random
 
 enum class InstanceLinkStatus { DISCONNECTED, CONNECTING, CONNECTED, ERROR }
 
@@ -58,16 +63,50 @@ class InstanceLinkClient(
     private val onSongSectionSelected: (Int) -> Unit,
     private val onPresentationSlideChanged: (id: String, index: Int, total: Int, isPlaying: Boolean, isLive: Boolean) -> Unit,
     private val onSongsUpdated: (SongCatalogResponse) -> Unit,
+    /** Every decoded WS message — application-level liveness ("last update Xs ago" in the UI). */
+    private val onMessageReceived: () -> Unit = {},
+    /** A reconnect was scheduled [delayMs] from now — drives the "reconnecting in Xs" indicator. */
+    private val onReconnectScheduled: (delayMs: Long) -> Unit = {},
+    /**
+     * Cache-invalidation signals: the primary's bible/pictures/backgrounds changed, so any
+     * locally cached copy is stale and must be re-fetched. Note the connect snapshot re-sends
+     * bible_updated/pictures_updated on every (re)connection — deliberately: one re-download
+     * per connect is exactly what fixes caches that were previously trusted forever.
+     */
+    private val onBibleUpdated: () -> Unit = {},
+    private val onSecondaryBibleUpdated: () -> Unit = {},
+    private val onPicturesUpdated: () -> Unit = {},
+    private val onBackgroundsUpdated: () -> Unit = {},
+    /** A controller-mode command was rejected or could not be delivered — surfaced as a toast. */
+    private val onCommandFailed: (commandType: String, reason: String?) -> Unit = { _, _ -> },
+    /** The primary never acked a command (older version?) — fired at most once per connection. */
+    private val onCommandNoAck: () -> Unit = {},
 ) {
+    private companion object {
+        /** Protocol-level WS ping cadence; a dead link surfaces within ~[WS_TIMEOUT_MS]. */
+        const val WS_PING_INTERVAL_MS = 10_000L
+        const val WS_TIMEOUT_MS = 20_000L
+        /** Reconnect backoff: 1s doubling up to this cap, with ±20% jitter. */
+        const val MAX_RECONNECT_DELAY_MS = 30_000L
+        /** How long a controller-mode command waits for its command_ack before soft-warning. */
+        const val ACK_TIMEOUT_MS = 5_000L
+    }
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val httpClient = HttpClient(CIO) {
-        install(WebSockets)
+        install(WebSockets) { pingIntervalMillis = WS_PING_INTERVAL_MS }
         install(HttpTimeout) { connectTimeoutMillis = 5_000 }
     }
     private val json = Json { ignoreUnknownKeys = true }
 
     private var connectJob: Job? = null
     @Volatile private var session: DefaultClientWebSocketSession? = null
+
+    // Commands awaiting their command_ack, keyed by commandId. Cancelled when the session ends.
+    private val pendingAcks = ConcurrentHashMap<String, CompletableDeferred<CommandAckPayload>>()
+
+    // A primary running an older version never acks — warn once per connection, not per command.
+    @Volatile private var ackTimeoutNotified = false
 
     // Bumped on every connect()/disconnect() so a stale, cooperatively-cancelling old loop
     // iteration can't clobber a newer connection's state (Socket/WS reads aren't real suspension
@@ -101,9 +140,13 @@ class InstanceLinkClient(
         myGeneration: Long
     ) {
         // A peer that's simply offline (not started yet, or closed) is an expected, benign state —
-        // don't let a fixed ~2s retry cadence flood Sentry with one warning per attempt. Report the
+        // don't let the retry cadence flood Sentry with one warning per attempt. Report the
         // first failure of a streak, then only every 10th thereafter; reset once connected again.
         var consecutiveFailures = 0
+        // Exponential reconnect backoff (1s doubling to MAX_RECONNECT_DELAY_MS, ±20% jitter so
+        // multiple followers don't hammer a restarting primary in lockstep). The reconnectDelayMs
+        // setting acts as the FLOOR of the backoff, not a fixed cadence.
+        var attempt = 0
         while (scope.isActive && generation == myGeneration) {
             onStatusChanged(InstanceLinkStatus.CONNECTING)
             InstanceLinkLogger.log(
@@ -123,12 +166,21 @@ class InstanceLinkClient(
                     }
                 ) {
                     if (generation != myGeneration) return@webSocket
+                    // Read timeout pairs with the plugin's ping interval: a half-open link (NAT
+                    // drop, primary hard-crash) closes this session within ~WS_TIMEOUT_MS instead
+                    // of showing CONNECTED with frozen content until the OS gives up.
+                    timeoutMillis = WS_TIMEOUT_MS
                     session = this
                     consecutiveFailures = 0
+                    attempt = 0
+                    ackTimeoutNotified = false
                     onStatusChanged(InstanceLinkStatus.CONNECTED)
                     InstanceLinkLogger.log(
                         InstanceLinkLogSide.FOLLOWER, "connect_result",
-                        mapOf("success" to true, "host" to host, "port" to port)
+                        mapOf(
+                            "success" to true, "host" to host, "port" to port,
+                            "pingIntervalMs" to WS_PING_INTERVAL_MS, "timeoutMs" to WS_TIMEOUT_MS
+                        )
                     )
                     for (frame in incoming) {
                         if (generation != myGeneration) break
@@ -155,14 +207,19 @@ class InstanceLinkClient(
                 )
             }
             session = null
+            failPendingAcks()
             if (generation != myGeneration) return
             onStatusChanged(InstanceLinkStatus.ERROR)
             if (!scope.isActive) break
+            val base = (1_000L shl attempt.coerceAtMost(5)).coerceAtMost(MAX_RECONNECT_DELAY_MS)
+            val delayMs = (base * Random.nextDouble(0.8, 1.2)).toLong().coerceAtLeast(reconnectDelayMs)
+            attempt++
             InstanceLinkLogger.log(
-                InstanceLinkLogSide.FOLLOWER, "reconnecting",
-                mapOf("host" to host, "port" to port, "delayMs" to reconnectDelayMs)
+                InstanceLinkLogSide.FOLLOWER, "reconnect_backoff",
+                mapOf("host" to host, "port" to port, "attempt" to attempt, "delayMs" to delayMs)
             )
-            delay(reconnectDelayMs)
+            onReconnectScheduled(delayMs)
+            delay(delayMs)
         }
     }
 
@@ -176,6 +233,7 @@ class InstanceLinkClient(
             return
         }
         InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_message_received", mapOf("type" to msg.type))
+        onMessageReceived()
         when (msg.type) {
             Constants.WS_EVENT_SCHEDULE_UPDATED -> {
                 val response = runCatching { json.decodeFromString(ScheduleResponse.serializer(), msg.payload) }.getOrNull()
@@ -202,6 +260,18 @@ class InstanceLinkClient(
                 onSongsUpdated(catalog)
             }
             Constants.WS_EVENT_DISPLAY_CLEARED -> onDisplayCleared()
+            Constants.WS_EVENT_BIBLE_UPDATED -> onBibleUpdated()
+            Constants.WS_EVENT_SECONDARY_BIBLE_UPDATED -> onSecondaryBibleUpdated()
+            Constants.WS_EVENT_PICTURES_UPDATED -> onPicturesUpdated()
+            Constants.WS_EVENT_BACKGROUNDS_UPDATED -> onBackgroundsUpdated()
+            Constants.WS_EVENT_COMMAND_ACK -> {
+                val ack = runCatching { json.decodeFromString(CommandAckPayload.serializer(), msg.payload) }.getOrNull()
+                if (ack == null) {
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_message_decode_failed", mapOf("context" to "command_ack"))
+                    return
+                }
+                pendingAcks.remove(ack.commandId)?.complete(ack)
+            }
             Constants.WS_EVENT_SONG_SECTION_SELECTED -> {
                 val index = msg.payload.toIntOrNull() ?: return
                 onSongSectionSelected(index)
@@ -221,27 +291,14 @@ class InstanceLinkClient(
     /**
      * Sends a new item to the primary's schedule — still subject to the primary operator's
      * existing approval dialog (same [Constants.WS_CMD_ADD_TO_SCHEDULE] flow a mobile client uses).
-     * Fire-and-forget: approval/denial is observed indirectly via the next schedule_updated broadcast.
+     * The primary acks "pending_approval" when queued; the operator's eventual decision is
+     * observed via the next schedule_updated broadcast (a denial is the absence of one).
      */
     fun sendAddToSchedule(item: ScheduleItem) {
-        val activeSession = session ?: return
-        val payload = json.encodeToString(AddToScheduleRequest.serializer(), AddToScheduleRequest(item))
-        scope.launch {
-            InstanceLinkLogger.log(
-                InstanceLinkLogSide.FOLLOWER, "ws_command_sent",
-                mapOf("type" to Constants.WS_CMD_ADD_TO_SCHEDULE)
-            )
-            runCatching {
-                activeSession.send(
-                    Frame.Text(
-                        json.encodeToString(
-                            WebSocketMessage.serializer(),
-                            WebSocketMessage(type = Constants.WS_CMD_ADD_TO_SCHEDULE, payload = payload)
-                        )
-                    )
-                )
-            }
-        }
+        sendCommand(
+            Constants.WS_CMD_ADD_TO_SCHEDULE,
+            json.encodeToString(AddToScheduleRequest.serializer(), AddToScheduleRequest(item))
+        )
     }
 
     /**
@@ -254,18 +311,75 @@ class InstanceLinkClient(
         sendCommand(Constants.WS_CMD_REMOVE_FROM_SCHEDULE, json.encodeToString(RemoveFromScheduleRequest.serializer(), RemoveFromScheduleRequest(id)))
     }
 
-    /** Sends a generic command payload to the primary — shared by every send* method below, same
-     *  fire-and-forget shape as [sendAddToSchedule]. */
+    /**
+     * Sends a command to the primary and awaits its command_ack (correlated by a generated
+     * commandId). Failures surface through [onCommandFailed] instead of being silently dropped;
+     * a primary that never acks (older version) triggers [onCommandNoAck] once per connection.
+     */
     private fun sendCommand(type: String, payload: String) {
-        val activeSession = session ?: return
+        val activeSession = session
+        if (activeSession == null) {
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "ws_command_dropped",
+                mapOf("type" to type, "reason" to "not_connected")
+            )
+            onCommandFailed(type, "not_connected")
+            return
+        }
+        val commandId = UUID.randomUUID().toString()
+        val ackDeferred = CompletableDeferred<CommandAckPayload>()
+        pendingAcks[commandId] = ackDeferred
         scope.launch {
-            InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_command_sent", mapOf("type" to type))
-            runCatching {
+            InstanceLinkLogger.log(
+                InstanceLinkLogSide.FOLLOWER, "ws_command_sent",
+                mapOf("type" to type, "commandId" to commandId)
+            )
+            val sent = runCatching {
                 activeSession.send(
-                    Frame.Text(json.encodeToString(WebSocketMessage.serializer(), WebSocketMessage(type = type, payload = payload)))
+                    Frame.Text(json.encodeToString(
+                        WebSocketMessage.serializer(),
+                        WebSocketMessage(type = type, payload = payload, commandId = commandId)
+                    ))
                 )
+            }.isSuccess
+            if (!sent) {
+                pendingAcks.remove(commandId)
+                onCommandFailed(type, "send_failed")
+                return@launch
+            }
+            val ack = withTimeoutOrNull(ACK_TIMEOUT_MS) { runCatching { ackDeferred.await() }.getOrNull() }
+            pendingAcks.remove(commandId)
+            when {
+                ack == null -> {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "command_ack_timeout",
+                        mapOf("type" to type, "commandId" to commandId)
+                    )
+                    if (!ackTimeoutNotified) {
+                        ackTimeoutNotified = true
+                        onCommandNoAck()
+                    }
+                }
+                ack.ok -> InstanceLinkLogger.log(
+                    InstanceLinkLogSide.FOLLOWER, "command_ack",
+                    mapOf("type" to type, "commandId" to commandId, "ok" to true, "reason" to ack.reason)
+                )
+                else -> {
+                    InstanceLinkLogger.log(
+                        InstanceLinkLogSide.FOLLOWER, "command_ack",
+                        mapOf("type" to type, "commandId" to commandId, "ok" to false, "reason" to ack.reason)
+                    )
+                    onCommandFailed(type, ack.reason)
+                }
             }
         }
+    }
+
+    /** Cancels every command still waiting for an ack — the session that could deliver one is gone. */
+    private fun failPendingAcks() {
+        val waiting = pendingAcks.values.toList()
+        pendingAcks.clear()
+        waiting.forEach { it.cancel() }
     }
 
     /**
@@ -328,6 +442,16 @@ class InstanceLinkClient(
      *  the same ad-hoc payload rather than introducing a serializer class for a single boolean. */
     fun sendBibleHold(hold: Boolean) {
         sendCommand(Constants.WS_CMD_BIBLE_HOLD, """{"hold":$hold}""")
+    }
+
+    /**
+     * Builds the streaming URL for one of the primary's local media files (PartialContent, so
+     * the player can seek) — used to mirror MEDIA live state. Null while not connected.
+     */
+    fun mediaStreamUrl(mediaId: String): String? {
+        if (currentHost.isEmpty()) return null
+        val keyParam = if (currentApiKey.isNotEmpty()) "?${Constants.QUERY_PARAM_API_KEY}=$currentApiKey" else ""
+        return "http://$currentHost:$currentPort${Constants.ENDPOINT_MEDIA_STREAM}/$mediaId$keyParam"
     }
 
     /** Logs the outcome of one `fetch*` call below — [kind] identifies which one (e.g. "bible_file",
@@ -517,6 +641,7 @@ class InstanceLinkClient(
         connectJob?.cancel()
         connectJob = null
         session = null
+        failPendingAcks()
         onStatusChanged(InstanceLinkStatus.DISCONNECTED)
     }
 

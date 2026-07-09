@@ -24,6 +24,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,6 +46,7 @@ import churchpresenter.composeapp.generated.resources.instance_link_bible_sync_f
 import churchpresenter.composeapp.generated.resources.instance_link_bible_sync_mode
 import churchpresenter.composeapp.generated.resources.instance_link_bible_sync_reference_only
 import churchpresenter.composeapp.generated.resources.instance_link_last_received
+import churchpresenter.composeapp.generated.resources.instance_link_last_update_age
 import churchpresenter.composeapp.generated.resources.instance_link_mirror_backgrounds
 import churchpresenter.composeapp.generated.resources.instance_link_port
 import churchpresenter.composeapp.generated.resources.instance_link_role
@@ -67,6 +69,7 @@ import churchpresenter.composeapp.generated.resources.obs_mode_website
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
@@ -84,6 +87,8 @@ fun InstanceLinkDialog(
     connectionStatus: InstanceLinkStatus,
     remoteLiveState: LiveStateDto?,
     remoteScheduleCount: Int,
+    /** Wall-clock ms of the last WS message from the primary, null while not connected. */
+    lastMessageAtMs: Long? = null,
     onConnect: (host: String, port: Int, apiKey: String, autoConnect: Boolean, allowPushToSchedule: Boolean, bibleSyncMode: BibleSyncMode, mirrorBackgrounds: Boolean, role: InstanceLinkRole) -> Unit,
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit
@@ -156,6 +161,24 @@ fun InstanceLinkDialog(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                            if (lastMessageAtMs != null) {
+                                // 1s ticker keeps the age readout current while the dialog is open
+                                var ageNowMs by remember { mutableStateOf(System.currentTimeMillis()) }
+                                LaunchedEffect(Unit) {
+                                    while (true) {
+                                        ageNowMs = System.currentTimeMillis()
+                                        delay(1000)
+                                    }
+                                }
+                                val ageSeconds = ((ageNowMs - lastMessageAtMs) / 1000).coerceAtLeast(0)
+                                val ageText = if (ageSeconds < 60) "${ageSeconds}s"
+                                else "${ageSeconds / 60}m ${ageSeconds % 60}s"
+                                Text(
+                                    text = stringResource(Res.string.instance_link_last_update_age, ageText),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                             remoteLiveState?.let { state ->
                                 Text(
                                     text = stringResource(Res.string.instance_link_last_received, liveStateSummary(state)),

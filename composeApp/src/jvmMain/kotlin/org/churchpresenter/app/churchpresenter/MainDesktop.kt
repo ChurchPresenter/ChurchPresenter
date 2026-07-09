@@ -35,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -73,6 +74,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.connect
 import churchpresenter.composeapp.generated.resources.instance_link_controlling_host
 import churchpresenter.composeapp.generated.resources.instance_link_following_host
+import churchpresenter.composeapp.generated.resources.instance_link_status_reconnecting_in
 import churchpresenter.composeapp.generated.resources.instance_link_primary_badge
 import churchpresenter.composeapp.generated.resources.menu_disconnect
 import churchpresenter.composeapp.generated.resources.ic_arrow_left
@@ -112,6 +114,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
 import org.churchpresenter.app.churchpresenter.dialogs.CrashFeedbackDialog
 import org.churchpresenter.app.churchpresenter.dialogs.KonamiEasterEggDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -208,6 +211,9 @@ fun MainDesktop(
     theme: ThemeMode = ThemeMode.SYSTEM,
     onSongsLoaded: ((List<SongItem>) -> Unit)? = null,
     onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null,
+    /** This instance's saved Canvas scenes, re-published whenever they change — the InstanceLink
+     *  follower path resolves a mirrored CANVAS live state by scene id against this list. */
+    onScenesChanged: ((List<Scene>) -> Unit)? = null,
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
     onPresentationSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>, slideNotes: List<String>) -> Unit)? = null,
     onPicturesLoaded: ((folderId: String, folderName: String, folderPath: String, imageFiles: List<File>) -> Unit)? = null,
@@ -230,6 +236,8 @@ fun MainDesktop(
     /** Persistent "Following <host>" badge shown above the Schedule panel while connected via Instance Link. */
     instanceLinkConnectionStatus: InstanceLinkStatus = InstanceLinkStatus.DISCONNECTED,
     instanceLinkFollowingHost: String = "",
+    /** Absolute wall-clock ms of the next reconnect attempt while status is ERROR, else null. */
+    instanceLinkNextRetryAtMs: Long? = null,
     /** Persistent "Primary — N follower(s) connected" badge — the symmetric primary-side counterpart. */
     connectedInstanceLinkFollowerCount: Int = 0,
     /** Reconnects using the last-saved Instance Link settings — lets the Connect/Disconnect button
@@ -244,6 +252,10 @@ fun MainDesktop(
     instanceLinkFetchSongDetail: (suspend (number: String, songbook: String) -> SongDetailDto?)? = null,
     /** Downloads the primary's bible file while connected via Instance Link — see BibleViewModel.setInstanceLinkSource. */
     instanceLinkFetchBibleFile: (suspend () -> ByteArray?)? = null,
+    /** Bumped when the primary announces its bible/secondary-bible changed — triggers cache
+     *  invalidation + re-download in the bible mirror effect below. */
+    instanceLinkBibleUpdatedSignal: Int = 0,
+    instanceLinkSecondaryBibleUpdatedSignal: Int = 0,
     /** How the Bible tab tracks the primary while connected — see BibleSyncMode. */
     instanceLinkBibleSyncMode: BibleSyncMode = BibleSyncMode.FULL_REPLICA,
     instanceLinkFetchSecondaryBibleFile: (suspend () -> ByteArray?)? = null,
@@ -432,6 +444,12 @@ fun MainDesktop(
     }
 
     val sceneViewModel = remember { SceneViewModel() }
+    // Publish the scene list out for InstanceLink CANVAS mirroring — the callback pattern keeps
+    // SceneViewModel owned here (only the plain Scene list crosses the boundary).
+    val currentOnScenesChanged by rememberUpdatedState(onScenesChanged)
+    LaunchedEffect(sceneViewModel.scenes.toList()) {
+        currentOnScenesChanged?.invoke(sceneViewModel.scenes.toList())
+    }
 
     val currentOnSongsLoaded by rememberUpdatedState(onSongsLoaded)
     val songsViewModel = remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> currentOnSongsLoaded?.invoke(songs) }) }
@@ -473,7 +491,15 @@ fun MainDesktop(
 
     // Mirrors the primary's bible while connected via Instance Link — see
     // BibleViewModel.setInstanceLinkSource. Only in Controlled mode, same reasoning as Songs above.
-    LaunchedEffect(instanceLinkConnectionStatus, instanceLinkBibleSyncMode, instanceLinkRole) {
+    // The two *UpdatedSignal keys re-run this when the primary announces a bible change: the
+    // cache is invalidated first so FULL_REPLICA re-downloads the fresh file.
+    LaunchedEffect(
+        instanceLinkConnectionStatus, instanceLinkBibleSyncMode, instanceLinkRole,
+        instanceLinkBibleUpdatedSignal, instanceLinkSecondaryBibleUpdatedSignal
+    ) {
+        if (instanceLinkBibleUpdatedSignal > 0 || instanceLinkSecondaryBibleUpdatedSignal > 0) {
+            bibleViewModel.invalidateInstanceLinkBibleCache()
+        }
         bibleViewModel.setInstanceLinkSource(
             active = instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED && instanceLinkRole == InstanceLinkRole.CONTROLLED,
             mode = instanceLinkBibleSyncMode,
@@ -975,16 +1001,30 @@ fun MainDesktop(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
+                            // 1s ticker so the "reconnecting in Xs" countdown stays current while
+                            // the link is down; idle (single recomposition) otherwise.
+                            var reconnectNowMs by remember { mutableStateOf(System.currentTimeMillis()) }
+                            LaunchedEffect(instanceLinkConnectionStatus == InstanceLinkStatus.ERROR) {
+                                while (instanceLinkConnectionStatus == InstanceLinkStatus.ERROR) {
+                                    reconnectNowMs = System.currentTimeMillis()
+                                    delay(1000)
+                                }
+                            }
+                            val retrySecondsLeft = instanceLinkNextRetryAtMs
+                                ?.let { ((it - reconnectNowMs) / 1000).coerceAtLeast(0) }
                             ConnectionStatusRow(
                                 status = instanceLinkConnectionStatus,
                                 connectedLabel = if (instanceLinkRole == InstanceLinkRole.CONTROLLER)
                                     stringResource(Res.string.instance_link_controlling_host, instanceLinkFollowingHost)
                                 else
-                                    stringResource(Res.string.instance_link_following_host, instanceLinkFollowingHost)
+                                    stringResource(Res.string.instance_link_following_host, instanceLinkFollowingHost),
+                                errorLabel = retrySecondsLeft?.let {
+                                    stringResource(Res.string.instance_link_status_reconnecting_in, it.toInt())
+                                }
                             )
-                            if (instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTED ||
-                                instanceLinkConnectionStatus == InstanceLinkStatus.CONNECTING
-                            ) {
+                            // != DISCONNECTED (not just CONNECTED/CONNECTING) so the operator can
+                            // stop an ERROR-state retry loop without reopening the dialog.
+                            if (instanceLinkConnectionStatus != InstanceLinkStatus.DISCONNECTED) {
                                 TextButton(onClick = onInstanceLinkDisconnect) {
                                     Text(stringResource(Res.string.menu_disconnect), style = MaterialTheme.typography.labelSmall)
                                 }

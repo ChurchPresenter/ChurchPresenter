@@ -269,6 +269,8 @@ object Constants {
     const val WS_EVENT_SONGS_UPDATED              = "songs_updated"
     const val WS_EVENT_BIBLE_UPDATED              = "bible_updated"
     const val WS_EVENT_SECONDARY_BIBLE_UPDATED    = "secondary_bible_updated"
+    const val WS_EVENT_BACKGROUNDS_UPDATED        = "backgrounds_updated"
+    const val WS_EVENT_COMMAND_ACK                = "command_ack"
     const val WS_EVENT_SCHEDULE_UPDATED           = "schedule_updated"
     const val WS_EVENT_PRESENTATION_UPDATED       = "presentation_updated"
     const val WS_EVENT_PICTURES_UPDATED           = "pictures_updated"

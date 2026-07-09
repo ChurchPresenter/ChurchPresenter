@@ -130,6 +130,10 @@
     <string name="instance_link_status_connecting">Connecting…</string>
     <string name="instance_link_status_connected">Connected</string>
     <string name="instance_link_status_error">Connection failed — retrying…</string>
+    <string name="instance_link_status_reconnecting_in">Link lost — reconnecting in %1$d s</string>
+    <string name="instance_link_last_update_age">Last update %1$s ago</string>
+    <string name="instance_link_command_failed">Instance Link command %1$s failed: %2$s</string>
+    <string name="instance_link_command_no_ack">Primary did not acknowledge commands — it may be running an older version</string>
     <string name="instance_link_last_received">Last received: %1$s</string>
     <string name="instance_link_schedule_count">Primary schedule: %1$d item(s)</string>
     <string name="connect">Connect</string>

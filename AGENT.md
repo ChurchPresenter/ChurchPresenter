@@ -536,6 +536,61 @@ over the page background with no ghosting. Not yet verified live: JPEG path with
 background, resolution-change reconnect, MEDIA/WEBSITE/crossfade in OBS — logic traced,
 needs a hands-on pass.
 
+## InstanceLink Overhaul (July 2026)
+
+**Problem**: the follower↔primary link had no heartbeat (a dead link showed CONNECTED with a
+frozen screen for many minutes), a fixed 2 s reconnect loop, caches that were `exists()`-gated
+forever (bible/pictures/backgrounds never refreshed), no dedup on `live_state_changed`
+broadcasts, mode-only mirroring for MEDIA/CANVAS/QA/DICTIONARY, and fire-and-forget controller
+commands that were silently dropped.
+
+**What changed**:
+- **Heartbeat both sides**: server `install(WebSockets) { pingPeriodMillis = 10_000;
+  timeoutMillis = 20_000 }` (protocol-transparent to mobile clients; also clears ghost
+  follower entries) + client `pingIntervalMillis`/session `timeoutMillis`. Verified live: a
+  silent client is closed after exactly 30 s.
+- **Reconnect**: exponential backoff 1 s→30 s cap ±20% jitter; `reconnectDelayMs` setting is
+  now the FLOOR, not a fixed cadence. On dropout the follower keeps showing last content
+  (never blanks the audience) while the badge shows "Link lost — reconnecting in Xs" and the
+  dialog shows "Last update Xs ago" (`lastMessageAtMs`/`nextRetryAtMs` flows on
+  `InstanceLinkViewModel`). Toggling the link off now actually disconnects; the silent
+  auto-arm of `enabled/autoConnect` on first success was removed (the dialog persists it
+  explicitly).
+- **Freshness**: `updateLiveState` dedups byte-identical DTOs (verified live: two identical
+  re-sends → zero extra broadcasts); new `backgrounds_updated` broadcast + the
+  never-actually-sent `secondary_bible_updated` now fires; broadcast buffer 16→64. The
+  follower handles `bible_updated`/`secondary_bible_updated`/`pictures_updated`/
+  `backgrounds_updated` by invalidating the corresponding instance-link cache — and since the
+  connect snapshot re-sends bible/pictures events, every (re)connection deliberately refreshes
+  once. Live-state/slide collectors use `collectLatest` + temp-file-rename cache writes so a
+  cancelled apply can't strand a truncated cache file.
+- **Content types**: `applyRemoteLiveState` now mirrors MEDIA (streamed from the primary via
+  `/api/media/stream/{id}`, muted-equivalent — no position/transport sync, DTO carries none),
+  CANVAS (id-match against local scenes, hoisted from MainDesktop via `onScenesChanged` —
+  content is NOT fetchable, both instances need the same scenes.json), QA (minimal Question),
+  and DICTIONARY (full `StrongsEntry` carried in `LiveStateDto.dictionaryEntry` — the
+  follower's own dictionary may be a different language, so no local lookup). STT stays
+  mode-only (`mode_only_no_feed`) — no caption feed exists.
+- **Command acks**: `WebSocketMessage` gained `commandId` with `@EncodeDefault(NEVER)`
+  (**critical**: the server json has `encodeDefaults=true`, so without NEVER every existing
+  broadcast would grow a `"commandId":null` field and change the wire format for all clients —
+  verified byte-identical via probe). Primary replies `command_ack` (instant commands: ok;
+  approval-gated: ok + `pending_approval` immediately; unknown: `unknown_command`). Follower
+  awaits acks with a 5 s timeout; failures surface via `InstanceLinkViewModel.commandFailures`
+  → `dialogs/InstanceLinkToast.kt`; a never-acking (older) primary triggers ONE soft notice
+  per connection. Legacy raw `{"ok":...}` decision replies kept for mobile compatibility.
+- **Testing enabler**: the single-instance lock port can be overridden —
+  `JAVA_TOOL_OPTIONS="-Dchurchpresenter.singleInstancePort=47633 -Duser.home=$HOME/cp-follower"`
+  runs an isolated second instance on one machine.
+
+**Verified live** (real app + python WS probe): connect snapshot order; ack round-trip with
+matching commandId; unknown-command ack; no-commandId compat (no ack, no error);
+live-state dedup (0 extra broadcasts for identical re-sends); envelope byte-purity (no
+undecodable frames); silent-client disconnect at exactly 30 s with clean follower logs.
+**Not verified live**: full two-GUI-instance drills (reconnect countdown badge, cache
+re-download on bible/picture change, MEDIA/CANVAS/QA/DICTIONARY rendering on a real follower,
+failure toast) — logic traced and compile-checked; needs a hands-on pass with two instances.
+
 ## Known Issues
 
 **Issue**: Song edits not saving/updating

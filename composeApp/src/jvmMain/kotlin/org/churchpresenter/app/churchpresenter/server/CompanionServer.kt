@@ -53,6 +53,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -60,6 +62,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import org.churchpresenter.app.churchpresenter.data.SongItem
+import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.data.settings.PresentationRemoteSettings
@@ -279,6 +282,11 @@ data class LiveStateDto(
     val questionText: String? = null,
     // Strong's dictionary
     val dictionaryWord: String? = null,
+    // Full Strong's entry for DICTIONARY mirroring — the primary holds it at broadcast time, and
+    // a follower's own bundled dictionary may be a different language, so carrying the entry beats
+    // a local lookup. Old primaries omit it (null → follower presents word-only); old followers
+    // ignore it (ignoreUnknownKeys).
+    val dictionaryEntry: StrongsEntry? = null,
     // lower third — resolves to a file via the same lowerThirdFiles() lookup /api/lowerthirds/{name}/json uses
     val lowerThirdName: String? = null
 )
@@ -493,9 +501,26 @@ data class StatusResponse(
 )
 
 @Serializable
+@OptIn(ExperimentalSerializationApi::class)
 data class WebSocketMessage(
     val type: String,
-    val payload: String = ""
+    val payload: String = "",
+    // Correlates a command with its command_ack reply (InstanceLink controller mode). NEVER-encoded
+    // when null: this server's json has encodeDefaults=true, so without the annotation every
+    // existing broadcast would grow a "commandId":null field and change the wire format for all
+    // clients. Old servers ignore it (ignoreUnknownKeys); old clients never send it.
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val commandId: String? = null
+)
+
+/** Reply to a WS command that carried a commandId — see [Constants.WS_EVENT_COMMAND_ACK].
+ *  Approval-gated commands ack immediately with ok=true, reason="pending_approval" (the operator's
+ *  decision can take minutes; its outcome still arrives via the following schedule_updated). */
+@Serializable
+data class CommandAckPayload(
+    val commandId: String,
+    val ok: Boolean,
+    val reason: String? = null
 )
 
 // ── Flat remote-item DTO (accepts the format mobile apps actually send) ───────
@@ -1139,9 +1164,11 @@ class CompanionServer {
     // File upload permission (updated from settings without restart)
     private val _fileUploadEnabled = MutableStateFlow(true)
 
-    // Outgoing WebSocket broadcast channel
+    // Outgoing WebSocket broadcast channel. Buffer sized generously: it is shared by every
+    // connected client's collector, and DROP_OLDEST means an overflow silently loses a message
+    // for slow consumers with no redelivery until their next reconnect snapshot.
     private val broadcastChannel = MutableSharedFlow<String>(
-        extraBufferCapacity = 16,
+        extraBufferCapacity = 64,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -1407,15 +1434,23 @@ class CompanionServer {
     /** Records the secondary bible's file path for GET /api/bible/file/secondary — no mobile
      *  companion catalog/broadcast exists for the secondary bible, only InstanceLink uses this. */
     fun updateSecondaryBibleFilePath(filePath: String) {
+        if (_secondaryBibleFilePath == filePath) return
         _secondaryBibleFilePath = filePath
         InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "secondary_bible_file_path", "filePath" to filePath))
+        // Invalidation signal for followers mirroring the secondary bible — they re-download
+        // the .spb on this event instead of trusting their local cache forever.
+        broadcast(WebSocketMessage(type = Constants.WS_EVENT_SECONDARY_BIBLE_UPDATED, payload = ""))
     }
 
     /** Records the current background settings for GET /api/backgrounds — only consumed by a
      *  follower that opted in to mirroring backgrounds (see InstanceLinkSettings.mirrorBackgrounds). */
     fun updateBackgroundSettings(settings: BackgroundSettings) {
+        if (_backgroundSettings.value == settings) return
         _backgroundSettings.value = settings
         InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "background_settings"))
+        // Invalidation signal for followers mirroring backgrounds — they clear their asset
+        // cache and re-fetch on this event.
+        broadcast(WebSocketMessage(type = Constants.WS_EVENT_BACKGROUNDS_UPDATED, payload = ""))
     }
 
     /**
@@ -1849,6 +1884,7 @@ class CompanionServer {
         questionId: String?,
         questionText: String?,
         dictionaryWord: String?,
+        dictionaryEntry: StrongsEntry? = null,
         lowerThirdName: String? = null,
         // Canonical verse code (book, chapter, verse) computed from this instance's OWN loaded bible —
         // see LiveStateDto.verseCodeBook and BibleSyncMode.REFERENCE_ONLY. Null when not applicable.
@@ -1883,8 +1919,13 @@ class CompanionServer {
             questionId = questionId,
             questionText = questionText,
             dictionaryWord = dictionaryWord,
+            dictionaryEntry = dictionaryEntry,
             lowerThirdName = lowerThirdName?.ifEmpty { null }
         )
+        // Skip byte-identical re-broadcasts (content setters fire on every call, even when
+        // nothing changed) — same early-return pattern the other update* functions use. Protects
+        // the shared broadcast buffer from floods that could evict messages for slow clients.
+        if (_liveState.value == dto) return
         _liveState.value = dto
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_LIVE_STATE_CHANGED,
@@ -2041,7 +2082,15 @@ class CompanionServer {
 
     private fun Application.configurePipeline() {
             install(ContentNegotiation) { json(json) }
-            install(WebSockets)
+            // Protocol-level pings on every /ws client (mobile companions answer them
+            // automatically — invisible to application code). A client that stops ponging is
+            // closed within ~timeoutMillis, which both frees its broadcast collector and clears
+            // ghost entries from _connectedInstanceLinkFollowers instead of leaving half-open
+            // TCP sessions "connected" indefinitely.
+            install(WebSockets) {
+                pingPeriodMillis = 10_000
+                timeoutMillis = 20_000
+            }
             install(PartialContent)
             install(CORS) {
                 allowMethod(HttpMethod.Get)
@@ -3091,6 +3140,30 @@ class CompanionServer {
                         broadcastChannel.collect { message -> send(Frame.Text(message)) }
                     }
 
+                    // Ack for commands that carried a commandId (InstanceLink controller mode) —
+                    // no-op for clients that don't send one, so mobile behavior is unchanged.
+                    suspend fun sendCommandAck(commandId: String?, ok: Boolean, reason: String? = null) {
+                        if (commandId == null) return
+                        try {
+                            send(Frame.Text(json.encodeToString(
+                                WebSocketMessage.serializer(),
+                                WebSocketMessage(
+                                    type = Constants.WS_EVENT_COMMAND_ACK,
+                                    payload = json.encodeToString(
+                                        CommandAckPayload.serializer(),
+                                        CommandAckPayload(commandId, ok, reason)
+                                    )
+                                )
+                            )))
+                        } catch (_: Exception) {
+                            // session already closing — the follower's timeout covers this
+                        }
+                        InstanceLinkLogger.log(
+                            InstanceLinkLogSide.PRIMARY, "command_ack",
+                            mapOf("commandId" to commandId, "ok" to ok, "reason" to reason)
+                        )
+                    }
+
                     try {
                     for (frame in incoming) {
                         if (frame is Frame.Text) {
@@ -3104,6 +3177,7 @@ class CompanionServer {
                                     Constants.WS_CMD_SELECT_SONG -> {
                                         val song = json.decodeFromString(ScheduleSongDto.serializer(), msg.payload)
                                         scope.launch { onSongSelected.emit(song) }
+                                        sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_SELECT_PICTURE -> {
                                         val req = json.decodeFromString(SelectPictureRequest.serializer(), msg.payload)
@@ -3111,17 +3185,20 @@ class CompanionServer {
                                         val folderName = _pictureCatalogs[req.folderId]?.folderName ?: req.folderId
                                         val imageLabel = req.fileName ?: "Image ${req.index}"
                                         scope.launch { onInstantAction.emit(RemoteInstantAction("present", folderName, imageLabel, wsClientId)) }
+                                        sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_SELECT_SONG_SECTION -> {
                                         val req = json.decodeFromString(SelectSongSectionRequest.serializer(), msg.payload)
                                         scope.launch { onSelectSongSection.emit(req) }
                                         scope.launch { onInstantAction.emit(RemoteInstantAction("present", "Song ${req.number}", "Section ${req.section}", wsClientId)) }
+                                        sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_SELECT_SLIDE -> {
                                         val req = json.decodeFromString(SelectSlideRequest.serializer(), msg.payload)
                                         scope.launch { onSelectSlide.emit(req) }
                                         val presName = _presentationCatalogs[_scheduleItemToPresentationId[req.id] ?: req.id]?.fileName ?: req.id
                                         scope.launch { onInstantAction.emit(RemoteInstantAction("present", presName, "Slide ${req.index + 1}", wsClientId)) }
+                                        sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_SELECT_BIBLE_VERSE -> {
                                         val req = json.decodeFromString(SelectBibleVerseRequest.serializer(), msg.payload)
@@ -3129,10 +3206,12 @@ class CompanionServer {
                                         val ref = if (req.verseRange.isNotEmpty()) "${req.bookName} ${req.chapter}:${req.verseRange}"
                                                   else "${req.bookName} ${req.chapter}:${req.verseNumber}"
                                         scope.launch { onInstantAction.emit(RemoteInstantAction("present", ref, req.verseText.take(60), wsClientId)) }
+                                        sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_CLEAR -> {
                                         scope.launch { onClear.emit(Unit) }
                                         scope.launch { onInstantAction.emit(RemoteInstantAction("clear", "Clear Display", clientId = wsClientId)) }
+                                        sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_BIBLE_HOLD -> {
                                         val hold = try {
@@ -3140,6 +3219,7 @@ class CompanionServer {
                                                 .jsonObject["hold"]?.toString()?.toBooleanStrictOrNull() ?: true
                                         } catch (_: Exception) { true }
                                         scope.launch { onBibleHold.emit(hold) }
+                                        sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {
                                         val item = parseRemoteItem(msg.payload)
@@ -3151,6 +3231,10 @@ class CompanionServer {
                                             val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
                                             try { send(Frame.Text(response)) } catch (_: Exception) { }
                                         }
+                                        // Ack "queued" immediately — the operator's approval can take
+                                        // minutes, and its outcome still arrives via schedule_updated
+                                        // (plus the legacy raw {"ok":...} reply above for mobile).
+                                        sendCommandAck(msg.commandId, ok = true, reason = "pending_approval")
                                     }
                                     Constants.WS_CMD_ADD_BATCH_TO_SCHEDULE -> {
                                         val items = try {
@@ -3165,6 +3249,9 @@ class CompanionServer {
                                                 val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
                                                 try { send(Frame.Text(response)) } catch (_: Exception) { }
                                             }
+                                            sendCommandAck(msg.commandId, ok = true, reason = "pending_approval")
+                                        } else {
+                                            sendCommandAck(msg.commandId, ok = false, reason = "invalid_payload")
                                         }
                                     }
                                     Constants.WS_CMD_PROJECT -> {
@@ -3177,6 +3264,7 @@ class CompanionServer {
                                             val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
                                             try { send(Frame.Text(response)) } catch (_: Exception) { }
                                         }
+                                        sendCommandAck(msg.commandId, ok = true, reason = "pending_approval")
                                     }
                                     Constants.WS_CMD_REMOVE_FROM_SCHEDULE -> {
                                         val req = json.decodeFromString(RemoveFromScheduleRequest.serializer(), msg.payload)
@@ -3188,7 +3276,9 @@ class CompanionServer {
                                             val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
                                             try { send(Frame.Text(response)) } catch (_: Exception) { }
                                         }
+                                        sendCommandAck(msg.commandId, ok = true, reason = "pending_approval")
                                     }
+                                    else -> sendCommandAck(msg.commandId, ok = false, reason = "unknown_command")
                                 }
                             } catch (e: Exception) {
                                 InstanceLinkLogger.log(

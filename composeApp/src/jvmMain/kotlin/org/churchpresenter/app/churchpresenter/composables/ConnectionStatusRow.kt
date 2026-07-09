@@ -29,11 +29,13 @@ import org.jetbrains.compose.resources.stringResource
  * @param connectedLabel overrides the generic "Connected" text when [status] is CONNECTED — e.g.
  *   "Following 192.168.2.254" — so the same status-dot pattern can carry richer context where there's
  *   room for it. Other statuses always use their generic label regardless of this parameter.
+ * @param errorLabel same idea for ERROR — e.g. "Link lost — reconnecting in 8 s".
  */
 @Composable
 fun ConnectionStatusRow(
     status: InstanceLinkStatus,
     connectedLabel: String? = null,
+    errorLabel: String? = null,
     modifier: Modifier = Modifier
 ) {
     val (color, defaultLabelRes) = when (status) {
@@ -42,10 +44,10 @@ fun ConnectionStatusRow(
         InstanceLinkStatus.ERROR -> Color(0xFFF44336) to Res.string.instance_link_status_error
         InstanceLinkStatus.DISCONNECTED -> Color(0xFF9E9E9E) to Res.string.instance_link_status_disconnected
     }
-    val label = if (status == InstanceLinkStatus.CONNECTED && connectedLabel != null) {
-        connectedLabel
-    } else {
-        stringResource(defaultLabelRes)
+    val label = when {
+        status == InstanceLinkStatus.CONNECTED && connectedLabel != null -> connectedLabel
+        status == InstanceLinkStatus.ERROR && errorLabel != null -> errorLabel
+        else -> stringResource(defaultLabelRes)
     }
     Row(
         modifier = modifier,

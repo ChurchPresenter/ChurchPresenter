@@ -1,7 +1,10 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
@@ -11,6 +14,17 @@ import org.churchpresenter.app.churchpresenter.server.LiveStateDto
 import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
 import org.churchpresenter.app.churchpresenter.server.SongDetailDto
+
+/**
+ * One surfaced InstanceLink command failure — a controller-mode command the primary rejected
+ * or that never got acknowledged. [soft] marks the once-per-connection "primary never acks"
+ * notice (informational, likely a version mismatch) as opposed to a hard failure.
+ */
+data class InstanceLinkCommandFailure(
+    val commandType: String,
+    val reason: String?,
+    val soft: Boolean = false
+)
 
 /** Snapshot of the primary's `presentation_slide_changed` broadcast — see [InstanceLinkClient]. */
 data class RemotePresentationSlide(
@@ -52,8 +66,41 @@ class InstanceLinkViewModel {
     private val _displayClearedSignal = MutableStateFlow(0)
     val displayClearedSignal: StateFlow<Int> = _displayClearedSignal.asStateFlow()
 
+    // Application-level liveness: wall-clock time of the last decoded WS message, null while
+    // not connected. Drives the "Last update Xs ago" readout.
+    private val _lastMessageAtMs = MutableStateFlow<Long?>(null)
+    val lastMessageAtMs: StateFlow<Long?> = _lastMessageAtMs.asStateFlow()
+
+    // When the client scheduled its next reconnect attempt (absolute wall-clock ms), null while
+    // connected/connecting. Drives the "Link lost — reconnecting in Xs" badge countdown.
+    private val _nextRetryAtMs = MutableStateFlow<Long?>(null)
+    val nextRetryAtMs: StateFlow<Long?> = _nextRetryAtMs.asStateFlow()
+
+    // Cache-invalidation signals — counters (same rationale as displayClearedSignal). Observers
+    // clear/re-fetch the corresponding instance-link cache when the value changes.
+    private val _bibleUpdatedSignal = MutableStateFlow(0)
+    val bibleUpdatedSignal: StateFlow<Int> = _bibleUpdatedSignal.asStateFlow()
+
+    private val _secondaryBibleUpdatedSignal = MutableStateFlow(0)
+    val secondaryBibleUpdatedSignal: StateFlow<Int> = _secondaryBibleUpdatedSignal.asStateFlow()
+
+    private val _picturesUpdatedSignal = MutableStateFlow(0)
+    val picturesUpdatedSignal: StateFlow<Int> = _picturesUpdatedSignal.asStateFlow()
+
+    private val _backgroundsUpdatedSignal = MutableStateFlow(0)
+    val backgroundsUpdatedSignal: StateFlow<Int> = _backgroundsUpdatedSignal.asStateFlow()
+
+    // Controller-mode command failures (rejected, undeliverable, or never acked) — collected by
+    // main.kt and surfaced as a toast; what used to be a silent drop.
+    private val _commandFailures = MutableSharedFlow<InstanceLinkCommandFailure>(extraBufferCapacity = 8)
+    val commandFailures: SharedFlow<InstanceLinkCommandFailure> = _commandFailures.asSharedFlow()
+
     private val client = InstanceLinkClient(
-        onStatusChanged = { status -> _connectionStatus.value = status },
+        onStatusChanged = { status ->
+            _connectionStatus.value = status
+            if (status != InstanceLinkStatus.ERROR) _nextRetryAtMs.value = null
+            if (status != InstanceLinkStatus.CONNECTED) _lastMessageAtMs.value = null
+        },
         onScheduleUpdated = { items -> _remoteSchedule.value = items },
         onLiveStateUpdated = { state -> _remoteLiveState.value = state },
         onDisplayCleared = { _displayClearedSignal.value++ },
@@ -61,7 +108,19 @@ class InstanceLinkViewModel {
         onPresentationSlideChanged = { id, index, total, isPlaying, isLive ->
             _remotePresentationSlide.value = RemotePresentationSlide(id, index, total, isPlaying, isLive)
         },
-        onSongsUpdated = { catalog -> _remoteSongCatalog.value = catalog }
+        onSongsUpdated = { catalog -> _remoteSongCatalog.value = catalog },
+        onMessageReceived = { _lastMessageAtMs.value = System.currentTimeMillis() },
+        onReconnectScheduled = { delayMs -> _nextRetryAtMs.value = System.currentTimeMillis() + delayMs },
+        onBibleUpdated = { _bibleUpdatedSignal.value++ },
+        onSecondaryBibleUpdated = { _secondaryBibleUpdatedSignal.value++ },
+        onPicturesUpdated = { _picturesUpdatedSignal.value++ },
+        onBackgroundsUpdated = { _backgroundsUpdatedSignal.value++ },
+        onCommandFailed = { type, reason ->
+            _commandFailures.tryEmit(InstanceLinkCommandFailure(commandType = type, reason = reason))
+        },
+        onCommandNoAck = {
+            _commandFailures.tryEmit(InstanceLinkCommandFailure(commandType = "", reason = null, soft = true))
+        }
     )
 
     fun connect(host: String, port: Int, apiKey: String, deviceId: String, reconnectDelayMs: Long) {
@@ -103,6 +162,9 @@ class InstanceLinkViewModel {
     /** Fetches one song's full lyrics from the primary on demand — see [InstanceLinkClient.fetchSongDetail]. */
     suspend fun fetchSongDetail(number: String, songbook: String): SongDetailDto? =
         client.fetchSongDetail(number, songbook)
+
+    /** Streaming URL for one of the primary's media files — see [InstanceLinkClient.mediaStreamUrl]. */
+    fun mediaStreamUrl(mediaId: String): String? = client.mediaStreamUrl(mediaId)
 
     /** Fetches one live picture's bytes — see [InstanceLinkClient.fetchPictureImageBytes]. */
     suspend fun fetchPictureImageBytes(folderId: String, index: Int): ByteArray? =

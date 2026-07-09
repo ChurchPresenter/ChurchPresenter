@@ -402,6 +402,21 @@ class BibleViewModel(
     private var remoteSecondaryBibleCacheFile: File? = null
     private val remoteBibleCacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/bibles")
 
+    /**
+     * Deletes the locally cached copies of the primary's bible files — called when the primary
+     * broadcasts bible_updated/secondary_bible_updated, so the next [setInstanceLinkSource] pass
+     * re-downloads instead of trusting a stale cache forever.
+     */
+    fun invalidateInstanceLinkBibleCache() {
+        val primary = File(remoteBibleCacheDir, "primary.spb")
+        val secondary = File(remoteBibleCacheDir, "secondary.spb")
+        val deleted = primary.delete() or secondary.delete()
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.FOLLOWER, "cache_invalidated",
+            mapOf("kind" to "bible", "deleted" to deleted)
+        )
+    }
+
     /** Called from the owning tab whenever Instance Link connects/disconnects, or the sync mode changes. */
     fun setInstanceLinkSource(
         active: Boolean,
