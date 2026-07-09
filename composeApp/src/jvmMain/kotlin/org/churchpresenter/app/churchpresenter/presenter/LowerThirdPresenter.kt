@@ -5,11 +5,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +28,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.LowerThirdDebugLog
 import org.jetbrains.skia.Bitmap
+import kotlinx.coroutines.delay
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -78,6 +82,37 @@ fun LowerThirdPresenter(
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     if (rawFrames == null && composition == null) return
+
+    // DIAGNOSTIC (temporary — see AGENT.md "lower third disappears mid-playback"): the state
+    // machine driving playback (main.kt's central LaunchedEffect) has been proven correct by prior
+    // logging — it runs a full, uninterrupted playthrough even on runs where the graphic visibly
+    // vanished early. So the failure is somewhere in what THIS composable actually renders with.
+    // These two effects log whether this specific composable instance gets torn down early (onDispose
+    // firing before natural completion — see `rawFrames == null && composition == null` above,
+    // which is exactly what would cause that) and whether its composition/rawFrames inputs go
+    // stale mid-play even while mounted.
+    val instanceId = remember { (0..9999).random() }
+    val currentComposition by rememberUpdatedState(composition)
+    val currentRawFrames by rememberUpdatedState(rawFrames)
+    val currentFrameIdx by rememberUpdatedState(currentFrameIndex)
+
+    DisposableEffect(Unit) {
+        LowerThirdDebugLog.log("LowerThirdPresenter[$instanceId/$outputRole] ENTERED composition")
+        onDispose {
+            LowerThirdDebugLog.log("LowerThirdPresenter[$instanceId/$outputRole] LEFT composition (onDispose)")
+        }
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(500)
+            LowerThirdDebugLog.log(
+                "LowerThirdPresenter[$instanceId/$outputRole] heartbeat: composition=" +
+                    (currentComposition?.let { "present(id=${System.identityHashCode(it)})" } ?: "null") +
+                    " rawFrames=" + (currentRawFrames?.let { "present(${it.size})" } ?: "null") +
+                    " currentFrameIndex=$currentFrameIdx"
+            )
+        }
+    }
 
     val s = appSettings.streamingSettings
     val contentModifier = Modifier
