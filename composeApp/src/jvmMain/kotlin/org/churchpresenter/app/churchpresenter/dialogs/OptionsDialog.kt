@@ -203,7 +203,8 @@ fun OptionsDialog(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
-                                }
+                                },
+                                companionServer = companionServer
                             )
                             1 -> BibleSettingsTab(
                                 settings = currentSettings,

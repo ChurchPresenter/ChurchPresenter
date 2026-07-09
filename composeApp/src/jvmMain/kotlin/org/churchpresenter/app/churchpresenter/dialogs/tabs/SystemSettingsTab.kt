@@ -102,6 +102,7 @@ import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
@@ -130,7 +131,8 @@ fun SystemSettingsTab(
     currentTheme: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit,
     settings: AppSettings = AppSettings(),
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {}
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
+    companionServer: CompanionServer? = null
 ) {
     val scope = rememberCoroutineScope()
     val fileManager = FileManager()
@@ -654,6 +656,10 @@ fun SystemSettingsTab(
                                     val imported = importJsonFormat.decodeFromString(AppSettings.serializer(), json)
                                     val settingsManager = SettingsManager()
                                     settingsManager.saveSettings(imported)
+                                    // Stop the server gracefully so in-flight WebSocket sessions
+                                    // (e.g. a connected companion app) close cleanly instead of
+                                    // hitting a ping timeout when the JVM exits below.
+                                    try { companionServer?.stop() } catch (_: Exception) {}
                                     // Restart the application
                                     val javaBin = System.getProperty("java.home") + "/bin/java"
                                     val command = ProcessHandle.current().info().command().orElse(javaBin)
@@ -707,6 +713,10 @@ fun SystemSettingsTab(
                                 settingsManager.lottiePresetsDir.deleteRecursively()
                             }
                             settingsManager.saveSettings(AppSettings())
+                            // Stop the server gracefully so in-flight WebSocket sessions
+                            // (e.g. a connected companion app) close cleanly instead of
+                            // hitting a ping timeout when the JVM exits below.
+                            try { companionServer?.stop() } catch (_: Exception) {}
                             // Restart the application
                             val javaBin = System.getProperty("java.home") + "/bin/java"
                             val command = ProcessHandle.current().info().command().orElse(javaBin)
