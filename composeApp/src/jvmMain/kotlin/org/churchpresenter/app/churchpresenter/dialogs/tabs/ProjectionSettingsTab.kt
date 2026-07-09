@@ -120,7 +120,9 @@ import churchpresenter.composeapp.generated.resources.vlc_browse
 import churchpresenter.composeapp.generated.resources.vlc_custom_path
 import churchpresenter.composeapp.generated.resources.vlc_path_hint
 import churchpresenter.composeapp.generated.resources.projection_decklink_io_conflict_tooltip
-import churchpresenter.composeapp.generated.resources.browser_source_content_unavailable_tooltip
+import churchpresenter.composeapp.generated.resources.browser_source_fps
+import churchpresenter.composeapp.generated.resources.browser_source_resolution
+import churchpresenter.composeapp.generated.resources.browser_source_website_snapshot_tooltip
 import churchpresenter.composeapp.generated.resources.projection_web_decklink_tooltip
 import churchpresenter.composeapp.generated.resources.vlc_path_invalid
 import churchpresenter.composeapp.generated.resources.window_position
@@ -1185,9 +1187,93 @@ fun ProjectionSettingsTab(
                                 }
                             }
                         }
+                        Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                                Text(
+                                    text = stringResource(Res.string.browser_source_resolution),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            var resolutionExpanded by remember { mutableStateOf(false) }
+                            OutlinedButton(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = { resolutionExpanded = true },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "${output.browserSourceWidth}\u00d7${output.browserSourceHeight}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = resolutionExpanded,
+                                onDismissRequest = { resolutionExpanded = false }
+                            ) {
+                                listOf(1280 to 720, 1920 to 1080, 2560 to 1440, 3840 to 2160).forEach { (w, h) ->
+                                    DropdownMenuItem(
+                                        text = { Text("$w\u00d7$h", style = MaterialTheme.typography.bodySmall) },
+                                        onClick = {
+                                            resolutionExpanded = false
+                                            val updated = output.copy(browserSourceWidth = w, browserSourceHeight = h)
+                                            onSettingsChange { s ->
+                                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        Column(modifier = Modifier.width(cellWidth), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                                Text(
+                                    text = stringResource(Res.string.browser_source_fps),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            var fpsExpanded by remember { mutableStateOf(false) }
+                            OutlinedButton(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = { fpsExpanded = true },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = output.browserSourceFps.toString(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = fpsExpanded,
+                                onDismissRequest = { fpsExpanded = false }
+                            ) {
+                                listOf(10, 15, 24, 30, 60).forEach { fps ->
+                                    DropdownMenuItem(
+                                        text = { Text(fps.toString(), style = MaterialTheme.typography.bodySmall) },
+                                        onClick = {
+                                            fpsExpanded = false
+                                            val updated = output.copy(browserSourceFps = fps)
+                                            onSettingsChange { s ->
+                                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
                         @OptIn(ExperimentalMaterial3Api::class)
                         contentCols.forEach { col ->
-                            val isUnavailableInBrowserSource = col.label == mediaLabel || col.label == "Web"
+                            // Web content on a Browser Source mirrors the main output's snapshot —
+                            // functional, but worth a tooltip explaining when it's actually live.
+                            val isWebSnapshotCol = col.label == "Web"
                             Column(modifier = Modifier.width(cellWidth), horizontalAlignment = Alignment.CenterHorizontally) {
                                 Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
                                     Text(
@@ -1198,15 +1284,7 @@ fun ProjectionSettingsTab(
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
-                                if (isUnavailableInBrowserSource) {
-                                    TooltipBox(
-                                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                                        tooltip = { PlainTooltip { Text(stringResource(Res.string.browser_source_content_unavailable_tooltip)) } },
-                                        state = rememberTooltipState()
-                                    ) {
-                                        Checkbox(checked = false, enabled = false, onCheckedChange = {})
-                                    }
-                                } else {
+                                val checkbox: @Composable () -> Unit = {
                                     Checkbox(
                                         checked = col.getter(output),
                                         enabled = col.enabled(output),
@@ -1217,6 +1295,17 @@ fun ProjectionSettingsTab(
                                             }
                                         }
                                     )
+                                }
+                                if (isWebSnapshotCol) {
+                                    TooltipBox(
+                                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                                        tooltip = { PlainTooltip { Text(stringResource(Res.string.browser_source_website_snapshot_tooltip)) } },
+                                        state = rememberTooltipState()
+                                    ) {
+                                        checkbox()
+                                    }
+                                } else {
+                                    checkbox()
                                 }
                             }
                         }

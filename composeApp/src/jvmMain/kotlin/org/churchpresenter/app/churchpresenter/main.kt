@@ -679,13 +679,21 @@ fun main() {
                     derivedStateOf { presenterManager.browserSourceLocks.value[i] ?: presenterManager.presentingMode.value }
                 }
                 val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
-                val renderer = remember(i) {
+                // Keyed on geometry/fps so a settings change tears the renderer down and builds a
+                // fresh one; registerBrowserSourceFrames then closes connected clients, which
+                // reconnect and reseed with a full frame at the new size.
+                val bsOutput = appSettings.projectionSettings.browserSourceOutputs.getOrNull(i) ?: ScreenAssignment()
+                val renderer = remember(i, bsOutput.browserSourceWidth, bsOutput.browserSourceHeight, bsOutput.browserSourceFps) {
                     BrowserSourceVideoRenderer(
                         presenterManager, appSettingsState, screenAssignmentState, effectiveModeState,
                         outputIndex = i,
                         sttManager = sttManager,
+                        mediaViewModel = mediaViewModel,
                         qaDisplayUrlState = qaDisplayUrlState,
                         serverUrlState = browserSourceServerUrlState,
+                        width = bsOutput.browserSourceWidth,
+                        height = bsOutput.browserSourceHeight,
+                        fps = bsOutput.browserSourceFps,
                     )
                 }
                 LaunchedEffect(renderer) {

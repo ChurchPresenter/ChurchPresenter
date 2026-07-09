@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.alpha
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.composables.keySignal
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import androidx.compose.ui.graphics.toComposeImageBitmap
@@ -32,6 +33,9 @@ fun PresenterScreen(
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
+    // Browser Source scenes blank to transparent pixels (OBS keys the video underneath);
+    // projector windows blank to black — that's what "nothing" looks like on a display.
+    val transparentBlanking = LocalTransparentBlanking.current
 
     val bgSettings = appSettings.backgroundSettings
     // Use lower third defaults when screen is in lower third mode.
@@ -61,9 +65,11 @@ fun PresenterScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // Background layer — black when backgrounds disabled
+        // Background layer — black when backgrounds disabled (transparent in Browser Source scenes)
         if (!showBackground) {
-            Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+            if (!transparentBlanking) {
+                Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+            }
         } else {
             when (bgType) {
                 Constants.BACKGROUND_IMAGE -> {
@@ -91,8 +97,11 @@ fun PresenterScreen(
                     )
                 }
                 Constants.BACKGROUND_TRANSPARENT -> {
-                    // No visible background — black (appears as "nothing" on a projector/display)
-                    Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+                    // No visible background — black (appears as "nothing" on a projector/display);
+                    // genuinely transparent in Browser Source scenes so OBS can key through it
+                    if (!transparentBlanking) {
+                        Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+                    }
                 }
                 else -> {
                     Box(modifier = Modifier.fillMaxSize().background(backgroundColor.copy(alpha = bgOpacity)))

@@ -487,6 +487,55 @@ lottie-web. Not yet verified: an actual ATEM upload (no device configured on the
 
 **Build Status**: ✅ Compiles successfully, zero warnings.
 
+## Browser Source Output Overhaul (July 2026)
+
+**Problem**: the Browser Source path (offscreen `ImageComposeScene` → pixel-diff dirty-rect →
+image encode → WebSocket → overlay-page canvas) lagged the real output windows: MEDIA and
+WEBSITE had no render branch at all (stream went black; settings UI force-disabled those
+checkboxes), "no background"/Transparent rendered solid black (no OBS overlay keying),
+mode switches hard-cut instead of crossfading, resolution/fps were hardcoded 1080p/30, and
+the WS handler had a send race (frame + heartbeat jobs on one session, unsynchronized
+`lastFrame`).
+
+**What changed** (all in `presenter/BrowserSourceVideoRenderer.kt`, `server/CompanionServer.kt`,
+`PresenterScreen.kt`, `presenter/BiblePresenter.kt`, `presenter/SongPresenter.kt`,
+`data/settings/ScreenAssignment.kt`, `dialogs/tabs/ProjectionSettingsTab.kt`, `main.kt`):
+- **True alpha transparency**: new `presenter/LocalTransparentBlanking.kt` CompositionLocal,
+  provided `true` inside the browser-source scene. `PresenterScreen` and BiblePresenter's /
+  SongPresenter's own background layers consult it — "no background" / `BACKGROUND_TRANSPARENT`
+  emit nothing (alpha 0) there instead of black; projector windows still paint black.
+  ⚠️ Two coupled fixes shipped with this — do not revert independently: the overlay JS now
+  does `clearRect` before drawing a *partial* delta (source-over blending of alpha deltas
+  ghosts fade-outs), and `registerBrowserSourceFrames` closes an output's connected WS
+  sessions when its flow is replaced (a session holds the flow captured at connect; after
+  renderer restart the old flow never emits and the heartbeat re-sends a stale frame forever).
+- **MEDIA**: renderer takes `mediaViewModel` and provides `LocalMediaViewModel` in the scene;
+  video draws muted via `MediaPresenter(audioEnabled = false)` — frames come from the single
+  master player's `SharedVideoOutput` (no second VLC pipeline), audio stays on the main output.
+  Audio-only files: background only (same as real windows).
+- **WEBSITE**: mirrors `presenterManager.webSnapshot` (same as LivePreviewPanel) — only live
+  while the Web tab or a real output window hosts the JCEF browser; documented in the
+  settings-UI tooltip (`browser_source_website_snapshot_tooltip`).
+- **Per-output resolution + fps**: `ScreenAssignment.browserSourceWidth/Height/Fps`
+  (defaults 1920/1080/30 keep old settings.json loading); renderer `remember`-keyed on them
+  in main.kt so a change rebuilds it and clients reconnect at the new geometry; dropdowns in
+  Projection settings (720p–4K, 10–60 fps).
+- **Mode crossfade**: same `Crossfade(effectiveMode, tween/snap)` + duration formula as
+  main.kt's real windows; visibility gates moved inside each `when (mode)` branch so the
+  outgoing mode fades instead of vanishing.
+- **JPEG fast path**: `encodeFrame` scans the rect for any non-opaque pixel (early exit);
+  fully opaque → JPEG (several times faster/smaller — what makes continuously-changing MEDIA
+  sustainable), any alpha → PNG. Client sniffs the first payload byte (0x89 PNG / 0xFF JPEG).
+- WS sends are Mutex-serialized; `lastFrame` is an `AtomicReference`; jobs run in the session
+  scope.
+
+**Verified live** (macOS, real app + WS probe + Safari): first full frame at 1920×1080 is
+100% transparent alpha; lower-third playback streams tight dirty-rect deltas (e.g. 428×132
+at the graphic's position) as PNG with anti-aliased alpha edges; overlay page composites
+over the page background with no ghosting. Not yet verified live: JPEG path with an opaque
+background, resolution-change reconnect, MEDIA/WEBSITE/crossfade in OBS — logic traced,
+needs a hands-on pass.
+
 ## Known Issues
 
 **Issue**: Song edits not saving/updating

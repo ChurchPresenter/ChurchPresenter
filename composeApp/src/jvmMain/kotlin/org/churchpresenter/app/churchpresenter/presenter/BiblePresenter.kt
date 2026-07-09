@@ -278,7 +278,9 @@ fun BiblePresenter(
     val effectiveOpacity: Float
 
     if (!showBackground) {
-        effectiveType = Constants.BACKGROUND_COLOR
+        // Browser Source scenes blank to transparent (OBS keying); projector windows to black
+        effectiveType = if (LocalTransparentBlanking.current) Constants.BACKGROUND_TRANSPARENT
+        else Constants.BACKGROUND_COLOR
         effectiveImagePath = ""
         effectiveVideoPath = ""
         backgroundColor = Color.Black

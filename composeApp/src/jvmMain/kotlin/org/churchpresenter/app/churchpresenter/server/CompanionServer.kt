@@ -29,6 +29,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
+import io.ktor.server.websocket.DefaultWebSocketServerSession
 import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.CloseReason
@@ -42,6 +43,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +51,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -98,6 +101,7 @@ import java.net.NetworkInterface
 import java.net.ServerSocket
 import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 import javax.imageio.ImageIO
@@ -834,7 +838,13 @@ class CompanionServer {
     // even on localhost. WebSocket is what the rest of this server already uses for real-time
     // push, and has none of that legacy baggage.)
     @Volatile private var _browserSourceOutputs: List<ScreenAssignment> = emptyList()
-    private val _browserSourceFrameFlows = java.util.concurrent.ConcurrentHashMap<Int, SharedFlow<BrowserSourceFrame>>()
+    private val _browserSourceFrameFlows = ConcurrentHashMap<Int, SharedFlow<BrowserSourceFrame>>()
+
+    // Live WebSocket sessions per output index, so a renderer replacement can close them —
+    // a session holds the flow it captured at connect time, and after re-registration that
+    // old flow never emits again while the heartbeat keeps re-sending its stale last frame.
+    // Closing forces the overlay page to reconnect (2s backoff) and reseed at the new stream.
+    private val _browserSourceSessions = ConcurrentHashMap<Int, MutableSet<DefaultWebSocketServerSession>>()
 
     fun updateBrowserSourceOutputs(outputs: List<ScreenAssignment>) {
         _browserSourceOutputs = outputs
@@ -843,9 +853,25 @@ class CompanionServer {
 
     fun browserSourceOutput(index: Int): ScreenAssignment? = _browserSourceOutputs.getOrNull(index)
 
-    /** Registers (or replaces) the frame delta flow a given output's renderer produces. */
+    /**
+     * Registers (or replaces) the frame delta flow a given output's renderer produces.
+     * Replacing an existing flow (renderer restarted, e.g. after a resolution/fps change)
+     * closes that output's connected sessions so clients reconnect to the new stream.
+     */
     fun registerBrowserSourceFrames(index: Int, frames: SharedFlow<BrowserSourceFrame>) {
-        _browserSourceFrameFlows[index] = frames
+        val previous = _browserSourceFrameFlows.put(index, frames)
+        if (previous != null && previous !== frames) {
+            val stranded = _browserSourceSessions.remove(index) ?: return
+            scope.launch {
+                stranded.forEach { session ->
+                    try {
+                        session.close(CloseReason(CloseReason.Codes.SERVICE_RESTART, "Renderer restarted"))
+                    } catch (_: Exception) {
+                        // already gone
+                    }
+                }
+            }
+        }
     }
 
     /** Pure check for the given output's independent Browser Source API-key requirement (separate from [_apiKeyEnabled]) — no response side effects, usable from both HTTP and WebSocket routes. */
@@ -867,7 +893,9 @@ class CompanionServer {
     /**
      * Packs one [BrowserSourceFrame] into a single WebSocket binary message: a fixed 24-byte
      * big-endian header (x, y, rectWidth, rectHeight, fullWidth, fullHeight — six Int32s) followed
-     * by the raw PNG bytes. The client reads this with a matching `DataView`. Using WebSocket
+     * by the raw image bytes — PNG when the frame carries transparency, JPEG when fully opaque
+     * (the client sniffs the first payload byte: 0x89 = PNG, 0xFF = JPEG). The client reads this
+     * with a matching `DataView`. Using WebSocket
      * binary messages instead of HTTP multipart/x-mixed-replace means each frame's boundary is
      * handled natively by the WebSocket protocol — no manual buffer/boundary parsing needed on
      * either side, and no dependence on a legacy MIME type with inconsistent engine support.
@@ -3483,23 +3511,39 @@ class CompanionServer {
                         close(CloseReason(CloseReason.Codes.TRY_AGAIN_LATER, "Renderer not ready"))
                         return@webSocket
                     }
+                    // Track the session so registerBrowserSourceFrames can close it if this
+                    // output's renderer is replaced (the captured `frames` flow goes dead then).
+                    val sessions = _browserSourceSessions.computeIfAbsent(index) {
+                        ConcurrentHashMap.newKeySet()
+                    }
+                    sessions.add(this)
                     // A frame is only ever emitted on a real content change, so a static slide
                     // can leave this connection completely silent for minutes. Safari (and
                     // plenty of consumer routers doing NAT connection tracking) have been
                     // observed killing an idle streaming connection after roughly 30-60s of no
                     // data. Re-sending the last known frame on a timer keeps it alive; the client
                     // draws it identically to before since it's the exact same bytes/rect.
-                    var lastFrame: BrowserSourceFrame? = null
-                    val frameJob = scope.launch {
-                        frames.collect { frame ->
-                            lastFrame = frame
+                    // Sends are Mutex-serialized: the frame collector and the heartbeat run in
+                    // separate coroutines, and a WebSocket session does not allow concurrent send.
+                    val lastFrame = AtomicReference<BrowserSourceFrame?>(null)
+                    val sendMutex = Mutex()
+                    suspend fun sendFrame(frame: BrowserSourceFrame) {
+                        sendMutex.withLock {
                             send(Frame.Binary(true, encodeBrowserSourceFrameMessage(frame)))
                         }
                     }
-                    val heartbeatJob = scope.launch {
+                    // Launched in the session scope (not the server scope) so they can never
+                    // outlive this connection; the finally-cancel below is belt-and-braces.
+                    val frameJob = launch {
+                        frames.collect { frame ->
+                            lastFrame.set(frame)
+                            sendFrame(frame)
+                        }
+                    }
+                    val heartbeatJob = launch {
                         while (true) {
-                            kotlinx.coroutines.delay(15_000)
-                            lastFrame?.let { send(Frame.Binary(true, encodeBrowserSourceFrameMessage(it))) }
+                            delay(15_000)
+                            lastFrame.get()?.let { sendFrame(it) }
                         }
                     }
                     try {
@@ -3511,6 +3555,7 @@ class CompanionServer {
                     } catch (_: Exception) {
                         // client disconnected
                     } finally {
+                        sessions.remove(this)
                         frameJob.cancel()
                         heartbeatJob.cancel()
                     }
@@ -4266,7 +4311,9 @@ async function drawFrame(pngBytes,rx,ry,rw,rh,fullW,fullH){
   // any delta until the first full frame arrives, so it never shows a corrupt/torn draw.
   if(!hasFullFrame && !isFullFrame)return;
   try{
-    const blob=new Blob([pngBytes],{type:'image/png'});
+    // Payload is PNG (transparency) or JPEG (fully opaque frames) — sniff the first byte.
+    const mime = pngBytes[0]===0xFF ? 'image/jpeg' : 'image/png';
+    const blob=new Blob([pngBytes],{type:mime});
     const bitmap=await createImageBitmap(blob);
     if(isFullFrame){
       if(!offscreen || offscreen.width!==fullW || offscreen.height!==fullH){
@@ -4277,6 +4324,9 @@ async function drawFrame(pngBytes,rx,ry,rw,rh,fullW,fullH){
       offscreenCtx.drawImage(bitmap,0,0);
       hasFullFrame=true;
     }else{
+      // Replace, don't blend: frames carry real alpha, and source-over compositing a delta
+      // whose pixels became MORE transparent (e.g. a fade-out) would ghost over stale pixels.
+      offscreenCtx.clearRect(rx,ry,rw,rh);
       offscreenCtx.drawImage(bitmap,rx,ry);
     }
     bitmap.close();

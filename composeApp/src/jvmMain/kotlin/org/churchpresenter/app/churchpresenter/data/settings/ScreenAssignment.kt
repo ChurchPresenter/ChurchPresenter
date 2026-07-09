@@ -34,7 +34,10 @@ data class ScreenAssignment(
     val showBibleBackground: Boolean = true, // additional layer on top of showFullscreenBackground/showLowerThirdBackground
     val showSongsBackground: Boolean = true, // additional layer on top of showFullscreenBackground/showLowerThirdBackground
     val browserSourceApiKeyRequired: Boolean = false, // only used by ProjectionSettings.browserSourceOutputs entries
-    val browserSourceEnabled: Boolean = true // only used by ProjectionSettings.browserSourceOutputs entries
+    val browserSourceEnabled: Boolean = true, // only used by ProjectionSettings.browserSourceOutputs entries
+    val browserSourceWidth: Int = 1920, // only used by ProjectionSettings.browserSourceOutputs entries
+    val browserSourceHeight: Int = 1080, // only used by ProjectionSettings.browserSourceOutputs entries
+    val browserSourceFps: Int = 30 // max sampling fps; only changed frames are actually encoded
 ) {
     val showBible: Boolean get() = bibleMode != Constants.SONG_LANG_OFF
     val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF

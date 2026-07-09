@@ -412,6 +412,9 @@
     <string name="projection_content_lt_background">Lower Third Background</string>
     <string name="projection_web_decklink_tooltip">Web browser cannot render on DeckLink outputs</string>
     <string name="browser_source_content_unavailable_tooltip">Not available for Browser Source output yet</string>
+    <string name="browser_source_resolution">Resolution</string>
+    <string name="browser_source_fps">Max FPS</string>
+    <string name="browser_source_website_snapshot_tooltip">Mirrors the website shown on the main output — only live while the Web tab or an output window is displaying it</string>
     <string name="projection_decklink_io_conflict_tooltip">Also used for input — may not work on devices without simultaneous I/O</string>
     <string name="projection_web_go_live_tooltip">Requires a regular display (non-DeckLink) with Web enabled in projection settings</string>
 

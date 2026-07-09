@@ -1,11 +1,19 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -15,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.sp
@@ -32,6 +41,8 @@ import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import java.awt.image.BufferedImage
@@ -45,12 +56,17 @@ import javax.imageio.ImageIO
  * presenter composables used everywhere else in the app — no reimplementation drift.
  *
  * Supported content types: Bible, Songs/Lyrics, Announcements, Pictures, Presentation slides,
- * Lower Third (Lottie graphics), Canvas (scene compositor), Q&A, STT captions, Dictionary —
- * plus Stage Monitor as a whole separate display-mode layout. Not yet supported: Media
- * (video/audio — would need `MediaViewModel`/`LocalMediaViewModel`, and unlike the others,
- * real video never settles into an "unchanged" frame, so it would force continuous encoding
- * at the full tick rate rather than only-on-change) and Website (JCEF-rendered, would need
- * its own off-screen browser instance rather than a Compose composable).
+ * Lower Third (Lottie graphics), Canvas (scene compositor), Q&A, STT captions, Dictionary,
+ * Media (muted — video frames come from the single master player via SharedVideoOutput;
+ * audio stays on the main output; note real video never settles into an "unchanged" frame,
+ * so MEDIA encodes continuously at the tick rate rather than only-on-change) and Website
+ * (mirrors [PresenterManager.webSnapshot], which is only pushed while the Web tab or a real
+ * output window hosts the live JCEF browser — a Browser Source alone cannot drive a site) —
+ * plus Stage Monitor as a whole separate display-mode layout.
+ *
+ * The scene provides [LocalTransparentBlanking] = true, so "no background"/Transparent
+ * renders genuinely transparent pixels (real alpha survives PNG encoding) for OBS keying,
+ * instead of the black a projector window paints.
  *
  * Only encodes and emits a frame when the rendered pixels actually changed since the last
  * tick, so a static slide costs one encode, not continuous encoding — this is what keeps a
@@ -86,14 +102,20 @@ class BrowserSourceVideoRenderer(
     private val effectiveModeState: State<Presenting>,
     private val outputIndex: Int = 0,
     private val sttManager: STTManager? = null,
+    private val mediaViewModel: MediaViewModel? = null,
     private val qaDisplayUrlState: State<String>? = null,
     private val serverUrlState: State<String>? = null,
     private val width: Int = 1920,
     private val height: Int = 1080,
+    fps: Int = 30,
 ) {
+    // Sampling cadence from the per-output fps setting; only changed frames are actually
+    // encoded/emitted, so this is a ceiling, not a constant cost.
+    private val tickDelayMs = 1000L / fps.coerceIn(1, 60)
+    // Keep the virtual animation clock in step with real sampling time
+    private val frameNanos = tickDelayMs * 1_000_000L
+
     private companion object {
-        const val TICK_DELAY_MS = 33L // ~30fps sampling; only changed frames are actually encoded/emitted
-        const val FRAME_NANOS = TICK_DELAY_MS * 1_000_000L // keep the virtual animation clock in step with real sampling time
         // DROP_OLDEST (below) is only safe for dirty-rect deltas because of this: each delta is
         // only valid applied on top of the exact state the previous delta produced, so a silently
         // dropped intermediate delta leaves a connected client permanently wrong in that region
@@ -123,166 +145,218 @@ class BrowserSourceVideoRenderer(
         if (job != null) return
         job = scope.launch(Dispatchers.Default) {
             val scene = ImageComposeScene(width, height, Density(1f)) {
-                val appSettings by appSettingsState
-                val screenAssignment by screenAssignmentState
-                val effectiveMode by effectiveModeState
-                val isIdentifying = presenterManager.browserSourceIdentifying.value.contains(outputIndex)
-                val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
-                val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
-                val outputRole = Constants.OUTPUT_ROLE_NORMAL
-                // General per-output background toggle — same field/logic as native output
-                // (main.kt). showBibleBackground/showSongsBackground below are an additional
-                // layer on top of this, not a replacement for it.
-                val showBg = if (isLowerThird) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
+                // Transparent blanking (real alpha for OBS keying) + the media view model
+                // for MEDIA playback — the same CompositionLocal the real windows provide.
+                CompositionLocalProvider(
+                    LocalTransparentBlanking provides true,
+                    LocalMediaViewModel provides mediaViewModel
+                ) {
+                    val appSettings by appSettingsState
+                    val screenAssignment by screenAssignmentState
+                    val effectiveMode by effectiveModeState
+                    val isIdentifying = presenterManager.browserSourceIdentifying.value.contains(outputIndex)
+                    val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
+                    val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
+                    val outputRole = Constants.OUTPUT_ROLE_NORMAL
+                    // General per-output background toggle — same field/logic as native output
+                    // (main.kt). showBibleBackground/showSongsBackground below are an additional
+                    // layer on top of this, not a replacement for it.
+                    val showBg = if (isLowerThird) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
 
-                if (isIdentifying) {
-                    Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.75f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        BasicText(
-                            text = "Browser Source ${outputIndex + 1}",
-                            style = TextStyle(
-                                color = Color.White,
-                                fontSize = 96.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
+                    if (isIdentifying) {
+                        Box(
+                            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.75f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            BasicText(
+                                text = "Browser Source ${outputIndex + 1}",
+                                style = TextStyle(
+                                    color = Color.White,
+                                    fontSize = 96.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
                             )
-                        )
-                    }
-                } else if (isStageMonitor) {
-                    StageMonitorScreen(
-                        sm = appSettings.stageMonitorSettings,
-                        presentingMode = effectiveMode,
-                        currentLyricSection = presenterManager.displayedLyricSection.value,
-                        allLyricSections = presenterManager.allLyricSections.value,
-                        songDisplaySectionIndex = presenterManager.songDisplaySectionIndex.value,
-                        displayedVerses = presenterManager.displayedVerses.value,
-                        nextVerses = presenterManager.nextVerses.value,
-                        announcementText = presenterManager.displayedAnnouncementText.value,
-                        displayedImagePath = presenterManager.displayedImagePath.value,
-                        displayedSlide = presenterManager.displayedSlide.value,
-                        presenterNotes = presenterManager.presenterNotes.value,
-                        activeScene = presenterManager.activeScene.value,
-                        displayedQuestion = presenterManager.displayedQuestion.value,
-                        qaSettings = appSettings.qaSettings,
-                        displayedDictionaryEntry = presenterManager.displayedDictionaryEntry.value,
-                        dictionarySettings = appSettings.dictionarySettings
-                    )
-                } else {
-                    PresenterScreen(
-                        appSettings = appSettings,
-                        outputRole = outputRole,
-                        isLowerThird = isLowerThird,
-                        showBackground = showBg
-                    ) {
-                        val showsContent = when (effectiveMode) {
-                            Presenting.BIBLE -> screenAssignment.showBible
-                            Presenting.LYRICS -> screenAssignment.showSongs
-                            Presenting.PICTURES, Presenting.PRESENTATION -> screenAssignment.showPictures
-                            Presenting.ANNOUNCEMENTS -> screenAssignment.showAnnouncements
-                            Presenting.LOWER_THIRD -> screenAssignment.showStreaming
-                            Presenting.CANVAS -> true
-                            Presenting.QA -> screenAssignment.showQA
-                            Presenting.STT -> screenAssignment.showSTT
-                            Presenting.DICTIONARY -> screenAssignment.showDictionary
-                            else -> false
                         }
-                        if (effectiveMode != Presenting.NONE && showsContent) {
-                            when (effectiveMode) {
-                                Presenting.BIBLE -> BiblePresenter(
-                                    selectedVerses = presenterManager.displayedVerses.value,
-                                    appSettings = appSettings,
-                                    isLowerThird = isLowerThird,
-                                    outputRole = outputRole,
-                                    transitionAlpha = presenterManager.bibleTransitionAlpha.value,
-                                    showBackground = showBg && screenAssignment.showBibleBackground,
-                                    crossfadeEnabled = appSettings.bibleSettings.crossfade,
-                                    languageMode = screenAssignment.bibleMode
-                                )
-                                Presenting.LYRICS -> SongPresenter(
-                                    lyricSection = presenterManager.displayedLyricSection.value,
-                                    appSettings = appSettings,
-                                    isLowerThird = isLowerThird,
-                                    outputRole = outputRole,
-                                    transitionAlpha = presenterManager.songTransitionAlpha.value,
-                                    displayLineIndex = presenterManager.songDisplayLineIndex.value,
-                                    lookAheadEnabled = screenAssignment.songLookAhead,
-                                    allLyricSections = presenterManager.allLyricSections.value,
-                                    displaySectionIndex = presenterManager.songDisplaySectionIndex.value,
-                                    showBackground = showBg && screenAssignment.showSongsBackground,
-                                    crossfadeEnabled = appSettings.songSettings.crossfade,
-                                    languageOverride = screenAssignment.songMode
-                                )
-                                Presenting.PICTURES -> PicturePresenter(
-                                    imagePath = presenterManager.displayedImagePath.value,
-                                    previousImagePath = presenterManager.previousDisplayedImagePath.value,
-                                    transitionAlpha = presenterManager.pictureTransitionAlpha.value,
-                                    slideOffset = presenterManager.pictureSlideOffset.value,
-                                    animationType = presenterManager.animationType.value
-                                )
-                                Presenting.ANNOUNCEMENTS -> AnnouncementsPresenter(
-                                    text = presenterManager.displayedAnnouncementText.value,
-                                    appSettings = appSettings,
-                                    outputRole = outputRole,
-                                    transitionAlpha = presenterManager.announcementTransitionAlpha.value,
-                                    showBackground = showBg
-                                )
-                                Presenting.PRESENTATION -> {
-                                    val frozen = presenterManager.slideFrozen.value
-                                    SlidePresenter(
-                                        slide = if (frozen) null else presenterManager.displayedSlide.value,
-                                        previousSlide = if (frozen) null else presenterManager.previousDisplayedSlide.value,
-                                        transitionAlpha = presenterManager.slideTransitionAlpha.value,
-                                        slideOffset = presenterManager.slideSlideOffset.value,
-                                        animationType = presenterManager.animationType.value,
-                                        outputRole = outputRole
-                                    )
+                    } else if (isStageMonitor) {
+                        StageMonitorScreen(
+                            sm = appSettings.stageMonitorSettings,
+                            presentingMode = effectiveMode,
+                            currentLyricSection = presenterManager.displayedLyricSection.value,
+                            allLyricSections = presenterManager.allLyricSections.value,
+                            songDisplaySectionIndex = presenterManager.songDisplaySectionIndex.value,
+                            displayedVerses = presenterManager.displayedVerses.value,
+                            nextVerses = presenterManager.nextVerses.value,
+                            announcementText = presenterManager.displayedAnnouncementText.value,
+                            displayedImagePath = presenterManager.displayedImagePath.value,
+                            displayedSlide = presenterManager.displayedSlide.value,
+                            presenterNotes = presenterManager.presenterNotes.value,
+                            activeScene = presenterManager.activeScene.value,
+                            displayedQuestion = presenterManager.displayedQuestion.value,
+                            qaSettings = appSettings.qaSettings,
+                            displayedDictionaryEntry = presenterManager.displayedDictionaryEntry.value,
+                            dictionarySettings = appSettings.dictionarySettings
+                        )
+                    } else {
+                        PresenterScreen(
+                            appSettings = appSettings,
+                            outputRole = outputRole,
+                            isLowerThird = isLowerThird,
+                            showBackground = showBg
+                        ) {
+                            // Mode-to-mode crossfade — same behavior and duration formula as the
+                            // real output windows (main.kt): fades only when bible/song crossfade
+                            // is enabled and neither the outgoing nor incoming mode is NONE.
+                            val modeCrossfadeDuration = maxOf(
+                                if (appSettings.bibleSettings.crossfade) appSettings.bibleSettings.transitionDuration.toInt() else 0,
+                                if (appSettings.songSettings.crossfade) appSettings.songSettings.transitionDuration.toInt() else 0
+                            ).coerceAtLeast(100)
+                            var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
+                            val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) &&
+                                effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
+                            if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
+                            Crossfade(
+                                targetState = effectiveMode,
+                                animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
+                            ) { mode ->
+                                val showsContent = when (mode) {
+                                    Presenting.BIBLE -> screenAssignment.showBible
+                                    Presenting.LYRICS -> screenAssignment.showSongs
+                                    Presenting.PICTURES, Presenting.PRESENTATION -> screenAssignment.showPictures
+                                    Presenting.ANNOUNCEMENTS -> screenAssignment.showAnnouncements
+                                    Presenting.LOWER_THIRD -> screenAssignment.showStreaming
+                                    Presenting.MEDIA -> screenAssignment.showMedia
+                                    Presenting.WEBSITE -> screenAssignment.showWebsite
+                                    Presenting.CANVAS -> true
+                                    Presenting.QA -> screenAssignment.showQA
+                                    Presenting.STT -> screenAssignment.showSTT
+                                    Presenting.DICTIONARY -> screenAssignment.showDictionary
+                                    else -> false
                                 }
-                                Presenting.LOWER_THIRD -> {
-                                    val lottieJsonContent = presenterManager.lottieJsonContent.value
-                                    val lottieComposition by rememberLottieComposition(key = lottieJsonContent) {
-                                        LottieCompositionSpec.JsonString(lottieJsonContent.ifBlank { "{}" })
-                                    }
-                                    LowerThirdPresenter(
-                                        composition = lottieComposition,
-                                        progress = { presenterManager.lottieProgress.value },
-                                        appSettings = appSettings,
-                                        outputRole = outputRole,
-                                        frame = presenterManager.lottieFrame.value
-                                    )
-                                }
-                                Presenting.CANVAS -> ScenePresenter(scene = presenterManager.activeScene.value)
-                                Presenting.QA -> {
-                                    val showQRCode = presenterManager.showQRCodeOnDisplay.value
-                                    val qaTransitionAlpha = presenterManager.qaTransitionAlpha.value
-                                    if (showQRCode) {
-                                        val base = qaDisplayUrlState?.value?.ifEmpty { serverUrlState?.value ?: "" } ?: (serverUrlState?.value ?: "")
-                                        QAQRCodePresenter(url = "$base/qa", qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
-                                    } else {
-                                        QAPresenter(question = presenterManager.displayedQuestion.value, qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
-                                    }
-                                }
-                                Presenting.STT -> {
-                                    sttManager?.let { stt ->
-                                        STTPresenter(
-                                            segments = stt.segments,
-                                            inProgressText = stt.inProgressText.value,
-                                            translationSegments = stt.translationSegments,
-                                            inProgressTranslation = stt.inProgressTranslation.value,
-                                            highlightedWords = stt.highlightedWords,
-                                            sttSettings = appSettings.sttSettings,
-                                            outputRole = outputRole
+                                if (mode != Presenting.NONE && showsContent) {
+                                    when (mode) {
+                                        Presenting.BIBLE -> BiblePresenter(
+                                            selectedVerses = presenterManager.displayedVerses.value,
+                                            appSettings = appSettings,
+                                            isLowerThird = isLowerThird,
+                                            outputRole = outputRole,
+                                            transitionAlpha = presenterManager.bibleTransitionAlpha.value,
+                                            showBackground = showBg && screenAssignment.showBibleBackground,
+                                            crossfadeEnabled = appSettings.bibleSettings.crossfade,
+                                            languageMode = screenAssignment.bibleMode
                                         )
+                                        Presenting.LYRICS -> SongPresenter(
+                                            lyricSection = presenterManager.displayedLyricSection.value,
+                                            appSettings = appSettings,
+                                            isLowerThird = isLowerThird,
+                                            outputRole = outputRole,
+                                            transitionAlpha = presenterManager.songTransitionAlpha.value,
+                                            displayLineIndex = presenterManager.songDisplayLineIndex.value,
+                                            lookAheadEnabled = screenAssignment.songLookAhead,
+                                            allLyricSections = presenterManager.allLyricSections.value,
+                                            displaySectionIndex = presenterManager.songDisplaySectionIndex.value,
+                                            showBackground = showBg && screenAssignment.showSongsBackground,
+                                            crossfadeEnabled = appSettings.songSettings.crossfade,
+                                            languageOverride = screenAssignment.songMode
+                                        )
+                                        Presenting.PICTURES -> PicturePresenter(
+                                            imagePath = presenterManager.displayedImagePath.value,
+                                            previousImagePath = presenterManager.previousDisplayedImagePath.value,
+                                            transitionAlpha = presenterManager.pictureTransitionAlpha.value,
+                                            slideOffset = presenterManager.pictureSlideOffset.value,
+                                            animationType = presenterManager.animationType.value
+                                        )
+                                        Presenting.ANNOUNCEMENTS -> AnnouncementsPresenter(
+                                            text = presenterManager.displayedAnnouncementText.value,
+                                            appSettings = appSettings,
+                                            outputRole = outputRole,
+                                            transitionAlpha = presenterManager.announcementTransitionAlpha.value,
+                                            showBackground = showBg
+                                        )
+                                        Presenting.PRESENTATION -> {
+                                            val frozen = presenterManager.slideFrozen.value
+                                            SlidePresenter(
+                                                slide = if (frozen) null else presenterManager.displayedSlide.value,
+                                                previousSlide = if (frozen) null else presenterManager.previousDisplayedSlide.value,
+                                                transitionAlpha = presenterManager.slideTransitionAlpha.value,
+                                                slideOffset = presenterManager.slideSlideOffset.value,
+                                                animationType = presenterManager.animationType.value,
+                                                outputRole = outputRole
+                                            )
+                                        }
+                                        Presenting.LOWER_THIRD -> {
+                                            val lottieJsonContent = presenterManager.lottieJsonContent.value
+                                            val lottieComposition by rememberLottieComposition(key = lottieJsonContent) {
+                                                LottieCompositionSpec.JsonString(lottieJsonContent.ifBlank { "{}" })
+                                            }
+                                            LowerThirdPresenter(
+                                                composition = lottieComposition,
+                                                progress = { presenterManager.lottieProgress.value },
+                                                appSettings = appSettings,
+                                                outputRole = outputRole,
+                                                frame = presenterManager.lottieFrame.value
+                                            )
+                                        }
+                                        Presenting.MEDIA -> {
+                                            // Same rule as the real output (main.kt): audio-only files
+                                            // show background only; video draws muted — frames come from
+                                            // the master player via SharedVideoOutput, audio stays on the
+                                            // main output's audio device.
+                                            if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
+                                                MediaPresenter(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    audioEnabled = false,
+                                                    transitionAlpha = presenterManager.mediaTransitionAlpha.value
+                                                )
+                                            }
+                                        }
+                                        Presenting.WEBSITE -> {
+                                            // Mirror of the live JCEF browser's periodic snapshot — only
+                                            // updates while the Web tab or a real output window shows the
+                                            // site (a Browser Source alone cannot drive a website). No
+                                            // snapshot yet -> nothing (transparent).
+                                            presenterManager.webSnapshot.value?.let { snapshot ->
+                                                Image(
+                                                    bitmap = snapshot,
+                                                    contentDescription = null,
+                                                    contentScale = ContentScale.FillBounds,
+                                                    modifier = Modifier.fillMaxSize()
+                                                )
+                                            }
+                                        }
+                                        Presenting.CANVAS -> ScenePresenter(scene = presenterManager.activeScene.value)
+                                        Presenting.QA -> {
+                                            val showQRCode = presenterManager.showQRCodeOnDisplay.value
+                                            val qaTransitionAlpha = presenterManager.qaTransitionAlpha.value
+                                            if (showQRCode) {
+                                                val base = qaDisplayUrlState?.value?.ifEmpty { serverUrlState?.value ?: "" } ?: (serverUrlState?.value ?: "")
+                                                QAQRCodePresenter(url = "$base/qa", qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
+                                            } else {
+                                                QAPresenter(question = presenterManager.displayedQuestion.value, qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
+                                            }
+                                        }
+                                        Presenting.STT -> {
+                                            sttManager?.let { stt ->
+                                                STTPresenter(
+                                                    segments = stt.segments,
+                                                    inProgressText = stt.inProgressText.value,
+                                                    translationSegments = stt.translationSegments,
+                                                    inProgressTranslation = stt.inProgressTranslation.value,
+                                                    highlightedWords = stt.highlightedWords,
+                                                    sttSettings = appSettings.sttSettings,
+                                                    outputRole = outputRole
+                                                )
+                                            }
+                                        }
+                                        Presenting.DICTIONARY -> DictionaryPresenter(
+                                            entry = presenterManager.displayedDictionaryEntry.value,
+                                            dictionarySettings = appSettings.dictionarySettings,
+                                            outputRole = outputRole,
+                                            transitionAlpha = 1f
+                                        )
+                                        Presenting.NONE -> {}
                                     }
                                 }
-                                Presenting.DICTIONARY -> DictionaryPresenter(
-                                    entry = presenterManager.displayedDictionaryEntry.value,
-                                    dictionarySettings = appSettings.dictionarySettings,
-                                    outputRole = outputRole,
-                                    transitionAlpha = 1f
-                                )
-                                else -> {}
                             }
                         }
                     }
@@ -296,7 +370,7 @@ class BrowserSourceVideoRenderer(
                 var lastSeenSubscriberCount = 0
                 var lastFullFrameAtMs = 0L
                 while (true) {
-                    timeNanos += FRAME_NANOS
+                    timeNanos += frameNanos
                     Snapshot.sendApplyNotifications()
                     val img = scene.render(timeNanos)
                     try {
@@ -326,20 +400,20 @@ class BrowserSourceVideoRenderer(
                     if (contentChanged || newSubscriberJoined || periodicReseedDue) {
                         val forceFullFrame = previous == null || newSubscriberJoined || periodicReseedDue
                         val frame = if (forceFullFrame) {
-                            BrowserSourceFrame(0, 0, width, height, width, height, encodePng(intBuf, width, height))
+                            BrowserSourceFrame(0, 0, width, height, width, height, encodeFrame(intBuf, width, height))
                         } else {
                             val rect = computeDirtyRect(intBuf, previous, width, height)
                             val cropped = cropPixels(intBuf, width, rect.x, rect.y, rect.w, rect.h)
                             BrowserSourceFrame(
                                 rect.x, rect.y, rect.w, rect.h, width, height,
-                                encodePng(cropped, rect.w, rect.h)
+                                encodeFrame(cropped, rect.w, rect.h)
                             )
                         }
                         frames.emit(frame)
                         if (forceFullFrame) lastFullFrameAtMs = elapsedMs
                         if (contentChanged) lastBuf = intBuf.copyOf()
                     }
-                    delay(TICK_DELAY_MS)
+                    delay(tickDelayMs)
                 }
             } finally {
                 scene.close()
@@ -404,11 +478,33 @@ class BrowserSourceVideoRenderer(
         return out
     }
 
-    private fun encodePng(argb: IntArray, w: Int, h: Int): ByteArray {
-        val image = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
-        image.setRGB(0, 0, w, h, argb, 0, w)
+    /**
+     * Encodes a frame rectangle: JPEG when every pixel is fully opaque (several times faster
+     * to encode and far smaller — what keeps continuously-changing MEDIA video sustainable at
+     * the tick rate), PNG whenever any transparency is present (JPEG has no alpha channel and
+     * transparency is the whole point of an overlay). The client sniffs the payload's first
+     * byte (0x89 = PNG, 0xFF = JPEG) — see browserSourceOverlayPageHtml in CompanionServer.
+     */
+    private fun encodeFrame(argb: IntArray, w: Int, h: Int): ByteArray {
+        // Early exit on the first non-opaque pixel — overlay-style frames bail almost
+        // immediately; a fully opaque frame (pictures, slides, video) costs one linear scan.
+        var fullyOpaque = true
+        for (px in argb) {
+            if (px ushr 24 != 0xFF) {
+                fullyOpaque = false
+                break
+            }
+        }
         val out = ByteArrayOutputStream()
-        ImageIO.write(image, "png", out)
+        if (fullyOpaque) {
+            val image = BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
+            image.setRGB(0, 0, w, h, argb, 0, w)
+            ImageIO.write(image, "jpg", out)
+        } else {
+            val image = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
+            image.setRGB(0, 0, w, h, argb, 0, w)
+            ImageIO.write(image, "png", out)
+        }
         return out.toByteArray()
     }
 }
