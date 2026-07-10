@@ -218,6 +218,14 @@ fun PicturesTab(
     /** Instance Link Controller mode — non-null only when connected and controlling. See
      *  PicturesViewModel.goLive for why this always sends the whole folder via PROJECT. */
     onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
+    /** Instance Link Controller mode — advance/retreat whatever the primary currently has live, no
+     *  id needed. Non-null only when connected and controlling. */
+    onInstanceLinkSendNextPicture: (() -> Unit)? = null,
+    onInstanceLinkSendPreviousPicture: (() -> Unit)? = null,
+    /** Fetches one image's raw bytes from the Instance Link primary by folder hash + index — non-null
+     *  only while connected. Used when a mirrored schedule item's folderPath doesn't resolve on this
+     *  machine (e.g. a network drive mounted differently, or not mounted at all, here). */
+    instanceLinkFetchPictureImageBytes: (suspend (folderId: String, index: Int) -> ByteArray?)? = null,
     selectedPictureItem: ScheduleItem.PictureItem? = null,
     presenterManager: PresenterManager? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
@@ -244,6 +252,19 @@ fun PicturesTab(
             if (folder.exists() && folder.isDirectory) {
                 viewModel.selectFolder(folder)
                 focusRequester.requestFocus()
+            } else if (instanceLinkFetchPictureImageBytes != null) {
+                // A mirrored schedule item's local path only exists on the primary's disk (e.g. a
+                // network drive mounted differently, or not mounted at all, here) — fetch bytes over
+                // Instance Link instead, same reasoning as MediaTab's instanceLinkMediaStreamUrl.
+                val folderId = pictureItem.folderPath.hashCode().toUInt().toString(16)
+                viewModel.loadPictureFromRemote(
+                    folderId = folderId,
+                    folderPath = pictureItem.folderPath,
+                    imageCount = pictureItem.imageCount,
+                    presenterManager = presenterManager,
+                    fetchBytes = { index -> instanceLinkFetchPictureImageBytes(folderId, index) }
+                )
+                focusRequester.requestFocus()
             }
         }
     }
@@ -268,25 +289,37 @@ fun PicturesTab(
             .focusRequester(focusRequester)
             .focusable()
             .onPreviewKeyEvent { keyEvent ->
-                if (keyEvent.type == KeyEventType.KeyDown && viewModel.images.isNotEmpty()) {
-                    val columnCount = (gridState.layoutInfo.visibleItemsInfo.maxOfOrNull { it.column } ?: 0) + 1
-                    when (keyEvent.key) {
-                        Key.DirectionLeft -> { viewModel.previousImage(); true }
-                        Key.DirectionRight -> { viewModel.nextImage(); true }
-                        Key.DirectionUp -> {
-                            val target = viewModel.selectedImageIndex - columnCount
-                            if (target >= 0) viewModel.selectImage(target)
-                            true
+                if (keyEvent.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                if (viewModel.images.isEmpty()) {
+                    // Instance Link Controller mode: next/prev must still reach the primary's own
+                    // live folder even though this Controller's own list is empty — the normal case,
+                    // since Controller mode doesn't mirror the primary's content.
+                    val hasInstanceLinkNav = onInstanceLinkSendNextPicture != null || onInstanceLinkSendPreviousPicture != null
+                    return@onPreviewKeyEvent if (hasInstanceLinkNav) {
+                        when (keyEvent.key) {
+                            Key.DirectionLeft -> { viewModel.previousImage(onInstanceLinkSendPreviousPicture); true }
+                            Key.DirectionRight -> { viewModel.nextImage(onInstanceLinkSendNextPicture); true }
+                            else -> false
                         }
-                        Key.DirectionDown -> {
-                            val target = viewModel.selectedImageIndex + columnCount
-                            if (target < viewModel.images.size) viewModel.selectImage(target)
-                            true
-                        }
-                        Key.Spacebar -> { viewModel.togglePlayPause(); true }
-                        else -> false
+                    } else false
+                }
+                val columnCount = (gridState.layoutInfo.visibleItemsInfo.maxOfOrNull { it.column } ?: 0) + 1
+                when (keyEvent.key) {
+                    Key.DirectionLeft -> { viewModel.previousImage(onInstanceLinkSendPreviousPicture); true }
+                    Key.DirectionRight -> { viewModel.nextImage(onInstanceLinkSendNextPicture); true }
+                    Key.DirectionUp -> {
+                        val target = viewModel.selectedImageIndex - columnCount
+                        if (target >= 0) viewModel.selectImage(target)
+                        true
                     }
-                } else false
+                    Key.DirectionDown -> {
+                        val target = viewModel.selectedImageIndex + columnCount
+                        if (target < viewModel.images.size) viewModel.selectImage(target)
+                        true
+                    }
+                    Key.Spacebar -> { viewModel.togglePlayPause(); true }
+                    else -> false
+                }
             }
     ) {
         // ── Folder bar ────────────────────────────────────────────────
@@ -460,8 +493,8 @@ fun PicturesTab(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(
-                        onClick = { viewModel.previousImage() },
-                        enabled = viewModel.images.isNotEmpty(),
+                        onClick = { viewModel.previousImage(onInstanceLinkSendPreviousPicture) },
+                        enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendPreviousPicture != null,
                         modifier = Modifier.size(30.dp)
                     ) {
                         Icon(
@@ -499,8 +532,8 @@ fun PicturesTab(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(
-                        onClick = { viewModel.nextImage() },
-                        enabled = viewModel.images.isNotEmpty(),
+                        onClick = { viewModel.nextImage(onInstanceLinkSendNextPicture) },
+                        enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendNextPicture != null,
                         modifier = Modifier.size(30.dp)
                     ) {
                         Icon(

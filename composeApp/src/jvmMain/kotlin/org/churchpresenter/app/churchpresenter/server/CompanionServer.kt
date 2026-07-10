@@ -472,7 +472,11 @@ data class SelectBibleVerseRequest(
 @Serializable
 data class SelectSongSectionRequest(
     val number: String,
-    val section: Int
+    val section: Int,
+    /** 0-based index of the line within [section] for "one line at a time" display mode, or -1 when
+     *  not applicable (section-level navigation only) — same sentinel PresenterManager.songDisplayLineIndex
+     *  already uses. Defaults to -1 so older clients that omit this field still decode correctly. */
+    val lineIndex: Int = -1
 )
 
 // ── ServerInfoResponse / WebSocketMessage / etc. ──────────────────────────────
@@ -1291,6 +1295,14 @@ class CompanionServer {
         extraBufferCapacity = 4,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
+
+    /** ID-less navigation commands (Instance Link Controller mode) — advance/retreat whatever the
+     *  primary currently has live, since a Controller has no way to learn the primary's internally-
+     *  assigned folderId/presentationId. See Constants.WS_CMD_NEXT_PICTURE and siblings. */
+    val onNextPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onPreviousPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onNextSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onPreviousSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     /**
      * Emitted for every instant (no-approval) action so the UI can show an activity toast.
@@ -3219,6 +3231,22 @@ class CompanionServer {
                                                 .jsonObject["hold"]?.toString()?.toBooleanStrictOrNull() ?: true
                                         } catch (_: Exception) { true }
                                         scope.launch { onBibleHold.emit(hold) }
+                                        sendCommandAck(msg.commandId, ok = true)
+                                    }
+                                    Constants.WS_CMD_NEXT_PICTURE -> {
+                                        scope.launch { onNextPicture.emit(Unit) }
+                                        sendCommandAck(msg.commandId, ok = true)
+                                    }
+                                    Constants.WS_CMD_PREVIOUS_PICTURE -> {
+                                        scope.launch { onPreviousPicture.emit(Unit) }
+                                        sendCommandAck(msg.commandId, ok = true)
+                                    }
+                                    Constants.WS_CMD_NEXT_SLIDE -> {
+                                        scope.launch { onNextSlide.emit(Unit) }
+                                        sendCommandAck(msg.commandId, ok = true)
+                                    }
+                                    Constants.WS_CMD_PREVIOUS_SLIDE -> {
+                                        scope.launch { onPreviousSlide.emit(Unit) }
                                         sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {

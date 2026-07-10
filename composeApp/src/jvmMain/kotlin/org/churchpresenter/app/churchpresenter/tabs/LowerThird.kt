@@ -12,6 +12,7 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
+import org.churchpresenter.app.churchpresenter.composables.finalPassClickable
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import androidx.compose.foundation.gestures.Orientation
@@ -736,7 +737,7 @@ fun LowerThirdTab(
                                     .drawBehind {
                                         if (isSelected) drawRect(color = accentColor, size = Size(4f, size.height))
                                     }
-                                    .initialPassClickable { selectedFile = file; isPlaying = false }
+                                    .finalPassClickable { selectedFile = file; isPlaying = false }
                                     .padding(start = 12.dp, end = 4.dp),
                                 contentAlignment = Alignment.CenterStart
                             ) {

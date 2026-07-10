@@ -188,8 +188,9 @@ fun SongsTab(
      *  *new* song (approval-gated the first time on the primary, instant afterwards). */
     onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
     /** Instance Link Controller mode — section navigation *within the same already-live song*
-     *  (always instant on the primary, no approval gate). */
-    onInstanceLinkSendSongSection: ((number: String, section: Int) -> Unit)? = null,
+     *  (always instant on the primary, no approval gate). [lineIndex] carries "one line at a time"
+     *  display-mode navigation (-1 = section-level only). */
+    onInstanceLinkSendSongSection: ((number: String, section: Int, lineIndex: Int) -> Unit)? = null,
     selectedSongItem: ScheduleItem.SongItem? = null,
     selectedSongItemVersion: Int = 0,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -295,7 +296,7 @@ fun SongsTab(
                     )
                 )
             } else {
-                onInstanceLinkSendSongSection?.invoke(song.number, viewModel.selectedSectionIndex.value)
+                onInstanceLinkSendSongSection?.invoke(song.number, viewModel.selectedSectionIndex.value, viewModel.selectedLineIndex.value)
             }
         }
         liveSongIndex = viewModel.selectedSongIndex.value
@@ -566,7 +567,7 @@ fun SongsTab(
                         Key.DirectionLeft -> {
                             if (isLineMode) {
                                 viewModel.navigatePreviousLine()
-                                sendToPresenter()
+                                sendToPresenter(goLive = isPresenting)
                             } else if (!isPresenting) {
                                 viewModel.navigatePreviousSong()
                             }
@@ -575,7 +576,7 @@ fun SongsTab(
                         Key.DirectionRight -> {
                             if (isLineMode) {
                                 viewModel.navigateNextLine()
-                                sendToPresenter()
+                                sendToPresenter(goLive = isPresenting)
                             } else if (!isPresenting) {
                                 viewModel.navigateNextSong()
                             }
@@ -583,12 +584,12 @@ fun SongsTab(
                         }
                         Key.DirectionUp -> {
                             if (!viewModel.navigatePreviousSection() && !isPresenting) viewModel.navigatePreviousSong()
-                            sendToPresenter()
+                            sendToPresenter(goLive = isPresenting)
                             true
                         }
                         Key.DirectionDown -> {
                             if (!viewModel.navigateNextSection() && !isPresenting) viewModel.navigateNextSong()
-                            sendToPresenter()
+                            sendToPresenter(goLive = isPresenting)
                             true
                         }
                         else -> false
@@ -1722,7 +1723,7 @@ fun SongsTab(
                                         onClick = {
                                             viewModel.selectSection(sectionIndex)
                                             isTitleSlideSelected = false
-                                            sendToPresenter()
+                                            sendToPresenter(goLive = isPresenting)
                                         },
                                         onDoubleClick = {
                                             viewModel.selectSection(sectionIndex)
@@ -1765,7 +1766,7 @@ fun SongsTab(
                                     viewModel.selectSection(sectionIndex)
                                     viewModel.setLineIndex(lineIdx)
                                     isTitleSlideSelected = false
-                                    sendToPresenter()
+                                    sendToPresenter(goLive = isPresenting)
                                 } else null
 
                                 if (showPrimary && showSecondary) {

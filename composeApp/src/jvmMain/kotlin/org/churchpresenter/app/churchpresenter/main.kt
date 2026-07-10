@@ -767,6 +767,14 @@ fun main() {
         }
         val remoteSelectSongFlow =
             remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 8) }
+        // Same backfill mechanism as remoteSelectSongFlow — a remote PROJECT go-live only adds the
+        // item to the schedule and flips presentingMode; these flows drive MainDesktop to actually
+        // load and push real content (see executeProjectItem below, which deliberately does NOT push
+        // picture/slide content itself).
+        val remoteSelectPictureFlow =
+            remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 8) }
+        val remoteSelectPresentationFlow =
+            remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 8) }
         var dialogDismissSignal by remember { mutableStateOf(0) }
         var showOptionsDialog by remember { mutableStateOf(false) }
         var optionsDialogInitialTab by remember { mutableStateOf(0) }
@@ -1276,6 +1284,12 @@ fun main() {
                                             if (item is ScheduleItem.SongItem) {
                                                 coroutineScope.launch { remoteSelectSongFlow.emit(item) }
                                             }
+                                            if (item is ScheduleItem.PictureItem) {
+                                                coroutineScope.launch { remoteSelectPictureFlow.emit(item) }
+                                            }
+                                            if (item is ScheduleItem.PresentationItem) {
+                                                coroutineScope.launch { remoteSelectPresentationFlow.emit(item) }
+                                            }
                                             pending.decision.complete(true)
                                             // Show activity toast so operator is aware
                                             val (pTitle, pDetail) = remoteEventLabel(item)
@@ -1308,6 +1322,12 @@ fun main() {
                                             if (item is ScheduleItem.SongItem) {
                                                 coroutineScope.launch { remoteSelectSongFlow.emit(item) }
                                             }
+                                            if (item is ScheduleItem.PictureItem) {
+                                                coroutineScope.launch { remoteSelectPictureFlow.emit(item) }
+                                            }
+                                            if (item is ScheduleItem.PresentationItem) {
+                                                coroutineScope.launch { remoteSelectPresentationFlow.emit(item) }
+                                            }
                                             pending.decision.complete(true)
                                         }
                                         val deny: () -> Unit = { pending.decision.complete(false) }
@@ -1324,6 +1344,7 @@ fun main() {
                                         val section = sections.getOrNull(req.section) ?: return@collect
                                         presenterManager.setLyricSection(section)
                                         presenterManager.setSongDisplaySectionIndex(req.section)
+                                        presenterManager.setSongDisplayLineIndex(if (req.lineIndex >= 0) req.lineIndex else -1)
                                         // Make sure the presenter is showing lyrics
                                         if (presenterManager.presentingMode.value != Presenting.LYRICS) {
                                             presenterManager.setPresentingMode(Presenting.LYRICS)
@@ -1654,13 +1675,34 @@ fun main() {
                                         { folderId, index, fileName -> instanceLinkViewModel.sendSelectPicture(folderId, index, fileName) }
                                     } else null,
                                     instanceLinkSendSongSection = if (instanceLinkIsControllerConnected) {
-                                        { number, section -> instanceLinkViewModel.sendSelectSongSection(number, section) }
+                                        { number, section, lineIndex -> instanceLinkViewModel.sendSelectSongSection(number, section, lineIndex) }
                                     } else null,
                                     instanceLinkSendSlide = if (instanceLinkIsControllerConnected) {
                                         { id, index -> instanceLinkViewModel.sendSelectSlide(id, index) }
                                     } else null,
                                     instanceLinkSendClear = if (instanceLinkIsControllerConnected) {
                                         { instanceLinkViewModel.sendClear() }
+                                    } else null,
+                                    instanceLinkSendBibleHold = if (instanceLinkIsControllerConnected) {
+                                        { hold -> instanceLinkViewModel.sendBibleHold(hold) }
+                                    } else null,
+                                    instanceLinkSendNextPicture = if (instanceLinkIsControllerConnected) {
+                                        { instanceLinkViewModel.sendNextPicture() }
+                                    } else null,
+                                    instanceLinkSendPreviousPicture = if (instanceLinkIsControllerConnected) {
+                                        { instanceLinkViewModel.sendPreviousPicture() }
+                                    } else null,
+                                    instanceLinkSendNextSlide = if (instanceLinkIsControllerConnected) {
+                                        { instanceLinkViewModel.sendNextSlide() }
+                                    } else null,
+                                    instanceLinkSendPreviousSlide = if (instanceLinkIsControllerConnected) {
+                                        { instanceLinkViewModel.sendPreviousSlide() }
+                                    } else null,
+                                    instanceLinkFetchPictureImageBytes = if (instanceLinkViewModel.connectionStatus.collectAsState().value == InstanceLinkStatus.CONNECTED) {
+                                        { folderId, index -> instanceLinkViewModel.fetchPictureImageBytes(folderId, index) }
+                                    } else null,
+                                    instanceLinkFetchPresentationSlideBytes = if (instanceLinkViewModel.connectionStatus.collectAsState().value == InstanceLinkStatus.CONNECTED) {
+                                        { id, index -> instanceLinkViewModel.fetchPresentationSlideBytes(id, index) }
                                     } else null,
                                     instanceLinkMediaStreamUrl = run {
                                         val link = appSettings.instanceLink
@@ -1744,6 +1786,20 @@ fun main() {
                                         }
                                     },
                                     remoteSelectSongFlow = remoteSelectSongFlow,
+                                    remoteSelectPictureFlow = remoteSelectPictureFlow,
+                                    remoteSelectPresentationFlow = remoteSelectPresentationFlow,
+                                    nextPictureFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onNextPicture.collect { emit(Unit) }
+                                    },
+                                    previousPictureFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onPreviousPicture.collect { emit(Unit) }
+                                    },
+                                    nextSlideFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onNextSlide.collect { emit(Unit) }
+                                    },
+                                    previousSlideFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onPreviousSlide.collect { emit(Unit) }
+                                    },
                                     uploadPresentationFlow = kotlinx.coroutines.flow.flow {
                                         companionServer.onPresentationUploaded.collect { file ->
                                             emit(file)
@@ -2547,8 +2603,11 @@ private fun executeProjectItem(
         }
 
         is ScheduleItem.PictureItem -> {
+            // Deliberately does NOT call setSelectedImagePath(item.folderPath) — that setter expects
+            // a single image FILE path, not a folder, and a folder path can never render. The actual
+            // image push happens via remoteSelectPictureFlow in main.kt (MainDesktop loads the folder
+            // into PicturesViewModel, whose own reactive effect pushes the current image once loaded).
             scheduleActions.addPicture(item.folderPath, item.folderName, item.imageCount)
-            presenterManager.setSelectedImagePath(item.folderPath)
             presenterManager.setPresentingMode(Presenting.PICTURES)
             presenterManager.setShowPresenterWindow(true)
         }

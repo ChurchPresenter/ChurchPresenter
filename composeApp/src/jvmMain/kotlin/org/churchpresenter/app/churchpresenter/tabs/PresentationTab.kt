@@ -175,6 +175,14 @@ fun PresentationTab(
      *  primary only has slide bytes cached for a presentation it has itself loaded/added to its own
      *  schedule, so a Controller has no reliable way to target an already-live presentation by id. */
     onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
+    /** Instance Link Controller mode — advance/retreat whatever the primary currently has live, no
+     *  id needed. Non-null only when connected and controlling. */
+    onInstanceLinkSendNextSlide: (() -> Unit)? = null,
+    onInstanceLinkSendPreviousSlide: (() -> Unit)? = null,
+    /** Fetches one slide's raw JPEG bytes from the Instance Link primary by presentation id + index —
+     *  non-null only while connected. Used when a mirrored schedule item's filePath doesn't resolve
+     *  on this machine (e.g. a network drive mounted differently, or not mounted at all, here). */
+    instanceLinkFetchPresentationSlideBytes: (suspend (id: String, index: Int) -> ByteArray?)? = null,
     selectedPresentationItem: ScheduleItem.PresentationItem? = null,
     presenterManager: PresenterManager? = null,
     onSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>, slideNotes: List<String>) -> Unit)? = null,
@@ -196,9 +204,26 @@ fun PresentationTab(
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(selectedPresentationItem) {
-        selectedPresentationItem?.let {
-            viewModel.loadPresentationByPath(it.filePath)
-            focusRequester.requestFocus()
+        selectedPresentationItem?.let { item ->
+            val file = File(item.filePath)
+            if (file.exists()) {
+                viewModel.loadPresentationByPath(item.filePath)
+                focusRequester.requestFocus()
+            } else if (instanceLinkFetchPresentationSlideBytes != null) {
+                // A mirrored schedule item's local path only exists on the primary's disk (e.g. a
+                // network drive mounted differently, or not mounted at all, here) — fetch bytes over
+                // Instance Link instead, same reasoning as MediaTab's instanceLinkMediaStreamUrl.
+                // item.id is the schedule UUID the primary already maps to its own file-hash id
+                // (CompanionServer._scheduleItemToPresentationId), populated when this exact item was
+                // added to the primary's schedule — which is how it got mirrored to us in the first place.
+                viewModel.loadPresentationFromRemote(
+                    scheduleItemId = item.id,
+                    filePath = item.filePath,
+                    slideCount = item.slideCount,
+                    fetchBytes = { index -> instanceLinkFetchPresentationSlideBytes(item.id, index) }
+                )
+                focusRequester.requestFocus()
+            }
         }
     }
 
@@ -263,14 +288,26 @@ fun PresentationTab(
             .focusRequester(focusRequester)
             .focusable()
             .onKeyEvent { keyEvent ->
-                if (keyEvent.type == KeyEventType.KeyDown && viewModel.slideFiles.isNotEmpty()) {
-                    when (keyEvent.key) {
-                        Key.DirectionLeft, Key.DirectionUp -> { viewModel.previousSlide(); true }
-                        Key.DirectionRight, Key.DirectionDown -> { viewModel.nextSlide(); true }
-                        Key.Spacebar -> { viewModel.togglePlayPause(); true }
-                        else -> false
-                    }
-                } else false
+                if (keyEvent.type != KeyEventType.KeyDown) return@onKeyEvent false
+                if (viewModel.slideFiles.isEmpty()) {
+                    // Instance Link Controller mode: next/prev must still reach the primary's own
+                    // live presentation even though this Controller's own slide list is empty — the
+                    // normal case, since Controller mode doesn't mirror the primary's content.
+                    val hasInstanceLinkNav = onInstanceLinkSendNextSlide != null || onInstanceLinkSendPreviousSlide != null
+                    return@onKeyEvent if (hasInstanceLinkNav) {
+                        when (keyEvent.key) {
+                            Key.DirectionLeft, Key.DirectionUp -> { viewModel.previousSlide(onInstanceLinkSendPreviousSlide); true }
+                            Key.DirectionRight, Key.DirectionDown -> { viewModel.nextSlide(onInstanceLinkSendNextSlide); true }
+                            else -> false
+                        }
+                    } else false
+                }
+                when (keyEvent.key) {
+                    Key.DirectionLeft, Key.DirectionUp -> { viewModel.previousSlide(onInstanceLinkSendPreviousSlide); true }
+                    Key.DirectionRight, Key.DirectionDown -> { viewModel.nextSlide(onInstanceLinkSendNextSlide); true }
+                    Key.Spacebar -> { viewModel.togglePlayPause(); true }
+                    else -> false
+                }
             }
     ) {
         // ── File bar ──────────────────────────────────────────────────
@@ -504,7 +541,7 @@ fun PresentationTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = { viewModel.previousSlide() }, modifier = Modifier.size(30.dp)) {
+                    IconButton(onClick = { viewModel.previousSlide(onInstanceLinkSendPreviousSlide) }, modifier = Modifier.size(30.dp)) {
                         Icon(painterResource(Res.drawable.ic_skip_previous), contentDescription = stringResource(Res.string.previous_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
                 }
@@ -529,7 +566,7 @@ fun PresentationTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = { viewModel.nextSlide() }, modifier = Modifier.size(30.dp)) {
+                    IconButton(onClick = { viewModel.nextSlide(onInstanceLinkSendNextSlide) }, modifier = Modifier.size(30.dp)) {
                         Icon(painterResource(Res.drawable.ic_skip_next), contentDescription = stringResource(Res.string.next_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
                 }

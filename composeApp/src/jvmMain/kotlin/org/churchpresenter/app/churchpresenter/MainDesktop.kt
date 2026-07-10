@@ -230,6 +230,18 @@ fun MainDesktop(
     /** Emits a verse to display instantly without approval. */
     selectBibleVerseFlow: Flow<SelectBibleVerseRequest>? = null,
     remoteSelectSongFlow: Flow<ScheduleItem.SongItem>? = null,
+    /** Same backfill mechanism as [remoteSelectSongFlow] — a remote PROJECT go-live for a picture
+     *  folder/presentation only adds it to the schedule and flips presentingMode; these drive this
+     *  composable to actually load the real content into the corresponding ViewModel. */
+    remoteSelectPictureFlow: Flow<ScheduleItem.PictureItem>? = null,
+    remoteSelectPresentationFlow: Flow<ScheduleItem.PresentationItem>? = null,
+    /** Instance Link Controller-mode navigation — advance/retreat whatever the primary currently has
+     *  live (no id needed, see Constants.WS_CMD_NEXT_PICTURE and siblings). Received on the primary
+     *  side; sent from the Controller side via [instanceLinkSendNextPicture] and siblings below. */
+    nextPictureFlow: Flow<Unit>? = null,
+    previousPictureFlow: Flow<Unit>? = null,
+    nextSlideFlow: Flow<Unit>? = null,
+    previousSlideFlow: Flow<Unit>? = null,
     /** Emits a presentation [File] uploaded by a mobile client — loaded into [PresentationViewModel] automatically. */
     uploadPresentationFlow: Flow<java.io.File>? = null,
     serverUrl: String = "",
@@ -281,12 +293,27 @@ fun MainDesktop(
     instanceLinkSendPicture: ((folderId: String, index: Int, fileName: String?) -> Unit)? = null,
     /** Controller mode instant song-section navigation (within an already-live song) — non-null only
      *  when connected AND controlling. */
-    instanceLinkSendSongSection: ((number: String, section: Int) -> Unit)? = null,
+    instanceLinkSendSongSection: ((number: String, section: Int, lineIndex: Int) -> Unit)? = null,
     /** Controller mode instant slide navigation (within an already-live presentation) — non-null only
      *  when connected AND controlling. */
     instanceLinkSendSlide: ((id: String, index: Int) -> Unit)? = null,
     /** Controller mode instant clear — non-null only when connected AND controlling. */
     instanceLinkSendClear: (() -> Unit)? = null,
+    /** Controller mode instant Bible Hold toggle — non-null only when connected AND controlling. */
+    instanceLinkSendBibleHold: ((Boolean) -> Unit)? = null,
+    /** Controller mode next/previous navigation for whatever the primary currently has live —
+     *  non-null only when connected AND controlling. See [nextPictureFlow] and siblings for the
+     *  primary-side receive. */
+    instanceLinkSendNextPicture: (() -> Unit)? = null,
+    instanceLinkSendPreviousPicture: (() -> Unit)? = null,
+    instanceLinkSendNextSlide: (() -> Unit)? = null,
+    instanceLinkSendPreviousSlide: (() -> Unit)? = null,
+    /** Fetches remote bytes for a mirrored Picture/Presentation schedule item whose local path
+     *  doesn't resolve on this machine (network/shared-drive mismatch) — non-null only while
+     *  connected via Instance Link. See PicturesTab/PresentationTab's fallback in their
+     *  selectedPictureItem/selectedPresentationItem effects. */
+    instanceLinkFetchPictureImageBytes: (suspend (folderId: String, index: Int) -> ByteArray?)? = null,
+    instanceLinkFetchPresentationSlideBytes: (suspend (id: String, index: Int) -> ByteArray?)? = null,
     qaManager: QAManager? = null,
     tunnelStatus: TunnelStatus = TunnelStatus.Idle,
     tunnelUrl: String = "",
@@ -705,6 +732,56 @@ fun MainDesktop(
         }
     }
 
+    // Instance Link Controller-mode navigation — advance/retreat whatever is currently live, no id
+    // needed. syncWithPresenter() only pushes when Pictures is actually the live content, same gate
+    // next/prev navigation should have.
+    LaunchedEffect(nextPictureFlow) {
+        nextPictureFlow?.collect {
+            picturesViewModel.nextImage()
+            picturesViewModel.syncWithPresenter(presenterManager)
+        }
+    }
+    LaunchedEffect(previousPictureFlow) {
+        previousPictureFlow?.collect {
+            picturesViewModel.previousImage()
+            picturesViewModel.syncWithPresenter(presenterManager)
+        }
+    }
+
+    // Pushes the presentation's current slide to the presenter — shared by the next/previous slide
+    // Instance Link commands below. Only pushes when Presentation is actually the live content,
+    // same gate PresentationTab's own slide-push effect uses.
+    suspend fun pushCurrentSlideIfLive() {
+        if (presenterManager.presentingMode.value != Presenting.PRESENTATION) return
+        val index = presentationViewModel.selectedSlideIndex
+        if (index !in presentationViewModel.slideFiles.indices) return
+        val bitmap = presentationViewModel.slideFiles.getOrNull(index)?.let { f ->
+            withContext(Dispatchers.IO) {
+                org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+            }
+        }
+        val nextBitmap = presentationViewModel.slideFiles.getOrNull(index + 1)?.let { f ->
+            withContext(Dispatchers.IO) {
+                org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+            }
+        }
+        presenterManager.setSelectedSlide(bitmap)
+        presenterManager.setNextSlide(nextBitmap)
+        presenterManager.setPresenterNotes(presentationViewModel.slideNotes.getOrElse(index) { "" })
+    }
+    LaunchedEffect(nextSlideFlow) {
+        nextSlideFlow?.collect {
+            presentationViewModel.nextSlide()
+            pushCurrentSlideIfLive()
+        }
+    }
+    LaunchedEffect(previousSlideFlow) {
+        previousSlideFlow?.collect {
+            presentationViewModel.previousSlide()
+            pushCurrentSlideIfLive()
+        }
+    }
+
     // Handle remote slide selection (POST /api/presentations/{id}/select or WS select_slide)
     // No approval required — navigates the live presentation instantly.
     LaunchedEffect(selectSlideFlow) {
@@ -813,6 +890,27 @@ fun MainDesktop(
             selectedSongItem = songItem
             selectedSongItemVersion++
             selectTab(Tabs.SONGS)
+        }
+    }
+
+    // Handle remote picture-folder selection — same backfill shape as remoteSelectSongFlow above.
+    // Setting selectedPictureItem drives the existing LaunchedEffect(selectedPictureItem) (below)
+    // to load the folder into PicturesViewModel, whose own reactive effect (PicturesTab.kt) pushes
+    // the current image to the presenter once loaded, since presentingMode is already PICTURES.
+    LaunchedEffect(remoteSelectPictureFlow) {
+        remoteSelectPictureFlow?.collect { pictureItem ->
+            selectedPictureItem = pictureItem
+            selectTab(Tabs.PICTURES)
+        }
+    }
+
+    // Handle remote presentation selection — same shape. Setting selectedPresentationItem drives
+    // PresentationTab's own LaunchedEffect(selectedPresentationItem) to load the file, and its
+    // LaunchedEffect(selectedSlideIndex, slideFiles.size) pushes the first slide once loaded.
+    LaunchedEffect(remoteSelectPresentationFlow) {
+        remoteSelectPresentationFlow?.collect { presentationItem ->
+            selectedPresentationItem = presentationItem
+            selectTab(Tabs.PRESENTATION)
         }
     }
 
@@ -1455,6 +1553,7 @@ fun MainDesktop(
                                 selectedVerseItem = selectedBibleVerseItem,
                                 onVerseSelected = onVerseSelected,
                                 onInstanceLinkSendVerse = instanceLinkSendVerse,
+                                onInstanceLinkSendBibleHold = instanceLinkSendBibleHold,
                                 onPresenting = presenting,
                                 isPresenting = presentingMode == Presenting.BIBLE,
                                 presenterManager = presenterManager,
@@ -1494,6 +1593,9 @@ fun MainDesktop(
                                     currentScheduleActions.addPicture(folderPath, folderName, imageCount)
                                 },
                                 onInstanceLinkSendProject = instanceLinkSendProject,
+                                onInstanceLinkSendNextPicture = instanceLinkSendNextPicture,
+                                onInstanceLinkSendPreviousPicture = instanceLinkSendPreviousPicture,
+                                instanceLinkFetchPictureImageBytes = instanceLinkFetchPictureImageBytes,
                                 selectedPictureItem = selectedPictureItem,
                                 presenterManager = presenterManager,
                                 onSettingsChange = onSettingsChange,
@@ -1507,6 +1609,9 @@ fun MainDesktop(
                                     currentScheduleActions.addPresentation(filePath, fileName, slideCount, fileType)
                                 },
                                 onInstanceLinkSendProject = instanceLinkSendProject,
+                                onInstanceLinkSendNextSlide = instanceLinkSendNextSlide,
+                                onInstanceLinkSendPreviousSlide = instanceLinkSendPreviousSlide,
+                                instanceLinkFetchPresentationSlideBytes = instanceLinkFetchPresentationSlideBytes,
                                 selectedPresentationItem = selectedPresentationItem,
                                 presenterManager = presenterManager,
                                 onSlidesLoaded = onPresentationSlidesLoaded,

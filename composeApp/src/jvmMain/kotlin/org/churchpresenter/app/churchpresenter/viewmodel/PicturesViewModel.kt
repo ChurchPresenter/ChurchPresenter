@@ -129,6 +129,51 @@ class PicturesViewModel(
         }
     }
 
+    /**
+     * Loads a picture folder from an Instance Link primary when [folderPath] doesn't resolve on this
+     * machine (e.g. a mirrored schedule item whose folder lives on a network drive mounted
+     * differently, or not mounted at all, here). Downloads each image's bytes via [fetchBytes] into
+     * a cache dir keyed by [folderId] and populates [_images] with the cached files — same public
+     * state contract as [selectFolder], so thumbnails, [syncWithPresenter], and navigation all work
+     * unchanged afterward. [folderPath] is only used to build [_selectedFolder]'s display value.
+     * [presenterManager] — when non-null, explicitly re-synced after every downloaded image (not
+     * just once): images arrive one at a time here (unlike the synchronous local-folder path), and
+     * PicturesTab's own reactive sync effect only restarts on selectedImageIndex/presentingMode
+     * changes, so without this the presenter could be left showing nothing if presentingMode was
+     * already PICTURES (e.g. a second remote item clicked while one was already live) and the
+     * currently-selected index's bytes hadn't arrived yet when that effect last ran.
+     */
+    fun loadPictureFromRemote(
+        folderId: String,
+        folderPath: String,
+        imageCount: Int,
+        presenterManager: PresenterManager? = null,
+        fetchBytes: suspend (index: Int) -> ByteArray?
+    ) {
+        clearImages()
+        _selectedFolder.value = File(folderPath)
+        val cacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/picture-folders/$folderId")
+        cacheDir.mkdirs()
+        scope.launch {
+            for (index in 0 until imageCount) {
+                val cacheFile = File(cacheDir, "image_%04d.jpg".format(index))
+                if (!cacheFile.exists()) {
+                    val bytes = fetchBytes(index) ?: continue
+                    val tmp = File(cacheDir, "${cacheFile.name}.tmp")
+                    tmp.writeBytes(bytes)
+                    if (!tmp.renameTo(cacheFile)) { tmp.delete(); continue }
+                }
+                _images.add(cacheFile)
+                try {
+                    _thumbnails[cacheFile] = loadImageBitmap(cacheFile)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                presenterManager?.let { syncWithPresenter(it) }
+            }
+        }
+    }
+
     fun clearImages() {
         watchJob?.cancel()
         watchJob = null
@@ -138,7 +183,11 @@ class PicturesViewModel(
         _isPlaying.value = false
     }
 
-    fun nextImage() {
+    /** [onInstanceLinkSendNext] — Instance Link Controller mode, non-null only when connected and
+     *  controlling. Invoked unconditionally (even when this Controller's own [_images] is empty,
+     *  which is the normal case — Controller mode doesn't mirror the primary's content) so next/prev
+     *  still reaches the primary's own currently-live folder. See Constants.WS_CMD_NEXT_PICTURE. */
+    fun nextImage(onInstanceLinkSendNext: (() -> Unit)? = null) {
         if (_images.isNotEmpty()) {
             if (_selectedImageIndex.value < _images.size - 1) {
                 _selectedImageIndex.value = (_selectedImageIndex.value + 1)
@@ -149,9 +198,10 @@ class PicturesViewModel(
                 _isPlaying.value = false
             }
         }
+        onInstanceLinkSendNext?.invoke()
     }
 
-    fun previousImage() {
+    fun previousImage(onInstanceLinkSendPrevious: (() -> Unit)? = null) {
         if (_images.isNotEmpty()) {
             _selectedImageIndex.value = if (_selectedImageIndex.value > 0) {
                 _selectedImageIndex.value - 1
@@ -159,6 +209,7 @@ class PicturesViewModel(
                 _images.size - 1
             }
         }
+        onInstanceLinkSendPrevious?.invoke()
     }
 
     fun selectImage(index: Int) {

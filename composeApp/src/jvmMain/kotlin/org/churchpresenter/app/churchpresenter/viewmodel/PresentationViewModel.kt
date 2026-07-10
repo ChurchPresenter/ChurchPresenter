@@ -160,6 +160,62 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         }
     }
 
+    /**
+     * Loads a presentation from an Instance Link primary when [filePath] doesn't resolve on this
+     * machine (e.g. a mirrored schedule item whose file lives on a network drive mounted
+     * differently, or not mounted at all, here). Downloads each slide's JPEG bytes via [fetchBytes]
+     * into a disk cache keyed by [scheduleItemId] (reusing the same cache-dir idiom [renderSlides]
+     * uses for local rendering) and populates [_slideFiles] from the cached files — no new rendering
+     * pipeline, just a remote source of already-cached slides. [filePath] is only used to build a
+     * synthetic [File] so [selectedPresentation] and downstream consumers (recents list,
+     * onSlidesLoaded broadcast) keep working the same as the local-file path — the file itself is
+     * never opened.
+     */
+    fun loadPresentationFromRemote(
+        scheduleItemId: String,
+        filePath: String,
+        slideCount: Int,
+        fetchBytes: suspend (index: Int) -> ByteArray?
+    ) {
+        val syntheticFile = File(filePath)
+        val existingFile = _presentations.find { it.absolutePath == syntheticFile.absolutePath }
+        if (existingFile == null) _presentations.add(syntheticFile)
+        _selectedPresentation.value = existingFile ?: syntheticFile
+        _selectedSlideIndex.value = 0
+        _loadError.value = null
+        activeLoadJob?.cancel()
+        activeLoadJob = scope.launch {
+            withContext(Dispatchers.Main) {
+                clearCurrentSlideState()
+                _totalSlides.value = slideCount
+                _isLoading.value = true
+            }
+            val cacheDir = File(APP_SLIDES_DIR, "remote_$scheduleItemId").also { it.mkdirs() }
+            var success = false
+            try {
+                for (index in 0 until slideCount) {
+                    val slideFile = File(cacheDir, "slide_%04d.jpg".format(index))
+                    if (!slideFile.exists()) {
+                        val bytes = fetchBytes(index) ?: continue
+                        val tmp = File(cacheDir, "${slideFile.name}.tmp")
+                        tmp.writeBytes(bytes)
+                        if (!tmp.renameTo(slideFile)) { tmp.delete(); continue }
+                    }
+                    withContext(Dispatchers.Main) { _slideFiles.add(slideFile); _slideNotes.add("") }
+                }
+                if (_slideFiles.isNotEmpty()) {
+                    withContext(Dispatchers.Main) { _loadGeneration.value++ }
+                    success = true
+                } else {
+                    withContext(Dispatchers.Main) { _loadError.value = PresentationLoadError.RENDER_FAILED }
+                }
+            } finally {
+                if (!success) cacheDir.deleteRecursively()
+                withContext(Dispatchers.Main) { _isLoading.value = false }
+            }
+        }
+    }
+
     fun addPresentation(file: File) {
         if (file.exists() && isValidPresentationFile(file)) {
             val existingFile = _presentations.find { it.absolutePath == file.absolutePath }
@@ -195,7 +251,11 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         }
     }
 
-    fun nextSlide() {
+    /** [onInstanceLinkSendNext] — Instance Link Controller mode, non-null only when connected and
+     *  controlling. Invoked unconditionally (even when this Controller's own [_slideFiles] is empty,
+     *  which is the normal case — Controller mode doesn't mirror the primary's content) so next/prev
+     *  still reaches the primary's own currently-live presentation. See Constants.WS_CMD_NEXT_SLIDE. */
+    fun nextSlide(onInstanceLinkSendNext: (() -> Unit)? = null) {
         if (_selectedSlideIndex.value < _slideFiles.size - 1) {
             _selectedSlideIndex.value++
         } else if (_isLooping.value && _slideFiles.isNotEmpty()) {
@@ -203,14 +263,16 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         } else {
             _isPlaying.value = false
         }
+        onInstanceLinkSendNext?.invoke()
     }
 
-    fun previousSlide() {
+    fun previousSlide(onInstanceLinkSendPrevious: (() -> Unit)? = null) {
         if (_selectedSlideIndex.value > 0) {
             _selectedSlideIndex.value--
         } else if (_isLooping.value && _slideFiles.isNotEmpty()) {
             _selectedSlideIndex.value = _slideFiles.size - 1
         }
+        onInstanceLinkSendPrevious?.invoke()
     }
 
     fun selectSlide(index: Int) {

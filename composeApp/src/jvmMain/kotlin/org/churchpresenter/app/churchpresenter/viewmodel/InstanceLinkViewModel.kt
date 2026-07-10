@@ -151,13 +151,18 @@ class InstanceLinkViewModel {
     fun sendSelectPicture(folderId: String, index: Int, fileName: String?) =
         client.sendSelectPicture(folderId, index, fileName)
 
-    fun sendSelectSongSection(number: String, section: Int) = client.sendSelectSongSection(number, section)
+    fun sendSelectSongSection(number: String, section: Int, lineIndex: Int = -1) = client.sendSelectSongSection(number, section, lineIndex)
 
     fun sendSelectSlide(id: String, index: Int) = client.sendSelectSlide(id, index)
 
     fun sendClear() = client.sendClear()
 
     fun sendBibleHold(hold: Boolean) = client.sendBibleHold(hold)
+
+    fun sendNextPicture() = client.sendNextPicture()
+    fun sendPreviousPicture() = client.sendPreviousPicture()
+    fun sendNextSlide() = client.sendNextSlide()
+    fun sendPreviousSlide() = client.sendPreviousSlide()
 
     /** Fetches one song's full lyrics from the primary on demand — see [InstanceLinkClient.fetchSongDetail]. */
     suspend fun fetchSongDetail(number: String, songbook: String): SongDetailDto? =

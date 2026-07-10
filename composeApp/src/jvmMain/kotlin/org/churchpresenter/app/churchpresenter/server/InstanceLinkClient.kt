@@ -434,11 +434,12 @@ class InstanceLinkClient(
     }
 
     /** Instantly navigates within an already-live song — [Constants.WS_CMD_SELECT_SONG_SECTION], no
-     *  approval gate. Picking a *different* song still needs [sendProject] first. */
-    fun sendSelectSongSection(number: String, section: Int) {
+     *  approval gate. Picking a *different* song still needs [sendProject] first. [lineIndex] carries
+     *  "one line at a time" display-mode navigation (-1 = section-level only, no specific line). */
+    fun sendSelectSongSection(number: String, section: Int, lineIndex: Int = -1) {
         sendCommand(
             Constants.WS_CMD_SELECT_SONG_SECTION,
-            json.encodeToString(SelectSongSectionRequest.serializer(), SelectSongSectionRequest(number, section))
+            json.encodeToString(SelectSongSectionRequest.serializer(), SelectSongSectionRequest(number, section, lineIndex))
         )
     }
 
@@ -462,6 +463,15 @@ class InstanceLinkClient(
     fun sendBibleHold(hold: Boolean) {
         sendCommand(Constants.WS_CMD_BIBLE_HOLD, """{"hold":$hold}""")
     }
+
+    /** Advances/retreats whatever picture folder or presentation the primary currently has live —
+     *  no payload, no id. Unlike [sendSelectPicture]/[sendSelectSlide], these don't need the
+     *  primary's internally-assigned folderId/presentationId (which a Controller has no way to
+     *  learn), since they operate on "whatever is live now" rather than a specific item. */
+    fun sendNextPicture() = sendCommand(Constants.WS_CMD_NEXT_PICTURE, "")
+    fun sendPreviousPicture() = sendCommand(Constants.WS_CMD_PREVIOUS_PICTURE, "")
+    fun sendNextSlide() = sendCommand(Constants.WS_CMD_NEXT_SLIDE, "")
+    fun sendPreviousSlide() = sendCommand(Constants.WS_CMD_PREVIOUS_SLIDE, "")
 
     /**
      * Builds the streaming URL for one of the primary's local media files (PartialContent, so

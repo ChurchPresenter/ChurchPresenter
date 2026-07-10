@@ -296,6 +296,13 @@ object Constants {
     const val WS_CMD_PROJECT                = "project"
     const val WS_CMD_CLEAR                  = "clear"
     const val WS_CMD_BIBLE_HOLD             = "bible_hold"
+    /** ID-less navigation commands — operate on whatever the primary currently has live, since a
+     *  Controller has no way to learn the primary's internally-assigned folderId/presentationId
+     *  (see PicturesViewModel.goLive's KDoc for why select_picture/select_slide can't be reused here). */
+    const val WS_CMD_NEXT_PICTURE           = "next_picture"
+    const val WS_CMD_PREVIOUS_PICTURE       = "previous_picture"
+    const val WS_CMD_NEXT_SLIDE             = "next_slide"
+    const val WS_CMD_PREVIOUS_SLIDE         = "previous_slide"
 
     // Instant-select endpoints (no approval dialog)
     const val ENDPOINT_BIBLE_SELECT         = "/api/bible/select"

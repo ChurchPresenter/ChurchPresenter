@@ -214,6 +214,9 @@ fun BibleTab(
     /** Instance Link Controller mode — non-null only when connected and controlling. Sends every
      *  verse go-live to the primary (always instant on the primary's side, no approval gate). */
     onInstanceLinkSendVerse: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit)? = null,
+    /** Instance Link Controller mode — non-null only when connected and controlling. Toggles Bible
+     *  Hold on the primary (always instant, no approval gate). */
+    onInstanceLinkSendBibleHold: ((hold: Boolean) -> Unit)? = null,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
     presenterManager: PresenterManager? = null,
@@ -343,7 +346,7 @@ fun BibleTab(
             )
             onVerseSelected(verses)
             onInstanceLinkSendVerse?.invoke(primary.bookName, primary.chapter, primary.verseNumber, primary.verseText, primary.verseRange)
-            presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
+            presenterManager?.let { if (it.bibleHold.value) { it.setBibleHold(false); onInstanceLinkSendBibleHold?.invoke(false) } }
             onPresenting(Presenting.BIBLE)
             TrainingDataLogger.logLiveReference(
                 book       = viewModel.canonicalBookIdForDisplayIndex(viewModel.selectedBookIndex.value),
@@ -422,7 +425,7 @@ fun BibleTab(
         if (viewModel.multiVerseEnabled.value) {
             viewModel.clearMultiVerseSelection()
         }
-        presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
+        presenterManager?.let { if (it.bibleHold.value) { it.setBibleHold(false); onInstanceLinkSendBibleHold?.invoke(false) } }
         onPresenting(Presenting.BIBLE)
     }
 
@@ -1295,6 +1298,7 @@ fun BibleTab(
                                             interactionSource = remember { MutableInteractionSource() }
                                         ) {
                                             presenterManager.setBibleHold(!holdLiveState)
+                                            onInstanceLinkSendBibleHold?.invoke(!holdLiveState)
                                             focusRequester.requestFocus()
                                         }
                                     else Modifier
@@ -1565,7 +1569,7 @@ fun BibleTab(
                                                 statisticsManager?.recordVerseDisplay(primary.bibleName, primary.bookName, primary.chapter, primary.verseNumber)
                                                 onVerseSelected(verses)
                                                 onInstanceLinkSendVerse?.invoke(primary.bookName, primary.chapter, primary.verseNumber, primary.verseText, primary.verseRange)
-                                                presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
+                                                presenterManager?.let { if (it.bibleHold.value) { it.setBibleHold(false); onInstanceLinkSendBibleHold?.invoke(false) } }
                                                 onPresenting(Presenting.BIBLE)
                                                 TrainingDataLogger.logLiveReference(
                                                     book       = viewModel.canonicalBookIdForDisplayIndex(viewModel.selectedBookIndex.value),
