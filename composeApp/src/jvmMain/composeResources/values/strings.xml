@@ -1601,6 +1601,8 @@
     <!-- Update checker -->
     <string name="update_dialog_title">Update Available</string>
     <string name="update_dialog_message">A new version of Church Presenter is available: %1$s</string>
+    <string name="update_dialog_channel_stable">Stable release</string>
+    <string name="update_dialog_channel_prerelease">Pre-release</string>
     <string name="update_dialog_download">Download</string>
     <string name="update_dialog_dismiss">Later</string>
     <string name="update_dialog_release_notes">What's new:</string>

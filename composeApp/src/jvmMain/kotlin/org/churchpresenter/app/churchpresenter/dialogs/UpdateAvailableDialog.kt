@@ -42,6 +42,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.participate_in_prereleases
+import churchpresenter.composeapp.generated.resources.update_dialog_channel_prerelease
+import churchpresenter.composeapp.generated.resources.update_dialog_channel_stable
 import churchpresenter.composeapp.generated.resources.update_already_latest
 import churchpresenter.composeapp.generated.resources.update_dialog_check_interval
 import churchpresenter.composeapp.generated.resources.update_dialog_dismiss
@@ -250,6 +252,27 @@ fun UpdateAvailableDialog(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Surface(
+                        color = if (updateInfo.isPrerelease)
+                            MaterialTheme.colorScheme.tertiaryContainer
+                        else
+                            MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = if (updateInfo.isPrerelease)
+                                stringResource(Res.string.update_dialog_channel_prerelease)
+                            else
+                                stringResource(Res.string.update_dialog_channel_stable),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (updateInfo.isPrerelease)
+                                MaterialTheme.colorScheme.onTertiaryContainer
+                            else
+                                MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
                     if (updateInfo.releaseNotes.isNotBlank()) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
