@@ -208,7 +208,7 @@ fun BibleTab(
     viewModel: BibleViewModel,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
-    onAddToSchedule: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit)? = null,
+    onAddToSchedule: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit)? = null,
     selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
     /** Instance Link Controller mode — non-null only when connected and controlling. Sends every
@@ -246,7 +246,7 @@ fun BibleTab(
             if (!viewModel.isFullyLoadedFlow.value) {
                 viewModel.isFullyLoadedFlow.first { it }
             }
-            val found = viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber, item.verseRange)
+            val found = viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber, item.verseRange, bookId = item.bookId)
             if (found) {
                 focusRequester.requestFocus()
             }
@@ -1372,8 +1372,8 @@ fun BibleTab(
                     // Add to Schedule (teal)
                     AddToScheduleButton(
                         onClick = {
-                            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
-                                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
+                            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
+                                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange, bookId)
                             }
                             focusRequester.requestFocus()
                         },
@@ -1536,8 +1536,8 @@ fun BibleTab(
                                         text = { Text(stringResource(Res.string.add_to_schedule)) },
                                         leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.secondary) },
                                         onClick = {
-                                            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
-                                                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
+                                            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
+                                                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange, bookId)
                                             }
                                             focusRequester.requestFocus()
                                             showVerseContextMenu = false

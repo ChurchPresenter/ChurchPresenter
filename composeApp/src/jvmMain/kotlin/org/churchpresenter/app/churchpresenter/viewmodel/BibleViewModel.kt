@@ -751,8 +751,9 @@ class BibleViewModel(
         return result
     }
 
-    fun selectVerseByDetails(bookName: String, chapter: Int, verseNumber: Int, verseRange: String = "", goLiveSource: String? = null): Boolean {
-        val bookIndex = _books.value.indexOfFirst { it.equals(bookName, ignoreCase = true) }
+    fun selectVerseByDetails(bookName: String, chapter: Int, verseNumber: Int, verseRange: String = "", goLiveSource: String? = null, bookId: Int = 0): Boolean {
+        val bookIndex = (if (bookId > 0) _primaryBible.value?.getDisplayIndexForBookId(bookId)?.takeIf { it in _books.value.indices } else null)
+            ?: _books.value.indexOfFirst { it.equals(bookName, ignoreCase = true) }
         if (bookIndex < 0) return false
 
         _selectedBookIndex.value = bookIndex
@@ -940,6 +941,7 @@ class BibleViewModel(
             val verseNumbers = mutableListOf<Int>()
             var bookName = ""
             var secondaryBookName = ""
+            var secondaryBookId = bookId
 
             for (idx in sortedIndices) {
                 val verse = _verses.value.getOrNull(idx) ?: continue
@@ -959,7 +961,10 @@ class BibleViewModel(
                 val sV = codeRef?.third ?: vNum
                 _secondaryBible.value?.takeIf { it.getVerseCount() > 0 }
                     ?.getVerseDetailsByCode(sB, sCh, sV)?.let { result ->
-                    if (secondaryBookName.isEmpty()) secondaryBookName = result.bookName
+                    if (secondaryBookName.isEmpty()) {
+                        secondaryBookName = result.bookName
+                        secondaryBookId = sB
+                    }
                     secondaryTexts.add(result.verseText)
                 }
             }
@@ -975,7 +980,8 @@ class BibleViewModel(
                         chapter = _selectedChapter.value,
                         verseNumber = verseNumbers.first(),
                         verseText = primaryTexts.joinToString(" "),
-                        verseRange = rangeStr
+                        verseRange = rangeStr,
+                        bookId = bookId
                     )
                 )
             }
@@ -988,7 +994,8 @@ class BibleViewModel(
                         chapter = _selectedChapter.value,
                         verseNumber = verseNumbers.first(),
                         verseText = secondaryTexts.joinToString(" "),
-                        verseRange = rangeStr
+                        verseRange = rangeStr,
+                        bookId = secondaryBookId
                     )
                 )
             }
@@ -1021,7 +1028,8 @@ class BibleViewModel(
                     bookName = primaryBookName,
                     chapter = _selectedChapter.value,
                     verseNumber = verseNumber,
-                    verseText = primaryVerseText
+                    verseText = primaryVerseText,
+                    bookId = bookId
                 )
             )
         }
@@ -1044,7 +1052,8 @@ class BibleViewModel(
                     bookName = result.bookName,
                     chapter = result.displayChapter,
                     verseNumber = result.displayVerse,
-                    verseText = result.verseText
+                    verseText = result.verseText,
+                    bookId = secBook
                 )
             )
         }
@@ -1221,7 +1230,7 @@ class BibleViewModel(
      * Returns true if the verse was successfully added, false otherwise.
      */
     fun addCurrentVerseToSchedule(
-        onAdd: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit
+        onAdd: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit
     ): Boolean {
         if (_verses.value.isEmpty()) return false
         val idx = _selectedVerseIndex.value
@@ -1229,7 +1238,7 @@ class BibleViewModel(
         val selectedVerses = getSelectedVerses()
         if (selectedVerses.isEmpty()) return false
         val verse = selectedVerses[0]
-        onAdd(verse.bookName, verse.chapter, verse.verseNumber, verse.verseText, verse.verseRange)
+        onAdd(verse.bookName, verse.chapter, verse.verseNumber, verse.verseText, verse.verseRange, verse.bookId)
         // Clear multi-selection so the next pick starts clean
         if (_multiVerseEnabled.value) {
             clearMultiVerseSelection()

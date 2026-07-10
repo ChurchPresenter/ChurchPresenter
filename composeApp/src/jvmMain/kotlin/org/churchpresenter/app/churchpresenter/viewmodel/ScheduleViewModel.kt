@@ -390,14 +390,15 @@ class ScheduleViewModel(
         addOrPush(ScheduleItem.SongItem(id = UUID.randomUUID().toString(), songNumber = songNumber, title = title, songbook = songbook, songId = songId))
     }
 
-    fun addBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String = "") {
+    fun addBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String = "", bookId: Int = 0) {
         addOrPush(ScheduleItem.BibleVerseItem(
             id = UUID.randomUUID().toString(),
             bookName = bookName,
             chapter = chapter,
             verseNumber = verseNumber,
             verseText = verseText,
-            verseRange = verseRange
+            verseRange = verseRange,
+            bookId = bookId
         ))
     }
 

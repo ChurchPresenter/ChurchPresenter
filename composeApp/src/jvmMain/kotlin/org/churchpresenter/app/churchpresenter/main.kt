@@ -953,7 +953,8 @@ fun main() {
                                                         item.chapter,
                                                         item.verseNumber,
                                                         item.verseText,
-                                                        item.verseRange
+                                                        item.verseRange,
+                                                        item.bookId
                                                     )
 
                                                 is ScheduleItem.PresentationItem ->
@@ -1019,7 +1020,8 @@ fun main() {
                                                         item.chapter,
                                                         item.verseNumber,
                                                         item.verseText,
-                                                        item.verseRange
+                                                        item.verseRange,
+                                                        item.bookId
                                                     )
 
                                                 is ScheduleItem.PresentationItem ->
@@ -1130,7 +1132,8 @@ fun main() {
                                                             item.chapter,
                                                             item.verseNumber,
                                                             item.verseText,
-                                                            item.verseRange
+                                                            item.verseRange,
+                                                            item.bookId
                                                         )
 
                                                     is ScheduleItem.PresentationItem ->
@@ -1224,7 +1227,8 @@ fun main() {
                                                             item.chapter,
                                                             item.verseNumber,
                                                             item.verseText,
-                                                            item.verseRange
+                                                            item.verseRange,
+                                                            item.bookId
                                                         )
 
                                                     is ScheduleItem.PresentationItem ->
@@ -2585,7 +2589,8 @@ private fun executeProjectItem(
                 item.chapter,
                 item.verseNumber,
                 item.verseText,
-                item.verseRange
+                item.verseRange,
+                item.bookId
             )
             presenterManager.setSelectedVerses(
                 listOf(

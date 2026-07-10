@@ -31,6 +31,14 @@ sealed class ScheduleItem {
          * Empty for a single verse — [verseNumber] is used for display in that case.
          */
         val verseRange: String = "",
+        /**
+         * Canonical (bible-agnostic) book id, e.g. from [org.churchpresenter.app.churchpresenter.data.Bible.getBookId].
+         * 0 means "unknown" — either an old saved schedule predating this field, or an item that
+         * arrived via a remote/companion DTO that doesn't carry it. Lookup falls back to matching
+         * [bookName] by text against the current primary Bible's book list in that case, which only
+         * works when the primary Bible's language hasn't changed since the item was added.
+         */
+        val bookId: Int = 0,
         override val displayText: String =
             if (verseRange.isNotEmpty()) "$bookName $chapter:$verseRange"
             else "$bookName $chapter:$verseNumber"
