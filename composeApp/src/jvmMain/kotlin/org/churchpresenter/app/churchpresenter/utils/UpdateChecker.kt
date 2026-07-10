@@ -1,6 +1,9 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -54,8 +57,14 @@ object UpdateChecker {
         "https://api.github.com/repos/ChurchPresenter/ChurchPresenter/releases?per_page=50"
     const val RELEASES_URL =
         "https://github.com/ChurchPresenter/ChurchPresenter/releases/latest"
+    // Count-only beacon on churchpresenter.org that attributes downloads to the
+    // app's updater (vs. the website's download buttons vs. GitHub directly).
+    private const val DOWNLOAD_BEACON_URL =
+        "https://www.churchpresenter.org/api/download"
 
     private val json = Json { ignoreUnknownKeys = true }
+
+    private val beaconScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     /**
      * Checks GitHub for a newer release that has an installer for the current OS.
@@ -135,6 +144,50 @@ object UpdateChecker {
                 urls.firstOrNull { !it.contains("arm64", ignoreCase = true) && it.endsWith(".dmg", ignoreCase = true) }
             else ->
                 urls.firstOrNull { it.endsWith(".deb", ignoreCase = true) }
+        }
+    }
+
+    // The website's platform naming for the four installer builds — same
+    // branching as selectDownloadUrl, so the beacon reports the platform whose
+    // installer is actually being downloaded.
+    private fun currentPlatformId(): String {
+        val os = System.getProperty("os.name", "").lowercase()
+        val arch = System.getProperty("os.arch", "").lowercase()
+        return when {
+            os.contains("win") -> "windows"
+            os.contains("mac") && arch == "aarch64" -> "macos_arm64"
+            os.contains("mac") -> "macos_x64"
+            else -> "linux"
+        }
+    }
+
+    /**
+     * Fire-and-forget beacon telling churchpresenter.org that an in-app update
+     * download started, so app-updater downloads can be counted separately from
+     * website and GitHub-direct downloads. Counting only: the installer itself
+     * still downloads straight from GitHub, so a failure here (offline stats
+     * endpoint, blocked network) never affects the update. Skipped for dev
+     * builds so test downloads don't skew the public stats — the same
+     * IS_RELEASE signal LiveMapReporter uses for ?src=dev.
+     */
+    fun reportDownloadStarted(version: String) {
+        if (!BuildConfig.IS_RELEASE) return
+        beaconScope.launch {
+            try {
+                val url = URI("$DOWNLOAD_BEACON_URL?platform=${currentPlatformId()}&source=app&version=$version").toURL()
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "POST"
+                // The website's CSRF middleware 403s cross-origin POSTs with a
+                // form-like (or absent) content type; JSON passes it.
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.setRequestProperty("User-Agent", "ChurchPresenter/${BuildConfig.APP_VERSION}")
+                connection.connectTimeout = 5_000
+                connection.readTimeout = 5_000
+                connection.responseCode // send the request
+                connection.disconnect()
+            } catch (_: Exception) {
+                // Non-fatal — silently ignore network errors.
+            }
         }
     }
 

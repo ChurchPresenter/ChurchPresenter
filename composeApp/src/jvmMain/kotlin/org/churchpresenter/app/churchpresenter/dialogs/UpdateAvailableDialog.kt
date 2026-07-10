@@ -164,6 +164,9 @@ fun UpdateAvailableDialog(
     val updateInfo = (result as? UpdateCheckResult.Available)?.info
 
     val startDownload: () -> Unit = {
+        // Count this as an app-updater download (fire-and-forget, own scope —
+        // never delays or fails the actual download below).
+        updateInfo?.let { UpdateChecker.reportDownloadStarted(it.latestVersion) }
         scope.launch(Dispatchers.IO) {
             try {
                 val url = URI(updateInfo!!.downloadUrl!!).toURL()
