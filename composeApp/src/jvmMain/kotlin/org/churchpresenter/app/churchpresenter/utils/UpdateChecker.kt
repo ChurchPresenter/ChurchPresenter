@@ -17,7 +17,8 @@ data class UpdateInfo(
     val latestVersion: String,
     val releaseUrl: String,
     val releaseNotes: String,
-    val downloadUrl: String? = null
+    val downloadUrl: String? = null,
+    val isPrerelease: Boolean = false
 )
 
 sealed class UpdateCheckResult {
@@ -108,7 +109,8 @@ object UpdateChecker {
                             latestVersion = latestVersion,
                             releaseUrl = obj["html_url"]?.jsonPrimitive?.contentOrNull ?: RELEASES_URL,
                             releaseNotes = (obj["body"]?.jsonPrimitive?.contentOrNull ?: "").take(500),
-                            downloadUrl = downloadUrl
+                            downloadUrl = downloadUrl,
+                            isPrerelease = isPrerelease
                         )
                     )
                 } else {
