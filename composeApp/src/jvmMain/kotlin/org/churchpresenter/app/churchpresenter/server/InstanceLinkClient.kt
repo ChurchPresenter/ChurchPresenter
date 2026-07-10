@@ -38,8 +38,12 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import javax.net.ssl.SSLException
 import kotlin.random.Random
 
 enum class InstanceLinkStatus { DISCONNECTED, CONNECTING, CONNECTED, ERROR }
@@ -197,7 +201,8 @@ class InstanceLinkClient(
                         "InstanceLink: connection failed — ${e.message}",
                         tags = mapOf(
                             "subsystem" to "instance_link",
-                            "consecutive_failures" to consecutiveFailures.toString()
+                            "consecutive_failures" to consecutiveFailures.toString(),
+                            "failure_kind" to classifyConnectFailure(e)
                         )
                     )
                 }
@@ -221,6 +226,20 @@ class InstanceLinkClient(
             onReconnectScheduled(delayMs)
             delay(delayMs)
         }
+    }
+
+    /**
+     * Buckets a connect failure so Sentry can be filtered/grouped by cause: "refused"/"dns" are
+     * the expected, benign case (primary not started yet or misconfigured host/port), while
+     * "timeout"/"tls"/"other" are more likely to indicate an actual regression (e.g. a primary
+     * that crashed mid-session, or a protocol/certificate bug).
+     */
+    private fun classifyConnectFailure(e: Exception): String = when (e) {
+        is ConnectException -> "refused"
+        is UnknownHostException -> "dns"
+        is SocketTimeoutException -> "timeout"
+        is SSLException -> "tls"
+        else -> "other"
     }
 
     private fun handleMessage(raw: String) {
