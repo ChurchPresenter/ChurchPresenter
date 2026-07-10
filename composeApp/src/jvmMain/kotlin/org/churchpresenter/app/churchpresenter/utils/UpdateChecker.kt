@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -15,6 +16,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import java.net.HttpURLConnection
 import java.net.URI
+import kotlin.time.Duration.Companion.seconds
 
 data class UpdateInfo(
     val latestVersion: String,
@@ -161,19 +163,28 @@ object UpdateChecker {
         }
     }
 
+    // Same quick-retry shape as LiveMapReporter: a transient blip at the moment
+    // the user clicks Download shouldn't drop the beacon. No slow retry — the
+    // app exits to launch the installer soon after, killing the coroutine.
+    private const val QUICK_ATTEMPTS = 3
+    private val QUICK_RETRY_DELAY = 5.seconds
+
     /**
      * Fire-and-forget beacon telling churchpresenter.org that an in-app update
      * download started, so app-updater downloads can be counted separately from
      * website and GitHub-direct downloads. Counting only: the installer itself
      * still downloads straight from GitHub, so a failure here (offline stats
-     * endpoint, blocked network) never affects the update. Skipped for dev
-     * builds so test downloads don't skew the public stats — the same
-     * IS_RELEASE signal LiveMapReporter uses for ?src=dev.
+     * endpoint, blocked network) never affects the update — it's retried a few
+     * times in quick succession, then dropped. Skipped for dev builds so test
+     * downloads don't skew the public stats — the same IS_RELEASE signal
+     * LiveMapReporter uses for ?src=dev.
      */
     fun reportDownloadStarted(version: String) {
         if (!BuildConfig.IS_RELEASE) return
         beaconScope.launch {
-            try {
+            // True once the server answered at all — any HTTP status counts,
+            // since a 4xx/5xx means the request arrived and a retry won't help.
+            fun tryBeacon(): Boolean = try {
                 val url = URI("$DOWNLOAD_BEACON_URL?platform=${currentPlatformId()}&source=app&version=$version").toURL()
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "POST"
@@ -185,8 +196,15 @@ object UpdateChecker {
                 connection.readTimeout = 5_000
                 connection.responseCode // send the request
                 connection.disconnect()
+                true
             } catch (_: Exception) {
                 // Non-fatal — silently ignore network errors.
+                false
+            }
+
+            repeat(QUICK_ATTEMPTS) { attempt ->
+                if (tryBeacon()) return@launch
+                if (attempt < QUICK_ATTEMPTS - 1) delay(QUICK_RETRY_DELAY)
             }
         }
     }
