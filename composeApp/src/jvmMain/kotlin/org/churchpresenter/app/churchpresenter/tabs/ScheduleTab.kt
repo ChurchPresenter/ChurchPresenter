@@ -187,7 +187,7 @@ fun ScheduleTab(
     val viewModel = scheduleViewModel ?: remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
     val scope = rememberCoroutineScope()
 
-    var showAutoRestoreDialog by remember { mutableStateOf(viewModel.autoSaveAvailable()) }
+    var showAutoRestoreDialog by remember { mutableStateOf(viewModel.shouldPromptAutoRestore()) }
     if (showAutoRestoreDialog) {
         val savedAt = remember { viewModel.autoSaveSavedAt() }
         val timeStr = remember(savedAt) {

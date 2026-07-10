@@ -107,6 +107,20 @@ class ScheduleViewModel(
         }
     }
 
+    @Volatile private var autoRestorePrompted = false
+
+    /**
+     * Returns whether the auto-restore dialog should be shown, but only ever returns true
+     * once per ViewModel lifetime (i.e. once per app session, since this ViewModel is hoisted
+     * to survive schedule panel collapse/expand). Prevents collapsing and re-expanding the
+     * schedule panel from re-showing the dialog on every remount of ScheduleTab.
+     */
+    fun shouldPromptAutoRestore(): Boolean {
+        if (autoRestorePrompted) return false
+        autoRestorePrompted = true
+        return autoSaveAvailable()
+    }
+
     /** Returns true if there is an autosave from today that is less than 4 hours old. */
     fun autoSaveAvailable(): Boolean {
         if (!autoSaveFile.exists() || autoSaveFile.length() == 0L) return false
