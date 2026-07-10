@@ -79,3 +79,36 @@ fun Modifier.initialPassCombinedClickable(
             }
         }
     }
+
+/**
+ * Combined-click counterpart to [finalPassClickable] — fires only when no child composable
+ * consumed the event, with the same double-click detection (300 ms threshold) as
+ * [initialPassCombinedClickable]. Use this on a container Row/Column that needs both click and
+ * double-click handling (e.g. select / go-live) while still letting nested clickable children
+ * (an [initialPassClickable] line, an IconButton, etc.) win the hit-test for their own clicks.
+ */
+fun Modifier.finalPassCombinedClickable(
+    onClick: () -> Unit,
+    onDoubleClick: (() -> Unit)? = null,
+): Modifier =
+    this.pointerInput(onClick, onDoubleClick) {
+        var lastClickTime = 0L
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Final)
+                if (event.type == PointerEventType.Release &&
+                    event.changes.any { !it.isConsumed }
+                ) {
+                    event.changes.forEach { it.consume() }
+                    val now = System.currentTimeMillis()
+                    val isDouble = now - lastClickTime < 300L
+                    lastClickTime = now
+                    if (isDouble && onDoubleClick != null) {
+                        onDoubleClick()
+                    } else {
+                        onClick()
+                    }
+                }
+            }
+        }
+    }
