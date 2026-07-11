@@ -34,6 +34,7 @@ import churchpresenter.composeapp.generated.resources.animation_slide_right
 import churchpresenter.composeapp.generated.resources.animation_type
 import churchpresenter.composeapp.generated.resources.auto_scroll_interval
 import churchpresenter.composeapp.generated.resources.loop
+import churchpresenter.composeapp.generated.resources.presentation_animate_keynote
 import churchpresenter.composeapp.generated.resources.milliseconds_suffix
 import churchpresenter.composeapp.generated.resources.seconds_suffix
 import churchpresenter.composeapp.generated.resources.slideshow_settings
@@ -105,6 +106,20 @@ fun MediaSettingsTab(
                 onCheckedChange = { value ->
                     onSettingsChange { s ->
                         s.copy(pictureSettings = s.pictureSettings.copy(isLooping = value))
+                    }
+                },
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        // Keynote animated playback (the parser is reverse-engineered — this is the
+        // one-click escape hatch back to static slides if a .key renders wrong)
+        SettingRow(stringResource(Res.string.presentation_animate_keynote)) {
+            Checkbox(
+                checked = settings.presentationSettings.animateKeynote,
+                onCheckedChange = { value ->
+                    onSettingsChange { s ->
+                        s.copy(presentationSettings = s.presentationSettings.copy(animateKeynote = value))
                     }
                 },
                 modifier = Modifier.size(24.dp)

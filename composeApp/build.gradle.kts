@@ -204,10 +204,19 @@ kotlin {
             implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.10.1")
             // Apache PDFBox for PDF slide extraction
             implementation("org.apache.pdfbox:pdfbox:2.0.33")
-            // Apache POI for PowerPoint slide extraction
+            // Apache POI for PowerPoint slide extraction.
+            // poi-ooxml-lite is swapped for poi-ooxml-full: the presentation engine's timing
+            // parser needs the <p:timing> schema classes (CTTLTimeNode*, …) that lite omits.
+            // Keep exactly one schema jar on the classpath (kept in sync with
+            // ChurchPresenter-PresentationEngine/build.gradle.kts).
             implementation("org.apache.poi:poi:5.3.0")
-            implementation("org.apache.poi:poi-ooxml:5.3.0")
+            implementation("org.apache.poi:poi-ooxml:5.3.0") {
+                exclude(group = "org.apache.poi", module = "poi-ooxml-lite")
+            }
+            implementation("org.apache.poi:poi-ooxml-full:5.3.0")
             implementation("org.apache.poi:poi-scratchpad:5.3.0")
+            // Pure-Java snappy for the presentation engine's Keynote IWA reader
+            implementation("io.airlift:aircompressor:2.0.2")
             // Ktor server for companion API
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.netty)
@@ -519,6 +528,9 @@ kotlin {
             // Include Companion Satellite client submodule source — pure-Kotlin client for
             // Bitfocus Companion's Satellite protocol, wrapped by CompanionSatelliteViewModel.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite/src/main/kotlin")
+            // Include Presentation Engine submodule source — parses and renders PPTX/PPT/PDF/
+            // Keynote decks (static + animated) for PresentationViewModel and CompanionServer.
+            kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/src/main/kotlin")
             // Include submodule resources (.properties files for localization)
             resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-Converter/src/main/resources")
             resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/resources")

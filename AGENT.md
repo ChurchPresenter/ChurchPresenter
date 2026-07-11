@@ -205,63 +205,142 @@ This document tracks coding standards, common mistakes, and debugging notes for 
 
 ## Dependencies
 
-### Apache PDFBox (for Presentation Tab)
-- 📦 **Dependency**: `org.apache.pdfbox:pdfbox:2.0.30`
-- 📌 **Location**: `composeApp/build.gradle.kts`
-- ⚠️ **Important**: After adding this dependency, you MUST run Gradle sync:
-  - Command line: `./gradlew build`
-  - IntelliJ: Click "Load Gradle Changes" or "Sync Now"
-- 🔍 **Symptom if missing**: PDF slides won't load, console shows "PDFBox library not found!"
-- ✅ **Solution**: Run Gradle sync to download the dependency
+### Presentation dependencies (PDFBox / POI / aircompressor)
+- 📦 In `composeApp/build.gradle.kts` **and mirrored in the engine sub-build**
+  (`ChurchPresenter-PresentationEngine/build.gradle.kts` — keep versions in sync):
+  - `org.apache.pdfbox:pdfbox:2.0.33`
+  - `org.apache.poi:poi:5.3.0`, `poi-scratchpad:5.3.0`
+  - `org.apache.poi:poi-ooxml:5.3.0` **with `poi-ooxml-lite` excluded** +
+    `org.apache.poi:poi-ooxml-full:5.3.0` — the animation timing parser needs the `<p:timing>`
+    schema classes that lite omits; exactly ONE schema jar may be on the classpath
+  - `io.airlift:aircompressor` — pure-Java snappy for the Keynote IWA reader (no natives)
+- All POI/PDFBox access is **typed, no reflection** (the old reflection wrappers are gone —
+  these are plain compile-time dependencies).
 
-### Apache POI (for PowerPoint Slide Extraction)
-- 📦 **Dependencies**: 
-  - `org.apache.poi:poi:5.2.5` - Core POI library
-  - `org.apache.poi:poi-ooxml:5.2.5` - For PPTX (PowerPoint 2007+) files
-  - `org.apache.poi:poi-scratchpad:5.2.5` - For PPT (PowerPoint 97-2003) files
-- 📌 **Location**: `composeApp/build.gradle.kts`
-- ⚠️ **Important**: After adding these dependencies, you MUST run Gradle sync:
-  - Command line: `./gradlew --refresh-dependencies build`
-  - IntelliJ: Click "Load Gradle Changes" or "Sync Now"
-- 🔍 **Symptom if missing**: PowerPoint slides won't load, console shows "Apache POI library not found!"
-- ✅ **Solution**: Run Gradle sync to download the dependencies
-- 📝 **Implementation Notes**:
-  - Uses XSLF (XML SlideShow) for `.pptx` files
-  - Uses HSLF (Horrible SlideShow Format) for `.ppt` files
-  - Renders slides to BufferedImage using Graphics2D
-  - Applies high-quality rendering hints (antialiasing, bicubic interpolation)
-  - Converts BufferedImage to Compose ImageBitmap via Skia
+### Keynote loading (see Presentation Engine section below for the full picture)
+- ⚠️ **NEVER use osascript, AppleScript, qlmanage, sips, `unzip`, or any external process** —
+  everything runs in-JVM (`java.util.zip`, aircompressor). The old macOS Keynote.app/qlmanage
+  export paths were removed in July 2026.
+- Primary path: **native IWA parse** (`presentation.engine.keynote.*`) — renders and animates
+  whitelisted content itself.
+- Static fallback (whole-file parse failure, or per-slide whitelist gate): embedded
+  `QuickLook/Preview.pdf` (full-res, most .key files) → `Data/st-*.jpg` slide thumbnails
+  ordered by the `Index/Slide-<id>.iwa` zip-order heuristic. Some documents (verified on a
+  real file) have NO Preview.pdf — thumbnails are the only static source there.
 
-### Keynote Slide Extraction
-- 📝 **Challenge**: Keynote files (.key) don't have a standard API for slide extraction
-- 🔍 **Solution**: Detect file format and unzip if compressed
-- 📂 **File Format Detection**:
-  - **Directory Package**: If `file.isDirectory` is true, access directly
-  - **Compressed File**: If `file.isDirectory` is false, unzip to temp directory first
-- 🗜️ **Unzip Process**:
-  - Use macOS `unzip` command to extract .key file to temporary directory
-  - Access extracted contents as regular directory
-  - Clean up temp directory after loading slides
-### Keynote Slide Loading Strategy (CROSS-PLATFORM, NO EXTERNAL APPS)
-- ⚠️ **NEVER use osascript, AppleScript, qlmanage, sips, or any external process** — everything must run within the JVM
-- ⚠️ **NEVER use shell `unzip` command** — use `java.util.zip.ZipInputStream` (pure Java, works everywhere)
-- **How it works**: Unzip `.key` file with `ZipInputStream` → extract `st-` (slide thumbnails) + full-size `mt-` (image-only slides) from `Data/` → sort by `Index/Presentation.iwa` varint scan
-- **st- files**: slide thumbnails for text/mixed slides — always present
-- **mt- files**: media assets — full-size (no `-small-` suffix) = image-only slide content
-- **Slide order**: scan `Index/Presentation.iwa` binary for varint IDs matching file trailing numbers → use byte offset as order; fallback to `index.apxl` XML; last resort = mtime sort
-- **Limitation**: slides that are purely image-only but whose mt- file is not the largest version may still be missing — this is a Keynote format limitation without the Keynote app
-  1. **Data directory**: Look for `st-*.jpg` files (slide thumbnails - these are the actual slide previews)
-     - `st-` prefix = Slide Thumbnail (what we want)
-     - `mt-` prefix = Media Thumbnail (user-inserted images/videos, not slides)
-     - Filename format: `st-{UUID}-{number}.jpg` where number indicates slide order
-     - Example: `st-875C55A8-466B-4362-9DC4-449E9C86ED29-9097.jpg`
-  2. **QuickLook directory**: Fallback preview images (usually just 1-2 preview images)
-  3. **Root preview files**: `preview.jpg`, `preview-micro.jpg`, `preview-web.jpg` (same image, different resolutions)
-  4. **macOS qlmanage**: Generate thumbnails as last resort (only creates 1 preview)
-- ⚠️ **Important**: Root preview files are all the same image at different resolutions - loading all 3 would show the same slide 3 times!
-- ⚠️ **Limitation**: If Keynote doesn't store `st-` files internally, only 1 slide will load
-- 💡 **Best Practice**: Export Keynote to PDF or PPTX for guaranteed multi-slide extraction
-- 🧹 **Cleanup**: Temporary extraction directory is automatically deleted after loading
+## Presentation Engine — Animated PPTX + Keynote Playback (July 2026)
+
+**What changed**: the Presentation feature was overhauled from "everything becomes a static
+JPEG via reflection-wrapped POI/PDFBox, duplicated between PresentationViewModel and
+CompanionServer" into a standalone engine sub-build with **true animation playback**:
+PowerPoint entrance/emphasis/exit effects, by-paragraph text builds, click-step sequencing,
+motion paths, slide transitions — and the same for Keynote via a reverse-engineered IWA parser.
+All in-JVM, all three platforms, no external processes.
+
+### Module: `composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/`
+BLE-pattern sub-build (own gradle project, JUnit5 tests, `kotlin.srcDir`-mounted into
+composeApp). Package root `presentation.engine`. **Zero Compose dependency by construction**
+(its own classpath has no Compose — accidental imports fail the standalone build).
+- `./gradlew test` — full suite (31+ tests), headless-safe (`java.awt.headless=true`)
+- `./gradlew dumpTiming -Pfile=/path/deck.pptx [-Pout=/dir]` — parse audit + PNG renders of
+  any deck; every degrade prints, so user reports become PresetCatalog data entry
+- `./gradlew dumpKeynote -Pfile=/path/deck.key` — IWA object-graph probe (schema drift triage)
+- `./gradlew makeSampleDeck -Pout=/path/sample.pptx` — generates an animated test deck
+
+### Architecture (engine)
+- **Model** (`model/`): `Deck → Slide → LayerSpec` (Background z-bands / Shape / ParagraphText /
+  StaticComposite) + `Timeline → Step → EffectInterval → EffectSpec` (all effects reduce to
+  sampled `LayerState`: alpha/translate/scale/rotate/RevealClip). `Slide.fidelity`:
+  NATIVE vs STATIC_FALLBACK (per-slide degrade).
+- **`PresentationLoader.load(file)`** — parse only, never throws; `DeckRasterizer` (open-once,
+  AutoCloseable) produces pixels: `renderFinalFrame` (all builds complete — grid, cache,
+  companion) and `rasterizeSlideLayers` (transparent ARGB per-layer bitmaps for playback).
+- **PPTX**: `AnimationTargetScanner` (spTgt scan) → `PptxLayerPlanner` (z-band flattening;
+  group targets animate the whole group) → `TimingParser` (typed CTTL* over poi-ooxml-full,
+  document-order cursor walk) → `TimelineCompiler` (behavior-first synthesis: anim curves /
+  animEffect filters / animMotion paths beat the preset table; `PresetCatalog` = filter map +
+  preset-id backstop; **unknown → Fade, never a missing shape**). Per-paragraph layers use
+  reversible transparent-fill mutation on run rPr elements (NEVER replace paragraph XML
+  wholesale — that disconnects POI's cached wrappers: XmlValueDisconnectedException).
+  Tested invariant: compositing all layers == plain `slide.draw` (perceptual), and the
+  mutation restores pixel-identically.
+- **Keynote** (`keynote/`): hand-rolled protobuf wire reader (`ProtoReader`; unknown fields
+  ignored → version drift degrades, never crashes) + `IwaChunkReader` (raw-snappy chunks) +
+  `ObjectIndex` (all iwa objects + Metadata data-id→file map). Field numbers vendored in
+  `KnFields.kt` with proto citations (extracted from psobot/keynote-parser 14.4).
+  `KeynoteDeckParser` walks Document→Show→slide nodes→drawables (whitelist: images, shapes
+  incl. bezier paths, text, groups; movies/charts/tables/masked images **gate the slide** to
+  static fallback), builds (`KeynoteBuildMapper` → the same EffectSpec model; buildChunks
+  drive click steps), transitions, notes. `KeynoteSceneRasterizer` lays text out itself
+  (LineBreakMeasurer over `SlideFontRegistry`).
+  Empirically validated against a real .key: geometry `flags` is NOT a flip bitmask (plain
+  drawables carry flags=3); `drawables_z_order` omits placeholders (render them below it);
+  auto-sized text boxes persist size (0,0) → lay out unwrapped from the anchor.
+  Known gap: theme-preset fills (stylesheet presets, not the parent chain) don't resolve →
+  decorative shapes can be invisible; text/images/explicit fills are correct.
+- **Fonts** (`fonts/SlideFontRegistry.kt`): bundled fonts registered into AWT at startup
+  (main.kt daemon thread via `LottieFonts.bundledFontResources()`), platform font dirs scanned
+  for families the JVM misses (per-user Windows fonts), POI `Drawable.FONT_HANDLER` hook
+  substitutes unavailable families (Calibri→Carlito→…→Open Sans). PPTX-embedded fntdata parts
+  register per-document. `LottieFonts` delegates its system-font lookup here.
+- **Cache** (`cache/SlideDiskCache.kt`): `~/.churchpresenter/slides/<id>/` schema v2 —
+  `manifest.json` written LAST as the commit marker (crashed render self-heals), final-frame
+  JPEGs + notes. **Shared by PresentationViewModel and CompanionServer** (one render, both
+  consumers; server accepts any width, writes at default 1920). Layers are rasterized lazily
+  in memory (window of current±1 slide), deliberately not persisted.
+
+### Architecture (app side)
+- `presenter/PresentationPlayer.kt` — rendering bridge owned by PresenterManager (LottieFrameStream
+  pattern, documented ViewModel-rule exception): owns the Deck, layer-bitmap window, click-step
+  state machine (`advance`/`rewind`; step -1 = pre-click state), deck-transition overlay.
+- `PresenterManager`: `presentationFrame: State<PresentationFrame?>`, `presentationShowSlide(deck, idx)`
+  (player only when the deck has any timeline/transition — static decks keep the old
+  AnimationType path), `advancePresentationStep()/rewindPresentationStep()`,
+  `runPresentationClock()` (withFrameNanos, driven from main.kt beside the Lottie clock; idles
+  when settled). Leaving PRESENTATION mode releases the player.
+- `presenter/PresentationPresenter.kt` — Canvas compositor for every output (main windows ×6
+  branches, LivePreviewPanel, BrowserSourceVideoRenderer): letterbox, per-layer
+  alpha/transform/clip, deck transitions (FADE/PUSH/WIPE/SPLIT/COVER), KEY-role white fill,
+  freeze + null-frame → falls back to the static `SlidePresenter` body.
+- `PresentationTab`: next/prev/keyboard/auto-play route through the step machine first
+  ("Build x of y" indicator + per-thumbnail step-count badge); thumbnails decode via
+  `produceState` on IO (jank fix). MainDesktop's remote-select/instance-link handlers keep the
+  player in sync (or cleared) so a stale animated frame can never override a pushed slide.
+- Settings: `PresentationSettings.animateKeynote` (default true; MediaSettingsTab checkbox) —
+  one-click fallback to static .key rendering since that parser is reverse-engineered.
+
+### Key rules
+- A slide must NEVER fail to show: every unknown effect degrades to Fade, every unrenderable
+  Keynote slide gates to its static fallback, whole-file parse failures fall back to the
+  static cascade. Degrades are logged as deck warnings → CrashReporter breadcrumbs.
+- Kotlin block comments NEST: never write paths like `Index/*.iwa` inside a KDoc.
+- JPEG writes must go through `DeckRasterizer.flattenToRgb` (ImageIO's JPEG writer corrupts
+  ARGB input).
+
+### Verification status
+- Engine: 31+ unit/invariant tests green (timing goldens, evaluator math, layer-composite
+  equivalence, mutation purity, IWA round-trips); PPTX pipeline validated end-to-end on a
+  generated animated deck (`dumpTiming`: 4 click steps, transitions, zero degrades); Keynote
+  validated against a real-world .key (all text/layout correct in PNG output, side-by-side
+  with Keynote's own thumbnail).
+- App: compiles zero-warning; 40 s launch smoke test clean. Arrow-key slide navigation
+  verified hands-on in the running GUI (System Events keystrokes + screenshots): tab
+  focus after keyboard tab-switch, after loading a deck via mouse click, both directions.
+  Two fixes landed from that session: (1) `focusRequester.requestFocus()` now fires on every
+  `loadGeneration` change and on thumbnail click — previously only the schedule-item path
+  requested focus, so decks opened via the file dialog or recents bar had dead arrow keys;
+  (2) `advancePresentationStep`/`rewindPresentationStep` are identity-guarded (player must be
+  showing exactly the caller's deck+slide, and the display must not be cleared) so the build
+  step machine can never silently eat arrow presses. Go-live of an animated deck on a real
+  output window verified hands-on (July 10, `makeSampleDeck` deck, System Events + screenshots):
+  pre-click state hides entrance targets (player active, not the static frame), all 4 build
+  steps advance AND rewind with the "Build x of y" indicator tracking, mid-fade alpha visibly
+  ~50%, PUSH mid-frame shows both slides at the seam, FADE mid-frame cross-fades both titles,
+  step-count badges on thumbnails match `dumpTiming`, the browser-source preview mirrors the
+  animated frame ("Live" badge), and Clear Display drops to the background with no stale frame.
+  Also fixed from that session: `presentation_static_note` (strings.xml) still claimed
+  animations/transitions are unsupported. **Not yet verified hands-on**: KEY-role output,
+  freeze during playback, DeckLink, and the browser-source overlay page in OBS itself.
 
 ## Presentation API (March 2026)
 
@@ -276,7 +355,11 @@ This document tracks coding standards, common mistakes, and debugging notes for 
 ### Background rendering (schedule items)
 When `updateSchedule` is called with a `PresentationItem`, `CompanionServer` immediately:
 1. Computes the stable file-hash ID and stores the mapping `scheduleUUID → fileHash` in `_scheduleItemToPresentationId`.
-2. Launches a coroutine on `Dispatchers.IO` that renders the file using reflection-based POI/PDFBox (same libraries as `PresentationViewModel` but without touching UI state).
+2. Launches a coroutine on `Dispatchers.IO` that renders the file through the shared
+   presentation engine (`PresentationLoader` + `DeckRasterizer` — same pipeline as
+   `PresentationViewModel`), reusing the shared `SlideDiskCache` when the tab already rendered
+   the file and writing into it otherwise (July 2026: the old duplicated reflection renderers
+   were deleted).
 3. On completion the JPEG bytes go into `_slideBytes[fileHash]` and metadata into `_presentationCatalogs[fileHash]`.
 
 `GET /api/presentations/{scheduleUUID}` resolves the UUID via the map and returns the `PresentationDto` immediately when rendering finishes. While still rendering, it returns `404` — the client should retry.

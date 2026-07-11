@@ -274,14 +274,15 @@ class BrowserSourceVideoRenderer(
                                             showBackground = showBg
                                         )
                                         Presenting.PRESENTATION -> {
-                                            val frozen = presenterManager.slideFrozen.value
-                                            SlidePresenter(
-                                                slide = if (frozen) null else presenterManager.displayedSlide.value,
-                                                previousSlide = if (frozen) null else presenterManager.previousDisplayedSlide.value,
+                                            PresentationPresenter(
+                                                frame = presenterManager.presentationFrame.value,
+                                                slide = presenterManager.displayedSlide.value,
+                                                previousSlide = presenterManager.previousDisplayedSlide.value,
                                                 transitionAlpha = presenterManager.slideTransitionAlpha.value,
                                                 slideOffset = presenterManager.slideSlideOffset.value,
                                                 animationType = presenterManager.animationType.value,
-                                                outputRole = outputRole
+                                                outputRole = outputRole,
+                                                frozen = presenterManager.slideFrozen.value
                                             )
                                         }
                                         Presenting.LOWER_THIRD -> {

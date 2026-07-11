@@ -80,6 +80,7 @@ import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
+import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -203,6 +204,7 @@ private fun SingleDisplayPreview(
     val displayedSlide by presenterManager.displayedSlide
     val previousDisplayedSlide by presenterManager.previousDisplayedSlide
     val slideFrozen by presenterManager.slideFrozen
+    val presentationFrame by presenterManager.presentationFrame
     val slideTransitionAlpha by presenterManager.slideTransitionAlpha
     val slideSlideOffset by presenterManager.slideSlideOffset
     val animationType by presenterManager.animationType
@@ -362,12 +364,14 @@ private fun SingleDisplayPreview(
                                     animationType = animationType,
                                 )
                             Presenting.PRESENTATION ->
-                                SlidePresenter(
-                                    slide = if (slideFrozen) null else displayedSlide,
-                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
+                                PresentationPresenter(
+                                    frame = presentationFrame,
+                                    slide = displayedSlide,
+                                    previousSlide = previousDisplayedSlide,
                                     transitionAlpha = slideTransitionAlpha,
                                     slideOffset = slideSlideOffset,
                                     animationType = animationType,
+                                    frozen = slideFrozen
                                 )
                             Presenting.MEDIA ->
                                 if (mediaViewModel != null && !mediaViewModel.isAudioFile) {

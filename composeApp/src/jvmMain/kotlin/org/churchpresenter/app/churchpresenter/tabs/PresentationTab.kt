@@ -53,6 +53,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -68,15 +69,24 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalWindowInfo
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -123,6 +133,8 @@ import churchpresenter.composeapp.generated.resources.select_presentation_file
 import churchpresenter.composeapp.generated.resources.select_presentation_file_button
 import churchpresenter.composeapp.generated.resources.slide_count
 import churchpresenter.composeapp.generated.resources.loading_slides_progress
+import churchpresenter.composeapp.generated.resources.presentation_builds_counter
+import churchpresenter.composeapp.generated.resources.presentation_focus_lost
 import churchpresenter.composeapp.generated.resources.slide_counter
 import churchpresenter.composeapp.generated.resources.slide_number
 import churchpresenter.composeapp.generated.resources.presentation_static_note
@@ -155,10 +167,18 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import java.awt.Canvas
+import java.awt.Component
+import java.awt.Container
+import java.awt.EventQueue
+import java.awt.Toolkit
+import java.awt.Window as AwtWindow
+import java.awt.event.WindowEvent
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -168,6 +188,10 @@ import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 @Composable
 fun PresentationTab(
     modifier: Modifier = Modifier,
+    /** The hosting AWT window — the focus-lost rescue banner uses it to force window focus
+     *  back when AWT's focus tracking wedges (window active per macOS, but windowGainedFocus
+     *  never delivered). */
+    hostWindow: AwtWindow? = null,
     appSettings: AppSettings,
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. Every go-live
@@ -202,6 +226,95 @@ fun PresentationTab(
     val scope = rememberCoroutineScope()
     var showRemoteDialog by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+    // True while the tab (or any control inside it) holds keyboard focus — exactly the
+    // condition under which arrow/clicker keys reach the onKeyEvent handler below. Drives
+    // the focus-lost rescue banner above the slide grid.
+    var tabHasFocus by remember { mutableStateOf(false) }
+    // Compose keeps the focused node "focused" when the whole WINDOW loses focus, so
+    // onFocusChanged alone can't see the operator switching to another window — but keys
+    // stop arriving all the same. Window focus must be watched separately.
+    val windowFocused = LocalWindowInfo.current.isWindowFocused
+    // AWT on macOS can miss a window re-activation entirely: the NSWindow is key again and
+    // mouse events flow, but WINDOW_ACTIVATED/WINDOW_GAINED_FOCUS are never delivered
+    // (observed live via a global AWT event tap). In that wedged state the
+    // KeyboardFocusManager discards every key event, so the operator's keys stay dead no
+    // matter where they click. Detect it — pointer input arriving while AWT still believes
+    // the window is unfocused — and repost the missing activation events to resync.
+    //
+    // ⚠️ The resync must be DEFERRED and RE-CHECKED, never immediate: the click that
+    // reactivates the window is delivered to Compose while AWT's real windowGainedFocus is
+    // still in flight. Posting the synthetic events right away wins that race, and the
+    // KeyboardFocusManager then discards the REAL activation event as a duplicate — before
+    // its focus-owner restore runs — leaving every subsequent key press silently dropped
+    // (user-reproduced: banner clears, arrow keys dead). Waiting and re-checking makes the
+    // resync a no-op whenever AWT heals itself, which is every normal physical click.
+    var resyncJob by remember { mutableStateOf<Job?>(null) }
+    val resyncWedgedWindowFocus = {
+        val w = hostWindow
+        if (w != null && !w.isFocused && resyncJob?.isActive != true) {
+            resyncJob = scope.launch {
+                delay(300)
+                if (!w.isFocused) {
+                    val queue = Toolkit.getDefaultToolkit().systemEventQueue
+                    queue.postEvent(WindowEvent(w, WindowEvent.WINDOW_ACTIVATED))
+                    queue.postEvent(WindowEvent(w, WindowEvent.WINDOW_GAINED_FOCUS))
+                    // The window events alone don't regenerate the component-level
+                    // FOCUS_GAINED, so the KeyboardFocusManager still has no focus owner.
+                    // Restore it explicitly once the queue has processed the window events.
+                    EventQueue.invokeLater {
+                        (w.mostRecentFocusOwner ?: w).requestFocusInWindow()
+                    }
+                }
+            }
+        }
+        Unit
+    }
+    // A mouse press on a component hands it AWT keyboard focus — that's why clicking a
+    // thumbnail revives dead arrow keys (user-observed) while regaining focus via the banner
+    // can leave them dead: the banner's press IS the activation click, and the real
+    // windowGainedFocus that follows can fail to restore the component-level focus owner, so
+    // the KeyboardFocusManager silently discards every key press. Do what the thumbnail click
+    // does, explicitly: once the window is really AWT-focused, restore its last focus owner
+    // (the Compose canvas). No-op when focus is already healthy; touches nothing else — no
+    // player state, so live slide animations are never restarted by focus recovery.
+    val restoreAwtFocusOwner = {
+        scope.launch {
+            val w = hostWindow ?: return@launch
+            var waitedMs = 0
+            while (!w.isFocused && waitedMs < 1500) {
+                delay(50)
+                waitedMs += 50
+            }
+            if (w.isFocused) {
+                EventQueue.invokeLater {
+                    // Key events reach Compose only when the AWT focus owner is the Compose
+                    // CANVAS — never the frame. mostRecentFocusOwner can be null after a
+                    // failed activation restore, so locate the canvas in the component tree
+                    // explicitly (what a physical click on any slide does natively).
+                    val target = findAwtCanvas(w) ?: w.mostRecentFocusOwner ?: w
+                    if (!target.requestFocusInWindow()) target.requestFocus()
+                }
+            }
+        }
+        Unit
+    }
+    // macOS swallows the first click on an inactive window — the rescue banner's onClick
+    // never fires from that click. Re-take keyboard focus whenever the window comes back to
+    // the foreground with no focus owner inside the tab, so ANY activation click (banner,
+    // thumbnail, title bar) or Cmd+Tab revives the keys immediately. AWT hands keyboard
+    // focus back to the Compose panel asynchronously after activation — a single immediate
+    // request is silently dropped (verified hands-on) — so retry briefly until the tab
+    // actually owns focus again.
+    LaunchedEffect(windowFocused) {
+        if (windowFocused && !tabHasFocus && viewModel.slideFiles.isNotEmpty()) {
+            restoreAwtFocusOwner()
+            repeat(10) {
+                focusRequester.requestFocus()
+                delay(100)
+                if (tabHasFocus) return@LaunchedEffect
+            }
+        }
+    }
 
     LaunchedEffect(selectedPresentationItem) {
         selectedPresentationItem?.let { item ->
@@ -245,13 +358,22 @@ fun PresentationTab(
                 val id = f.absolutePath.hashCode().toUInt().toString(16)
                 onSlidesLoaded?.invoke(id, f.absolutePath, f.nameWithoutExtension, f.extension.lowercase(), viewModel.slideFiles.toList(), viewModel.slideNotes.toList())
             }
+            // Arrow-key navigation needs the tab to hold keyboard focus. Previously only the
+            // schedule-item path requested it, so decks opened via the file dialog or the
+            // recents bar had dead arrow keys until the user clicked into a focusable control.
+            focusRequester.requestFocus()
         }
     }
 
     LaunchedEffect(viewModel.isPlaying, viewModel.selectedSlideIndex, viewModel.autoScrollInterval) {
         if (viewModel.isPlaying && viewModel.slideFiles.isNotEmpty()) {
             delay((viewModel.autoScrollInterval * 1000).toLong())
-            viewModel.nextSlide()
+            // Auto-play steps through builds too: only when the live slide has no build step
+            // left does the interval move to the next slide (same identity guard as goNext).
+            val deck = viewModel.deck
+            val liveStepAdvanced = deck != null && presenterManager
+                ?.advancePresentationStep(deck, viewModel.selectedSlideIndex) == true
+            if (!liveStepAdvanced) viewModel.nextSlide()
         }
     }
 
@@ -274,6 +396,10 @@ fun PresentationTab(
             presenterManager.setSelectedSlide(bitmap)
             presenterManager.setNextSlide(nextBitmap)
             presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
+            // Animated playback: point the player at the new slide (no-op → static path
+            // when the slide has no timeline or the deck is remote/unparsed).
+            viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx) }
+                ?: presenterManager.clearPresentationPlayback()
         }
     }
 
@@ -282,10 +408,38 @@ fun PresentationTab(
         presenterManager?.setTransitionDuration(viewModel.transitionDuration.toInt())
     }
 
+    // Step-aware navigation: while the live output is showing exactly the selected slide of the
+    // selected deck, next/prev first advances/rewinds its build steps (PowerPoint click
+    // semantics). The identity/visibility guard lives in PresenterManager — in every other
+    // situation (not live, cleared display, different deck/slide) arrows change slides.
+    val goNext: () -> Unit = {
+        val deck = viewModel.deck
+        val stepped = deck != null && presenterManager
+            ?.advancePresentationStep(deck, viewModel.selectedSlideIndex) == true
+        if (!stepped) viewModel.nextSlide(onInstanceLinkSendNextSlide)
+    }
+    val goPrevious: () -> Unit = {
+        val deck = viewModel.deck
+        val stepped = deck != null && presenterManager
+            ?.rewindPresentationStep(deck, viewModel.selectedSlideIndex) == true
+        if (!stepped) viewModel.previousSlide(onInstanceLinkSendPreviousSlide)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .focusRequester(focusRequester)
+            .onFocusChanged { tabHasFocus = it.hasFocus }
+            // Any press landing in the tab while AWT believes the window is unfocused is
+            // proof of the wedge described above — heal it no matter what was clicked.
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                        if (event.type == PointerEventType.Press) resyncWedgedWindowFocus()
+                    }
+                }
+            }
             .focusable()
             .onKeyEvent { keyEvent ->
                 if (keyEvent.type != KeyEventType.KeyDown) return@onKeyEvent false
@@ -296,16 +450,28 @@ fun PresentationTab(
                     val hasInstanceLinkNav = onInstanceLinkSendNextSlide != null || onInstanceLinkSendPreviousSlide != null
                     return@onKeyEvent if (hasInstanceLinkNav) {
                         when (keyEvent.key) {
-                            Key.DirectionLeft, Key.DirectionUp -> { viewModel.previousSlide(onInstanceLinkSendPreviousSlide); true }
-                            Key.DirectionRight, Key.DirectionDown -> { viewModel.nextSlide(onInstanceLinkSendNextSlide); true }
+                            Key.DirectionLeft, Key.DirectionUp, Key.PageUp -> { viewModel.previousSlide(onInstanceLinkSendPreviousSlide); true }
+                            Key.DirectionRight, Key.DirectionDown, Key.PageDown -> { viewModel.nextSlide(onInstanceLinkSendNextSlide); true }
                             else -> false
                         }
                     } else false
                 }
                 when (keyEvent.key) {
-                    Key.DirectionLeft, Key.DirectionUp -> { viewModel.previousSlide(onInstanceLinkSendPreviousSlide); true }
-                    Key.DirectionRight, Key.DirectionDown -> { viewModel.nextSlide(onInstanceLinkSendNextSlide); true }
+                    // Page Down/Up are what presentation clickers send (also handled globally
+                    // in MainDesktop while a presentation is live, for any-tab operation).
+                    Key.DirectionLeft, Key.DirectionUp, Key.PageUp -> { goPrevious(); true }
+                    Key.DirectionRight, Key.DirectionDown, Key.PageDown -> { goNext(); true }
                     Key.Spacebar -> { viewModel.togglePlayPause(); true }
+                    // Clicker blank-screen button ('b' or '.' depending on model): toggle the
+                    // same Blank Output state as the eye button — a truly blank output
+                    // (PowerPoint's own 'B'), NOT Clear Display, which shows the configured
+                    // background instead.
+                    Key.B, Key.Period -> {
+                        if (presenterManager?.presentingMode?.value == Presenting.PRESENTATION) {
+                            onFreezeToggle()
+                            true
+                        } else false
+                    }
                     else -> false
                 }
             }
@@ -430,6 +596,7 @@ fun PresentationTab(
                             presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
                         }
                         presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                        viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx) }
                         presenterManager.setShowPresenterWindow(true)
                         viewModel.selectedPresentation?.let { f ->
                             onInstanceLinkSendProject?.invoke(
@@ -525,6 +692,12 @@ fun PresentationTab(
         }
 
         // ── Playback controls bar ─────────────────────────────────────
+        // Adaptive shortcut hint: inline at the end of the controls bar when it fits on one
+        // line there, otherwise on its own full-width row below the bar — never ellipsized.
+        val hintText = stringResource(Res.string.presentation_arrow_key_hint)
+        val hintStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp)
+        val hintColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+        var hintOnOwnRow by remember { mutableStateOf(false) }
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -541,7 +714,7 @@ fun PresentationTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = { viewModel.previousSlide(onInstanceLinkSendPreviousSlide) }, modifier = Modifier.size(30.dp)) {
+                    IconButton(onClick = goPrevious, modifier = Modifier.size(30.dp)) {
                         Icon(painterResource(Res.drawable.ic_skip_previous), contentDescription = stringResource(Res.string.previous_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
                 }
@@ -566,7 +739,7 @@ fun PresentationTab(
                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
-                    IconButton(onClick = { viewModel.nextSlide(onInstanceLinkSendNextSlide) }, modifier = Modifier.size(30.dp)) {
+                    IconButton(onClick = goNext, modifier = Modifier.size(30.dp)) {
                         Icon(painterResource(Res.drawable.ic_skip_next), contentDescription = stringResource(Res.string.next_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
                 }
@@ -579,6 +752,16 @@ fun PresentationTab(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                     modifier = Modifier.widthIn(min = 60.dp)
                 )
+                // Build progress of the live animated slide (only shown when it has builds).
+                val liveFrame = presenterManager?.presentationFrame?.value
+                if (liveFrame != null && liveFrame.stepCount > 0 && liveFrame.slideIndex == viewModel.selectedSlideIndex) {
+                    Text(
+                        text = stringResource(Res.string.presentation_builds_counter, liveFrame.completedSteps, liveFrame.stepCount),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                        modifier = Modifier.widthIn(min = 60.dp)
+                    )
+                }
             }
 
             // Loop button
@@ -699,15 +882,41 @@ fun PresentationTab(
                 }
             )
 
-            Text(
-                text = stringResource(Res.string.presentation_arrow_key_hint),
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                modifier = Modifier.weight(1f, fill = false),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            // Measuring slot: takes the leftover width of the bar's last flow line and only
+            // renders the hint here when the whole text fits it on a single line. The Box
+            // stays in the flow either way, so the width measurement can't oscillate.
+            // (Deliberately NOT BoxWithConstraints — FlowRow needs children's intrinsic
+            // widths for line breaking, which SubcomposeLayout-based components can't give.)
+            val textMeasurer = rememberTextMeasurer()
+            var hintSlotWidthPx by remember { mutableStateOf(-1) }
+            val fitsInline = remember(hintText, hintStyle, hintSlotWidthPx) {
+                hintSlotWidthPx >= 0 && !textMeasurer.measure(
+                    text = hintText,
+                    style = hintStyle,
+                    softWrap = false,
+                    maxLines = 1,
+                    constraints = Constraints(maxWidth = hintSlotWidthPx)
+                ).didOverflowWidth
+            }
+            LaunchedEffect(fitsInline, hintSlotWidthPx) {
+                if (hintSlotWidthPx >= 0) hintOnOwnRow = !fitsInline
+            }
+            Box(modifier = Modifier.weight(1f).onSizeChanged { hintSlotWidthPx = it.width }) {
+                if (fitsInline) {
+                    Text(text = hintText, style = hintStyle, color = hintColor, maxLines = 1)
+                }
+            }
 
+        }
+        if (hintOnOwnRow) {
+            Text(
+                text = hintText,
+                style = hintStyle,
+                color = hintColor,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 6.dp)
+            )
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
@@ -716,6 +925,39 @@ fun PresentationTab(
             // ── Left: slide grid / states ────────────────────────────
             Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
                 if (viewModel.slideFiles.isNotEmpty()) {
+                    // Focus-lost rescue: arrow keys and clicker keys only reach this tab's
+                    // key handler while something inside the tab holds keyboard focus AND the
+                    // window itself is focused. When focus wanders off (schedule panel, another
+                    // window entirely), one click here brings it back instead of leaving the
+                    // operator with dead keys.
+                    if (!tabHasFocus || !windowFocused) {
+                        Button(
+                            onClick = {
+                                resyncWedgedWindowFocus()
+                                restoreAwtFocusOwner()
+                                focusRequester.requestFocus()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .height(48.dp)
+                                // MUST stay non-focusable: a click on a focusable button takes
+                                // focus, which flips tabHasFocus true, which removes this very
+                                // banner from composition, which destroys the focused node,
+                                // which clears focus, which re-shows the banner — an infinite
+                                // show/hide oscillation (observed live via focus logging).
+                                .focusProperties { canFocus = false },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.presentation_focus_lost),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                    }
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(minSize = 200.dp),
                         modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
@@ -724,14 +966,23 @@ fun PresentationTab(
                         contentPadding = PaddingValues(vertical = 18.dp)
                     ) {
                         itemsIndexed(viewModel.slideFiles) { index, slideFile ->
-                            val bitmap = remember(slideFile) {
-                                org.jetbrains.skia.Image.makeFromEncoded(slideFile.readBytes()).toComposeImageBitmap()
+                            // Decode off the composition thread — big decks scrolled fast used
+                            // to jank the whole UI decoding full-res JPEGs during layout.
+                            val bitmap by produceState<ImageBitmap?>(initialValue = null, slideFile) {
+                                value = withContext(Dispatchers.IO) {
+                                    org.jetbrains.skia.Image.makeFromEncoded(slideFile.readBytes()).toComposeImageBitmap()
+                                }
                             }
                             SlideThumbnail(
                                 slide = bitmap,
                                 slideNumber = index + 1,
+                                buildCount = viewModel.deck?.slides?.getOrNull(index)?.timeline?.stepCount ?: 0,
                                 isSelected = viewModel.selectedSlideIndex == index,
-                                onClick = { viewModel.selectSlide(index) },
+                                onClick = {
+                                    viewModel.selectSlide(index)
+                                    // Keep arrow keys working after a mouse selection.
+                                    focusRequester.requestFocus()
+                                },
                                 onDoubleClick = {
                                     viewModel.selectSlide(index)
                                     if (presenterManager != null) {
@@ -751,6 +1002,7 @@ fun PresentationTab(
                                             presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(index) { "" })
                                         }
                                         presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                                        viewModel.deck?.let { presenterManager.presentationShowSlide(it, index) }
                                         presenterManager.setShowPresenterWindow(true)
                                         viewModel.selectedPresentation?.let { f ->
                                             onInstanceLinkSendProject?.invoke(
@@ -871,8 +1123,9 @@ fun PresentationTab(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SlideThumbnail(
-    slide: ImageBitmap,
+    slide: ImageBitmap?,
     slideNumber: Int,
+    buildCount: Int = 0,
     isSelected: Boolean,
     onClick: () -> Unit,
     onDoubleClick: () -> Unit = {}
@@ -891,12 +1144,25 @@ private fun SlideThumbnail(
                 .background(Color.Black),
             contentAlignment = Alignment.Center
         ) {
-            Image(
+            if (slide != null) Image(
                 bitmap = slide,
                 contentDescription = stringResource(Res.string.slide_number, slideNumber),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit
             )
+            // Build-step badge: the slide animates in N click steps.
+            if (buildCount > 0) {
+                Text(
+                    text = buildCount.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
+                        .padding(horizontal = 5.dp, vertical = 1.dp)
+                )
+            }
         }
         Box(
             modifier = Modifier
@@ -915,4 +1181,12 @@ private fun SlideThumbnail(
             )
         }
     }
+}
+
+/** Deepest AWT Canvas under [c] — the Skiko/Compose render surface that must own AWT
+ *  keyboard focus for key events to reach Compose at all. */
+private fun findAwtCanvas(c: Component): Component? = when (c) {
+    is Canvas -> c
+    is Container -> c.components.firstNotNullOfOrNull { findAwtCanvas(it) }
+    else -> null
 }

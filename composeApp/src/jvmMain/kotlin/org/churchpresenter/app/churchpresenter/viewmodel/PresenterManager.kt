@@ -15,8 +15,12 @@ import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.cef.browser.CefBrowser
 import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import androidx.compose.runtime.withFrameNanos
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
+import org.churchpresenter.app.churchpresenter.presenter.PresentationFrame
+import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
+import presentation.engine.model.Deck
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.models.Question
@@ -279,6 +283,10 @@ class PresenterManager {
             _bibleTransitionAlpha.value = 1f
             _songTransitionAlpha.value = 1f
         }
+        if (mode != Presenting.PRESENTATION) {
+            // Leaving presentation mode releases the animated player and its layer bitmaps.
+            clearPresentationPlayback()
+        }
         notifyLiveStateChanged(mode)
     }
 
@@ -405,6 +413,97 @@ class PresenterManager {
 
     fun setSelectedSlide(slide: ImageBitmap?) {
         _selectedSlide.value = slide
+    }
+
+    // ── Animated presentation playback ───────────────────────────────────────
+    // The player is a rendering bridge like LottieFrameStream: one evaluation per display
+    // frame, published here, drawn by every output window's PresentationPresenter.
+
+    private val _presentationFrame = mutableStateOf<PresentationFrame?>(null)
+    val presentationFrame: State<PresentationFrame?> = _presentationFrame
+
+    private var presentationPlayer: PresentationPlayer? = null
+
+    /**
+     * Points playback at [deck]/[slideIndex]. Decks with no timing at all (plain PDFs, static
+     * exports) clear the player — the static bitmap path with the app's configured slide
+     * transition then renders as before. A deck with any timeline or deck-defined transition
+     * plays entirely through the player so its own transitions win consistently.
+     */
+    fun presentationShowSlide(deck: Deck, slideIndex: Int) {
+        val deckIsAnimated = deck.slides.any { it.timeline != null || it.transition != null }
+        if (!deckIsAnimated) {
+            clearPresentationPlayback()
+            return
+        }
+        // Same-slide idempotence: when the player is already showing exactly this slide AND it
+        // is visible on the output, keep its build state untouched — re-selecting the live
+        // slide's thumbnail, focus-recovery paths, or a repeated Go Live must never restart the
+        // slide's animations mid-service. Slide changes, cleared displays and different decks
+        // fall through to the full (re)show, where starting from the pre-click state is correct.
+        if (steppablePlayer(deck, slideIndex) != null) return
+        val player = presentationPlayer?.takeIf { it.deck === deck }
+            ?: PresentationPlayer(deck).also { fresh ->
+                presentationPlayer?.close()
+                presentationPlayer = fresh
+            }
+        player.showSlide(slideIndex)
+        _presentationFrame.value = null // published by the clock once layers are rasterized
+    }
+
+    /**
+     * Advances one build step of the live animated slide. Identity-guarded: acts only when the
+     * player is showing exactly [deck]/[slideIndex] AND that content is actually visible —
+     * otherwise the keypress must fall through to plain slide navigation instead of being
+     * silently eaten by a player the operator can't see (cleared display, different deck, or a
+     * player created ahead of the grid selection).
+     * False = caller changes the slide instead.
+     */
+    fun advancePresentationStep(deck: Deck, slideIndex: Int): Boolean =
+        steppablePlayer(deck, slideIndex)?.advance(System.nanoTime()) ?: false
+
+    /** Steps one build back. Same identity guard; false = caller changes the slide instead. */
+    fun rewindPresentationStep(deck: Deck, slideIndex: Int): Boolean =
+        steppablePlayer(deck, slideIndex)?.rewind() ?: false
+
+    private fun steppablePlayer(deck: Deck, slideIndex: Int): PresentationPlayer? {
+        val player = presentationPlayer ?: return null
+        if (player.deck !== deck || player.currentSlideIndex != slideIndex) return null
+        // A cleared display blanks the mode-driven output — steps would be invisible there.
+        // (Screen-lock visibility is the caller's gate, as with all lock-aware behavior.)
+        val visibleViaMode = _presentingMode.value == Presenting.PRESENTATION && !_clearDisplayRequested.value
+        val visibleViaLock = _screenLocks.value.values.any { it == Presenting.PRESENTATION }
+        return if (visibleViaMode || visibleViaLock) player else null
+    }
+
+    fun clearPresentationPlayback() {
+        presentationPlayer?.close()
+        presentationPlayer = null
+        _presentationFrame.value = null
+    }
+
+    /**
+     * Frame clock body, driven from main.kt (same pattern as the Lottie clock): publishes the
+     * evaluated frame on every display frame while a step animates, and idles cheaply when
+     * settled or when no animated presentation is live.
+     */
+    suspend fun runPresentationClock() {
+        while (true) {
+            val player = presentationPlayer
+            if (player == null) {
+                delay(100)
+                continue
+            }
+            withFrameNanos { now ->
+                if (presentationPlayer === player) {
+                    _presentationFrame.value = player.frame(now)
+                }
+            }
+            if (!player.isAnimating(System.nanoTime())) {
+                // Settled: keep the last frame, poll for the next advance/slide change.
+                delay(33)
+            }
+        }
     }
 
     fun setDisplayedSlide(slide: ImageBitmap?) {

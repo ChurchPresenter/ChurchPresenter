@@ -57,8 +57,10 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.app.churchpresenter.utils.findScreenIndexByBounds
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
+import presentation.engine.fonts.SlideFontRegistry
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
@@ -113,6 +115,7 @@ import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
+import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
@@ -269,6 +272,18 @@ fun main() {
 
     // Repair a stale login-launch registration if the install path changed (e.g. after an update)
     Thread { AutoStartManager.syncRegistration() }.apply { isDaemon = true }.start()
+
+    // Register bundled fonts with AWT and scan platform font dirs so slide rendering (POI/PDF)
+    // resolves real typefaces instead of silently substituting the JVM default. Runs in the
+    // background — the registry substitutes safely for any slide rendered before it finishes.
+    Thread {
+        LottieFonts.bundledFontResources().forEach { resource ->
+            LottieFonts::class.java.getResourceAsStream(resource)?.let {
+                SlideFontRegistry.registerFontStream(it)
+            }
+        }
+        SlideFontRegistry.initialize()
+    }.apply { isDaemon = true }.start()
 
     // Set custom VLC path from saved settings before any composable checks isVlcAvailable
     vlcCustomPath = startupSettings.projectionSettings.vlcPath
@@ -1639,6 +1654,7 @@ fun main() {
                                     instanceLinkViewModel.connectionStatus.collectAsState().value == InstanceLinkStatus.CONNECTED &&
                                         appSettings.instanceLink.role == InstanceLinkRole.CONTROLLER
                                 MainDesktop(
+                                    hostWindow = window,
                                     instanceLinkConnectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
                                     instanceLinkNextRetryAtMs = instanceLinkViewModel.nextRetryAtMs.collectAsState().value,
                                     instanceLinkBibleUpdatedSignal = instanceLinkViewModel.bibleUpdatedSignal.collectAsState().value,
@@ -2723,6 +2739,7 @@ private fun PresenterWindows(
     val selectedSlide by presenterManager.selectedSlide
     val displayedSlide by presenterManager.displayedSlide
     val slideFrozen by presenterManager.slideFrozen
+    val presentationFrame by presenterManager.presentationFrame
     val slideTransitionAlpha by presenterManager.slideTransitionAlpha
     val previousDisplayedSlide by presenterManager.previousDisplayedSlide
     val slideSlideOffset by presenterManager.slideSlideOffset
@@ -2869,6 +2886,12 @@ private fun PresenterWindows(
                 presenterManager.setPictureSlideOffset(1f)
             }
         }
+    }
+
+    // Animated-presentation frame clock: one evaluation per display frame while a build step
+    // animates, published to every output window via presenterManager.presentationFrame.
+    LaunchedEffect(Unit) {
+        presenterManager.runPresentationClock()
     }
 
     // Centralized Slide transition
@@ -3146,12 +3169,14 @@ private fun PresenterWindows(
 
                                 Presenting.PRESENTATION ->
                                     if (screenAssignment.showPictures)
-                                        SlidePresenter(
-                                            slide = if (slideFrozen) null else displayedSlide,
-                                            previousSlide = if (slideFrozen) null else previousDisplayedSlide,
+                                        PresentationPresenter(
+                                            frame = presentationFrame,
+                                            slide = displayedSlide,
+                                            previousSlide = previousDisplayedSlide,
                                             transitionAlpha = slideTransitionAlpha,
                                             slideOffset = slideSlideOffset,
-                                            animationType = animationType
+                                            animationType = animationType,
+                                            frozen = slideFrozen
                                         )
 
                                 Presenting.MEDIA ->
@@ -3364,12 +3389,14 @@ private fun PresenterWindows(
 
                         Presenting.PRESENTATION ->
                             if (screenAssignment.showPictures)
-                                SlidePresenter(
-                                    slide = if (slideFrozen) null else displayedSlide,
-                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
+                                PresentationPresenter(
+                                    frame = presentationFrame,
+                                    slide = displayedSlide,
+                                    previousSlide = previousDisplayedSlide,
                                     transitionAlpha = slideTransitionAlpha,
                                     slideOffset = slideSlideOffset,
-                                    animationType = animationType
+                                    animationType = animationType,
+                                    frozen = slideFrozen
                                 )
 
                         Presenting.MEDIA ->
@@ -3517,13 +3544,15 @@ private fun PresenterWindows(
 
                         Presenting.PRESENTATION ->
                             if (screenAssignment.showPictures)
-                                SlidePresenter(
-                                    slide = if (slideFrozen) null else displayedSlide,
-                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
+                                PresentationPresenter(
+                                    frame = presentationFrame,
+                                    slide = displayedSlide,
+                                    previousSlide = previousDisplayedSlide,
                                     transitionAlpha = slideTransitionAlpha,
                                     slideOffset = slideSlideOffset,
                                     animationType = animationType,
-                                    outputRole = Constants.OUTPUT_ROLE_KEY
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    frozen = slideFrozen
                                 )
 
                         Presenting.MEDIA ->
@@ -3706,13 +3735,15 @@ private fun PresenterWindows(
 
                                         Presenting.PRESENTATION ->
                                             if (screenAssignment.showPictures)
-                                                SlidePresenter(
-                                    slide = if (slideFrozen) null else displayedSlide,
-                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
+                                                PresentationPresenter(
+                                    frame = presentationFrame,
+                                    slide = displayedSlide,
+                                    previousSlide = previousDisplayedSlide,
                                     transitionAlpha = slideTransitionAlpha,
                                     slideOffset = slideSlideOffset,
                                     animationType = animationType,
-                                    outputRole = Constants.OUTPUT_ROLE_KEY
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    frozen = slideFrozen
                                 )
 
                                         Presenting.MEDIA ->
@@ -3968,7 +3999,8 @@ private fun PresenterWindows(
 
                                     Presenting.PRESENTATION ->
                                         if (screenAssignment.showPictures)
-                                            SlidePresenter(
+                                            PresentationPresenter(
+                                                frame = presentationFrame,
                                                 slide = displayedSlide,
                                                 previousSlide = previousDisplayedSlide,
                                                 transitionAlpha = slideTransitionAlpha,
@@ -4133,13 +4165,15 @@ private fun PresenterWindows(
 
                         Presenting.PRESENTATION ->
                             if (screenAssignment.showPictures)
-                                SlidePresenter(
-                                    slide = if (slideFrozen) null else displayedSlide,
-                                    previousSlide = if (slideFrozen) null else previousDisplayedSlide,
+                                PresentationPresenter(
+                                    frame = presentationFrame,
+                                    slide = displayedSlide,
+                                    previousSlide = previousDisplayedSlide,
                                     transitionAlpha = slideTransitionAlpha,
                                     slideOffset = slideSlideOffset,
                                     animationType = animationType,
-                                    outputRole = Constants.OUTPUT_ROLE_KEY
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    frozen = slideFrozen
                                 )
 
                         Presenting.MEDIA ->

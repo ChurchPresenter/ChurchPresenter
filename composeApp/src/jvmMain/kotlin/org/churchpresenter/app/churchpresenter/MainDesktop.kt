@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -48,6 +49,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import java.awt.Cursor
 import java.awt.GraphicsEnvironment
+import java.awt.Window as AwtWindow
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -90,6 +92,7 @@ import churchpresenter.composeapp.generated.resources.tab_visibility
 import churchpresenter.composeapp.generated.resources.ic_close
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.toComposeImageBitmap
 
@@ -189,6 +192,9 @@ data class ScheduleActions(
 @Composable
 fun MainDesktop(
     modifier: Modifier = Modifier,
+    // The hosting AWT window — lets tabs force window focus back when AWT's focus
+    // tracking wedges (see PresentationTab's focus-lost rescue banner).
+    hostWindow: AwtWindow? = null,
     appSettings: AppSettings,
     // Same as appSettings except backgroundSettings may be swapped for a mirrored-from-primary copy
     // (Instance Link) — used ONLY at the live-preview render call site below, never for editing/
@@ -606,6 +612,9 @@ fun MainDesktop(
 
     val presentingMode by presenterManager.presentingMode
 
+    // Runs the clicker-key (Page Down/Up) slide advances from the root key handler.
+    val clickerScope = rememberCoroutineScope()
+
     // Keep the Stage Monitor's "Next" verse in sync with whatever is currently selected —
     // recomputes automatically whenever the underlying Bible selection changes, from any source
     // (manual click, auto-follow, remote API), since nextVerses is a derived state.
@@ -768,6 +777,10 @@ fun MainDesktop(
         presenterManager.setSelectedSlide(bitmap)
         presenterManager.setNextSlide(nextBitmap)
         presenterManager.setPresenterNotes(presentationViewModel.slideNotes.getOrElse(index) { "" })
+        // Keep animated playback in sync (or cleared) so a stale animated frame from a
+        // previous slide can never override the freshly pushed static slide.
+        presentationViewModel.deck?.let { presenterManager.presentationShowSlide(it, index) }
+            ?: presenterManager.clearPresentationPlayback()
     }
     LaunchedEffect(nextSlideFlow) {
         nextSlideFlow?.collect {
@@ -805,6 +818,8 @@ fun MainDesktop(
                     presenterManager.setPresentingMode(Presenting.PRESENTATION)
                     presenterManager.setShowPresenterWindow(true)
                 }
+                presentationViewModel.deck?.let { presenterManager.presentationShowSlide(it, index) }
+                    ?: presenterManager.clearPresentationPlayback()
             }
         }
     }
@@ -984,6 +999,35 @@ fun MainDesktop(
                             appSettings.projectionSettings.screenAssignments.indices
                                 .filter { appSettings.projectionSettings.screenAssignments[it].displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR }
                                 .forEach { presenterManager.setScreenLock(it, null) }
+                            true
+                        }
+                        // Presentation clickers (Logitech/Kensington etc.) are HID keyboards
+                        // sending Page Down/Up. Handled here in the preview pass so a live
+                        // presentation responds no matter which tab or control has focus —
+                        // the presenter clicks from the platform while the operator works
+                        // elsewhere. Only claimed while a presentation is actually live.
+                        keyEvent.key == Key.PageDown && presentingMode == Presenting.PRESENTATION -> {
+                            clickerScope.launch {
+                                val deck = presentationViewModel.deck
+                                val stepped = deck != null && presenterManager
+                                    .advancePresentationStep(deck, presentationViewModel.selectedSlideIndex)
+                                if (!stepped) {
+                                    presentationViewModel.nextSlide(instanceLinkSendNextSlide)
+                                    pushCurrentSlideIfLive()
+                                }
+                            }
+                            true
+                        }
+                        keyEvent.key == Key.PageUp && presentingMode == Presenting.PRESENTATION -> {
+                            clickerScope.launch {
+                                val deck = presentationViewModel.deck
+                                val stepped = deck != null && presenterManager
+                                    .rewindPresentationStep(deck, presentationViewModel.selectedSlideIndex)
+                                if (!stepped) {
+                                    presentationViewModel.previousSlide(instanceLinkSendPreviousSlide)
+                                    pushCurrentSlideIfLive()
+                                }
+                            }
                             true
                         }
                         keyEvent.key == Key.F6 -> { selectTab(Tabs.BIBLE); true }
@@ -1604,6 +1648,7 @@ fun MainDesktop(
 
                             Tabs.PRESENTATION -> PresentationTab(
                                 modifier = Modifier.fillMaxSize(),
+                                hostWindow = hostWindow,
                                 appSettings = appSettings,
                                 onAddToSchedule = { filePath, fileName, slideCount, fileType ->
                                     currentScheduleActions.addPresentation(filePath, fileName, slideCount, fileType)

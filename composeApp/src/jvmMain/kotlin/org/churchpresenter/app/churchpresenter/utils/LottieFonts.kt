@@ -6,7 +6,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
 import io.github.alexzhirkevich.compottie.assets.LottieFontManager
 import io.github.alexzhirkevich.compottie.assets.LottieFontSpec
-import java.io.File
+import presentation.engine.fonts.SlideFontRegistry
 
 /**
  * Resolves the fonts named by lower-third lottie files (declared in the JSON by family name
@@ -42,6 +42,14 @@ object LottieFonts : LottieFontManager {
 
     private val cache = mutableMapOf<String, Font?>()
 
+    /**
+     * Classpath resource paths of every bundled font file — registered into the slide-rendering
+     * font registry at startup (see main.kt) so POI resolves the same families Lottie does.
+     */
+    fun bundledFontResources(): List<String> =
+        fontFiles.values.flatMap { (regular, bold) -> listOfNotNull(regular, bold) }
+            .map { "/fonts/$it" }
+
     override suspend fun font(font: LottieFontSpec): Font? {
         val wantBold = font.weight >= FontWeight.SemiBold || font.name.endsWith("-Bold")
         val key = "${font.family}|$wantBold|${font.style}"
@@ -71,58 +79,12 @@ object LottieFonts : LottieFontManager {
 
     // ── System font lookup (fallback for families not bundled with the app) ──────
 
-    private val systemFontDirs: List<File> by lazy {
-        val os = System.getProperty("os.name").lowercase()
-        val home = System.getProperty("user.home")
-        when {
-            os.contains("mac") -> listOf(
-                "/System/Library/Fonts",
-                "/System/Library/Fonts/Supplemental",
-                "/Library/Fonts",
-                "$home/Library/Fonts"
-            )
-            os.contains("win") -> listOf(
-                (System.getenv("WINDIR") ?: "C:\\Windows") + "\\Fonts",
-                "$home\\AppData\\Local\\Microsoft\\Windows\\Fonts"
-            )
-            else -> listOf(
-                "/usr/share/fonts",
-                "/usr/local/share/fonts",
-                "$home/.fonts",
-                "$home/.local/share/fonts"
-            )
-        }.map(::File)
-    }
-
-    /** Normalized filename (sans extension) → font file; built once, first hit wins. */
-    private val systemFontIndex: Map<String, File> by lazy {
-        val index = mutableMapOf<String, File>()
-        for (dir in systemFontDirs) {
-            if (!dir.isDirectory) continue
-            dir.walkTopDown().maxDepth(3)
-                .filter { it.isFile && it.extension.lowercase() in setOf("ttf", "otf", "ttc") }
-                .forEach { index.putIfAbsent(normalizeName(it.nameWithoutExtension), it) }
-        }
-        index
-    }
-
-    private fun normalizeName(name: String): String =
-        name.lowercase().filter { it.isLetterOrDigit() }
-
     /**
-     * Finds an installed font file by common naming patterns: "Verdana Bold.ttf" (macOS),
-     * "verdanab.ttf"/"verdanabd.ttf" (Windows), "Verdana-Regular.ttf". A bold request falls
-     * back to the regular cut (the requested FontWeight then synthesizes the heavier stroke).
+     * Finds an installed font file via the shared slide-rendering font index
+     * ([SlideFontRegistry.findSystemFontFile] — same platform directories and filename patterns
+     * this object used to scan itself). A bold request falls back to the regular cut (the
+     * requested FontWeight then synthesizes the heavier stroke).
      */
-    private fun systemFontBytes(family: String, wantBold: Boolean): ByteArray? {
-        val base = normalizeName(family)
-        if (base.isEmpty()) return null
-        val boldKeys = listOf("${base}bold", "${base}bd", "${base}b")
-        val regularKeys = listOf(base, "${base}regular")
-        val keys = if (wantBold) boldKeys + regularKeys else regularKeys
-        for (key in keys) {
-            systemFontIndex[key]?.let { return it.readBytes() }
-        }
-        return null
-    }
+    private fun systemFontBytes(family: String, wantBold: Boolean): ByteArray? =
+        SlideFontRegistry.findSystemFontFile(family, wantBold)?.readBytes()
 }

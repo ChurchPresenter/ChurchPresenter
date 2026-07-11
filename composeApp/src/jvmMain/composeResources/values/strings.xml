@@ -549,7 +549,7 @@
     <string name="settings">Settings</string>
     <string name="images_suffix">images</string>
     <string name="pictures_arrow_key_hint">← → next/prev image  ·  ↑ ↓ navigate rows</string>
-    <string name="presentation_arrow_key_hint">← → next/prev slide</string>
+    <string name="presentation_arrow_key_hint">← → / PgUp PgDn — prev/next build &amp; slide  ·  Space — play/pause  ·  B or . — blank screen</string>
     <string name="pictures_reorder_hint">Shift+drag thumbnails to reorder</string>
     <string name="slideshow_settings">Media Slideshow Settings</string>
     <string name="transition_settings">Transition Settings</string>
@@ -560,10 +560,13 @@
     <string name="slide_count">%1$d slides</string>
     <string name="loading_slides_progress">%1$d / %2$d slides</string>
     <string name="slide_counter">Slide %1$d of %2$d</string>
+    <string name="presentation_builds_counter">Build %1$d of %2$d</string>
+    <string name="presentation_animate_keynote">Animate Keynote presentations</string>
+    <string name="presentation_focus_lost">Keyboard focus lost — click here to re-enable arrow keys and clicker</string>
     <string name="loading_slides">Loading slides...</string>
     <string name="select_presentation_file">Select a presentation file to view slides</string>
     <string name="supported_formats">Supported: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
-    <string name="presentation_static_note">Slides are rendered as static images — animations, transitions, videos, and audio are not supported.</string>
+    <string name="presentation_static_note">Animations, builds and slide transitions play back natively — embedded videos and audio are not supported.</string>
     <string name="presentation_error_password_protected">This PDF is password-protected and can\'t be opened. Remove the password and try again.</string>
     <string name="presentation_error_empty_document">This file has no pages to display.</string>
     <string name="presentation_error_library_missing">PDF support isn\'t available in this build.</string>

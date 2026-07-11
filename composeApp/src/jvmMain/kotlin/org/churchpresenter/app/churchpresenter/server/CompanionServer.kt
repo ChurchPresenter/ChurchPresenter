@@ -67,8 +67,6 @@ import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.data.settings.PresentationRemoteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
-import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
-import org.churchpresenter.app.churchpresenter.models.PresentationLoadError
 import org.churchpresenter.app.churchpresenter.models.Question
 import org.churchpresenter.app.churchpresenter.models.QuestionDto
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
@@ -91,23 +89,17 @@ import org.churchpresenter.app.churchpresenter.models.VoteRequest
 import org.churchpresenter.app.churchpresenter.models.toDto
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import java.awt.image.BufferedImage
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.ByteArrayOutputStream
+import presentation.engine.DeckRasterizer
+import presentation.engine.LoadResult
+import presentation.engine.PresentationLoader
+import presentation.engine.cache.SlideDiskCache
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.IOException
-import java.lang.reflect.InvocationTargetException
 import java.net.NetworkInterface
 import java.net.ServerSocket
 import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
-import java.util.zip.ZipFile
-import java.util.zip.ZipInputStream
-import javax.imageio.ImageIO
 
 // ── API DTOs ─────────────────────────────────────────────────────────────────
 
@@ -1128,6 +1120,8 @@ class CompanionServer {
     private val _renderingPresentations = ConcurrentHashMap<String, Unit>()
     /** Cancels previous updatePresentation encode job when a new presentation is loaded */
     private var _activeUpdateJob: Job? = null
+    /** Shared slide disk cache — same directory PresentationViewModel renders into (one render, both consumers). */
+    private val slideDiskCache = SlideDiskCache()
 
     private fun cacheSlideBytes(id: String, slides: List<ByteArray>) {
         _slideBytes[id] = slides
@@ -1596,39 +1590,65 @@ class CompanionServer {
             .forEach { id -> _pictureFiles.remove(id); _pictureCatalogs.remove(id) }
     }
 
+    /**
+     * Renders a schedule presentation for the mobile companion API using the shared presentation
+     * engine. When the Presentation tab already rendered this file into the shared disk cache the
+     * JPEGs are reused directly (any resolution); otherwise the deck is rendered here — into the
+     * same shared cache, so a later tab open at the default width hits it too.
+     */
     private fun renderPresentationForServer(presentationId: String, filePath: String) {
         val file = File(filePath)
         if (!file.exists()) return
         try {
-            var failureReason: PresentationLoadError? = null
-            val images: List<BufferedImage> = CrashReporter.trace("server.render", "Server render presentation") {
-                when (file.extension.lowercase()) {
-                    "pdf" -> {
-                        val (imgs, reason) = renderPdfForServer(file)
-                        failureReason = reason
-                        imgs
+            val jpegSlides: List<ByteArray>
+            val notes: List<String>
+            val cached = slideDiskCache.lookup(file, renderWidthPx = null)
+            if (cached != null) {
+                jpegSlides = cached.slideFiles.map { it.readBytes() }
+                notes = cached.notes
+            } else {
+                val deck = when (val result = PresentationLoader.load(file)) {
+                    is LoadResult.Failure -> {
+                        CrashReporter.reportWarning(
+                            "Presentation: No slides extracted from ${file.extension.lowercase()} file (server)",
+                            tags = mapOf(
+                                "subsystem" to "presentation",
+                                "file.type" to file.extension.lowercase(),
+                                "failure.reason" to result.error.name.lowercase()
+                            )
+                        )
+                        return
                     }
-                    "pptx", "ppt" -> renderPowerPointForServer(file)
-                    "key"         -> renderKeynoteForServer(file)
-                    else          -> return
+                    is LoadResult.Success -> result.deck
+                }
+                notes = deck.slides.map { it.notes }
+                val writer = slideDiskCache.beginWrite(file, deck.format, DeckRasterizer.DEFAULT_TARGET_WIDTH_PX)
+                var committed = false
+                try {
+                    jpegSlides = CrashReporter.trace("server.render", "Server render presentation") {
+                        DeckRasterizer(deck).use { rasterizer ->
+                            deck.slides.map { slide ->
+                                val slideFile = writer.putSlide(
+                                    index = slide.index,
+                                    image = rasterizer.renderFinalFrame(slide.index),
+                                    note = slide.notes,
+                                    fidelity = slide.fidelity,
+                                    hasTimeline = slide.timeline != null
+                                )
+                                slideFile.readBytes()
+                            }
+                        }
+                    }
+                    writer.commit()
+                    committed = true
+                } finally {
+                    if (!committed) writer.abort()
                 }
             }
-            if (images.isEmpty()) {
-                CrashReporter.reportWarning(
-                    "Presentation: No slides extracted from ${file.extension.lowercase()} file (server)",
-                    tags = buildMap {
-                        put("subsystem", "presentation")
-                        put("file.type", file.extension.lowercase())
-                        failureReason?.let { put("failure.reason", it.name.lowercase()) }
-                    }
-                )
-                return
-            }
-            val jpegSlides = images.map { img ->
-                ByteArrayOutputStream().also { baos -> ImageIO.write(img, "jpg", baos) }.toByteArray()
-            }
+            if (jpegSlides.isEmpty()) return
             cacheSlideBytes(presentationId, jpegSlides)
             _presentationFilePaths[presentationId] = filePath
+            _presentationNotes[presentationId] = notes
             val slideDtos = jpegSlides.indices.map { i ->
                 SlideDto(slideIndex = i, thumbnailUrl = "${Constants.ENDPOINT_PRESENTATIONS}/$presentationId/slides/$i")
             }
@@ -1642,156 +1662,6 @@ class CompanionServer {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
-
-    private fun renderPdfForServer(file: File): Pair<List<BufferedImage>, PresentationLoadError?> {
-        val result = mutableListOf<BufferedImage>()
-        val docClass = try {
-            Class.forName("org.apache.pdfbox.pdmodel.PDDocument")
-        } catch (e: ClassNotFoundException) {
-            return result to PresentationLoadError.LIBRARY_MISSING
-        }
-        var doc: Any? = null
-        return try {
-            val rendClass = Class.forName("org.apache.pdfbox.rendering.PDFRenderer")
-            doc = docClass.getMethod("load", File::class.java).invoke(null, file)
-            val pages = docClass.getMethod("getNumberOfPages").invoke(doc) as Int
-            if (pages == 0) return result to PresentationLoadError.EMPTY_DOCUMENT
-            val rend = rendClass.getConstructor(docClass).newInstance(doc)
-            val renderDpi = rendClass.getMethod("renderImageWithDPI", Int::class.java, Float::class.java)
-            for (p in 0 until pages) {
-                try {
-                    result.add(renderDpi.invoke(rend, p, 150f) as BufferedImage)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-            result to null
-        } catch (e: InvocationTargetException) {
-            val cause = e.targetException
-            (cause ?: e).printStackTrace()
-            result to if (cause is InvalidPasswordException) PresentationLoadError.PASSWORD_PROTECTED else PresentationLoadError.RENDER_FAILED
-        } catch (e: Exception) {
-            e.printStackTrace()
-            result to PresentationLoadError.RENDER_FAILED
-        } finally {
-            try { doc?.let { docClass.getMethod("close").invoke(it) } } catch (_: Exception) {}
-        }
-    }
-
-    private fun renderPowerPointForServer(file: File): List<BufferedImage> {
-        val result = mutableListOf<BufferedImage>()
-        val className = if (file.extension.lowercase() == "pptx")
-            "org.apache.poi.xslf.usermodel.XMLSlideShow"
-        else
-            "org.apache.poi.hslf.usermodel.HSLFSlideShow"
-        try {
-            val clazz  = Class.forName(className)
-            val fis    = java.io.FileInputStream(file)
-            try {
-                val ppt    = clazz.getConstructor(java.io.InputStream::class.java).newInstance(fis)
-                try {
-                    val slides = clazz.getMethod("getSlides").invoke(ppt) as List<*>
-                    val size   = clazz.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
-                    slides.forEach { slide ->
-                        val s = slide ?: return@forEach
-                        val img = BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB)
-                        val g   = img.createGraphics()
-                        g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON)
-                        g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY)
-                        g.paint = java.awt.Color.WHITE
-                        g.fillRect(0, 0, size.width, size.height)
-                        s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, g)
-                        g.dispose()
-                        result.add(img)
-                    }
-                } finally {
-                    clazz.getMethod("close").invoke(ppt)
-                }
-            } finally {
-                fis.close()
-            }
-        } catch (_: ClassNotFoundException) {
-        } catch (e: Exception) { e.printStackTrace() }
-        return result
-    }
-
-    /**
-     * Renders Keynote slides by extracting the .key bundle and reading the pre-rendered
-     * st- thumbnail images that Keynote embeds in every package.
-     */
-    private fun renderKeynoteForServer(file: File): List<BufferedImage> {
-        val result = mutableListOf<BufferedImage>()
-        val slideIwaOrder = mutableListOf<Long>()
-        if (!file.isDirectory) {
-            try {
-                ZipFile(file).use { zip ->
-                    zip.entries().asSequence()
-                        .map { it.name }
-                        .filter { n ->
-                            val base = n.substringAfterLast("/")
-                            base.startsWith("Slide-") && base.endsWith(".iwa") && base != "Slide.iwa"
-                        }
-                        .forEach { n ->
-                            val base = n.substringAfterLast("/")
-                            base.removePrefix("Slide-").removeSuffix(".iwa").split("-")[0]
-                                .toLongOrNull()?.let { slideIwaOrder.add(it) }
-                        }
-                }
-            } catch (e: Exception) {
-                System.err.println("[CompanionServer] Keynote slide-order scan failed for ${file.name}: ${e.message}")
-            }
-        }
-        var tempDir: File? = null
-        val keynoteDir: File
-        if (file.isDirectory) {
-            keynoteDir = file
-        } else if (file.name.endsWith(".key")) {
-            tempDir = File(System.getProperty("java.io.tmpdir"), "keynote_server_${System.currentTimeMillis()}")
-            tempDir.mkdirs()
-            try {
-                ZipInputStream(BufferedInputStream(FileInputStream(file))).use { zip ->
-                    val tempCanonical = tempDir.canonicalPath
-                    var entry = zip.nextEntry
-                    while (entry != null) {
-                        val out = File(tempDir, entry.name)
-                        if (!out.canonicalPath.startsWith(tempCanonical + File.separator) &&
-                            out.canonicalPath != tempCanonical) {
-                            zip.closeEntry(); entry = zip.nextEntry; continue
-                        }
-                        if (entry.isDirectory) out.mkdirs()
-                        else {
-                            out.parentFile?.mkdirs()
-                            BufferedOutputStream(FileOutputStream(out)).use { zip.copyTo(it) }
-                        }
-                        zip.closeEntry(); entry = zip.nextEntry
-                    }
-                }
-                keynoteDir = tempDir
-            } catch (e: Exception) { tempDir.deleteRecursively(); return result }
-        } else return result
-
-        try {
-            val dataDir = File(keynoteDir, "Data")
-            if (!dataDir.exists()) return result
-            val stFiles = dataDir.listFiles()?.filter { f ->
-                f.isFile && f.extension.lowercase() in listOf("jpg", "jpeg", "png", "tiff", "tif") &&
-                    f.name.lowercase().startsWith("st-")
-            } ?: return result
-            val stSortedByStId = stFiles.sortedBy { f ->
-                f.nameWithoutExtension.split("-").lastOrNull()?.toLongOrNull() ?: Long.MAX_VALUE
-            }
-            val ordered: List<File> = if (slideIwaOrder.isNotEmpty()) {
-                val iwaOrderSorted = slideIwaOrder.sorted()
-                val rankToSt = stSortedByStId.mapIndexed { rank, f -> rank to f }.toMap()
-                val main = slideIwaOrder.mapNotNull { id -> rankToSt[iwaOrderSorted.indexOf(id)] }.distinct()
-                main + stFiles.filter { it !in main }
-            } else stSortedByStId
-            ordered.forEach { f -> ImageIO.read(f)?.let { result.add(it) } }
-        } finally {
-            tempDir?.deleteRecursively()
-        }
-        return result
     }
 
     fun updateSchedule(items: List<ScheduleItem>) {
