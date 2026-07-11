@@ -296,12 +296,20 @@ fun PresentationTab(
         if (anyScreenOnPresentation && viewModel.slideFiles.isNotEmpty()) {
             val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
                 withContext(Dispatchers.IO) {
-                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                    try {
+                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                    } catch (_: Exception) {
+                        null
+                    }
                 }
             }
             val nextBitmap = viewModel.slideFiles.getOrNull(idx + 1)?.let { f ->
                 withContext(Dispatchers.IO) {
-                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                    try {
+                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                    } catch (_: Exception) {
+                        null
+                    }
                 }
             }
             presenterManager.setSelectedSlide(bitmap)
@@ -841,9 +849,17 @@ fun PresentationTab(
                         itemsIndexed(viewModel.slideFiles) { index, slideFile ->
                             // Decode off the composition thread — big decks scrolled fast used
                             // to jank the whole UI decoding full-res JPEGs during layout.
+                            // slideFile can be deleted out from under this (removePresentation
+                            // invalidates the shared disk cache synchronously, before slideFiles
+                            // is cleared), so a missing/corrupt file just stays a blank thumbnail
+                            // instead of crashing the grid.
                             val bitmap by produceState<ImageBitmap?>(initialValue = null, slideFile) {
                                 value = withContext(Dispatchers.IO) {
-                                    org.jetbrains.skia.Image.makeFromEncoded(slideFile.readBytes()).toComposeImageBitmap()
+                                    try {
+                                        org.jetbrains.skia.Image.makeFromEncoded(slideFile.readBytes()).toComposeImageBitmap()
+                                    } catch (_: Exception) {
+                                        null
+                                    }
                                 }
                             }
                             SlideThumbnail(
@@ -862,12 +878,20 @@ fun PresentationTab(
                                         scope.launch {
                                             val cur = viewModel.slideFiles.getOrNull(index)?.let { f ->
                                                 withContext(Dispatchers.IO) {
-                                                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                                    try {
+                                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                                    } catch (_: Exception) {
+                                                        null
+                                                    }
                                                 }
                                             }
                                             val next = viewModel.slideFiles.getOrNull(index + 1)?.let { f ->
                                                 withContext(Dispatchers.IO) {
-                                                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                                    try {
+                                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                                    } catch (_: Exception) {
+                                                        null
+                                                    }
                                                 }
                                             }
                                             presenterManager.setSelectedSlide(cur)
