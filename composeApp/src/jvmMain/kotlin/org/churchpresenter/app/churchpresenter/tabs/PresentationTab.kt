@@ -130,6 +130,10 @@ import churchpresenter.composeapp.generated.resources.slide_count
 import churchpresenter.composeapp.generated.resources.loading_slides_progress
 import churchpresenter.composeapp.generated.resources.presentation_builds_counter
 import churchpresenter.composeapp.generated.resources.presentation_focus_lost
+import churchpresenter.composeapp.generated.resources.media_vlc_required
+import churchpresenter.composeapp.generated.resources.media_vlc_install
+import churchpresenter.composeapp.generated.resources.media_vlc_arch_mismatch
+import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
 import churchpresenter.composeapp.generated.resources.slide_counter
 import churchpresenter.composeapp.generated.resources.slide_number
 import churchpresenter.composeapp.generated.resources.presentation_static_note
@@ -145,6 +149,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Warning
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
@@ -152,6 +157,10 @@ import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
+import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
+import presentation.engine.model.LayerSpec
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.PresentationRemoteDialog
@@ -844,6 +853,22 @@ fun PresentationTab(
             // ── Left: slide grid / states ────────────────────────────
             Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
                 if (viewModel.slideFiles.isNotEmpty()) {
+                    // Embedded video degrades gracefully with no VLC (the slide just shows its
+                    // static poster forever, see EmbeddedVideoDecoder.start()) — this banner only
+                    // tells the operator why, so it's not a silent surprise during a live service.
+                    val deckHasVideo = viewModel.deck?.slides
+                        ?.any { slide -> slide.layers.any { it is LayerSpec.Media } } == true
+                    var vlcBannerDismissed by remember(viewModel.loadGeneration) { mutableStateOf(false) }
+                    if (deckHasVideo && !isVlcAvailable && !vlcBannerDismissed) {
+                        VlcMissingBanner(
+                            detail = when {
+                                isVlcArchMismatch -> stringResource(Res.string.media_vlc_arch_mismatch)
+                                isVlcLoadFailed -> stringResource(Res.string.media_vlc_load_failed)
+                                else -> stringResource(Res.string.media_vlc_install)
+                            },
+                            onDismiss = { vlcBannerDismissed = true }
+                        )
+                    }
                     // Focus-lost rescue: arrow keys and clicker keys only reach this tab's
                     // key handler while something inside the tab holds keyboard focus AND the
                     // window itself is focused. One click on the banner brings both back.
@@ -1023,6 +1048,34 @@ fun PresentationTab(
             onStopTunnel = onStopTunnel,
             onDismiss = { showRemoteDialog = false }
         )
+    }
+}
+
+/** Dismissible warning shown when the loaded deck has embedded video but VLC isn't installed —
+ *  the slide itself already degrades gracefully to a static poster (see EmbeddedVideoDecoder),
+ *  this only explains why to the operator. Resets per deck load via the caller's `remember` key. */
+@Composable
+private fun VlcMissingBanner(detail: String, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        shape = MaterialTheme.shapes.small
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(Icons.Default.Warning, contentDescription = null)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(stringResource(Res.string.media_vlc_required), style = MaterialTheme.typography.titleSmall)
+                Text(detail, style = MaterialTheme.typography.bodySmall)
+            }
+            IconButton(onClick = onDismiss) {
+                Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear))
+            }
+        }
     }
 }
 
