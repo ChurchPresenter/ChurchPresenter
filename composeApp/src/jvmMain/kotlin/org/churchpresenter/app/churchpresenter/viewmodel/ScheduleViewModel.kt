@@ -91,6 +91,11 @@ class ScheduleViewModel(
     @Volatile private var isDirty = false
 
     init {
+        // Compose's DisposableEffect-driven dispose() isn't guaranteed to run on a raw
+        // exitProcess/System.exit shutdown (e.g. the self-updater relaunching an installer),
+        // so this loop could otherwise wake up mid-shutdown and try to classload ScheduleFileV2
+        // after the installer has started overwriting the app's own files.
+        Runtime.getRuntime().addShutdownHook(Thread { scope.cancel() })
         scope.launch {
             while (true) {
                 delay(60_000)
@@ -101,7 +106,9 @@ class ScheduleViewModel(
                         val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
                         autoSaveFile.writeText(encrypt(serialized))
                         isDirty = false
-                    } catch (_: Exception) {}
+                    } catch (_: Exception) {
+                    } catch (_: LinkageError) {
+                    }
                 }
             }
         }
