@@ -16,7 +16,10 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isShiftPressed
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
+import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -68,6 +71,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -118,6 +122,7 @@ import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.previous_image
 import churchpresenter.composeapp.generated.resources.select_folder
+import churchpresenter.composeapp.generated.resources.tab_focus_lost
 import churchpresenter.composeapp.generated.resources.select_folder_to_view
 import churchpresenter.composeapp.generated.resources.select_image_folder_dialog
 import churchpresenter.composeapp.generated.resources.transition_duration
@@ -134,6 +139,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import java.awt.Window as AwtWindow
 import java.io.File
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items as lazyItems
@@ -213,6 +219,9 @@ private object RecentPictureFolders {
 @Composable
 fun PicturesTab(
     modifier: Modifier = Modifier,
+    /** The hosting AWT window — used by the focus-lost rescue to heal AWT focus (see
+     *  composables/FocusLostRescue.kt). */
+    hostWindow: AwtWindow? = null,
     appSettings: AppSettings? = null,
     onAddToSchedule: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. See
@@ -283,10 +292,16 @@ fun PicturesTab(
     // Hoisted so onPreviewKeyEvent can read column count for row-based Up/Down navigation
     val gridState = rememberLazyGridState()
 
+    // Focus-lost rescue: arrow-key image navigation only works while the tab holds keyboard
+    // focus AND the window is focused — full machinery in composables/FocusLostRescue.kt
+    // (shared with Presentation/Bible/Songs).
+    val focusRescue = rememberFocusLostRescue(hostWindow, focusRequester)
     Column(
         modifier = modifier
             .fillMaxSize()
             .focusRequester(focusRequester)
+            .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
+            .focusRescuePressHook(focusRescue)
             .focusable()
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
@@ -791,6 +806,7 @@ fun PicturesTab(
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
 
         // ── Thumbnail grid ────────────────────────────────────────────
         if (viewModel.images.isNotEmpty()) {

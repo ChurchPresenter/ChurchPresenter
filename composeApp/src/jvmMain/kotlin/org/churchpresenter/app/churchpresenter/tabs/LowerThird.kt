@@ -871,6 +871,64 @@ fun LowerThirdTab(
             ) {
                 Spacer(Modifier.weight(1f))
 
+                // ATEM controls — deliberately LEFT of the primary actions so
+                // Play/Pause · Add to Schedule · Go Live keep the canonical rightmost tail.
+                if (atemConfigured && atemEverConnected) {
+                    val atemButtonColors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                        disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    )
+                    val unreachableTooltip = stringResource(Res.string.atem_unreachable, appSettings.atemSettings.host)
+                    val goLiveKey = appSettings.atemSettings.goLiveKey
+                    Tooltip(stringResource(Res.string.atem_golive_key)) {
+                        FilledIconButton(
+                            onClick = { onSettingsChangeState.value { s -> s.copy(atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey)) } },
+                            modifier = Modifier.size(34.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = if (goLiveKey) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            )
+                        ) {
+                            Icon(painterResource(Res.drawable.ic_key), contentDescription = null, modifier = Modifier.size(16.dp))
+                        }
+                    }
+
+                    if (appSettings.atemSettings.quickUpload) {
+                        val stillSlot = appSettings.atemSettings.defaultStillSlot
+                        val clipSlot = appSettings.atemSettings.defaultClipSlot
+                        val quickEnabled = canPlay && !atemBusy && atemReachable
+                        val quickClipVariant = if (jsonContent.isNotBlank()) atemVariant(isClip = true, useDetectedFps = false) else null
+                        val quickClipCapacity = appSettings.atemSettings.detectedClipMaxFrames.getOrNull(clipSlot)
+                        val quickClipTooLong = quickClipVariant != null && quickClipCapacity != null && quickClipVariant.frameCount > quickClipCapacity
+
+                        Tooltip(if (!atemReachable) unreachableTooltip else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)) {
+                            FilledIconButton(onClick = { startAtemUpload(atemVariant(isClip = false, useDetectedFps = false), stillSlot, closeDialogOnSuccess = false) }, enabled = quickEnabled, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
+                                Icon(Icons.Filled.Image, contentDescription = null, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                        Tooltip(when { !atemReachable -> unreachableTooltip; quickClipTooLong -> { val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps); stringResource(Res.string.atem_clip_too_long, quickClipVariant.frameCount, clipSlot + 1, quickClipCapacity, secs) }; else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1) }) {
+                            FilledIconButton(onClick = { quickClipVariant?.let { startAtemUpload(it, clipSlot, closeDialogOnSuccess = false) } }, enabled = quickEnabled && !quickClipTooLong, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
+                                Icon(Icons.Filled.Movie, contentDescription = null, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    } else {
+                        Tooltip(if (atemReachable) stringResource(Res.string.atem_send_to_atem) else unreachableTooltip) {
+                            FilledIconButton(
+                                onClick = { atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot else appSettings.atemSettings.defaultStillSlot; atemError = null; atemProgress = null; showAtemDialog = true },
+                                enabled = canPlay && !atemBusy && atemReachable,
+                                modifier = Modifier.size(34.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = atemButtonColors
+                            ) {
+                                Icon(painterResource(Res.drawable.ic_upload), contentDescription = null, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    }
+                }
+
                 // Play / Pause
                 Tooltip(stringResource(if (isPlaying) Res.string.pause else Res.string.play)) {
                     FilledIconButton(
@@ -932,63 +990,6 @@ fun LowerThirdTab(
                     enabled = canPlay,
                     tooltipText = stringResource(Res.string.go_live)
                 )
-
-                // ATEM controls
-                if (atemConfigured && atemEverConnected) {
-                    val atemButtonColors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary,
-                        disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    )
-                    val unreachableTooltip = stringResource(Res.string.atem_unreachable, appSettings.atemSettings.host)
-                    val goLiveKey = appSettings.atemSettings.goLiveKey
-                    Tooltip(stringResource(Res.string.atem_golive_key)) {
-                        FilledIconButton(
-                            onClick = { onSettingsChangeState.value { s -> s.copy(atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey)) } },
-                            modifier = Modifier.size(34.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = if (goLiveKey) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                            )
-                        ) {
-                            Icon(painterResource(Res.drawable.ic_key), contentDescription = null, modifier = Modifier.size(16.dp))
-                        }
-                    }
-
-                    if (appSettings.atemSettings.quickUpload) {
-                        val stillSlot = appSettings.atemSettings.defaultStillSlot
-                        val clipSlot = appSettings.atemSettings.defaultClipSlot
-                        val quickEnabled = canPlay && !atemBusy && atemReachable
-                        val quickClipVariant = if (jsonContent.isNotBlank()) atemVariant(isClip = true, useDetectedFps = false) else null
-                        val quickClipCapacity = appSettings.atemSettings.detectedClipMaxFrames.getOrNull(clipSlot)
-                        val quickClipTooLong = quickClipVariant != null && quickClipCapacity != null && quickClipVariant.frameCount > quickClipCapacity
-
-                        Tooltip(if (!atemReachable) unreachableTooltip else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)) {
-                            FilledIconButton(onClick = { startAtemUpload(atemVariant(isClip = false, useDetectedFps = false), stillSlot, closeDialogOnSuccess = false) }, enabled = quickEnabled, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
-                                Icon(Icons.Filled.Image, contentDescription = null, modifier = Modifier.size(16.dp))
-                            }
-                        }
-                        Tooltip(when { !atemReachable -> unreachableTooltip; quickClipTooLong -> { val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps); stringResource(Res.string.atem_clip_too_long, quickClipVariant.frameCount, clipSlot + 1, quickClipCapacity, secs) }; else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1) }) {
-                            FilledIconButton(onClick = { quickClipVariant?.let { startAtemUpload(it, clipSlot, closeDialogOnSuccess = false) } }, enabled = quickEnabled && !quickClipTooLong, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
-                                Icon(Icons.Filled.Movie, contentDescription = null, modifier = Modifier.size(16.dp))
-                            }
-                        }
-                    } else {
-                        Tooltip(if (atemReachable) stringResource(Res.string.atem_send_to_atem) else unreachableTooltip) {
-                            FilledIconButton(
-                                onClick = { atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot else appSettings.atemSettings.defaultStillSlot; atemError = null; atemProgress = null; showAtemDialog = true },
-                                enabled = canPlay && !atemBusy && atemReachable,
-                                modifier = Modifier.size(34.dp),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = atemButtonColors
-                            ) {
-                                Icon(painterResource(Res.drawable.ic_upload), contentDescription = null, modifier = Modifier.size(16.dp))
-                            }
-                        }
-                    }
-                }
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 

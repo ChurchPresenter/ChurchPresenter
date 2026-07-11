@@ -78,6 +78,7 @@ import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import java.awt.Cursor
+import java.awt.Window as AwtWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -171,8 +172,12 @@ import churchpresenter.composeapp.generated.resources.hold_live
 import churchpresenter.composeapp.generated.resources.swap_bibles
 import churchpresenter.composeapp.generated.resources.swap_bibles_hint
 import churchpresenter.composeapp.generated.resources.verse
+import churchpresenter.composeapp.generated.resources.tab_focus_lost
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
+import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
+import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
+import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
@@ -205,6 +210,9 @@ import androidx.compose.ui.input.pointer.isMetaPressed
 @Composable
 fun BibleTab(
     modifier: Modifier = Modifier,
+    /** The hosting AWT window — used by the focus-lost rescue to heal AWT focus (see
+     *  composables/FocusLostRescue.kt). */
+    hostWindow: AwtWindow? = null,
     viewModel: BibleViewModel,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
@@ -658,10 +666,16 @@ fun BibleTab(
         )
     }
 
+    // Focus-lost rescue: arrow-key verse/chapter navigation only works while the tab holds
+    // keyboard focus AND the window is focused — full machinery in
+    // composables/FocusLostRescue.kt (shared with Presentation/Songs).
+    val focusRescue = rememberFocusLostRescue(hostWindow, focusRequester)
     Column(
         modifier = modifier
             .fillMaxSize()
             .focusRequester(focusRequester)
+            .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
+            .focusRescuePressHook(focusRescue)
             .focusable()
             .onPreviewKeyEvent { handleKeyEvent(it) }
     ) {
@@ -1217,6 +1231,8 @@ fun BibleTab(
             val swapBiblesStr = stringResource(Res.string.swap_bibles)
             val goLiveStr = stringResource(Res.string.go_live)
             val addScheduleStr = stringResource(Res.string.add_to_schedule)
+
+            FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
 
             // ── Unified column headers row ───────────────────────────────
             val accentColor = MaterialTheme.colorScheme.primary

@@ -84,6 +84,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -96,10 +97,14 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
+import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import java.awt.Cursor
+import java.awt.Window as AwtWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -147,6 +152,7 @@ import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.no_lyrics_available
 import churchpresenter.composeapp.generated.resources.remove_from_favorites
 import churchpresenter.composeapp.generated.resources.song_favorites
+import churchpresenter.composeapp.generated.resources.tab_focus_lost
 import churchpresenter.composeapp.generated.resources.song_favorites_clear
 import churchpresenter.composeapp.generated.resources.song_play_count
 import churchpresenter.composeapp.generated.resources.song_columns
@@ -181,6 +187,9 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun SongsTab(
     modifier: Modifier = Modifier,
+    /** The hosting AWT window — used by the focus-lost rescue to heal AWT focus (see
+     *  composables/FocusLostRescue.kt). */
+    hostWindow: AwtWindow? = null,
     viewModel: SongsViewModel,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
@@ -306,6 +315,10 @@ fun SongsTab(
     }
 
     val tabFocusRequester = remember { FocusRequester() }
+    // Focus-lost rescue: arrow-key song/section/line navigation only works while the tab
+    // holds keyboard focus AND the window is focused — full machinery in
+    // composables/FocusLostRescue.kt (shared with Presentation/Bible).
+    val focusRescue = rememberFocusLostRescue(hostWindow, tabFocusRequester)
 
     // React to schedule item selection
     // Uses selectedSongItemVersion as a key so clicking the same song twice always re-fires
@@ -557,6 +570,8 @@ fun SongsTab(
                 }
             }
             .focusRequester(tabFocusRequester)
+            .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
+            .focusRescuePressHook(focusRescue)
             .focusable()
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
@@ -1526,6 +1541,7 @@ fun SongsTab(
                 )
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
 
             // "Back to Live" button — shown when browsing a different song than what's live
             if (isPresenting && liveSongIndex >= 0 && selectedSongIndex != liveSongIndex) {

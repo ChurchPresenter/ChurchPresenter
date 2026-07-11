@@ -563,6 +563,7 @@
     <string name="presentation_builds_counter">Build %1$d of %2$d</string>
     <string name="presentation_animate_keynote">Animate Keynote presentations</string>
     <string name="presentation_focus_lost">Keyboard focus lost — click here to re-enable arrow keys and clicker</string>
+    <string name="tab_focus_lost">Keyboard focus lost — click here to re-enable arrow keys</string>
     <string name="loading_slides">Loading slides...</string>
     <string name="select_presentation_file">Select a presentation file to view slides</string>
     <string name="supported_formats">Supported: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>

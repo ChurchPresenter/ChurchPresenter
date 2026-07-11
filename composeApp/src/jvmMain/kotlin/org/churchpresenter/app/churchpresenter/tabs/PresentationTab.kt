@@ -69,17 +69,12 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalWindowInfo
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -152,6 +147,9 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
+import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
+import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
+import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
@@ -167,18 +165,13 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Canvas
 import java.awt.Component
 import java.awt.Container
-import java.awt.EventQueue
-import java.awt.Toolkit
 import java.awt.Window as AwtWindow
-import java.awt.event.WindowEvent
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -226,95 +219,13 @@ fun PresentationTab(
     val scope = rememberCoroutineScope()
     var showRemoteDialog by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
-    // True while the tab (or any control inside it) holds keyboard focus — exactly the
-    // condition under which arrow/clicker keys reach the onKeyEvent handler below. Drives
-    // the focus-lost rescue banner above the slide grid.
-    var tabHasFocus by remember { mutableStateOf(false) }
-    // Compose keeps the focused node "focused" when the whole WINDOW loses focus, so
-    // onFocusChanged alone can't see the operator switching to another window — but keys
-    // stop arriving all the same. Window focus must be watched separately.
-    val windowFocused = LocalWindowInfo.current.isWindowFocused
-    // AWT on macOS can miss a window re-activation entirely: the NSWindow is key again and
-    // mouse events flow, but WINDOW_ACTIVATED/WINDOW_GAINED_FOCUS are never delivered
-    // (observed live via a global AWT event tap). In that wedged state the
-    // KeyboardFocusManager discards every key event, so the operator's keys stay dead no
-    // matter where they click. Detect it — pointer input arriving while AWT still believes
-    // the window is unfocused — and repost the missing activation events to resync.
-    //
-    // ⚠️ The resync must be DEFERRED and RE-CHECKED, never immediate: the click that
-    // reactivates the window is delivered to Compose while AWT's real windowGainedFocus is
-    // still in flight. Posting the synthetic events right away wins that race, and the
-    // KeyboardFocusManager then discards the REAL activation event as a duplicate — before
-    // its focus-owner restore runs — leaving every subsequent key press silently dropped
-    // (user-reproduced: banner clears, arrow keys dead). Waiting and re-checking makes the
-    // resync a no-op whenever AWT heals itself, which is every normal physical click.
-    var resyncJob by remember { mutableStateOf<Job?>(null) }
-    val resyncWedgedWindowFocus = {
-        val w = hostWindow
-        if (w != null && !w.isFocused && resyncJob?.isActive != true) {
-            resyncJob = scope.launch {
-                delay(300)
-                if (!w.isFocused) {
-                    val queue = Toolkit.getDefaultToolkit().systemEventQueue
-                    queue.postEvent(WindowEvent(w, WindowEvent.WINDOW_ACTIVATED))
-                    queue.postEvent(WindowEvent(w, WindowEvent.WINDOW_GAINED_FOCUS))
-                    // The window events alone don't regenerate the component-level
-                    // FOCUS_GAINED, so the KeyboardFocusManager still has no focus owner.
-                    // Restore it explicitly once the queue has processed the window events.
-                    EventQueue.invokeLater {
-                        (w.mostRecentFocusOwner ?: w).requestFocusInWindow()
-                    }
-                }
-            }
-        }
-        Unit
-    }
-    // A mouse press on a component hands it AWT keyboard focus — that's why clicking a
-    // thumbnail revives dead arrow keys (user-observed) while regaining focus via the banner
-    // can leave them dead: the banner's press IS the activation click, and the real
-    // windowGainedFocus that follows can fail to restore the component-level focus owner, so
-    // the KeyboardFocusManager silently discards every key press. Do what the thumbnail click
-    // does, explicitly: once the window is really AWT-focused, restore its last focus owner
-    // (the Compose canvas). No-op when focus is already healthy; touches nothing else — no
-    // player state, so live slide animations are never restarted by focus recovery.
-    val restoreAwtFocusOwner = {
-        scope.launch {
-            val w = hostWindow ?: return@launch
-            var waitedMs = 0
-            while (!w.isFocused && waitedMs < 1500) {
-                delay(50)
-                waitedMs += 50
-            }
-            if (w.isFocused) {
-                EventQueue.invokeLater {
-                    // Key events reach Compose only when the AWT focus owner is the Compose
-                    // CANVAS — never the frame. mostRecentFocusOwner can be null after a
-                    // failed activation restore, so locate the canvas in the component tree
-                    // explicitly (what a physical click on any slide does natively).
-                    val target = findAwtCanvas(w) ?: w.mostRecentFocusOwner ?: w
-                    if (!target.requestFocusInWindow()) target.requestFocus()
-                }
-            }
-        }
-        Unit
-    }
-    // macOS swallows the first click on an inactive window — the rescue banner's onClick
-    // never fires from that click. Re-take keyboard focus whenever the window comes back to
-    // the foreground with no focus owner inside the tab, so ANY activation click (banner,
-    // thumbnail, title bar) or Cmd+Tab revives the keys immediately. AWT hands keyboard
-    // focus back to the Compose panel asynchronously after activation — a single immediate
-    // request is silently dropped (verified hands-on) — so retry briefly until the tab
-    // actually owns focus again.
-    LaunchedEffect(windowFocused) {
-        if (windowFocused && !tabHasFocus && viewModel.slideFiles.isNotEmpty()) {
-            restoreAwtFocusOwner()
-            repeat(10) {
-                focusRequester.requestFocus()
-                delay(100)
-                if (tabHasFocus) return@LaunchedEffect
-            }
-        }
-    }
+    // Focus-lost rescue (banner + window-focus watch + AWT heal) — the full, hands-on
+    // verified machinery lives in composables/FocusLostRescue.kt; shared with Bible/Songs.
+    val focusRescue = rememberFocusLostRescue(
+        hostWindow = hostWindow,
+        focusRequester = focusRequester,
+        active = viewModel.slideFiles.isNotEmpty(),
+    )
 
     LaunchedEffect(selectedPresentationItem) {
         selectedPresentationItem?.let { item ->
@@ -429,17 +340,8 @@ fun PresentationTab(
         modifier = modifier
             .fillMaxSize()
             .focusRequester(focusRequester)
-            .onFocusChanged { tabHasFocus = it.hasFocus }
-            // Any press landing in the tab while AWT believes the window is unfocused is
-            // proof of the wedge described above — heal it no matter what was clicked.
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent(PointerEventPass.Initial)
-                        if (event.type == PointerEventType.Press) resyncWedgedWindowFocus()
-                    }
-                }
-            }
+            .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
+            .focusRescuePressHook(focusRescue)
             .focusable()
             .onKeyEvent { keyEvent ->
                 if (keyEvent.type != KeyEventType.KeyDown) return@onKeyEvent false
@@ -927,37 +829,8 @@ fun PresentationTab(
                 if (viewModel.slideFiles.isNotEmpty()) {
                     // Focus-lost rescue: arrow keys and clicker keys only reach this tab's
                     // key handler while something inside the tab holds keyboard focus AND the
-                    // window itself is focused. When focus wanders off (schedule panel, another
-                    // window entirely), one click here brings it back instead of leaving the
-                    // operator with dead keys.
-                    if (!tabHasFocus || !windowFocused) {
-                        Button(
-                            onClick = {
-                                resyncWedgedWindowFocus()
-                                restoreAwtFocusOwner()
-                                focusRequester.requestFocus()
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .height(48.dp)
-                                // MUST stay non-focusable: a click on a focusable button takes
-                                // focus, which flips tabHasFocus true, which removes this very
-                                // banner from composition, which destroys the focused node,
-                                // which clears focus, which re-shows the banner — an infinite
-                                // show/hide oscillation (observed live via focus logging).
-                                .focusProperties { canFocus = false },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.presentation_focus_lost),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    }
+                    // window itself is focused. One click on the banner brings both back.
+                    FocusLostBanner(focusRescue, stringResource(Res.string.presentation_focus_lost))
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(minSize = 200.dp),
                         modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
@@ -1181,12 +1054,4 @@ private fun SlideThumbnail(
             )
         }
     }
-}
-
-/** Deepest AWT Canvas under [c] — the Skiko/Compose render surface that must own AWT
- *  keyboard focus for key events to reach Compose at all. */
-private fun findAwtCanvas(c: Component): Component? = when (c) {
-    is Canvas -> c
-    is Container -> c.components.firstNotNullOfOrNull { findAwtCanvas(it) }
-    else -> null
 }

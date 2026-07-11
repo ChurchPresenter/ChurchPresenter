@@ -1588,6 +1588,7 @@ fun MainDesktop(
                         when (tab) {
                             Tabs.BIBLE -> BibleTab(
                                 modifier = Modifier.fillMaxSize(),
+                                hostWindow = hostWindow,
                                 viewModel = bibleViewModel,
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
@@ -1609,6 +1610,7 @@ fun MainDesktop(
 
                             Tabs.SONGS -> SongsTab(
                                 modifier = Modifier.fillMaxSize(),
+                                hostWindow = hostWindow,
                                 viewModel = songsViewModel,
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
@@ -1632,6 +1634,7 @@ fun MainDesktop(
 
                             Tabs.PICTURES -> PicturesTab(
                                 modifier = Modifier.fillMaxSize(),
+                                hostWindow = hostWindow,
                                 appSettings = appSettings,
                                 onAddToSchedule = { folderPath, folderName, imageCount ->
                                     currentScheduleActions.addPicture(folderPath, folderName, imageCount)
