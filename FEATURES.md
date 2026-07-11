@@ -31,25 +31,31 @@
 - **Search the whole Bible** — search across the entire text or just the current book.
 - **History** — jump back to recently shown passages instantly.
 - **Strong's dictionary** — explore original Hebrew and Greek words with transliteration, pronunciation, definitions and KJV usage.
+- **Follow along automatically** — connect a live speech-to-text feed and the app listens for spoken Bible references — stated outright or simply the next verse in a passage being read — and stages or goes live with the matching verse on its own, tiered by confidence so only clear matches jump straight to the screen.
 
 **Source locations:**
 - `tabs/BibleTab.kt` — main UI
 - `tabs/DictionaryTab.kt` — Strong's dictionary UI
 - `viewmodel/BibleViewModel.kt`, `viewmodel/BibleSettingsViewModel.kt`, `viewmodel/DictionaryViewModel.kt`
+- `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `data/Bible.kt`, `data/BibleBook.kt`, `data/BibleBookNames.kt`, `data/BibleSearch.kt`, `data/BibleVerse.kt`, `data/StrongsEntry.kt`
-- `data/settings/BibleSettings.kt`
+- `data/settings/BibleSettings.kt`, `data/settings/BibleEngineSettings.kt`
 - `presenter/BiblePresenter.kt`
 - `dialogs/tabs/BibleSettingsTab.kt`
 - `models/SelectedVerse.kt`
+- `appResources/common/ChurchPresenter-BLE/` — Bible Lookup Engine (speech-to-reference detection)
 
 ## Slides & Presentations
 - **PowerPoint, Keynote & PDF** — drop in `.pptx`, `.ppt`, `.key` or `.pdf` files and present them as slides — no Microsoft or Apple software required.
+- **Real animations, not just static slides** — PowerPoint and Keynote entrance, emphasis and exit effects, per-paragraph text builds, click-step sequencing, motion paths and slide transitions all play back live, right in the app.
 - **Slide thumbnails & navigation** — see every slide at a glance and jump anywhere.
 - **Presenter notes** — speaker notes from PowerPoint and Keynote flow straight to your stage monitor.
 
 **Source locations:**
 - `tabs/PresentationTab.kt` — main UI
 - `viewmodel/PresentationViewModel.kt`
+- `presenter/PresentationPlayer.kt`, `presenter/PresentationPresenter.kt` — animated playback
+- `appResources/common/ChurchPresenter-PresentationEngine/` — PPTX/Keynote parsing, timing and animation engine
 - `data/settings/PresentationSettings.kt`
 - `server/CompanionServer.kt` — slide API for mobile (background rendering)
 
@@ -147,7 +153,9 @@
 - **Unlimited outputs** — drive as many screens as you have — one window per connected display, plus every DeckLink/SDI device. No artificial limit.
 - **Full screen or lower third** — present full-screen or as a lower-third band, per content type.
 - **Beautiful backgrounds** — solid colors, images, looping video, gradients or transparent — set defaults and per-type overrides.
+- **Built-in stock photo & video search** — search and download from Pexels and Pixabay right inside the app with a free API key, plus a set of preloaded backgrounds ready to use offline.
 - **Broadcast fill + key** — output separate fill and key signals for hardware keying, including SDI via Blackmagic DeckLink.
+- **Browser Source streaming output** — a transparent, OBS-ready browser-source overlay with true alpha transparency, crossfaded mode switching and configurable per-output resolution/fps — for lower thirds, media, websites and more, no OBS scene-switching integration required.
 - **Typography that fits** — auto-fit text to the screen, with control over fonts, size, alignment, shadows and margins.
 - **Live preview** — always see exactly what's on screen, and lock any output to a chosen tab.
 
@@ -155,6 +163,8 @@
 - `PresenterScreen.kt` — output window
 - `presenter/Presenting.kt` — active-content state enum
 - `presenter/DeckLinkComposeOutput.kt`
+- `presenter/BrowserSourceVideoRenderer.kt`, `presenter/LocalTransparentBlanking.kt` — Browser Source output
+- `data/StockMediaClient.kt`, `dialogs/StockMediaBrowserDialog.kt`, `viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
 - `composables/DeckLinkIO.kt`, `composables/LivePreviewPanel.kt`, `composables/LoopingVideoBackground.kt`
 - `viewmodel/PresenterManager.kt`, `viewmodel/BackgroundSettingsViewModel.kt`
 - `data/settings/BackgroundConfig.kt`, `data/settings/BackgroundSettings.kt`, `data/settings/ProjectionSettings.kt`, `data/settings/ScreenAssignment.kt`
@@ -182,16 +192,29 @@
 - `dialogs/tabs/ServerSettingsTab.kt`
 - `dialogs/RemoteActivityToast.kt`, `dialogs/RemoteEventDialog.kt`
 
+## Multi-Room & Instance Linking
+- **Follow another instance live** — link a second ChurchPresenter instance — an overflow room, a secondary campus, a confidence feed — so it automatically mirrors whatever the primary sends live: Bible, songs, pictures, presentations, media, canvas, Q&A and dictionary entries.
+- **Resilient by design** — automatic reconnect with backoff, a heartbeat that surfaces a dead link within seconds instead of freezing on stale content, and command acknowledgement so remote actions never silently fail.
+
+**Source locations:**
+- `server/InstanceLinkClient.kt`
+- `viewmodel/InstanceLinkViewModel.kt`
+- `data/settings/InstanceLinkSettings.kt`
+- `dialogs/InstanceLinkDialog.kt`, `dialogs/InstanceLinkToast.kt`
+- `composables/ConnectionStatusRow.kt`
+
 ## Broadcast Integrations
 - **Blackmagic ATEM** — upload animated lower thirds straight into the ATEM media pool and drive the upstream key automatically when you go live — one tap, perfectly timed.
 - **OBS Studio** — automatically switch OBS scenes as your content changes, with per-content-type scene mapping.
-- **Bitfocus Companion** — trigger lower thirds, ATEM keys and any content from a Stream Deck with ready-made HTTP buttons.
+- **Bitfocus Companion** — trigger lower thirds, ATEM keys and any content from a Stream Deck, either with ready-made HTTP buttons or a native Companion Satellite connection with live status right in the app.
 
 **Source locations:**
 - `server/AtemClient.kt`, `server/AtemConnectionManager.kt`, `server/AtemFrameEncoder.kt`, `server/AtemRenderCache.kt`, `server/AtemUploadStatus.kt`
 - `viewmodel/OBSWebSocketManager.kt`
-- `data/settings/AtemSettings.kt`, `data/settings/OBSSettings.kt`
-- `dialogs/tabs/AtemSettingsTab.kt`, `dialogs/tabs/OBSSettingsTab.kt`
+- `tabs/CompanionSurfaceTab.kt`, `viewmodel/CompanionSatelliteViewModel.kt`, `composables/CompanionSurfacePanel.kt`, `composables/CompanionConnectionChipRow.kt`
+- `appResources/common/ChurchPresenter-CompanionSatellite/` — native Companion Satellite protocol client
+- `data/settings/AtemSettings.kt`, `data/settings/OBSSettings.kt`, `data/settings/CompanionSatelliteSettings.kt`
+- `dialogs/tabs/AtemSettingsTab.kt`, `dialogs/tabs/OBSSettingsTab.kt`, `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
 
 ## Reporting & Licensing
 - **CCLI usage reports** — automatically track every song and verse you present and export date-filtered CSV/Excel reports for license reporting.
