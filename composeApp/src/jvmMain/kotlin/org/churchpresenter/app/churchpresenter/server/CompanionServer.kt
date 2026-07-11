@@ -1477,16 +1477,23 @@ class CompanionServer {
         _presentationNotes[id] = slideNotes
         _activeUpdateJob?.cancel()
         _activeUpdateJob = scope.launch {
-            val jpegSlides = slideFiles.map { it.readBytes() }
-            cacheSlideBytes(id, jpegSlides)
+            // slideFiles can be deleted out from under this coroutine (e.g. removePresentation()
+            // invalidating the shared disk cache) while it's queued on Dispatchers.IO — treat a
+            // vanished cache the same way renderPresentationForServer does: skip, don't crash.
+            try {
+                val jpegSlides = slideFiles.map { it.readBytes() }
+                cacheSlideBytes(id, jpegSlides)
 
-            val catalog = buildPresentationCatalog(id, fileName, fileType, jpegSlides.size)
-            _presentationCatalogs[id] = catalog.presentations.first()
-            _presentationCatalog.value = catalog
-            broadcast(WebSocketMessage(
-                type = Constants.WS_EVENT_PRESENTATION_UPDATED,
-                payload = json.encodeToString(PresentationCatalogResponse.serializer(), catalog)
-            ))
+                val catalog = buildPresentationCatalog(id, fileName, fileType, jpegSlides.size)
+                _presentationCatalogs[id] = catalog.presentations.first()
+                _presentationCatalog.value = catalog
+                broadcast(WebSocketMessage(
+                    type = Constants.WS_EVENT_PRESENTATION_UPDATED,
+                    payload = json.encodeToString(PresentationCatalogResponse.serializer(), catalog)
+                ))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
