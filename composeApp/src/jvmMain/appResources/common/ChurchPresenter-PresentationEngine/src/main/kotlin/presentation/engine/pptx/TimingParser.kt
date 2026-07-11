@@ -207,9 +207,22 @@ internal object TimingParser {
     private fun firstAttrName(cBhvr: CTTLCommonBehaviorData): String? =
         cBhvr.attrNameLst?.attrNameList?.firstOrNull()
 
+    /**
+     * A `<p:tav>` can carry a `fmla` formula (arbitrary trig/`$`-progress expressions — PowerPoint
+     * writes these for parametric presets like Spiral) alongside a plain `<p:val>` fallback for
+     * viewers that don't evaluate formulas. That fallback is NOT a usable absolute position —
+     * confirmed on a real deck: a Spiral entrance's ppt_x/ppt_y tavs fell back to literal `0`/`1`
+     * (meant only as a dummy placeholder), which this engine's [MotionExpr] happily evaluated as
+     * "slide's left edge"/"slide's right edge", flinging the shape off-screen. If any keyframe in
+     * the list has a formula, the whole sequence is unreliable — return empty so the caller finds
+     * no usable curve and falls through to [presentation.engine.timeline.PresetCatalog]'s
+     * preset-id backstop instead (Spiral already degrades there to a safe on-screen zoom).
+     */
     private fun parseKeyframes(anim: CTTLAnimateBehavior): List<Pair<Double, String>> {
         if (!anim.isSetTavLst) return emptyList()
-        return anim.tavLst.tavList.mapNotNull { tav ->
+        val tavs = anim.tavLst.tavList
+        if (tavs.any { it.isSetFmla }) return emptyList()
+        return tavs.mapNotNull { tav ->
             val time = tav.tm?.toString()?.toDoubleOrNull()?.div(100000.0) ?: return@mapNotNull null
             val value = tav.`val`?.let { v ->
                 when {

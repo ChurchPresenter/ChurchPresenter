@@ -1088,6 +1088,48 @@ spamming libvlc once steady-state is confirmed. Verified hands-on: smooth playba
 `RandomPresentation.key` and `.pptx`'s video slide, autoplay-gating still holds. Do not revert to
 a blind per-frame reissue — confirm the state via the player events instead.
 
+## PPTX Custom-Path Entrance Flinging Text Off-Screen (July 2026)
+
+**Problem**: on `RandomPresentation.pptx`, slide 5's bullet text flew off-screen when its entrance
+build played, even though the render used for thumbnails/disk cache looked correct — a live-vs-
+static-render discrepancy, since thumbnails render via POI's plain `slide.draw()`
+(`DeckRasterizer.renderFinalFrame`), completely bypassing the animated layer/timeline path that
+`PresentationPlayer` actually uses live.
+
+**Root cause**, found by unzipping the real slide XML rather than guessing: the shape's entrance
+is PowerPoint's "Spiral" preset (`presetClass="entr" presetId="15" presetSubtype="9"`), which
+already has a safe, correct mapping in `timeline/PresetCatalog.kt` (`zoomIn()`). But
+`TimelineCompiler`'s behavior-first synthesis runs *before* the preset-id backstop and found
+"usable" `ppt_x`/`ppt_y` `AnimateValue` curves, so it never reached the catalog. Those curves
+were bogus: PowerPoint's real animation specifies the position via a `fmla` formula (spiral motion
+using `cos`/`sin`/`$`-progress, decaying to exactly the shape's own resting position — engine
+doesn't evaluate these) with a plain `<p:val>` fallback of literal `0`/`1` alongside it, meant only
+as a placeholder for non-formula-aware viewers. `TimingParser.parseKeyframes()` was reading that
+placeholder as if it were a real `MotionExpr` position — `0` and `1` are valid normalized
+slide-relative positions ("left edge"/"right edge" of the *entire slide*, not the shape), so the
+shape's held end-state landed offset by (+960pt, +510pt) — almost exactly half the slide's
+1920×1080pt canvas — confirmed via `dumpTiming`'s curve dump (extended to print full keyframe
+values, not just which properties are animated) showing `TRANSLATE_X=[(0.0,-960.0),(1.0,960.0)]`.
+
+**Fix**: `TimingParser.parseKeyframes()` now returns empty (not the misleading placeholder values)
+whenever any `<p:tav>` in the list has `isSetFmla` set — the plain `val` fallback is never
+trustworthy when a real formula is present, and interpolating a mix of formula-backed and plain
+keyframes doesn't make sense anyway. With no usable translate/scale/rotate curves,
+`synthesizeSpec()`'s existing fallback chain correctly reaches
+`PresetCatalog.fromPreset("entr", 15, 9)` → the already-present, correct Spiral→Zoom mapping.
+`ppt_w`/`ppt_h` (already-ignored "Unhandled anim attribute" warnings, unrelated to this bug — those
+attributes aren't fmla-driven here, just not yet mapped to scale curves at all) are unaffected.
+
+**Verification**: `dumpTiming` before/after confirms the curve is gone and `Zoom(role=ENTRANCE,
+fromScale=0.0)` is synthesized instead (5 honest degrade warnings now, up from 3 — `ppt_x`/`ppt_y`
+correctly join `ppt_w`/`ppt_h` as "unhandled," which is truthful, not a regression). Full engine
+`./gradlew test` green. Hands-on verified: Go Live on slide 5, advance the build — bullet text
+settles fully on-screen instead of flying off to the bottom-right.
+
+**Files Modified**: `pptx/TimingParser.kt` (`parseKeyframes`), `tools/DumpTiming.kt` (curve
+keyframe values + layer `boundsPt` added to the diagnostic printout — kept as a lasting
+improvement, not reverted) — engine-side only, no app changes needed.
+
 ## Known Issues
 
 **Issue**: Song edits not saving/updating

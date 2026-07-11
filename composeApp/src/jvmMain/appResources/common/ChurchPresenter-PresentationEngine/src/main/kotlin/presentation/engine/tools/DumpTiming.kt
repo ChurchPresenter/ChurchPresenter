@@ -45,7 +45,8 @@ object DumpTiming {
                     is LayerSpec.StaticComposite -> "static"
                     is LayerSpec.Media -> "media=${layer.mediaFile}"
                 }
-                println("  layer ${layer.id} z=${layer.zIndex} visible=${layer.initiallyVisible} $detail")
+                println("  layer ${layer.id} z=${layer.zIndex} visible=${layer.initiallyVisible} " +
+                    "boundsPt=${layer.boundsPt} $detail")
             }
             val timeline = slide.timeline
             if (timeline == null) {
@@ -86,7 +87,9 @@ object DumpTiming {
     }
 
     private fun describe(effect: EffectSpec): String = when (effect) {
-        is EffectSpec.Custom -> "Custom(${effect.role}, curves=${effect.curves.map { it.property }})"
+        is EffectSpec.Custom -> "Custom(${effect.role}, curves=${
+            effect.curves.joinToString { c -> "${c.property}=${c.keyframes}" }
+        })"
         else -> effect.toString()
     }
 }
