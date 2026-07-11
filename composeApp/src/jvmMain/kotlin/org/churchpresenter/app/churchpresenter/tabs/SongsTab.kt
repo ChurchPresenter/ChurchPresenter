@@ -1785,20 +1785,30 @@ fun SongsTab(
                                     isTitleSlideSelected = false
                                     sendToPresenter(goLive = isPresenting)
                                 } else null
+                                // Double-click on the words goes live too — at the clicked LINE,
+                                // so per-line display mode stays line-accurate (the section's own
+                                // double-click below the text still covers the background).
+                                val lineDoubleClickHandler: ((Int) -> Unit)? = if (isPerLineMode) { lineIdx ->
+                                    viewModel.selectSection(sectionIndex)
+                                    viewModel.setLineIndex(lineIdx)
+                                    isTitleSlideSelected = false
+                                    sendToPresenter(goLive = true)
+                                    onPresenting(Presenting.LYRICS)
+                                } else null
 
                                 if (showPrimary && showSecondary) {
                                     Row(modifier = Modifier.fillMaxWidth()) {
                                         Column(modifier = Modifier.weight(1f)) {
-                                            LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler)
+                                            LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
                                         }
                                         Column(modifier = Modifier.weight(1f)) {
-                                            LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler)
+                                            LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
                                         }
                                     }
                                 } else if (showSecondary) {
-                                    LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler)
+                                    LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
                                 } else {
-                                    LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler)
+                                    LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
                                 }
                             }
                             HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
@@ -1910,7 +1920,13 @@ fun SongsTab(
 }
 
 @Composable
-private fun LyricLines(lines: List<String>, textColor: Color, activeLineIndex: Int = -1, onLineClick: ((Int) -> Unit)? = null) {
+private fun LyricLines(
+    lines: List<String>,
+    textColor: Color,
+    activeLineIndex: Int = -1,
+    onLineClick: ((Int) -> Unit)? = null,
+    onLineDoubleClick: ((Int) -> Unit)? = null,
+) {
     lines.forEachIndexed { lineIndex, line ->
         val isActiveLine = activeLineIndex >= 0 && lineIndex == activeLineIndex
         Text(
@@ -1920,7 +1936,12 @@ private fun LyricLines(lines: List<String>, textColor: Color, activeLineIndex: I
             color = if (isActiveLine) MaterialTheme.colorScheme.primary else textColor,
             modifier = Modifier
                 .padding(vertical = 2.dp)
-                .then(if (onLineClick != null) Modifier.initialPassClickable { onLineClick(lineIndex) } else Modifier)
+                .then(
+                    if (onLineClick != null) Modifier.initialPassCombinedClickable(
+                        onClick = { onLineClick(lineIndex) },
+                        onDoubleClick = { onLineDoubleClick?.invoke(lineIndex) }
+                    ) else Modifier
+                )
         )
     }
 }
