@@ -149,13 +149,21 @@ object PresentationLoader {
                 if (layers != null) {
                     val remapped = KeynoteLayerPlanner.remapTimeline(knSlide, layers)
                     if (remapped == null) {
-                        layers = null
+                        // No animatable timeline survived remapping — a video layer still needs
+                        // its own layer identity even without a build driving it, so only fall
+                        // back to the flattened static composite when there isn't one.
+                        if (layers.none { it is LayerSpec.Media }) layers = null
                     } else {
                         timeline = remapped.first
                         layers = layers.map { spec ->
-                            if (spec.id in remapped.second && spec is LayerSpec.Shape) {
-                                spec.copy(initiallyVisible = false)
-                            } else spec
+                            if (spec.id !in remapped.second) {
+                                spec
+                            } else when (spec) {
+                                is LayerSpec.Shape -> spec.copy(initiallyVisible = false)
+                                is LayerSpec.Media -> spec.copy(initiallyVisible = false)
+                                is LayerSpec.ParagraphText -> spec.copy(initiallyVisible = false)
+                                else -> spec
+                            }
                         }
                     }
                 }

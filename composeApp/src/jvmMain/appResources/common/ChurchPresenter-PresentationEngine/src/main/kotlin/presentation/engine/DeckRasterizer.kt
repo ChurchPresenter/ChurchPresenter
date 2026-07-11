@@ -63,6 +63,10 @@ class DeckRasterizer(
     private var keynoteTempPdf: File? = null
     private var keynoteSceneRasterizer: KeynoteSceneRasterizer? = null
 
+    /** Embedded pptx video files extracted to temp files, keyed by relationship id — see
+     *  [PptxSlideRasterizer.rasterizeLayer]; deleted in [close], not just `deleteOnExit()`. */
+    private val pptxExtractedTempFiles = HashMap<String, File?>()
+
     /**
      * Renders the slide with every build complete — the image used for thumbnails, the static
      * output path, the companion API and the disk cache. ARGB when the source can carry
@@ -112,7 +116,9 @@ class DeckRasterizer(
             if (xslfShow != null) {
                 val slide = xslfShow.slides[slideIndex]
                 val scale = targetWidthPx.toDouble() / show.pageSize.width
-                return slideSpec.layers.map { PptxSlideRasterizer.rasterizeLayer(slide, it, scale) }
+                return slideSpec.layers.map {
+                    PptxSlideRasterizer.rasterizeLayer(slide, it, scale, pptxExtractedTempFiles)
+                }
             }
         }
         if (isLayered && source is DeckSource.KeynoteNative &&
@@ -149,6 +155,8 @@ class DeckRasterizer(
         } catch (_: Exception) {
         }
         keynoteSceneRasterizer = null
+        pptxExtractedTempFiles.values.forEach { it?.delete() }
+        pptxExtractedTempFiles.clear()
     }
 
     // ── PDF ───────────────────────────────────────────────────────────────────

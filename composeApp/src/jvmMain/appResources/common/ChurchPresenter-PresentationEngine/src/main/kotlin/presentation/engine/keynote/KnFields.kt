@@ -125,6 +125,18 @@ internal object KnFields {
     const val IMAGE_MASK = 5                    // TSP.Reference (set → gate)
     const val DATA_REFERENCE_IDENTIFIER = 1     // TSP.DataReference.identifier
 
+    // ── TSD.MovieArchive — validated via dumpKeynote against RandomPresentation.key: field 1's
+    // submessage yields the correct drawable geometry (position/size matched the dumped drawable
+    // line), field 14's reference resolved to data id 9137 (= Data/IMG_3840-9137.mov, the deck's
+    // actual movie asset), field 15's reference resolved to data id 9138 (= Data/posterImage-9138
+    // .png, the deck's actual poster). Several other scalar fields are present (autoplay/loop/
+    // volume-shaped booleans and floats at 3/4/5/7/9/13/18/23/24/28) but with no corroborating
+    // evidence for which is which — left unmapped rather than guessed; playback start is instead
+    // driven by the layer's build-derived visibility (see KeynoteBuildMapper/PresentationPlayer).
+    const val MOVIE_SUPER = 1                   // TSD.DrawableArchive
+    const val MOVIE_DATA = 14                   // TSP.DataReference → the .mov asset
+    const val MOVIE_POSTER = 15                 // TSP.DataReference → poster image
+
     const val GROUP_SUPER = 1                   // TSD.DrawableArchive
     const val GROUP_CHILDREN = 2                // repeated TSP.Reference
 

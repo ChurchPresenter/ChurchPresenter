@@ -1,10 +1,9 @@
 package presentation.engine
 
-import io.airlift.compress.snappy.SnappyCompressor
 import org.junit.jupiter.api.Test
+import presentation.engine.Fixtures.ProtoWriter
 import presentation.engine.keynote.IwaChunkReader
 import presentation.engine.keynote.IwaMessage
-import java.io.ByteArrayOutputStream
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -14,44 +13,6 @@ import kotlin.test.assertTrue
  * the foundations the reverse-engineered Keynote parser stands on.
  */
 class KeynoteIwaTest {
-
-    // ── Minimal protobuf writer (test-side only) ──────────────────────────────
-
-    private class ProtoWriter {
-        val out = ByteArrayOutputStream()
-
-        fun varintField(field: Int, value: Long) {
-            writeVarint((field.toLong() shl 3) or 0L)
-            writeVarint(value)
-        }
-
-        fun bytesField(field: Int, data: ByteArray) {
-            writeVarint((field.toLong() shl 3) or 2L)
-            writeVarint(data.size.toLong())
-            out.write(data)
-        }
-
-        fun fixed32Field(field: Int, bits: Int) {
-            writeVarint((field.toLong() shl 3) or 5L)
-            for (i in 0 until 4) out.write((bits shr (8 * i)) and 0xFF)
-        }
-
-        fun floatField(field: Int, value: Float) = fixed32Field(field, java.lang.Float.floatToIntBits(value))
-
-        fun writeVarint(value: Long) {
-            var v = value
-            while (true) {
-                if (v and 0x7F.inv().toLong() == 0L) {
-                    out.write(v.toInt())
-                    return
-                }
-                out.write(((v and 0x7F) or 0x80).toInt())
-                v = v ushr 7
-            }
-        }
-
-        fun toByteArray(): ByteArray = out.toByteArray()
-    }
 
     @Test
     fun `proto reader round-trips varints strings floats and nested messages`() {
@@ -81,43 +42,8 @@ class KeynoteIwaTest {
 
     // ── IWA chunk container ───────────────────────────────────────────────────
 
-    private fun buildIwa(objects: List<Triple<Long, Int, ByteArray>>, compressed: Boolean): ByteArray {
-        val stream = ByteArrayOutputStream()
-        for ((identifier, type, payload) in objects) {
-            val messageInfo = ProtoWriter().apply {
-                varintField(1, type.toLong())      // MessageInfo.type
-                varintField(3, payload.size.toLong()) // MessageInfo.length
-            }.toByteArray()
-            val archiveInfo = ProtoWriter().apply {
-                varintField(1, identifier)          // ArchiveInfo.identifier
-                bytesField(2, messageInfo)          // ArchiveInfo.message_infos
-            }.toByteArray()
-            val lengthPrefix = ProtoWriter().apply { writeVarint(archiveInfo.size.toLong()) }.toByteArray()
-            stream.write(lengthPrefix)
-            stream.write(archiveInfo)
-            stream.write(payload)
-        }
-        val raw = stream.toByteArray()
-        val body: ByteArray
-        val chunkType: Int
-        if (compressed) {
-            val compressor = SnappyCompressor()
-            val buffer = ByteArray(compressor.maxCompressedLength(raw.size))
-            val written = compressor.compress(raw, 0, raw.size, buffer, 0, buffer.size)
-            body = buffer.copyOf(written)
-            chunkType = 0
-        } else {
-            body = raw
-            chunkType = 1
-        }
-        val file = ByteArrayOutputStream()
-        file.write(chunkType)
-        file.write(body.size and 0xFF)
-        file.write((body.size shr 8) and 0xFF)
-        file.write((body.size shr 16) and 0xFF)
-        file.write(body)
-        return file.toByteArray()
-    }
+    private fun buildIwa(objects: List<Triple<Long, Int, ByteArray>>, compressed: Boolean): ByteArray =
+        Fixtures.buildIwa(objects, compressed)
 
     @Test
     fun `chunk reader round-trips snappy-compressed archives`() {

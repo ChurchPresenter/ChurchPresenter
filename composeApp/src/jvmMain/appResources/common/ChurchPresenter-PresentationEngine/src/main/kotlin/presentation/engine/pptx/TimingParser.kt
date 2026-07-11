@@ -7,6 +7,7 @@ import org.openxmlformats.schemas.presentationml.x2006.main.CTTLAnimateEffectBeh
 import org.openxmlformats.schemas.presentationml.x2006.main.CTTLAnimateMotionBehavior
 import org.openxmlformats.schemas.presentationml.x2006.main.CTTLAnimateRotationBehavior
 import org.openxmlformats.schemas.presentationml.x2006.main.CTTLAnimateScaleBehavior
+import org.openxmlformats.schemas.presentationml.x2006.main.CTTLCommandBehavior
 import org.openxmlformats.schemas.presentationml.x2006.main.CTTLCommonBehaviorData
 import org.openxmlformats.schemas.presentationml.x2006.main.CTTLCommonTimeNodeData
 import org.openxmlformats.schemas.presentationml.x2006.main.CTTLSetBehavior
@@ -114,7 +115,16 @@ internal object TimingParser {
                     byY = if (obj.isSetBy) parsePercentFactor(obj.by.y) else null
                 )
             }
-            // audio, video, cmd — media/verb behaviors, not visual: skipped.
+            "cmd" -> behaviorNode((obj as CTTLCommandBehavior).cBhvr) { cBhvr, dur, delay ->
+                TimingBehavior.Command(
+                    target = target(cBhvr.tgtEl),
+                    durMs = dur, delayMs = delay,
+                    verb = if (obj.isSetCmd) obj.cmd else ""
+                )
+            }
+            // audio, video — media declaration nodes (volume/mute/showWhenStopped metadata), not
+            // part of the click-triggered behavior tree: skipped. The <p:cmd> behavior alone
+            // (parsed above) carries everything needed to click-gate playback.
             else -> null
         }
     }

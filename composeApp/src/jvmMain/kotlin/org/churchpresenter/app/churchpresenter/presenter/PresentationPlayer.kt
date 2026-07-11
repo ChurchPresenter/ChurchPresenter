@@ -17,6 +17,8 @@ import presentation.engine.model.LayerState
 import presentation.engine.model.SlideTransitionSpec
 import presentation.engine.model.TransitionType
 import presentation.engine.timeline.TimelineEvaluator
+import java.awt.Rectangle
+import java.awt.image.BufferedImage
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -92,6 +94,20 @@ class PresentationPlayer(
     private val slideCache = ConcurrentHashMap<Int, SlideLayers>()
     private val loading = ConcurrentHashMap<Int, Job>()
 
+    // Embedded video playback (Keynote or PowerPoint): posterCanvases holds the raw poster
+    // bitmap per slide (pre-toComposeImageBitmap, needed as the AWT compositing base — see
+    // EmbeddedVideoDecoder). movieLayerId is the current slide's video layer id (known
+    // synchronously from the Deck model in showSlide); movieDecoder is lazily constructed in
+    // frame() once that slide's poster has actually finished rasterizing. One decoder alive
+    // at a time.
+    private val posterCanvases = ConcurrentHashMap<Int, BufferedImage>()
+    @Volatile private var movieLayerId: String? = null
+    private var movieDecoder: EmbeddedVideoDecoder? = null
+    // The click step whose build targets movieLayerId — the poster is visible from slide entry
+    // (not entrance-gated, matches both real Keynote and PowerPoint), but playback only starts
+    // once this step is reached. -1 (no build targets it) means "always eligible."
+    private var movieStepIndex: Int = -1
+
     private val scalePxPerPt: Float = (renderWidthPx / deck.slideWidthPt).toFloat()
     private val frameWidthPx: Int = renderWidthPx
     private val frameHeightPx: Int = (deck.slideHeightPt * scalePxPerPt).toInt().coerceAtLeast(1)
@@ -99,6 +115,10 @@ class PresentationPlayer(
     @Volatile private var slideIndex: Int = -1
     /** -1 = pre-click state (entrance targets hidden); 0..stepCount-1 = that step playing. */
     @Volatile private var stepIndex: Int = -1
+    /** Set by [showSlide] when [SlideLayers] isn't cached yet and entry should land on the last
+     *  step once it loads (backward navigation) — applied in [ensureLoaded]'s completion, guarded
+     *  by slide index so a stale request can't misapply after further navigation. */
+    @Volatile private var pendingEnterAtLastStepFor: Int? = null
 
     /** The slide playback currently points at — identity check for step navigation. */
     val currentSlideIndex: Int get() = slideIndex
@@ -113,7 +133,13 @@ class PresentationPlayer(
     /** The last frame's placed layers — snapshot source for the next transition's "from" side. */
     @Volatile private var lastPlacedLayers: List<PlacedLayer> = emptyList()
 
-    fun showSlide(index: Int) {
+    /**
+     * Points playback at [index]. [enterAtLastStep] is true only for genuine backward navigation
+     * (see [org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager.presentationShowSlide]) —
+     * real PowerPoint/Keynote show a slide you step back onto fully built, as the audience last
+     * saw it, while stepping forward onto a new slide always starts unbuilt.
+     */
+    fun showSlide(index: Int, enterAtLastStep: Boolean = false) {
         if (index !in deck.slides.indices) return
         val outgoing = lastPlacedLayers
         val spec = deck.slides[index].transition
@@ -125,9 +151,39 @@ class PresentationPlayer(
         slideIndex = index
         stepIndex = -1
         stepStartNanos = 0L
+        pendingEnterAtLastStepFor = null
         ensureLoaded(index)
         ensureLoaded(index + 1)
         evictBeyondWindow(index)
+        syncMovieTarget(index)
+        if (enterAtLastStep) {
+            val cachedStepCount = slideCache[index]?.evaluator?.stepCount
+            if (cachedStepCount != null) {
+                stepIndex = (cachedStepCount - 1).coerceAtLeast(-1)
+            } else {
+                pendingEnterAtLastStepFor = index
+            }
+        }
+    }
+
+    /**
+     * Tears down the movie decoder the instant the target layer changes (leaving a video slide,
+     * or landing on a different one) — never waits on the new slide's async rasterization, so a
+     * decoder can never keep decoding/playing audio for a slide that's no longer showing.
+     * [frame] lazily (re)constructs the decoder once the new target's poster is actually ready.
+     */
+    private fun syncMovieTarget(index: Int) {
+        val slide = deck.slides.getOrNull(index)
+        val newTarget = slide?.layers?.firstOrNull { it is LayerSpec.Media }?.id
+        if (newTarget == movieLayerId) return
+        movieDecoder?.close()
+        movieDecoder = null
+        movieLayerId = newTarget
+        movieStepIndex = if (newTarget == null) {
+            -1
+        } else {
+            slide.timeline?.steps?.indexOfFirst { step -> step.intervals.any { it.layerId == newTarget } } ?: -1
+        }
     }
 
     /**
@@ -181,11 +237,19 @@ class PresentationPlayer(
                 evaluator.evaluate(stepIndex.coerceAtMost(evaluator.stepCount - 1), elapsed).layerStates
             }
         }
+        ensureMovieDecoder(index, slide)
+        val targetId = movieLayerId
         val placed = slide.layers.mapNotNull { raw ->
             val state = states[raw.spec.id]
                 ?: if (raw.spec.initiallyVisible) LayerState.VISIBLE else LayerState.HIDDEN
+            if (raw.spec.id == targetId) {
+                // Poster/video is visible from slide entry (see role fix in KeynoteBuildMapper);
+                // only playback itself is gated by reaching the movie's own build step.
+                if (stepIndex >= movieStepIndex) movieDecoder?.resume() else movieDecoder?.pause()
+            }
             if (!state.visible) return@mapNotNull null
-            PlacedLayer(raw.spec, raw.bitmap, raw.offsetXPx, raw.offsetYPx, state)
+            val bitmap = if (raw.spec.id == targetId) movieDecoder?.latestFrame ?: raw.bitmap else raw.bitmap
+            PlacedLayer(raw.spec, bitmap, raw.offsetXPx, raw.offsetYPx, state)
         }
         lastPlacedLayers = placed
         return PresentationFrame(
@@ -220,6 +284,8 @@ class PresentationPlayer(
     fun close() {
         closed = true
         scope.cancel()
+        movieDecoder?.close()
+        movieDecoder = null
         synchronized(rasterLock) {
             try {
                 rasterizer.close()
@@ -227,6 +293,23 @@ class PresentationPlayer(
             }
         }
         slideCache.clear()
+        posterCanvases.clear()
+    }
+
+    /** Lazily (re)builds the decoder for [movieLayerId] once this slide's poster is rasterized. */
+    private fun ensureMovieDecoder(index: Int, slide: SlideLayers) {
+        val targetId = movieLayerId ?: return
+        if (movieDecoder != null) return
+        val mediaSpec = slide.layers.firstOrNull { it.spec.id == targetId }?.spec as? LayerSpec.Media ?: return
+        val videoFile = mediaSpec.mediaFile ?: return
+        val poster = posterCanvases[index] ?: return
+        val contentRectPx = Rectangle(
+            ((mediaSpec.contentRectPt.x - mediaSpec.boundsPt.x) * scalePxPerPt).toInt(),
+            ((mediaSpec.contentRectPt.y - mediaSpec.boundsPt.y) * scalePxPerPt).toInt(),
+            (mediaSpec.contentRectPt.w * scalePxPerPt).toInt().coerceAtLeast(1),
+            (mediaSpec.contentRectPt.h * scalePxPerPt).toInt().coerceAtLeast(1)
+        )
+        movieDecoder = EmbeddedVideoDecoder(videoFile, poster, contentRectPx).also { it.start() }
     }
 
     // ── Rasterization ─────────────────────────────────────────────────────────
@@ -242,6 +325,8 @@ class PresentationPlayer(
                         if (closed) return@launch
                         rasterizer.rasterizeSlideLayers(index)
                     }
+                    rasterLayers.firstOrNull { it.spec is LayerSpec.Media }
+                        ?.let { posterCanvases[index] = it.image }
                     val raws = rasterLayers.map { layer ->
                         RawLayer(
                             spec = layer.spec,
@@ -260,6 +345,10 @@ class PresentationPlayer(
                         )
                     }
                     slideCache[index] = SlideLayers(raws, evaluator)
+                    if (pendingEnterAtLastStepFor == index && slideIndex == index) {
+                        pendingEnterAtLastStepFor = null
+                        stepIndex = ((evaluator?.stepCount ?: 0) - 1).coerceAtLeast(-1)
+                    }
                 } catch (e: Exception) {
                     CrashReporter.reportException(e, "Rasterizing presentation slide $index for playback")
                 } finally {
@@ -272,5 +361,6 @@ class PresentationPlayer(
     /** Keep current−1 .. current+1; drop the rest (a few full-res layers each — RAM stays flat). */
     private fun evictBeyondWindow(current: Int) {
         slideCache.keys.filter { it < current - 1 || it > current + 1 }.forEach { slideCache.remove(it) }
+        posterCanvases.keys.filter { it < current - 1 || it > current + 1 }.forEach { posterCanvases.remove(it) }
     }
 }

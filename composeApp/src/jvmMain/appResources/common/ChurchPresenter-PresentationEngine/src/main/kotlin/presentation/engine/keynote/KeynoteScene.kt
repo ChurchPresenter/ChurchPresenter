@@ -27,6 +27,8 @@ internal class KnSlide(
     val timeline: Timeline?,
     /** Ids of drawables that are build targets (they become their own layers). */
     val builtDrawableIds: Set<Long>,
+    /** Ids of drawables whose build fanned out into per-paragraph layers (By Paragraph/Bullet). */
+    val paragraphBuiltDrawableIds: Set<Long>,
     val transition: SlideTransitionSpec?,
     /** Non-null → this slide is beyond the whitelist and must render from the static fallback. */
     val gateReason: String?
@@ -89,6 +91,14 @@ internal sealed interface KnDrawable {
         override val geometry: KnGeometry,
         /** Children with positions relative to the group's origin. */
         val children: List<KnPlacedDrawable>
+    ) : KnDrawable
+
+    data class Movie(
+        override val geometry: KnGeometry,
+        /** File name under Data/ for the movie asset. */
+        val videoFile: String,
+        /** File name under Data/ for the poster frame; null = no static fallback available. */
+        val posterFile: String?
     ) : KnDrawable
 }
 

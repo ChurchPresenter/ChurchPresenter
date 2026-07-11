@@ -226,9 +226,22 @@ internal class TimelineCompiler(
         var clipEffect: EffectSpec? = null
         var sawFade = false
         var sawAppearOnly = true
+        var sawCommand = false
 
         for (behavior in behaviors) {
             when (behavior) {
+                is TimingBehavior.Command -> {
+                    // A media command (playFrom/togglePause/pause/stop — embedded video/audio
+                    // "Start: On Click" and its secondary interactions) is never a visual effect —
+                    // the poster/first frame is already on screen, so a click should not
+                    // fade/reveal anything. playFrom is the one that matters (it only needs to
+                    // exist as a timeline entry so playback gating, PresentationPlayer's
+                    // movieStepIndex, can find it); the others aren't drivers of anything yet, but
+                    // must still be treated as non-visual rather than falling through to the
+                    // preset backstop, which doesn't recognize presetClass="mediacall" and would
+                    // otherwise degrade them to a spurious, misleadingly-worded Fade.
+                    sawCommand = true
+                }
                 is TimingBehavior.AnimEffect -> {
                     sawAppearOnly = false
                     val mapped = PresetCatalog.fromFilter(behavior.filter, role)
@@ -275,6 +288,11 @@ internal class TimelineCompiler(
         val hasRotate = curves.any { it.property == LayerProperty.ROTATION }
 
         return when {
+            // A media command always wins outright — PowerPoint never combines a media call with
+            // a visual effect on the same node, and it must never fall through to the preset
+            // backstop below (presetClass="mediacall" matches none of its entries, which would
+            // otherwise degrade to a spurious Fade with a "degraded to fade" warning).
+            sawCommand -> EffectSpec.Appear(role)
             // Reveal-clip effects are exclusive (a wipe over a moving layer is not a thing
             // PowerPoint produces); translate/scale beat the clip when both appear.
             clipEffect != null && !hasTranslate && !hasScale && !hasRotate -> clipEffect

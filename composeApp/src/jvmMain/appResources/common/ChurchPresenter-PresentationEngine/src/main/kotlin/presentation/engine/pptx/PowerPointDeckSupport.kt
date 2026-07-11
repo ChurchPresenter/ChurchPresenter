@@ -157,6 +157,7 @@ internal object PowerPointDeckSupport {
         }
         val shapeLayers = layers.filterIsInstance<LayerSpec.Shape>().associateBy { it.shapeIndex }
         val paragraphLayers = layers.filterIsInstance<LayerSpec.ParagraphText>().groupBy { it.shapeIndex }
+        val mediaLayers = layers.filterIsInstance<LayerSpec.Media>().associateBy { it.shapeIndex }
 
         return fun(shapeId: Long, paragraphIndex: Int?): List<TimelineCompiler.LayerIdWithBounds> {
             val topIndex = topIndexByShapeId[shapeId] ?: return emptyList()
@@ -169,6 +170,9 @@ internal object PowerPointDeckSupport {
                 }
             }
             shapeLayers[topIndex]?.let {
+                return listOf(TimelineCompiler.LayerIdWithBounds(it.id, it.boundsPt))
+            }
+            mediaLayers[topIndex]?.let {
                 return listOf(TimelineCompiler.LayerIdWithBounds(it.id, it.boundsPt))
             }
             return emptyList()

@@ -89,12 +89,17 @@ object DumpKeynote {
                     val geo = drawableMsg?.message(KnFields.DRAWABLE_GEOMETRY)
                     val pos = geo?.message(KnFields.GEOMETRY_POSITION)
                     val sz = geo?.message(KnFields.GEOMETRY_SIZE)
-                    val text = message.message(KnFields.SHAPE_INFO_OWNED_STORAGE)
+                    val chunks = message.message(KnFields.SHAPE_INFO_OWNED_STORAGE)
                         ?.varint(KnFields.REFERENCE_IDENTIFIER)
                         ?.let { index.message(it) }?.strings(KnFields.STORAGE_TEXT)
-                        ?.joinToString("")?.take(30)
+                    val text = chunks?.joinToString("")?.replace("\n", "\\n")?.replace(' ', '¶')
+                    val codePoints = chunks?.joinToString("")
+                        ?.filter { it.code !in 32..126 }
+                        ?.map { "U+%04X".format(it.code) }
+                        ?.distinct()
                     return "pos=(${pos?.float(KnFields.POINT_X)},${pos?.float(KnFields.POINT_Y)}) " +
-                        "size=(${sz?.float(KnFields.SIZE_WIDTH)},${sz?.float(KnFields.SIZE_HEIGHT)}) text=${text ?: ""}"
+                        "size=(${sz?.float(KnFields.SIZE_WIDTH)},${sz?.float(KnFields.SIZE_HEIGHT)}) " +
+                        "chunks=${chunks?.size ?: 0} nonAscii=$codePoints text=${text ?: ""}"
                 }
                 for (id in drawables) {
                     if (index.typeOf(id) == KnFields.TYPE_TSD_GROUP) {
@@ -106,6 +111,23 @@ object DumpKeynote {
                         }
                     } else {
                         println("${"  ".repeat(depth)}  drawable $id:${index.typeOf(id)} ${geometryLine(id)}")
+                        if (index.typeOf(id) == KnFields.TYPE_TSD_MOVIE) {
+                            val movie = index.message(id)
+                            val fields = movie?.fieldNumbers()?.sorted().orEmpty()
+                            println("${"  ".repeat(depth)}    movie fields=$fields")
+                            for (f in fields) {
+                                val sub = movie?.message(f)
+                                if (sub != null) {
+                                    println("${"  ".repeat(depth)}    movie.$f fields=${sub.fieldNumbers().sorted()} " +
+                                        "ref=${sub.varint(KnFields.REFERENCE_IDENTIFIER)} " +
+                                        "dataRef=${sub.varint(KnFields.DATA_REFERENCE_IDENTIFIER)} " +
+                                        "str=${sub.string(1)}")
+                                } else {
+                                    println("${"  ".repeat(depth)}    movie.$f scalar varint=${movie?.varint(f)} " +
+                                        "bool=${movie?.bool(f)} float=${movie?.float(f)} double=${movie?.double(f)}")
+                                }
+                            }
+                        }
                     }
                 }
                 val builds = slide.messages(KnFields.SLIDE_BUILDS)

@@ -12,8 +12,10 @@ import kotlin.math.abs
  * transitions/notes) into a renderable [KeynoteScene].
  *
  * Whitelist + per-slide fidelity gate: a slide containing anything the renderer can't reproduce
- * (movies, charts, tables, masked images, unknown drawable types) gets a [KnSlide.gateReason]
- * and renders from the static fallback instead — never a crash, never a missing slide.
+ * (charts, tables, masked images, unresolvable movie assets, unknown drawable types) gets a
+ * [KnSlide.gateReason] and renders from the static fallback instead — never a crash, never a
+ * missing slide. Movies with a resolvable asset are NOT gated — they render as a poster-frame
+ * layer that the app layer can decode and play back live (see [KnDrawable.Movie]).
  */
 internal object KeynoteDeckParser {
 
@@ -71,7 +73,7 @@ internal object KeynoteDeckParser {
         val gate = Gate()
         val slide = index.message(slideId)
         if (slide == null) {
-            return KnSlide(slideIndex, null, emptyList(), "", null, emptySet(), null, "slide archive unreadable")
+            return KnSlide(slideIndex, null, emptyList(), "", null, emptySet(), emptySet(), null, "slide archive unreadable")
         }
 
         // Master chain, deepest first (theme decorations render below slide content).
@@ -104,10 +106,10 @@ internal object KeynoteDeckParser {
             ?.message(F.NOTE_CONTAINED_STORAGE)?.varint(F.REFERENCE_IDENTIFIER)
             ?.let { index.message(it) }
             ?.strings(F.STORAGE_TEXT)?.joinToString("")
-            ?.replace('\u2029', '\n')?.trim()
+            ?.let(::normalizeParagraphBreaks)?.trim()
             ?: ""
 
-        val builds = KeynoteBuildMapper.map(index, slide)
+        val builds = KeynoteBuildMapper.map(index, slide, drawables)
         val transition = KeynoteBuildMapper.mapTransition(slide)
 
         return KnSlide(
@@ -117,6 +119,7 @@ internal object KeynoteDeckParser {
             notes = notes,
             timeline = builds?.timeline,
             builtDrawableIds = builds?.builtDrawableIds ?: emptySet(),
+            paragraphBuiltDrawableIds = builds?.paragraphBuiltDrawableIds ?: emptySet(),
             transition = transition,
             gateReason = gate.reason
         )
@@ -162,10 +165,7 @@ internal object KeynoteDeckParser {
             F.TYPE_KN_PLACEHOLDER, F.TYPE_KN_PLACEHOLDER_ALT ->
                 message.message(F.PLACEHOLDER_SUPER)?.let { parseTextShape(index, it, gate) }
             F.TYPE_TSD_GROUP -> parseGroup(index, message, gate)
-            F.TYPE_TSD_MOVIE -> {
-                gate.raise("movie drawable")
-                null
-            }
+            F.TYPE_TSD_MOVIE -> parseMovie(index, message, gate)
             else -> {
                 gate.raise("drawable type $type")
                 null
@@ -223,6 +223,22 @@ internal object KeynoteDeckParser {
         } else {
             shape
         }
+    }
+
+    /** Gates only when the movie's own asset can't be resolved — a missing poster still plays. */
+    private fun parseMovie(index: ObjectIndex, message: IwaMessage, gate: Gate): KnDrawable? {
+        val geometry = geometryOf(message.message(F.MOVIE_SUPER))
+        val dataId = message.message(F.MOVIE_DATA)?.varint(F.DATA_REFERENCE_IDENTIFIER) ?: run {
+            gate.raise("movie without data")
+            return null
+        }
+        val videoFile = index.dataFileNames[dataId] ?: run {
+            gate.raise("movie data $dataId not in package metadata")
+            return null
+        }
+        val posterDataId = message.message(F.MOVIE_POSTER)?.varint(F.DATA_REFERENCE_IDENTIFIER)
+        val posterFile = posterDataId?.let { index.dataFileNames[it] }
+        return KnDrawable.Movie(geometry, videoFile, posterFile)
     }
 
     private fun parseGroup(index: ObjectIndex, message: IwaMessage, gate: Gate): KnDrawable {
@@ -365,10 +381,22 @@ internal object KeynoteDeckParser {
 
     // ── Text ──────────────────────────────────────────────────────────────────
 
+    /**
+     * Keynote paragraph breaks: observed as a lone CR (`\r`, U+000D) in real files \u2014 not the
+     * Unicode paragraph separator (`\u2029`) the code originally assumed, which never actually
+     * appears (confirmed via `dumpKeynote`'s raw code-point dump against a real multi-bullet
+     * text box: bullets were silently concatenating into one line because the CR was never being
+     * converted). Both are replaced 1-for-1 with `\n` so [parseParagraphs]'s running character
+     * offset (`start += line.length + 1`, used to look up the attribute-run tables, which are
+     * indexed against the *original* string) stays exactly in sync.
+     */
+    private fun normalizeParagraphBreaks(raw: String): String =
+        raw.replace('\u2029', '\n').replace('\r', '\n')
+
     private fun parseParagraphs(index: ObjectIndex, storage: IwaMessage): List<KnParagraph> {
         val raw = storage.strings(F.STORAGE_TEXT).joinToString("")
         if (raw.isEmpty()) return emptyList()
-        val text = raw.replace('\u2029', '\n')
+        val text = normalizeParagraphBreaks(raw)
 
         val charStyleTable = attributeRuns(storage.message(F.STORAGE_TABLE_CHAR_STYLE))
         val paraStyleTable = attributeRuns(storage.message(F.STORAGE_TABLE_PARA_STYLE))

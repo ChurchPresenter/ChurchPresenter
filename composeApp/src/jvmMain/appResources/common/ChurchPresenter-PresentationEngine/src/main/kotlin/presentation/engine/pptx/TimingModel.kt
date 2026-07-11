@@ -119,4 +119,17 @@ internal sealed interface TimingBehavior {
         val toX: Double?, val toY: Double?,
         val byX: Double?, val byY: Double?
     ) : TimingBehavior
+
+    /**
+     * `<p:cmd>` — a media/verb command (`playFrom(0.0)`, `togglePause`, `pause`, `stop`, …), not
+     * a visual effect. Used to click-gate embedded video/audio playback: the click sequence
+     * position is the same as any other behavior, only the interpretation differs — see
+     * [presentation.engine.timeline.TimelineCompiler]'s Command handling.
+     */
+    data class Command(
+        override val target: BehaviorTarget?,
+        override val durMs: Long?,
+        override val delayMs: Long,
+        val verb: String
+    ) : TimingBehavior
 }

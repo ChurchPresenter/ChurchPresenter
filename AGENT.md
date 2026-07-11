@@ -342,6 +342,276 @@ composeApp). Package root `presentation.engine`. **Zero Compose dependency by co
   animations/transitions are unsupported. **Not yet verified hands-on**: KEY-role output,
   freeze during playback, DeckLink, and the browser-source overlay page in OBS itself.
 
+## Keynote Video Playback + Transition Fidelity (July 2026)
+
+**Problem**: a user-provided stress-test `.key` (11 slides, each exercising a different Keynote
+slide transition — Swoosh, Push, Dissolve+Flip, Scale+3D-cube, Twist, Swing×2, Reflection,
+Confetti — and a final slide with an embedded `.mov`) rendered visibly differently than real
+Keynote.app. Root causes, found by unzipping the file directly and cross-referencing the engine
+source: (1) `KeynoteDeckParser` unconditionally gated any slide containing a movie drawable to
+the static Keynote-exported thumbnail — the video slide's title, builds and transition were all
+silently dropped for one frozen JPEG; (2) `KeynoteBuildMapper.mapTransition()` only mapped
+Push/Fade/Wipe/Cover — 7 of the 8 real transitions in the file fell through to a blanket Fade;
+(3) a couple of build-effect names (`pivot-build`, `bc-drop`) matched no keyword and silently
+degraded to Fade despite better primitives existing.
+
+**Fix — movie playback** (real field numbers confirmed via a `dumpKeynote` extension before
+writing any parser code, not guessed: field 14 = movie data reference, field 15 = poster image
+reference, both validated by resolving to the file's actual `Data/` entries):
+- `KnFields.kt` — new `TSD.MovieArchive` field section (`MOVIE_SUPER`/`MOVIE_DATA`/`MOVIE_POSTER`).
+- `KeynoteScene.kt` — new `KnDrawable.Movie` (geometry + `videoFile` + nullable `posterFile`).
+- `KeynoteDeckParser.parseMovie()` replaces the old gate, modeled on `parseImage()` — gates only
+  when the movie's own asset can't be resolved, never on a missing poster.
+- `LayerSpec.Media` (pre-existing, `model/Deck.kt`, never actually constructed anywhere before
+  this) gained `shapeIndex`/`contentRectPt` and is now built by `KeynoteLayerPlanner` for every
+  top-level movie drawable — forced into its own layer even without a build targeting it.
+  `PresentationLoader.kt`'s remap-hidden-layer step had to be extended from `is LayerSpec.Shape`
+  to also cover `Media` (it silently discarded the whole layer list back to a flat static
+  composite otherwise whenever a slide had a movie but no other timeline).
+- `KeynoteSceneRasterizer` rasterizes the Media layer's poster with the same crop/offset math as
+  `Shape`, and gained `extractDataFile()` — directory-bundle `.key` returns the real file, zip
+  bundles extract once to a cached temp file, deleted in `close()` (not left to `deleteOnExit()`,
+  which would leak large `.mov` temp files for the whole app run).
+- New `presenter/KeynoteMovieDecoder.kt` (app-side, NOT the `SharedVideoOutput` singleton that
+  stays scoped to the Media tab's one master video) — copies `SoftwareVideoPlayer`'s
+  `CallbackVideoSurface`→`BufferedImage` technique, but blits each decoded frame into a mutable
+  copy of the cached poster canvas at the pre-computed content rect, so every published bitmap is
+  pixel-identical in size/offset to the poster it replaces — `PresentationPresenter.kt`'s
+  `drawLayer()` needed zero changes as a result (already bitmap-source-agnostic).
+  `createMediaPlayerComponent()`/`Component.mediaPlayer()`/`Component.releasePlayer()` in
+  `VideoPlayer.kt` widened from `private` to `internal` for reuse.
+- `PresentationPlayer.kt` owns one decoder at a time: `showSlide()` tears it down the instant the
+  target layer changes (synchronously, from the Deck model — never waits on the new slide's async
+  rasterization, so a decoder can't keep playing audio for a slide that's no longer showing);
+  `frame()` lazily (re)constructs it once that slide's poster has actually rasterized.
+
+**Fix — a real visibility/semantics bug found only by testing hands-on**: the first working build
+hid the video's poster entirely until the "movie-start" build's click, because
+`animation_type="In"` from the IWA defaulted to `EffectSpec.Role.ENTRANCE` — but Keynote's movie
+start/pause/stop builds are *actions*, not entrances: the poster is visible on the slide from the
+moment it appears, and the build only gates *playback*, not visibility (confirmed by comparing
+against the file's own Keynote-rendered slide thumbnail, which shows title+poster together).
+`KeynoteBuildMapper` now special-cases `effect.contains("movie")` to force `Role.EMPHASIS` ahead
+of the type-string check, and maps it to `EffectSpec.Appear` instead of the default `Fade` (Appear
+is a constant "present" state — no alpha ramp — vs. Fade's 0→1 animation, which would otherwise
+still flash the already-visible poster in on click). Since the layer is no longer entrance-gated,
+`PresentationPlayer` can no longer key playback start off `LayerState.visible`; it now caches
+`movieStepIndex` (the click step whose build targets the movie layer, computed synchronously from
+`Deck.slides[i].timeline` when the target layer changes) and gates `resume()`/`pause()` on
+`stepIndex >= movieStepIndex` instead.
+
+**Fix — transition/build coverage**: `mapTransition()` routes Swoosh/Swing/Twist/Reflection to
+`COVER` (incoming content displaced onto the frame from a direction — much closer to the real
+motion than a flat cross-fade) ahead of the final Fade catch-all; Confetti and pure Scale/Cube
+stay on Fade per the pre-existing "no motion equivalent" philosophy (unchanged, still correct).
+`mapEffect()` gained `pivot`→Spin and `drop`→`Fly(DOWN)`.
+
+**Verification**: engine `./gradlew test` green throughout (compiled/tested after each stage,
+engine-only changes never touched app code); `dumpTiming` against the actual file confirmed "No
+degrade warnings — full coverage for this deck" and every transition/build mapping by hand.
+Hands-on in the running GUI (System Events + screenshots, VLC installed via
+`brew install --cask vlc` specifically to enable this — wasn't present before): all 11 slides
+render live instead of frozen thumbnails; the video slide's poster is visible immediately in the
+pre-click state (`Build 0 of 1`) and the embedded video plays with audio once the build step is
+reached, confirmed by the user. A stale `~/.churchpresenter/slides/<hash>/` disk-cache entry from
+before the fix (likely from the user's own earlier preview of the file) kept the thumbnail grid
+showing the old blank render even after the fix landed — cleared manually; worth remembering that
+`SlideDiskCache` entries don't invalidate on app-code changes, only on `sourceMtime`.
+
+**Known gaps not addressed** (not exercised by this file — plain title+body slides, no custom
+shapes/images/gradients/flips found): flip-bitmask disabled, theme-preset fills unresolved,
+auto-sized text alignment/vertical-anchor, gradient-flattens-to-first-stop, rounded-corner loss,
+editable-bezier degrade, per-paragraph/word build delivery. All pre-existing, already documented
+above in this file — not regressions from this work.
+
+**Files Modified**: `KnFields.kt`, `KeynoteScene.kt`, `KeynoteDeckParser.kt`,
+`KeynoteLayerPlanner.kt`, `KeynoteSceneRasterizer.kt`, `model/Deck.kt`, `PresentationLoader.kt`,
+`KeynoteBuildMapper.kt`, `tools/DumpKeynote.kt` (movie field probe) — all engine-side;
+`presenter/KeynoteMovieDecoder.kt` (new), `presenter/PresentationPlayer.kt`,
+`composables/VideoPlayer.kt` (visibility widening only) — app-side; `strings.xml`
+(`presentation_static_note` no longer claims embedded video is unsupported).
+
+### Follow-up crash: Go Live slide-preload race (same day)
+A fifth unguarded `readBytes()` call site survived the July 10 disk-cache-race fix (commit
+`736d612f`, which guarded four sites in `PresentationTab.kt`) — the "Go Live" button's own slide
+preload (`GoLiveButton.onClick`, ~line 494-503) still called `f.readBytes()` unguarded. Deleting a
+stale `~/.churchpresenter/slides/<hash>/` cache entry (while the app was live, testing the video
+poster fix above) hit exactly this race and crashed the app with an uncaught
+`FileNotFoundException` on `AWT-EventQueue-0`. Wrapped both reads in the same
+`try/catch → null` pattern as the other five sites — all 7 `readBytes()` call sites in
+`PresentationTab.kt` are now consistently guarded.
+
+## Cross-Format Animation Consistency: PPTX Transition Fidelity + Keynote Per-Paragraph Builds (July 2026)
+
+**Problem**: text and slide-transition animations didn't look similar between `.ppt` and `.key`
+files. Investigated using the same file pair as the video-playback work above
+(`RandomPresentation.key`/`.pptx`, exported minutes apart specifically for this comparison) plus
+direct inspection of both files' raw XML/IWA data.
+
+**Root cause 1 (the dominant one) — PPTX transitions were silently dropped for 10 of 11 slides.**
+`TransitionParser`'s typed `isSetTransition`/`.transition` accessor only sees a `<p:transition>`
+that's a *direct* child of `<p:sld>` — but any PowerPoint-2010+ transition (flip/warp/prism/…) is
+wrapped in `<mc:AlternateContent><mc:Choice Requires="p14">`…richer…`</mc:Choice><mc:Fallback>`…
+plain…`</mc:Fallback></mc:AlternateContent>` for backward compatibility, and `isSetTransition`
+returns `false` for every one of those — confirmed via debug logging against the real deck (10/11
+slides, zero warning, the transition just silently vanished). Rewrote `TransitionParser` to search
+inside the wrapper via `XmlCursor` when the direct check misses, extracting the transition's own
+attributes and its single content-child's name/direction as **plain strings** rather than through
+POI's typed choice-content accessors — those resolve `isSetPush`/`isSetWipe`/etc. as `false` even
+on a correctly retyped, standalone-reparsed fragment (tried `Factory.parse`, tried
+`changeType()`, both failed the same way; `changeType()` on a still-cursor-live object also
+silently corrupts the cursor's remaining `toNextSelection()` iteration — a real trap, don't retry
+either approach) — raw text extraction sidesteps the whole binding problem and is exactly as
+reliable for this shape (one wrapper, at most one simple self-closing child).
+
+**Root cause 2 — even where the transition WAS read, duration was wrong.** The same
+`mc:AlternateContent` transitions always carry a precise `p14:dur` extension attribute (real
+milliseconds) alongside the legacy `spd` 3-bucket enum (slow/med/fast → 1000/750/500ms) for
+readers that predate the extension — `p14:dur` was being discarded entirely. Real deck: `spd="slow"`
+on every transitioned slide (→ flat 1000ms), but `p14:dur` ranging 1200-2900ms, matching the
+Keynote counterpart's actual durations almost exactly (confirming both files came from the same
+source timing). Now reads `p14:dur` via cursor when present, falling back to the `spd` bucket only
+when it's genuinely absent (own cursor-positioning gotcha: a cursor from a document-level parse
+starts at STARTDOC, not the element itself — `getAttributeText` silently finds nothing until
+`toFirstContentToken()` is called first).
+
+**Root cause 3 (smaller) — mismatched defaults.** When a build/transition duration is truly
+unspecified in the source (rare — both formats' authoring tools almost always write one), Keynote
+fell back to 700ms (`KeynoteBuildMapper`'s `?: 0.7`) vs PPTX's 500ms
+(`TimelineCompiler.DEFAULT_EFFECT_DUR_MS` / `TransitionParser`'s fast/unset bucket). Aligned
+Keynote's fallback to 500ms in both `mapEffect` and `mapTransition`.
+
+**Feature — Keynote per-paragraph/bullet text builds** (user-requested, larger scope; the sample
+file pair doesn't exercise it, told the user this before proceeding since neither file actually
+uses paragraph-range builds — real Keynote.app isn't installed here either, so exact delivery
+strings are provisional, same "validated per-deck via DumpKeynote" convention already used
+elsewhere in this file for direction constants). PowerPoint can stagger a text build
+paragraph-by-paragraph (multiple click steps); Keynote always animated a whole text box as one
+click — an explicitly documented gap (`KeynoteBuildMapper`'s old "WS6 text work" comment).
+`BUILD_DELIVERY` (`KnFields.kt`, already defined, previously only read by the `dumpKeynote` debug
+tool) now gets consumed: `KeynoteBuildMapper.map()` gained a `drawables` parameter (cross-references
+the target's already-parsed paragraph count), detects "paragraph"/"bullet" in the delivery string,
+and synthesizes one `EffectInterval` per paragraph — each its own click step (matches Keynote's
+real on-stage behavior) — instead of one whole-drawable interval.
+`KeynoteLayerPlanner.plan()` emits one `LayerSpec.ParagraphText` per paragraph for those drawables
+— **the exact same layer kind PPTX's planner already produces**, reused rather than reinventing a
+new model type. `KeynoteSceneRasterizer` gained a `ParagraphText` case; `drawParagraphs()`'s
+measure-and-draw loop was refactored into a shared `layOutParagraph(..., paint: Boolean)` so the
+whole-object render and the new per-paragraph render can never drift out of sync — simpler than
+PPTX's approach (which must mutate run XML through opaque POI drawing code to isolate one
+paragraph), since Keynote already does its own text layout.
+`PresentationLoader.kt`'s hidden-layer remap (already extended once this session for `Media`) needed
+the same `ParagraphText` branch — otherwise a paragraph build's ENTRANCE role wouldn't correctly
+hide it pre-click, the same bug class already hit and fixed for movie layers.
+
+**Verification**: `TransitionParser`'s fix confirmed via `dumpTiming` against the real file —
+before: 1 of 11 slides had any transition, all durations flat-bucketed; after: 10/11 slides show
+their real transition (`PUSH/LEFT` correctly detected for the one non-exotic type; flip/warp/prism
+correctly still degrade to `FADE`, matching the "no faithful compositor implementation" policy —
+genuinely no equivalent, not a bug) with precise 1200-2900ms durations matching Keynote's. New
+`KeynoteParagraphBuildTest.kt` (4 tests, engine suite): delivery detection + per-step interval
+synthesis via a hand-built synthetic IWA fixture (promoted `ProtoWriter`/`buildIwa` from
+`KeynoteIwaTest.kt` into shared `Fixtures.kt` for this), layer emission + `remapTimeline`
+pass-through via hand-built `KnSlide` (no IWA needed for that half) — confirmed the
+all-at-once/whole-object path is completely unaffected (regression-checked against
+`RandomPresentation.key`'s own dumpTiming output, byte-identical before/after). Hands-on: both
+decks load and go live without crashing; the video-slide feature from the session above (poster
+visible pre-click, plays on build) still works correctly — no regression from any of this.
+
+**Files Modified**: `pptx/TransitionParser.kt` (rewritten), `keynote/KeynoteBuildMapper.kt`,
+`keynote/KeynoteLayerPlanner.kt`, `keynote/KeynoteScene.kt`, `keynote/KeynoteDeckParser.kt`,
+`keynote/KeynoteSceneRasterizer.kt`, `PresentationLoader.kt` — all engine-side;
+`test/.../Fixtures.kt`, `test/.../KeynoteIwaTest.kt` (promoted helpers, no behavior change),
+`test/.../KeynoteParagraphBuildTest.kt` (new).
+
+## PPTX Embedded Video Playback (July 2026)
+
+**Problem**: PowerPoint embedded videos never played — the slide showed only the static poster
+forever. The PPTX-side counterpart to the Keynote movie work above; same file pair
+(`RandomPresentation.pptx`/`.key` both carry the identical video, `ppt/media/media1.mov` /
+`Data/IMG_3840-9137.mov`).
+
+**Root cause, confirmed against the real file's raw XML, not guessed**: a pptx video shape is a
+plain `XSLFPictureShape` — no dedicated video-shape class exists in POI — carrying
+`isVideoFile()`/`getVideoFileLink()` (a relationship id) alongside its ordinary `getPictureData()`
+(the poster). Neither `PptxLayerPlanner` nor `PptxSlideRasterizer` had any video awareness at all;
+`LayerSpec.Media` (the shared model already built for Keynote) was never constructed for PPTX —
+`PptxSlideRasterizer.kt` explicitly threw if it was ever reached. Worse, the file's own
+click-to-play trigger — `<p:cmd type="call" cmd="playFrom(0.0)">` inside a click-triggered
+`<p:par>` (`presetClass="mediacall"`), `dur="24753"` matching the movie's real 24.75s length
+exactly — was being silently dropped: `TimingParser.kt` had an explicit
+`// audio, video, cmd — media/verb behaviors, not visual: skipped` catch-all. Because the
+command's targeting uses the exact same `<p:tgtEl><p:spTgt>` structure as every other behavior,
+`AnimationTargetScanner` already recognized the shape as an animation target — only the specific
+"this is a play command" interpretation was thrown away, so `TimelineCompiler.compile()` ended up
+with an empty timeline for that slide and legitimately (no exception, no warning) returned null,
+falling the whole slide back to one static composite.
+
+**Fix** (mirrors the Keynote architecture closely — same shared `LayerSpec.Media` model, same
+click-gate design):
+- `TimingModel.kt` gained `TimingBehavior.Command(verb: String)`; `TimingParser.kt` now parses
+  `<p:cmd>` via `CTTLCommandBehavior` (already on the classpath, same `cBhvr`/`tgtEl` common
+  structure every other behavior uses) instead of skipping it. The sibling `<p:video>`/`<p:audio>`
+  media-declaration nodes (volume/mute/showWhenStopped metadata, not part of the click-triggered
+  tree) stay skipped — not needed, the `<p:cmd>` alone carries everything required.
+- `TimelineCompiler.synthesizeSpec()`: any `Command` behavior (verb doesn't matter — `playFrom`,
+  `togglePause`, `pause`, `stop` are all non-visual) wins outright and produces
+  `EffectSpec.Appear(EMPHASIS)` — exactly the choice already made for Keynote's `movie-start`
+  build, for the same reason (poster already on screen, click shouldn't fade/reveal anything, only
+  needs to exist as a timeline entry for `PresentationPlayer`'s `movieStepIndex` gating to find).
+  Originally only special-cased `verb.startsWith("playFrom")`, which left the sample file's
+  *second* interactive sequence (click the *playing* video to toggle pause — a real, separate
+  `<p:cmd cmd="togglePause">` the file also has) falling through to the preset backstop and
+  degrading to a spurious, misleadingly-worded "degraded to fade" warning; broadened to treat any
+  `Command` uniformly once this showed up in `dumpTiming` output.
+- `PptxLayerPlanner.plan()`: mirrors Keynote's `hasTopLevelMovie` bypass — a top-level
+  `XSLFPictureShape` with `isVideoFile()` always gets its own `LayerSpec.Media` layer (checked
+  ahead of paragraph/animated/background classification), and bypasses the
+  `targets.isEmpty → return null` early-out, so a silent/no-behavior embedded video (one
+  `AnimationTargetScanner` wouldn't otherwise flag) still becomes decodable rather than silently
+  folding into the background band.
+- `PowerPointDeckSupport.layerResolver()` gained a `mediaLayers` map alongside the existing
+  `shapeLayers`/`paragraphLayers` — without it, a behavior targeting a shape whose only layer is
+  `Media` resolved to `emptyList()` and was silently dropped.
+- `PptxSlideRasterizer.rasterizeLayer()`'s `Media` case reuses the exact same `renderCropped(...)`
+  call the `Shape` case already uses — POI's generic `DrawFactory` already paints a video shape's
+  poster correctly, zero new drawing code needed. The only new logic resolves the actual video
+  bytes: `getVideoFileLink()` → `slide.getRelationById(rId)` (POI has no typed relation for
+  video, so this always resolves to a generic `POIXMLDocumentPart`) →
+  `.getPackagePart().getInputStream()` → extracted to a temp file (extension preserved from the
+  zip entry's own part name, since some decoders sniff container format from it), cached by
+  relationship id. Since `PptxSlideRasterizer` is a stateless `object` with no lifecycle (unlike
+  `KeynoteSceneRasterizer`, a `class` with `close()`), the temp-file cache map lives in
+  `DeckRasterizer` instead (which already owns `slideShow`/`keynoteSceneRasterizer` lifecycle) and
+  is passed in as a parameter — deleted in `DeckRasterizer.close()`, not just `deleteOnExit()`,
+  for the same leak-prevention reason already documented on the Keynote side.
+- App-side: **zero changes needed** beyond a rename. `PresentationPlayer.kt`'s
+  `movieLayerId`/`movieStepIndex`/`ensureMovieDecoder`/`syncMovieTarget` machinery already operated
+  generically on `LayerSpec.Media`, and `KeynoteMovieDecoder` (built for Keynote) was already
+  format-agnostic (`videoFile: File`, `posterCanvas: BufferedImage`, `contentRectPx: Rectangle`,
+  nothing Keynote-specific) — renamed to `EmbeddedVideoDecoder` since it now serves both formats,
+  no other change.
+
+**Verification**: `dumpTiming` before/after — before: the video slide fell back to one static
+composite, zero warnings (the empty-timeline null-return is silent, not exceptional); after: a
+real `Media` layer with two `Appear(EMPHASIS)` steps (`dur=24753` for `playFrom`, `dur=1` for
+`togglePause`) and one honest pre-existing warning ("Shape-click trigger compiled as click step
+(outputs are not interactive)" — the toggle-pause interactive sequence, correctly not treated as
+anything more than a no-op click step, since clicking a specific point on a live output isn't
+something this architecture supports for any content type). Full engine test suite green
+throughout, no new tests added (the plan's own verification was `dumpTiming` + hands-on, matching
+what was approved). Hands-on in the running GUI (System Events + screenshots): the video's poster
+shows immediately in the slide's pre-click state (`Build 0 of 2`), does not play until the build
+step is advanced (confirmed answering the original ask — playback must wait for the click, not
+autoplay), and once advanced the frame visibly changes across repeated screenshots (real gymnast
+footage progressing, not a static swap) — genuine ongoing decode, not a one-time frame grab.
+
+**Files Modified**: `pptx/TimingModel.kt`, `pptx/TimingParser.kt`, `timeline/TimelineCompiler.kt`,
+`pptx/PptxLayerPlanner.kt`, `pptx/PowerPointDeckSupport.kt`, `pptx/PptxSlideRasterizer.kt`,
+`DeckRasterizer.kt` — all engine-side; `presenter/EmbeddedVideoDecoder.kt` (renamed from
+`KeynoteMovieDecoder.kt`), `presenter/PresentationPlayer.kt` (updated references + comments) —
+app-side.
+
 ## Presentation API (March 2026)
 
 **Feature**: Mobile companion app can now retrieve presentation slides via the Ktor REST API.
@@ -741,6 +1011,82 @@ undecodable frames); silent-client disconnect at exactly 30 s with clean followe
 **Not verified live**: full two-GUI-instance drills (reconnect countdown badge, cache
 re-download on bible/picture change, MEDIA/CANVAS/QA/DICTIONARY rendering on a real follower,
 failure toast) — logic traced and compile-checked; needs a hands-on pass with two instances.
+
+## Presentation Playback Fixes: Bullet Merging, Reverse Navigation, Video Autoplay (July 2026)
+
+**Problem**: hands-on testing of the animated Presentation Engine surfaced three bugs on the same
+`RandomPresentation.key`/`.pptx` pair used throughout the animation work: (1) Keynote text boxes
+with multiple bullets rendered as one run-on sentence; (2) navigating backward always landed on
+"build 0" instead of the destination slide's last-completed build; (3) embedded videos (both
+formats) started playing immediately on slide entry instead of waiting for their click/build step.
+
+**Bug 1 root cause**: `KeynoteDeckParser.parseParagraphs()` split text on `\n` after replacing only
+` `. Confirmed via `dumpKeynote` (extended to print the untruncated joined text plus a
+non-ASCII code-point list — the tool's own preview was truncated to 30 chars, which had been
+hiding the evidence) that real bulleted text boxes use a lone CR (`\r`, U+000D) between bullets,
+never ` ` — so `text.split('\n')` never found a boundary and all bullets landed in one
+`KnParagraph`. Fixed by also replacing `\r`→`\n` (both single-character swaps, so
+`parseParagraphs`'s running char offset into the attribute-run tables stays exact — a
+length-changing `"\r\n"→"\n"` substitution would have desynced it for any later paragraph).
+Applied to both `parseParagraphs()` and the sibling presenter-notes text extraction via a shared
+`normalizeParagraphBreaks()` helper. Verified with `dumpTiming`'s PNG render: three bullets that
+were one line are now three.
+
+**Bug 2 root cause**: `PresentationPlayer.showSlide(index)` unconditionally set `stepIndex = -1`
+regardless of navigation direction — real PowerPoint/Keynote show a slide you step *back* onto
+fully built (as the audience last saw it), only a slide you step *forward* onto starts unbuilt.
+Fixed by adding `showSlide(index, enterAtLastStep: Boolean)`: when true and the destination slide
+is already cached (the common case — `evictBeyondWindow` keeps `current-1..current+1`), enters at
+`stepCount - 1` synchronously; otherwise defers via `pendingEnterAtLastStepFor`, applied once
+`ensureLoaded()`'s coroutine populates the cache (guarded against a stale request if the operator
+navigates elsewhere first). Threaded through `PresenterManager.presentationShowSlide()` and a new
+one-shot `PresentationViewModel.consumeEnteredViaPreviousSlide()` flag set only by
+`previousSlide()` (cleared by `nextSlide()`/`selectSlide()`) — scoped narrowly so only genuine
+backward navigation (arrow/PageUp, clicker, Instance Link "send previous") gets the new behavior;
+forward navigation and thumbnail clicks are unaffected.
+
+**Bug 3 root cause**: not in `PresentationPlayer`'s step-gating math (traced by hand against the
+real file's video build — top-level drawable, its own click step, ids matching end to end — the
+gating logic is correct on paper). The actual bug is a race in `EmbeddedVideoDecoder.start()`:
+`player.media().play(...)` only queues the open/play command (libvlc transitions to actually
+playing asynchronously), so the synchronous `player.controls().pause()` right after it can land
+while the player is still "opening" and silently no-op. That would be self-correcting — `frame()`
+calls `pause()` again every subsequent animation frame — except `pause()`/`resume()` were guarded
+by a `resumed` flag that starts `false`, so *every* pause() call before the operator's first real
+click was ALSO a no-op (the guard meant for cheap idempotence instead prevented the race from ever
+being corrected). Fixed by removing the racy inline `pause()` from `start()` and making
+`resume()`/`pause()` issue the real libvlc command unconditionally on every call (documented as a
+cheap no-op when already in that state, which is why calling every frame was already the design)
+— `resumed` now only gates the one-time volume change. Shared by both formats
+(`EmbeddedVideoDecoder` serves Keynote and PPTX alike), matching that the bug was reported on both.
+
+**Verification**: engine `./gradlew test` and app `./gradlew compileKotlinJvm` green after each
+fix. Bug 1 additionally verified visually via a `dumpTiming` PNG render. Bugs 2 and 3 could not be
+verified hands-on this session — the dev machine's screen locked (idle timeout) mid-verification
+and automation couldn't unlock it; needs a hands-on pass (System Events + screenshots, or just the
+user's own testing) to confirm the built-out-of-cache and video-timing behavior on a live run.
+
+**Files Modified**: `KeynoteDeckParser.kt` (`normalizeParagraphBreaks`), `tools/DumpKeynote.kt`
+(untruncated text preview, chunk count, non-ASCII code-point dump — kept as a lasting improvement
+to the debug tool, not reverted) — engine-side; `presenter/PresentationPlayer.kt`
+(`enterAtLastStep`, `pendingEnterAtLastStepFor`), `viewmodel/PresenterManager.kt`
+(`presentationShowSlide` parameter), `viewmodel/PresentationViewModel.kt`
+(`consumeEnteredViaPreviousSlide`), `tabs/PresentationTab.kt` (consumes the flag),
+`presenter/EmbeddedVideoDecoder.kt` (`start`/`resume`/`pause`) — app-side.
+
+### Follow-up: choppy playback (same day)
+The fix above's `resume()`/`pause()` — reissuing the native `play()`/`pause()` command
+unconditionally on every call — is itself called every evaluated display frame by
+`PresentationPlayer.frame()` for the *entire* duration of playback, not just at the click
+transition. The user reported choppy video (both formats) immediately after this shipped;
+hammering libvlc's play/pause at display refresh rate for the whole clip turned out not to be
+free despite the "documented no-op" assumption. Fixed by tracking the *confirmed* state via
+vlcj's own `MediaPlayerEventListener.playing()`/`paused()` callbacks (`confirmedPlaying`/
+`confirmedPaused`) — `resume()`/`pause()` now only reissue the native command while unconfirmed,
+closing the original async-open race (still retries every ~16ms until the event lands) without
+spamming libvlc once steady-state is confirmed. Verified hands-on: smooth playback on both
+`RandomPresentation.key` and `.pptx`'s video slide, autoplay-gating still holds. Do not revert to
+a blind per-frame reissue — confirm the state via the player events instead.
 
 ## Known Issues
 

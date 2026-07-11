@@ -2,6 +2,7 @@ package presentation.engine.pptx
 
 import org.apache.poi.sl.draw.DrawFactory
 import org.apache.poi.sl.draw.Drawable
+import org.apache.poi.xslf.usermodel.XSLFPictureShape
 import org.apache.poi.xslf.usermodel.XSLFShape
 import org.apache.poi.xslf.usermodel.XSLFSlide
 import org.apache.poi.xslf.usermodel.XSLFTextShape
@@ -21,6 +22,7 @@ import java.awt.Graphics2D
 import java.awt.RenderingHints
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
+import java.io.File
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -35,7 +37,18 @@ import kotlin.math.floor
  */
 internal object PptxSlideRasterizer {
 
-    fun rasterizeLayer(slide: XSLFSlide, spec: LayerSpec, scale: Double): RasterLayer {
+    /**
+     * [extractedTempFiles] caches embedded video files extracted from the pptx zip, keyed by
+     * relationship id — owned by the caller ([presentation.engine.DeckRasterizer], which already
+     * owns the rest of this deck's per-open lifecycle) so temp files are extracted once and
+     * deleted when the deck closes rather than relying on `deleteOnExit()` alone.
+     */
+    fun rasterizeLayer(
+        slide: XSLFSlide,
+        spec: LayerSpec,
+        scale: Double,
+        extractedTempFiles: MutableMap<String, File?> = mutableMapOf()
+    ): RasterLayer {
         return when (spec) {
             is LayerSpec.Background -> RasterLayer(
                 spec = spec,
@@ -52,8 +65,48 @@ internal object PptxSlideRasterizer {
                     drawShape(graphics, shape)
                 }
             }
-            is LayerSpec.StaticComposite, is LayerSpec.Media ->
+            is LayerSpec.Media -> {
+                // The shape's own picture data is the poster/first frame — draw it exactly like
+                // an ordinary picture, no video-specific drawing needed.
+                val raster = renderCropped(slide, spec, spec.boundsPt, scale) { graphics ->
+                    drawShape(graphics, slide.shapes[spec.shapeIndex])
+                }
+                val videoShape = slide.shapes[spec.shapeIndex] as? XSLFPictureShape
+                val videoFile = videoShape?.let { extractVideoFile(slide, it, extractedTempFiles) }
+                RasterLayer(spec.copy(mediaFile = videoFile), raster.image, raster.offsetXPx, raster.offsetYPx)
+            }
+            is LayerSpec.StaticComposite ->
                 throw IllegalArgumentException("Layer kind ${spec::class.simpleName} is not rasterized per-shape")
+        }
+    }
+
+    /**
+     * Resolves an embedded video shape's data to a real filesystem [File] a decoder can open
+     * directly. POI has no typed relation for the `video`/media2007 relationship types, so this
+     * always resolves to a generic `POIXMLDocumentPart` — the raw zip-entry bytes behind it are
+     * extracted to a temp file once (cached in [cache] by relationship id) and deleted by the
+     * caller's `close()`, mirroring `KeynoteSceneRasterizer.extractDataFile`'s temp-file lifecycle.
+     */
+    private fun extractVideoFile(
+        slide: XSLFSlide,
+        shape: XSLFPictureShape,
+        cache: MutableMap<String, File?>
+    ): File? {
+        if (!shape.isVideoFile) return null
+        val relId = shape.videoFileLink ?: return null
+        return cache.getOrPut(relId) {
+            try {
+                val part = slide.getRelationById(relId) ?: return@getOrPut null
+                val packagePart = part.packagePart
+                // Preserve the real extension (e.g. .mov/.mp4) from the zip entry's own part name
+                // (".../ppt/media/media1.mov") — some decoders sniff container format from it.
+                val ext = packagePart.partName.name.substringAfterLast('.', "").takeIf { it.isNotEmpty() }
+                val temp = File.createTempFile("pptx_media_", if (ext != null) ".$ext" else ".bin")
+                packagePart.inputStream.use { input -> temp.outputStream().use { input.copyTo(it) } }
+                temp
+            } catch (_: Exception) {
+                null
+            }
         }
     }
 

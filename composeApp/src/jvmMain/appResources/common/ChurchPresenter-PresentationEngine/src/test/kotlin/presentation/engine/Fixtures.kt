@@ -8,6 +8,7 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.apache.poi.xslf.usermodel.XMLSlideShow
 import org.apache.poi.xslf.usermodel.XSLFSlide
 import org.apache.poi.xslf.usermodel.XSLFTextShape
+import io.airlift.compress.snappy.SnappyCompressor
 import org.apache.xmlbeans.XmlObject
 import java.awt.Color
 import java.awt.Rectangle
@@ -20,6 +21,101 @@ import javax.imageio.ImageIO
 
 /** Programmatic test fixtures — no binary files committed for these formats. */
 object Fixtures {
+
+    // ── Minimal protobuf writer, for hand-built Keynote IWA fixtures ──────────
+
+    class ProtoWriter {
+        val out = ByteArrayOutputStream()
+
+        fun varintField(field: Int, value: Long) {
+            writeVarint((field.toLong() shl 3) or 0L)
+            writeVarint(value)
+        }
+
+        fun bytesField(field: Int, data: ByteArray) {
+            writeVarint((field.toLong() shl 3) or 2L)
+            writeVarint(data.size.toLong())
+            out.write(data)
+        }
+
+        fun stringField(field: Int, value: String) = bytesField(field, value.toByteArray(Charsets.UTF_8))
+
+        fun fixed32Field(field: Int, bits: Int) {
+            writeVarint((field.toLong() shl 3) or 5L)
+            for (i in 0 until 4) out.write((bits shr (8 * i)) and 0xFF)
+        }
+
+        fun floatField(field: Int, value: Float) = fixed32Field(field, java.lang.Float.floatToIntBits(value))
+
+        fun fixed64Field(field: Int, bits: Long) {
+            writeVarint((field.toLong() shl 3) or 1L)
+            for (i in 0 until 8) out.write(((bits shr (8 * i)) and 0xFF).toInt())
+        }
+
+        fun doubleField(field: Int, value: Double) = fixed64Field(field, java.lang.Double.doubleToLongBits(value))
+
+        fun writeVarint(value: Long) {
+            var v = value
+            while (true) {
+                if (v and 0x7F.inv().toLong() == 0L) {
+                    out.write(v.toInt())
+                    return
+                }
+                out.write(((v and 0x7F) or 0x80).toInt())
+                v = v ushr 7
+            }
+        }
+
+        fun toByteArray(): ByteArray = out.toByteArray()
+    }
+
+    /** Encodes a whole `.iwa` chunk container (ArchiveInfo + MessageInfo framing) for [objects]. */
+    fun buildIwa(objects: List<Triple<Long, Int, ByteArray>>, compressed: Boolean = false): ByteArray {
+        val stream = ByteArrayOutputStream()
+        for ((identifier, type, payload) in objects) {
+            val messageInfo = ProtoWriter().apply {
+                varintField(1, type.toLong())      // MessageInfo.type
+                varintField(3, payload.size.toLong()) // MessageInfo.length
+            }.toByteArray()
+            val archiveInfo = ProtoWriter().apply {
+                varintField(1, identifier)          // ArchiveInfo.identifier
+                bytesField(2, messageInfo)          // ArchiveInfo.message_infos
+            }.toByteArray()
+            val lengthPrefix = ProtoWriter().apply { writeVarint(archiveInfo.size.toLong()) }.toByteArray()
+            stream.write(lengthPrefix)
+            stream.write(archiveInfo)
+            stream.write(payload)
+        }
+        val raw = stream.toByteArray()
+        val body: ByteArray
+        val chunkType: Int
+        if (compressed) {
+            val compressor = SnappyCompressor()
+            val buffer = ByteArray(compressor.maxCompressedLength(raw.size))
+            val written = compressor.compress(raw, 0, raw.size, buffer, 0, buffer.size)
+            body = buffer.copyOf(written)
+            chunkType = 0
+        } else {
+            body = raw
+            chunkType = 1
+        }
+        val file = ByteArrayOutputStream()
+        file.write(chunkType)
+        file.write(body.size and 0xFF)
+        file.write((body.size shr 8) and 0xFF)
+        file.write((body.size shr 16) and 0xFF)
+        file.write(body)
+        return file.toByteArray()
+    }
+
+    /** Writes [objects] as a directory-bundle `.key` (`ObjectIndex.load` accepts either a
+     *  directory or a zip) — a single `Index/Test.iwa` chunk container holding all of them. */
+    fun writeKeynoteDir(dir: File, objects: List<Triple<Long, Int, ByteArray>>): File {
+        val bundle = File(dir, "fixture.key").apply { mkdirs() }
+        File(bundle, "Index").mkdirs()
+        File(bundle, "Index/Test.iwa").writeBytes(buildIwa(objects))
+        return bundle
+    }
 
     /** A .pptx with one slide per (bodyText, notesText) pair. */
     fun createPptx(dir: File, slides: List<Pair<String, String>>, name: String = "fixture.pptx"): File {

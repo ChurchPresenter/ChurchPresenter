@@ -291,6 +291,7 @@ fun PresentationTab(
     LaunchedEffect(viewModel.selectedSlideIndex, viewModel.slideFiles.size) {
         val mode = presenterManager?.presentingMode?.value
         val idx = viewModel.selectedSlideIndex
+        val enterAtLastStep = viewModel.consumeEnteredViaPreviousSlide()
         val anyScreenOnPresentation = mode == Presenting.PRESENTATION ||
             presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
         if (anyScreenOnPresentation && viewModel.slideFiles.isNotEmpty()) {
@@ -317,7 +318,7 @@ fun PresentationTab(
             presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
             // Animated playback: point the player at the new slide (no-op → static path
             // when the slide has no timeline or the deck is remote/unparsed).
-            viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx) }
+            viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx, enterAtLastStep) }
                 ?: presenterManager.clearPresentationPlayback()
         }
     }
@@ -493,12 +494,20 @@ fun PresentationTab(
                         scope.launch {
                             val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
                                 withContext(Dispatchers.IO) {
-                                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                    try {
+                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                    } catch (_: Exception) {
+                                        null
+                                    }
                                 }
                             }
                             val nextBitmap = viewModel.slideFiles.getOrNull(idx + 1)?.let { f ->
                                 withContext(Dispatchers.IO) {
-                                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                    try {
+                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                    } catch (_: Exception) {
+                                        null
+                                    }
                                 }
                             }
                             presenterManager.setSelectedSlide(bitmap)

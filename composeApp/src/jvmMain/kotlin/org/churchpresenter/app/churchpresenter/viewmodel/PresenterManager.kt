@@ -429,8 +429,12 @@ class PresenterManager {
      * exports) clear the player — the static bitmap path with the app's configured slide
      * transition then renders as before. A deck with any timeline or deck-defined transition
      * plays entirely through the player so its own transitions win consistently.
+     *
+     * [enterAtLastStep] is true only for genuine backward navigation (the operator stepping to
+     * the *previous* slide) — real PowerPoint/Keynote show that slide fully built, as the
+     * audience last saw it, rather than resetting it to the pre-click state.
      */
-    fun presentationShowSlide(deck: Deck, slideIndex: Int) {
+    fun presentationShowSlide(deck: Deck, slideIndex: Int, enterAtLastStep: Boolean = false) {
         val deckIsAnimated = deck.slides.any { it.timeline != null || it.transition != null }
         if (!deckIsAnimated) {
             clearPresentationPlayback()
@@ -447,7 +451,7 @@ class PresenterManager {
                 presentationPlayer?.close()
                 presentationPlayer = fresh
             }
-        player.showSlide(slideIndex)
+        player.showSlide(slideIndex, enterAtLastStep)
         _presentationFrame.value = null // published by the clock once layers are rasterized
     }
 

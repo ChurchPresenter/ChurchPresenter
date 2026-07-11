@@ -276,7 +276,7 @@ fun listVlcAudioDevices(): List<VlcAudioDevice> {
  * macOS requires CallbackMediaPlayerComponent; Linux/Windows use EmbeddedMediaPlayerComponent.
  * See https://github.com/caprica/vlcj/issues/887#issuecomment-503288294
  */
-private fun createMediaPlayerComponent(): Component? {
+internal fun createMediaPlayerComponent(): Component? {
     return try {
         if (isMacOS()) CallbackMediaPlayerComponent()
         else EmbeddedMediaPlayerComponent()
@@ -293,14 +293,14 @@ private fun createMediaPlayerComponent(): Component? {
 }
 
 /** Extracts the EmbeddedMediaPlayer from either component type. */
-private fun Component.mediaPlayer(): EmbeddedMediaPlayer = when (this) {
+internal fun Component.mediaPlayer(): EmbeddedMediaPlayer = when (this) {
     is CallbackMediaPlayerComponent -> mediaPlayer()
     is EmbeddedMediaPlayerComponent -> mediaPlayer()
     else -> error("Unexpected component type")
 }
 
 /** Releases the component. */
-private fun Component.releasePlayer() = when (this) {
+internal fun Component.releasePlayer() = when (this) {
     is CallbackMediaPlayerComponent -> release()
     is EmbeddedMediaPlayerComponent -> release()
     else -> {}

@@ -2,6 +2,7 @@ package presentation.engine.pptx
 
 import org.apache.poi.sl.usermodel.PlaceableShape
 import org.apache.poi.xslf.usermodel.XSLFGroupShape
+import org.apache.poi.xslf.usermodel.XSLFPictureShape
 import org.apache.poi.xslf.usermodel.XSLFShape
 import org.apache.poi.xslf.usermodel.XSLFSlide
 import org.apache.poi.xslf.usermodel.XSLFTextShape
@@ -37,7 +38,12 @@ internal object PptxLayerPlanner {
      * targets and should stay a single static composite.
      */
     fun plan(slide: XSLFSlide, targets: AnimationTargetScanner.Targets): List<LayerSpec>? {
-        if (targets.isEmpty) return null
+        // A top-level video always becomes its own identifiable layer — the app needs to find it
+        // to drive live playback — even on a slide with no other animation targets at all (a
+        // silent/no-behavior embedded video wouldn't otherwise appear in AnimationTargetScanner's
+        // results, and would silently fold into the background band).
+        val hasTopLevelVideo = slide.shapes.any { it is XSLFPictureShape && it.isVideoFile() }
+        if (targets.isEmpty && !hasTopLevelVideo) return null
         val slideBounds = RectPt(
             0.0, 0.0,
             slide.slideShow.pageSize.getWidth(),
@@ -68,7 +74,23 @@ internal object PptxLayerPlanner {
             val isParagraphBuilt = shape is XSLFTextShape &&
                 shape.shapeId.toLong() in targets.paragraphBuiltShapeIds
             val isAnimated = shapeOrDescendantTargeted(shape, targets.shapeIds)
+            val isVideo = shape is XSLFPictureShape && shape.isVideoFile()
             when {
+                isVideo -> {
+                    flushBand(force = z == 0)
+                    val geometry = shape.anchor
+                    layers.add(
+                        LayerSpec.Media(
+                            id = "shape-$shapeIndex",
+                            zIndex = z++,
+                            boundsPt = paddedBounds(shape),
+                            shapeIndex = shapeIndex,
+                            contentRectPt = RectPt(geometry.x, geometry.y, geometry.width, geometry.height),
+                            mediaFile = null,
+                            initiallyVisible = true
+                        )
+                    )
+                }
                 isParagraphBuilt -> {
                     flushBand(force = z == 0)
                     val bounds = paddedBounds(shape)

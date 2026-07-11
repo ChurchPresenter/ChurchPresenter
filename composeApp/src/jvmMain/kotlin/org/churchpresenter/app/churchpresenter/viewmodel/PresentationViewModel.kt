@@ -76,6 +76,18 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
     val selectedSlideIndex: Int
         get() = _selectedSlideIndex.value
 
+    /** One-shot: set by [previousSlide], consumed by the reactive slide-change effect in
+     *  PresentationTab so only genuine backward navigation enters the destination slide at its
+     *  last build step (matching real PowerPoint/Keynote) instead of the pre-click state. */
+    private val _enteredViaPreviousSlide = mutableStateOf(false)
+
+    /** Reads and resets the backward-navigation flag — call exactly once per slide-index change. */
+    fun consumeEnteredViaPreviousSlide(): Boolean {
+        val value = _enteredViaPreviousSlide.value
+        _enteredViaPreviousSlide.value = false
+        return value
+    }
+
     private val _isPlaying = mutableStateOf(false)
     val isPlaying: Boolean
         get() = _isPlaying.value
@@ -245,6 +257,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
      *  which is the normal case — Controller mode doesn't mirror the primary's content) so next/prev
      *  still reaches the primary's own currently-live presentation. See Constants.WS_CMD_NEXT_SLIDE. */
     fun nextSlide(onInstanceLinkSendNext: (() -> Unit)? = null) {
+        _enteredViaPreviousSlide.value = false
         if (_selectedSlideIndex.value < _slideFiles.size - 1) {
             _selectedSlideIndex.value++
         } else if (_isLooping.value && _slideFiles.isNotEmpty()) {
@@ -257,8 +270,10 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
 
     fun previousSlide(onInstanceLinkSendPrevious: (() -> Unit)? = null) {
         if (_selectedSlideIndex.value > 0) {
+            _enteredViaPreviousSlide.value = true
             _selectedSlideIndex.value--
         } else if (_isLooping.value && _slideFiles.isNotEmpty()) {
+            _enteredViaPreviousSlide.value = true
             _selectedSlideIndex.value = _slideFiles.size - 1
         }
         onInstanceLinkSendPrevious?.invoke()
@@ -266,6 +281,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
 
     fun selectSlide(index: Int) {
         if (index in _slideFiles.indices) {
+            _enteredViaPreviousSlide.value = false
             _selectedSlideIndex.value = index
         }
     }

@@ -107,6 +107,10 @@ sealed class LayerSpec {
         override val id: String,
         override val zIndex: Int,
         override val boundsPt: RectPt,
+        /** Index into the source slide's shape list. */
+        val shapeIndex: Int,
+        /** The drawable's own unpadded geometry — locates the media content within [boundsPt]'s padded canvas. */
+        val contentRectPt: RectPt,
         /** Path of the extracted media file, when extraction succeeded. */
         val mediaFile: File?,
         override val initiallyVisible: Boolean = true

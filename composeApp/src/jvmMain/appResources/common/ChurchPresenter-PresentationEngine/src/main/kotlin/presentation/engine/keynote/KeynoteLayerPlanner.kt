@@ -22,13 +22,17 @@ internal object KeynoteLayerPlanner {
     private const val MARGIN_FRACTION = 0.25
 
     fun plan(slide: KnSlide, slideWidthPt: Double, slideHeightPt: Double): List<LayerSpec>? {
-        if (slide.timeline == null || slide.builtDrawableIds.isEmpty()) return null
+        // A top-level movie always becomes its own identifiable layer — the app layer needs to
+        // find it to drive live playback — even on a slide with no builds at all.
+        val hasTopLevelMovie = slide.drawables.any { it.drawable is KnDrawable.Movie }
+        if (!hasTopLevelMovie && (slide.timeline == null || slide.builtDrawableIds.isEmpty())) return null
         val slideBounds = RectPt(0.0, 0.0, slideWidthPt, slideHeightPt)
 
         // A built id inside a group promotes the enclosing top-level drawable.
         val builtTopIds = mutableSetOf<Long>()
         for (placed in slide.drawables) {
             if (containsAnyId(placed, slide.builtDrawableIds)) builtTopIds.add(placed.id)
+            if (placed.drawable is KnDrawable.Movie) builtTopIds.add(placed.id)
         }
 
         val layers = mutableListOf<LayerSpec>()
@@ -45,15 +49,49 @@ internal object KeynoteLayerPlanner {
         slide.drawables.forEachIndexed { drawableIndex, placed ->
             if (placed.id in builtTopIds) {
                 flushBand(force = z == 0)
-                layers.add(
-                    LayerSpec.Shape(
-                        id = KeynoteBuildMapper.layerIdFor(placed.id),
-                        zIndex = z++,
-                        boundsPt = paddedBounds(placed.drawable.geometry),
-                        shapeIndex = drawableIndex,
-                        initiallyVisible = true
+                val geometry = placed.drawable.geometry
+                val movie = placed.drawable as? KnDrawable.Movie
+                val text = placed.drawable as? KnDrawable.Text
+                if (placed.id in slide.paragraphBuiltDrawableIds && text != null && text.paragraphs.size > 1) {
+                    // By-Paragraph/By-Bullet build: one ParagraphText layer per paragraph — the
+                    // same layer kind PPTX's planner already uses, so the rasterizer/timeline
+                    // machinery downstream is shared, not reinvented.
+                    val bounds = paddedBounds(geometry)
+                    text.paragraphs.forEachIndexed { paragraphIndex, _ ->
+                        layers.add(
+                            LayerSpec.ParagraphText(
+                                id = KeynoteBuildMapper.paragraphLayerIdFor(placed.id, paragraphIndex),
+                                zIndex = z++,
+                                boundsPt = bounds,
+                                shapeIndex = drawableIndex,
+                                paragraphIndex = paragraphIndex,
+                                initiallyVisible = true
+                            )
+                        )
+                    }
+                } else if (movie != null) {
+                    layers.add(
+                        LayerSpec.Media(
+                            id = KeynoteBuildMapper.layerIdFor(placed.id),
+                            zIndex = z++,
+                            boundsPt = paddedBounds(geometry),
+                            shapeIndex = drawableIndex,
+                            contentRectPt = RectPt(geometry.x, geometry.y, geometry.w, geometry.h),
+                            mediaFile = null,
+                            initiallyVisible = true
+                        )
                     )
-                )
+                } else {
+                    layers.add(
+                        LayerSpec.Shape(
+                            id = KeynoteBuildMapper.layerIdFor(placed.id),
+                            zIndex = z++,
+                            boundsPt = paddedBounds(geometry),
+                            shapeIndex = drawableIndex,
+                            initiallyVisible = true
+                        )
+                    )
+                }
             } else {
                 band.add(drawableIndex)
             }
