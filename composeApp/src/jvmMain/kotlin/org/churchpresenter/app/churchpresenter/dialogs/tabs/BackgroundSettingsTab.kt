@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhotoLibrary
@@ -35,6 +36,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -54,7 +57,7 @@ import churchpresenter.composeapp.generated.resources.default_background_color
 import churchpresenter.composeapp.generated.resources.default_background_color_help
 import churchpresenter.composeapp.generated.resources.default_lower_third_background
 import churchpresenter.composeapp.generated.resources.default_lower_third_background_help
-import churchpresenter.composeapp.generated.resources.display_lower_third_horizontal
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.gradient_bottom_color
 import churchpresenter.composeapp.generated.resources.background_opacity
@@ -71,6 +74,7 @@ import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -203,9 +207,10 @@ fun BackgroundSettingsTab(
                 }
 
                 // Card 2: Default Lower Third Background
+                Box(modifier = Modifier.weight(1f)) {
                 SettingsSection(
                     title = stringResource(Res.string.default_lower_third_background),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = stringResource(Res.string.default_lower_third_background_help),
@@ -297,6 +302,16 @@ fun BackgroundSettingsTab(
                         }
                     }
                 }
+                    // Top 2/3 highlighted — this background fills everything above the lower-third band.
+                    LowerThirdCoverageTv(
+                        highlightTop = true,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 38.dp, end = 6.dp)
+                            .width(112.dp)
+                            .height(84.dp)
+                    )
+                }
             }
 
             // Row 2: Bible + Songs
@@ -327,7 +342,7 @@ fun BackgroundSettingsTab(
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             BackgroundColumn(
-                                subtitle = stringResource(Res.string.display_lower_third_horizontal),
+                                subtitle = stringResource(Res.string.display_lower_third),
                                 config = settings.backgroundSettings.bibleLowerThirdBackground,
                                 onConfigChange = { viewModel.updateBibleLowerThirdBackground(it, onSettingsChange) },
                                 isLowerThird = true,
@@ -363,7 +378,7 @@ fun BackgroundSettingsTab(
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             BackgroundColumn(
-                                subtitle = stringResource(Res.string.display_lower_third_horizontal),
+                                subtitle = stringResource(Res.string.display_lower_third),
                                 config = settings.backgroundSettings.songLowerThirdBackground,
                                 onConfigChange = { viewModel.updateSongLowerThirdBackground(it, onSettingsChange) },
                                 isLowerThird = true,
@@ -399,6 +414,11 @@ private fun BackgroundColumn(
     val backgroundTransparentStr  = stringResource(Res.string.background_transparent_option)
     val backgroundGradientStr     = stringResource(Res.string.gradient_enabled)
 
+    // A Box overlay so the corner TV badge doesn't add to the column's measured height and
+    // push the radio buttons (and everything below) down. The badge is declared last so it
+    // draws on top of the column content it overlaps.
+    Box(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth()) {
     Text(
         text = subtitle,
         style = MaterialTheme.typography.labelLarge,
@@ -530,6 +550,51 @@ private fun BackgroundColumn(
                 onValueChange = { onConfigChange(config.copy(gradientPosition = it)) },
                 valueRange = 0f..1f,
                 modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+    } // Column
+    if (isLowerThird) {
+        // Bottom 1/3 highlighted — this is the color/image of the lower-third band itself.
+        LowerThirdCoverageTv(
+            highlightTop = false,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .width(112.dp)
+                .height(84.dp)
+        )
+    }
+    } // Box
+}
+
+/**
+ * A tiny [TvScreenBox] with either its top 2/3 or bottom 1/3 filled in the theme's primary
+ * color, showing at a glance which portion of the output screen a background setting covers.
+ */
+@Composable
+private fun LowerThirdCoverageTv(
+    highlightTop: Boolean,
+    modifier: Modifier = Modifier
+) {
+    TvScreenBox(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                // Match TvScreenBox's own screen corner radius, or the coverage fill's square
+                // corners poke past the rounded border at the bottom of the screen.
+                .clip(RoundedCornerShape(4.dp))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(2f)
+                    .background(if (highlightTop) MaterialTheme.colorScheme.primary else Color.Transparent)
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .background(if (highlightTop) Color.Transparent else MaterialTheme.colorScheme.primary)
             )
         }
     }
