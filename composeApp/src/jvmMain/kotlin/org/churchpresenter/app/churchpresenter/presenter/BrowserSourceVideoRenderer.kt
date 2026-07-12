@@ -155,7 +155,7 @@ class BrowserSourceVideoRenderer(
                     val screenAssignment by screenAssignmentState
                     val effectiveMode by effectiveModeState
                     val isIdentifying = presenterManager.browserSourceIdentifying.value.contains(outputIndex)
-                    val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
+                    val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
                     val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
                     val outputRole = Constants.OUTPUT_ROLE_NORMAL
                     // General per-output background toggle — same field/logic as native output

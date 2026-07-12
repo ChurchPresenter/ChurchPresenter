@@ -54,7 +54,7 @@ import churchpresenter.composeapp.generated.resources.default_background_color
 import churchpresenter.composeapp.generated.resources.default_background_color_help
 import churchpresenter.composeapp.generated.resources.default_lower_third_background
 import churchpresenter.composeapp.generated.resources.default_lower_third_background_help
-import churchpresenter.composeapp.generated.resources.display_lower_third
+import churchpresenter.composeapp.generated.resources.display_lower_third_horizontal
 import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.gradient_bottom_color
 import churchpresenter.composeapp.generated.resources.background_opacity
@@ -327,7 +327,7 @@ fun BackgroundSettingsTab(
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             BackgroundColumn(
-                                subtitle = stringResource(Res.string.display_lower_third),
+                                subtitle = stringResource(Res.string.display_lower_third_horizontal),
                                 config = settings.backgroundSettings.bibleLowerThirdBackground,
                                 onConfigChange = { viewModel.updateBibleLowerThirdBackground(it, onSettingsChange) },
                                 isLowerThird = true,
@@ -363,7 +363,7 @@ fun BackgroundSettingsTab(
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             BackgroundColumn(
-                                subtitle = stringResource(Res.string.display_lower_third),
+                                subtitle = stringResource(Res.string.display_lower_third_horizontal),
                                 config = settings.backgroundSettings.songLowerThirdBackground,
                                 onConfigChange = { viewModel.updateSongLowerThirdBackground(it, onSettingsChange) },
                                 isLowerThird = true,

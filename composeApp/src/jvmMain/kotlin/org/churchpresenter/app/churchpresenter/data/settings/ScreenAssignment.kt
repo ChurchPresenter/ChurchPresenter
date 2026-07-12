@@ -24,7 +24,7 @@ data class ScreenAssignment(
     val showStreaming: Boolean = true,
     val showAnnouncements: Boolean = true,
     val showWebsite: Boolean = true,
-    val displayMode: String = "fullscreen", // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD
+    val displayMode: String = "fullscreen", // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
     val songLookAhead: Boolean = false, // enable look-ahead for songs on this output
     val showQA: Boolean = true,
     val showSTT: Boolean = true,

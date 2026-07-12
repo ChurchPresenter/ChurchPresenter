@@ -616,6 +616,7 @@
     <string name="display_mode">Display Mode</string>
     <string name="display_fullscreen">Full Screen</string>
     <string name="display_lower_third">Lower Third</string>
+    <string name="display_lower_third_horizontal">Horizontal Lower Third</string>
     <string name="lower_third_height">Lower Third Height % (for Bible and Songs)</string>
     <string name="full_screen">Full Screen</string>
     <string name="lower_third_size">Lower Third</string>
