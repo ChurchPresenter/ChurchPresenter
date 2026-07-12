@@ -254,6 +254,10 @@ data class LiveStateDto(
     val songNumber: Int? = null,
     val sectionType: String? = null,
     val lines: List<String>? = null,
+    // Current line/section position within the mirrored section — lets a follower's own
+    // line-by-line display mode track the primary's navigation, not just section changes.
+    val songSectionIndex: Int? = null,
+    val songLineIndex: Int? = null,
     // picture — resolved against a registered folder catalog when possible
     val pictureFolderId: String? = null,
     val pictureIndex: Int? = null,
@@ -1777,7 +1781,10 @@ class CompanionServer {
         lowerThirdName: String? = null,
         // Canonical verse code (book, chapter, verse) computed from this instance's OWN loaded bible —
         // see LiveStateDto.verseCodeBook and BibleSyncMode.REFERENCE_ONLY. Null when not applicable.
-        verseCode: Triple<Int, Int, Int>? = null
+        verseCode: Triple<Int, Int, Int>? = null,
+        // Current line/section position within [lyricSection] — see LiveStateDto.songSectionIndex.
+        songSectionIndex: Int? = null,
+        songLineIndex: Int? = null
     ) {
         val (pictureFolderId, pictureIndex) = resolvePictureLocation(pictureImagePath)
         val mediaId = mediaUrl?.let { url -> _scheduleItemToMediaPath.entries.find { it.value == url }?.key }
@@ -1795,6 +1802,8 @@ class CompanionServer {
             songNumber = lyricSection?.songNumber,
             sectionType = lyricSection?.type?.ifEmpty { null },
             lines = lyricSection?.lines,
+            songSectionIndex = songSectionIndex,
+            songLineIndex = songLineIndex,
             pictureFolderId = pictureFolderId,
             pictureIndex = pictureIndex,
             mediaId = mediaId,
@@ -3014,6 +3023,14 @@ class CompanionServer {
                             WebSocketMessage(Constants.WS_EVENT_PICTURES_UPDATED,
                                 json.encodeToString(PictureFolderResponse.serializer(), pictureCatalog)))))
                     }
+                    // Resent on every (re)connect so a follower mirroring backgrounds
+                    // (InstanceLinkSettings.mirrorBackgrounds) always invalidates its local asset
+                    // cache once per connection — same reasoning as bible/pictures above. Without
+                    // this, a follower that reconnects (app restart, network blip, the automatic
+                    // backoff reconnect) keeps serving whatever it cached last session even if the
+                    // primary's background changed while it was disconnected.
+                    send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
+                        WebSocketMessage(Constants.WS_EVENT_BACKGROUNDS_UPDATED, payload = ""))))
                     send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
                         WebSocketMessage(
                             type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,

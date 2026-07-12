@@ -1199,21 +1199,156 @@ plain `if`/`Animatable`-driven collapse fraction, `BoxWithConstraints` → `Box`
 `onSizeChanged`, `panelCapPx`'s zero-`availablePx` guard. All temporary diagnostic `println`
 logging added during the investigation was removed once confirmed fixed.
 
+## Instance Link Song Line-by-Line Sync (July 2026)
+
+**Problem**: on a follower instance, clicking through a song section-by-section worked, but
+clicking **line-by-line** within the same section did nothing — the follower's output froze on
+whatever line it last showed.
+
+**Root cause**: `LiveStateDto` (`server/CompanionServer.kt`) had no field for the current
+line/section index within a song — only the section's *content* (`songTitle`/`sectionType`/
+`lines`). The primary's "current line" lives purely in `PresenterManager._songDisplayLineIndex`/
+`_songDisplaySectionIndex`, local UI state that never fed `updateLiveState`. Clicking next/prev
+line (`SongsViewModel.navigateNextLine/PreviousLine`) re-sends the **same** `LyricSection` (same
+title/lines/type — only the index into it changed), which — since the DTO structurally can't
+represent "which line" — produces a byte-identical `LiveStateDto`, silently swallowed by
+`updateLiveState`'s dedup guard (`if (_liveState.value == dto) return`, intentional elsewhere to
+protect the broadcast buffer from floods). Even had it gotten through, the follower's
+`applyRemoteLiveState` LYRICS branch never called `setSongDisplaySectionIndex`/
+`setSongDisplayLineIndex` on its own `PresenterManager`, so its `SongPresenter` would still
+render at whatever line it was last locally set to.
+
+**Fix**: added `songSectionIndex`/`songLineIndex: Int? = null` to `LiveStateDto` and
+`updateLiveState()` (mirrors the existing `pictureIndex` precedent in the same DTO), populated
+in `main.kt`'s `onLiveStateChanged` wiring from `pm.songDisplaySectionIndex.value`/
+`pm.songDisplayLineIndex.value` (gated to `source == Presenting.LYRICS`, same pattern as
+`verseCode`'s BIBLE gating). `applyRemoteLiveState`'s LYRICS branch now calls
+`setSongDisplaySectionIndex`/`setSongDisplayLineIndex` on the follower's `PresenterManager`
+right after `setLyricSection`. No dedup change needed — the DTO now genuinely changes on every
+line click. `SongPresenter` indexes the current line directly off `displayLineIndex` against the
+passed-in section's `lines` — no dependency on `allLyricSections` (that's only used for
+next-section look-ahead, a separate pre-existing limitation of section-only mirroring, unrelated
+to this bug).
+
+**Verification**: traced the full execution order by hand across `SongsTab.sendToPresenter()`
+(confirms `setSongDisplaySectionIndex`/`setSongDisplayLineIndex` run before `setLyricSection`
+triggers the notify, so the indices are current at broadcast time), `CompanionServer.kt`, and
+`main.kt` — no guessing, every call site read directly. `./gradlew compileKotlinJvm` clean.
+Confirmed via `InstanceLinkLogger`'s jsonl logs that two isolated instances (primary +
+follower, distinct `singleInstancePort`/ports/`user.home`) connect and exchange live-state
+correctly. **Not verified hands-on with real clicks** this session — spawning a fresh GUI
+instance via `./gradlew :composeApp:run` in the background DOES create a real, interactable
+window on the actual desktop session (confirmed in the very next session below, same
+technique) — an earlier attempt this session wrongly concluded the sandboxed shell couldn't
+create windows at all, when the actual cause was the windows appearing on the user's real
+screen and being closed (once accidentally). Needs a hands-on pass — set line display mode,
+go live on a multi-line section, click through lines with arrow keys, confirm the follower's
+output advances line-by-line instead of only on section changes.
+
+**Files Modified**: `server/CompanionServer.kt` (`LiveStateDto`, `updateLiveState`), `main.kt`
+(`onLiveStateChanged` wiring, `applyRemoteLiveState` LYRICS branch).
+
+## Instance Link Background Mirroring Goes Stale on Reconnect (July 2026)
+
+**Problem**: with `InstanceLinkSettings.mirrorBackgrounds` enabled, a follower's mirrored
+background could silently keep showing an old image/video after the primary changed it, if the
+change happened while the follower wasn't continuously connected (app restart, network blip,
+the automatic backoff reconnect Instance Link already has).
+
+**Root cause**: the follower caches downloaded background assets on disk keyed only by slot
+name (`instanceLinkBackgroundCacheDir`, `main.kt:2182-2184`), re-downloading only
+`if (!cacheFile.exists())` (`main.kt:2203`). The only thing that clears that cache is a live
+`backgrounds_updated` WS message incrementing `backgroundsUpdatedSignal` (`main.kt:594-601`).
+While already connected this works correctly — `CompanionServer.updateBackgroundSettings()`
+broadcasts on every real change. But the primary's WS **connect-snapshot** handler
+(`CompanionServer.kt:3002-3035`) resends `songs_updated`/`bible_updated`/`schedule_updated`/
+`presentation_updated`/`pictures_updated` to a (re)connecting follower specifically so those
+caches always refresh once per connection — and never resent `backgrounds_updated`. So any
+reconnect left the follower's background cache serving whatever was on disk from a previous
+session, forever, with no error or log to notice by.
+
+**Fix**: added the missing resend, matching the exact existing pattern for the other five
+events (`CompanionServer.kt`, connect-snapshot block, alongside the `pictures_updated` resend).
+One line, no follower-side changes needed — the follower's existing
+`backgroundsUpdatedSignal > 0` cache-invalidation branch does the rest.
+
+**Verification**: `./gradlew compileKotlinJvm` clean. Confirmed live via two isolated instances
+(same `singleInstancePort`/`user.home` override technique as the line-sync work above) — before
+the fix, `backgrounds_updated` never appeared among a follower's connect-time
+`ws_message_received` log entries (only songs/bible/schedule/presentation were present, 3
+separate captures); after the fix, it appears, followed by `cache_invalidated
+kind=backgrounds` and a fresh `GET /api/backgrounds` (`status:200`) on the primary side. Not
+yet verified: an actual stale-then-fresh background swap end-to-end (only the connect-snapshot
+message delivery + cache-invalidation trigger were exercised).
+
+**Files Modified**: `server/CompanionServer.kt` (connect-snapshot block only).
+
+**Also noted, same bug class, not fixed**: `secondary_bible_updated` (`CompanionServer.kt:1452`)
+has the identical gap — broadcasts live but is also absent from the connect-snapshot block.
+
+## Song Edit While Live Doesn't Update the Output (July 2026)
+
+**Problem**: editing a song's lyrics in the song editor while that song is the one currently
+live/presenting left the audience output (and, by the same mechanism, any Instance Link
+follower mirroring live state) showing the **pre-edit** lyrics until the operator manually
+re-clicked the song/section.
+
+**Root cause**: `SongsTab.kt`'s `EditSongDialog` `onSave` callback called
+`viewModel.updateSong()` (saves to disk, reloads the catalog) but never re-pushed to the
+presenter — `presenter/SongPresenter.kt` only renders whatever `PresenterManager.lyricSection`
+holds, mutated only by `setLyricSection()` (called from `onSongItemSelected`, never wired into
+`onSave`). Since the follower's live-mirrored view is driven by the exact same
+`setLyricSection()` → `notifyLiveStateChanged()` → `CompanionServer.updateLiveState()` →
+broadcast path (already-correct machinery — see the line-by-line sync fix above), this single
+gap explained both "edit while live" and "edit while an Instance Link follower is watching."
+
+Re-using the existing `sendToPresenter()` (`SongsTab.kt`) after the edit wasn't an option:
+`SongsViewModel.updateSong()` (`SongsViewModel.kt:680-748`) saves the file then calls
+`loadSongs()` — an async `viewModelScope.launch` coroutine that only refreshes
+`_allSongItems`/`_filteredSongItems` once the disk re-read completes. `updateSong()`'s own
+synchronous `applyFilters()` call right after runs against still-stale data. So
+`viewModel.getSelectedLyricSection()` (what `sendToPresenter()` reads) is not guaranteed fresh
+immediately after a successful save — a real async race.
+
+**Fix**: bypassed the race entirely by sourcing fresh content directly from `onSave`'s
+`updatedSong: SongItem` parameter, which already holds the just-saved content, rather than
+going back through the ViewModel's async-reloaded state.
+- `SongsViewModel.getLyricSections()` split into a pure overload,
+  `getLyricSections(song: SongItem)`, containing the actual section-derivation logic (primary/
+  secondary split + chorus-repeat + last-section marking) parameterized on an explicit song
+  instead of resolving one from `_filteredSongItems`/`_selectedSongIndex`. The no-arg version
+  is now a two-line wrapper — every existing call site unchanged.
+- `SongsTab.kt`: new `sendEditedSongToPresenter(editedSong: SongItem)`, sibling to
+  `sendToPresenter()`, rebuilds sections from `editedSong` via the new overload, clamps the
+  existing `liveSectionIndex`/`liveLineIndex` tracking vars to the (possibly now-different)
+  section/line counts, and pushes through the same `onAllSectionsChanged`/`onSectionIndexChanged`
+  /`onLineIndexChanged`/`onSongItemSelected` callbacks `sendToPresenter()` already uses — same
+  bpm lookup (`appSettings.songBpm[songId]`), same downstream `setLyricSection()` path.
+  `onSave` now checks whether the song being edited is the currently-live one (matched by the
+  stable `SongItem.songId`, captured *before* calling `updateSong()`) and calls
+  `sendEditedSongToPresenter(updatedSong)` when it is.
+
+**Out of scope, noted**: the Instance Link follower's *browsable* catalog (separate from the
+live-state mirror) rebuilds every `SongItem` with empty `lyrics` on each `songs_updated`
+refresh (`SongsViewModel.setInstanceLinkSource()`), relying on a lazy per-song refetch only on
+explicit selection. Self-heals on next click; not what was reported here.
+
+**Verification**: `./gradlew compileKotlinJvm` clean. Root cause and fix traced by hand against
+the actual execution order (confirmed `_filteredSongItems`/`_allSongItems` are only touched by
+`applySongList()`, itself only reached from `loadSongs()`'s async coroutine, never
+synchronously from `updateSong()`). Not yet verified hands-on — the user opted to test this one
+directly rather than a GUI-automation pass, since verifying it needs typing into a real edit
+dialog while live (single instance) and while an Instance Link follower is connected (two
+instances).
+
+**Files Modified**: `viewmodel/SongsViewModel.kt` (`getLyricSections` overload),
+`tabs/SongsTab.kt` (`sendEditedSongToPresenter`, `onSave` wiring).
+
 ## Known Issues
 
-**Issue**: Song edits not saving/updating
-- **Symptom**: Old and new song in logs show identical values
-- **Added logs in**:
-  - `EditSongDialog.kt` (save button click)
-  - `SongsTab.kt` (onSave callback)
-  - `SongsViewModel.kt` (updateSong method)
-  - `Songs.kt` (saveSongToFile method)
-
-**Next Steps**:
-1. Run app and edit a song
-2. Check logs to see where the values diverge
-3. Once fixed, document solution here
-4. Only then remove logs
+*(none currently tracked — the "song edits not saving/updating" entry that lived here was
+already resolved by commit `6b9a1b58` well before this file was last edited; no debug logs from
+that investigation remain in the codebase)*
 
 ## Architecture Cheat Sheet
 

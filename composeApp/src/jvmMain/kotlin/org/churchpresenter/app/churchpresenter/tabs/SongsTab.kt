@@ -314,6 +314,31 @@ fun SongsTab(
         liveLineIndex = viewModel.selectedLineIndex.value
     }
 
+    // Re-pushes freshly-edited content to the presenter when the just-saved song is the one
+    // currently live. Sourced directly from `editedSong` (the dialog's just-saved SongItem)
+    // rather than viewModel.getSelectedLyricSection() — the catalog reload triggered by
+    // updateSong() is async, so the viewModel's own selection state isn't guaranteed fresh yet.
+    fun sendEditedSongToPresenter(editedSong: SongItem) {
+        val sections = viewModel.getLyricSections(editedSong)
+        val sectionIndex = liveSectionIndex.coerceIn(-1, sections.size - 1)
+        val section = sections.getOrNull(sectionIndex) ?: LyricSection(
+            title = editedSong.title,
+            secondaryTitle = editedSong.secondaryTitle,
+            songNumber = editedSong.number.toIntOrNull() ?: 0,
+            lines = editedSong.lyrics,
+            secondaryLines = editedSong.secondaryLyrics,
+            type = Constants.SECTION_TYPE_SONG
+        )
+        val lineIndex = liveLineIndex.coerceIn(0, (section.lines.size - 1).coerceAtLeast(0))
+        val bpm = appSettings.songBpm[editedSong.songId] ?: 0
+        onAllSectionsChanged(sections)
+        onSectionIndexChanged(sectionIndex)
+        onLineIndexChanged(lineIndex)
+        onSongItemSelected(section.copy(bpm = bpm))
+        liveSectionIndex = sectionIndex
+        liveLineIndex = lineIndex
+    }
+
     val tabFocusRequester = remember { FocusRequester() }
     // Focus-lost rescue: arrow-key song/section/line navigation only works while the tab
     // holds keyboard focus AND the window is focused — full machinery in
@@ -1842,10 +1867,13 @@ fun SongsTab(
         onDismiss = { showEditDialog = false },
         onSave = { updatedSong ->
             songToEdit?.let { oldSong ->
+                val wasLive = isPresenting && liveSongIndex >= 0 &&
+                    viewModel.filteredSongItems.value.getOrNull(liveSongIndex)?.songId == oldSong.songId
                 val success = viewModel.updateSong(oldSong, updatedSong)
                 if (success) {
                     songToEdit = null
                     showEditDialog = false
+                    if (wasLive) sendEditedSongToPresenter(updatedSong)
                 }
             }
         }

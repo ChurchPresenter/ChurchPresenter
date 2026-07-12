@@ -385,8 +385,13 @@ class SongsViewModel(
         val items = _filteredSongItems.value
         val idx = _selectedSongIndex.value
         if (items.isEmpty() || idx < 0 || idx >= items.size) return emptyList()
-        val song = items[idx]
+        return getLyricSections(items[idx])
+    }
 
+    /** Pure variant of [getLyricSections] for an arbitrary [song] — doesn't read any selection
+     *  state, so it can be used with freshly-edited content that hasn't round-tripped through
+     *  the (async) catalog reload yet, e.g. right after [updateSong] returns. */
+    fun getLyricSections(song: SongItem): List<LyricSection> {
         // Split primary lyrics into sections
         val primarySections = splitLyricsIntoSections(song.lyrics, song.title, song.number)
         // Split secondary lyrics into sections (matched by order)

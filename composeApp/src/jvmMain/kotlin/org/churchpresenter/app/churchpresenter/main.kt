@@ -638,7 +638,9 @@ fun main() {
                     dictionaryWord = pm.displayedDictionaryEntry.value?.word,
                     dictionaryEntry = pm.displayedDictionaryEntry.value,
                     lowerThirdName = pm.currentLowerThirdName.value.ifEmpty { null },
-                    verseCode = verseCode
+                    verseCode = verseCode,
+                    songSectionIndex = if (source == Presenting.LYRICS) pm.songDisplaySectionIndex.value else null,
+                    songLineIndex = if (source == Presenting.LYRICS) pm.songDisplayLineIndex.value else null
                 )
             }
         }
@@ -2345,6 +2347,8 @@ private suspend fun applyRemoteLiveState(
                     lines = state.lines ?: emptyList()
                 )
             )
+            presenterManager.setSongDisplaySectionIndex(state.songSectionIndex ?: -1)
+            presenterManager.setSongDisplayLineIndex(state.songLineIndex ?: -1)
             InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "LYRICS", "resolved" to true))
         } else {
             InstanceLinkLogger.log(
