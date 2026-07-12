@@ -383,10 +383,23 @@ class AnnouncementsViewModel {
     fun startPauseTimer(presenterManager: PresenterManager?) {
         if (presenterManager == null) return
         when (_timerMode.value) {
-            // The live clock display is always on — nothing to start, pause, or resume.
-            Constants.TIMER_MODE_CLOCK_DISPLAY -> {}
-            // Specific Time has no pause concept either — it always tracks the wall clock.
-            Constants.TIMER_MODE_CLOCK -> presenterManager.startAnnouncementSpecificTime(_targetHour.value, _targetMinute.value, _targetSecond.value)
+            // Specific Time and Clock Display recompute from the wall clock, so pausing/resuming
+            // just stops/restarts their ticker — announcementTickerActive (not timerRunning, which
+            // never applies to these two modes) is the correct running-state check for both.
+            Constants.TIMER_MODE_CLOCK_DISPLAY -> {
+                if (presenterManager.announcementTickerActive.value) {
+                    presenterManager.pauseAnnouncementTimer()
+                } else {
+                    presenterManager.startAnnouncementClockDisplay(_liveClockFormat.value)
+                }
+            }
+            Constants.TIMER_MODE_CLOCK -> {
+                if (presenterManager.announcementTickerActive.value) {
+                    presenterManager.pauseAnnouncementTimer()
+                } else {
+                    presenterManager.startAnnouncementSpecificTime(_targetHour.value, _targetMinute.value, _targetSecond.value)
+                }
+            }
             Constants.TIMER_MODE_COUNT_UP -> {
                 if (presenterManager.timerRunning.value) {
                     presenterManager.pauseAnnouncementTimer(presenterManager.timerRemainingSeconds.value)
@@ -406,10 +419,14 @@ class AnnouncementsViewModel {
         }
     }
 
+    // Unconditional (not gated on timerRunning) — Specific Time and Clock Display keep their ticker
+    // coroutine active while timerRunning stays false for them, and it must be stopped before
+    // plain announcement text is pushed live or it silently overwrites the text within a second.
+    // Also releases announcementTickerLive — text is taking over the live slot from the timer, so
+    // a later plain Resume click on the timer's play/pause button must not silently go live again.
     fun pauseTimer(presenterManager: PresenterManager?) {
-        if (presenterManager != null && presenterManager.timerRunning.value) {
-            presenterManager.pauseAnnouncementTimer(presenterManager.timerRemainingSeconds.value)
-        }
+        presenterManager?.pauseAnnouncementTimer(presenterManager.timerRemainingSeconds.value)
+        presenterManager?.setAnnouncementTickerLive(false)
     }
 
     fun resetTimer(presenterManager: PresenterManager?) {
@@ -476,6 +493,7 @@ class AnnouncementsViewModel {
     // ── Go Live ──────────────────────────────────────────────────────
     fun goLive(presenterManager: PresenterManager, onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {
         saveToSettings(onSettingsChange)
+        pauseTimer(presenterManager)
         presenterManager.setAnnouncementText(_text.value)
         presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
     }

@@ -706,6 +706,29 @@ class PresenterManager {
     private val _timerRunning = mutableStateOf(false)
     val timerRunning: State<Boolean> = _timerRunning
 
+    // Unlike [_timerRunning] (which is only ever true for Duration/Count-Up, the two modes with a
+    // pause concept), this is true whenever ANY of the four ticker modes below is actively pushing
+    // its value into the shared announcementText slot every second — including Specific Time and
+    // Clock Display, which are otherwise always-on. Switching to plain announcement text must check
+    // this, not [_timerRunning], or the still-running ticker silently overwrites the text a second later.
+    private val _announcementTickerActive = mutableStateOf(false)
+    val announcementTickerActive: State<Boolean> = _announcementTickerActive
+
+    // True only once the operator has explicitly pushed the ticker's content live via Go Live or
+    // Send to Stage Monitor — NOT merely because the ticker is running. This is what the play/pause
+    // button in the Announcements tab must gate on so pressing it while only previewing (never gone
+    // live) can never touch the presenter screen; only Go Live/Send to Stage Monitor may set this
+    // true. Deliberately NOT cleared by pauseAnnouncementTimer() itself — once live, pausing the
+    // ticker freezes the on-screen value (last push stands) and pressing play again resumes
+    // pushing live, so a live countdown can be paused/resumed with the same button without a
+    // separate "stop timer on presenter" control.
+    private val _announcementTickerLive = mutableStateOf(false)
+    val announcementTickerLive: State<Boolean> = _announcementTickerLive
+
+    fun setAnnouncementTickerLive(live: Boolean) {
+        _announcementTickerLive.value = live
+    }
+
     // True once a Duration countdown has run out — the authoritative signal the Announcements tab
     // uses to show the expired message/color, since it (unlike this manager) may have been
     // recreated since the countdown actually finished.
@@ -721,6 +744,7 @@ class PresenterManager {
         val endEpochSecond = java.time.Instant.now().epochSecond + remainingSeconds
         _timerRemainingSeconds.value = remainingSeconds
         _timerRunning.value = true
+        _announcementTickerActive.value = true
         _announcementTimerExpired.value = false
         announcementTickerJob = preRenderScope.launch {
             while (true) {
@@ -732,6 +756,7 @@ class PresenterManager {
             }
             _timerRemainingSeconds.value = 0
             _timerRunning.value = false
+            _announcementTickerActive.value = false
             _announcementTimerExpired.value = true
             pushAnnouncementTextIfLive(expiredText)
             setPresentingMode(Presenting.ANNOUNCEMENTS)
@@ -744,6 +769,7 @@ class PresenterManager {
         val startEpochSecond = java.time.Instant.now().epochSecond - initialElapsedSeconds
         _timerRemainingSeconds.value = initialElapsedSeconds
         _timerRunning.value = true
+        _announcementTickerActive.value = true
         _announcementTimerExpired.value = false
         announcementTickerJob = preRenderScope.launch {
             while (true) {
@@ -759,6 +785,7 @@ class PresenterManager {
     fun startAnnouncementSpecificTime(targetHour: Int, targetMinute: Int, targetSecond: Int) {
         announcementTickerJob?.cancel()
         _timerRunning.value = false
+        _announcementTickerActive.value = true
         announcementTickerJob = preRenderScope.launch {
             while (true) {
                 val nowSec = java.time.LocalTime.now().toSecondOfDay()
@@ -776,6 +803,7 @@ class PresenterManager {
     fun startAnnouncementClockDisplay(formatPattern: String) {
         announcementTickerJob?.cancel()
         _timerRunning.value = false
+        _announcementTickerActive.value = true
         announcementTickerJob = preRenderScope.launch {
             while (true) {
                 val text = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern(formatPattern))
@@ -789,6 +817,7 @@ class PresenterManager {
     fun pauseAnnouncementTimer(remainingSeconds: Int? = null) {
         announcementTickerJob?.cancel()
         _timerRunning.value = false
+        _announcementTickerActive.value = false
         _announcementTimerExpired.value = false
         if (remainingSeconds != null) _timerRemainingSeconds.value = remainingSeconds
     }
@@ -796,7 +825,7 @@ class PresenterManager {
     private fun pushAnnouncementTextIfLive(text: String) {
         val anyScreenOnAnnouncements = _presentingMode.value == Presenting.ANNOUNCEMENTS ||
             _screenLocks.value.values.any { it == Presenting.ANNOUNCEMENTS }
-        if (anyScreenOnAnnouncements) setAnnouncementText(text)
+        if (anyScreenOnAnnouncements && _announcementTickerLive.value) setAnnouncementText(text)
     }
 
     // Q&A display state

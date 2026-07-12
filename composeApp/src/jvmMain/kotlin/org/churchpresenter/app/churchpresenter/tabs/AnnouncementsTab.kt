@@ -223,12 +223,16 @@ fun AnnouncementsTab(
     } else {
         presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS
     }
-    fun toggleStageMonitor(text: String) {
+    // [stopTicker] must be true when [text] is plain announcement text (the ticker would otherwise
+    // silently overwrite it within a second) and false when [text] IS the timer/clock's own current
+    // value (stopping the ticker there would freeze the very content being sent).
+    fun toggleStageMonitor(text: String, stopTicker: Boolean = false) {
         if (presenterManager == null || !canSendToStageMonitor) return
         if (!hasSeparateMainScreen) {
             if (isSentToStageMonitor) {
                 presenterManager.requestClearDisplay()
             } else {
+                if (stopTicker) viewModel.pauseTimer(presenterManager)
                 presenterManager.setAnnouncementText(text)
                 presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
             }
@@ -237,6 +241,7 @@ fun AnnouncementsTab(
         if (isSentToStageMonitor) {
             stageMonitorScreenIndices.forEach { presenterManager.setScreenLock(it, null) }
         } else {
+            if (stopTicker) viewModel.pauseTimer(presenterManager)
             presenterManager.setAnnouncementText(text)
             stageMonitorScreenIndices.forEach { presenterManager.setScreenLock(it, Presenting.ANNOUNCEMENTS) }
         }
@@ -266,11 +271,12 @@ fun AnnouncementsTab(
         }
     }
 
-    // Duration/Count-up now tick on presenterManager (see above), so "is it running" and "what's
-    // the current value" must be read from there rather than from the tab's own ViewModel, which
-    // may have been recreated since the countdown was actually started.
+    // All four timer/clock modes now tick on presenterManager (see above), so "is it running" and
+    // "what's the current value" must be read from there rather than from the tab's own ViewModel,
+    // which may have been recreated since the countdown was actually started. announcementTickerActive
+    // (not timerRunning, which is only ever true for Duration/Count-Up) reflects all four.
     val isDurationOrCountUp = viewModel.timerMode == Constants.TIMER_MODE_DURATION || viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP
-    val isTimerRunning = isDurationOrCountUp && presenterManager?.timerRunning?.value == true
+    val isTimerRunning = presenterManager?.announcementTickerActive?.value == true
     val isTimerExpired = viewModel.timerMode == Constants.TIMER_MODE_DURATION && presenterManager?.announcementTimerExpired?.value == true
     val timerDisplayValue = when {
         isTimerRunning -> presenterManager.timerRemainingSeconds.value
@@ -363,6 +369,9 @@ fun AnnouncementsTab(
                 )
             }
             if (presenterManager != null) {
+                // Mutually exclusive with the timer's own play/pause button below — only one of
+                // text/timer can occupy the shared announcementText slot at a time, so whichever
+                // one is started (isTimerRunning going true) automatically shows this as not-live.
                 val announcementTextIsLive = presenterManager.presentingMode.value == Presenting.ANNOUNCEMENTS && !isTimerRunning
                 ActionIconButton(
                     onClick = {
@@ -377,7 +386,7 @@ fun AnnouncementsTab(
                 )
                 if (canSendToStageMonitor) {
                     ActionIconButton(
-                        onClick = { toggleStageMonitor(viewModel.text) },
+                        onClick = { toggleStageMonitor(viewModel.text, stopTicker = true) },
                         enabled = viewModel.text.isNotBlank() || isSentToStageMonitor,
                         tooltipText = if (isSentToStageMonitor) stringResource(Res.string.tooltip_hide_from_stage_monitor) else stringResource(Res.string.tooltip_send_to_stage_monitor),
                         icon = if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast,
@@ -583,8 +592,10 @@ fun AnnouncementsTab(
                                 selectedValue = viewModel.timerMode,
                                 onValueChange = { mode ->
                                     // Switching modes makes whatever was ticking on presenterManager stale
-                                    // (it's counting down/up for a mode that's no longer selected) — stop it.
+                                    // (it's counting down/up for a mode that's no longer selected) — stop it,
+                                    // and release live status so the new mode starts as preview-only again.
                                     presenterManager?.pauseAnnouncementTimer(0)
+                                    presenterManager?.setAnnouncementTickerLive(false)
                                     viewModel.setTimerMode(mode)
                                     viewModel.saveToSettings(onSettingsChange)
                                 },
@@ -750,27 +761,25 @@ fun AnnouncementsTab(
                             itemVerticalAlignment = Alignment.CenterVertically
                         ) {
                             val total = viewModel.timerHours * 3600 + viewModel.timerMinutes * 60 + viewModel.timerSeconds
-                            val isClockDisplay = viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY
-                            // Only Timer/Duration have a real play/pause concept. Specific Time and the
-                            // live Clock always track automatically — "Go Live" is enough to push them.
-                            val hasPlayPause = viewModel.timerMode == Constants.TIMER_MODE_DURATION || viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP
-                            if (hasPlayPause) {
-                                ActionIconButton(
-                                    onClick = {
-                                        viewModel.saveToSettings(onSettingsChange)
-                                        viewModel.startPauseTimer(presenterManager)
-                                    },
-                                    enabled = viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || isTimerRunning,
-                                    tooltipText = if (isTimerRunning) pauseLabel else startLabel,
-                                    painter = painterResource(if (isTimerRunning) Res.drawable.ic_pause else Res.drawable.ic_play),
-                                    containerColor = if (isTimerRunning) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = if (isTimerRunning) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
+                            // All four modes now have a real play/pause concept — pressing it on one
+                            // stops any other timer/clock ticker AND the announcement text (mutually
+                            // exclusive, see isTimerRunning/announcementTextIsLive above) since they
+                            // all share the same announcementText slot.
+                            ActionIconButton(
+                                onClick = {
+                                    viewModel.saveToSettings(onSettingsChange)
+                                    viewModel.startPauseTimer(presenterManager)
+                                },
+                                enabled = viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || isTimerRunning,
+                                tooltipText = if (isTimerRunning) pauseLabel else startLabel,
+                                painter = painterResource(if (isTimerRunning) Res.drawable.ic_pause else Res.drawable.ic_play),
+                                containerColor = if (isTimerRunning) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = if (isTimerRunning) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
+                            )
                             // Reset only makes sense for Timer/Duration, which count down/up from a
                             // starting point. Specific Time and the live Clock always track the wall
                             // clock automatically — there's nothing to reset back to.
-                            if (hasPlayPause) {
+                            if (isDurationOrCountUp) {
                                 ActionIconButton(
                                     onClick = { viewModel.resetTimer(presenterManager) },
                                     tooltipText = resetLabel,
@@ -784,10 +793,15 @@ fun AnnouncementsTab(
                             if (presenterManager != null && canSendToStageMonitor && viewModel.timerMode != Constants.TIMER_MODE_CLOCK_DISPLAY) {
                                 ActionIconButton(
                                     onClick = {
-                                        // Specific Time has no Start button of its own — sending it to
-                                        // Stage Monitor is what kicks off its always-on ticking.
-                                        if (!isSentToStageMonitor && viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
-                                            presenterManager.startAnnouncementSpecificTime(viewModel.targetHour, viewModel.targetMinute, viewModel.targetSecond)
+                                        // Sending is the only thing (besides Go Live) allowed to mark the
+                                        // ticker live — the play/pause button above stays preview-only.
+                                        if (!isSentToStageMonitor) {
+                                            // Sending Specific Time to Stage Monitor also (re)starts its
+                                            // ticker if it wasn't already running via the play/pause button.
+                                            if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
+                                                presenterManager.startAnnouncementSpecificTime(viewModel.targetHour, viewModel.targetMinute, viewModel.targetSecond)
+                                            }
+                                            presenterManager.setAnnouncementTickerLive(true)
                                         }
                                         val liveText = AnnouncementsViewModel.formatTimer(timerDisplayValue)
                                         toggleStageMonitor(liveText)
@@ -808,13 +822,16 @@ fun AnnouncementsTab(
                             if (presenterManager != null) {
                                 GoLiveButton(
                                     onClick = {
-                                        // Specific Time / Clock Display have no Start button of their own —
-                                        // Go Live is what kicks off their always-on ticking.
+                                        // Also (re)starts Specific Time / Clock Display's ticker if it
+                                        // wasn't already running via the play/pause button above. Go Live
+                                        // is one of only two places (with Send to Stage Monitor) allowed
+                                        // to mark the ticker live — the play/pause button stays preview-only.
                                         when (viewModel.timerMode) {
                                             Constants.TIMER_MODE_CLOCK -> presenterManager.startAnnouncementSpecificTime(viewModel.targetHour, viewModel.targetMinute, viewModel.targetSecond)
                                             Constants.TIMER_MODE_CLOCK_DISPLAY -> presenterManager.startAnnouncementClockDisplay(viewModel.liveClockFormat)
                                             else -> {}
                                         }
+                                        presenterManager.setAnnouncementTickerLive(true)
                                         val liveText = if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) viewModel.liveClockText else AnnouncementsViewModel.formatTimer(timerDisplayValue)
                                         presenterManager.setAnnouncementText(liveText)
                                         presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
@@ -881,24 +898,20 @@ fun AnnouncementsTab(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Specific Time and the live Clock always preview automatically (they tick even
-                    // before Start is pressed, or don't have a Start at all). Timer/Duration only
-                    // preview the counter while actively running, and otherwise fall back to the
-                    // expired message or plain announcement text.
+                    // All four timer/clock modes now share one play/pause control (isTimerRunning),
+                    // mutually exclusive with the announcement text — so this preview must follow
+                    // whichever one is actually running/live, not just which mode is selected, or it
+                    // shows the clock/specific-time value even while text is the one live on screen.
                     val previewText = when {
                         isTimerExpired -> viewModel.timerExpiredText.ifBlank { timerExpiredLabel }
-                        viewModel.timerMode == Constants.TIMER_MODE_CLOCK -> AnnouncementsViewModel.formatTimer(viewModel.timerRemaining)
-                        viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY -> viewModel.liveClockText
+                        isTimerRunning && viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY -> viewModel.liveClockText
                         isTimerRunning -> AnnouncementsViewModel.formatTimer(timerDisplayValue)
                         else -> viewModel.text
                     }
                     // A live timer/clock value changes every second and must stay legible, so skip the
                     // configured entrance animation in the preview (it would otherwise cycle the value
                     // fully off-screen on every animation loop, looking like it froze or went dark).
-                    val isShowingLiveTimerValue = isTimerExpired ||
-                        viewModel.timerMode == Constants.TIMER_MODE_CLOCK ||
-                        viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY ||
-                        isTimerRunning
+                    val isShowingLiveTimerValue = isTimerExpired || isTimerRunning
                     var previewWidthPx by remember { mutableStateOf(0) }
                     var previewHeightPx by remember { mutableStateOf(0) }
                     val scaleFactor = if (previewWidthPx > 0)
