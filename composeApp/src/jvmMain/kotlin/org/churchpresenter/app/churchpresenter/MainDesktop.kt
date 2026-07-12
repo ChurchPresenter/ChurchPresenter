@@ -1,19 +1,18 @@
 package org.churchpresenter.app.churchpresenter
 
+import kotlin.math.roundToInt
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.ui.window.WindowPlacement
-import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import java.awt.Cursor
 import java.awt.GraphicsEnvironment
@@ -1086,13 +1087,33 @@ fun MainDesktop(
 
             var scheduleCollapsed by remember(isMaximized) { mutableStateOf(currentLayout.schedulePanelCollapsed) }
 
-            // Schedule panel width — loaded from settings, local state for smooth dragging
-            var schedulePanelPx by remember(currentLayout.schedulePanelWidthDp, isMaximized) {
+            // Schedule panel width — loaded from settings, local state for smooth dragging.
+            // Keyed ONLY on isMaximized (not the persisted width, which saveScheduleWidth()
+            // rewrites after every single drag gesture) — recreating this MutableState after
+            // every gesture was found to correlate with every subsequent gesture's remeasure
+            // freezing until an unrelated recompose forced its way through; see AGENT.md's
+            // sidebar-resize debugging notes. The object should persist for the whole
+            // windowed/maximized session, only reloading when that mode's saved width should
+            // legitimately take over (switching between windowed and maximized).
+            var schedulePanelPx by remember(isMaximized) {
                 mutableStateOf(with(density) { currentLayout.schedulePanelWidthDp.dp.toPx() })
             }
             var previewCollapsed by remember(isMaximized) { mutableStateOf(currentLayout.previewPanelCollapsed) }
-            var previewPanelPx by remember(currentLayout.previewPanelWidthDp, isMaximized) {
+            var previewPanelPx by remember(isMaximized) {
                 mutableStateOf(with(density) { currentLayout.previewPanelWidthDp.dp.toPx() })
+            }
+
+            // Drives the collapse/expand slide manually (replaces AnimatedVisibility, which
+            // was found to stop remeasuring its content after the first drag gesture settles —
+            // see AGENT.md's sidebar-resize debugging notes). While settled at 0f/1f the
+            // rendered width below tracks schedulePanelPx/previewPanelPx with no extra lag.
+            val scheduleVisibleFraction = remember { Animatable(if (scheduleCollapsed) 0f else 1f) }
+            LaunchedEffect(scheduleCollapsed) {
+                scheduleVisibleFraction.animateTo(if (scheduleCollapsed) 0f else 1f, animationSpec = tween(220))
+            }
+            val previewVisibleFraction = remember { Animatable(if (previewCollapsed) 0f else 1f) }
+            LaunchedEffect(previewCollapsed) {
+                previewVisibleFraction.animateTo(if (previewCollapsed) 0f else 1f, animationSpec = tween(220))
             }
 
             fun saveScheduleWidth() {
@@ -1111,29 +1132,72 @@ fun MainDesktop(
                 }
             }
 
-            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            // Plain Box + onSizeChanged (not BoxWithConstraints/SubcomposeLayout): subcomposed
+            // content here was found to stop remeasuring after the first drag gesture on a
+            // given handle settles, only catching up when an unrelated, larger recomposition
+            // forced its way through — see AGENT.md's sidebar-resize debugging notes. Ordinary
+            // composition/layout (no subcomposition boundary) doesn't exhibit that freeze.
+            var availablePx by remember { mutableStateOf(0f) }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged { availablePx = it.width.toFloat() }
+            ) {
                 // Keep the resize handles on screen at any window size (e.g. when the
                 // window is snapped to a half/quadrant): cap each side panel's width so
                 // both 16dp handles plus a minimum slice of main content always fit.
                 // Render/drag clamp only — saved widths are untouched and restore when
                 // the window grows again.
-                val availablePx = constraints.maxWidth.toFloat()
                 val reservePx = with(density) { (16 + 16 + 200).dp.toPx() } // 2 handles + min main
                 val absMaxPx = with(density) { 600.dp.toPx() }
+                // availablePx is 0f until onSizeChanged fires on the first layout pass — treat
+                // that as "unknown" (uncapped) rather than clamping panels to 0 in the interim,
+                // since nothing here ever raises schedulePanelPx/previewPanelPx back up once the
+                // SideEffect below has clamped them down.
                 fun panelCapPx(otherPanelPx: Float) =
-                    (availablePx - otherPanelPx - reservePx).coerceIn(0f, absMaxPx)
+                    if (availablePx <= 0f) Float.MAX_VALUE
+                    else (availablePx - otherPanelPx - reservePx).coerceIn(0f, absMaxPx)
 
                 val maxSchedulePx = panelCapPx(if (previewCollapsed) 0f else previewPanelPx)
                 val maxPreviewPx = panelCapPx(if (scheduleCollapsed) 0f else schedulePanelPx)
 
+                // Drag handlers below live across many separate gestures (their
+                // pointerInput key no longer churns per-drag — see comment there), so
+                // they must read these caps live rather than from a captured local val.
+                val maxScheduleState = rememberUpdatedState(maxSchedulePx)
+                val maxPreviewState = rememberUpdatedState(maxPreviewPx)
+
+                // Keep the drag-base state in sync with the live cap — otherwise the
+                // first drag after a shrink jumps/snaps instead of tracking the cursor,
+                // since the drag delta would be applied to a stale, out-of-range base.
+                // Uses SideEffect (not LaunchedEffect): these caps are plain vals that
+                // change on nearly every recomposition during an active drag, and a
+                // LaunchedEffect keyed on a value that churns that fast cancels/relaunches
+                // its coroutine constantly, starving live recomposition until the drag ends.
+                SideEffect {
+                    if (schedulePanelPx > maxSchedulePx) {
+                        schedulePanelPx = maxSchedulePx
+                    }
+                    if (previewPanelPx > maxPreviewPx) {
+                        previewPanelPx = maxPreviewPx
+                    }
+                }
+
             Row(modifier = Modifier.fillMaxSize()) {
                 // Collapsible schedule panel
-                AnimatedVisibility(
-                    visible = !scheduleCollapsed,
-                    enter = expandHorizontally(expandFrom = Alignment.Start),
-                    exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
-                ) {
-                    Column(modifier = Modifier.width(with(density) { schedulePanelPx.coerceAtMost(maxSchedulePx).toDp() }).fillMaxHeight()) {
+                if (!scheduleCollapsed || scheduleVisibleFraction.value > 0f) {
+                    Column(
+                        modifier = Modifier
+                            .layout { measurable, constraints ->
+                                val targetWidthPx = schedulePanelPx.coerceAtMost(maxScheduleState.value)
+                                val widthPx = (targetWidthPx * scheduleVisibleFraction.value).roundToInt().coerceAtLeast(0)
+                                val placeable = measurable.measure(constraints.copy(minWidth = widthPx, maxWidth = widthPx))
+                                layout(widthPx, placeable.height) {
+                                    placeable.placeRelative(0, 0)
+                                }
+                            }
+                            .fillMaxHeight()
+                    ) {
                     // Shown once a host has ever been configured — not just while actively connected —
                     // so the operator can always see the last-known status and reconnect/disconnect
                     // without reopening the Connect dialog.
@@ -1443,7 +1507,7 @@ fun MainDesktop(
                         }
                     }
                     } // end Column
-                } // end AnimatedVisibility
+                } // end if (schedule panel visible)
 
                 // Drag handle + collapse toggle between schedule and main content
                 Box(
@@ -1451,14 +1515,20 @@ fun MainDesktop(
                         .width(16.dp)
                         .fillMaxHeight()
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .pointerInput(scheduleCollapsed, appSettings.schedulePanelWidthDp) {
+                        // Keyed only on scheduleCollapsed (not the persisted width, which
+                        // saveScheduleWidth() rewrites at the end of every drag) — otherwise
+                        // this coroutine gets torn down and relaunched after every gesture,
+                        // which is what made the second drag onward unreliable. Matches the
+                        // working pattern in SongsTab.kt's column-resize handles.
+                        .pointerInput(scheduleCollapsed) {
                             if (!scheduleCollapsed) {
                                 detectHorizontalDragGestures(
                                     onDragEnd = ::saveScheduleWidth
                                 ) { _, amount ->
+                                    val cap = maxScheduleState.value
                                     schedulePanelPx = (schedulePanelPx + amount).coerceIn(
-                                        minOf(with(density) { 160.dp.toPx() }, maxSchedulePx),
-                                        maxSchedulePx
+                                        minOf(with(density) { 160.dp.toPx() }, cap),
+                                        cap
                                     )
                                 }
                             }
@@ -1848,15 +1918,19 @@ fun MainDesktop(
                         .width(16.dp)
                         .fillMaxHeight()
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .pointerInput(previewCollapsed, appSettings.previewPanelWidthDp) {
+                        // Keyed only on previewCollapsed — see the matching comment on the
+                        // schedule handle's pointerInput above for why the persisted width
+                        // must not be part of this key.
+                        .pointerInput(previewCollapsed) {
                             if (!previewCollapsed) {
                                 detectHorizontalDragGestures(
                                     onDragEnd = ::savePreviewWidth
                                 ) { _, amount ->
+                                    val cap = maxPreviewState.value
                                     // Invert drag direction: dragging left increases width
                                     previewPanelPx = (previewPanelPx - amount).coerceIn(
-                                        minOf(with(density) { 150.dp.toPx() }, maxPreviewPx),
-                                        maxPreviewPx
+                                        minOf(with(density) { 150.dp.toPx() }, cap),
+                                        cap
                                     )
                                 }
                             }
@@ -1905,14 +1979,17 @@ fun MainDesktop(
                 }
 
                 // Collapsible preview panel (right sidebar)
-                AnimatedVisibility(
-                    visible = !previewCollapsed,
-                    enter = expandHorizontally(expandFrom = Alignment.End),
-                    exit = shrinkHorizontally(shrinkTowards = Alignment.End)
-                ) {
+                if (!previewCollapsed || previewVisibleFraction.value > 0f) {
                     Column(
                         modifier = Modifier
-                            .width(with(density) { previewPanelPx.coerceAtMost(maxPreviewPx).toDp() })
+                            .layout { measurable, constraints ->
+                                val targetWidthPx = previewPanelPx.coerceAtMost(maxPreviewState.value)
+                                val widthPx = (targetWidthPx * previewVisibleFraction.value).roundToInt().coerceAtLeast(0)
+                                val placeable = measurable.measure(constraints.copy(minWidth = widthPx, maxWidth = widthPx))
+                                layout(widthPx, placeable.height) {
+                                    placeable.placeRelative(0, 0)
+                                }
+                            }
                             .fillMaxHeight()
                             .padding(8.dp)
                     ) {
@@ -1990,7 +2067,7 @@ fun MainDesktop(
                     }
                 }
             }
-            } // end BoxWithConstraints
+            } // end Box (available-width measurement)
         }
     }
 

@@ -1130,6 +1130,75 @@ settles fully on-screen instead of flying off to the bottom-right.
 keyframe values + layer `boundsPt` added to the diagnostic printout — kept as a lasting
 improvement, not reverted) — engine-side only, no app changes needed.
 
+## Schedule/Preview Sidebar Resize Freezing After the First Drag (July 2026)
+
+**Problem**: dragging the left (Schedule) or right (Preview) sidebar handle worked smoothly
+exactly once — the panel tracked the cursor live. Every subsequent drag on the same handle
+(second, third, ...) appeared "stuck": the panel didn't visually move at all until the mouse was
+released, at which point it jumped straight to the final width.
+
+**Investigation**: this took eight attempts to root-cause, several of which fixed real (but
+insufficient) bugs along the way, all in `MainDesktop.kt`'s schedule/preview panel code:
+1. A stale-clamp bug from the Aero-Snap fix (`07ad66a3`) — the render-time width clamp never
+   wrote the reduced value back into `schedulePanelPx`/`previewPanelPx`, so the first drag after
+   a window/panel shrink snapped instead of tracking. Fixed with a `LaunchedEffect` correction —
+   **caused a regression**: `LaunchedEffect` keyed on a value (`maxSchedulePx`) that changes on
+   nearly every recomposition during a drag cancels/relaunches its coroutine constantly, starving
+   live recomposition. Replaced with `SideEffect` (no coroutine) — real fix, but didn't resolve
+   the user's report.
+2. The `pointerInput` modifiers were keyed on the *persisted* width (`appSettings
+   .schedulePanelWidthDp`), which `saveScheduleWidth()` rewrites on every `onDragEnd` — forcing
+   Compose to tear down and relaunch the drag-gesture coroutine after every gesture. Decoupled the
+   key to just `scheduleCollapsed`, matching the working column-resize pattern already in
+   `SongsTab.kt` (`rememberUpdatedState` for the live cap instead of a captured local val). Real
+   fix, still didn't resolve the report.
+3. Added temporary diagnostic logging (timestamps on every state write + a print inside the
+   `AnimatedVisibility` content) and proved conclusively via log analysis that the underlying
+   state updates correctly and continuously on every single gesture — the drag math was never the
+   problem. The composable reading that state for `.width(...)` simply stopped recomposing after
+   the first gesture, only catching up once when `onDragEnd`'s settings write forced an unrelated,
+   larger recompose through.
+4. Moved the width from `Modifier.width(Dp)` (composition-time) to a custom
+   `Modifier.layout { ... }` (measure-time) — theory: tying it to the layout phase would sidestep
+   whatever was freezing composition. Disproven — the layout lambda froze too.
+5. Removed `AnimatedVisibility` entirely (replaced with a plain `if` + a manually driven
+   `Animatable` fraction for the collapse/expand slide) — theory: `AnimatedVisibility` was
+   skipping remeasurement of idle content. Disproven — identical freeze with it completely gone.
+6. Replaced `BoxWithConstraints` (built on `SubcomposeLayout`) with a plain
+   `Box(Modifier.fillMaxSize().onSizeChanged { ... })` — theory: subcomposition was the common
+   thread across every failed attempt. Disproven — identical freeze with no subcomposition
+   anywhere in the path. (This step also surfaced a real, separate bug: `onSizeChanged` starts at
+   0 before the first layout pass, and the one-directional `SideEffect` clamp permanently zeroed
+   `previewPanelPx` before that first callback fired, rendering a collapsed-to-0-width panel —
+   fixed by treating `availablePx <= 0f` as "unknown/uncapped" rather than clamping to zero.)
+7. Explicitly called `Snapshot.sendApplyNotifications()` after every drag state write, in case
+   writes from within the `pointerInput` gesture coroutine weren't reliably notifying observers.
+   Disproven — no change.
+8. **Actual root cause**: `schedulePanelPx`/`previewPanelPx` were declared via
+   `remember(currentLayout.schedulePanelWidthDp, isMaximized) { mutableStateOf(...) }` — and
+   `currentLayout.schedulePanelWidthDp` changes every time `saveScheduleWidth()` runs, i.e. after
+   *every single gesture*. That means the `MutableState` object itself was being discarded and
+   recreated right before the next drag began. Removing the persisted width from the `remember`
+   key (keying only on `isMaximized`, so the same state object persists for the whole
+   windowed/maximized session and is only reloaded on a genuine mode switch) fixed it completely,
+   confirmed both hands-on and via the diagnostic logs (`Column LAYOUT` now tracks every `onDrag`
+   continuously, deep into a long multi-gesture session).
+
+**Lesson**: a `remember(key) { mutableStateOf(...) }` whose key includes a value the state's own
+writes feed back into (drag → save → persisted value → remember key → new state object) creates a
+"recreate the observable right before the next observation" trap that looks exactly like a
+recomposition/layout freeze from the read side, even though composition-time and layout-time
+reads were both proven live and correct in isolation. When a "read never seems to update after the
+first time" bug survives removing every layer between the write and the read (animation wrapper,
+subcomposition boundary, explicit snapshot flush), check whether the *state object itself* is
+being swapped out from under the reader.
+
+**Files Modified**: `MainDesktop.kt` only — `schedulePanelPx`/`previewPanelPx`'s `remember` key,
+`SideEffect`-based stale-clamp correction, `pointerInput` key decoupling, `AnimatedVisibility` →
+plain `if`/`Animatable`-driven collapse fraction, `BoxWithConstraints` → `Box` +
+`onSizeChanged`, `panelCapPx`'s zero-`availablePx` guard. All temporary diagnostic `println`
+logging added during the investigation was removed once confirmed fixed.
+
 ## Known Issues
 
 **Issue**: Song edits not saving/updating
