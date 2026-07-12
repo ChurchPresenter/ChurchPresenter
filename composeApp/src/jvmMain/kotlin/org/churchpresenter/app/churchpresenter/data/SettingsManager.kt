@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.data
 
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import kotlinx.serialization.decodeFromString
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import kotlinx.serialization.encodeToString
@@ -19,6 +21,7 @@ class SettingsManager {
     private val userHome = System.getProperty("user.home")
     private val appDataDir = File(userHome, ".churchpresenter")
     private val settingsFile = File(appDataDir, "settings.json")
+    private val settingsTmpFile = File(appDataDir, "settings.json.tmp")
     val lottiePresetsDir: File = File(appDataDir, "lottie_presets")
 
     private val jsonFormat = Json {
@@ -225,7 +228,11 @@ class SettingsManager {
         cachedSettings = settings
         try {
             val json = jsonFormat.encodeToString(settings)
-            settingsFile.writeText(json)
+            // Write to a temp file first, then atomically swap it into place — a process kill
+            // mid-write (e.g. during the self-updater's exit race) leaves the temp file
+            // incomplete but never touches the live settings.json.
+            settingsTmpFile.writeText(json)
+            Files.move(settingsTmpFile.toPath(), settingsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
         } catch (e: Exception) {
             // Silently handle error
         }
