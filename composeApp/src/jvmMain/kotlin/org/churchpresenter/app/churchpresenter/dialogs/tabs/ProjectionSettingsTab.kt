@@ -39,7 +39,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.app.churchpresenter.models.Scene
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -338,7 +337,6 @@ fun ProjectionSettingsTab(
 
     // Shared column widths — used by both the Screen Assignment table (Card 1) and the
     // Browser Source Outputs table (Card 1.5) so their columns line up the same way.
-    val displayModeColWidth = 92.dp
     val langDropdownWidth = 95.dp
     val cellWidth = 82.dp
     // Reserves 2 lines of bodySmall (16.sp line height) so single-line labels (Bible, display
@@ -423,6 +421,15 @@ fun ProjectionSettingsTab(
             Row(modifier = Modifier.weight(1f).horizontalScroll(contentScrollState), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Box(modifier = Modifier.width(langDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
                     Text(
+                        text = stringResource(Res.string.display_mode),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                Box(modifier = Modifier.width(langDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                    Text(
                         text = bibleLabel,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
@@ -450,32 +457,6 @@ fun ProjectionSettingsTab(
                         )
                     }
                 }
-            }
-            Box(modifier = Modifier.width(displayModeColWidth * 3).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
-                Text(
-                    text = stringResource(Res.string.display_mode),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-
-        // Sub-header for display mode columns
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(modifier = Modifier.width(screenLabelWidth + displayDropdownWidth * 2))
-            Spacer(modifier = Modifier.weight(1f))
-            displayModes.forEach { (modeLabel, _) ->
-                Text(
-                    text = modeLabel,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    softWrap = false,
-                    modifier = Modifier.width(displayModeColWidth)
-                )
             }
         }
 
@@ -783,13 +764,46 @@ fun ProjectionSettingsTab(
                     }
                 }
 
-                // Scrollable content: Bible/Songs dropdowns + checkboxes
+                // Scrollable content: Display mode + Bible/Songs dropdowns + checkboxes
                 @OptIn(ExperimentalMaterial3Api::class)
                 Row(
                     modifier = Modifier.weight(1f).horizontalScroll(contentScrollState),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
+                    Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
+                        var displayModeExpanded by remember { mutableStateOf(false) }
+                        OutlinedButton(
+                            shape = RoundedCornerShape(6.dp),
+                            onClick = { displayModeExpanded = true },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = displayModes.find { it.second == assignment.displayMode }?.first ?: fullScreenLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = displayModeExpanded,
+                            onDismissRequest = { displayModeExpanded = false }
+                        ) {
+                            displayModes.forEach { (label, modeValue) ->
+                                DropdownMenuItem(
+                                    text = { Text(label, style = MaterialTheme.typography.bodySmall) },
+                                    onClick = {
+                                        displayModeExpanded = false
+                                        val updated = assignment.copy(displayMode = modeValue)
+                                        onSettingsChange { s ->
+                                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
                     Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
                         var bibleModeExpanded by remember { mutableStateOf(false) }
                         OutlinedButton(
@@ -894,21 +908,6 @@ fun ProjectionSettingsTab(
                     }
                 } // end scrollable Row
 
-                // Radio buttons for display mode (outside scroll)
-                displayModes.forEach { (_, modeValue) ->
-                    Box(modifier = Modifier.width(displayModeColWidth), contentAlignment = Alignment.Center) {
-                        RadioButton(
-                            selected = assignment.displayMode == modeValue,
-                            onClick = {
-                                val updated = assignment.copy(displayMode = modeValue)
-                                onSettingsChange { s ->
-                                    s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
-                                }
-                            }
-                        )
-                    }
-                }
-
             } // end data Row
 
             if (i < numScreens - 1) {
@@ -930,7 +929,6 @@ fun ProjectionSettingsTab(
                     )
                 )
             }
-            Spacer(modifier = Modifier.width(displayModeColWidth * 3))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -1102,6 +1100,49 @@ fun ProjectionSettingsTab(
                 Column(modifier = Modifier.alpha(if (output.browserSourceEnabled) 1f else 0.5f)) {
                 Row(verticalAlignment = Alignment.Top) {
                     Row(modifier = Modifier.weight(1f).horizontalScroll(rowScrollState), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        @OptIn(ExperimentalMaterial3Api::class)
+                        Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                                Text(
+                                    text = stringResource(Res.string.display_mode),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            var displayModeExpanded by remember { mutableStateOf(false) }
+                            OutlinedButton(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = { displayModeExpanded = true },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = displayModes.find { it.second == output.displayMode }?.first ?: fullScreenLabel,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = displayModeExpanded,
+                                onDismissRequest = { displayModeExpanded = false }
+                            ) {
+                                displayModes.forEach { (label, modeValue) ->
+                                    DropdownMenuItem(
+                                        text = { Text(label, style = MaterialTheme.typography.bodySmall) },
+                                        onClick = {
+                                            displayModeExpanded = false
+                                            val updated = output.copy(displayMode = modeValue)
+                                            onSettingsChange { s ->
+                                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
                         Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
                                 Text(
@@ -1338,39 +1379,6 @@ fun ProjectionSettingsTab(
                             }
                         }
                     }
-                    Column {
-                        Text(
-                            text = stringResource(Res.string.display_mode),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.width(displayModeColWidth * 3)
-                        )
-                        Row {
-                            displayModes.forEach { (label, modeValue) ->
-                                Column(modifier = Modifier.width(displayModeColWidth), horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        text = label,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        textAlign = TextAlign.Center,
-                                        maxLines = 1,
-                                        softWrap = false,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                    RadioButton(
-                                        selected = output.displayMode == modeValue,
-                                        onClick = {
-                                            val updated = output.copy(displayMode = modeValue)
-                                            onSettingsChange { s ->
-                                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
                 }
 
                 Row {
@@ -1385,7 +1393,6 @@ fun ProjectionSettingsTab(
                             )
                         )
                     }
-                    Spacer(modifier = Modifier.width(displayModeColWidth * 3))
                 }
                 } // end alpha-dimmed Column
             }
