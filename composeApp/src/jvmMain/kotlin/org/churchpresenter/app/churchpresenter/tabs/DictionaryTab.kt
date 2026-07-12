@@ -206,6 +206,7 @@ fun DictionaryTab(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DictionaryListPane(
     modifier: Modifier = Modifier,
@@ -225,12 +226,14 @@ private fun DictionaryListPane(
     }
 
     Column(modifier = modifier) {
-        // Language filter chips
-        Row(
+        // Language filter chips — FlowRow so a chip wraps onto a new line instead of
+        // overflowing/getting clipped off the edge when the panel is narrow.
+        FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             DictionaryLanguageFilter.entries.forEach { filter ->
                 FilterChip(
@@ -254,13 +257,14 @@ private fun DictionaryListPane(
             }
         }
 
-        // Search field
+        // Search field — capped so it doesn't stretch edge-to-edge on a wide panel.
         DictionarySearchField(
             value = viewModel.searchQuery,
             placeholder = stringResource(Res.string.dictionary_search_hint),
             onValueChange = { viewModel.searchQuery = it },
             onClear = { viewModel.searchQuery = "" },
             modifier = Modifier
+                .widthIn(max = 360.dp)
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 8.dp),

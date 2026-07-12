@@ -107,7 +107,14 @@ fun ColorPickerField(
                     fontWeight = FontWeight.Medium
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f)
+                // No weight(1f) here: this Row has no fillMaxWidth of its own, so a weighted
+                // child makes the whole field claim as much width as its parent allows — fine
+                // when the caller bounds it with fillMaxWidth()/weight(), but inside a FlowRow
+                // with only a widthIn(min=) floor this reported an unbounded "wanted" width and
+                // made siblings wrap prematurely even with visible room left. maxLines+ellipsis
+                // below already handles the rare long-value case without needing to expand.
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
