@@ -211,6 +211,7 @@ object Constants {
     // Display Mode Types (for screen assignments)
     const val DISPLAY_MODE_FULLSCREEN = "fullscreen"
     const val DISPLAY_MODE_LOWER_THIRD_HORIZONTAL = "lower_third"
+    const val DISPLAY_MODE_LOWER_THIRD_VERTICAL = "lower_third_vertical"
     const val DISPLAY_MODE_STAGE_MONITOR = "stage_monitor"
 
     // Screen assignment target types

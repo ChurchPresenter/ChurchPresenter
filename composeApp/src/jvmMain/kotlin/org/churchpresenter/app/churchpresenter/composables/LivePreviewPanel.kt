@@ -57,6 +57,7 @@ import churchpresenter.composeapp.generated.resources.fill_badge
 import churchpresenter.composeapp.generated.resources.browser_source_output_label
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.display_lower_third_horizontal
+import churchpresenter.composeapp.generated.resources.display_lower_third_vertical
 import churchpresenter.composeapp.generated.resources.live_preview_nothing
 import churchpresenter.composeapp.generated.resources.live_preview_title
 import churchpresenter.composeapp.generated.resources.lock_screen_to_tab
@@ -224,7 +225,8 @@ private fun SingleDisplayPreview(
     val presenterNotes by presenterManager.presenterNotes
     val mediaViewModel = LocalMediaViewModel.current
 
-    val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
+    val isLowerThirdVertical = screenAssignment.isLowerThirdVertical
+    val isLowerThird = screenAssignment.isLowerThird
 
     // Determine if this screen shows the current content
     val showsContent = when (effectiveMode) {
@@ -264,6 +266,7 @@ private fun SingleDisplayPreview(
     val displayModeChipLabel = when (screenAssignment.displayMode) {
         Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
         Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL -> stringResource(Res.string.display_lower_third_horizontal)
+        Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL -> stringResource(Res.string.display_lower_third_vertical)
         else -> null
     }
 
@@ -336,6 +339,7 @@ private fun SingleDisplayPreview(
                                     selectedVerses = displayedVerses,
                                     appSettings = appSettings,
                                     isLowerThird = isLowerThird,
+                                    isLowerThirdVertical = isLowerThirdVertical,
                                     outputRole = primaryRole,
                                     transitionAlpha = bibleTransitionAlpha,
                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
@@ -346,6 +350,7 @@ private fun SingleDisplayPreview(
                                     lyricSection = displayedLyricSection,
                                     appSettings = appSettings,
                                     isLowerThird = isLowerThird,
+                                    isLowerThirdVertical = isLowerThirdVertical,
                                     outputRole = primaryRole,
                                     transitionAlpha = songTransitionAlpha,
                                     displayLineIndex = songDisplayLineIndex,

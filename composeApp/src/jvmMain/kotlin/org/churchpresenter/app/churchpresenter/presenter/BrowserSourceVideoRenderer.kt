@@ -155,7 +155,8 @@ class BrowserSourceVideoRenderer(
                     val screenAssignment by screenAssignmentState
                     val effectiveMode by effectiveModeState
                     val isIdentifying = presenterManager.browserSourceIdentifying.value.contains(outputIndex)
-                    val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
+                    val isLowerThirdVertical = screenAssignment.isLowerThirdVertical
+                    val isLowerThird = screenAssignment.isLowerThird
                     val isStageMonitor = screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
                     val outputRole = Constants.OUTPUT_ROLE_NORMAL
                     // General per-output background toggle — same field/logic as native output
@@ -239,6 +240,7 @@ class BrowserSourceVideoRenderer(
                                             selectedVerses = presenterManager.displayedVerses.value,
                                             appSettings = appSettings,
                                             isLowerThird = isLowerThird,
+                                            isLowerThirdVertical = isLowerThirdVertical,
                                             outputRole = outputRole,
                                             transitionAlpha = presenterManager.bibleTransitionAlpha.value,
                                             showBackground = showBg && screenAssignment.showBibleBackground,
@@ -249,6 +251,7 @@ class BrowserSourceVideoRenderer(
                                             lyricSection = presenterManager.displayedLyricSection.value,
                                             appSettings = appSettings,
                                             isLowerThird = isLowerThird,
+                                            isLowerThirdVertical = isLowerThirdVertical,
                                             outputRole = outputRole,
                                             transitionAlpha = presenterManager.songTransitionAlpha.value,
                                             displayLineIndex = presenterManager.songDisplayLineIndex.value,

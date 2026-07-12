@@ -742,7 +742,7 @@ private fun RightColumn(
     } else false
     val activeScreens = settings.projectionSettings.screenAssignments
     val hasFullscreenScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN }
-    val hasLowerThirdScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL }
+    val hasLowerThirdScreen = activeScreens.any { it.isLowerThird }
 
     SettingsSection(title = stringResource(Res.string.lyrics)) {
     Row(

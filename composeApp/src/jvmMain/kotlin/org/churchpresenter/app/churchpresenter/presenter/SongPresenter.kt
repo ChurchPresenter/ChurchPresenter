@@ -62,6 +62,10 @@ fun SongPresenter(
     lyricSection: LyricSection,
     appSettings: AppSettings,
     isLowerThird: Boolean = false,
+    // Only changes the band's geometry (a right-anchored vertical strip instead of a bottom
+    // horizontal band) — isLowerThird alone still selects all the *LowerThird* styling fields
+    // for both orientations, so there's one style profile to maintain.
+    isLowerThirdVertical: Boolean = false,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     transitionAlpha: Float = 1f,
     displayLineIndex: Int = -1,
@@ -463,7 +467,9 @@ fun SongPresenter(
 
         if (isLowerThird) {
             val lowerThirdFraction = appSettings.projectionSettings.lowerThirdHeightPercent / 100f
-            // Background stretches full width at bottom third, text respects padding on top
+            // Background stretches full width at bottom third, text respects padding on top —
+            // same band geometry for horizontal and vertical; isLowerThirdVertical only forces
+            // bilingual content to stack instead of side-by-side, see TextContent below.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -532,6 +538,9 @@ fun SongPresenter(
                 val numberConfigured = numberDisplay != Constants.NONE && section.songNumber > 0
                 val effectiveTitlePosition = if (isLowerThird) ss.titleLowerThirdPosition else ss.titlePosition
                 val effectiveSongNumberPosition = if (isLowerThird) ss.songNumberLowerThirdPosition else ss.songNumberPosition
+                // isLowerThirdVertical forces bilingual content to stack (one below the other)
+                // instead of side-by-side — see the useSideBySide gate further below — same
+                // band/geometry as horizontal otherwise.
                 BoxWithConstraints(
                     modifier = innerModifier,
                     contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
@@ -681,7 +690,10 @@ fun SongPresenter(
                     }
 
                     val hasBilingual = combinedSecondaryLines.isNotEmpty()
-                    val useSideBySide = appSettings.songSettings.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE
+                    // A Row-split side-by-side layout doesn't fit a narrow vertical band — falls
+                    // through to the top/bottom bilingual branch below, which already special-cases
+                    // isLowerThird (true for vertical too) with a compact stacked layout.
+                    val useSideBySide = appSettings.songSettings.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE && !isLowerThirdVertical
 
                     // Look-ahead text style with full font controls
                     val laBaseShadow = Shadow(

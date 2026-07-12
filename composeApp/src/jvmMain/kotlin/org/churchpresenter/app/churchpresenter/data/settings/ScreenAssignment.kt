@@ -42,6 +42,10 @@ data class ScreenAssignment(
     val showBible: Boolean get() = bibleMode != Constants.SONG_LANG_OFF
     val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF
 
+    /** True if [displayMode] is either lower-third band orientation (horizontal or vertical). */
+    val isLowerThird: Boolean get() = displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL || displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL
+    val isLowerThirdVertical: Boolean get() = displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL
+
     /** Whether a key output target is configured */
     val hasKeyOutput: Boolean get() = keyTargetDisplay >= 0
 

@@ -414,7 +414,7 @@ private fun PrimaryBibleTextColumn(
     } else false
     val activeScreens = settings.projectionSettings.screenAssignments
     val hasFullscreenScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN }
-    val hasLowerThirdScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL }
+    val hasLowerThirdScreen = activeScreens.any { it.isLowerThird }
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -806,7 +806,7 @@ private fun SecondaryBibleTextColumn(
     } else false
     val activeScreens2 = settings.projectionSettings.screenAssignments
     val hasFullscreenScreen2 = activeScreens2.any { it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN }
-    val hasLowerThirdScreen2 = activeScreens2.any { it.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL }
+    val hasLowerThirdScreen2 = activeScreens2.any { it.isLowerThird }
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {

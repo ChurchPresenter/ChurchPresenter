@@ -3081,7 +3081,7 @@ private fun PresenterWindows(
     // screenNumber is null when there's no physical screen to label (e.g. the test window).
     val presenterOutputContent: @Composable (screenAssignment: ScreenAssignment, effectiveMode: Presenting, screenNumber: Int?) -> Unit = { screenAssignment, effectiveMode, screenNumber ->
         val primaryRole = screenAssignment.primaryOutputRole
-        val showBg = if (screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
+        val showBg = if (screenAssignment.isLowerThird) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
         CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
             if (screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
                 // Stage monitor: dedicated presenter-confidence layout
@@ -3110,7 +3110,7 @@ private fun PresenterWindows(
                     modifier = Modifier.fillMaxSize(),
                     appSettings = appSettings,
                     outputRole = primaryRole,
-                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                    isLowerThird = screenAssignment.isLowerThird,
                     showBackground = showBg
                 ) {
                     Box(
@@ -3134,7 +3134,8 @@ private fun PresenterWindows(
                                         BiblePresenter(
                                             selectedVerses = displayedVerses,
                                             appSettings = appSettings,
-                                            isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                            isLowerThird = screenAssignment.isLowerThird,
+                                            isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                             outputRole = primaryRole,
                                             transitionAlpha = bibleTransitionAlpha,
                                             showBackground = showBg && screenAssignment.showBibleBackground,
@@ -3148,7 +3149,8 @@ private fun PresenterWindows(
                                         SongPresenter(
                                             lyricSection = displayedLyricSection,
                                             appSettings = appSettings,
-                                            isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                            isLowerThird = screenAssignment.isLowerThird,
+                                            isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                             outputRole = primaryRole,
                                             transitionAlpha = songTransitionAlpha,
                                             displayLineIndex = songDisplayLineIndex,
@@ -3341,7 +3343,7 @@ private fun PresenterWindows(
                     outputRole = deckLinkRole,
                     appSettings = appSettings,
                     mediaViewModel = mediaViewModel,
-                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                    isLowerThird = screenAssignment.isLowerThird,
                 ) {
                     var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                     val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) && effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
@@ -3356,7 +3358,8 @@ private fun PresenterWindows(
                                 BiblePresenter(
                                     selectedVerses = displayedVerses,
                                     appSettings = appSettings,
-                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                    isLowerThird = screenAssignment.isLowerThird,
+                                    isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                     outputRole = deckLinkRole,
                                     transitionAlpha = bibleTransitionAlpha,
                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
@@ -3369,7 +3372,8 @@ private fun PresenterWindows(
                                 SongPresenter(
                                     lyricSection = displayedLyricSection,
                                     appSettings = appSettings,
-                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                    isLowerThird = screenAssignment.isLowerThird,
+                                    isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                     outputRole = deckLinkRole,
                                     transitionAlpha = songTransitionAlpha,
                                     displayLineIndex = songDisplayLineIndex,
@@ -3498,7 +3502,7 @@ private fun PresenterWindows(
                     outputRole = Constants.OUTPUT_ROLE_KEY,
                     appSettings = appSettings,
                     mediaViewModel = mediaViewModel,
-                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                    isLowerThird = screenAssignment.isLowerThird,
                 ) {
                     var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                     val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) && effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
@@ -3510,7 +3514,8 @@ private fun PresenterWindows(
                                 BiblePresenter(
                                     selectedVerses = displayedVerses,
                                     appSettings = appSettings,
-                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                    isLowerThird = screenAssignment.isLowerThird,
+                                    isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                     outputRole = Constants.OUTPUT_ROLE_KEY,
                                     transitionAlpha = bibleTransitionAlpha,
                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
@@ -3523,7 +3528,8 @@ private fun PresenterWindows(
                                 SongPresenter(
                                     lyricSection = displayedLyricSection,
                                     appSettings = appSettings,
-                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                    isLowerThird = screenAssignment.isLowerThird,
+                                    isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                     outputRole = Constants.OUTPUT_ROLE_KEY,
                                     transitionAlpha = songTransitionAlpha,
                                     displayLineIndex = songDisplayLineIndex,
@@ -3701,7 +3707,8 @@ private fun PresenterWindows(
                                                 BiblePresenter(
                                                     selectedVerses = displayedVerses,
                                                     appSettings = appSettings,
-                                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                                    isLowerThird = screenAssignment.isLowerThird,
+                                                    isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                                     outputRole = Constants.OUTPUT_ROLE_KEY,
                                                     transitionAlpha = bibleTransitionAlpha,
                                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
@@ -3714,7 +3721,8 @@ private fun PresenterWindows(
                                                 SongPresenter(
                                                     lyricSection = displayedLyricSection,
                                                     appSettings = appSettings,
-                                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                                    isLowerThird = screenAssignment.isLowerThird,
+                                                    isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                                     outputRole = Constants.OUTPUT_ROLE_KEY,
                                                     transitionAlpha = songTransitionAlpha,
                                                     displayLineIndex = songDisplayLineIndex,
@@ -3871,7 +3879,7 @@ private fun PresenterWindows(
         if (targetScreenIndex < 0 || targetScreenIndex >= screens.size) continue
 
         // Per-output background toggle
-        val showBg = if (screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
+        val showBg = if (screenAssignment.isLowerThird) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
 
         // Derive output role from key target configuration
         val primaryRole = screenAssignment.primaryOutputRole
@@ -3965,7 +3973,8 @@ private fun PresenterWindows(
                                             BiblePresenter(
                                                 selectedVerses = displayedVerses,
                                                 appSettings = appSettings,
-                                                isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                                isLowerThird = screenAssignment.isLowerThird,
+                                                isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                                 outputRole = Constants.OUTPUT_ROLE_KEY,
                                                 transitionAlpha = bibleTransitionAlpha,
                                                 crossfadeEnabled = appSettings.bibleSettings.crossfade,
@@ -3978,7 +3987,8 @@ private fun PresenterWindows(
                                             SongPresenter(
                                                 lyricSection = displayedLyricSection,
                                                 appSettings = appSettings,
-                                                isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                                isLowerThird = screenAssignment.isLowerThird,
+                                                isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                                 outputRole = Constants.OUTPUT_ROLE_KEY,
                                                 transitionAlpha = songTransitionAlpha,
                                                 displayLineIndex = songDisplayLineIndex,
@@ -4119,7 +4129,7 @@ private fun PresenterWindows(
                     outputRole = Constants.OUTPUT_ROLE_KEY,
                     appSettings = appSettings,
                     mediaViewModel = mediaViewModel,
-                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                    isLowerThird = screenAssignment.isLowerThird,
                 ) {
                     var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
                     val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) && effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
@@ -4131,7 +4141,8 @@ private fun PresenterWindows(
                                 BiblePresenter(
                                     selectedVerses = displayedVerses,
                                     appSettings = appSettings,
-                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                    isLowerThird = screenAssignment.isLowerThird,
+                                    isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                     outputRole = Constants.OUTPUT_ROLE_KEY,
                                     transitionAlpha = bibleTransitionAlpha,
                                     crossfadeEnabled = appSettings.bibleSettings.crossfade,
@@ -4144,7 +4155,8 @@ private fun PresenterWindows(
                                 SongPresenter(
                                     lyricSection = displayedLyricSection,
                                     appSettings = appSettings,
-                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                                    isLowerThird = screenAssignment.isLowerThird,
+                                    isLowerThirdVertical = screenAssignment.isLowerThirdVertical,
                                     outputRole = Constants.OUTPUT_ROLE_KEY,
                                     transitionAlpha = songTransitionAlpha,
                                     displayLineIndex = songDisplayLineIndex,

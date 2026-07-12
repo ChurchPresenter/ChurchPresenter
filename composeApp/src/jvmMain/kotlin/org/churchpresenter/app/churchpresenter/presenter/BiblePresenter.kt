@@ -74,6 +74,10 @@ fun BiblePresenter(
     selectedVerses: List<SelectedVerse>,
     appSettings: AppSettings,
     isLowerThird: Boolean = false,
+    // Only changes the band's geometry (a right-anchored vertical strip instead of a bottom
+    // horizontal band) — isLowerThird alone still selects all the *LowerThird* styling fields
+    // (fonts/colors/sizes/etc.) for both orientations, so there's one style profile to maintain.
+    isLowerThirdVertical: Boolean = false,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     transitionAlpha: Float = 1f,
     showBackground: Boolean = true,
@@ -420,7 +424,9 @@ fun BiblePresenter(
 
         if (isLowerThird) {
             val lowerThirdFraction = appSettings.projectionSettings.lowerThirdHeightPercent / 100f
-            // Background stretches full width at bottom third, text respects padding on top
+            // Background stretches full width at bottom third, text respects padding on top —
+            // same band geometry for horizontal and vertical; isLowerThirdVertical only forces
+            // bilingual content to stack instead of side-by-side, see TextContent below.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -477,7 +483,7 @@ fun BiblePresenter(
                     .align(Alignment.BottomCenter)
                     .clipToBounds()
             else
-                Modifier.align(Alignment.Center)
+                Modifier.align(contentAlignment)
 
             val textMeasurer = rememberTextMeasurer()
 
@@ -499,7 +505,10 @@ fun BiblePresenter(
                 val showParallelLayout = isParallelIntended && secondary != null && (!isLowerThird || appSettings.bibleSettings.secondaryBibleLowerThirdEnabled)
                 val showSecondary = secondary != null && showParallelLayout
 
-                if (showParallelLayout && isLowerThird) {
+                // isLowerThirdVertical forces bilingual/parallel content to stack (one below the
+                // other) instead of the side-by-side Row split below — same band/geometry as
+                // horizontal otherwise, see the routing to the single-column "else" branch.
+                if (showParallelLayout && isLowerThird && !isLowerThirdVertical) {
                     val sec = secondary
                     // Lower third: side-by-side Row layout (50/50) with matched auto-fit
                     BoxWithConstraints(
@@ -565,8 +574,10 @@ fun BiblePresenter(
                             }
                         }
                     }
-                } else if (showParallelLayout) {
-                    // Parallel layout: rigid 50/50 split with matched auto-fit
+                } else if (showParallelLayout && !isLowerThird) {
+                    // Parallel layout: rigid 50/50 split with matched auto-fit — fullscreen only;
+                    // lower-third (either orientation) falls through to the single-column branch
+                    // below, which is constrained to the band via innerModifier.
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                         val widthConstraint = Constraints(maxWidth = constraints.maxWidth)
                         val halfH = constraints.maxHeight / 2
