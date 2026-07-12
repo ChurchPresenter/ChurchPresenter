@@ -87,6 +87,7 @@ import churchpresenter.composeapp.generated.resources.content_songs
 import churchpresenter.composeapp.generated.resources.content_songs_background
 import churchpresenter.composeapp.generated.resources.content_streaming
 import churchpresenter.composeapp.generated.resources.detected_screens
+import churchpresenter.composeapp.generated.resources.dev_window_label
 import churchpresenter.composeapp.generated.resources.display_fullscreen
 import churchpresenter.composeapp.generated.resources.display_lower_third_horizontal
 import churchpresenter.composeapp.generated.resources.display_lower_third_vertical
@@ -137,11 +138,13 @@ import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
 import org.churchpresenter.app.churchpresenter.composables.listVlcAudioDevices
 import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailability
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
+import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 import kotlin.io.path.Path
@@ -169,7 +172,11 @@ fun ProjectionSettingsTab(
     val detectedScreens = screenDevicesAll.size
     val deckLinkDeviceCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
     val realWindowCount = screenDevicesAll.count { it != primaryDevice } + deckLinkDeviceCount
-    val presenterWindowCount = realWindowCount
+    // Dev convenience: mirrors main.kt's devWindowedFallback — on a single-monitor dev machine
+    // with no DeckLink device, main.kt opens an extra windowed "dev" output at assignment slot 0.
+    // Without this, that window would have no row here to configure it.
+    val devWindowedFallback = (!BuildConfig.IS_RELEASE || DevFlags.forceDevWindow) && realWindowCount == 0
+    val presenterWindowCount = realWindowCount + if (devWindowedFallback) 1 else 0
 
     // Extend the assignments list and resolve any unassigned (-1 auto) to actual non-primary displays.
     val nonPrimaryDevices = remember(screenDevicesAll, primaryDevice) {
@@ -469,9 +476,13 @@ fun ProjectionSettingsTab(
         for (i in 0 until numScreens) {
             val assignment = screenAssignments[i]
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Screen label
+                // Screen label — the dev-window fallback always occupies slot 0
                 Text(
-                    text = stringResource(Res.string.screen_col_label, i + 1),
+                    text = if (devWindowedFallback && i == 0) {
+                        stringResource(Res.string.dev_window_label)
+                    } else {
+                        stringResource(Res.string.screen_col_label, i + 1)
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.width(screenLabelWidth)

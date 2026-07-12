@@ -49,6 +49,24 @@ in your IDE's toolbar or run it directly from the terminal:
   .\gradlew.bat :composeApp:run
 ```
 
+#### Forcing the dev fallback window
+
+On a single-monitor machine with no DeckLink device, dev builds automatically open an extra
+small windowed presenter output (since there's no second display to show it on). To get that
+same window in a packaged/release build too — e.g. to demo or test presenter output without a
+second monitor — set an environment variable before launching the app:
+
+```shell
+CHURCHPRESENTER_FORCE_DEV_WINDOW=true ./ChurchPresenter   # macOS/Linux
+```
+```shell
+set CHURCHPRESENTER_FORCE_DEV_WINDOW=true && ChurchPresenter.exe   # Windows
+```
+
+Equivalently, the JVM system property `-Dchurchpresenter.forceDevWindow=true` works too (e.g.
+via `JAVA_TOOL_OPTIONS`). This only affects whether the fallback window appears — it does not
+change how the app reports itself for update checks, crash reporting, or usage analytics.
+
 ---
 
 ## 📚 Documentation

@@ -38,6 +38,8 @@ import churchpresenter.composeapp.generated.resources.menu_clear_schedule
 import churchpresenter.composeapp.generated.resources.menu_close_schedule
 import churchpresenter.composeapp.generated.resources.menu_connect
 import churchpresenter.composeapp.generated.resources.menu_connect_to_instance
+import churchpresenter.composeapp.generated.resources.menu_developer
+import churchpresenter.composeapp.generated.resources.menu_developer_show_window
 import churchpresenter.composeapp.generated.resources.menu_disconnect
 import churchpresenter.composeapp.generated.resources.menu_edit
 import churchpresenter.composeapp.generated.resources.menu_exit
@@ -89,7 +91,10 @@ fun FrameWindowScope.NavigationTopBar(
     onConverter: () -> Unit = {},
     onKeyboardShortcuts: () -> Unit = {},
     onCheckForUpdates: () -> Unit = {},
-    onContactUs: () -> Unit = {}
+    onContactUs: () -> Unit = {},
+    showDeveloperMenu: Boolean = false,
+    isPresenterWindowVisible: Boolean = true,
+    onSetPresenterWindowVisible: (Boolean) -> Unit = {}
 ) {
 
     val fileLabel = stringResource(Res.string.menu_file)
@@ -300,6 +305,16 @@ fun FrameWindowScope.NavigationTopBar(
             Item(stringResource(Res.string.menu_help_item), onClick = onHelp)
             Item(stringResource(Res.string.menu_contact_us), onClick = onContactUs)
             Item(stringResource(Res.string.menu_check_for_updates), onClick = onCheckForUpdates)
+        }
+
+        if (showDeveloperMenu) {
+            Menu(stringResource(Res.string.menu_developer), mnemonic = 'D') {
+                CheckboxItem(
+                    text = stringResource(Res.string.menu_developer_show_window),
+                    checked = isPresenterWindowVisible,
+                    onCheckedChange = onSetPresenterWindowVisible
+                )
+            }
         }
     }
 }

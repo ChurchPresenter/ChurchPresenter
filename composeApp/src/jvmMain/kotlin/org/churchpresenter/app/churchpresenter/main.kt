@@ -57,6 +57,7 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.app.churchpresenter.utils.findScreenIndexByBounds
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
@@ -1626,6 +1627,12 @@ fun main() {
                                         currentScheduleActions.clearSchedule()
                                         selectedScheduleItemId = null
                                     },
+                                    // Mirrors the devWindowedFallback gate below (main.kt) and in
+                                    // ProjectionSettingsTab.kt — only a dev build or the forced flag
+                                    // gets this menu.
+                                    showDeveloperMenu = !BuildConfig.IS_RELEASE || DevFlags.forceDevWindow,
+                                    isPresenterWindowVisible = presenterManager.showPresenterWindow.value,
+                                    onSetPresenterWindowVisible = { presenterManager.setShowPresenterWindow(it) },
                                 )
                                 // Crash recovery warning banner
                                 if (CrashReporter.didCrashLastRun && CrashReporter.videoBackgroundsDisabled) {
@@ -3311,7 +3318,7 @@ private fun PresenterWindows(
     // Dev convenience: on a single-monitor dev machine there's no non-primary monitor or DeckLink
     // device to open a real output window on. Show Output 1 as an ordinary window instead of not
     // rendering at all, driven by the same "Toggle Presenter Displays" button/state.
-    val devWindowedFallback = !BuildConfig.IS_RELEASE && windowCount == 0
+    val devWindowedFallback = (!BuildConfig.IS_RELEASE || DevFlags.forceDevWindow) && windowCount == 0
     for (i in 0 until (windowCount + if (devWindowedFallback) 1 else 0)) {
         if (devWindowedFallback && i >= windowCount) {
             val screenAssignment = proj.getAssignment(0)
