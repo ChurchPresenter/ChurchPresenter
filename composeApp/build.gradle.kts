@@ -257,11 +257,17 @@ kotlin {
                     runtimeOnly("org.openjfx:$module:21:win")
                 }
             }
-            // DBus for Linux file chooser integration
+            // DBus for Linux file chooser integration.
             implementation("com.github.hypfvieh:dbus-java-core:5.2.0")
             implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.0")
-            // FileKit — native OS file dialogs (Windows Explorer dialog, macOS NSOpenPanel)
-            implementation(libs.filekit.dialogs)
+            // FileKit — native OS file dialogs (Windows Explorer dialog, macOS NSOpenPanel).
+            // filekit-dialogs-jvm transitively pulls in dbus-java-transport-native-unixsocket,
+            // which conflicts with the junixsocket transport above — TransportBuilder throws
+            // TransportRegistrationException if both UNIX transport providers are on the
+            // classpath at once, so the native one must be excluded here.
+            implementation("io.github.vinceglb:filekit-dialogs:${libs.versions.filekit.get()}") {
+                exclude(group = "com.github.hypfvieh", module = "dbus-java-transport-native-unixsocket")
+            }
         }
     }
 }
