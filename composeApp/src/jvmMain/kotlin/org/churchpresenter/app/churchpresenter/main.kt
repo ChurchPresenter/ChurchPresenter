@@ -408,6 +408,9 @@ fun main() {
         val companionServer = remember { CompanionServer() }
         val qaManager = remember { QAManager() }
         val sttManager = remember { STTManager() }
+        LaunchedEffect(appSettings.bibleEngineSettings.helpDevMode) {
+            sttManager.helpDevModeEnabled = appSettings.bibleEngineSettings.helpDevMode
+        }
         val obsManager = remember { OBSWebSocketManager() }
         val companionSatelliteViewModel = remember { CompanionSatelliteViewModel() }
         DisposableEffect(Unit) { onDispose { companionSatelliteViewModel.dispose() } }

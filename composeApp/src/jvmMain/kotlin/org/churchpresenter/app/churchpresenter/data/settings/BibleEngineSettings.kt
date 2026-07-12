@@ -22,4 +22,9 @@ data class BibleEngineSettings(
     val port: Int = 8766,
     val textMatchLevel: String = "off",
     val autoFollow: Boolean = false,
+    // When on, the Bible tab shows live feedback buttons (wrong passage / premature / missed
+    // passage) that write to TrainingDataLogger's operator-flags-*.jsonl for the BLE training
+    // workflow — set here so STTTab (where the checkbox lives) and BibleTab (where the buttons
+    // render) share it without passing a ViewModel between tabs.
+    val helpDevMode: Boolean = false,
 )

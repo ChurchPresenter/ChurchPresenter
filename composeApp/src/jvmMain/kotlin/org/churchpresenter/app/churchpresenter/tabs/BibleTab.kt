@@ -117,6 +117,9 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ManageSearch
 import org.churchpresenter.app.churchpresenter.viewmodel.DetectionTrack
@@ -152,6 +155,12 @@ import churchpresenter.composeapp.generated.resources.bible_stt_level_off
 import churchpresenter.composeapp.generated.resources.bible_stt_level_conservative
 import churchpresenter.composeapp.generated.resources.bible_stt_level_balanced
 import churchpresenter.composeapp.generated.resources.bible_stt_level_aggressive
+import churchpresenter.composeapp.generated.resources.bible_stt_flag_wrong
+import churchpresenter.composeapp.generated.resources.bible_stt_flag_wrong_hint
+import churchpresenter.composeapp.generated.resources.bible_stt_flag_premature
+import churchpresenter.composeapp.generated.resources.bible_stt_flag_premature_hint
+import churchpresenter.composeapp.generated.resources.bible_stt_flag_missed
+import churchpresenter.composeapp.generated.resources.bible_stt_flag_missed_hint
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_search
@@ -202,6 +211,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.isCtrlPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.isMetaPressed
@@ -948,6 +958,57 @@ fun BibleTab(
                         )
                     }
                 }
+                }
+                if (engineSettings.helpDevMode) {
+                    FlagPillButton(
+                        icon = Icons.Filled.Flag,
+                        label = stringResource(Res.string.bible_stt_flag_wrong),
+                        tooltip = stringResource(Res.string.bible_stt_flag_wrong_hint),
+                        onClick = {
+                            val live = displayedVerses
+                            if (live.isNotEmpty()) {
+                                TrainingDataLogger.logOperatorFlag(
+                                    kind = "wrong_passage",
+                                    book = live.first().bookId,
+                                    chapter = live.first().chapter,
+                                    verseStart = live.minOf { it.verseNumber },
+                                    verseEnd = live.maxOf { it.verseNumber }.takeIf { live.size > 1 },
+                                    segmentId = viewModel.lastDetectionSegmentId,
+                                    matchType = viewModel.autoFollowLiveMatchType.value,
+                                )
+                            }
+                        }
+                    )
+                    FlagPillButton(
+                        icon = Icons.Filled.FastForward,
+                        label = stringResource(Res.string.bible_stt_flag_premature),
+                        tooltip = stringResource(Res.string.bible_stt_flag_premature_hint),
+                        onClick = {
+                            val live = displayedVerses
+                            if (live.isNotEmpty()) {
+                                TrainingDataLogger.logOperatorFlag(
+                                    kind = "premature",
+                                    book = live.first().bookId,
+                                    chapter = live.first().chapter,
+                                    verseStart = live.minOf { it.verseNumber },
+                                    verseEnd = live.maxOf { it.verseNumber }.takeIf { live.size > 1 },
+                                    segmentId = viewModel.lastDetectionSegmentId,
+                                    matchType = viewModel.autoFollowLiveMatchType.value,
+                                )
+                            }
+                        }
+                    )
+                    FlagPillButton(
+                        icon = Icons.Filled.SearchOff,
+                        label = stringResource(Res.string.bible_stt_flag_missed),
+                        tooltip = stringResource(Res.string.bible_stt_flag_missed_hint),
+                        onClick = {
+                            TrainingDataLogger.logOperatorFlag(
+                                kind = "missed_passage",
+                                segmentId = viewModel.lastDetectionSegmentId,
+                            )
+                        }
+                    )
                 }
                 if (detectedReferences.isNotEmpty()) {
                     IconButton(
@@ -1758,6 +1819,48 @@ private fun LiveChapterPanel(
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
             adapter = rememberScrollbarAdapter(listState)
         )
+    }
+}
+
+/** Small flat pill button matching the auto-follow/text-match pills in the status row above. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun FlagPillButton(
+    icon: ImageVector,
+    label: String,
+    tooltip: String,
+    onClick: () -> Unit,
+) {
+    TooltipArea(tooltip = {
+        Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
+            Text(text = tooltip, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(8.dp))
+        }
+    }) {
+        Box(
+            modifier = Modifier
+                .height(27.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+                .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }, onClick = onClick)
+                .padding(horizontal = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(11.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.5.sp, fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
     }
 }
 

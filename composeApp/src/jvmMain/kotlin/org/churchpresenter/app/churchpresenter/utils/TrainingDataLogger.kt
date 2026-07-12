@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Writes session-keyed files to ~/.churchpresenter/bible-stt-logs/:
  *   live-references-<sessionId>.jsonl       — ground truth: which verse went live and why
  *   suggestion-outcomes-<sessionId>.jsonl   — operator reactions to detection chips
+ *   operator-flags-<sessionId>.jsonl        — live "Help Dev" flags (wrong/premature/missed)
  *
  * When STT has supplied a stable [sessionId] (forwarded from the engine via BibleViewModel) the file
  * is keyed by it, giving an exact 1:1 join with the STT db and the engine detection-log and letting a
@@ -26,6 +27,7 @@ object TrainingDataLogger {
     private const val MAX_AGE_DAYS = 30L
     private const val LIVE_REF_PREFIX = "live-references-"
     private const val OUTCOME_PREFIX = "suggestion-outcomes-"
+    private const val FLAG_PREFIX = "operator-flags-"
 
     // Stable per-service session id from STT (db base name or UUID), set by BibleViewModel on the first
     // engine detection. Null until then; the filename falls back to [runStamp] (zero behaviour change).
@@ -50,6 +52,7 @@ object TrainingDataLogger {
     private fun suffix(): String = sessionId?.let { sanitize(it) } ?: runStamp
     private fun liveRefPath() = File(logDir, "$LIVE_REF_PREFIX${suffix()}.jsonl").absolutePath
     private fun outcomePath() = File(logDir, "$OUTCOME_PREFIX${suffix()}.jsonl").absolutePath
+    private fun flagPath() = File(logDir, "$FLAG_PREFIX${suffix()}.jsonl").absolutePath
 
     /** Keeps `[A-Za-z0-9._-]`, replacing anything else with `_`, so any session id is filename-safe. */
     private fun sanitize(raw: String): String =
@@ -80,15 +83,21 @@ object TrainingDataLogger {
     /**
      * Deletes dated training-data logs older than [MAX_AGE_DAYS]. Runs at most once per process
      * (first write triggers it). Mirrors CrashReporter's age-based cleanup. Best-effort.
+     * Also sweeps the `.db` snapshots [org.churchpresenter.app.churchpresenter.viewmodel.STTManager]'s
+     * "Help Dev" capture writes into this same folder — they bypass this object's own write path
+     * entirely, but share its retention policy, so `internal` lets STTManager trigger this sweep too
+     * (idempotent either way; whichever of the two runs first each process wins).
      */
-    private fun cleanupOldLogsOnce() {
+    internal fun cleanupOldLogsOnce() {
         if (!cleanedUp.compareAndSet(false, true)) return
         runCatching {
             val cutoff = System.currentTimeMillis() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000
             logDir.listFiles()?.forEach { file ->
                 val n = file.name
-                val dated = file.isFile && n.endsWith(".jsonl") &&
-                    (n.startsWith(LIVE_REF_PREFIX) || n.startsWith(OUTCOME_PREFIX))
+                val dated = file.isFile && (
+                    (n.endsWith(".jsonl") && (n.startsWith(LIVE_REF_PREFIX) || n.startsWith(OUTCOME_PREFIX) || n.startsWith(FLAG_PREFIX))) ||
+                        n.endsWith(".db") || n.endsWith(".db.tmp")
+                )
                 if (dated && file.lastModified() < cutoff) file.delete()
             }
         }
@@ -179,6 +188,50 @@ object TrainingDataLogger {
                 else append(",\"suggestedVerse\":null")
                 append(",\"action\":\"").append(action).append("\"")
                 if (correctedRef != null) append(",\"correctedRef\":\"").append(correctedRef).append("\"")
+                if (matchType != null) append(",\"matchType\":\"").append(esc(matchType)).append("\"")
+                else append(",\"matchType\":null")
+                append("}")
+            }
+            synchronized(lock) { File(p).appendText(line + "\n", Charsets.UTF_8) }
+        }
+    }
+
+    /**
+     * Call when the operator uses a "Help Dev" button (STTTab's `helpDevMode` toggle) to flag a
+     * BLE issue live, in real time during a service.
+     * [kind] is "wrong_passage" (the currently-live reference is confidently wrong), "premature"
+     * (the engine landed on the right book/chapter but the wrong verse, before the sentence
+     * finished — a `Stabilizer`/debounce signal, distinct from a parsing bug), or "missed_passage"
+     * (the engine detected nothing while a reference was actually being read/cited).
+     * [book]/[chapter]/[verseStart]/[verseEnd] are the flagged reference's canonical numbers —
+     * null for "missed_passage", since there is no detection to anchor to; triage cross-references
+     * the STT db by [ts_ms]/[segmentId] instead, the same way an FN is already found today.
+     * [matchType] is the flagged detection's engine match type when known (see [logLiveReference]).
+     */
+    fun logOperatorFlag(
+        kind: String,
+        book: Int? = null,
+        chapter: Int? = null,
+        verseStart: Int? = null,
+        verseEnd: Int? = null,
+        segmentId: String? = null,
+        matchType: String? = null,
+    ) {
+        cleanupOldLogsOnce()
+        val p = flagPath()
+        ensureSessionHeader(p)
+        runCatching {
+            val line = buildString {
+                append("{\"ts_ms\":").append(System.currentTimeMillis())
+                if (sessionId != null) append(",\"sessionId\":\"").append(esc(sessionId!!)).append("\"")
+                else append(",\"sessionId\":null")
+                append(",\"kind\":\"").append(esc(kind)).append("\"")
+                if (book != null) append(",\"book\":").append(book) else append(",\"book\":null")
+                if (chapter != null) append(",\"chapter\":").append(chapter) else append(",\"chapter\":null")
+                if (verseStart != null) append(",\"verseStart\":").append(verseStart) else append(",\"verseStart\":null")
+                if (verseEnd != null) append(",\"verseEnd\":").append(verseEnd) else append(",\"verseEnd\":null")
+                if (segmentId != null) append(",\"segmentId\":\"").append(esc(segmentId)).append("\"")
+                else append(",\"segmentId\":null")
                 if (matchType != null) append(",\"matchType\":\"").append(esc(matchType)).append("\"")
                 else append(",\"matchType\":null")
                 append("}")

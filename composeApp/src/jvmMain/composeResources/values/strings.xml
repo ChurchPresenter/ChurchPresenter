@@ -504,6 +504,7 @@
     <string name="tooltip_go_live">Go Live</string>
     <string name="tooltip_presentation_remote">Open Remote Control</string>
     <string name="tooltip_qa_remote">Sharing &amp; Remote Access</string>
+    <string name="tooltip_stt_settings">STT Display Settings</string>
     <string name="tooltip_send_to_stage_monitor">Send to Stage Monitor</string>
     <string name="tooltip_hide_from_stage_monitor">Hide Announcement</string>
     <string name="tooltip_add_label">Add Label</string>
@@ -1538,6 +1539,7 @@
     <string name="stt_background_color">Background Color</string>
     <string name="stt_opacity">Opacity:</string>
     <string name="stt_position">Position</string>
+    <string name="stt_settings_dialog_title">STT Display Settings</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI Report</string>
@@ -1910,6 +1912,12 @@
     <string name="bible_stt_engine_stt_down">Engine lost its connection to the STT server</string>
     <string name="bible_stt_no_bible">No Bible configured</string>
     <string name="bible_stt_waiting_for_stt">Running — waiting for STT</string>
+    <string name="bible_stt_flag_wrong">Wrong passage</string>
+    <string name="bible_stt_flag_wrong_hint">Flag the currently live passage as wrong, for the BLE developer to review later</string>
+    <string name="bible_stt_flag_premature">Premature</string>
+    <string name="bible_stt_flag_premature_hint">Flag the currently live passage as a premature match — right book/chapter, but the engine jumped to a verse before the sentence finished</string>
+    <string name="bible_stt_flag_missed">Missed passage</string>
+    <string name="bible_stt_flag_missed_hint">Flag that the engine missed a passage that was actually being read or cited just now</string>
     <!-- Shared STT connection-status labels (used by both the Bible detection strip and the STT tab) -->
     <string name="stt_status_not_connected">STT not connected</string>
     <string name="stt_status_connecting">Connecting to STT…</string>
@@ -1919,6 +1927,7 @@
     <string name="bible_engine_run_local">Run engine locally</string>
     <string name="bible_engine_host">Engine host</string>
     <string name="bible_engine_port">Port</string>
+    <string name="stt_help_dev_mode">Help Dev — show live feedback buttons on the Bible tab (wrong passage / premature / missed passage)</string>
     <string name="dictionary_settings_word_text">Word (Original)</string>
     <string name="dictionary_settings_reference_text">Reference &amp; Transliteration</string>
     <string name="dictionary_settings_definition_text">Definition</string>
