@@ -117,9 +117,10 @@ fun BackgroundSettingsTab(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Card 1: Default Full Screen Background
+                Box(modifier = Modifier.weight(1f)) {
                 SettingsSection(
                     title = stringResource(Res.string.default_background_color),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = stringResource(Res.string.default_background_color_help),
@@ -204,6 +205,15 @@ fun BackgroundSettingsTab(
                             }
                         }
                     }
+                }
+                    // Fully colored — this background fills the entire output screen.
+                    FullScreenCoverageTv(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 38.dp, end = 6.dp)
+                            .width(112.dp)
+                            .height(84.dp)
+                    )
                 }
 
                 // Card 2: Default Lower Third Background
@@ -563,6 +573,14 @@ private fun BackgroundColumn(
                 .width(112.dp)
                 .height(84.dp)
         )
+    } else {
+        // Fully colored — this background fills the entire output screen.
+        FullScreenCoverageTv(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .width(112.dp)
+                .height(84.dp)
+        )
     }
     } // Box
 }
@@ -597,6 +615,24 @@ private fun LowerThirdCoverageTv(
                     .background(if (highlightTop) Color.Transparent else MaterialTheme.colorScheme.primary)
             )
         }
+    }
+}
+
+/**
+ * A tiny [TvScreenBox] with its entire screen filled in the theme's primary color, showing at a
+ * glance that this background setting covers the whole output screen (no lower-third split).
+ */
+@Composable
+private fun FullScreenCoverageTv(
+    modifier: Modifier = Modifier
+) {
+    TvScreenBox(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(4.dp))
+                .background(MaterialTheme.colorScheme.primary)
+        )
     }
 }
 
