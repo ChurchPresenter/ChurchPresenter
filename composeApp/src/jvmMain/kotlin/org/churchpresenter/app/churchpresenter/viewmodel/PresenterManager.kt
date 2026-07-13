@@ -179,6 +179,9 @@ class PresenterManager {
     private val _showPresenterWindow = mutableStateOf(true)
     val showPresenterWindow: State<Boolean> = _showPresenterWindow
 
+    private val _devWindowAlwaysOnTop = mutableStateOf(false)
+    val devWindowAlwaysOnTop: State<Boolean> = _devWindowAlwaysOnTop
+
     private val _selectedSlide = mutableStateOf<ImageBitmap?>(null)
     val selectedSlide: State<ImageBitmap?> = _selectedSlide
 
@@ -409,6 +412,10 @@ class PresenterManager {
 
     fun setShowPresenterWindow(show: Boolean) {
         _showPresenterWindow.value = show
+    }
+
+    fun setDevWindowAlwaysOnTop(alwaysOnTop: Boolean) {
+        _devWindowAlwaysOnTop.value = alwaysOnTop
     }
 
     fun setSelectedSlide(slide: ImageBitmap?) {

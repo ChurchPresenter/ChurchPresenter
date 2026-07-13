@@ -1636,6 +1636,8 @@ fun main() {
                                     showDeveloperMenu = !BuildConfig.IS_RELEASE || DevFlags.forceDevWindow,
                                     isPresenterWindowVisible = presenterManager.showPresenterWindow.value,
                                     onSetPresenterWindowVisible = { presenterManager.setShowPresenterWindow(it) },
+                                    isDevWindowAlwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
+                                    onSetDevWindowAlwaysOnTop = { presenterManager.setDevWindowAlwaysOnTop(it) },
                                 )
                                 // Crash recovery warning banner
                                 if (CrashReporter.didCrashLastRun && CrashReporter.videoBackgroundsDisabled) {
@@ -3336,7 +3338,7 @@ private fun PresenterWindows(
                 state = fallbackWindowState,
                 undecorated = false,
                 resizable = true,
-                alwaysOnTop = false,
+                alwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
             ) {
                 presenterOutputContent(screenAssignment, effectiveMode, null)
             }

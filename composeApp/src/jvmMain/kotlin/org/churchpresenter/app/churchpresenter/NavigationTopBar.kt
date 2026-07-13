@@ -39,6 +39,8 @@ import churchpresenter.composeapp.generated.resources.menu_close_schedule
 import churchpresenter.composeapp.generated.resources.menu_connect
 import churchpresenter.composeapp.generated.resources.menu_connect_to_instance
 import churchpresenter.composeapp.generated.resources.menu_developer
+import churchpresenter.composeapp.generated.resources.menu_developer_always_on_top
+import churchpresenter.composeapp.generated.resources.menu_developer_display
 import churchpresenter.composeapp.generated.resources.menu_developer_show_window
 import churchpresenter.composeapp.generated.resources.menu_disconnect
 import churchpresenter.composeapp.generated.resources.menu_edit
@@ -94,7 +96,9 @@ fun FrameWindowScope.NavigationTopBar(
     onContactUs: () -> Unit = {},
     showDeveloperMenu: Boolean = false,
     isPresenterWindowVisible: Boolean = true,
-    onSetPresenterWindowVisible: (Boolean) -> Unit = {}
+    onSetPresenterWindowVisible: (Boolean) -> Unit = {},
+    isDevWindowAlwaysOnTop: Boolean = false,
+    onSetDevWindowAlwaysOnTop: (Boolean) -> Unit = {}
 ) {
 
     val fileLabel = stringResource(Res.string.menu_file)
@@ -309,11 +313,18 @@ fun FrameWindowScope.NavigationTopBar(
 
         if (showDeveloperMenu) {
             Menu(stringResource(Res.string.menu_developer), mnemonic = 'D') {
-                CheckboxItem(
-                    text = stringResource(Res.string.menu_developer_show_window),
-                    checked = isPresenterWindowVisible,
-                    onCheckedChange = onSetPresenterWindowVisible
-                )
+                Menu(stringResource(Res.string.menu_developer_display), mnemonic = 'S') {
+                    CheckboxItem(
+                        text = stringResource(Res.string.menu_developer_show_window),
+                        checked = isPresenterWindowVisible,
+                        onCheckedChange = onSetPresenterWindowVisible
+                    )
+                    CheckboxItem(
+                        text = stringResource(Res.string.menu_developer_always_on_top),
+                        checked = isDevWindowAlwaysOnTop,
+                        onCheckedChange = onSetDevWindowAlwaysOnTop
+                    )
+                }
             }
         }
     }
