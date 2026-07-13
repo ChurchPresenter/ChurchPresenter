@@ -5,7 +5,7 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
-import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
+import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -726,7 +726,7 @@ private fun ScheduleItemRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 2.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -753,8 +753,12 @@ private fun ScheduleItemRow(
             // Item content
             Column(modifier = Modifier.weight(1f)
                 .then(
-                    if (item !is ScheduleItem.LabelItem) Modifier.initialPassClickable { onSelect() }
-                    else Modifier
+                    if (item !is ScheduleItem.LabelItem) {
+                        Modifier.initialPassCombinedClickable(
+                            onClick = { onSelect() },
+                            onDoubleClick = { onPresent() }
+                        )
+                    } else Modifier
                 )
             ) {
                 when (item) {
@@ -894,8 +898,26 @@ private fun ScheduleItemRow(
                     )
                 }
             }
+        }
 
-            // Action buttons
+        // Action buttons (second, more compact line)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 32.dp, end = 12.dp, bottom = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Remove button
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_close),
+                text = stringResource(Res.string.tooltip_remove),
+                onClick = onRemove,
+                buttonSize = 28.dp,
+                iconSize = 16.dp,
+                iconTint = MaterialTheme.colorScheme.error
+            )
+
             Row(
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -905,7 +927,8 @@ private fun ScheduleItemRow(
                     painter = painterResource(Res.drawable.ic_arrow_up),
                     text = stringResource(Res.string.tooltip_move_up),
                     onClick = onMoveUp,
-                    buttonSize = 32.dp,
+                    buttonSize = 28.dp,
+                    iconSize = 16.dp,
                     iconTint = MaterialTheme.colorScheme.onSurface
                 )
 
@@ -914,7 +937,8 @@ private fun ScheduleItemRow(
                     painter = painterResource(Res.drawable.ic_arrow_down),
                     text = stringResource(Res.string.tooltip_move_down),
                     onClick = onMoveDown,
-                    buttonSize = 32.dp,
+                    buttonSize = 28.dp,
+                    iconSize = 16.dp,
                     iconTint = MaterialTheme.colorScheme.onSurface
                 )
 
@@ -923,8 +947,8 @@ private fun ScheduleItemRow(
                     painter = painterResource(Res.drawable.ic_note),
                     text = stringResource(Res.string.tooltip_note),
                     onClick = { noteExpanded = !noteExpanded },
-                    buttonSize = 32.dp,
-                    iconSize = 18.dp,
+                    buttonSize = 28.dp,
+                    iconSize = 16.dp,
                     iconTint = if (note.isNotEmpty() || noteExpanded) MaterialTheme.colorScheme.primary
                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )
@@ -935,8 +959,8 @@ private fun ScheduleItemRow(
                         painter = painterResource(Res.drawable.ic_edit),
                         text = stringResource(Res.string.tooltip_edit_label),
                         onClick = onEditLabel,
-                        buttonSize = 32.dp,
-                        iconSize = 18.dp,
+                        buttonSize = 28.dp,
+                        iconSize = 14.dp,
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -948,24 +972,11 @@ private fun ScheduleItemRow(
                         painter = painterResource(Res.drawable.ic_play),
                         text = stringResource(Res.string.tooltip_go_live),
                         onClick = onPresent,
-                        buttonSize = 32.dp,
-                        iconSize = 18.dp,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        iconTint = MaterialTheme.colorScheme.onPrimary
+                        buttonSize = 28.dp,
+                        iconSize = 16.dp,
+                        iconTint = MaterialTheme.colorScheme.primary
                     )
                 }
-
-                // Remove button
-                TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_close),
-                    text = stringResource(Res.string.tooltip_remove),
-                    onClick = onRemove,
-                    buttonSize = 32.dp,
-                    iconTint = MaterialTheme.colorScheme.error
-                )
             }
         }
 

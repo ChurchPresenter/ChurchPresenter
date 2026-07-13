@@ -1025,9 +1025,9 @@ fun BibleTab(
                 }
             }
 
-            // ── Detected references — at most 5 rows tall, scrolls beyond ──
+            // ── Detected references — at most 4 rows tall, scrolls beyond ──
             val detRowHeight = 24.dp
-            val detMaxVisibleRows = 5
+            val detMaxVisibleRows = 4
             if (detectedReferences.isNotEmpty()) {
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             val detScroll = rememberScrollState()
