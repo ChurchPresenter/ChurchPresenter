@@ -44,6 +44,9 @@ import churchpresenter.composeapp.generated.resources.atem_clip_fps_hint
 import churchpresenter.composeapp.generated.resources.atem_clip_fps_unit
 import churchpresenter.composeapp.generated.resources.atem_default_clip_slot
 import churchpresenter.composeapp.generated.resources.atem_default_still_slot
+import churchpresenter.composeapp.generated.resources.atem_section_background_uploads
+import churchpresenter.composeapp.generated.resources.atem_background_slot_1
+import churchpresenter.composeapp.generated.resources.atem_background_slot_2
 import churchpresenter.composeapp.generated.resources.atem_description
 import churchpresenter.composeapp.generated.resources.atem_detected_keyers
 import churchpresenter.composeapp.generated.resources.atem_detected_keyers_unknown
@@ -64,7 +67,8 @@ import churchpresenter.composeapp.generated.resources.atem_status_disconnected
 import churchpresenter.composeapp.generated.resources.atem_status_error
 import churchpresenter.composeapp.generated.resources.atem_test_connection
 import churchpresenter.composeapp.generated.resources.atem_section_connection
-import churchpresenter.composeapp.generated.resources.atem_section_upload_defaults
+import churchpresenter.composeapp.generated.resources.atem_section_lower_third_uploads
+import churchpresenter.composeapp.generated.resources.atem_render_resolution
 import churchpresenter.composeapp.generated.resources.atem_test_connection_hint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -91,6 +95,8 @@ fun AtemSettingsTab(
     // Slots are stored 0-based (protocol) but displayed 1-based like ATEM Software Control
     var stillSlotText by remember(atem.defaultStillSlot) { mutableStateOf((atem.defaultStillSlot + 1).toString()) }
     var clipSlotText by remember(atem.defaultClipSlot) { mutableStateOf((atem.defaultClipSlot + 1).toString()) }
+    var backgroundSlot1Text by remember(atem.backgroundSlot1) { mutableStateOf((atem.backgroundSlot1 + 1).toString()) }
+    var backgroundSlot2Text by remember(atem.backgroundSlot2) { mutableStateOf((atem.backgroundSlot2 + 1).toString()) }
     var renderWidthText by remember(atem.renderWidth) { mutableStateOf(atem.renderWidth.toString()) }
     var renderHeightText by remember(atem.renderHeight) { mutableStateOf(atem.renderHeight.toString()) }
     var clipFpsText by remember(atem.clipFps) { mutableStateOf(formatAtemFps(atem.clipFps)) }
@@ -156,6 +162,50 @@ fun AtemSettingsTab(
                             modifier = Modifier.width(68.dp)
                         )
                     }
+                }
+
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = stringResource(Res.string.atem_render_resolution),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.widthIn(max = 350.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SettingsTextField(
+                        value = renderWidthText,
+                        onValueChange = { v ->
+                            renderWidthText = v
+                            v.toIntOrNull()?.let { update { copy(renderWidth = it) } }
+                        },
+                        label = stringResource(Res.string.atem_render_width),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    )
+                    SettingsTextField(
+                        value = renderHeightText,
+                        onValueChange = { v ->
+                            renderHeightText = v
+                            v.toIntOrNull()?.let { update { copy(renderHeight = it) } }
+                        },
+                        label = stringResource(Res.string.atem_render_height),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    )
+                    SettingsTextField(
+                        value = clipFpsText,
+                        onValueChange = { v ->
+                            clipFpsText = v
+                            v.toDoubleOrNull()?.let { update { copy(clipFps = it) } }
+                        },
+                        label = stringResource(Res.string.atem_clip_fps_unit),
+                        placeholder = { Text(stringResource(Res.string.atem_clip_fps_hint)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    )
                 }
 
                 Spacer(Modifier.height(8.dp))
@@ -261,48 +311,19 @@ fun AtemSettingsTab(
                 }
             }
 
-            // ── Defaults card ────────────────────────────────────────────────
-            SettingsSection(
-                title = stringResource(Res.string.atem_section_upload_defaults),
-                modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
+            // ── Lower Third Uploads + Background Uploads, side by side ──────
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Everything on one line: width / height / fps / still slot / clip slot,
-                // labels (and detected ranges) directly underneath each field
+            SettingsSection(
+                title = stringResource(Res.string.atem_section_lower_third_uploads),
+                modifier = Modifier.weight(1f)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    SettingsTextField(
-                        value = renderWidthText,
-                        onValueChange = { v ->
-                            renderWidthText = v
-                            v.toIntOrNull()?.let { update { copy(renderWidth = it) } }
-                        },
-                        label = stringResource(Res.string.atem_render_width),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                    SettingsTextField(
-                        value = renderHeightText,
-                        onValueChange = { v ->
-                            renderHeightText = v
-                            v.toIntOrNull()?.let { update { copy(renderHeight = it) } }
-                        },
-                        label = stringResource(Res.string.atem_render_height),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                    SettingsTextField(
-                        value = clipFpsText,
-                        onValueChange = { v ->
-                            clipFpsText = v
-                            v.toDoubleOrNull()?.let { update { copy(clipFps = it) } }
-                        },
-                        label = stringResource(Res.string.atem_clip_fps_unit),
-                        placeholder = { Text(stringResource(Res.string.atem_clip_fps_hint)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    )
                     SettingsTextField(
                         value = stillSlotText,
                         onValueChange = { v ->
@@ -533,6 +554,51 @@ fun AtemSettingsTab(
                         )
                     }
                 }
+            }
+
+            // Kept as its own card so background uploads (Settings → Backgrounds) are never
+            // confused with the lower-third slot fields to its left — background uploads
+            // always target one of these two slots, never the lower-third still/clip slots.
+            SettingsSection(
+                title = stringResource(Res.string.atem_section_background_uploads),
+                modifier = Modifier.weight(1f)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SettingsTextField(
+                        value = backgroundSlot1Text,
+                        onValueChange = { v ->
+                            backgroundSlot1Text = v
+                            v.toIntOrNull()?.let { update { copy(backgroundSlot1 = (it - 1).coerceAtLeast(0)) } }
+                        },
+                        label = run {
+                            val l = stringResource(Res.string.atem_background_slot_1)
+                            if (atem.detectedStillSlots > 0) "$l (1–${atem.detectedStillSlots})" else l
+                        },
+                        isError = atem.detectedStillSlots > 0 &&
+                            backgroundSlot1Text.toIntOrNull()?.let { it !in 1..atem.detectedStillSlots } != false,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    )
+                    SettingsTextField(
+                        value = backgroundSlot2Text,
+                        onValueChange = { v ->
+                            backgroundSlot2Text = v
+                            v.toIntOrNull()?.let { update { copy(backgroundSlot2 = (it - 1).coerceAtLeast(0)) } }
+                        },
+                        label = run {
+                            val l = stringResource(Res.string.atem_background_slot_2)
+                            if (atem.detectedStillSlots > 0) "$l (1–${atem.detectedStillSlots})" else l
+                        },
+                        isError = atem.detectedStillSlots > 0 &&
+                            backgroundSlot2Text.toIntOrNull()?.let { it !in 1..atem.detectedStillSlots } != false,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    )
+                }
+            }
             }
         }
     }

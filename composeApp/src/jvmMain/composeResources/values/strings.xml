@@ -1784,8 +1784,13 @@
     <string name="atem_status_connecting">Connecting…</string>
     <string name="atem_status_disconnected">Not connected</string>
     <string name="atem_status_error">Error: %1$s</string>
-    <string name="atem_default_still_slot">Default Still Slot</string>
-    <string name="atem_default_clip_slot">Default Clip Slot</string>
+    <string name="atem_default_still_slot">Still Slot</string>
+    <string name="atem_default_clip_slot">Clip Slot</string>
+    <string name="atem_section_background_uploads">Background Uploads</string>
+    <string name="atem_background_slot_1">Background Slot 1</string>
+    <string name="atem_background_slot_2">Background Slot 2</string>
+    <string name="atem_upload_background_1_tooltip">Upload to Background Slot 1</string>
+    <string name="atem_upload_background_2_tooltip">Upload to Background Slot 2</string>
     <string name="atem_render_resolution">Render Resolution</string>
     <string name="atem_render_width">Width</string>
     <string name="atem_render_height">Height</string>
@@ -1837,7 +1842,7 @@
     <string name="atem_slots_error">Could not load slots: %1$s</string>
     <string name="atem_not_configured">Configure ATEM in Settings to enable this button.</string>
     <string name="atem_section_connection">Blackmagic ATEM</string>
-    <string name="atem_section_upload_defaults">Upload Defaults</string>
+    <string name="atem_section_lower_third_uploads">Lower Third Uploads</string>
     <string name="atem_slot_unnamed">Slot %1$d</string>
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (in use)</string>

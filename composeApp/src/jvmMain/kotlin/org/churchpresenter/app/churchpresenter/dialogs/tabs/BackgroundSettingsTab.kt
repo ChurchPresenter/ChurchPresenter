@@ -20,11 +20,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -37,14 +40,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_color
 import churchpresenter.composeapp.generated.resources.background_color_option
@@ -74,6 +80,12 @@ import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.stock_library_tooltip
 import churchpresenter.composeapp.generated.resources.stock_photo_browse_tooltip
+import churchpresenter.composeapp.generated.resources.atem_upload_background_1_tooltip
+import churchpresenter.composeapp.generated.resources.atem_upload_background_2_tooltip
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
@@ -82,13 +94,22 @@ import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundConfig
 import org.churchpresenter.app.churchpresenter.dialogs.LocalLibraryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.StockMediaBrowserDialog
+import org.churchpresenter.app.churchpresenter.server.AtemClient
+import org.churchpresenter.app.churchpresenter.server.AtemFrameEncoder
+import org.churchpresenter.app.churchpresenter.server.AtemUploadStatus
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.BackgroundSettingsViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import java.awt.RenderingHints
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
+import kotlin.math.roundToInt
 
 @Composable
 fun BackgroundSettingsTab(
@@ -185,6 +206,7 @@ fun BackgroundSettingsTab(
                                 onPexelsApiKeyChange = onPexelsApiKeyChange,
                                 pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
                                 onPixabayApiKeyChange = onPixabayApiKeyChange,
+                                atemSettings = settings.atemSettings,
                                 modifier = Modifier.fillMaxWidth()
                             )
                             OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
@@ -301,6 +323,7 @@ fun BackgroundSettingsTab(
                                 onPexelsApiKeyChange = onPexelsApiKeyChange,
                                 pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
                                 onPixabayApiKeyChange = onPixabayApiKeyChange,
+                                atemSettings = settings.atemSettings,
                                 modifier = Modifier.fillMaxWidth()
                             )
                             OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
@@ -372,7 +395,8 @@ fun BackgroundSettingsTab(
                                 pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
                                 onPexelsApiKeyChange = onPexelsApiKeyChange,
                                 pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
-                                onPixabayApiKeyChange = onPixabayApiKeyChange
+                                onPixabayApiKeyChange = onPixabayApiKeyChange,
+                                atemSettings = settings.atemSettings
                             )
                         }
                         Column(modifier = Modifier.weight(1f)) {
@@ -384,7 +408,8 @@ fun BackgroundSettingsTab(
                                 pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
                                 onPexelsApiKeyChange = onPexelsApiKeyChange,
                                 pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
-                                onPixabayApiKeyChange = onPixabayApiKeyChange
+                                onPixabayApiKeyChange = onPixabayApiKeyChange,
+                                atemSettings = settings.atemSettings
                             )
                         }
                     }
@@ -408,7 +433,8 @@ fun BackgroundSettingsTab(
                                 pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
                                 onPexelsApiKeyChange = onPexelsApiKeyChange,
                                 pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
-                                onPixabayApiKeyChange = onPixabayApiKeyChange
+                                onPixabayApiKeyChange = onPixabayApiKeyChange,
+                                atemSettings = settings.atemSettings
                             )
                         }
                         Column(modifier = Modifier.weight(1f)) {
@@ -420,7 +446,8 @@ fun BackgroundSettingsTab(
                                 pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
                                 onPexelsApiKeyChange = onPexelsApiKeyChange,
                                 pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
-                                onPixabayApiKeyChange = onPixabayApiKeyChange
+                                onPixabayApiKeyChange = onPixabayApiKeyChange,
+                                atemSettings = settings.atemSettings
                             )
                         }
                     }
@@ -440,7 +467,8 @@ private fun BackgroundColumn(
     pexelsApiKey: String = "",
     onPexelsApiKeyChange: (String) -> Unit = {},
     pixabayApiKey: String = "",
-    onPixabayApiKeyChange: (String) -> Unit = {}
+    onPixabayApiKeyChange: (String) -> Unit = {},
+    atemSettings: AtemSettings = AtemSettings()
 ) {
     val backgroundDefaultStr      = stringResource(Res.string.background_default)
     val backgroundColorStr        = stringResource(Res.string.background_color_option)
@@ -512,6 +540,7 @@ private fun BackgroundColumn(
                 onPexelsApiKeyChange = onPexelsApiKeyChange,
                 pixabayApiKey = pixabayApiKey,
                 onPixabayApiKeyChange = onPixabayApiKeyChange,
+                atemSettings = atemSettings,
                 modifier = Modifier.fillMaxWidth()
             )
             OpacitySlider(config.backgroundOpacity) { onConfigChange(config.copy(backgroundOpacity = it)) }
@@ -770,6 +799,73 @@ private fun OpacitySlider(
     }
 }
 
+/**
+ * Scales [src] to cover a [dw]×[dh] box (uniform scale by the larger of the two axis ratios,
+ * so the result never falls short of either dimension) then crops the centered overflow — no
+ * distortion, unlike a plain non-uniform stretch to the exact target size.
+ */
+private fun coverCropArgb(src: IntArray, sw: Int, sh: Int, dw: Int, dh: Int): IntArray {
+    val srcImg = BufferedImage(sw, sh, BufferedImage.TYPE_INT_ARGB)
+    srcImg.setRGB(0, 0, sw, sh, src, 0, sw)
+    val scale = maxOf(dw.toDouble() / sw, dh.toDouble() / sh)
+    val scaledW = (sw * scale).roundToInt().coerceAtLeast(dw)
+    val scaledH = (sh * scale).roundToInt().coerceAtLeast(dh)
+    val scaledImg = BufferedImage(scaledW, scaledH, BufferedImage.TYPE_INT_ARGB)
+    val g = scaledImg.createGraphics()
+    try {
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+        g.drawImage(srcImg, 0, 0, scaledW, scaledH, null)
+    } finally {
+        g.dispose()
+    }
+    val cropX = (scaledW - dw) / 2
+    val cropY = (scaledH - dh) / 2
+    val dst = IntArray(dw * dh)
+    scaledImg.getRGB(cropX, cropY, dw, dh, dst, 0, dw)
+    return dst
+}
+
+/**
+ * Uploads [imagePath] as a single still frame to the ATEM media pool, into [slot] — one of the
+ * two background slots ([AtemSettings.backgroundSlot1]/[AtemSettings.backgroundSlot2]), separate from the
+ * lower-third still/clip slots uploaded from [org.churchpresenter.app.churchpresenter.tabs.LowerThird].
+ * Publishes progress through the shared [AtemUploadStatus] so it's visible anywhere that already
+ * observes it (e.g. the Lower Third tab's upload bar, if open).
+ */
+private suspend fun uploadBackgroundToAtem(atemSettings: AtemSettings, imagePath: String, slot: Int) {
+    val file = File(imagePath)
+    val name = file.nameWithoutExtension
+    val argb = withContext(Dispatchers.IO) {
+        val img = ImageIO.read(file) ?: throw Exception("Could not read image file")
+        val w = atemSettings.renderWidth
+        val h = atemSettings.renderHeight
+        val src = IntArray(img.width * img.height)
+        img.getRGB(0, 0, img.width, img.height, src, 0, img.width)
+        if (img.width == w && img.height == h) src
+        else coverCropArgb(src, img.width, img.height, w, h)
+    }
+    val frame = withContext(Dispatchers.IO) {
+        AtemFrameEncoder.encodeFrame(atemSettings.renderWidth, atemSettings.renderHeight, argb)
+    }
+    val id = AtemUploadStatus.begin(name, clip = false, slot + 1)
+    try {
+        val client = AtemClient(atemSettings.host, atemSettings.port)
+        withContext(Dispatchers.IO) { client.connect() }
+        try {
+            client.uploadStillEncoded(slot, frame, name) { p -> AtemUploadStatus.progress(id, p) }
+        } finally {
+            client.disconnect()
+        }
+        AtemUploadStatus.complete(id)
+        delay(800)
+        AtemUploadStatus.clear(id)
+    } catch (e: Exception) {
+        AtemUploadStatus.fail(id, e.message)
+        throw e
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TooltipIconButton(
@@ -796,6 +892,54 @@ private fun TooltipIconButton(
     }
 }
 
+/**
+ * One of the two independent "upload background to ATEM slot N" buttons in [ImagePickerRow].
+ * Each carries its own busy/error state so clicking one never disables or affects the other —
+ * an operator can push the same image to both background slots back to back.
+ */
+@Composable
+private fun AtemUploadIconButton(
+    badge: String,
+    tooltip: String,
+    imagePath: String,
+    atemSettings: AtemSettings,
+    slot: Int
+) {
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    if (busy) {
+        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+    } else {
+        Box {
+            TooltipIconButton(Icons.Default.CloudUpload, error ?: tooltip) {
+                error = null
+                busy = true
+                scope.launch {
+                    try {
+                        uploadBackgroundToAtem(atemSettings, imagePath, slot)
+                    } catch (e: Exception) {
+                        error = e.message ?: tooltip
+                    } finally {
+                        busy = false
+                    }
+                }
+            }
+            Text(
+                text = badge,
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                color = MaterialTheme.colorScheme.onPrimary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 4.dp, end = 4.dp)
+                    .size(12.dp)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+            )
+        }
+    }
+}
+
 @Composable
 private fun ImagePickerRow(
     imagePath: String,
@@ -804,12 +948,15 @@ private fun ImagePickerRow(
     onPexelsApiKeyChange: (String) -> Unit,
     pixabayApiKey: String,
     onPixabayApiKeyChange: (String) -> Unit,
+    atemSettings: AtemSettings = AtemSettings(),
     modifier: Modifier = Modifier
 ) {
     var showBrowser by remember { mutableStateOf(false) }
     var showLibrary by remember { mutableStateOf(false) }
     val browseTooltip = stringResource(Res.string.stock_photo_browse_tooltip)
     val libraryTooltip = stringResource(Res.string.stock_library_tooltip)
+    val uploadTooltip1 = stringResource(Res.string.atem_upload_background_1_tooltip)
+    val uploadTooltip2 = stringResource(Res.string.atem_upload_background_2_tooltip)
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -822,6 +969,22 @@ private fun ImagePickerRow(
         )
         TooltipIconButton(Icons.Default.PhotoLibrary, libraryTooltip) { showLibrary = true }
         TooltipIconButton(Icons.Default.Search, browseTooltip) { showBrowser = true }
+        if (atemSettings.host.isNotBlank() && imagePath.isNotBlank()) {
+            AtemUploadIconButton(
+                badge = "1",
+                tooltip = uploadTooltip1,
+                imagePath = imagePath,
+                atemSettings = atemSettings,
+                slot = atemSettings.backgroundSlot1
+            )
+            AtemUploadIconButton(
+                badge = "2",
+                tooltip = uploadTooltip2,
+                imagePath = imagePath,
+                atemSettings = atemSettings,
+                slot = atemSettings.backgroundSlot2
+            )
+        }
     }
     if (showBrowser) {
         StockMediaBrowserDialog(

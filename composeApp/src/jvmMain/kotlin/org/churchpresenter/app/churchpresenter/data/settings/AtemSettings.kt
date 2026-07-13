@@ -40,5 +40,10 @@ data class AtemSettings(
     /** Downstream keyer to use when [useDownstreamKey] is on (0-based; shown 1-based). */
     val dskIndex: Int = 0,
     /** Downstream keyer count from the last test connection; 0 = unknown. */
-    val detectedDownstreamKeyers: Int = 0
+    val detectedDownstreamKeyers: Int = 0,
+    /** Still-store slot for the first background image upload button (0-based; shown 1-based).
+     *  Separate from [defaultStillSlot] so a background upload never overwrites the lower-third still. */
+    val backgroundSlot1: Int = 1,
+    /** Still-store slot for the second background image upload button (0-based; shown 1-based). */
+    val backgroundSlot2: Int = 2
 )
