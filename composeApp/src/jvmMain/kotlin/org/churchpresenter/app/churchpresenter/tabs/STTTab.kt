@@ -161,6 +161,14 @@ fun STTTab(
                 )
             }
 
+            ActionIconButton(
+                onClick = { showSettingsDialog = true },
+                tooltipText = stringResource(Res.string.tooltip_stt_settings),
+                icon = Icons.Default.Tune,
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+
             // Go Live
             GoLiveButton(
                 onClick = {
@@ -168,14 +176,6 @@ fun STTTab(
                 },
                 enabled = connected && !isLive,
                 tooltipText = stringResource(Res.string.stt_go_live)
-            )
-
-            ActionIconButton(
-                onClick = { showSettingsDialog = true },
-                tooltipText = stringResource(Res.string.tooltip_stt_settings),
-                icon = Icons.Default.Tune,
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
 
