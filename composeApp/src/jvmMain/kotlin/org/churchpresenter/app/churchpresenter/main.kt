@@ -1986,6 +1986,7 @@ fun main() {
                                 AboutDialog(
                                     isVisible = showAboutDialog,
                                     onDismiss = { showAboutDialog = false; dialogDismissSignal++ },
+                                    appSettings = appSettings,
                                     theme = theme
                                 )
                                 ContactUsDialog(

@@ -148,6 +148,9 @@
     <string name="converter_window_title">ChurchPresenter Converter</string>
     <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
     <string name="open_crash_logs">Open Crash Logs</string>
+    <string name="save_diagnostic_info">Save Diagnostic Info…</string>
+    <string name="diagnostic_info_saved">Diagnostic info saved successfully.</string>
+    <string name="diagnostic_info_save_failed">Failed to save diagnostic info.</string>
     <string name="open_converter">Converter</string>
     <string name="report_bug">Report a Bug</string>
     <string name="submit_feature_request">Feature Request</string>
