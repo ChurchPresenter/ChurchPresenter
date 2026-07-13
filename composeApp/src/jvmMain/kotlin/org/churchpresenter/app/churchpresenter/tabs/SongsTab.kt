@@ -252,8 +252,10 @@ fun SongsTab(
     var favoritesExpanded by remember { mutableStateOf(true) }
     val favorites by viewModel.favorites
 
-    // Track which song/section/line is currently live on the presenter
-    var liveSongIndex by remember { mutableStateOf(-1) }
+    // Track which song/section/line is currently live on the presenter.
+    // liveSongId is the song's stable songId (not a list index) so it survives the
+    // filtered list being rebuilt by search — see AGENT.md's "Song Edit While Live" note.
+    var liveSongId by remember { mutableStateOf<String?>(null) }
     var liveSectionIndex by remember { mutableStateOf(0) }
     var liveLineIndex by remember { mutableStateOf(0) }
 
@@ -276,7 +278,7 @@ fun SongsTab(
         viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it.copy(bpm = bpm)) }
         // Record song display for statistics — only when the song is actually live
         // (or being sent live), and only when a different song is presented.
-        val isDifferentSong = idx != liveSongIndex
+        val isDifferentSong = items.getOrNull(idx)?.songId?.let { it != liveSongId } ?: false
         if ((goLive || isPresenting) && isDifferentSong) {
             if (idx in items.indices) {
                 val song = items[idx]
@@ -309,7 +311,7 @@ fun SongsTab(
                 onInstanceLinkSendSongSection?.invoke(song.number, viewModel.selectedSectionIndex.value, viewModel.selectedLineIndex.value)
             }
         }
-        liveSongIndex = viewModel.selectedSongIndex.value
+        liveSongId = items.getOrNull(idx)?.songId
         liveSectionIndex = viewModel.selectedSectionIndex.value
         liveLineIndex = viewModel.selectedLineIndex.value
     }
@@ -1045,7 +1047,7 @@ fun SongsTab(
                                 )
                                 .finalPassClickable {
                                     viewModel.selectSong(index)
-                                    if (isPresenting && liveSongIndex >= 0) {
+                                    if (isPresenting && liveSongId != null) {
                                         viewModel.selectSection(-1)
                                     }
                                     tabFocusRequester.requestFocus()
@@ -1120,7 +1122,7 @@ fun SongsTab(
                                                 .width(with(density) { colWidth(colId).toDp() })
                                                 .initialPassClickable {
                                                     viewModel.selectSong(index)
-                                                    if (isPresenting && liveSongIndex >= 0) {
+                                                    if (isPresenting && liveSongId != null) {
                                                         viewModel.selectSection(-1)
                                                     }
                                                     tabFocusRequester.requestFocus()
@@ -1568,13 +1570,16 @@ fun SongsTab(
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
 
-            // "Back to Live" button — shown when browsing a different song than what's live
-            if (isPresenting && liveSongIndex >= 0 && selectedSongIndex != liveSongIndex) {
+            // "Back to Live" button — shown when browsing a different song than what's live.
+            // Compares songId, not index/position, so this stays correct even when the live
+            // song has been filtered out of the visible list by a search.
+            val currentSongIdForLiveCheck = filteredSongs.getOrNull(selectedSongIndex)?.songId
+            if (isPresenting && liveSongId != null && currentSongIdForLiveCheck != liveSongId) {
                 Button(
                     shape = RoundedCornerShape(6.dp),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                     onClick = {
-                        viewModel.selectSong(liveSongIndex)
+                        liveSongId?.let { viewModel.selectSongById(it) }
                         viewModel.selectSection(liveSectionIndex)
                         viewModel.setLineIndex(liveLineIndex)
                     },
@@ -1701,7 +1706,7 @@ fun SongsTab(
                                 onLineIndexChanged(0)
                                 onSongItemSelected(ts)
                                 isTitleSlideSelected = true
-                                liveSongIndex = selectedSongIndex
+                                liveSongId = currentSong.songId
                                 liveSectionIndex = -1
                                 liveLineIndex = 0
                             }
@@ -1867,8 +1872,7 @@ fun SongsTab(
         onDismiss = { showEditDialog = false },
         onSave = { updatedSong ->
             songToEdit?.let { oldSong ->
-                val wasLive = isPresenting && liveSongIndex >= 0 &&
-                    viewModel.filteredSongItems.value.getOrNull(liveSongIndex)?.songId == oldSong.songId
+                val wasLive = isPresenting && liveSongId == oldSong.songId
                 val success = viewModel.updateSong(oldSong, updatedSong)
                 if (success) {
                     songToEdit = null

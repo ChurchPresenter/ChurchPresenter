@@ -357,6 +357,9 @@ class SongsViewModel(
         return true
     }
 
+    /** Selects a song by its stable songId alone, clearing filters if needed to reveal it. */
+    fun selectSongById(songId: String): Boolean = selectSongByDetails(0, "", "", songId)
+
     fun selectSection(index: Int) {
         _selectedSectionIndex.value = index
         _selectedLineIndex.value = 0
