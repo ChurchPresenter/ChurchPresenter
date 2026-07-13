@@ -4,6 +4,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,11 +25,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -66,13 +70,13 @@ import churchpresenter.composeapp.generated.resources.gradient_enabled
 import churchpresenter.composeapp.generated.resources.gradient_position
 import churchpresenter.composeapp.generated.resources.gradient_top_color
 import churchpresenter.composeapp.generated.resources.gradient_top_opacity
+import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.stock_library_tooltip
 import churchpresenter.composeapp.generated.resources.stock_photo_browse_tooltip
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
@@ -83,6 +87,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.LocalLibraryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.StockMediaBrowserDialog
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.BackgroundSettingsViewModel
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -127,7 +132,8 @@ fun BackgroundSettingsTab(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
-                    BackgroundTypeRadioGroup(
+                    Spacer(modifier = Modifier.height(6.dp))
+                    BackgroundTypeDropdown(
                         selectedType = settings.backgroundSettings.defaultBackgroundType,
                         onTypeSelected = { type ->
                             onSettingsChange { s ->
@@ -146,6 +152,7 @@ fun BackgroundSettingsTab(
                         ),
                         disabledTypes = if (!isVlcAvailable) setOf(Constants.BACKGROUND_VIDEO) else emptySet()
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
                     when (settings.backgroundSettings.defaultBackgroundType) {
                         Constants.BACKGROUND_COLOR -> {
                             ColorPickerField(
@@ -161,21 +168,25 @@ fun BackgroundSettingsTab(
                             }
                         }
                         Constants.BACKGROUND_IMAGE -> {
-                            SettingRow(stringResource(Res.string.background_image)) {
-                                ImagePickerRow(
-                                    imagePath = settings.backgroundSettings.defaultBackgroundImage,
-                                    onImagePathChange = { path ->
-                                        onSettingsChange { s ->
-                                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundImage = path))
-                                        }
-                                    },
-                                    pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
-                                    onPexelsApiKeyChange = onPexelsApiKeyChange,
-                                    pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
-                                    onPixabayApiKeyChange = onPixabayApiKeyChange,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                            Text(
+                                text = stringResource(Res.string.background_image),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            ImagePickerRow(
+                                imagePath = settings.backgroundSettings.defaultBackgroundImage,
+                                onImagePathChange = { path ->
+                                    onSettingsChange { s ->
+                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundImage = path))
+                                    }
+                                },
+                                pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                onPixabayApiKeyChange = onPixabayApiKeyChange,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                             OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
                                     s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
@@ -183,21 +194,25 @@ fun BackgroundSettingsTab(
                             }
                         }
                         Constants.BACKGROUND_VIDEO -> {
-                            SettingRow(stringResource(Res.string.background_video)) {
-                                VideoPickerRow(
-                                    videoPath = settings.backgroundSettings.defaultBackgroundVideo,
-                                    onVideoPathChange = { path ->
-                                        onSettingsChange { s ->
-                                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundVideo = path))
-                                        }
-                                    },
-                                    pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
-                                    onPexelsApiKeyChange = onPexelsApiKeyChange,
-                                    pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
-                                    onPixabayApiKeyChange = onPixabayApiKeyChange,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                            Text(
+                                text = stringResource(Res.string.background_video),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            VideoPickerRow(
+                                videoPath = settings.backgroundSettings.defaultBackgroundVideo,
+                                onVideoPathChange = { path ->
+                                    onSettingsChange { s ->
+                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundVideo = path))
+                                    }
+                                },
+                                pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                onPixabayApiKeyChange = onPixabayApiKeyChange,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                             OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
                                     s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
@@ -211,8 +226,8 @@ fun BackgroundSettingsTab(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(top = 38.dp, end = 6.dp)
-                            .width(112.dp)
-                            .height(84.dp)
+                            .width(100.dp)
+                            .height(75.dp)
                     )
                 }
 
@@ -227,7 +242,8 @@ fun BackgroundSettingsTab(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
-                    BackgroundTypeRadioGroup(
+                    Spacer(modifier = Modifier.height(6.dp))
+                    BackgroundTypeDropdown(
                         selectedType = settings.backgroundSettings.defaultLowerThirdBackgroundType,
                         onTypeSelected = { type ->
                             onSettingsChange { s ->
@@ -248,6 +264,7 @@ fun BackgroundSettingsTab(
                         ),
                         disabledTypes = if (!isVlcAvailable) setOf(Constants.BACKGROUND_VIDEO) else emptySet()
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
                     when (settings.backgroundSettings.defaultLowerThirdBackgroundType) {
                         Constants.BACKGROUND_COLOR -> {
                             ColorPickerField(
@@ -267,21 +284,25 @@ fun BackgroundSettingsTab(
                             }
                         }
                         Constants.BACKGROUND_IMAGE -> {
-                            SettingRow(stringResource(Res.string.background_image)) {
-                                ImagePickerRow(
-                                    imagePath = settings.backgroundSettings.defaultLowerThirdBackgroundImage,
-                                    onImagePathChange = { path ->
-                                        onSettingsChange { s ->
-                                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundImage = path))
-                                        }
-                                    },
-                                    pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
-                                    onPexelsApiKeyChange = onPexelsApiKeyChange,
-                                    pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
-                                    onPixabayApiKeyChange = onPixabayApiKeyChange,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                            Text(
+                                text = stringResource(Res.string.background_image),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            ImagePickerRow(
+                                imagePath = settings.backgroundSettings.defaultLowerThirdBackgroundImage,
+                                onImagePathChange = { path ->
+                                    onSettingsChange { s ->
+                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundImage = path))
+                                    }
+                                },
+                                pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                onPixabayApiKeyChange = onPixabayApiKeyChange,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                             OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
                                     s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
@@ -289,21 +310,25 @@ fun BackgroundSettingsTab(
                             }
                         }
                         Constants.BACKGROUND_VIDEO -> {
-                            SettingRow(stringResource(Res.string.background_video)) {
-                                VideoPickerRow(
-                                    videoPath = settings.backgroundSettings.defaultLowerThirdBackgroundVideo,
-                                    onVideoPathChange = { path ->
-                                        onSettingsChange { s ->
-                                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundVideo = path))
-                                        }
-                                    },
-                                    pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
-                                    onPexelsApiKeyChange = onPexelsApiKeyChange,
-                                    pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
-                                    onPixabayApiKeyChange = onPixabayApiKeyChange,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                            Text(
+                                text = stringResource(Res.string.background_video),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            VideoPickerRow(
+                                videoPath = settings.backgroundSettings.defaultLowerThirdBackgroundVideo,
+                                onVideoPathChange = { path ->
+                                    onSettingsChange { s ->
+                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundVideo = path))
+                                    }
+                                },
+                                pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
+                                onPexelsApiKeyChange = onPexelsApiKeyChange,
+                                pixabayApiKey = settings.stockPhotoSettings.pixabayApiKey,
+                                onPixabayApiKeyChange = onPixabayApiKeyChange,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                             OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
                                     s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
@@ -318,8 +343,8 @@ fun BackgroundSettingsTab(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(top = 38.dp, end = 6.dp)
-                            .width(112.dp)
-                            .height(84.dp)
+                            .width(100.dp)
+                            .height(75.dp)
                     )
                 }
             }
@@ -441,9 +466,9 @@ private fun BackgroundColumn(
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
-    Spacer(modifier = Modifier.height(4.dp))
+    Spacer(modifier = Modifier.height(6.dp))
 
-    BackgroundTypeRadioGroup(
+    BackgroundTypeDropdown(
         selectedType = config.backgroundType,
         onTypeSelected = { type ->
             if (type == Constants.BACKGROUND_GRADIENT) {
@@ -474,31 +499,39 @@ private fun BackgroundColumn(
             OpacitySlider(config.backgroundOpacity) { onConfigChange(config.copy(backgroundOpacity = it)) }
         }
         Constants.BACKGROUND_IMAGE -> {
-            SettingRow(stringResource(Res.string.background_image)) {
-                ImagePickerRow(
-                    imagePath = config.backgroundImage,
-                    onImagePathChange = { onConfigChange(config.copy(backgroundImage = it)) },
-                    pexelsApiKey = pexelsApiKey,
-                    onPexelsApiKeyChange = onPexelsApiKeyChange,
-                    pixabayApiKey = pixabayApiKey,
-                    onPixabayApiKeyChange = onPixabayApiKeyChange,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            Text(
+                text = stringResource(Res.string.background_image),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            ImagePickerRow(
+                imagePath = config.backgroundImage,
+                onImagePathChange = { onConfigChange(config.copy(backgroundImage = it)) },
+                pexelsApiKey = pexelsApiKey,
+                onPexelsApiKeyChange = onPexelsApiKeyChange,
+                pixabayApiKey = pixabayApiKey,
+                onPixabayApiKeyChange = onPixabayApiKeyChange,
+                modifier = Modifier.fillMaxWidth()
+            )
             OpacitySlider(config.backgroundOpacity) { onConfigChange(config.copy(backgroundOpacity = it)) }
         }
         Constants.BACKGROUND_VIDEO -> {
-            SettingRow(stringResource(Res.string.background_video)) {
-                VideoPickerRow(
-                    videoPath = config.backgroundVideo,
-                    onVideoPathChange = { onConfigChange(config.copy(backgroundVideo = it)) },
-                    pexelsApiKey = pexelsApiKey,
-                    onPexelsApiKeyChange = onPexelsApiKeyChange,
-                    pixabayApiKey = pixabayApiKey,
-                    onPixabayApiKeyChange = onPixabayApiKeyChange,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            Text(
+                text = stringResource(Res.string.background_video),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            VideoPickerRow(
+                videoPath = config.backgroundVideo,
+                onVideoPathChange = { onConfigChange(config.copy(backgroundVideo = it)) },
+                pexelsApiKey = pexelsApiKey,
+                onPexelsApiKeyChange = onPexelsApiKeyChange,
+                pixabayApiKey = pixabayApiKey,
+                onPixabayApiKeyChange = onPixabayApiKeyChange,
+                modifier = Modifier.fillMaxWidth()
+            )
             OpacitySlider(config.backgroundOpacity) { onConfigChange(config.copy(backgroundOpacity = it)) }
         }
         else -> {
@@ -570,16 +603,16 @@ private fun BackgroundColumn(
             highlightTop = false,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .width(112.dp)
-                .height(84.dp)
+                .width(100.dp)
+                .height(75.dp)
         )
     } else {
         // Fully colored — this background fills the entire output screen.
         FullScreenCoverageTv(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .width(112.dp)
-                .height(84.dp)
+                .width(100.dp)
+                .height(75.dp)
         )
     }
     } // Box
@@ -637,7 +670,7 @@ private fun FullScreenCoverageTv(
 }
 
 @Composable
-private fun BackgroundTypeRadioGroup(
+private fun BackgroundTypeDropdown(
     selectedType: String,
     onTypeSelected: (String) -> Unit,
     defaultLabel: String,
@@ -664,26 +697,52 @@ private fun BackgroundTypeRadioGroup(
             if (gradientLabel != null) add(Constants.BACKGROUND_GRADIENT to gradientLabel)
         }
     }
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        entries.forEach { (type, label) ->
-            val isDisabled = type in disabledTypes
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                RadioButton(
-                    selected = selectedType == type,
-                    onClick = { onTypeSelected(type) },
+    var expanded by remember { mutableStateOf(false) }
+    val selectedLabel = entries.firstOrNull { it.first == selectedType }?.second ?: selectedType
+
+    Box(
+        modifier = Modifier
+            .heightIn(min = 36.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+            .padding(horizontal = 11.dp, vertical = 8.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = selectedLabel,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.width(4.dp))
+            Icon(
+                painter = painterResource(Res.drawable.ic_arrow_down),
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            entries.forEach { (type, label) ->
+                val isDisabled = type in disabledTypes
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = if (isDisabled) "$label (Install VLC)" else label,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (isDisabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    else MaterialTheme.colorScheme.onSurface
+                        )
+                    },
                     enabled = !isDisabled,
-                    modifier = Modifier.size(28.dp),
-                    colors = RadioButtonDefaults.colors()
-                )
-                Text(
-                    text = if (isDisabled) "$label (Install VLC)" else label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isDisabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(start = 4.dp)
+                    onClick = {
+                        onTypeSelected(type)
+                        expanded = false
+                    }
                 )
             }
         }
