@@ -195,7 +195,9 @@ object Constants {
 
 ## 🧹 Cleanup TODO List
 
-> Last audited: March 8, 2026
+> Last audited: July 13, 2026 (scoped review of commits `67b49f16..HEAD`, 204 commits /
+> 2026-07-01 to 2026-07-13 — zero violations found; full-tree audit last confirmed clean at
+> `adf83cc3`, 2026-07-06)
 
 ### Previously Flagged — Now Resolved ✅
 
@@ -222,6 +224,9 @@ object Constants {
 - Singular/plural verse API in PresenterManager — convenience accessors
 - `System.err.println` in VideoPlayer/WebsitePresenter/LowerThirdSettingsTab — error diagnostics for VLC/JCEF/WebView issues
 - Emoji strings — not translatable, no benefit to moving to resources
+- `println` in the PresentationEngine submodule's `DumpKeynote.kt`/`DumpTiming.kt`/`MakeSampleDeck.kt` — these are CLI diagnostic tools (`dumpKeynote`/`dumpTiming`/`makeSampleDeck` gradle tasks) whose entire purpose is printing to stdout, not stray debug output
+- Hardcoded `"%"` suffix on dynamic values (`SourcePropertiesPanel.kt`, `QARemoteDialog.kt`, `STTSettingsDialog.kt`, `MediaTab.kt`) — attempted extracting to a `unit_percent` string resource (matching `unit_s`/`unit_ms`) on 2026-07-13, but `./gradlew compileKotlinJvm` reproducibly failed with `Unresolved reference` on the new symbol in this dev environment, even for a throwaway dummy string unrelated to `%` — ruled out every caching layer (full `composeApp/build`/root `build/`/`.kotlin` wipe, Gradle + Kotlin daemon restarts, `--no-build-cache --rerun-tasks`, two fully separate invocations) without finding the cause, so the resource extraction was reverted and the literal `"%"` left in place. Worth retrying once the underlying tooling issue is understood — the percent sign is identical across all 14 supported locales regardless, so this was never a translation-correctness bug, just a minor consistency gap with `unit_s`/`unit_ms`.
+- `CompanionSatelliteViewModel` passed as a parameter into `CompanionSurfaceTab`/`CompanionSurfacePanel` (added 2026-07-06, commit `ff9e1ef5`) — a new instance of the same already-documented `MainDesktop.kt` top-down ViewModel wiring, not a fresh isolated violation
 
 ---
 
