@@ -52,6 +52,8 @@ import churchpresenter.composeapp.generated.resources.secondary_bible_reference
 import churchpresenter.composeapp.generated.resources.secondary_bible_text
 import churchpresenter.composeapp.generated.resources.show_abbreviation
 import churchpresenter.composeapp.generated.resources.show_in_lower_third
+import churchpresenter.composeapp.generated.resources.swap_bibles
+import churchpresenter.composeapp.generated.resources.ic_swap
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.fade_in
@@ -69,6 +71,7 @@ import churchpresenter.composeapp.generated.resources.vertical_alignment
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 
+import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
@@ -95,6 +98,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleSettingsViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 
@@ -185,6 +189,17 @@ private fun LeftColumn(
                     onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBible = fileName)) }
                 }
             )
+            if (settings.bibleSettings.secondaryBible.isNotEmpty()) {
+                ActionIconButton(
+                    onClick = {
+                        onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) }
+                    },
+                    tooltipText = stringResource(Res.string.swap_bibles),
+                    painter = painterResource(Res.drawable.ic_swap),
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary
+                )
+            }
             DropdownSettingsField(
                 label = stringResource(Res.string.secondary_bible),
                 value = if (settings.bibleSettings.secondaryBible.isEmpty()) noneStr
