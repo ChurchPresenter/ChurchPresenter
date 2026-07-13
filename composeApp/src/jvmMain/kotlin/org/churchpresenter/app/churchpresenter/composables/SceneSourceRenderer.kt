@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
@@ -90,20 +91,21 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 fun SceneSourceRenderer(
     source: SceneSource,
     modifier: Modifier = Modifier,
-    isPresenter: Boolean = false
+    isPresenter: Boolean = false,
+    fontScale: Float = 1f
 ) {
     when (source) {
         is SceneSource.ImageSource -> ImageSourceContent(source, modifier)
-        is SceneSource.TextSource -> TextSourceContent(source, modifier)
+        is SceneSource.TextSource -> TextSourceContent(source, modifier, fontScale)
         is SceneSource.ColorSource -> ColorSourceContent(source, modifier)
         is SceneSource.VideoSource -> VideoSourceContent(source, modifier, isPresenter)
         is SceneSource.BrowserSource -> BrowserSourceContent(source, modifier, isPresenter)
-        is SceneSource.ShapeSource -> ShapeSourceContent(source, modifier)
-        is SceneSource.ClockSource -> ClockSourceContent(source, modifier)
+        is SceneSource.ShapeSource -> ShapeSourceContent(source, modifier, fontScale)
+        is SceneSource.ClockSource -> ClockSourceContent(source, modifier, fontScale)
         is SceneSource.QRCodeSource -> QRCodeSourceContent(source, modifier)
         is SceneSource.CameraSource -> CameraSourceContent(source, modifier, isPresenter)
         is SceneSource.ScreenCaptureSource -> ScreenCaptureSourceContent(source, modifier)
-        is SceneSource.BibleSource -> BibleSourceContent(source, modifier)
+        is SceneSource.BibleSource -> BibleSourceContent(source, modifier, fontScale)
     }
 }
 
@@ -141,7 +143,7 @@ private fun ImageSourceContent(source: SceneSource.ImageSource, modifier: Modifi
 }
 
 @Composable
-private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier) {
+private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier, fontScale: Float = 1f) {
     val bgColor = if (source.backgroundColor.equals("#00000000", ignoreCase = true))
         Color.Transparent
     else
@@ -167,12 +169,12 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
         Text(
             text = source.text,
             color = textColor,
-            fontSize = source.fontSize.sp,
+            fontSize = (source.fontSize * fontScale).sp,
             fontFamily = fontFamily,
             fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
             textAlign = align,
-            lineHeight = (source.fontSize * lineHeightMultiplier).sp,
+            lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(4.dp)
         )
@@ -393,10 +395,12 @@ private fun BrowserSourceContent(
 }
 
 @Composable
-private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifier) {
+private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifier, fontScale: Float = 1f) {
     val strokeColor = parseHexColor(source.strokeColor).copy(alpha = source.strokeOpacity)
     val fillColor = parseHexColor(source.fillColor).copy(alpha = source.fillOpacity)
-    val strokeWidth = source.strokeWidth
+    val density = LocalDensity.current
+    val strokeWidth = with(density) { (source.strokeWidth * fontScale).dp.toPx() }
+    val arrowMinPx = with(density) { (12f * fontScale).dp.toPx() }
     val stroke = Stroke(
         width = strokeWidth,
         cap = StrokeCap.Round,
@@ -472,7 +476,7 @@ private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifi
                     cap = StrokeCap.Round
                 )
                 // Arrowhead
-                val arrowSize = (strokeWidth * 4f).coerceAtLeast(12f)
+                val arrowSize = (strokeWidth * 4f).coerceAtLeast(arrowMinPx)
                 val dx = endPt.x - startPt.x
                 val dy = endPt.y - startPt.y
                 val angle = kotlin.math.atan2(dy, dx)
@@ -508,7 +512,7 @@ private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifi
 }
 
 @Composable
-private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifier) {
+private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifier, fontScale: Float = 1f) {
     val bgColor = parseHexColor(source.backgroundColor)
     val fontColor = parseHexColor(source.fontColor)
     val fontFamily = systemFontFamilyOrDefault(source.fontFamily)
@@ -566,7 +570,7 @@ private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifi
         Text(
             text = displayText,
             color = fontColor,
-            fontSize = source.fontSize.sp,
+            fontSize = (source.fontSize * fontScale).sp,
             fontFamily = fontFamily,
             fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal
         )
@@ -856,7 +860,7 @@ private fun findMacWindowBounds(title: String): Rectangle? {
 }
 
 @Composable
-private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifier) {
+private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifier, fontScale: Float = 1f) {
     val bgColor = if (source.backgroundColor.equals("#00000000", ignoreCase = true))
         Color.Transparent
     else
@@ -891,12 +895,12 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
             Text(
                 text = source.verseText.ifEmpty { "Select a verse..." },
                 color = if (source.verseText.isEmpty()) Color.Gray else textColor,
-                fontSize = source.fontSize.sp,
+                fontSize = (source.fontSize * fontScale).sp,
                 fontFamily = fontFamily,
                 fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
                 fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
                 textAlign = align,
-                lineHeight = (source.fontSize * lineHeightMultiplier).sp,
+                lineHeight = (source.fontSize * fontScale * lineHeightMultiplier).sp,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -905,7 +909,7 @@ private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifi
                 Text(
                     text = source.referenceText,
                     color = refColor,
-                    fontSize = source.referenceFontSize.sp,
+                    fontSize = (source.referenceFontSize * fontScale).sp,
                     fontFamily = fontFamily,
                     fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,
                     fontStyle = if (source.referenceItalic) FontStyle.Italic else FontStyle.Normal,
