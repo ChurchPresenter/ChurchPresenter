@@ -439,10 +439,14 @@ class ScheduleViewModel(
         italic: Boolean = false,
         underline: Boolean = false,
         shadow: Boolean = false,
+        shadowColor: String = "#000000",
+        shadowSize: Int = 100,
+        shadowOpacity: Int = 78,
         horizontalAlignment: String = "center",
         position: String = "center",
         animationType: String = "SLIDE_FROM_BOTTOM",
         animationDuration: Int = 500,
+        loopCount: Int = 0,
         isTimer: Boolean = false,
         timerHours: Int = 0,
         timerMinutes: Int = 0,
@@ -452,7 +456,8 @@ class ScheduleViewModel(
         timerMode: String = "duration",
         targetHour: Int = 0,
         targetMinute: Int = 0,
-        targetSecond: Int = 0
+        targetSecond: Int = 0,
+        liveClockFormat: String = "HH:mm:ss"
     ) {
         addOrPush(
             ScheduleItem.AnnouncementItem(
@@ -466,10 +471,14 @@ class ScheduleViewModel(
                 italic = italic,
                 underline = underline,
                 shadow = shadow,
+                shadowColor = shadowColor,
+                shadowSize = shadowSize,
+                shadowOpacity = shadowOpacity,
                 horizontalAlignment = horizontalAlignment,
                 position = position,
                 animationType = animationType,
                 animationDuration = animationDuration,
+                loopCount = loopCount,
                 isTimer = isTimer,
                 timerHours = timerHours,
                 timerMinutes = timerMinutes,
@@ -479,7 +488,8 @@ class ScheduleViewModel(
                 timerMode = timerMode,
                 targetHour = targetHour,
                 targetMinute = targetMinute,
-                targetSecond = targetSecond
+                targetSecond = targetSecond,
+                liveClockFormat = liveClockFormat
             )
         )
     }

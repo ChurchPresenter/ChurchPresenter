@@ -103,10 +103,14 @@ sealed class ScheduleItem {
         val italic: Boolean = false,
         val underline: Boolean = false,
         val shadow: Boolean = false,
+        val shadowColor: String = "#000000",
+        val shadowSize: Int = 100,
+        val shadowOpacity: Int = 78,
         val horizontalAlignment: String = "center",
         val position: String = "center",
         val animationType: String = "SLIDE_FROM_BOTTOM",
         val animationDuration: Int = 500,
+        val loopCount: Int = 0,
         val isTimer: Boolean = false,
         val timerHours: Int = 0,
         val timerMinutes: Int = 0,
@@ -117,6 +121,7 @@ sealed class ScheduleItem {
         val targetHour: Int = 0,
         val targetMinute: Int = 0,
         val targetSecond: Int = 0,
+        val liveClockFormat: String = "HH:mm:ss",
         override val displayText: String = if (isTimer) {
             when (timerMode) {
                 Constants.TIMER_MODE_CLOCK -> "Until %02d:%02d:%02d".format(targetHour, targetMinute, targetSecond)

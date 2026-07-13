@@ -91,6 +91,7 @@ import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.tooltip_settings
 import churchpresenter.composeapp.generated.resources.tab_visibility
 import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.timer_expired
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -361,7 +362,7 @@ fun MainDesktop(
     var selectedMediaItem by remember { mutableStateOf<ScheduleItem.MediaItem?>(null) }
     var selectedLowerThirdItem by remember { mutableStateOf<ScheduleItem.LowerThirdItem?>(null) }
     var selectedWebsiteItem by remember { mutableStateOf<ScheduleItem.WebsiteItem?>(null) }
-    var scheduleTimerVersion by remember { mutableStateOf(0) }
+    val timerExpiredDefaultLabel = stringResource(Res.string.timer_expired)
 
     var showCrosswordTab by remember { mutableStateOf(false) }
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
@@ -1308,10 +1309,14 @@ fun MainDesktop(
                                         italic              = item.italic,
                                         underline           = item.underline,
                                         shadow              = item.shadow,
+                                        shadowColor         = item.shadowColor,
+                                        shadowSize          = item.shadowSize,
+                                        shadowOpacity       = item.shadowOpacity,
                                         horizontalAlignment = item.horizontalAlignment,
                                         position            = item.position,
                                         animationType       = item.animationType,
                                         animationDuration   = item.animationDuration,
+                                        loopCount           = item.loopCount,
                                         timerHours          = item.timerHours,
                                         timerMinutes        = item.timerMinutes,
                                         timerSeconds        = item.timerSeconds,
@@ -1320,12 +1325,23 @@ fun MainDesktop(
                                         timerMode           = item.timerMode,
                                         targetHour          = item.targetHour,
                                         targetMinute        = item.targetMinute,
-                                        targetSecond        = item.targetSecond
+                                        targetSecond        = item.targetSecond,
+                                        liveClockFormat     = item.liveClockFormat
                                     )
                                 )
                             }
                             if (item.isTimer) {
-                                scheduleTimerVersion++
+                                presenterManager.goLiveAnnouncementTimer(
+                                    timerMode = item.timerMode,
+                                    timerHours = item.timerHours,
+                                    timerMinutes = item.timerMinutes,
+                                    timerSeconds = item.timerSeconds,
+                                    targetHour = item.targetHour,
+                                    targetMinute = item.targetMinute,
+                                    targetSecond = item.targetSecond,
+                                    liveClockFormat = item.liveClockFormat,
+                                    timerExpiredText = item.timerExpiredText.ifBlank { timerExpiredDefaultLabel }
+                                )
                             } else {
                                 presenterManager.setAnnouncementText(item.text)
                             }
@@ -1353,6 +1369,13 @@ fun MainDesktop(
                             presenterManager.setAnnouncementText("${item.word} (${item.transliteration})\n\n${item.definition}")
                             presenterManager.setShowPresenterWindow(true)
                             presenting(Presenting.ANNOUNCEMENTS)
+                        },
+                        onPresentScene = { item ->
+                            sceneViewModel.selectScene(item.sceneId)
+                            val scene = sceneViewModel.scenes.find { it.id == item.sceneId }
+                            presenterManager.setActiveScene(scene)
+                            selectTab(Tabs.CANVAS)
+                            presenting(Presenting.CANVAS)
                         },
                         onItemClick = { item ->
                             when (item) {
@@ -1406,10 +1429,14 @@ fun MainDesktop(
                                                 italic              = item.italic,
                                                 underline           = item.underline,
                                                 shadow              = item.shadow,
+                                                shadowColor         = item.shadowColor,
+                                                shadowSize          = item.shadowSize,
+                                                shadowOpacity       = item.shadowOpacity,
                                                 horizontalAlignment = item.horizontalAlignment,
                                                 position            = item.position,
                                                 animationType       = item.animationType,
                                                 animationDuration   = item.animationDuration,
+                                                loopCount           = item.loopCount,
                                                 timerHours          = item.timerHours,
                                                 timerMinutes        = item.timerMinutes,
                                                 timerSeconds        = item.timerSeconds,
@@ -1418,7 +1445,8 @@ fun MainDesktop(
                                                 timerMode           = item.timerMode,
                                                 targetHour          = item.targetHour,
                                                 targetMinute        = item.targetMinute,
-                                                targetSecond        = item.targetSecond
+                                                targetSecond        = item.targetSecond,
+                                                liveClockFormat     = item.liveClockFormat
                                             )
                                         )
                                     }
@@ -1780,9 +1808,8 @@ fun MainDesktop(
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
                                 presenterManager = presenterManager,
-                                scheduleTimerVersion = scheduleTimerVersion,
                                 onAddToSchedule = { settings ->
-                                    val isTimer = settings.timerMode == "clock" ||
+                                    val isTimer = settings.timerMode != Constants.TIMER_MODE_DURATION ||
                                         settings.timerHours > 0 || settings.timerMinutes > 0 || settings.timerSeconds > 0
                                     currentScheduleActions.addAnnouncement(
                                         settings.text,
@@ -1794,10 +1821,14 @@ fun MainDesktop(
                                         settings.italic,
                                         settings.underline,
                                         settings.shadow,
+                                        settings.shadowColor,
+                                        settings.shadowSize,
+                                        settings.shadowOpacity,
                                         settings.horizontalAlignment,
                                         settings.position,
                                         settings.animationType,
                                         settings.animationDuration,
+                                        settings.loopCount,
                                         isTimer,
                                         settings.timerHours,
                                         settings.timerMinutes,
@@ -1807,7 +1838,8 @@ fun MainDesktop(
                                         settings.timerMode,
                                         settings.targetHour,
                                         settings.targetMinute,
-                                        settings.targetSecond
+                                        settings.targetSecond,
+                                        settings.liveClockFormat
                                     )
                                 }
                             )

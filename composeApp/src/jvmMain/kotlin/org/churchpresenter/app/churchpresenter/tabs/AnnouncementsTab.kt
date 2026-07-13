@@ -187,8 +187,7 @@ fun AnnouncementsTab(
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     presenterManager: PresenterManager? = null,
-    onAddToSchedule: ((settings: AnnouncementsSettings) -> Unit)? = null,
-    scheduleTimerVersion: Int = 0
+    onAddToSchedule: ((settings: AnnouncementsSettings) -> Unit)? = null
 ) {
     val viewModel = remember { AnnouncementsViewModel() }
 
@@ -254,22 +253,6 @@ fun AnnouncementsTab(
     val hrLabel           = stringResource(Res.string.timer_hours)
     val minLabel          = stringResource(Res.string.timer_minutes)
     val secLabel          = stringResource(Res.string.timer_seconds)
-
-    // Auto-start timer when triggered from the schedule panel. The actual ticking (and pushing to
-    // the live output/Stage Monitor) now happens on presenterManager itself — see
-    // PresenterManager.startAnnouncementCountdown/CountUp/SpecificTime/ClockDisplay — so it keeps
-    // running even after this tab is switched away from.
-    LaunchedEffect(scheduleTimerVersion) {
-        if (scheduleTimerVersion == 0) return@LaunchedEffect
-        viewModel.syncFromSettings(appSettings.announcementsSettings)
-        if (presenterManager == null) return@LaunchedEffect
-        when (viewModel.timerMode) {
-            Constants.TIMER_MODE_COUNT_UP -> presenterManager.startAnnouncementCountUp(viewModel.countUpElapsed)
-            Constants.TIMER_MODE_CLOCK -> presenterManager.startAnnouncementSpecificTime(viewModel.targetHour, viewModel.targetMinute, viewModel.targetSecond)
-            Constants.TIMER_MODE_CLOCK_DISPLAY -> presenterManager.startAnnouncementClockDisplay(viewModel.liveClockFormat)
-            else -> presenterManager.startAnnouncementCountdown(viewModel.timerRemaining, viewModel.timerExpiredText.ifBlank { timerExpiredLabel })
-        }
-    }
 
     // All four timer/clock modes now tick on presenterManager (see above), so "is it running" and
     // "what's the current value" must be read from there rather than from the tab's own ViewModel,

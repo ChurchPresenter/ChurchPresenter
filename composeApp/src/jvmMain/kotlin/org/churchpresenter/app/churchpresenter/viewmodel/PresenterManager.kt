@@ -27,6 +27,7 @@ import org.churchpresenter.app.churchpresenter.models.Question
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
+import org.churchpresenter.app.churchpresenter.utils.Constants
 
 class PresenterManager {
 
@@ -818,6 +819,43 @@ class PresenterManager {
                 delay(1000L)
             }
         }
+    }
+
+    /**
+     * Starts (or resumes, if already ticking) the given timer/clock config and marks it live,
+     * pushing a value immediately instead of waiting for the ticker's next natural tick. Must work
+     * regardless of whether the Announcements tab has ever been composed this session — e.g.
+     * presenting a Timer schedule item straight from the Schedule tab, before Announcements has
+     * ever been opened.
+     */
+    fun goLiveAnnouncementTimer(
+        timerMode: String,
+        timerHours: Int,
+        timerMinutes: Int,
+        timerSeconds: Int,
+        targetHour: Int,
+        targetMinute: Int,
+        targetSecond: Int,
+        liveClockFormat: String,
+        timerExpiredText: String
+    ) {
+        val skipRestart = _announcementTickerActive.value &&
+            (timerMode == Constants.TIMER_MODE_DURATION || timerMode == Constants.TIMER_MODE_COUNT_UP)
+        if (!skipRestart) {
+            when (timerMode) {
+                Constants.TIMER_MODE_COUNT_UP -> startAnnouncementCountUp(0)
+                Constants.TIMER_MODE_CLOCK -> startAnnouncementSpecificTime(targetHour, targetMinute, targetSecond)
+                Constants.TIMER_MODE_CLOCK_DISPLAY -> startAnnouncementClockDisplay(liveClockFormat)
+                else -> startAnnouncementCountdown(timerHours * 3600 + timerMinutes * 60 + timerSeconds, timerExpiredText)
+            }
+        }
+        _announcementTickerLive.value = true
+        val liveText = if (timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) {
+            java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern(liveClockFormat))
+        } else {
+            AnnouncementsViewModel.formatTimer(_timerRemainingSeconds.value)
+        }
+        setAnnouncementText(liveText)
     }
 
     /** Pauses/stops whichever announcement ticker is active, optionally pinning the mirrored remaining value (e.g. on Reset). */
