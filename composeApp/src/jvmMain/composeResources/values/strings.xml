@@ -145,6 +145,16 @@
     <string name="menu_developer_always_on_top">Always on Top</string>
     <string name="menu_developer_style_editor">Animation Style Editor…</string>
     <string name="style_editor_window_title">Animation Style Editor</string>
+    <string name="menu_developer_memory_monitor">Memory Monitor…</string>
+    <string name="memory_monitor_window_title">Memory Monitor</string>
+    <string name="memory_monitor_heap">Heap</string>
+    <string name="memory_monitor_non_heap">Non-heap</string>
+    <string name="memory_monitor_used">Used</string>
+    <string name="memory_monitor_committed">Committed</string>
+    <string name="memory_monitor_max">Max</string>
+    <string name="memory_monitor_gc">GC collections</string>
+    <string name="memory_monitor_force_gc">Force GC</string>
+    <string name="memory_monitor_native_note">JVM heap/non-heap only — native memory not shown</string>
     <string name="menu_getting_started">Getting Started…</string>
     <string name="menu_about">About</string>
     <string name="about_title">About Church Presenter</string>

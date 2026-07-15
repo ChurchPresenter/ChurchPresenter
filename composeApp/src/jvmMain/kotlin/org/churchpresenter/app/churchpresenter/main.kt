@@ -95,6 +95,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
+import org.churchpresenter.app.churchpresenter.dialogs.MemoryMonitorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.SetupWizardDialog
@@ -813,6 +814,7 @@ fun main() {
         var showConverterWindow by remember { mutableStateOf(false) }
         var showLottieGenWindow by remember { mutableStateOf(false) }
         var showStyleEditorWindow by remember { mutableStateOf(false) }
+        var showMemoryMonitorWindow by remember { mutableStateOf(false) }
         // Secret keypress unlock (press D seven times) — reveals the Developer menu in a
         // packaged build for this session only. See MainDesktop's onPreviewKeyEvent.
         var developerMenuUnlocked by remember { mutableStateOf(false) }
@@ -1645,6 +1647,7 @@ fun main() {
                                     isDevWindowAlwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
                                     onSetDevWindowAlwaysOnTop = { presenterManager.setDevWindowAlwaysOnTop(it) },
                                     onOpenStyleEditor = { showStyleEditorWindow = true },
+                                    onOpenMemoryMonitor = { showMemoryMonitorWindow = true },
                                 )
                                 // Crash recovery warning banner
                                 if (CrashReporter.didCrashLastRun && CrashReporter.videoBackgroundsDisabled) {
@@ -2018,6 +2021,12 @@ fun main() {
                                         onFileSaved = lottieGenOnFileSaved,
                                         canvasWidth = screenBounds.width,
                                         canvasHeight = screenBounds.height
+                                    )
+                                }
+                                if (showMemoryMonitorWindow) {
+                                    MemoryMonitorWindow(
+                                        theme = theme,
+                                        onClose = { showMemoryMonitorWindow = false }
                                     )
                                 }
                                 if (showStyleEditorWindow) {
