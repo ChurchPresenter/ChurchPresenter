@@ -813,6 +813,9 @@ fun main() {
         var showConverterWindow by remember { mutableStateOf(false) }
         var showLottieGenWindow by remember { mutableStateOf(false) }
         var showStyleEditorWindow by remember { mutableStateOf(false) }
+        // Secret keypress unlock (press D seven times) — reveals the Developer menu in a
+        // packaged build for this session only. See MainDesktop's onPreviewKeyEvent.
+        var developerMenuUnlocked by remember { mutableStateOf(false) }
         var lottieGenOutputDir by remember { mutableStateOf<java.io.File?>(null) }
         var lottieGenOnFileSaved by remember { mutableStateOf<(() -> Unit)?>(null) }
         var pendingUpdateResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
@@ -1633,9 +1636,10 @@ fun main() {
                                         selectedScheduleItemId = null
                                     },
                                     // Mirrors the devWindowedFallback gate below (main.kt) and in
-                                    // ProjectionSettingsTab.kt — only a dev build or the forced flag
-                                    // gets this menu.
-                                    showDeveloperMenu = !BuildConfig.IS_RELEASE || DevFlags.forceDevWindow,
+                                    // ProjectionSettingsTab.kt — a dev build or the forced flag
+                                    // gets this menu, plus the secret D-x7 keypress unlock
+                                    // (developerMenuUnlocked, session-only) for packaged builds.
+                                    showDeveloperMenu = !BuildConfig.IS_RELEASE || DevFlags.forceDevWindow || developerMenuUnlocked,
                                     isPresenterWindowVisible = presenterManager.showPresenterWindow.value,
                                     onSetPresenterWindowVisible = { presenterManager.setShowPresenterWindow(it) },
                                     isDevWindowAlwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
@@ -1884,7 +1888,8 @@ fun main() {
                                     },
                                     sttManager = sttManager,
                                     dialogDismissSignal = dialogDismissSignal,
-                                    companionSatelliteViewModel = companionSatelliteViewModel
+                                    companionSatelliteViewModel = companionSatelliteViewModel,
+                                    onRequestDeveloperMenuUnlock = { developerMenuUnlocked = true }
                                 )
                                 OptionsDialog(
                                     isVisible = showOptionsDialog,

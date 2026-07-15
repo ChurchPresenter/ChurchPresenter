@@ -342,6 +342,9 @@ fun MainDesktop(
     sttManager: STTManager? = null,
     dialogDismissSignal: Int = 0,
     companionSatelliteViewModel: CompanionSatelliteViewModel,
+    // Secret keypress unlock — invoked after D is pressed seven times in a row, revealing
+    // the Developer menu in packaged builds for this session (see onPreviewKeyEvent below).
+    onRequestDeveloperMenuUnlock: () -> Unit = {},
 ) {
     // ScheduleViewModel lives inside ScheduleTab — MainDesktop drives it via callbacks.
     // rememberUpdatedState ensures toolbar lambdas always read the latest actions without
@@ -675,6 +678,9 @@ fun MainDesktop(
         )
     }
     var crosswordProgress by remember { mutableStateOf(0) }
+
+    // Secret Developer-menu unlock: the letter D pressed seven times in a row
+    var developerUnlockProgress by remember { mutableStateOf(0) }
 
     // Notify server whenever the picture folder, image list, or image order changes
     val pictureImages = picturesViewModel.images
@@ -1069,6 +1075,15 @@ fun MainDesktop(
                                     }
                                 } else {
                                     crosswordProgress = if (keyEvent.key == crosswordSequence[0]) 1 else 0
+                                }
+
+                                // Secret unlock: press D seven times in a row to reveal the
+                                // Developer menu (upper- or lower-case; Key.D is Shift-agnostic).
+                                developerUnlockProgress =
+                                    if (keyEvent.key == Key.D) developerUnlockProgress + 1 else 0
+                                if (developerUnlockProgress >= 7) {
+                                    developerUnlockProgress = 0
+                                    onRequestDeveloperMenuUnlock()
                                 }
 
                                 false
