@@ -94,6 +94,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkToastHost
 import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
+import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.SetupWizardDialog
@@ -811,6 +812,7 @@ fun main() {
         var showContactDialog by remember { mutableStateOf(false) }
         var showConverterWindow by remember { mutableStateOf(false) }
         var showLottieGenWindow by remember { mutableStateOf(false) }
+        var showStyleEditorWindow by remember { mutableStateOf(false) }
         var lottieGenOutputDir by remember { mutableStateOf<java.io.File?>(null) }
         var lottieGenOnFileSaved by remember { mutableStateOf<(() -> Unit)?>(null) }
         var pendingUpdateResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
@@ -1638,6 +1640,7 @@ fun main() {
                                     onSetPresenterWindowVisible = { presenterManager.setShowPresenterWindow(it) },
                                     isDevWindowAlwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
                                     onSetDevWindowAlwaysOnTop = { presenterManager.setDevWindowAlwaysOnTop(it) },
+                                    onOpenStyleEditor = { showStyleEditorWindow = true },
                                 )
                                 // Crash recovery warning banner
                                 if (CrashReporter.didCrashLastRun && CrashReporter.videoBackgroundsDisabled) {
@@ -2010,6 +2013,12 @@ fun main() {
                                         onFileSaved = lottieGenOnFileSaved,
                                         canvasWidth = screenBounds.width,
                                         canvasHeight = screenBounds.height
+                                    )
+                                }
+                                if (showStyleEditorWindow) {
+                                    StyleEditorWindow(
+                                        theme = theme,
+                                        onClose = { showStyleEditorWindow = false }
                                     )
                                 }
                                 UpdateAvailableDialog(

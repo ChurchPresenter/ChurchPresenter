@@ -908,6 +908,135 @@ lottie-web. Not yet verified: an actual ATEM upload (no device configured on the
 
 **Build Status**: ✅ Compiles successfully, zero warnings.
 
+## Animation Style Editor — Developer Tool for Authoring LottieGen Styles (July 2026)
+
+**What**: a developer-only "video editor for animation styles" living entirely in the
+ChurchPresenter-LottieGen submodule. Devs author a lower-third style as a declarative
+`StyleSpec` JSON document (slot-based layout, elements, keyframe tracks) with instant live
+preview, a scrubbable timeline, and a 12-cell test matrix (3 alignments × logo × bg) — no
+rebuild per iteration. Finished specs ship COMPILED into releases like the 12 hand-written
+styles (no runtime downloads, per explicit user decision): commit the spec into
+`src/main/resources/styles/` + register per **Path B in the submodule's ADDING_ANIMATIONS.md**
+(map entry `SpecStyleGenerator.fromResource(...)`, enum, Strings getter, base label).
+
+**Architecture** (all in the submodule):
+- `lottiegen.spec` (no Compose): `StyleSpec.kt` (@Serializable sealed model, classDiscriminator
+  "type", `formatVersion` — field names FROZEN once a spec ships), `SpecJson.kt`,
+  `SpecLayout.kt` (`SpecLayoutContext` — the generic slot-layout engine replacing each style's
+  bespoke geometry: slots laid out from the alignment edge inward, flow coordinates with +x =
+  inward auto-mirrored on right alignment, per-alignment overrides, color ROLES not literals),
+  `SpecStyleGenerator.kt` (implements `StyleGenerator`, renders specs through the exact
+  LottieBuilder/buildKeyframes/ShapeHelpers/TextHelpers pipeline; also used by the editor
+  preview — one interpreter for both).
+- `lottiegen.editor` (+ `.editor.ui`): `EditorState` interface seam (UI never sees the
+  ViewModel class), `EditorViewModel` (300 ms debounced regenerate via a new behavior-identical
+  `LottieGenerator.generate(config, style)` overload; matrix cells generated off-thread only
+  while the matrix view is showing), `StyleEditorApp`, panels (ElementListPanel,
+  ElementInspector, LayoutInspector, TimelinePanel, TestConfigPanel, TestMatrixView,
+  ProjectDialogs, EditorPreview — a deliberate hoisted-state copy of PreviewPanel; the original
+  is untouched). Projects persist one-JSON-per-spec in
+  `~/.churchpresenter/churchpresenter-lottiegen/style-specs/` (`StyleSpecStorage`, PresetStorage
+  pattern).
+- **User-facing generator unchanged**: styles 1-12 stay compiled classes; the only
+  `LottieGenerator` change is the delegating overload + `registeredIds`.
+
+**Entry points**: main app **Developer → Animation Style Editor…** (menu item inside the
+pre-existing gated Developer menu block; window flag + `StyleEditorWindow` clone of the
+LottieGenWindow pattern — the only 4 main-repo touches are NavigationTopBar.kt, AboutDialog.kt,
+main.kt, strings.xml) and standalone `./gradlew run --args="--editor"` from the submodule.
+
+**Style 1 port** (`src/main/resources/styles/style1_bar_port.json`): the expressiveness proof
+and the editor's bundled template — NOT registered; users still get compiled Style1Bar for id
+"1". Fidelity insight from the port: Style1's background "edge anchor trick" (position=edge,
+anchor=±bgW/2) is mathematically identical to center growth (position=baseX, anchor=0) — the
+fidelity test therefore compares layer **origin (position − anchor)**, not raw positions.
+Slide-in start offsets are expressed in element-relative units (documented approximation);
+everything at rest matches exactly.
+
+**Tests** (submodule-only, `./gradlew test` from the submodule root — NOT part of the main-app
+build, which mounts src/main only): SpecRoundTripTest (serialization, every sealed subtype,
+format-version rejection), SpecLayoutTest (slot math == Style1 formulas across alignments,
+collapse rules, mirroring), SpecFidelityTest (port vs compiled Style1: identical layer
+names/order/types/td/tt + rest origins across 15 config combos).
+
+**Gotcha worth remembering**: `var matrixMode` with a private setter + `fun setMatrixMode(Boolean)`
+in the same class is a JVM platform declaration clash — the MAIN app's compile accepted it but
+the submodule's own standalone build failed. Renamed to `setMatrixModeEnabled`. Always compile
+BOTH builds (`./gradlew compileKotlinJvm` at repo root AND `sh gradlew build` in the submodule)
+when touching submodule code.
+
+**Verified hands-on** (System Events + screenshots): standalone `--editor` launch; embedded
+launch via the real Developer menu in the running main app (inherits host theme); element
+selection → inspector sections; timeline rows with property-colored keyframe diamonds at the
+port's exact percentages + scrub line tracking playback; Test-matrix mode rendering all 12
+static cells with correct per-alignment mirroring; mask-reveal visibly clipping mid-slide text;
+user-facing generator regression (opens unchanged, Style 1 renders). Automated fidelity gate
+green. **Not verified hands-on**: save/open/export dialog flows (typing automation skipped —
+logic compile-checked), release-packaged build hiding the Developer menu (the new Item sits
+inside the pre-existing gated block, so it inherits the already-verified gate).
+
+**Files**: all new code in the submodule (`spec/`, `editor/`, `persistence/StyleSpecStorage.kt`,
+`resources/styles/style1_bar_port.json`, `src/test/`, ADDING_ANIMATIONS.md Path B, README.md);
+main repo: NavigationTopBar.kt, dialogs/AboutDialog.kt, main.kt, strings.xml
+(`menu_developer_style_editor`, `style_editor_window_title`).
+
+**All 12 classic styles ported to editable specs (same month)** — user asked to edit the
+originals in the editor. Every `StyleN*.kt` now has a bundled spec port
+(`resources/styles/styleN_*_port.json`) listed as a template in the editor's New dialog
+(labels come from `AnimationStyle`); the Export dialog lists registered ids+labels so the next
+free id is obvious. **Compiled classes remain what users get for ids 1-12** — ports are
+editing templates only. Each port was authored by a parallel subagent and is verified by its
+own `SpecPortNTest` (11 new tests): layer structure (names/order/ty/td/tt) matches the
+compiled original exactly across the config matrix; rest origins (position − anchor) exact
+except deviations documented per-test (mostly cfg-derived constants baked at the default
+config — the spec model can't reference cfg.borderThickness/lineSpacing/logoSize in
+sizes/offsets). Model additions that made the ports possible: `PlacementOverride.hidden`
+(per-alignment element variants — THE recurring technique: duplicate same-named elements,
+exactly one builds per alignment), `FillSpec/StrokeSpec.alphaFactor`, `TextElement.colorRole`,
+`MaskRevealSpec` padEm/widthEm/heightEm/offsets/skewXEm/`tracks` (animated wipe masks — Style 9's
+two-tone diagonal wipe works via dual text copies), `LogoElement.sizeEm`. Consolidated
+remaining gaps (documented in ADDING_ANIMATIONS.md; escape hatch = Path A): negated visibility
+rules, config-derived lengths, stroke FromConfig factor (0.1 only — Style 8 wants 0.15, 11
+wants 0.7; Style 12's port worked around via a constant STROKE_WIDTH track), logo scale basis
+(max(w,h) vs height-fit), justify not spec-controllable, masks text-extent-anchored only.
+Hands-on verified: New dialog lists Blank + 12 ports + vine demo; News Badge port renders its
+band/badge/slashes/ticker faithfully mid-animation. Suite: 28 tests green.
+
+**Code-free style shipping via registry (same month)** — user asked if exports auto-ship.
+Now they effectively do: `resources/styles/registry.json` (id → name → spec resource) is
+overlaid onto the compiled dispatch map at `LottieGenerator` init (registry wins per id =
+code-free replacement of a compiled style; corrupt spec skipped with stderr, never breaks
+others), and the generator's picker is driven by the new `model/StyleCatalog.kt` (12 enum
+entries + registry ids; label prefers a `style_<id>` bundle key, else "Style N — Name" from
+the spec — ControlPanel is the ONE user-facing file touched, behavior identical with an empty
+registry). The editor's Export dialog gained **Register into build**
+(`editor/BuildRegistrar.kt`): when running from a source checkout (cwd sentinel = a styles dir
+containing registry.json, covering both standalone and embedded dev runs) it writes the spec +
+registry upsert directly into the repo — the dev only commits the two files. Packaged builds
+keep the manual FileDialog flow. Export dialog also gained a style-name field with a live
+picker-label preview, and the registered-styles list (labels only — the id is already in the
+label). Registry-registered styles appear as New-dialog templates automatically. Tests:
+`StyleRegistryTest` (round-trip, overlay replace/add/corrupt-skip, catalog merge rules) — suite
+at 32. ADDING_ANIMATIONS.md Path B registration rewritten (enum/Strings/label steps now
+optional localization only).
+
+**Vine/organic extensions (same month)**, prompted by "can it do a growing vine?" — all
+additive, formatVersion still 1 (nothing had shipped): `PathElement` (bezier `CurveVertex`
+with tangent handles — the flow sign flips tangent x too, so curve handedness mirrors on right
+alignment, covered by SpecVineTest), `AnimProperty.TRIM` ([startFrac, endFrac] → Lottie Trim
+Paths `tm` via a new `makeCurvedPath`/`makeTrimPath` in ShapeHelpers — the draw-on primitive;
+the buildKeyframes mirror makes exits retract the vine), `Placement.pivotXEm/pivotYEm`
+(rotation/scale orbit a pivot; implemented as anchor + identical position shift, preserving the
+position−anchor origin invariant the fidelity test checks), `StrokeSpec.dashEm` (dash/gap `d`
+array), `RepeatSpec` on shape elements (`rp` repeater — **verified rendering in Compottie**
+incl. the end-opacity fade, via a throwaway probe project opened in the live editor), and SCALE
+tracks accepting [sx, sy]. Bundled second template `resources/styles/demo_vine.json` (New →
+From vine demo) exercises curves+trim+pivot+stagger and was verified drawing on hands-on in the
+preview. Tests: 17 total (SpecVineTest new: trim keyframes hit expected frames, tangent
+mirroring, leaf stagger/pivot). The export dialog's id-validation error path was also verified
+hands-on (incidentally). Both docs updated (ADDING_ANIMATIONS Path B item 5, design brief's
+motion palette now includes draw-on/pivot/dash/repeat).
+
 ## Browser Source Output Overhaul (July 2026)
 
 **Problem**: the Browser Source path (offscreen `ImageComposeScene` → pixel-diff dirty-rect →

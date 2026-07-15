@@ -40,6 +40,7 @@ import churchpresenter.composeapp.generated.resources.lottie_gen_window_title
 import churchpresenter.composeapp.generated.resources.open_crash_logs
 import churchpresenter.composeapp.generated.resources.report_bug
 import churchpresenter.composeapp.generated.resources.save_diagnostic_info
+import churchpresenter.composeapp.generated.resources.style_editor_window_title
 import churchpresenter.composeapp.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -52,6 +53,7 @@ import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import ui.App as ConverterApp
 import lottiegen.App as LottieGenApp
+import lottiegen.editor.StyleEditorApp
 import java.awt.Desktop
 import java.awt.Window as AwtWindow
 import java.io.File
@@ -222,6 +224,20 @@ fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onF
     ) {
         AppThemeWrapper(theme = theme) {
             LottieGenApp(outputDir = outputDir, onFileSaved = onFileSaved, canvasWidth = canvasWidth, canvasHeight = canvasHeight)
+        }
+    }
+}
+
+@Composable
+fun StyleEditorWindow(theme: ThemeMode, onClose: () -> Unit) {
+    Window(
+        onCloseRequest = onClose,
+        title = stringResource(Res.string.style_editor_window_title),
+        icon = painterResource(Res.drawable.ic_app_icon),
+        state = rememberWindowState(width = 1500.dp, height = 950.dp)
+    ) {
+        AppThemeWrapper(theme = theme) {
+            StyleEditorApp(standalone = false)
         }
     }
 }
