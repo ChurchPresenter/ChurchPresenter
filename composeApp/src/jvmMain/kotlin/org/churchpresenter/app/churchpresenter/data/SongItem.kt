@@ -13,7 +13,8 @@ data class SongItem(
     val lyrics: List<String> = emptyList(),
     val secondaryTitle: String = "",
     val secondaryLyrics: List<String> = emptyList(),
-    val sourceFile: String = ""
+    val sourceFile: String = "",
+    val ccliNumber: String = ""
 ) {
     /** Stable unique ID across songbooks: "songbook::number" or "songbook::title" when no number */
     val songId: String get() = if (number.isNotBlank()) "$songbook::$number" else "$songbook::$title"

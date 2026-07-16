@@ -5,6 +5,7 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
+import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -48,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isShiftPressed
@@ -78,6 +82,7 @@ import churchpresenter.composeapp.generated.resources.ic_redo
 import churchpresenter.composeapp.generated.resources.ic_save
 import churchpresenter.composeapp.generated.resources.ic_undo
 import churchpresenter.composeapp.generated.resources.pause_duration_ms
+import churchpresenter.composeapp.generated.resources.planning_center_import_title
 import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.schedule_note_placeholder
 import churchpresenter.composeapp.generated.resources.tooltip_note
@@ -106,9 +111,12 @@ import churchpresenter.composeapp.generated.resources.tooltip_remove_from_schedu
 import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.app.churchpresenter.data.settings.PlanningCenterSettings
+import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
@@ -181,7 +189,12 @@ fun ScheduleTab(
     onSelectedItemChanged: (String?) -> Unit = {},
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
     onAddLabel: () -> Unit = {},
-    onAddWebsite: () -> Unit = {}
+    onAddWebsite: () -> Unit = {},
+    theme: ThemeMode = ThemeMode.SYSTEM,
+    planningCenterSettings: PlanningCenterSettings = PlanningCenterSettings(),
+    onPlanningCenterTokensRefreshed: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long) -> Unit = { _, _, _ -> },
+    onPlanningCenterConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit = { _, _, _, _ -> },
+    onPlanningCenterDisconnect: () -> Unit = {}
 ) {
     val onScheduleChangedState = rememberUpdatedState(onScheduleChanged)
     // Use the provided view model, or fall back to a locally-owned one.
@@ -264,6 +277,7 @@ fun ScheduleTab(
 
     val scheduleItems = viewModel.scheduleItems
     val selectedItemId = viewModel.selectedItemId
+    var showPlanningCenterImport by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize().padding(8.dp)) {
 
@@ -325,6 +339,15 @@ fun ScheduleTab(
                 painter = painterResource(Res.drawable.ic_label),
                 text = stringResource(Res.string.tooltip_add_label),
                 onClick = onAddLabel,
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+
+            // Import from Planning Center
+            TooltipIconButton(
+                painter = rememberVectorPainter(Icons.Default.CloudDownload),
+                text = stringResource(Res.string.planning_center_import_title),
+                onClick = { showPlanningCenterImport = true },
                 buttonSize = 32.dp,
                 iconTint = MaterialTheme.colorScheme.onSurface
             )
@@ -620,30 +643,63 @@ fun ScheduleTab(
 
         // Add Files button at the bottom
         Box(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
-            Button(
-                shape = RoundedCornerShape(6.dp),
-                onClick = {
-                    scope.launch {
-                        val files = FileChooser.platformInstance.chooseMultiple(
-                            path = null,
-                            title = "Add Files to Schedule",
-                            filters = emptyList(),
-                            selectDirectory = false
-                        )
-                        if (files != null) {
-                            handleDroppedFiles(files.map(Path::toFile), viewModel)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    shape = RoundedCornerShape(6.dp),
+                    onClick = {
+                        scope.launch {
+                            val files = FileChooser.platformInstance.chooseMultiple(
+                                path = null,
+                                title = "Add Files to Schedule",
+                                filters = emptyList(),
+                                selectDirectory = false
+                            )
+                            if (files != null) {
+                                handleDroppedFiles(files.map(Path::toFile), viewModel)
+                            }
                         }
-                    }
-                },
-                modifier = Modifier.width(200.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            ) {
-                Text(stringResource(Res.string.schedule_add_files))
+                    },
+                    modifier = Modifier.width(200.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
+                    Text(stringResource(Res.string.schedule_add_files))
+                }
             }
         }
+
+        PlanningCenterImportDialog(
+            isVisible = showPlanningCenterImport,
+            theme = theme,
+            settings = planningCenterSettings,
+            onDismiss = { showPlanningCenterImport = false },
+            onTokensRefreshed = onPlanningCenterTokensRefreshed,
+            onAddSong = { songNumber, title, songbook, songId ->
+                viewModel.addSong(songNumber, title, songbook, songId)
+            },
+            onAddLabel = { text, textColor, backgroundColor ->
+                viewModel.addLabel(text, textColor, backgroundColor)
+            },
+            onAddPresentation = { filePath, fileName, slideCount, fileType ->
+                viewModel.addPresentation(filePath, fileName, slideCount, fileType)
+            },
+            onAddPicture = { folderPath, folderName, imageCount ->
+                viewModel.addPicture(folderPath, folderName, imageCount)
+            },
+            onAddMedia = { mediaUrl, mediaTitle, mediaType ->
+                viewModel.addMedia(mediaUrl, mediaTitle, mediaType)
+            },
+            onAddAnnouncement = { text ->
+                viewModel.addAnnouncement(text = text)
+            },
+            onAddBibleVerse = { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
+                viewModel.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId)
+            },
+            onConnected = onPlanningCenterConnected,
+            onDisconnect = onPlanningCenterDisconnect
+        )
     }
 }
 
@@ -720,6 +776,13 @@ private fun ScheduleItemRow(
         if (noteText != note) noteText = note
     }
 
+    // The row-select/present click lives on two separately-scoped modifiers rather than one
+    // wrapping the whole row: the content area uses Initial-pass (survives the LazyColumn
+    // scroll-gesture-eats-clicks issue on ARM Mac, see ClickModifiers.kt), while the button
+    // toolbar row below uses Final-pass so its own IconButtons (Remove, Move Up/Down, etc.) win
+    // the hit-test first — an Initial-pass handler wrapping the whole row consumes every click
+    // before a nested button's own Main-pass clickable ever sees it, which silently breaks every
+    // button in the toolbar.
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -728,7 +791,15 @@ private fun ScheduleItemRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 2.dp),
+                .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 2.dp)
+                .then(
+                    if (item !is ScheduleItem.LabelItem) {
+                        Modifier.initialPassCombinedClickable(
+                            onClick = { onSelect() },
+                            onDoubleClick = { onPresent() }
+                        )
+                    } else Modifier
+                ),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -752,17 +823,9 @@ private fun ScheduleItemRow(
                 modifier = Modifier.width(24.dp)
             )
 
-            // Item content
-            Column(modifier = Modifier.weight(1f)
-                .then(
-                    if (item !is ScheduleItem.LabelItem) {
-                        Modifier.initialPassCombinedClickable(
-                            onClick = { onSelect() },
-                            onDoubleClick = { onPresent() }
-                        )
-                    } else Modifier
-                )
-            ) {
+            // Item content (row-wide click handling now lives on the outer Column above,
+            // so both this content area and the button toolbar row below are selectable)
+            Column(modifier = Modifier.weight(1f)) {
                 when (item) {
                     is ScheduleItem.LabelItem -> {
                         // Display label text with custom text color
@@ -906,7 +969,15 @@ private fun ScheduleItemRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 32.dp, end = 12.dp, bottom = 4.dp),
+                .padding(start = 32.dp, end = 12.dp, bottom = 4.dp)
+                .then(
+                    if (item !is ScheduleItem.LabelItem) {
+                        Modifier.finalPassCombinedClickable(
+                            onClick = { onSelect() },
+                            onDoubleClick = { onPresent() }
+                        )
+                    } else Modifier
+                ),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {

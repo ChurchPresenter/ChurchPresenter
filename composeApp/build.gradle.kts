@@ -495,6 +495,12 @@ val generateBuildConfig by tasks.registering {
         val t = task.lowercase()
         listOf("package", "distributable", "sign", "notariz").any { t.contains(it) }
     }
+    // Planning Center integration: one shared OAuth app for the whole project (per PCO's own
+    // multi-tenant guidance — each church authorizes this one app, rather than registering their
+    // own). Neither value is committed — both are read from env vars at build time, same pattern
+    // as SENTRY_AUTH_TOKEN above. Local/dev builds without these set simply can't complete OAuth.
+    val planningCenterClientId = System.getenv("PLANNING_CENTER_CLIENT_ID") ?: ""
+    val planningCenterClientSecret = System.getenv("PLANNING_CENTER_CLIENT_SECRET") ?: ""
     val outputDir = layout.buildDirectory.dir("generated/buildconfig")
 
     // Always re-run — git state (commit count/hash) can change without any file edits
@@ -514,6 +520,8 @@ val generateBuildConfig by tasks.registering {
             |    const val COMMIT_COUNT = "$commits"
             |    const val VERSION_DISPLAY = "$appVersion ($commitHash)"
             |    const val IS_RELEASE = $isRelease
+            |    const val PLANNING_CENTER_CLIENT_ID = "$planningCenterClientId"
+            |    const val PLANNING_CENTER_CLIENT_SECRET = "$planningCenterClientSecret"
             |}
             """.trimMargin()
         )

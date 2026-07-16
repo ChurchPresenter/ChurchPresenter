@@ -44,6 +44,7 @@ class SongFileParser {
             var author = ""
             var composer = ""
             var tune = ""
+            var ccli = ""
             var inHeader = false
             var headerEndIndex = 0
 
@@ -67,6 +68,7 @@ class SongFileParser {
                             "author" -> author = value
                             "composer" -> composer = value
                             "tune" -> tune = value
+                            "ccli" -> ccli = value
                         }
                     }
                 }
@@ -137,7 +139,8 @@ class SongFileParser {
                 lyrics = primaryLyrics,
                 secondaryTitle = secondaryTitle,
                 secondaryLyrics = secondaryLyrics,
-                sourceFile = filePath
+                sourceFile = filePath,
+                ccliNumber = ccli
             )
         } catch (_: Exception) {
             return null
@@ -148,11 +151,12 @@ class SongFileParser {
         val sb = StringBuilder()
 
         // Write header if any metadata exists
-        if (song.author.isNotEmpty() || song.composer.isNotEmpty() || song.tune.isNotEmpty()) {
+        if (song.author.isNotEmpty() || song.composer.isNotEmpty() || song.tune.isNotEmpty() || song.ccliNumber.isNotEmpty()) {
             sb.appendLine("---")
             if (song.author.isNotEmpty()) sb.appendLine("author: ${song.author}")
             if (song.composer.isNotEmpty()) sb.appendLine("composer: ${song.composer}")
             if (song.tune.isNotEmpty()) sb.appendLine("tune: ${song.tune}")
+            if (song.ccliNumber.isNotEmpty()) sb.appendLine("ccli: ${song.ccliNumber}")
             sb.appendLine("---")
             sb.appendLine()
         }

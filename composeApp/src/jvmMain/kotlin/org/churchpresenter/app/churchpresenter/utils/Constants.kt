@@ -82,6 +82,14 @@ object Constants {
     /** Localhost port used to enforce single-instance via ServerSocket lock. */
     const val SINGLE_INSTANCE_PORT = 47632
 
+    /**
+     * Fixed loopback port for the Planning Center OAuth redirect catcher. Fixed (not
+     * auto-selected like the Companion Server's [findFreePort]-style ports) because PCO OAuth
+     * apps require an exact, pre-registered redirect URI — this value must match what the user
+     * registers as their PCO Developer app's redirect URI: http://127.0.0.1:47850/callback
+     */
+    const val PLANNING_CENTER_OAUTH_PORT = 47850
+
     const val TIMER_MODE_DURATION = "duration"
     const val TIMER_MODE_CLOCK    = "clock"
     /** Open-ended stopwatch: counts up from zero, no h:m:s configuration. */
