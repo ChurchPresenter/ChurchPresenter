@@ -48,6 +48,13 @@ enum class DetectionTrack { TRANSCRIPTION, TRANSLATION }
 enum class TextMatchLevel { OFF, CONSERVATIVE, BALANCED, AGGRESSIVE }
 
 /**
+ * How much of a verse must be spoken before the engine confirms it while reading straight
+ * through several verses in a row (engine.Config.applyContinuationSpeed / continuationMinCoverage).
+ * Independent of [TextMatchLevel] — the aggressiveness level never touches this floor.
+ */
+enum class ContinuationSpeed { BALANCED, FAST }
+
+/**
  * A Scripture reference detected in the live STT transcript and already resolved to a real book in
  * the loaded Bible. Surfaced as a clickable chip in the Bible tab. [label] is a clean, localized
  * display string (e.g. "Притчи 30:5") built from the resolved book — not the messy spoken words.
@@ -240,6 +247,20 @@ class BibleViewModel(
     fun setTextMatchLevel(level: TextMatchLevel) {
         _textMatchLevel.value = level
         onTextMatchLevelChanged?.invoke(level)
+    }
+
+    // "Verse speed" — sequential continuation floor. Pushed to the engine; seeded from persisted
+    // settings. Independent of [_textMatchLevel] above.
+    private val _continuationSpeed = mutableStateOf(
+        runCatching { ContinuationSpeed.valueOf(appSettings.bibleEngineSettings.continuationSpeed.uppercase()) }
+            .getOrDefault(ContinuationSpeed.BALANCED)
+    )
+    val continuationSpeed: State<ContinuationSpeed> = _continuationSpeed
+    /** Registered by the engine client to forward speed changes to the engine. */
+    var onContinuationSpeedChanged: ((ContinuationSpeed) -> Unit)? = null
+    fun setContinuationSpeed(speed: ContinuationSpeed) {
+        _continuationSpeed.value = speed
+        onContinuationSpeedChanged?.invoke(speed)
     }
 
     // Recently emitted keys so repeated engine events don't add duplicate rows.

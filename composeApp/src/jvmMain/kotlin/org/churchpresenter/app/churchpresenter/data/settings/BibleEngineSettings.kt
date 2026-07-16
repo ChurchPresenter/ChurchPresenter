@@ -22,6 +22,10 @@ data class BibleEngineSettings(
     val port: Int = 8766,
     val textMatchLevel: String = "off",
     val autoFollow: Boolean = false,
+    // "balanced" / "fast" — how much of a verse must be spoken before the engine confirms it
+    // while reading straight through several in a row (Config.applyContinuationSpeed). Same
+    // String-not-enum decoupling rationale as [textMatchLevel]; independent of it.
+    val continuationSpeed: String = "balanced",
     // When on, the Bible tab shows live feedback buttons (wrong passage / premature / missed
     // passage) that write to TrainingDataLogger's operator-flags-*.jsonl for the BLE training
     // workflow — set here so STTTab (where the checkbox lives) and BibleTab (where the buttons

@@ -119,6 +119,7 @@ import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ManageSearch
@@ -126,6 +127,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.DetectionTrack
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.DetectionSource
+import org.churchpresenter.app.churchpresenter.viewmodel.ContinuationSpeed
 import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
 import churchpresenter.composeapp.generated.resources.bible_stt_listening
 import churchpresenter.composeapp.generated.resources.bible_stt_engine_connecting
@@ -155,6 +157,11 @@ import churchpresenter.composeapp.generated.resources.bible_stt_level_off
 import churchpresenter.composeapp.generated.resources.bible_stt_level_conservative
 import churchpresenter.composeapp.generated.resources.bible_stt_level_balanced
 import churchpresenter.composeapp.generated.resources.bible_stt_level_aggressive
+import churchpresenter.composeapp.generated.resources.bible_next_verse_speed_label
+import churchpresenter.composeapp.generated.resources.bible_next_verse_speed_balanced
+import churchpresenter.composeapp.generated.resources.bible_next_verse_speed_fast
+import churchpresenter.composeapp.generated.resources.bible_next_verse_speed_tooltip_balanced
+import churchpresenter.composeapp.generated.resources.bible_next_verse_speed_tooltip_fast
 import churchpresenter.composeapp.generated.resources.bible_stt_flag_wrong
 import churchpresenter.composeapp.generated.resources.bible_stt_flag_wrong_hint
 import churchpresenter.composeapp.generated.resources.bible_stt_flag_premature
@@ -279,6 +286,7 @@ fun BibleTab(
     val detectedReferences by viewModel.detectedReferences
     val autoFollowEnabled by viewModel.autoFollowEnabled
     val textMatchLevel by viewModel.textMatchLevel
+    val continuationSpeed by viewModel.continuationSpeed
 
     val books by viewModel.books
     val selectedBookIndex by viewModel.selectedBookIndex
@@ -954,6 +962,74 @@ fun BibleTab(
                                 fontWeight = FontWeight.Medium
                             ),
                             color = if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+                }
+                // Verse speed flat button (cycles Balanced → Fast) — only affects how fast the
+                // engine confirms a verse while reading straight through several in a row.
+                val verseSpeedName = when (continuationSpeed) {
+                    ContinuationSpeed.BALANCED -> stringResource(Res.string.bible_next_verse_speed_balanced)
+                    ContinuationSpeed.FAST -> stringResource(Res.string.bible_next_verse_speed_fast)
+                }
+                val verseSpeedHint = when (continuationSpeed) {
+                    ContinuationSpeed.BALANCED -> stringResource(Res.string.bible_next_verse_speed_tooltip_balanced)
+                    ContinuationSpeed.FAST -> stringResource(Res.string.bible_next_verse_speed_tooltip_fast)
+                }
+                TooltipArea(tooltip = {
+                    Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
+                        Text(
+                            text = verseSpeedHint,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }) {
+                Box(
+                    modifier = Modifier
+                        .height(27.dp)
+                        .background(
+                            if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                            RoundedCornerShape(6.dp)
+                        )
+                        .border(
+                            1.dp,
+                            if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            else MaterialTheme.colorScheme.outlineVariant,
+                            RoundedCornerShape(6.dp)
+                        )
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            val all = ContinuationSpeed.values()
+                            val next = all[(continuationSpeed.ordinal + 1) % all.size]
+                            viewModel.setContinuationSpeed(next)
+                            onSettingsChange { it.copy(bibleEngineSettings = it.bibleEngineSettings.copy(continuationSpeed = next.name.lowercase())) }
+                        }
+                        .padding(horizontal = 11.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Speed,
+                            contentDescription = null,
+                            modifier = Modifier.size(11.dp),
+                            tint = if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary
+                                   else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                        Text(
+                            text = "${stringResource(Res.string.bible_next_verse_speed_label)}: $verseSpeedName",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         )
                     }

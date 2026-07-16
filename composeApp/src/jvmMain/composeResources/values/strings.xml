@@ -1929,6 +1929,11 @@
     <string name="bible_stt_level_conservative">Conservative</string>
     <string name="bible_stt_level_balanced">Balanced</string>
     <string name="bible_stt_level_aggressive">Aggressive</string>
+    <string name="bible_next_verse_speed_label">Next verse speed</string>
+    <string name="bible_next_verse_speed_balanced">Balanced</string>
+    <string name="bible_next_verse_speed_fast">Fast</string>
+    <string name="bible_next_verse_speed_tooltip_balanced">Waits until more of each verse has been read before moving to the next one — fewer wrong guesses.</string>
+    <string name="bible_next_verse_speed_tooltip_fast">Moves to the next verse after less of it has been read — advances sooner, but may occasionally jump ahead.</string>
     <string name="bible_stt_engine_connecting">Starting engine…</string>
     <string name="bible_stt_engine_unavailable">Engine unavailable</string>
     <string name="bible_stt_engine_stt_down">Engine lost its connection to the STT server</string>

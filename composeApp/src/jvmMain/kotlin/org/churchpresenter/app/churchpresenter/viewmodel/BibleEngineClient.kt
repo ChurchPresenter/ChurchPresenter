@@ -73,6 +73,7 @@ class BibleEngineClient(
     private var wsJob: Job? = null
     @Volatile private var session: DefaultClientWebSocketSession? = null
     @Volatile private var currentLevel: String = "off"
+    @Volatile private var currentContinuationSpeed: String = "balanced"
 
     private val engineErrorLock = Any()
 
@@ -88,9 +89,11 @@ class BibleEngineClient(
         host: String,
         port: Int,
         level: String,
+        continuationSpeed: String = "balanced",
     ) {
         stop()
         currentLevel = level
+        currentContinuationSpeed = continuationSpeed
         _startFailed.value = false
         // Engine startup (SPB load + BM25 index) is heavy — keep it off the UI thread.
         wsJob = scope.launch {
@@ -130,7 +133,7 @@ class BibleEngineClient(
                     session = this
                     _connected.value = true
                     attempt = 0
-                    runCatching { send(Frame.Text(levelMessage(currentLevel))) }
+                    runCatching { send(Frame.Text(tuningMessage(currentLevel, currentContinuationSpeed))) }
                     for (frame in incoming) {
                         if (frame is Frame.Text) handleMessage(frame.readText())
                     }
@@ -191,10 +194,18 @@ class BibleEngineClient(
     fun setLevel(level: String) {
         currentLevel = level
         val s = session ?: return
-        scope.launch { runCatching { s.send(Frame.Text(levelMessage(level))) } }
+        scope.launch { runCatching { s.send(Frame.Text(tuningMessage(level, currentContinuationSpeed))) } }
     }
 
-    private fun levelMessage(level: String) = """{"type":"set_tuning","level":"$level"}"""
+    /** Pushes the "Verse speed" preset (sequential continuation floor) to the engine. */
+    fun setContinuationSpeed(speed: String) {
+        currentContinuationSpeed = speed
+        val s = session ?: return
+        scope.launch { runCatching { s.send(Frame.Text(tuningMessage(currentLevel, speed))) } }
+    }
+
+    private fun tuningMessage(level: String, continuationSpeed: String) =
+        """{"type":"set_tuning","level":"$level","continuationSpeed":"$continuationSpeed"}"""
 
     /** Stops the WebSocket link and the in-process engine (if we started one). */
     fun stop() {

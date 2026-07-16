@@ -551,6 +551,7 @@ fun MainDesktop(
     val bibleEngineClient = remember {
         BibleEngineClient(onScripture = bibleViewModel::onEngineScripture).also { client ->
             bibleViewModel.onTextMatchLevelChanged = { level -> client.setLevel(level.name.lowercase()) }
+            bibleViewModel.onContinuationSpeedChanged = { speed -> client.setContinuationSpeed(speed.name.lowercase()) }
         }
     }
     DisposableEffect(Unit) { onDispose { bibleEngineClient.dispose() } }
@@ -579,6 +580,7 @@ fun MainDesktop(
                 host = bibleEngineSettings.host,
                 port = bibleEngineSettings.port,
                 level = bibleViewModel.textMatchLevel.value.name.lowercase(),
+                continuationSpeed = bibleViewModel.continuationSpeed.value.name.lowercase(),
             )
         } else {
             bibleEngineClient.stop()
