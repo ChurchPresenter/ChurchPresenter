@@ -233,6 +233,9 @@ class PlanningCenterImportViewModel(
         selectedScriptureIndices = selectedScriptureIndices + (itemId to updated)
     }
 
+    /** Matches only a leading 4-digit song number (e.g. "1234 Amazing Grace") — 3 or 5+ digits don't count. */
+    private val leadingSongNumberRegex = Regex("""^(\d{4})(?!\d)""")
+
     private fun matchLocalSong(pco: PlanningCenterClient.PlanItem, catalog: List<SongItem>): SongItem? {
         if (pco.itemType != "song") return null
         val ccli = pco.songCcliNumber
@@ -240,6 +243,10 @@ class PlanningCenterImportViewModel(
             catalog.firstOrNull { it.ccliNumber.isNotBlank() && it.ccliNumber == ccli }?.let { return it }
         }
         val title = pco.songTitle ?: pco.title
+        val leadingNumber = leadingSongNumberRegex.find(title.trim())?.groupValues?.get(1)?.toIntOrNull()
+        if (leadingNumber != null) {
+            catalog.firstOrNull { it.number.toIntOrNull() == leadingNumber }?.let { return it }
+        }
         return catalog.firstOrNull { it.title.equals(title, ignoreCase = true) }
     }
 
