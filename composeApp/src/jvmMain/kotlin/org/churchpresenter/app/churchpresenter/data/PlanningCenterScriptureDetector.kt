@@ -6,11 +6,15 @@ package org.churchpresenter.app.churchpresenter.data
  * whose title/description is just a list of references becomes real local Bible verses instead of
  * an inert announcement. PCO itself never provides verse text (see the app's Planning Center
  * integration notes) — this only recognizes references and looks them up in the user's own
- * already-loaded primary Bible, respecting whatever language/translation that Bible is in.
+ * already-loaded primary Bible, respecting whatever language/translation that Bible is in. The
+ * book name may be spelled out in full (matched against the loaded Bible's own book names) or a
+ * common abbreviation (see [BibleBookAbbreviations]) — either resolves to whichever full name
+ * the loaded Bible actually uses for that book.
  *
- * Reference matching is intentionally simple (one reference filling an entire line) rather than
- * the fuzzy free-text matching used by the live speech-detection engine (`ChurchPresenter-BLE`) —
- * this is for cleanly-authored plan text, not spoken audio transcripts.
+ * Reference matching is intentionally simple (one reference filling an entire line, or several
+ * comma/semicolon-separated references on one line) rather than the fuzzy free-text matching used
+ * by the live speech-detection engine (`ChurchPresenter-BLE`) — this is for cleanly-authored plan
+ * text, not spoken audio transcripts.
  */
 object PlanningCenterScriptureDetector {
 
@@ -25,25 +29,28 @@ object PlanningCenterScriptureDetector {
     /** Matches a whole line shaped like "<Book name> <chapter>:<verse>[-<verseEnd>]". */
     private val referenceLineRegex = Regex("""^(.*?)\s*(\d+)\s*[:.]\s*(\d+)(?:\s*-\s*(\d+))?\s*$""")
 
-    fun detectReferences(text: String, bible: Bible): List<DetectedReference> {
+    suspend fun detectReferences(text: String, bible: Bible): List<DetectedReference> {
         if (text.isBlank()) return emptyList()
         val bookNamesById = (0 until bible.getBookCount()).mapNotNull { displayIndex ->
             val bookId = bible.getBookId(displayIndex)
             bible.getBookName(bookId)?.let { bookId to it }
         }
-        return text.lines().mapNotNull { rawLine ->
-            val line = rawLine.trim()
-            if (line.isEmpty()) return@mapNotNull null
-            val match = referenceLineRegex.find(line) ?: return@mapNotNull null
-            val bookText = match.groupValues[1].trim().trimEnd('.').trim()
-            if (bookText.isBlank()) return@mapNotNull null
-            val chapter = match.groupValues[2].toIntOrNull() ?: return@mapNotNull null
-            val verseStart = match.groupValues[3].toIntOrNull() ?: return@mapNotNull null
-            val verseEnd = match.groupValues[4].toIntOrNull() ?: verseStart
-            val (bookId, bookName) = bookNamesById.firstOrNull { (_, name) -> name.equals(bookText, ignoreCase = true) }
-                ?: return@mapNotNull null
-            DetectedReference(bookId, bookName, chapter, verseStart, verseEnd)
-        }
+        return text.lines()
+            .flatMap { it.split(",", ";") }
+            .mapNotNull { rawSegment ->
+                val line = rawSegment.trim()
+                if (line.isEmpty()) return@mapNotNull null
+                val match = referenceLineRegex.find(line) ?: return@mapNotNull null
+                val bookText = match.groupValues[1].trim().trimEnd('.').trim()
+                if (bookText.isBlank()) return@mapNotNull null
+                val chapter = match.groupValues[2].toIntOrNull() ?: return@mapNotNull null
+                val verseStart = match.groupValues[3].toIntOrNull() ?: return@mapNotNull null
+                val verseEnd = match.groupValues[4].toIntOrNull() ?: verseStart
+                val (bookId, bookName) = bookNamesById.firstOrNull { (_, name) -> name.equals(bookText, ignoreCase = true) }
+                    ?: BibleBookAbbreviations.resolveBookId(bookText)?.let { id -> bookNamesById.firstOrNull { (bid, _) -> bid == id } }
+                    ?: return@mapNotNull null
+                DetectedReference(bookId, bookName, chapter, verseStart, verseEnd)
+            }
     }
 
     data class ResolvedVerses(

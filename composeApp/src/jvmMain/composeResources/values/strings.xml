@@ -387,6 +387,76 @@
     <string name="bible_book_65">Jude</string>
     <string name="bible_book_66">Revelation</string>
 
+    <!-- Common Bible book abbreviations for Planning Center scripture-reference detection,
+         pipe-separated (one or more variants per book). English defaults only — do not add
+         translations here directly; localized variants belong in each locale's own strings.xml. -->
+    <string name="bible_book_abbrev_1">Gen|Ge|Gn</string>
+    <string name="bible_book_abbrev_2">Ex|Exo|Exod</string>
+    <string name="bible_book_abbrev_3">Lev|Le|Lv</string>
+    <string name="bible_book_abbrev_4">Num|Nu|Nm</string>
+    <string name="bible_book_abbrev_5">Deut|De|Dt</string>
+    <string name="bible_book_abbrev_6">Josh|Jos|Jsh</string>
+    <string name="bible_book_abbrev_7">Judg|Jdg|Jg</string>
+    <string name="bible_book_abbrev_8">Ruth|Ru|Rth</string>
+    <string name="bible_book_abbrev_9">1 Sam|1 Sa|1 Sm</string>
+    <string name="bible_book_abbrev_10">2 Sam|2 Sa|2 Sm</string>
+    <string name="bible_book_abbrev_11">1 Kgs|1 Ki|1 K</string>
+    <string name="bible_book_abbrev_12">2 Kgs|2 Ki|2 K</string>
+    <string name="bible_book_abbrev_13">1 Chr|1 Ch</string>
+    <string name="bible_book_abbrev_14">2 Chr|2 Ch</string>
+    <string name="bible_book_abbrev_15">Ezra|Ezr</string>
+    <string name="bible_book_abbrev_16">Neh|Ne</string>
+    <string name="bible_book_abbrev_17">Esth|Est|Es</string>
+    <string name="bible_book_abbrev_18">Job|Jb</string>
+    <string name="bible_book_abbrev_19">Ps|Psa|Psalm|Psalms</string>
+    <string name="bible_book_abbrev_20">Prov|Pro|Prv|Pr</string>
+    <string name="bible_book_abbrev_21">Eccl|Ecc|Ec</string>
+    <string name="bible_book_abbrev_22">Song|SoS|Song of Solomon</string>
+    <string name="bible_book_abbrev_23">Isa|Is</string>
+    <string name="bible_book_abbrev_24">Jer|Je|Jr</string>
+    <string name="bible_book_abbrev_25">Lam|La</string>
+    <string name="bible_book_abbrev_26">Ezek|Eze|Ez</string>
+    <string name="bible_book_abbrev_27">Dan|Da|Dn</string>
+    <string name="bible_book_abbrev_28">Hos|Ho</string>
+    <string name="bible_book_abbrev_29">Joel|Jl</string>
+    <string name="bible_book_abbrev_30">Amos|Am</string>
+    <string name="bible_book_abbrev_31">Obad|Ob</string>
+    <string name="bible_book_abbrev_32">Jonah|Jon|Jnh</string>
+    <string name="bible_book_abbrev_33">Mic|Mi</string>
+    <string name="bible_book_abbrev_34">Nah|Na</string>
+    <string name="bible_book_abbrev_35">Hab|Hb</string>
+    <string name="bible_book_abbrev_36">Zeph|Zep|Zp</string>
+    <string name="bible_book_abbrev_37">Hag|Hg</string>
+    <string name="bible_book_abbrev_38">Zech|Zec|Zc</string>
+    <string name="bible_book_abbrev_39">Mal|Ml</string>
+    <string name="bible_book_abbrev_40">Matt|Mt</string>
+    <string name="bible_book_abbrev_41">Mark|Mk|Mrk</string>
+    <string name="bible_book_abbrev_42">Luke|Lk</string>
+    <string name="bible_book_abbrev_43">John|Jn|Jhn</string>
+    <string name="bible_book_abbrev_44">Acts|Ac</string>
+    <string name="bible_book_abbrev_45">Rom|Ro|Rm</string>
+    <string name="bible_book_abbrev_46">1 Cor|1 Co</string>
+    <string name="bible_book_abbrev_47">2 Cor|2 Co</string>
+    <string name="bible_book_abbrev_48">Gal|Ga</string>
+    <string name="bible_book_abbrev_49">Eph|Ep</string>
+    <string name="bible_book_abbrev_50">Phil|Php|Pp</string>
+    <string name="bible_book_abbrev_51">Col|Co</string>
+    <string name="bible_book_abbrev_52">1 Thess|1 Th</string>
+    <string name="bible_book_abbrev_53">2 Thess|2 Th</string>
+    <string name="bible_book_abbrev_54">1 Tim|1 Ti</string>
+    <string name="bible_book_abbrev_55">2 Tim|2 Ti</string>
+    <string name="bible_book_abbrev_56">Titus|Tit|Ti</string>
+    <string name="bible_book_abbrev_57">Phlm|Philem|Phm</string>
+    <string name="bible_book_abbrev_58">Heb|He</string>
+    <string name="bible_book_abbrev_59">Jas|Jm</string>
+    <string name="bible_book_abbrev_60">1 Pet|1 Pe</string>
+    <string name="bible_book_abbrev_61">2 Pet|2 Pe</string>
+    <string name="bible_book_abbrev_62">1 John|1 Jn</string>
+    <string name="bible_book_abbrev_63">2 John|2 Jn</string>
+    <string name="bible_book_abbrev_64">3 John|3 Jn</string>
+    <string name="bible_book_abbrev_65">Jude|Jud</string>
+    <string name="bible_book_abbrev_66">Rev|Re|Rv</string>
+
     <!-- Bible Settings -->
     <string name="bible_files">Bible Files</string>
     <string name="position">Position</string>
