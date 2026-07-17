@@ -309,6 +309,27 @@ class StatisticsManager {
 
     // ── Exports ───────────────────────────────────────────────────────────────
 
+    /**
+     * Builds a "songbook::title(lowercase)" -> CCLI number lookup from the on-disk song
+     * catalog. The event log only stores title/songbook/number/author (see [SongPlayEvent]),
+     * not a CCLI number, so this is resolved fresh from the catalog at export time rather than
+     * stored per-event.
+     */
+    private fun loadSongCcliLookup(): Map<String, String> = try {
+        val storageDir = SettingsManager().loadSettings().songSettings.storageDirectory
+        if (storageDir.isBlank()) {
+            emptyMap()
+        } else {
+            val cached = SongFileParser.loadCachedSongMap(storageDir)
+            SongFileParser().loadSongsFromDirectory(storageDir, cached)
+                .map { it.song }
+                .filter { it.ccliNumber.isNotBlank() }
+                .associate { "${it.songbook}::${it.title.lowercase()}" to it.ccliNumber }
+        }
+    } catch (_: Exception) {
+        emptyMap()
+    }
+
     fun exportStatisticsToXls(file: File): Boolean = try {
         val workbook = HSSFWorkbook()
         val headerStyle = workbook.createCellStyle().apply {
@@ -365,12 +386,14 @@ class StatisticsManager {
 
     fun exportCcliCsv(file: File, fromMs: Long, toMs: Long): Boolean = try {
         val songs = getAllSongsInRange(fromMs, toMs)
+        val ccliLookup = loadSongCcliLookup()
         val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val sb = StringBuilder()
-        sb.appendLine("Title,Author,Songbook,Song Number,Times Used,First Used,Last Used")
+        sb.appendLine("Title,Author,Songbook,Song Number,CCLI Number,Times Used,First Used,Last Used")
         for (song in songs) {
             fun esc(s: String) = "\"${s.replace("\"", "\"\"")}\""
-            sb.appendLine("${esc(song.title)},${esc(song.author)},${esc(song.songbook)},${song.songNumber},${song.count},${dateFmt.format(Date(song.firstUsed))},${dateFmt.format(Date(song.lastUsed))}")
+            val ccliNumber = ccliLookup["${song.songbook}::${song.title.lowercase()}"] ?: ""
+            sb.appendLine("${esc(song.title)},${esc(song.author)},${esc(song.songbook)},${song.songNumber},${esc(ccliNumber)},${song.count},${dateFmt.format(Date(song.firstUsed))},${dateFmt.format(Date(song.lastUsed))}")
         }
         file.writeText(sb.toString())
         true
@@ -386,9 +409,10 @@ class StatisticsManager {
         val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
         val songsSheet = workbook.createSheet("Songs")
+        val ccliLookup = loadSongCcliLookup()
         var rowIndex = 0
         val sHeader = songsSheet.createRow(rowIndex++)
-        listOf("Rank", "Title", "Author", "Songbook", "Song #", "Times Used", "First Used", "Last Used")
+        listOf("Rank", "Title", "Author", "Songbook", "Song #", "CCLI #", "Times Used", "First Used", "Last Used")
             .forEachIndexed { col, label ->
                 sHeader.createCell(col).also { it.setCellValue(label); it.cellStyle = headerStyle }
             }
@@ -399,11 +423,12 @@ class StatisticsManager {
             row.createCell(2).setCellValue(song.author)
             row.createCell(3).setCellValue(song.songbook)
             row.createCell(4).setCellValue(song.songNumber.toDouble())
-            row.createCell(5).setCellValue(song.count.toDouble())
-            row.createCell(6).setCellValue(dateFmt.format(Date(song.firstUsed)))
-            row.createCell(7).setCellValue(dateFmt.format(Date(song.lastUsed)))
+            row.createCell(5).setCellValue(ccliLookup["${song.songbook}::${song.title.lowercase()}"] ?: "")
+            row.createCell(6).setCellValue(song.count.toDouble())
+            row.createCell(7).setCellValue(dateFmt.format(Date(song.firstUsed)))
+            row.createCell(8).setCellValue(dateFmt.format(Date(song.lastUsed)))
         }
-        (0..7).forEach { songsSheet.autoSizeColumn(it) }
+        (0..8).forEach { songsSheet.autoSizeColumn(it) }
 
         val versesSheet = workbook.createSheet("Bible Verses")
         rowIndex = 0

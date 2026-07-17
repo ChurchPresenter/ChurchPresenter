@@ -193,7 +193,7 @@ fun SceneCanvas(
         val scale = density.density
         val cw = canvasSize.width.toFloat()
         val ch = canvasSize.height.toFloat()
-        val fontScale = if (scene.canvasWidth > 0) (cw / density.density) / scene.canvasWidth.toFloat() else 1f
+        val fontScale = if (scene.canvasWidth > 0 && cw > 0) (cw / density.density) / scene.canvasWidth.toFloat() else 1f
 
         // Render sources in order (first = back, last = front)
         scene.sources.forEach { source ->

@@ -1513,7 +1513,44 @@ fun MainDesktop(
                         onSelectedItemChanged = { id ->
                             onScheduleItemSelected(id)
                         },
-                        onScheduleChanged = onScheduleChanged
+                        onScheduleChanged = onScheduleChanged,
+                        theme = theme,
+                        planningCenterSettings = appSettings.planningCenterSettings,
+                        onPlanningCenterTokensRefreshed = { accessToken, refreshToken, expiresAtEpochMs ->
+                            onSettingsChange { settings ->
+                                settings.copy(
+                                    planningCenterSettings = settings.planningCenterSettings.copy(
+                                        accessToken = accessToken,
+                                        refreshToken = refreshToken,
+                                        tokenExpiresAtEpochMs = expiresAtEpochMs
+                                    )
+                                )
+                            }
+                        },
+                        onPlanningCenterConnected = { accessToken, refreshToken, expiresAtEpochMs, personName ->
+                            onSettingsChange { settings ->
+                                settings.copy(
+                                    planningCenterSettings = settings.planningCenterSettings.copy(
+                                        accessToken = accessToken,
+                                        refreshToken = refreshToken,
+                                        tokenExpiresAtEpochMs = expiresAtEpochMs,
+                                        connectedPersonName = personName
+                                    )
+                                )
+                            }
+                        },
+                        onPlanningCenterDisconnect = {
+                            onSettingsChange { settings ->
+                                settings.copy(
+                                    planningCenterSettings = settings.planningCenterSettings.copy(
+                                        accessToken = "",
+                                        refreshToken = "",
+                                        tokenExpiresAtEpochMs = 0L,
+                                        connectedPersonName = ""
+                                    )
+                                )
+                            }
+                        }
                     )
                     } // end Box (ScheduleTab weight)
                     val leftSidebarConnections = appSettings.companionSatelliteConnections.filter { it.showInLeftSidebar && it.host.isNotBlank() }

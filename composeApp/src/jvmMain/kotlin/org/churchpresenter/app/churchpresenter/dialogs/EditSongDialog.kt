@@ -62,6 +62,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.author
 import churchpresenter.composeapp.generated.resources.cancel
+import churchpresenter.composeapp.generated.resources.ccli_number
 import churchpresenter.composeapp.generated.resources.composer
 import churchpresenter.composeapp.generated.resources.add_new
 import churchpresenter.composeapp.generated.resources.duplicate_song_error
@@ -105,6 +106,7 @@ fun EditSongDialog(
     var editedTune by remember(isVisible, song) { mutableStateOf(song.tune) }
     var editedAuthor by remember(isVisible, song) { mutableStateOf(song.author) }
     var editedComposer by remember(isVisible, song) { mutableStateOf(song.composer) }
+    var editedCcli by remember(isVisible, song) { mutableStateOf(song.ccliNumber) }
     var editedLyrics by remember(isVisible, song) { mutableStateOf(song.lyrics.joinToString("\n")) }
     var editedSecondaryTitle by remember(isVisible, song) { mutableStateOf(song.secondaryTitle) }
     var editedSecondaryLyrics by remember(isVisible, song) { mutableStateOf(song.secondaryLyrics.joinToString("\n")) }
@@ -313,7 +315,7 @@ fun EditSongDialog(
                             SettingsTextField(
                                 value = editedAuthor,
                                 onValueChange = { editedAuthor = it },
-                                modifier = Modifier.weight(0.5f),
+                                modifier = Modifier.weight(0.4f),
                                 label = stringResource(Res.string.author),
                                 fillWidth = true,
                                 singleLine = true,
@@ -322,8 +324,17 @@ fun EditSongDialog(
                             SettingsTextField(
                                 value = editedComposer,
                                 onValueChange = { editedComposer = it },
-                                modifier = Modifier.weight(0.5f),
+                                modifier = Modifier.weight(0.4f),
                                 label = stringResource(Res.string.composer),
+                                fillWidth = true,
+                                singleLine = true,
+                            )
+
+                            SettingsTextField(
+                                value = editedCcli,
+                                onValueChange = { editedCcli = it },
+                                modifier = Modifier.weight(0.2f),
+                                label = stringResource(Res.string.ccli_number),
                                 fillWidth = true,
                                 singleLine = true,
                             )
@@ -417,7 +428,8 @@ fun EditSongDialog(
                                     secondaryLyrics = editedSecondaryLyrics.split("\n").let {
                                         if (it.all { line -> line.isBlank() || line.trim().startsWith("[") }) emptyList() else it
                                     },
-                                    sourceFile = song.sourceFile
+                                    sourceFile = song.sourceFile,
+                                    ccliNumber = editedCcli
                                 )
                                 onSave(updatedSong)
                             },

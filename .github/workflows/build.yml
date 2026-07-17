@@ -126,6 +126,8 @@ jobs:
       - name: Build and sign installer
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          PLANNING_CENTER_CLIENT_ID: ${{ secrets.PLANNING_CENTER_CLIENT_ID }}
+          PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
         run: ./gradlew :composeApp:signWindowsMsi
 
       - name: Rename MSI (add WINDOWS-x64 label)
@@ -223,6 +225,8 @@ jobs:
       - name: Build signed DMG
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          PLANNING_CENTER_CLIENT_ID: ${{ secrets.PLANNING_CENTER_CLIENT_ID }}
+          PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
         run: ./gradlew :composeApp:packageDmg
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
@@ -390,6 +394,8 @@ jobs:
       - name: Build signed DMG
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          PLANNING_CENTER_CLIENT_ID: ${{ secrets.PLANNING_CENTER_CLIENT_ID }}
+          PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
         run: ./gradlew :composeApp:packageDmg
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
@@ -530,6 +536,8 @@ jobs:
       - name: Build and sign installer
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          PLANNING_CENTER_CLIENT_ID: ${{ secrets.PLANNING_CENTER_CLIENT_ID }}
+          PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
         run: ./gradlew :composeApp:signLinuxDeb
 
       - name: Rename DEB (add DEBIAN-x64 label)

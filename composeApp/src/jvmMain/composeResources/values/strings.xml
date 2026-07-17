@@ -118,13 +118,13 @@
     <string name="instance_link_host_hint">e.g. 192.168.1.10</string>
     <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Connect automatically on launch</string>
-    <string name="instance_link_allow_push_to_schedule">Allow adding items to the primary\'s schedule</string>
-    <string name="instance_link_mirror_backgrounds">Also mirror the primary\'s backgrounds</string>
+    <string name="instance_link_allow_push_to_schedule">Allow adding items to the primary's schedule</string>
+    <string name="instance_link_mirror_backgrounds">Also mirror the primary's backgrounds</string>
     <string name="instance_link_role">Connection role</string>
-    <string name="instance_link_role_controlled">Controlled — mirror the primary\'s content</string>
-    <string name="instance_link_role_controller">Controller — drive the primary\'s output from here</string>
+    <string name="instance_link_role_controlled">Controlled — mirror the primary's content</string>
+    <string name="instance_link_role_controller">Controller — drive the primary's output from here</string>
     <string name="instance_link_bible_sync_mode">Bible sync</string>
-    <string name="instance_link_bible_sync_full_replica">Full replica — use the primary\'s exact Bible file(s)</string>
+    <string name="instance_link_bible_sync_full_replica">Full replica — use the primary's exact Bible file(s)</string>
     <string name="instance_link_bible_sync_reference_only">Reference only — keep my own Bible(s), just follow the same verse</string>
     <string name="instance_link_status_disconnected">Disconnected</string>
     <string name="instance_link_status_connecting">Connecting…</string>
@@ -588,10 +588,10 @@
     <string name="select_presentation_file">Select a presentation file to view slides</string>
     <string name="supported_formats">Supported: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Animations, builds, slide transitions and embedded Keynote videos play back natively.</string>
-    <string name="presentation_error_password_protected">This PDF is password-protected and can\'t be opened. Remove the password and try again.</string>
+    <string name="presentation_error_password_protected">This PDF is password-protected and can't be opened. Remove the password and try again.</string>
     <string name="presentation_error_empty_document">This file has no pages to display.</string>
-    <string name="presentation_error_library_missing">PDF support isn\'t available in this build.</string>
-    <string name="presentation_error_render_failed">Couldn\'t read this file — it may be corrupted or in an unsupported format.</string>
+    <string name="presentation_error_library_missing">PDF support isn't available in this build.</string>
+    <string name="presentation_error_render_failed">Couldn't read this file — it may be corrupted or in an unsupported format.</string>
     <string name="slide_number">Slide %1$d</string>
     <string name="remove">Remove</string>
     <string name="select_presentation_file_button">Select File</string>
@@ -1987,4 +1987,26 @@
     <string name="contact_rate_limited_browser">For security, please finish sending in your browser.</string>
     <string name="contact_network_error">Couldn't reach the server. Check your internet connection and try again.</string>
     <string name="contact_open_browser">Open in Browser</string>
+
+    <string name="ccli_number">CCLI Number</string>
+
+    <!-- Planning Center Online integration -->
+    <string name="planning_center_settings">Planning Center</string>
+    <string name="planning_center_description">Import a Planning Center Services plan's songs, media, and order of service into the Schedule.</string>
+    <string name="planning_center_connect">Connect to Planning Center</string>
+    <string name="planning_center_disconnect">Disconnect</string>
+    <string name="planning_center_status_connected">Connected as %1$s</string>
+    <string name="planning_center_status_connecting">Connecting…</string>
+    <string name="planning_center_status_error">Error: %1$s</string>
+    <string name="planning_center_import_title">Import from Planning Center</string>
+    <string name="planning_center_import_service_type">Service Type</string>
+    <string name="planning_center_import_select_plan">Select a Plan</string>
+    <string name="planning_center_import_no_plans">No upcoming plans found.</string>
+    <string name="planning_center_import_items">Plan Items</string>
+    <string name="planning_center_import_select_all">Select All</string>
+    <string name="planning_center_import_deselect_all">Deselect All</string>
+    <string name="planning_center_import_add_song">Add Song</string>
+    <string name="planning_center_import_matched">✓ Matched</string>
+    <string name="planning_center_import_button">Import Selected</string>
+    <string name="planning_center_import_file_count">%1$d file(s)</string>
 </resources>
