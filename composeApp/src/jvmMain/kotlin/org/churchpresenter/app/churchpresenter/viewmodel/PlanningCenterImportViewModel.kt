@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
+import org.churchpresenter.app.churchpresenter.data.PlanningCenterLyricsFormatter
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterScriptureDetector
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.SongFileParser
@@ -288,15 +289,30 @@ class PlanningCenterImportViewModel(
         }
     }
 
-    /** Fetches lyrics/chord-chart text for the add-song dialog's prefill. Null on any failure. */
+    /**
+     * Fetches lyrics/chord-chart text for the add-song dialog's prefill. Prefers the song's
+     * Arrangement detail; when that's unavailable (no arrangement linked, request failure, or
+     * blank lyrics), falls back to the plan item's own "description" text, and then its
+     * "html_details" rich text — worship leaders sometimes paste lyrics into either of those
+     * instead of using Planning Center's Arrangement feature, and PCO's own item editor writes
+     * to whichever field the user's cursor happened to be in (plain "Description" vs. the rich
+     * "Details" box), so both need checking. Null only when none of the three has anything usable.
+     */
     suspend fun fetchArrangementForAddSong(pco: PlanningCenterClient.PlanItem): PlanningCenterClient.ArrangementDetail? {
-        val songId = pco.songId ?: return null
-        val arrangementId = pco.arrangementId ?: return null
-        if (!ensureValidToken()) return null
-        return when (val outcome = PlanningCenterClient.getArrangementDetail(accessToken, songId, arrangementId)) {
-            is PlanningCenterClient.ArrangementOutcome.Success -> outcome.detail
-            else -> null
+        val songId = pco.songId
+        val arrangementId = pco.arrangementId
+        if (songId != null && arrangementId != null && ensureValidToken()) {
+            val outcome = PlanningCenterClient.getArrangementDetail(accessToken, songId, arrangementId)
+            if (outcome is PlanningCenterClient.ArrangementOutcome.Success && outcome.detail.lyrics.isNotBlank()) {
+                return outcome.detail
+            }
         }
+        pco.description.takeIf { it.isNotBlank() }?.let {
+            return PlanningCenterClient.ArrangementDetail(chordChart = "", lyrics = it)
+        }
+        return pco.htmlDetails.takeIf { it.isNotBlank() }
+            ?.let { PlanningCenterClient.ArrangementDetail(chordChart = "", lyrics = PlanningCenterLyricsFormatter.htmlDetailsToPlainText(it)) }
+            ?.takeIf { it.lyrics.isNotBlank() }
     }
 
     fun defaultSongbookForNewSongs(): String = importSongbookName.ifBlank { "Planning Center" }

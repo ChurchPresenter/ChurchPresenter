@@ -22,4 +22,34 @@ object PlanningCenterLyricsFormatter {
         chordChart.lines().joinToString("\n") { line ->
             chordToken.replace(line, "").replace(Regex(" {2,}"), " ").trimEnd()
         }
+
+    private val tagRegex = Regex("<[^>]+>")
+    private val brOrCloseParagraph = Regex("(?i)<br\\s*/?>|</p>")
+    private val whitespaceBetweenTags = Regex(">\\s+<")
+
+    /**
+     * Converts Planning Center's "html_details" rich text (plain `<p>`-per-line markup, no
+     * nested formatting seen in practice) into plain text: one line per `<p>`/`<br>`, entities
+     * decoded, remaining tags stripped. A lone `&nbsp;` paragraph (PCO's blank-line spacer)
+     * collapses to an empty line, preserving verse/section breaks.
+     *
+     * PCO's stored markup already has a real newline between each `</p>` and the next `<p>`
+     * (cosmetic source formatting, not a second line break) — collapsed away first via
+     * [whitespaceBetweenTags] so it doesn't double up with the newline this function inserts for
+     * every `</p>`/`<br>` and produce a spurious blank line between every single lyric line.
+     */
+    fun htmlDetailsToPlainText(html: String): String =
+        html
+            .replace(whitespaceBetweenTags, "><")
+            .replace(brOrCloseParagraph, "\n")
+            .replace(tagRegex, "")
+            .replace("&nbsp;", " ")
+            .replace("&amp;", "&")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&quot;", "\"")
+            .replace("&#39;", "'")
+            .lines()
+            .joinToString("\n") { it.trim() }
+            .trim('\n')
 }

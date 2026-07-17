@@ -211,6 +211,12 @@ object PlanningCenterClient {
         val id: String,
         val title: String,
         val description: String = "",
+        /**
+         * PCO's rich-text "Details" field for the item — some worship leaders paste lyrics here
+         * (as HTML) instead of the plain-text "description" field. Raw HTML; run through
+         * [PlanningCenterLyricsFormatter.htmlDetailsToPlainText] before display.
+         */
+        val htmlDetails: String = "",
         /** PCO's own item_type string: "song", "header", "media", or "item" (generic). */
         val itemType: String,
         val sequence: Int,
@@ -369,6 +375,7 @@ object PlanningCenterClient {
                         id = obj["id"]?.jsonPrimitive?.contentOrNull ?: "",
                         title = attrs?.get("title")?.jsonPrimitive?.contentOrNull ?: "",
                         description = attrs?.get("description")?.jsonPrimitive?.contentOrNull ?: "",
+                        htmlDetails = attrs?.get("html_details")?.jsonPrimitive?.contentOrNull ?: "",
                         itemType = attrs?.get("item_type")?.jsonPrimitive?.contentOrNull ?: "item",
                         sequence = attrs?.get("sequence")?.jsonPrimitive?.int ?: 0,
                         songId = songId,
