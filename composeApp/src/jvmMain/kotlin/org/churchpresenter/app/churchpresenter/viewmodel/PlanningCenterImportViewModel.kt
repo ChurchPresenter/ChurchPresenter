@@ -210,8 +210,12 @@ class PlanningCenterImportViewModel(
                     // Eagerly check for attachments too, so the "Show Files" affordance can be
                     // hidden entirely for items that don't have any (one request per item — plans
                     // are small enough that this is fine, and it avoids showing dead-end buttons).
+                    // "media"-type plan items are deliberately excluded: their PCO attachments are
+                    // incidental files (lyric sheets, cue notes), not the actual media the item
+                    // represents, so surfacing them as importable is misleading — there's nothing
+                    // usable to fetch for these rows.
                     for (pco in outcome.items) {
-                        if (pco.itemType == "media" || pco.itemType == "item") loadAttachments(pco.id)
+                        if (pco.itemType == "item") loadAttachments(pco.id)
                     }
                 }
                 PlanningCenterClient.PlanItemsOutcome.Unauthorized ->

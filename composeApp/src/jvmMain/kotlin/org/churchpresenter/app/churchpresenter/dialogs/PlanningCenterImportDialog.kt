@@ -358,6 +358,7 @@ fun PlanningCenterImportDialog(
                                                         enabled = entry.matchedSongId != null,
                                                         onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
                                                     )
+                                                    PlanItemTypeIcon("♪")
                                                     Text(pco.songTitle ?: pco.title, modifier = Modifier.weight(1f))
                                                     if (entry.matchedSongId != null) {
                                                         Text(
@@ -396,10 +397,25 @@ fun PlanningCenterImportDialog(
                                                         checked = entry.selected,
                                                         onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
                                                     )
+                                                    PlanItemTypeIcon("🏷")
                                                     Text(
                                                         pco.title,
                                                         style = MaterialTheme.typography.titleSmall,
                                                         modifier = Modifier.weight(1f)
+                                                    )
+                                                }
+                                                "media" -> {
+                                                    // PCO "media" items reference video/audio that lives
+                                                    // in the Media Library, not the Attachments API — the
+                                                    // "attachments" this endpoint would return are incidental
+                                                    // files, not the actual media, so there's nothing usable
+                                                    // to import. Show the row as plain, non-selectable text.
+                                                    Spacer(Modifier.width(40.dp))
+                                                    PlanItemTypeIcon("🎬")
+                                                    Text(
+                                                        pco.title,
+                                                        modifier = Modifier.weight(1f),
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                                     )
                                                 }
                                                 else -> {
@@ -407,10 +423,9 @@ fun PlanningCenterImportDialog(
                                                     // detected (see below), that accordion IS the selection
                                                     // mechanism — no separate announcement checkbox needed.
                                                     // Otherwise fall back to a plain checkbox (import the
-                                                    // title as an announcement). "media" rows never get a
-                                                    // top-level checkbox — attachments are their own picker.
+                                                    // title as an announcement).
                                                     val hasScripture = viewModel.detectedScripturesByItemId[pco.id]?.isNotEmpty() == true
-                                                    if (pco.itemType == "item" && !hasScripture) {
+                                                    if (!hasScripture) {
                                                         Checkbox(
                                                             checked = entry.selected,
                                                             onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
@@ -418,6 +433,7 @@ fun PlanningCenterImportDialog(
                                                     } else {
                                                         Spacer(Modifier.width(40.dp))
                                                     }
+                                                    PlanItemTypeIcon(if (hasScripture) "✝" else "📢")
                                                     Text(
                                                         pco.title,
                                                         modifier = Modifier.weight(1f),
@@ -460,24 +476,33 @@ fun PlanningCenterImportDialog(
                                             }
                                         }
 
-                                        if (expanded && pco.itemType != "song" && pco.itemType != "header") {
+                                        if (expanded && pco.itemType == "item") {
                                             val attachments = viewModel.attachmentsByItemId[pco.id].orEmpty()
                                             val selectedIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
                                             attachments.forEach { att ->
+                                                val ext = att.filename.substringAfterLast('.', "").lowercase()
+                                                val supported = isSupportedAttachment(att.filename)
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth().padding(start = 40.dp),
                                                     verticalAlignment = Alignment.CenterVertically,
                                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                                 ) {
                                                     Checkbox(
-                                                        checked = att.id in selectedIds,
+                                                        checked = supported && att.id in selectedIds,
+                                                        enabled = supported,
                                                         onCheckedChange = { viewModel.toggleAttachmentSelected(pco.id, att.id) }
                                                     )
                                                     val thumbUrl = att.thumbnailUrl
-                                                    if (thumbUrl != null && att.filename.substringAfterLast('.', "").lowercase() in IMAGE_EXTENSIONS) {
+                                                    if (thumbUrl != null && ext in IMAGE_EXTENSIONS) {
                                                         AttachmentThumbnail(thumbUrl, viewModel)
+                                                    } else {
+                                                        Text(attachmentExtensionIcon(ext), modifier = Modifier.width(20.dp))
                                                     }
-                                                    Text(att.filename, style = MaterialTheme.typography.bodySmall)
+                                                    Text(
+                                                        att.filename,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = if (supported) Color.Unspecified else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                                    )
                                                 }
                                             }
                                         }
@@ -515,9 +540,10 @@ fun PlanningCenterImportDialog(
                                     "item" -> if (hasScripture) {
                                         viewModel.selectedScriptureIndices[pco.id]?.isNotEmpty() == true
                                     } else {
-                                        entry.selected || viewModel.selectedAttachmentIds[pco.id]?.isNotEmpty() == true
+                                        val selectedAttachmentIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
+                                        entry.selected || viewModel.attachmentsByItemId[pco.id].orEmpty()
+                                            .any { it.id in selectedAttachmentIds && isSupportedAttachment(it.filename) }
                                     }
-                                    "media" -> viewModel.selectedAttachmentIds[pco.id]?.isNotEmpty() == true
                                     else -> false
                                 }
                             },
@@ -539,7 +565,9 @@ fun PlanningCenterImportDialog(
                                             "header" -> onAddLabel(pco.title, "#FFFFFF", "#2196F3")
                                             "item" -> {
                                                 val scriptures = viewModel.detectedScripturesByItemId[pco.id].orEmpty()
-                                                val hasSelectedAttachments = viewModel.selectedAttachmentIds[pco.id]?.isNotEmpty() == true
+                                                val selectedAttachmentIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
+                                                val hasSelectedAttachments = viewModel.attachmentsByItemId[pco.id].orEmpty()
+                                                    .any { it.id in selectedAttachmentIds && isSupportedAttachment(it.filename) }
                                                 if (scriptures.isNotEmpty()) {
                                                     val selectedIdx = viewModel.selectedScriptureIndices[pco.id].orEmpty()
                                                     scriptures.forEachIndexed { index, verse ->
@@ -563,8 +591,8 @@ fun PlanningCenterImportDialog(
                                             }
                                         }
                                         // Attachments are their own per-file checkboxes, independent of
-                                        // the row's main checkbox — applies to both "media" and "item".
-                                        if (pco.itemType == "media" || pco.itemType == "item") {
+                                        // the row's main checkbox.
+                                        if (pco.itemType == "item") {
                                             val attachments = viewModel.attachmentsByItemId[pco.id].orEmpty()
                                             val selectedIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
                                             // All selected images for this item share one cache folder
@@ -574,7 +602,7 @@ fun PlanningCenterImportDialog(
                                             var pictureFolderName: String? = null
                                             var pictureCount = 0
                                             for (att in attachments) {
-                                                if (att.id !in selectedIds) continue
+                                                if (att.id !in selectedIds || !isSupportedAttachment(att.filename)) continue
                                                 // The schedule item's title should read as the plan item's
                                                 // own title (e.g. "Guest Speaker Presentation"), not the
                                                 // raw uploaded filename — fall back to the filename only
@@ -647,6 +675,34 @@ fun PlanningCenterImportDialog(
 }
 
 private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "bmp", "webp")
+private val VIDEO_EXTENSIONS = setOf("mp4", "avi", "mov", "mkv", "webm")
+private val AUDIO_EXTENSIONS = setOf("mp3", "wav", "flac")
+private val PRESENTATION_EXTENSIONS = setOf("ppt", "pptx", "key", "pdf")
+
+/** Mirrors [PlanningCenterImportViewModel.importAttachment]'s extension classification. */
+private fun isSupportedAttachment(filename: String): Boolean {
+    val ext = filename.substringAfterLast('.', "").lowercase()
+    return ext in IMAGE_EXTENSIONS || ext in VIDEO_EXTENSIONS || ext in AUDIO_EXTENSIONS || ext in PRESENTATION_EXTENSIONS
+}
+
+/** Same glyph set as ScheduleTab's row type icon, for the file an attachment will become. */
+private fun attachmentExtensionIcon(ext: String): String = when (ext) {
+    in PRESENTATION_EXTENSIONS -> "📊"
+    in IMAGE_EXTENSIONS -> "📷"
+    in VIDEO_EXTENSIONS, in AUDIO_EXTENSIONS -> "🎬"
+    else -> "📎"
+}
+
+/** Row-leading type glyph, styled to match ScheduleTab's per-item icon column. */
+@Composable
+private fun PlanItemTypeIcon(glyph: String) {
+    Text(
+        text = glyph,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.width(24.dp)
+    )
+}
 
 /** Small thumbnail preview for an image attachment in the import picker, fetched on demand. */
 @Composable
