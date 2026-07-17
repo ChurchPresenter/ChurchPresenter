@@ -393,7 +393,7 @@ internal fun cpColorToHsv(color: Color): Triple<Float, Float, Float> {
     return Triple(h, s, v)
 }
 
-internal fun cpColorToHex(color: Color): String {
+fun cpColorToHex(color: Color): String {
     val r = (color.red * 255f).toInt().coerceIn(0, 255)
     val g = (color.green * 255f).toInt().coerceIn(0, 255)
     val b = (color.blue * 255f).toInt().coerceIn(0, 255)

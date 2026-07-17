@@ -70,6 +70,7 @@ import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.PlanningCenterSettings
@@ -226,6 +227,10 @@ fun PlanningCenterImportDialog(
     var addSongPrefill by remember { mutableStateOf<SongItem?>(null) }
     var isFetchingArrangement by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    // Header rows import with no color-picker step, so they need a default — sourced from the
+    // current theme (matching AddLabelDialog's own picker) instead of a hardcoded hex pair.
+    val defaultHeaderTextColor = cpColorToHex(MaterialTheme.colorScheme.onPrimary)
+    val defaultHeaderBackgroundColor = cpColorToHex(MaterialTheme.colorScheme.primary)
 
     val mainWindowState = LocalMainWindowState.current
     DialogWindow(
@@ -552,18 +557,25 @@ fun PlanningCenterImportDialog(
                                 isImporting = true
                                 scope.launch {
                                     for (entry in viewModel.planItems) {
-                                        if (!entry.selected) continue
                                         val pco = entry.pco
                                         when (pco.itemType) {
                                             "song" -> {
+                                                if (!entry.selected) continue
                                                 val songId = entry.matchedSongId ?: continue
                                                 val parts = songId.split("::", limit = 2)
                                                 val songbook = parts.getOrNull(0) ?: ""
                                                 val songNumber = parts.getOrNull(1)?.toIntOrNull() ?: 0
                                                 onAddSong(songNumber, pco.songTitle ?: pco.title, songbook, songId)
                                             }
-                                            "header" -> onAddLabel(pco.title, "#FFFFFF", "#2196F3")
+                                            "header" -> {
+                                                if (!entry.selected) continue
+                                                onAddLabel(pco.title, defaultHeaderTextColor, defaultHeaderBackgroundColor)
+                                            }
                                             "item" -> {
+                                                // Scripture and attachment checkboxes are independent of
+                                                // the row's own checkbox (matching the button's enabled
+                                                // check above) — unchecking the row while leaving one of
+                                                // those checked must still import just that one thing.
                                                 val scriptures = viewModel.detectedScripturesByItemId[pco.id].orEmpty()
                                                 val selectedAttachmentIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
                                                 val hasSelectedAttachments = viewModel.attachmentsByItemId[pco.id].orEmpty()
@@ -581,7 +593,7 @@ fun PlanningCenterImportDialog(
                                                             verse.bookId
                                                         )
                                                     }
-                                                } else if (!hasSelectedAttachments) {
+                                                } else if (entry.selected && !hasSelectedAttachments) {
                                                     // Only fall back to a text announcement when there's
                                                     // no attached file — a file import already becomes its
                                                     // own Presentation/Picture/Media schedule entry below,
@@ -589,6 +601,7 @@ fun PlanningCenterImportDialog(
                                                     onAddAnnouncement(pco.description.ifBlank { pco.title })
                                                 }
                                             }
+                                            else -> continue
                                         }
                                         // Attachments are their own per-file checkboxes, independent of
                                         // the row's main checkbox.
