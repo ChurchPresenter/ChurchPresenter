@@ -30,8 +30,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.OndemandVideo
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
@@ -62,7 +64,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -201,11 +207,18 @@ fun SetupWizardDialog(
                 ) {
                     Column(modifier = Modifier.fillMaxSize()) {
 
-                        // Step indicator header
+                        // Step indicator header — seamless dark with a faint accent glow
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.primaryContainer)
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                                            Color.Transparent
+                                        )
+                                    )
+                                )
                                 .padding(horizontal = 24.dp, vertical = 16.dp)
                         ) {
                             Column(
@@ -216,7 +229,7 @@ fun SetupWizardDialog(
                                     text = stringResource(Res.string.setup_wizard_title),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
                                 StepDots(currentStep = step, totalSteps = TOTAL_STEPS)
@@ -224,12 +237,10 @@ fun SetupWizardDialog(
                                 Text(
                                     text = stringResource(Res.string.setup_wizard_step, step + 1, TOTAL_STEPS),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
-
-                        HorizontalDivider()
 
                         // Step content — animated slide
                         AnimatedContent(
@@ -324,19 +335,50 @@ fun SetupWizardDialog(
 
 @Composable
 private fun StepDots(currentStep: Int, totalSteps: Int) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         repeat(totalSteps) { index ->
             val active = index == currentStep
             Box(
                 modifier = Modifier
-                    .size(if (active) 10.dp else 8.dp)
-                    .clip(CircleShape)
+                    .height(8.dp)
+                    .width(if (active) 20.dp else 8.dp)
+                    .clip(if (active) RoundedCornerShape(4.dp) else CircleShape)
                     .background(
-                        if (active) MaterialTheme.colorScheme.onPrimaryContainer
-                        else MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.35f)
+                        if (active) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                     )
             )
         }
+    }
+}
+
+/** A step's icon inside a dark, faintly blue-tinted rounded tile with the accent-tinted glyph. */
+@Composable
+private fun StepIconBadge(icon: ImageVector) {
+    Box(
+        modifier = Modifier
+            .size(64.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.surfaceVariant,
+                        lerp(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.primary, 0.4f)
+                    )
+                )
+            )
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(18.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(30.dp)
+        )
     }
 }
 
@@ -351,6 +393,7 @@ private fun LanguageStep(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
+        StepIconBadge(Icons.Filled.Language)
         Text(
             text = stringResource(Res.string.setup_step0_title),
             style = MaterialTheme.typography.headlineSmall,
@@ -369,36 +412,46 @@ private fun LanguageStep(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Language.entries.forEach { language ->
-                val selected = language == selectedLanguage
-                Box(
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.small)
-                        .background(
-                            if (selected) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.surfaceVariant
-                        )
-                        .border(
-                            width = if (selected) 2.dp else 0.dp,
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = MaterialTheme.shapes.small
-                        )
-                        .clickable { onLanguageSelected(language) }
-                        .padding(horizontal = 14.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = language.nativeName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                                else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                SelectPill(
+                    label = language.nativeName,
+                    selected = language == selectedLanguage,
+                    onClick = { onLanguageSelected(language) }
+                )
             }
         }
+    }
+}
+
+/** A rounded selectable pill: filled with the accent when selected, subtle outline otherwise. */
+@Composable
+private fun SelectPill(label: String, selected: Boolean, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(12.dp)
+    Box(
+        modifier = Modifier
+            .clip(shape)
+            .background(
+                if (selected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+            )
+            .border(
+                width = 1.dp,
+                color = if (selected) Color.Transparent else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                shape = shape
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 9.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (selected) MaterialTheme.colorScheme.onPrimary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -426,6 +479,7 @@ private fun ThemeStep(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
+        StepIconBadge(Icons.Filled.Palette)
         Text(
             text = stringResource(Res.string.setup_step1_theme_title),
             style = MaterialTheme.typography.headlineSmall,
@@ -442,34 +496,15 @@ private fun ThemeStep(
         Spacer(modifier = Modifier.height(4.dp))
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             themes.forEach { (mode, label) ->
-                val selected = mode == selectedTheme
-                Box(
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.small)
-                        .background(
-                            if (selected) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.surfaceVariant
-                        )
-                        .border(
-                            width = if (selected) 2.dp else 0.dp,
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = MaterialTheme.shapes.small
-                        )
-                        .clickable { onThemeSelected(mode) }
-                        .padding(horizontal = 14.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                                else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                SelectPill(
+                    label = label,
+                    selected = mode == selectedTheme,
+                    onClick = { onThemeSelected(mode) }
+                )
             }
         }
     }
@@ -481,11 +516,28 @@ private fun WelcomeStep() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Image(
-            painter = painterResource(Res.drawable.ic_app_icon),
-            contentDescription = null,
-            modifier = Modifier.size(72.dp)
-        )
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            lerp(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.primary, 0.4f)
+                        )
+                    )
+                )
+                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(18.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.ic_app_icon),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
+                modifier = Modifier.size(44.dp)
+            )
+        }
         Text(
             text = stringResource(Res.string.setup_step1_title),
             style = MaterialTheme.typography.headlineSmall,
@@ -511,12 +563,7 @@ private fun BibleStep(onOpenSettings: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(end = 12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Filled.Book,
-                contentDescription = null,
-                modifier = Modifier.size(52.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            StepIconBadge(Icons.Filled.Book)
             Text(
                 text = stringResource(Res.string.setup_step2_title),
                 style = MaterialTheme.typography.headlineSmall,
@@ -592,12 +639,7 @@ private fun SongsStep(onOpenSettings: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(end = 12.dp)
     ) {
-        Icon(
-            imageVector = Icons.Filled.MusicNote,
-            contentDescription = null,
-            modifier = Modifier.size(52.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
+        StepIconBadge(Icons.Filled.MusicNote)
         Text(
             text = stringResource(Res.string.setup_step3_title),
             style = MaterialTheme.typography.headlineSmall,
@@ -665,12 +707,7 @@ private fun ProjectionStep(onOpenSettings: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(end = 12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Filled.Tv,
-                contentDescription = null,
-                modifier = Modifier.size(52.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            StepIconBadge(Icons.Filled.Tv)
             Text(
                 text = stringResource(Res.string.setup_proj_title),
                 style = MaterialTheme.typography.headlineSmall,
@@ -769,12 +806,7 @@ private fun VlcStep() {
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(end = 12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Filled.OndemandVideo,
-                contentDescription = null,
-                modifier = Modifier.size(52.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            StepIconBadge(Icons.Filled.OndemandVideo)
             Text(
                 text = stringResource(Res.string.setup_step5_title),
                 style = MaterialTheme.typography.headlineSmall,
@@ -891,12 +923,7 @@ private fun ReadyStep() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Icon(
-            imageVector = Icons.Filled.CheckCircle,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
+        StepIconBadge(Icons.Filled.CheckCircle)
         Text(
             text = stringResource(Res.string.setup_step4_title),
             style = MaterialTheme.typography.headlineSmall,
