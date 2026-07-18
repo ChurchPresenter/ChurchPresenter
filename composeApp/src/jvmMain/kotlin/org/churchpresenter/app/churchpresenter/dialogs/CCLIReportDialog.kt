@@ -1,6 +1,10 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -15,9 +19,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -44,13 +51,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindow
@@ -143,6 +152,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 
 private val VERSE_BAR_COLOR = Color(0xFF43A047)
+private val BUSIEST_CARD_COLOR = Color(0xFFFF9800)
 
 @Composable
 fun CCLIReportDialog(
@@ -184,6 +194,8 @@ fun CCLIReportDialog(
     var selectedTab by remember { mutableStateOf(0) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var statusIsSuccess by remember { mutableStateOf(true) }
+    // Which quick-range preset is currently highlighted (null once a date is edited by hand).
+    var activePreset by remember { mutableStateOf<Int?>(null) }
 
     val hasLog = remember { statisticsManager.hasEventLog() }
 
@@ -239,17 +251,25 @@ fun CCLIReportDialog(
                     ) {
                         // Preset buttons
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            PresetButton(stringResource(Res.string.ccli_preset_30d)) { applyPreset(30) }
-                            PresetButton(stringResource(Res.string.ccli_preset_90d)) { applyPreset(90) }
-                            PresetButton(stringResource(Res.string.ccli_preset_this_year)) {
+                            PresetButton(stringResource(Res.string.ccli_preset_30d), active = activePreset == 0) {
+                                activePreset = 0; applyPreset(30)
+                            }
+                            PresetButton(stringResource(Res.string.ccli_preset_90d), active = activePreset == 1) {
+                                activePreset = 1; applyPreset(90)
+                            }
+                            PresetButton(stringResource(Res.string.ccli_preset_this_year), active = activePreset == 2) {
+                                activePreset = 2
                                 fromYear = today.year; fromMonth = 1; fromDay = 1
                                 toYear = today.year; toMonth = today.monthValue; toDay = today.dayOfMonth
                             }
-                            PresetButton(stringResource(Res.string.ccli_preset_last_year)) {
+                            PresetButton(stringResource(Res.string.ccli_preset_last_year), active = activePreset == 3) {
+                                activePreset = 3
                                 fromYear = today.year - 1; fromMonth = 1; fromDay = 1
                                 toYear = today.year - 1; toMonth = 12; toDay = 31
                             }
-                            PresetButton(stringResource(Res.string.ccli_preset_all_time)) { applyPreset(null) }
+                            PresetButton(stringResource(Res.string.ccli_preset_all_time), active = activePreset == 4) {
+                                activePreset = 4; applyPreset(null)
+                            }
                         }
                         // Date pickers
                         Row(
@@ -260,14 +280,14 @@ fun CCLIReportDialog(
                             DatePicker(
                                 year = fromYear, month = fromMonth, day = fromDay,
                                 yearRange = yearRange,
-                                onChanged = { y, m, d -> fromYear = y; fromMonth = m; fromDay = d }
+                                onChanged = { y, m, d -> activePreset = null; fromYear = y; fromMonth = m; fromDay = d }
                             )
                             Spacer(Modifier.width(16.dp))
                             Text(stringResource(Res.string.ccli_to), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             DatePicker(
                                 year = toYear, month = toMonth, day = toDay,
                                 yearRange = yearRange,
-                                onChanged = { y, m, d -> toYear = y; toMonth = m; toDay = d }
+                                onChanged = { y, m, d -> activePreset = null; toYear = y; toMonth = m; toDay = d }
                             )
                         }
                     }
@@ -381,41 +401,29 @@ private fun SongsReportContent(songs: List<SongSummary>) {
         return
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = stringResource(Res.string.ccli_songs_summary, songs.size, totalPlays),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-
-        Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            // Left: bar chart (top 12)
-            Column(
-                modifier = Modifier
-                    .width(320.dp)
-                    .fillMaxHeight()
-                    .padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 8.dp)
-            ) {
-                Text(
-                    stringResource(Res.string.ccli_songs_chart),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                HorizontalBarChart(
-                    data = songs.take(12).map { it.title to it.count },
-                    barColor = primary,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-            HorizontalDivider(modifier = Modifier.fillMaxHeight().width(1.dp))
-
-            // Right: full table
-            SongTable(songs = songs, modifier = Modifier.weight(1f).fillMaxHeight())
+    Row(modifier = Modifier.fillMaxSize()) {
+        // Left: ranked bar list (top 12)
+        Column(
+            modifier = Modifier
+                .width(300.dp)
+                .fillMaxHeight()
+                .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 8.dp)
+        ) {
+            ChartPanelHeader(
+                title = stringResource(Res.string.ccli_songs_chart),
+                subtitle = stringResource(Res.string.ccli_songs_summary, songs.size, totalPlays)
+            )
+            TopItemsChart(
+                data = songs.take(12).map { it.title to it.count },
+                accent = primary,
+                modifier = Modifier.fillMaxSize()
+            )
         }
+
+        HorizontalDivider(modifier = Modifier.fillMaxHeight().width(1.dp))
+
+        // Right: full table
+        SongTable(songs = songs, modifier = Modifier.weight(1f).fillMaxHeight())
     }
 }
 
@@ -437,39 +445,27 @@ private fun BibleReportContent(verses: List<VerseSummary>) {
         .map { (book, vs) -> book to vs.sumOf { it.count } }
         .sortedByDescending { it.second }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = stringResource(Res.string.ccli_bible_summary, verses.size, totalPlays),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-
-        Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            Column(
-                modifier = Modifier
-                    .width(300.dp)
-                    .fillMaxHeight()
-                    .padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 8.dp)
-            ) {
-                Text(
-                    stringResource(Res.string.ccli_bible_books_chart),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                HorizontalBarChart(
-                    data = byBook.take(12),
-                    barColor = secondary,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-            HorizontalDivider(modifier = Modifier.fillMaxHeight().width(1.dp))
-
-            VerseTable(verses = verses, modifier = Modifier.weight(1f).fillMaxHeight())
+    Row(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .width(300.dp)
+                .fillMaxHeight()
+                .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 8.dp)
+        ) {
+            ChartPanelHeader(
+                title = stringResource(Res.string.ccli_bible_books_chart),
+                subtitle = stringResource(Res.string.ccli_bible_summary, verses.size, totalPlays)
+            )
+            TopItemsChart(
+                data = byBook.take(12),
+                accent = secondary,
+                modifier = Modifier.fillMaxSize()
+            )
         }
+
+        HorizontalDivider(modifier = Modifier.fillMaxHeight().width(1.dp))
+
+        VerseTable(verses = verses, modifier = Modifier.weight(1f).fillMaxHeight())
     }
 }
 
@@ -481,27 +477,41 @@ private fun ActivityContent(activity: List<ActivityPoint>) {
     val verseColor = VERSE_BAR_COLOR
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(
-            stringResource(Res.string.ccli_activity_title),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
         if (activity.isEmpty() || activity.all { it.songCount + it.verseCount == 0 }) {
             EmptyState(stringResource(Res.string.ccli_no_data))
             return
         }
 
-        // Summary stats
+        // Summary stat cards
         val totalSongs = activity.sumOf { it.songCount }
         val totalVerses = activity.sumOf { it.verseCount }
         val busiest = activity.maxByOrNull { it.songCount + it.verseCount }
-        Row(horizontalArrangement = Arrangement.spacedBy(24.dp), modifier = Modifier.padding(bottom = 12.dp)) {
-            StatChip(stringResource(Res.string.ccli_stat_songs_presented), "$totalSongs", primary)
-            StatChip(stringResource(Res.string.ccli_stat_bible_verses), "$totalVerses", verseColor)
-            if (busiest != null) StatChip(stringResource(Res.string.ccli_stat_busiest), "${busiest.label} (${busiest.songCount + busiest.verseCount})", MaterialTheme.colorScheme.secondary)
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+            StatCard(stringResource(Res.string.ccli_stat_songs_presented), "$totalSongs", primary)
+            StatCard(stringResource(Res.string.ccli_stat_bible_verses), "$totalVerses", verseColor)
+            StatCard(
+                stringResource(Res.string.ccli_stat_busiest),
+                if (busiest != null) "${busiest.label} (${busiest.songCount + busiest.verseCount})" else "—",
+                BUSIEST_CARD_COLOR
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Chart header + date range
+        Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.padding(bottom = 8.dp)) {
+            Text(
+                stringResource(Res.string.ccli_activity_title),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                "${activity.first().label} – ${activity.last().label}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
 
         // Chart
@@ -533,6 +543,8 @@ private fun ActivityContent(activity: List<ActivityPoint>) {
 @Composable
 private fun SongTable(songs: List<SongSummary>, modifier: Modifier = Modifier) {
     val dateFmt = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
+    val maxCount = remember(songs) { songs.maxOfOrNull { it.count } ?: 1 }
+    val accent = MaterialTheme.colorScheme.primary
     Column(modifier = modifier) {
         // Header
         Row(
@@ -551,27 +563,34 @@ private fun SongTable(songs: List<SongSummary>, modifier: Modifier = Modifier) {
             TableHeader(stringResource(Res.string.ccli_col_last), 90.dp.value)
         }
         HorizontalDivider()
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            itemsIndexed(songs) { index, song ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(if (index % 2 == 0) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                        .padding(horizontal = 12.dp, vertical = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    TableCell("${index + 1}", fixedWidth = 28.dp.value, align = TextAlign.End)
-                    TableCell(song.title, weight = 2f)
-                    TableCell(song.author.ifBlank { "—" }, weight = 1.5f, muted = song.author.isBlank())
-                    TableCell(song.songbook.ifBlank { "—" }, weight = 1f, muted = song.songbook.isBlank())
-                    TableCell(song.ccliNumber.ifBlank { "—" }, fixedWidth = 66.dp.value, muted = song.ccliNumber.isBlank())
-                    TableCell("${song.count}", fixedWidth = 52.dp.value, align = TextAlign.End, bold = true, color = MaterialTheme.colorScheme.primary)
-                    TableCell(dateFmt.format(Date(song.firstUsed)), fixedWidth = 90.dp.value)
-                    TableCell(dateFmt.format(Date(song.lastUsed)), fixedWidth = 90.dp.value)
+        val listState = rememberLazyListState()
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                itemsIndexed(songs) { index, song ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(if (index % 2 == 0) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                            .padding(start = 12.dp, end = 20.dp, top = 5.dp, bottom = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        TableCell("${index + 1}", fixedWidth = 28.dp.value, align = TextAlign.End)
+                        TableCell(song.title, weight = 2f)
+                        TableCell(song.author.ifBlank { "—" }, weight = 1.5f, muted = song.author.isBlank())
+                        TableCell(song.songbook.ifBlank { "—" }, weight = 1f, muted = song.songbook.isBlank())
+                        TableCell(song.ccliNumber.ifBlank { "—" }, fixedWidth = 66.dp.value, muted = song.ccliNumber.isBlank())
+                        UsageBadgeCell(song.count, maxCount, accent, fixedWidth = 52.dp.value)
+                        TableCell(dateFmt.format(Date(song.firstUsed)), fixedWidth = 90.dp.value)
+                        TableCell(dateFmt.format(Date(song.lastUsed)), fixedWidth = 90.dp.value)
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
             }
+            VerticalScrollbar(
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                adapter = rememberScrollbarAdapter(listState)
+            )
         }
     }
 }
@@ -579,6 +598,8 @@ private fun SongTable(songs: List<SongSummary>, modifier: Modifier = Modifier) {
 @Composable
 private fun VerseTable(verses: List<VerseSummary>, modifier: Modifier = Modifier) {
     val dateFmt = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
+    val maxCount = remember(verses) { verses.maxOfOrNull { it.count } ?: 1 }
+    val accent = MaterialTheme.colorScheme.tertiary
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth()
@@ -594,25 +615,32 @@ private fun VerseTable(verses: List<VerseSummary>, modifier: Modifier = Modifier
             TableHeader(stringResource(Res.string.ccli_col_last), 90.dp.value)
         }
         HorizontalDivider()
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            itemsIndexed(verses) { index, verse ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(if (index % 2 == 0) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                        .padding(horizontal = 12.dp, vertical = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    TableCell("${index + 1}", fixedWidth = 28.dp.value, align = TextAlign.End)
-                    TableCell("${verse.bookName} ${verse.chapter}:${verse.verseNumber}", weight = 2f)
-                    TableCell(verse.bibleName.ifBlank { "—" }, weight = 1f, muted = verse.bibleName.isBlank())
-                    TableCell("${verse.count}", fixedWidth = 52.dp.value, align = TextAlign.End, bold = true, color = MaterialTheme.colorScheme.tertiary)
-                    TableCell(dateFmt.format(Date(verse.firstUsed)), fixedWidth = 90.dp.value)
-                    TableCell(dateFmt.format(Date(verse.lastUsed)), fixedWidth = 90.dp.value)
+        val listState = rememberLazyListState()
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                itemsIndexed(verses) { index, verse ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(if (index % 2 == 0) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                            .padding(start = 12.dp, end = 20.dp, top = 5.dp, bottom = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        TableCell("${index + 1}", fixedWidth = 28.dp.value, align = TextAlign.End)
+                        TableCell("${verse.bookName} ${verse.chapter}:${verse.verseNumber}", weight = 2f)
+                        TableCell(verse.bibleName.ifBlank { "—" }, weight = 1f, muted = verse.bibleName.isBlank())
+                        UsageBadgeCell(verse.count, maxCount, accent, fixedWidth = 52.dp.value)
+                        TableCell(dateFmt.format(Date(verse.firstUsed)), fixedWidth = 90.dp.value)
+                        TableCell(dateFmt.format(Date(verse.lastUsed)), fixedWidth = 90.dp.value)
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
             }
+            VerticalScrollbar(
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                adapter = rememberScrollbarAdapter(listState)
+            )
         }
     }
 }
@@ -620,50 +648,89 @@ private fun VerseTable(verses: List<VerseSummary>, modifier: Modifier = Modifier
 // ── Charts ────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun HorizontalBarChart(
-    data: List<Pair<String, Int>>,
-    barColor: Color,
-    modifier: Modifier = Modifier
-) {
-    val maxValue = data.maxOfOrNull { it.second }?.coerceAtLeast(1) ?: 1
-    val bgColor = MaterialTheme.colorScheme.surfaceVariant
-
-    Column(modifier = modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        data.forEach { (label, value) ->
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(24.dp)) {
-                Text(
-                    label,
-                    modifier = Modifier.width(120.dp),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(Modifier.width(6.dp))
-                Box(
-                    modifier = Modifier.weight(1f).height(18.dp)
-                        .background(bgColor, RoundedCornerShape(3.dp))
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(fraction = value.toFloat() / maxValue)
-                            .background(barColor, RoundedCornerShape(3.dp))
-                    )
-                }
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    "$value",
-                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                    color = barColor,
-                    modifier = Modifier.width(36.dp),
-                    textAlign = TextAlign.End
-                )
-            }
-        }
+private fun ChartPanelHeader(title: String, subtitle: String) {
+    Column(modifier = Modifier.padding(bottom = 12.dp)) {
+        Text(
+            title,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            subtitle,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 2.dp)
+        )
     }
 }
 
+/**
+ * Ranked list where each row shows the label and its value on one line with a thin
+ * gradient bar below it, sized relative to the largest value. The bar is a quick
+ * visual ranking indicator, not an axis-based chart.
+ */
+@Composable
+private fun TopItemsChart(
+    data: List<Pair<String, Int>>,
+    accent: Color,
+    modifier: Modifier = Modifier
+) {
+    val maxValue = data.maxOfOrNull { it.second }?.coerceAtLeast(1) ?: 1
+    val trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    val brightEnd = lerp(accent, Color.White, 0.35f)
+    val barBrush = Brush.horizontalGradient(listOf(accent, brightEnd))
+    val scrollState = rememberScrollState()
+
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(end = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(11.dp)
+        ) {
+            data.forEach { (label, value) ->
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            label,
+                            modifier = Modifier.weight(1f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            "$value",
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                            color = accent
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(trackColor)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(fraction = value.toFloat() / maxValue)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(barBrush)
+                        )
+                    }
+                }
+            }
+        }
+        VerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+            adapter = rememberScrollbarAdapter(scrollState)
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ActivityBarChart(
     data: List<ActivityPoint>,
@@ -674,58 +741,23 @@ private fun ActivityBarChart(
     val maxTotal = data.maxOf { it.songCount + it.verseCount }.coerceAtLeast(1)
     val gridColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val songsLabel = stringResource(Res.string.ccli_legend_songs)
+    val versesLabel = stringResource(Res.string.ccli_legend_bible)
+    val barCorner = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+    // Lighter at the top, fading down to the series color.
+    val songBrush = Brush.verticalGradient(listOf(lerp(songColor, Color.White, 0.3f), songColor))
+    val verseBrush = Brush.verticalGradient(listOf(lerp(verseColor, Color.White, 0.3f), verseColor))
+    val barWidth = when {
+        data.size <= 14 -> 18.dp
+        data.size <= 26 -> 9.dp
+        else -> 5.dp
+    }
 
     // How many labels to show on x-axis to avoid crowding
     val labelStep = ((data.size / 10) + 1).coerceAtLeast(1)
 
     Column(modifier = modifier) {
-        // Chart area + y-axis
-        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            Canvas(modifier = Modifier.fillMaxSize().padding(start = 32.dp, end = 8.dp, bottom = 4.dp)) {
-                val chartH = size.height
-                val chartW = size.width
-                val barCount = data.size
-                if (barCount == 0) return@Canvas
-                val slotW = chartW / barCount
-                val barW = (slotW * 0.75f).coerceAtLeast(4f)
-                val barOffset = (slotW - barW) / 2f
-
-                // Horizontal grid lines
-                for (i in 0..4) {
-                    val y = chartH * (1f - i / 4f)
-                    drawLine(gridColor, Offset(0f, y), Offset(chartW, y), strokeWidth = 0.8f)
-                }
-
-                // Bars (stacked: verses bottom, songs top)
-                data.forEachIndexed { idx, pt ->
-                    val x = idx * slotW + barOffset
-                    val total = pt.songCount + pt.verseCount
-                    if (total == 0) return@forEachIndexed
-                    val totalH = (total.toFloat() / maxTotal) * chartH
-                    val songH = (pt.songCount.toFloat() / maxTotal) * chartH
-                    val verseH = totalH - songH
-
-                    // Verse bar (bottom)
-                    if (verseH > 0f) {
-                        drawRoundRect(
-                            color = verseColor,
-                            topLeft = Offset(x, chartH - verseH),
-                            size = Size(barW, verseH),
-                            cornerRadius = CornerRadius(2f)
-                        )
-                    }
-                    // Song bar (top of verse bar)
-                    if (songH > 0f) {
-                        drawRoundRect(
-                            color = songColor,
-                            topLeft = Offset(x, chartH - totalH),
-                            size = Size(barW, songH),
-                            cornerRadius = CornerRadius(2f)
-                        )
-                    }
-                }
-            }
-
+        Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
             // Y-axis labels
             Column(
                 modifier = Modifier.width(30.dp).fillMaxHeight().padding(bottom = 4.dp),
@@ -741,12 +773,86 @@ private fun ActivityBarChart(
                     )
                 }
             }
+
+            // Plot area: grid lines behind grouped bars
+            Box(modifier = Modifier.weight(1f).fillMaxHeight().padding(bottom = 4.dp)) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    for (i in 0..4) {
+                        val y = size.height * (1f - i / 4f)
+                        drawLine(gridColor, Offset(0f, y), Offset(size.width, y), strokeWidth = 0.8f)
+                    }
+                }
+                Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
+                    data.forEach { pt ->
+                        val songFrac = pt.songCount.toFloat() / maxTotal
+                        val verseFrac = pt.verseCount.toFloat() / maxTotal
+                        TooltipArea(
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                            tooltip = {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    shape = MaterialTheme.shapes.extraSmall,
+                                    tonalElevation = 4.dp
+                                ) {
+                                    Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)) {
+                                        Text(
+                                            pt.label,
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            "$songsLabel: ${pt.songCount}",
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        Text(
+                                            "$versesLabel: ${pt.verseCount}",
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.ComponentRect(
+                                anchor = Alignment.TopCenter,
+                                offset = DpOffset(0.dp, (-6).dp)
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalAlignment = Alignment.Bottom,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterHorizontally)
+                            ) {
+                                if (pt.songCount > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(barWidth)
+                                            .fillMaxHeight(songFrac.coerceIn(0.004f, 1f))
+                                            .clip(barCorner)
+                                            .background(songBrush)
+                                    )
+                                }
+                                if (pt.verseCount > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(barWidth)
+                                            .fillMaxHeight(verseFrac.coerceIn(0.004f, 1f))
+                                            .clip(barCorner)
+                                            .background(verseBrush)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        // X-axis labels
+        // X-axis labels (aligned under the plot area, past the 30dp y-axis gutter)
         Row(
-            modifier = Modifier.fillMaxWidth().padding(start = 32.dp, end = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth().padding(start = 30.dp),
+            horizontalArrangement = Arrangement.Start
         ) {
             data.forEachIndexed { idx, pt ->
                 Box(modifier = Modifier.weight(1f)) {
@@ -870,14 +976,26 @@ private fun DropdownPicker(
 // ── Small helpers ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun PresetButton(label: String, onClick: () -> Unit) {
-    OutlinedButton(
-        shape = RoundedCornerShape(6.dp),
-        onClick = onClick,
-        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-        modifier = Modifier.height(32.dp)
-    ) {
-        Text(label, style = MaterialTheme.typography.labelSmall)
+private fun PresetButton(label: String, active: Boolean, onClick: () -> Unit) {
+    val contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)
+    if (active) {
+        Button(
+            shape = RoundedCornerShape(50),
+            onClick = onClick,
+            contentPadding = contentPadding,
+            modifier = Modifier.height(32.dp)
+        ) {
+            Text(label, style = MaterialTheme.typography.labelSmall)
+        }
+    } else {
+        OutlinedButton(
+            shape = RoundedCornerShape(50),
+            onClick = onClick,
+            contentPadding = contentPadding,
+            modifier = Modifier.height(32.dp)
+        ) {
+            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
 
@@ -889,16 +1007,28 @@ private fun EmptyState(text: String) {
 }
 
 @Composable
-private fun StatChip(label: String, value: String, color: Color) {
+private fun RowScope.StatCard(label: String, value: String, color: Color) {
     Column(
         modifier = Modifier
-            .background(color.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
-            .border(1.dp, color.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .weight(1f)
+            .background(color.copy(alpha = 0.10f), RoundedCornerShape(10.dp))
+            .border(1.dp, color.copy(alpha = 0.35f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = color)
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            value,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = color,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 2.dp)
+        )
     }
 }
 
@@ -915,11 +1045,44 @@ private fun RowScope.TableHeader(
 ) {
     val mod = if (fixedWidth != null) Modifier.width(fixedWidth.dp) else Modifier.weight(weight)
     Text(
-        text, style = MaterialTheme.typography.labelSmall,
+        text.uppercase(),
+        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.6.sp),
         fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
         modifier = mod, maxLines = 1
     )
+}
+
+/**
+ * A "times used" count rendered as a rounded badge whose fill intensity scales with how
+ * high the count is relative to the busiest item in the list.
+ */
+@Composable
+private fun RowScope.UsageBadgeCell(
+    count: Int,
+    maxCount: Int,
+    accent: Color,
+    fixedWidth: Float
+) {
+    val ratio = if (maxCount > 0) count.toFloat() / maxCount else 0f
+    val bg = accent.copy(alpha = (0.18f + 0.72f * ratio).coerceIn(0.18f, 0.9f))
+    val fg = if (ratio > 0.5f) Color.White else accent
+    Box(modifier = Modifier.width(fixedWidth.dp)) {
+        Box(
+            modifier = Modifier
+                .widthIn(min = 24.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .background(bg)
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                "$count",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                color = fg
+            )
+        }
+    }
 }
 
 @Composable
