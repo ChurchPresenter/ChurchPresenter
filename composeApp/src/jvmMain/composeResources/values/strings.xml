@@ -1282,6 +1282,8 @@
     <string name="statistics">Statistics</string>
     <string name="top_songs">Top Songs</string>
     <string name="top_verses">Top Verses</string>
+    <string name="statistics_song_count">%1$d songs</string>
+    <string name="statistics_verse_count">%1$d verses</string>
     <string name="clear_statistics">Clear Statistics</string>
     <string name="times_displayed">times</string>
     <string name="menu_statistics">Statistics</string>
