@@ -2,6 +2,9 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,11 +22,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Slideshow
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -38,10 +54,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import org.jetbrains.skia.Image as SkiaImage
 import androidx.compose.ui.window.DialogWindow
@@ -246,32 +266,45 @@ fun PlanningCenterImportDialog(
         AppThemeWrapper(theme = theme) {
             Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                 Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                    val selectedServiceTypeName = viewModel.serviceTypes
-                        .firstOrNull { it.id == viewModel.selectedServiceTypeId }?.name ?: ""
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         DropdownSelector(
                             label = stringResource(Res.string.planning_center_import_service_type),
-                            items = viewModel.serviceTypes.map { it.name },
-                            selected = selectedServiceTypeName,
-                            onSelectedChange = { name ->
-                                viewModel.serviceTypes.firstOrNull { it.name == name }?.let { viewModel.selectServiceType(it.id) }
-                            },
+                            value = viewModel.selectedServiceTypeId ?: "",
+                            options = viewModel.serviceTypes.map { it.id to it.name },
+                            onValueChange = { id -> viewModel.selectServiceType(id) },
                             modifier = Modifier.weight(1f)
                         )
+                        if (viewModel.plans.isNotEmpty() && !viewModel.isLoadingPlans) {
+                            Spacer(Modifier.width(12.dp))
+                            DropdownSelector(
+                                label = stringResource(Res.string.planning_center_import_select_plan),
+                                value = viewModel.selectedPlanId ?: "",
+                                options = viewModel.plans.map { plan ->
+                                    plan.id to "${plan.title}${if (plan.dates.isNotBlank()) " — ${plan.dates}" else ""}"
+                                },
+                                onValueChange = { viewModel.selectPlan(it) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                         Spacer(Modifier.width(12.dp))
+                        Box(
+                            modifier = Modifier.size(8.dp).clip(CircleShape).background(PC_CONNECTED_GREEN)
+                        )
+                        Spacer(Modifier.width(6.dp))
                         Text(
                             stringResource(Res.string.planning_center_status_connected, settings.connectedPersonName.ifBlank { "?" }),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF4CAF50)
+                            color = PC_CONNECTED_GREEN
                         )
-                        TextButton(
+                        Spacer(Modifier.width(10.dp))
+                        OutlinedButton(
                             onClick = onDisconnect,
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                            modifier = Modifier.height(28.dp)
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                            modifier = Modifier.height(32.dp)
                         ) {
                             Text(stringResource(Res.string.planning_center_disconnect), style = MaterialTheme.typography.bodySmall)
                         }
@@ -292,34 +325,21 @@ fun PlanningCenterImportDialog(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
-                    } else {
-                        Text(
-                            stringResource(Res.string.planning_center_import_select_plan),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 8.dp)) {
-                            viewModel.plans.forEach { plan ->
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    OutlinedButton(
-                                        shape = RoundedCornerShape(6.dp),
-                                        onClick = { viewModel.selectPlan(plan.id) }
-                                    ) {
-                                        Text("${plan.title}${if (plan.dates.isNotBlank()) " — ${plan.dates}" else ""}")
-                                    }
-                                }
-                            }
-                        }
                     }
 
                     if (viewModel.selectedPlanId != null) {
                         HorizontalDivider()
                         Spacer(Modifier.height(8.dp))
-                        Text(stringResource(Res.string.planning_center_import_items), style = MaterialTheme.typography.titleSmall)
-                        Spacer(Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                stringResource(Res.string.planning_center_import_items),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(Modifier.width(12.dp))
                             Checkbox(
                                 checked = viewModel.allSelected,
                                 onCheckedChange = { viewModel.setAllSelected(it) },
@@ -350,9 +370,14 @@ fun PlanningCenterImportDialog(
                                     // Scoped to the whole row (not just the button's branch) so the
                                     // attachments list below can also check it — a real accordion.
                                     var expanded by remember(pco.id) { mutableStateOf(false) }
+                                    val hasScripture = viewModel.detectedScripturesByItemId[pco.id]?.isNotEmpty() == true
+                                    val isExpandable = pco.itemType == "item" && !hasScripture &&
+                                        viewModel.attachmentsByItemId.containsKey(pco.id) &&
+                                        (viewModel.attachmentsByItemId[pco.id]?.size ?: 0) > 0
                                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                                         Row(
-                                            modifier = Modifier.fillMaxWidth(),
+                                            modifier = Modifier.fillMaxWidth()
+                                                .then(if (isExpandable) Modifier.clickable { expanded = !expanded } else Modifier),
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
@@ -363,19 +388,17 @@ fun PlanningCenterImportDialog(
                                                         enabled = entry.matchedSongId != null,
                                                         onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
                                                     )
-                                                    PlanItemTypeIcon("♪")
+                                                    PlanItemTypeIcon(Icons.Filled.MusicNote)
                                                     Text(pco.songTitle ?: pco.title, modifier = Modifier.weight(1f))
                                                     if (entry.matchedSongId != null) {
-                                                        Text(
-                                                            stringResource(Res.string.planning_center_import_matched),
-                                                            style = MaterialTheme.typography.bodySmall,
-                                                            color = MaterialTheme.colorScheme.primary
-                                                        )
+                                                        MatchedTag()
                                                     } else if (isFetchingArrangement == pco.id) {
                                                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                                                     } else {
-                                                        OutlinedButton(
-                                                            shape = RoundedCornerShape(6.dp),
+                                                        Button(
+                                                            shape = RoundedCornerShape(8.dp),
+                                                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
+                                                            modifier = Modifier.height(32.dp),
                                                             onClick = {
                                                                 isFetchingArrangement = pco.id
                                                                 scope.launch {
@@ -393,7 +416,10 @@ fun PlanningCenterImportDialog(
                                                                 }
                                                             }
                                                         ) {
-                                                            Text(stringResource(Res.string.planning_center_import_add_song))
+                                                            Text(
+                                                                stringResource(Res.string.planning_center_import_add_song),
+                                                                style = MaterialTheme.typography.labelMedium
+                                                            )
                                                         }
                                                     }
                                                 }
@@ -402,10 +428,11 @@ fun PlanningCenterImportDialog(
                                                         checked = entry.selected,
                                                         onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
                                                     )
-                                                    PlanItemTypeIcon("🏷")
+                                                    PlanItemTypeIcon(Icons.Filled.Label, tint = PC_HEADER_AMBER)
                                                     Text(
                                                         pco.title,
                                                         style = MaterialTheme.typography.titleSmall,
+                                                        fontWeight = FontWeight.Bold,
                                                         modifier = Modifier.weight(1f)
                                                     )
                                                 }
@@ -414,13 +441,19 @@ fun PlanningCenterImportDialog(
                                                     // in the Media Library, not the Attachments API — the
                                                     // "attachments" this endpoint would return are incidental
                                                     // files, not the actual media, so there's nothing usable
-                                                    // to import. Show the row as plain, non-selectable text.
-                                                    Spacer(Modifier.width(40.dp))
-                                                    PlanItemTypeIcon("🎬")
+                                                    // to import. Show the row disabled — a greyed,
+                                                    // uncheckable checkbox and muted title (e.g. YouTube/
+                                                    // Vimeo videos, which are external links, not files).
+                                                    // Non-null (no-op) onCheckedChange keeps the same
+                                                    // minimumInteractiveComponentSize footprint as the
+                                                    // interactive rows so the checkbox stays aligned.
+                                                    Checkbox(checked = false, enabled = false, onCheckedChange = {})
+                                                    PlanItemTypeIcon(Icons.Filled.PlayCircle, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
                                                     Text(
                                                         pco.title,
                                                         modifier = Modifier.weight(1f),
-                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                                        textDecoration = TextDecoration.LineThrough
                                                     )
                                                 }
                                                 else -> {
@@ -428,8 +461,7 @@ fun PlanningCenterImportDialog(
                                                     // detected (see below), that accordion IS the selection
                                                     // mechanism — no separate announcement checkbox needed.
                                                     // Otherwise fall back to a plain checkbox (import the
-                                                    // title as an announcement).
-                                                    val hasScripture = viewModel.detectedScripturesByItemId[pco.id]?.isNotEmpty() == true
+                                                    // title as an announcement). hasScripture is hoisted above.
                                                     if (!hasScripture) {
                                                         Checkbox(
                                                             checked = entry.selected,
@@ -438,7 +470,7 @@ fun PlanningCenterImportDialog(
                                                     } else {
                                                         Spacer(Modifier.width(40.dp))
                                                     }
-                                                    PlanItemTypeIcon(if (hasScripture) "✝" else "📢")
+                                                    PlanItemTypeIcon(if (hasScripture) Icons.Filled.MenuBook else Icons.Filled.Campaign)
                                                     Text(
                                                         pco.title,
                                                         modifier = Modifier.weight(1f),
@@ -452,11 +484,20 @@ fun PlanningCenterImportDialog(
                                                     if (!attachmentsLoaded) {
                                                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                                                     } else if (fileCount > 0) {
-                                                        OutlinedButton(
-                                                            shape = RoundedCornerShape(6.dp),
-                                                            onClick = { expanded = !expanded }
+                                                        // Plain badge — the whole row is the click target
+                                                        // for expand/collapse (see isExpandable above).
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .clip(RoundedCornerShape(50))
+                                                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
+                                                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(50))
+                                                                .padding(horizontal = 12.dp, vertical = 5.dp)
                                                         ) {
-                                                            Text(stringResource(Res.string.planning_center_import_file_count, fileCount))
+                                                            Text(
+                                                                stringResource(Res.string.planning_center_import_file_count, fileCount),
+                                                                style = MaterialTheme.typography.labelMedium,
+                                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                            )
                                                         }
                                                     }
                                                 }
@@ -501,12 +542,13 @@ fun PlanningCenterImportDialog(
                                                     if (thumbUrl != null && ext in IMAGE_EXTENSIONS) {
                                                         AttachmentThumbnail(thumbUrl, viewModel)
                                                     } else {
-                                                        Text(attachmentExtensionIcon(ext), modifier = Modifier.width(20.dp))
+                                                        PlanItemTypeIcon(attachmentExtensionIcon(ext))
                                                     }
                                                     Text(
                                                         att.filename,
                                                         style = MaterialTheme.typography.bodySmall,
-                                                        color = if (supported) Color.Unspecified else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                                        color = if (supported) Color.Unspecified else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                                        textDecoration = if (supported) null else TextDecoration.LineThrough
                                                     )
                                                 }
                                             }
@@ -529,7 +571,12 @@ fun PlanningCenterImportDialog(
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TextButton(onClick = onDismiss, modifier = Modifier.padding(end = 8.dp)) {
+                        OutlinedButton(
+                            onClick = onDismiss,
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
                             Text(stringResource(Res.string.cancel))
                         }
                         var isImporting by remember { mutableStateOf(false) }
@@ -687,6 +734,9 @@ fun PlanningCenterImportDialog(
     )
 }
 
+private val PC_CONNECTED_GREEN = Color(0xFF4CAF50)
+private val PC_HEADER_AMBER = Color(0xFFF5B301)
+
 private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "bmp", "webp")
 private val VIDEO_EXTENSIONS = setOf("mp4", "avi", "mov", "mkv", "webm")
 private val AUDIO_EXTENSIONS = setOf("mp3", "wav", "flac")
@@ -698,23 +748,47 @@ private fun isSupportedAttachment(filename: String): Boolean {
     return ext in IMAGE_EXTENSIONS || ext in VIDEO_EXTENSIONS || ext in AUDIO_EXTENSIONS || ext in PRESENTATION_EXTENSIONS
 }
 
-/** Same glyph set as ScheduleTab's row type icon, for the file an attachment will become. */
-private fun attachmentExtensionIcon(ext: String): String = when (ext) {
-    in PRESENTATION_EXTENSIONS -> "📊"
-    in IMAGE_EXTENSIONS -> "📷"
-    in VIDEO_EXTENSIONS, in AUDIO_EXTENSIONS -> "🎬"
-    else -> "📎"
+/** Material icon for the file kind an attachment will become. */
+private fun attachmentExtensionIcon(ext: String): ImageVector = when (ext) {
+    in PRESENTATION_EXTENSIONS -> Icons.Filled.Slideshow
+    in IMAGE_EXTENSIONS -> Icons.Filled.Image
+    in VIDEO_EXTENSIONS, in AUDIO_EXTENSIONS -> Icons.Filled.Movie
+    else -> Icons.Filled.AttachFile
 }
 
-/** Row-leading type glyph, styled to match ScheduleTab's per-item icon column. */
+/** A green "✓ Matched" tag shown on song rows already matched to the local library. */
 @Composable
-private fun PlanItemTypeIcon(glyph: String) {
-    Text(
-        text = glyph,
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.width(24.dp)
-    )
+private fun MatchedTag() {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(PC_CONNECTED_GREEN.copy(alpha = 0.15f))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+    ) {
+        // The string already carries a leading "✓".
+        Text(
+            stringResource(Res.string.planning_center_import_matched),
+            style = MaterialTheme.typography.labelMedium,
+            color = PC_CONNECTED_GREEN
+        )
+    }
+}
+
+/** Row-leading type icon inside a small tinted rounded badge (matches the design's item tree). */
+@Composable
+private fun PlanItemTypeIcon(
+    icon: ImageVector,
+    tint: Color = MaterialTheme.colorScheme.primary
+) {
+    Box(
+        modifier = Modifier
+            .size(28.dp)
+            .clip(RoundedCornerShape(7.dp))
+            .background(tint.copy(alpha = 0.15f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
+    }
 }
 
 /** Small thumbnail preview for an image attachment in the import picker, fetched on demand. */

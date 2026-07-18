@@ -171,7 +171,13 @@ class PlanningCenterImportViewModel(
                 return@launch
             }
             when (val outcome = PlanningCenterClient.listUpcomingPlans(accessToken, serviceTypeId)) {
-                is PlanningCenterClient.PlansOutcome.Success -> plans = outcome.plans
+                is PlanningCenterClient.PlansOutcome.Success -> {
+                    plans = outcome.plans
+                    // Plans come back future-only, ordered by sort_date ascending, so the first
+                    // one is the closest upcoming plan. Auto-select it and preload its items so
+                    // the operator lands straight on the plan they'll most likely present.
+                    plans.firstOrNull()?.let { selectPlan(it.id) }
+                }
                 PlanningCenterClient.PlansOutcome.Unauthorized ->
                     errorMessage = "Planning Center session expired — reconnect in Settings"
                 else -> errorMessage = "Couldn't load plans"
