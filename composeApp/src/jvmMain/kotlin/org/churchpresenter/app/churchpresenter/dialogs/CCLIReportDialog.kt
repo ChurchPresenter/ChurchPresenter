@@ -61,6 +61,7 @@ import churchpresenter.composeapp.generated.resources.ccli_bible_books_chart
 import churchpresenter.composeapp.generated.resources.ccli_bible_summary
 import churchpresenter.composeapp.generated.resources.ccli_col_author
 import churchpresenter.composeapp.generated.resources.ccli_col_bible
+import churchpresenter.composeapp.generated.resources.ccli_col_ccli
 import churchpresenter.composeapp.generated.resources.ccli_col_first
 import churchpresenter.composeapp.generated.resources.ccli_col_last
 import churchpresenter.composeapp.generated.resources.ccli_col_rank
@@ -544,6 +545,7 @@ private fun SongTable(songs: List<SongSummary>, modifier: Modifier = Modifier) {
             TableHeader(stringResource(Res.string.ccli_col_title), null, weight = 2f)
             TableHeader(stringResource(Res.string.ccli_col_author), null, weight = 1.5f)
             TableHeader(stringResource(Res.string.ccli_col_songbook), null, weight = 1f)
+            TableHeader(stringResource(Res.string.ccli_col_ccli), 66.dp.value)
             TableHeader(stringResource(Res.string.ccli_col_used), 52.dp.value)
             TableHeader(stringResource(Res.string.ccli_col_first), 90.dp.value)
             TableHeader(stringResource(Res.string.ccli_col_last), 90.dp.value)
@@ -563,6 +565,7 @@ private fun SongTable(songs: List<SongSummary>, modifier: Modifier = Modifier) {
                     TableCell(song.title, weight = 2f)
                     TableCell(song.author.ifBlank { "—" }, weight = 1.5f, muted = song.author.isBlank())
                     TableCell(song.songbook.ifBlank { "—" }, weight = 1f, muted = song.songbook.isBlank())
+                    TableCell(song.ccliNumber.ifBlank { "—" }, fixedWidth = 66.dp.value, muted = song.ccliNumber.isBlank())
                     TableCell("${song.count}", fixedWidth = 52.dp.value, align = TextAlign.End, bold = true, color = MaterialTheme.colorScheme.primary)
                     TableCell(dateFmt.format(Date(song.firstUsed)), fixedWidth = 90.dp.value)
                     TableCell(dateFmt.format(Date(song.lastUsed)), fixedWidth = 90.dp.value)

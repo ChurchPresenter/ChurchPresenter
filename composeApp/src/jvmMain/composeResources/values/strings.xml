@@ -1657,6 +1657,7 @@
     <string name="ccli_col_title">Title</string>
     <string name="ccli_col_author">Author</string>
     <string name="ccli_col_songbook">Songbook</string>
+    <string name="ccli_col_ccli">CCLI #</string>
     <string name="ccli_col_used">Used</string>
     <string name="ccli_col_first">First</string>
     <string name="ccli_col_last">Last</string>

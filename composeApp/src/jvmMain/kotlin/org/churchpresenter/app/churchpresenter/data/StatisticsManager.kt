@@ -75,6 +75,7 @@ data class SongSummary(
     val title: String,
     val songbook: String,
     val author: String,
+    val ccliNumber: String,
     val count: Int,
     val firstUsed: Long,
     val lastUsed: Long
@@ -197,23 +198,29 @@ class StatisticsManager {
     fun getSongPlayCount(songId: String): Int =
         synchronized(lock) { statistics.songDisplayCounts[songId]?.count ?: 0 }
 
-    fun getAllSongsInRange(fromMs: Long, toMs: Long): List<SongSummary> = synchronized(lock) {
-        eventLog.songEvents
-            .filter { it.timestamp in fromMs..toMs }
-            .groupBy { "${it.songbook}::${it.songNumber}::${it.title}" }
-            .map { (_, events) ->
-                val e = events.first()
-                SongSummary(
-                    songNumber = e.songNumber,
-                    title = e.title,
-                    songbook = e.songbook,
-                    author = events.firstOrNull { it.author.isNotBlank() }?.author ?: "",
-                    count = events.size,
-                    firstUsed = events.minOf { it.timestamp },
-                    lastUsed = events.maxOf { it.timestamp }
-                )
-            }
-            .sortedByDescending { it.count }
+    fun getAllSongsInRange(fromMs: Long, toMs: Long): List<SongSummary> {
+        // Build the catalog CCLI lookup outside the lock so recording (go-live) isn't blocked
+        // by catalog file I/O.
+        val ccliLookup = loadSongCcliLookup()
+        return synchronized(lock) {
+            eventLog.songEvents
+                .filter { it.timestamp in fromMs..toMs }
+                .groupBy { "${it.songbook}::${it.songNumber}::${it.title}" }
+                .map { (_, events) ->
+                    val e = events.first()
+                    SongSummary(
+                        songNumber = e.songNumber,
+                        title = e.title,
+                        songbook = e.songbook,
+                        author = events.firstOrNull { it.author.isNotBlank() }?.author ?: "",
+                        ccliNumber = ccliLookup.resolve(e.songbook, e.songNumber, e.title),
+                        count = events.size,
+                        firstUsed = events.minOf { it.timestamp },
+                        lastUsed = events.maxOf { it.timestamp }
+                    )
+                }
+                .sortedByDescending { it.count }
+        }
     }
 
     fun getAllVersesInRange(fromMs: Long, toMs: Long): List<VerseSummary> = synchronized(lock) {
@@ -310,24 +317,39 @@ class StatisticsManager {
     // ── Exports ───────────────────────────────────────────────────────────────
 
     /**
-     * Builds a "songbook::title(lowercase)" -> CCLI number lookup from the on-disk song
-     * catalog. The event log only stores title/songbook/number/author (see [SongPlayEvent]),
-     * not a CCLI number, so this is resolved fresh from the catalog at export time rather than
-     * stored per-event.
+     * A songbook+number / songbook+title lookup for CCLI numbers resolved from the on-disk song
+     * catalog. The event log only stores title/songbook/number/author (see [SongPlayEvent]), not
+     * a CCLI number, so this is resolved fresh from the catalog at query/export time rather than
+     * stored per-event. Matching prefers songbook + song number (stable across title edits) and
+     * falls back to songbook + lowercased title.
      */
-    private fun loadSongCcliLookup(): Map<String, String> = try {
+    private class CcliLookup(
+        private val byNumber: Map<String, String>,
+        private val byTitle: Map<String, String>
+    ) {
+        fun resolve(songbook: String, songNumber: Int, title: String): String {
+            if (songNumber != 0) byNumber["$songbook::$songNumber"]?.let { return it }
+            return byTitle["$songbook::${title.lowercase()}"] ?: ""
+        }
+    }
+
+    private fun loadSongCcliLookup(): CcliLookup = try {
         val storageDir = SettingsManager().loadSettings().songSettings.storageDirectory
         if (storageDir.isBlank()) {
-            emptyMap()
+            CcliLookup(emptyMap(), emptyMap())
         } else {
             val cached = SongFileParser.loadCachedSongMap(storageDir)
-            SongFileParser().loadSongsFromDirectory(storageDir, cached)
+            val songs = SongFileParser().loadSongsFromDirectory(storageDir, cached)
                 .map { it.song }
                 .filter { it.ccliNumber.isNotBlank() }
-                .associate { "${it.songbook}::${it.title.lowercase()}" to it.ccliNumber }
+            val byNumber = songs.mapNotNull { song ->
+                song.number.toIntOrNull()?.let { "${song.songbook}::$it" to song.ccliNumber }
+            }.toMap()
+            val byTitle = songs.associate { "${it.songbook}::${it.title.lowercase()}" to it.ccliNumber }
+            CcliLookup(byNumber, byTitle)
         }
     } catch (_: Exception) {
-        emptyMap()
+        CcliLookup(emptyMap(), emptyMap())
     }
 
     fun exportStatisticsToXls(file: File): Boolean = try {
@@ -386,14 +408,12 @@ class StatisticsManager {
 
     fun exportCcliCsv(file: File, fromMs: Long, toMs: Long): Boolean = try {
         val songs = getAllSongsInRange(fromMs, toMs)
-        val ccliLookup = loadSongCcliLookup()
         val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val sb = StringBuilder()
         sb.appendLine("Title,Author,Songbook,Song Number,CCLI Number,Times Used,First Used,Last Used")
         for (song in songs) {
             fun esc(s: String) = "\"${s.replace("\"", "\"\"")}\""
-            val ccliNumber = ccliLookup["${song.songbook}::${song.title.lowercase()}"] ?: ""
-            sb.appendLine("${esc(song.title)},${esc(song.author)},${esc(song.songbook)},${song.songNumber},${esc(ccliNumber)},${song.count},${dateFmt.format(Date(song.firstUsed))},${dateFmt.format(Date(song.lastUsed))}")
+            sb.appendLine("${esc(song.title)},${esc(song.author)},${esc(song.songbook)},${song.songNumber},${esc(song.ccliNumber)},${song.count},${dateFmt.format(Date(song.firstUsed))},${dateFmt.format(Date(song.lastUsed))}")
         }
         file.writeText(sb.toString())
         true
@@ -409,7 +429,6 @@ class StatisticsManager {
         val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
         val songsSheet = workbook.createSheet("Songs")
-        val ccliLookup = loadSongCcliLookup()
         var rowIndex = 0
         val sHeader = songsSheet.createRow(rowIndex++)
         listOf("Rank", "Title", "Author", "Songbook", "Song #", "CCLI #", "Times Used", "First Used", "Last Used")
@@ -423,7 +442,7 @@ class StatisticsManager {
             row.createCell(2).setCellValue(song.author)
             row.createCell(3).setCellValue(song.songbook)
             row.createCell(4).setCellValue(song.songNumber.toDouble())
-            row.createCell(5).setCellValue(ccliLookup["${song.songbook}::${song.title.lowercase()}"] ?: "")
+            row.createCell(5).setCellValue(song.ccliNumber)
             row.createCell(6).setCellValue(song.count.toDouble())
             row.createCell(7).setCellValue(dateFmt.format(Date(song.firstUsed)))
             row.createCell(8).setCellValue(dateFmt.format(Date(song.lastUsed)))
