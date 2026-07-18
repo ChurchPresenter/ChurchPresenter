@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -34,10 +37,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ok
@@ -114,6 +120,39 @@ private fun updateIntervalLabel(interval: UpdateCheckInterval): String = when (i
     UpdateCheckInterval.EVERY_3_MONTHS -> stringResource(Res.string.update_interval_every_3_months)
     UpdateCheckInterval.EVERY_6_MONTHS -> stringResource(Res.string.update_interval_every_6_months)
     UpdateCheckInterval.NEVER -> stringResource(Res.string.update_interval_never)
+}
+
+/**
+ * Circular hero glyph shown above the dialog headline: a solid [circleColor] disc with a
+ * centered [icon], wrapped in a soft same-color halo. Colors come from the active theme so
+ * the glyph tracks light/dark and every accent theme.
+ */
+@Composable
+private fun HeroIcon(
+    icon: ImageVector,
+    circleColor: Color,
+    iconColor: Color
+) {
+    Box(modifier = Modifier.size(72.dp), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .background(circleColor.copy(alpha = 0.15f), CircleShape)
+        )
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .background(circleColor, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(30.dp)
+            )
+        }
+    }
 }
 
 @Composable
@@ -223,7 +262,12 @@ fun UpdateAvailableDialog(
     else
         stringResource(Res.string.update_dialog_up_to_date_title)
 
-    val dialogHeight = if (isManualCheck) 468.dp else 420.dp
+    // Extra height for the update-available state, whose hero sits above a full release-notes
+    // panel; the up-to-date state's flexible spacer absorbs the hero at the original heights.
+    val dialogHeight = when {
+        updateInfo != null -> if (isManualCheck) 548.dp else 500.dp
+        else -> if (isManualCheck) 468.dp else 420.dp
+    }
 
     DialogWindow(
         onCloseRequest = onDismiss,
@@ -244,6 +288,12 @@ fun UpdateAvailableDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (updateInfo != null) {
+                    HeroIcon(
+                        icon = Icons.Default.Download,
+                        circleColor = MaterialTheme.colorScheme.primary,
+                        iconColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = stringResource(Res.string.update_dialog_title),
                         style = MaterialTheme.typography.headlineSmall,
@@ -339,6 +389,12 @@ fun UpdateAvailableDialog(
                     }
                 } else {
                     Spacer(modifier = Modifier.height(8.dp))
+                    HeroIcon(
+                        icon = Icons.Default.Check,
+                        circleColor = MaterialTheme.colorScheme.inverseSurface,
+                        iconColor = MaterialTheme.colorScheme.inverseOnSurface
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = stringResource(Res.string.update_dialog_up_to_date_title),
                         style = MaterialTheme.typography.headlineSmall,
@@ -439,9 +495,10 @@ fun UpdateAvailableDialog(
                 } else {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         OutlinedButton(
+                            modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(6.dp),
                             onClick = {
                                 Desktop.getDesktop().browse(URI(UpdateChecker.RELEASES_URL))
