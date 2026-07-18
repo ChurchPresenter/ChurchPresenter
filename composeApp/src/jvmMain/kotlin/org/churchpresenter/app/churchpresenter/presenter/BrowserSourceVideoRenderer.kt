@@ -228,7 +228,7 @@ class BrowserSourceVideoRenderer(
                                     Presenting.LOWER_THIRD -> screenAssignment.showStreaming
                                     Presenting.MEDIA -> screenAssignment.showMedia
                                     Presenting.WEBSITE -> screenAssignment.showWebsite
-                                    Presenting.CANVAS -> true
+                                    Presenting.CANVAS -> screenAssignment.showCanvas
                                     Presenting.QA -> screenAssignment.showQA
                                     Presenting.STT -> screenAssignment.showSTT
                                     Presenting.DICTIONARY -> screenAssignment.showDictionary

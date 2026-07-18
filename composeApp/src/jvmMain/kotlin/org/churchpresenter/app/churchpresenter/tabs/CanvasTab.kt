@@ -19,7 +19,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TabGoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -93,7 +93,6 @@ import churchpresenter.composeapp.generated.resources.canvas_source_image
 import churchpresenter.composeapp.generated.resources.canvas_source_text
 import churchpresenter.composeapp.generated.resources.canvas_source_video
 import churchpresenter.composeapp.generated.resources.canvas_sources
-import churchpresenter.composeapp.generated.resources.go_live
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
@@ -818,13 +817,16 @@ fun CanvasTab(
                         )
 
                         // Go Live
-                        GoLiveButton(
-                            onClick = {
+                        TabGoLiveButton(
+                            appSettings = appSettings,
+                            presenterManager = presenterManager,
+                            liveMode = Presenting.CANVAS,
+                            isEnabled = { it.showCanvas },
+                            onGoLive = {
                                 presenterManager.setActiveScene(currentScene)
                                 presenterManager.setPresentingMode(Presenting.CANVAS)
                                 presenterManager.setShowPresenterWindow(true)
                             },
-                            tooltipText = stringResource(Res.string.go_live)
                         )
                     }
                 }

@@ -95,7 +95,6 @@ import org.churchpresenter.app.churchpresenter.data.settings.WebBookmark
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.app.churchpresenter.presenter.WebNavController
 import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
@@ -103,7 +102,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TabGoLiveButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.awt.event.InputEvent
@@ -250,14 +249,6 @@ fun WebTab(
         val actionButtonsWidth = 320.dp // bookmark + Add to Schedule + Go Live
         val minUrlWidth = 200.dp
 
-        val hasSecondaryDisplay = rememberScreenDevices().size > 1
-        // Web can only go live if at least one regular (non-DeckLink) fill output has showWebsite enabled
-        val hasWebCapableOutput = remember(appSettings.projectionSettings) {
-            val proj = appSettings.projectionSettings
-            val assignments = (0 until proj.screenAssignments.size).map { proj.getAssignment(it) }
-            assignments.any { it.targetType != "decklink" && it.targetDisplay >= 0 && it.showWebsite }
-        }
-
         // Shared composables for URL bar and action buttons
         val urlBar: @Composable RowScope.() -> Unit = {
             Row(
@@ -368,17 +359,19 @@ fun WebTab(
             }
 
             // Go Live
-            val goLiveEnabled = urlInput.isNotBlank() && hasSecondaryDisplay && hasWebCapableOutput
-            GoLiveButton(
-                onClick = {
+            TabGoLiveButton(
+                appSettings = appSettings,
+                presenterManager = presenterManager,
+                liveMode = Presenting.WEBSITE,
+                isEnabled = { it.showWebsite },
+                onGoLive = {
                     val url = normaliseUrl(urlInput)
                     urlInput = url
                     liveUrl = url
                     presenterManager?.setWebsiteUrl(url)
                     presenterManager?.setPresentingMode(Presenting.WEBSITE)
                 },
-                enabled = goLiveEnabled,
-                tooltipText = stringResource(Res.string.web_go_live)
+                enabled = urlInput.isNotBlank(),
             )
         }
 

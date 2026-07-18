@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TabGoLiveButton
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -97,7 +97,6 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_add_to_schedule
-import churchpresenter.composeapp.generated.resources.tooltip_go_live
 import churchpresenter.composeapp.generated.resources.tooltip_send_to_stage_monitor
 import churchpresenter.composeapp.generated.resources.tooltip_hide_from_stage_monitor
 import churchpresenter.composeapp.generated.resources.tooltip_announcement_show
@@ -386,10 +385,13 @@ fun AnnouncementsTab(
                 )
             }
             if (presenterManager != null) {
-                GoLiveButton(
-                    onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
+                TabGoLiveButton(
+                    appSettings = appSettings,
+                    presenterManager = presenterManager,
+                    liveMode = Presenting.ANNOUNCEMENTS,
+                    isEnabled = { it.showAnnouncements },
+                    onGoLive = { viewModel.goLive(presenterManager, onSettingsChange) },
                     enabled = viewModel.text.isNotBlank(),
-                    tooltipText = stringResource(Res.string.tooltip_go_live)
                 )
             }
         }
@@ -803,8 +805,12 @@ fun AnnouncementsTab(
                                 )
                             }
                             if (presenterManager != null) {
-                                GoLiveButton(
-                                    onClick = {
+                                TabGoLiveButton(
+                                    appSettings = appSettings,
+                                    presenterManager = presenterManager,
+                                    liveMode = Presenting.ANNOUNCEMENTS,
+                                    isEnabled = { it.showAnnouncements },
+                                    onGoLive = {
                                         // Also (re)starts Specific Time / Clock Display's ticker if it
                                         // wasn't already running via the play/pause button above. Go Live
                                         // is one of only two places (with Send to Stage Monitor) allowed
@@ -819,7 +825,7 @@ fun AnnouncementsTab(
                                         presenterManager.setAnnouncementText(liveText)
                                         presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
                                     },
-                                    tooltipText = stringResource(Res.string.tooltip_go_live)
+                                    enabled = viewModel.text.isNotBlank() || viewModel.timerMode != Constants.TIMER_MODE_DURATION || viewModel.timerHours > 0 || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0,
                                 )
                             }
                         }

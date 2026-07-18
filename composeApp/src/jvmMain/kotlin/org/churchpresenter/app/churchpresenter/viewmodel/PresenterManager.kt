@@ -11,6 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.app.churchpresenter.models.GoLiveTarget
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.cef.browser.CefBrowser
 import org.churchpresenter.app.churchpresenter.models.Scene
@@ -93,6 +94,16 @@ class PresenterManager {
         val updated = _screenLocks.value.toMutableMap()
         if (mode == null) updated.remove(screenIndex) else updated[screenIndex] = mode
         _screenLocks.value = updated
+    }
+
+    // Which output(s) the next Go Live action targets, chosen from the Go Live button's display
+    // picker. Shared across tabs so the selection persists as the operator switches content types.
+    // All = project to every output (historical behavior); Display(i) = a single output slot.
+    private val _goLiveTarget = mutableStateOf<GoLiveTarget>(GoLiveTarget.All)
+    val goLiveTarget: State<GoLiveTarget> = _goLiveTarget
+
+    fun setGoLiveTarget(target: GoLiveTarget) {
+        _goLiveTarget.value = target
     }
 
     // Per-Browser-Source-output lock: separate index space from _screenLocks since

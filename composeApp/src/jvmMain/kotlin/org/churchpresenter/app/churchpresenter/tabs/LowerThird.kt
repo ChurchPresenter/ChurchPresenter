@@ -14,7 +14,7 @@ import androidx.compose.foundation.border
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.finalPassClickable
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TabGoLiveButton
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -157,6 +157,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.generate_lower_third
 import churchpresenter.composeapp.generated.resources.aspect_ratio_mismatch
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import java.awt.Window
 import java.io.File
@@ -167,6 +169,7 @@ import javax.swing.SwingUtilities
 fun LowerThirdTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
+    presenterManager: PresenterManager? = null,
     selectedLowerThirdItem: ScheduleItem.LowerThirdItem? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
@@ -966,8 +969,12 @@ fun LowerThirdTab(
                 )
 
                 // Go Live
-                GoLiveButton(
-                    onClick = {
+                TabGoLiveButton(
+                    appSettings = appSettings,
+                    presenterManager = presenterManager,
+                    liveMode = Presenting.LOWER_THIRD,
+                    isEnabled = { true },
+                    onGoLive = {
                         val atemSettings = appSettings.atemSettings
                         if (atemSettings.goLiveKey && atemConfigured) {
                             val durationMs = LottieRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
@@ -987,8 +994,6 @@ fun LowerThirdTab(
                             onGoLive(jsonContent, false, -1f, 0L, selectedFile?.nameWithoutExtension ?: "")
                         }
                     },
-                    enabled = canPlay,
-                    tooltipText = stringResource(Res.string.go_live)
                 )
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

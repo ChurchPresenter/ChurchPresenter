@@ -110,14 +110,16 @@ import churchpresenter.composeapp.generated.resources.verse
 import java.awt.Cursor
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TabGoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.InterlinearWord
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryLanguageFilter
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -129,6 +131,7 @@ fun DictionaryTab(
     modifier: Modifier = Modifier,
     viewModel: DictionaryViewModel,
     appSettings: AppSettings? = null,
+    presenterManager: PresenterManager? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((number: String, word: String, transliteration: String, definition: String) -> Unit)? = null,
     onGoLive: ((StrongsEntry) -> Unit)? = null,
@@ -202,6 +205,8 @@ fun DictionaryTab(
             getEntry = { number -> entryIndex[number] },
             onAddToSchedule = onAddToSchedule?.let { cb -> { e -> cb(e.number, e.word, e.transliteration, e.definition) } },
             onGoLive = onGoLive,
+            appSettings = appSettings,
+            presenterManager = presenterManager,
         )
     }
 }
@@ -477,9 +482,10 @@ private fun DictionaryDetailPane(
     getEntry: ((strongsNumber: String) -> StrongsEntry?)? = null,
     onAddToSchedule: ((StrongsEntry) -> Unit)? = null,
     onGoLive: ((StrongsEntry) -> Unit)? = null,
+    appSettings: AppSettings? = null,
+    presenterManager: PresenterManager? = null,
 ) {
     val addScheduleStr = stringResource(Res.string.add_to_schedule)
-    val goLiveStr = stringResource(Res.string.go_live)
     val backStr = stringResource(Res.string.dictionary_back)
     val forwardStr = stringResource(Res.string.dictionary_forward)
     val switchLangStr = stringResource(Res.string.dictionary_switch_language)
@@ -547,10 +553,13 @@ private fun DictionaryDetailPane(
                 )
             }
             if (onGoLive != null) {
-                GoLiveButton(
-                    onClick = { entry?.let { onGoLive(it) } },
+                TabGoLiveButton(
+                    appSettings = appSettings,
+                    presenterManager = presenterManager,
+                    liveMode = Presenting.DICTIONARY,
+                    isEnabled = { it.showDictionary },
+                    onGoLive = { entry?.let { onGoLive(it) } },
                     enabled = entry != null,
-                    tooltipText = goLiveStr
                 )
             }
             } // end right-side Row

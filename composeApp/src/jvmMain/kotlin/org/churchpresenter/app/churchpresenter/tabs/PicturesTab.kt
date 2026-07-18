@@ -17,7 +17,8 @@ import androidx.compose.ui.input.pointer.isShiftPressed
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TabGoLiveButton
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import androidx.compose.foundation.layout.Arrangement
@@ -390,10 +391,13 @@ fun PicturesTab(
                 )
             }
             if (presenterManager != null) {
-                GoLiveButton(
-                    onClick = { viewModel.goLive(presenterManager, onInstanceLinkSendProject) },
+                TabGoLiveButton(
+                    appSettings = appSettings,
+                    presenterManager = presenterManager,
+                    liveMode = Presenting.PICTURES,
+                    isEnabled = { it.showPictures },
+                    onGoLive = { viewModel.goLive(presenterManager, onInstanceLinkSendProject) },
                     enabled = viewModel.images.isNotEmpty(),
-                    tooltipText = stringResource(Res.string.go_live)
                 )
             }
         }

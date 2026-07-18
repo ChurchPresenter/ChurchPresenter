@@ -3266,7 +3266,7 @@ private fun PresenterWindows(
                                         audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
                                     )
 
-                                Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+                                Presenting.CANVAS -> { if (screenAssignment.showCanvas) ScenePresenter(scene = activeScene) }
 
                                 Presenting.QA ->
                                     if (screenAssignment.showQA) {
@@ -3501,7 +3501,7 @@ private fun PresenterWindows(
                                 outputRole = Constants.OUTPUT_ROLE_KEY
                             )
 
-                        Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+                        Presenting.CANVAS -> { if (screenAssignment.showCanvas) ScenePresenter(scene = activeScene) }
 
                         Presenting.QA ->
                             if (screenAssignment.showQA) {
@@ -3664,7 +3664,7 @@ private fun PresenterWindows(
                                 outputRole = Constants.OUTPUT_ROLE_KEY
                             )
 
-                        Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+                        Presenting.CANVAS -> { if (screenAssignment.showCanvas) ScenePresenter(scene = activeScene) }
 
                         Presenting.QA ->
                             if (screenAssignment.showQA) {
@@ -3857,7 +3857,7 @@ private fun PresenterWindows(
                                                 outputRole = Constants.OUTPUT_ROLE_KEY
                                             )
 
-                                        Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+                                        Presenting.CANVAS -> { if (screenAssignment.showCanvas) ScenePresenter(scene = activeScene) }
 
                                         Presenting.QA ->
                                             if (screenAssignment.showQA) {
@@ -4122,7 +4122,7 @@ private fun PresenterWindows(
                                             outputRole = Constants.OUTPUT_ROLE_KEY
                                         )
 
-                                    Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+                                    Presenting.CANVAS -> { if (screenAssignment.showCanvas) ScenePresenter(scene = activeScene) }
 
                                     Presenting.QA ->
                                         if (screenAssignment.showQA) {
@@ -4291,7 +4291,7 @@ private fun PresenterWindows(
                                 outputRole = Constants.OUTPUT_ROLE_KEY
                             )
 
-                        Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+                        Presenting.CANVAS -> { if (screenAssignment.showCanvas) ScenePresenter(scene = activeScene) }
 
                         Presenting.QA ->
                             if (screenAssignment.showQA) {

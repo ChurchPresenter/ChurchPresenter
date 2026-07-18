@@ -1765,6 +1765,7 @@ fun MainDesktop(
                                 hostWindow = hostWindow,
                                 viewModel = songsViewModel,
                                 appSettings = appSettings,
+                                presenterManager = presenterManager,
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { songNumber, title, songbook, songId ->
                                     currentScheduleActions.addSong(songNumber, title, songbook, songId)
@@ -1844,6 +1845,7 @@ fun MainDesktop(
                             Tabs.LOWER_THIRD -> LowerThirdTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
+                                presenterManager = presenterManager,
                                 selectedLowerThirdItem = selectedLowerThirdItem,
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
@@ -1969,6 +1971,7 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 viewModel = dictionaryViewModel,
                                 appSettings = appSettings,
+                                presenterManager = presenterManager,
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { number, word, transliteration, definition ->
                                     scheduleActions.addDictionary(number, word, transliteration, definition)

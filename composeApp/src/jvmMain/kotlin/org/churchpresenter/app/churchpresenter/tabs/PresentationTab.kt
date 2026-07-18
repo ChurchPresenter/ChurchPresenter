@@ -100,7 +100,6 @@ import churchpresenter.composeapp.generated.resources.auto_scroll_interval
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.clear_recents
-import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.ic_pause
@@ -155,7 +154,7 @@ import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TabGoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
@@ -497,8 +496,13 @@ fun PresentationTab(
                 )
             }
             if (presenterManager != null) {
-                GoLiveButton(
-                    onClick = {
+                TabGoLiveButton(
+                    appSettings = appSettings,
+                    presenterManager = presenterManager,
+                    liveMode = Presenting.PRESENTATION,
+                    isEnabled = { it.showPictures },
+                    enabled = viewModel.slideFiles.isNotEmpty(),
+                    onGoLive = {
                         val idx = viewModel.selectedSlideIndex
                         scope.launch {
                             val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
@@ -538,8 +542,6 @@ fun PresentationTab(
                             )
                         }
                     },
-                    enabled = viewModel.slideFiles.isNotEmpty(),
-                    tooltipText = stringResource(Res.string.go_live)
                 )
             }
         }
