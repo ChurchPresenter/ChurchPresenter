@@ -1379,7 +1379,7 @@ fun BibleTab(
                     .fillMaxWidth()
                     .heightIn(min = 31.dp)
                     .background(MaterialTheme.colorScheme.surface)
-                    .padding(start = 4.dp),
+                    .padding(start = 4.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(modifier = Modifier.width(with(density) { colWBook.toDp() }).padding(start = 12.dp)) {

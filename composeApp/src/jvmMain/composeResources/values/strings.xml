@@ -709,6 +709,9 @@
     <string name="projection_type_lower_third">Lower Third</string>
     <string name="projection_go_live_disabled">(disabled)</string>
     <string name="projection_simulated_output">Simulated output</string>
+    <string name="projection_screens_count">%1$d screens</string>
+    <string name="projection_displays_list">Displays %1$s</string>
+    <string name="projection_displays_selected">%1$d selected</string>
     <string name="content_bible">Bible</string>
     <string name="content_songs">Songs</string>
     <string name="content_bible_background">Bible Background</string>

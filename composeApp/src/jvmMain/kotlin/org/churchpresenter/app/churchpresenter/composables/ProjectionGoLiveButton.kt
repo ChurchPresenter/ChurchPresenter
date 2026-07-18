@@ -60,13 +60,14 @@ import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.projection_all_displays
 import churchpresenter.composeapp.generated.resources.projection_all_displays_sub
 import churchpresenter.composeapp.generated.resources.projection_display_num
-import churchpresenter.composeapp.generated.resources.projection_display_hash
+import churchpresenter.composeapp.generated.resources.projection_displays_list
+import churchpresenter.composeapp.generated.resources.projection_displays_selected
 import churchpresenter.composeapp.generated.resources.projection_go_live_disabled
 import churchpresenter.composeapp.generated.resources.projection_go_live_label
 import churchpresenter.composeapp.generated.resources.projection_live_label
 import churchpresenter.composeapp.generated.resources.projection_output_display_header
+import churchpresenter.composeapp.generated.resources.projection_screens_count
 import churchpresenter.composeapp.generated.resources.projection_simulated_output
-import churchpresenter.composeapp.generated.resources.projection_target_all_short
 import churchpresenter.composeapp.generated.resources.projection_type_lower_third
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -193,6 +194,28 @@ fun rememberGoLiveDisplays(
     }
 }
 
+/** Whether [index] is one of this target's selected outputs (All targets everything, none individually). */
+private fun GoLiveTarget.containsDisplay(index: Int): Boolean = when (this) {
+    is GoLiveTarget.All -> false
+    is GoLiveTarget.Display -> this.index == index
+    is GoLiveTarget.Multi -> index in indices
+}
+
+/** Toggles [index] in/out of the selection, collapsing to All (none), Display (one) or Multi (many). */
+private fun GoLiveTarget.toggleDisplay(index: Int): GoLiveTarget {
+    val current: Set<Int> = when (this) {
+        is GoLiveTarget.All -> emptySet()
+        is GoLiveTarget.Display -> setOf(this.index)
+        is GoLiveTarget.Multi -> indices
+    }
+    val next = if (index in current) current - index else current + index
+    return when (next.size) {
+        0 -> GoLiveTarget.All
+        1 -> GoLiveTarget.Display(next.first())
+        else -> GoLiveTarget.Multi(next)
+    }
+}
+
 /**
  * Convenience wrapper around [ProjectionGoLiveButton] for a content tab. Reads the shared Go Live
  * target and live state from [presenterManager], builds the display list gated by [isEnabled], and
@@ -243,16 +266,33 @@ fun ProjectionGoLiveButton(
 ) {
     var open by remember { mutableStateOf(false) }
 
-    val selDisp = (selectedTarget as? GoLiveTarget.Display)?.let { t -> displays.find { it.index == t.index } }
-    // Single-line compact label for the trigger (the row height is too short for two lines):
-    // "ALL" for all outputs, "#N" for a specific one.
-    val compactLabel = if (selDisp == null) stringResource(Res.string.projection_target_all_short)
-        else stringResource(Res.string.projection_display_hash, selDisp.number)
+    // Two-line trigger: the target identity on top, a distinct descriptor below.
+    // All → "All Displays" / "N screens";  Single → "Display N" / the output type;
+    // Multi → "Displays 1, 2, 4" / "N selected".
+    val triggerTitle: String
+    val triggerSub: String
+    when (val t = selectedTarget) {
+        is GoLiveTarget.All -> {
+            triggerTitle = stringResource(Res.string.projection_all_displays)
+            triggerSub = stringResource(Res.string.projection_screens_count, displays.size)
+        }
+        is GoLiveTarget.Display -> {
+            val d = displays.find { it.index == t.index }
+            triggerTitle = stringResource(Res.string.projection_display_num, d?.number ?: (t.index + 1))
+            triggerSub = d?.typeLabel ?: ""
+        }
+        is GoLiveTarget.Multi -> {
+            val nums = t.indices.sorted().joinToString(", ") { (it + 1).toString() }
+            triggerTitle = stringResource(Res.string.projection_displays_list, nums)
+            triggerSub = stringResource(Res.string.projection_displays_selected, t.indices.size)
+        }
+    }
 
     val mainBg = if (isLive) LiveMainBg else IdleMainBg
     val mainText = if (isLive) Color.White else IdleMainText
     val dot = if (isLive) Color.White else IdleDot
     val typeColor = if (isLive) LiveTypeColor else IdleTypeColor
+    val triggerSubColor = if (isLive) LiveTriggerLabel else IdleTriggerLabel
     val divider = if (isLive) LiveDivider else IdleDivider
 
     Box(modifier) {
@@ -287,11 +327,11 @@ fun ProjectionGoLiveButton(
 
             Box(Modifier.width(1.dp).fillMaxHeight().background(divider))
 
-            // Trigger area (opens the picker) — single line so it fits the 34dp row height.
+            // Trigger area (opens the picker) — two-line caption + target name, per the design.
             Row(
                 Modifier
                     .fillMaxHeight()
-                    .width(68.dp)
+                    .width(120.dp)
                     .clip(RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp))
                     .background(mainBg)
                     .clickable(enabled = enabled) { open = !open }
@@ -299,16 +339,28 @@ fun ProjectionGoLiveButton(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
-                    compactLabel,
-                    modifier = Modifier.weight(1f),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = typeColor,
-                    maxLines = 1,
-                    softWrap = false,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        triggerTitle,
+                        fontSize = 12.sp,
+                        lineHeight = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = typeColor,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        triggerSub,
+                        fontSize = 9.sp,
+                        lineHeight = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = triggerSubColor,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 Icon(
                     Icons.Default.KeyboardArrowDown,
                     contentDescription = null,
@@ -358,24 +410,19 @@ fun ProjectionGoLiveButton(
                         )
                     }
                     HorizontalDivider(color = HeaderBorder)
+                    // Rows toggle the selection (checkbox-style) and keep the picker open, so several
+                    // outputs can be chosen at once; the operator clicks away to dismiss.
                     displays.forEach { d ->
                         DisplayPickerRow(
                             option = d,
-                            selected = selectedTarget is GoLiveTarget.Display &&
-                                (selectedTarget as GoLiveTarget.Display).index == d.index,
-                            onClick = {
-                                onSelectTarget(GoLiveTarget.Display(d.index))
-                                open = false
-                            }
+                            selected = selectedTarget.containsDisplay(d.index),
+                            onClick = { onSelectTarget(selectedTarget.toggleDisplay(d.index)) }
                         )
                     }
                     HorizontalDivider(color = HeaderBorder)
                     AllDisplaysRow(
                         selected = selectedTarget is GoLiveTarget.All,
-                        onClick = {
-                            onSelectTarget(GoLiveTarget.All)
-                            open = false
-                        }
+                        onClick = { onSelectTarget(GoLiveTarget.All) }
                     )
                 }
             }
