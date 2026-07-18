@@ -1225,6 +1225,8 @@
     <string name="times_displayed">korda</string>
     <string name="menu_statistics">Statistika</string>
     <string name="export_to_xls">Ekspordi XLS-ina</string>
+    <string name="statistics_song_count">%1$d laulu</string>
+    <string name="statistics_verse_count">%1$d salmi</string>
     <string name="statistics_exported_success">Statistika eksporditi edukalt.</string>
     <string name="statistics_exported_error">Statistika eksportimine ebaõnnestus.</string>
     <string name="file_chooser_save_statistics">Salvesta statistika kui</string>
@@ -1586,6 +1588,7 @@
     <string name="ccli_col_title">Pealkiri</string>
     <string name="ccli_col_author">Autor</string>
     <string name="ccli_col_songbook">Laulik</string>
+    <string name="ccli_col_ccli">CCLI #</string>
     <string name="ccli_col_used">Kasut.</string>
     <string name="ccli_col_first">Esimene</string>
     <string name="ccli_col_last">Viimane</string>

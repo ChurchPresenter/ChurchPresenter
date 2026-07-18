@@ -1197,6 +1197,8 @@
     <string name="times_displayed">ori</string>
     <string name="menu_statistics">Statistici</string>
     <string name="export_to_xls">Exportă în XLS</string>
+    <string name="statistics_song_count">%1$d cântări</string>
+    <string name="statistics_verse_count">%1$d versete</string>
     <string name="statistics_exported_success">Statisticile au fost exportate cu succes.</string>
     <string name="statistics_exported_error">Exportul statisticilor a eșuat.</string>
     <string name="file_chooser_save_statistics">Salvează Statisticile Ca</string>
@@ -1554,6 +1556,7 @@
     <string name="ccli_col_title">Titlu</string>
     <string name="ccli_col_author">Autor</string>
     <string name="ccli_col_songbook">Carte de Cântări</string>
+    <string name="ccli_col_ccli">CCLI #</string>
     <string name="ccli_col_used">Utilizat</string>
     <string name="ccli_col_first">Prima</string>
     <string name="ccli_col_last">Ultima</string>

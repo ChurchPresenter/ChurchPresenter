@@ -908,6 +908,8 @@
     <string name="times_displayed">mal</string>
     <string name="menu_statistics">Statistik</string>
     <string name="export_to_xls">Als XLS exportieren</string>
+    <string name="statistics_song_count">%1$d Lieder</string>
+    <string name="statistics_verse_count">%1$d Verse</string>
     <string name="statistics_exported_success">Statistik erfolgreich exportiert.</string>
     <string name="statistics_exported_error">Statistik konnte nicht exportiert werden.</string>
     <string name="file_chooser_save_statistics">Statistik speichern als</string>
@@ -1454,6 +1456,7 @@
     <string name="ccli_col_title">Titel</string>
     <string name="ccli_col_author">Autor</string>
     <string name="ccli_col_songbook">Liederbuch</string>
+    <string name="ccli_col_ccli">CCLI #</string>
     <string name="ccli_col_used">Verw.</string>
     <string name="ccli_col_first">Erste</string>
     <string name="ccli_col_last">Letzte</string>

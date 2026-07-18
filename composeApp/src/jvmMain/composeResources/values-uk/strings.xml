@@ -908,6 +908,8 @@
     <string name="times_displayed">разів</string>
     <string name="menu_statistics">Статистика</string>
     <string name="export_to_xls">Експортувати в XLS</string>
+    <string name="statistics_song_count">%1$d пісень</string>
+    <string name="statistics_verse_count">%1$d віршів</string>
     <string name="statistics_exported_success">Статистику успішно експортовано.</string>
     <string name="statistics_exported_error">Не вдалося експортувати статистику.</string>
     <string name="file_chooser_save_statistics">Зберегти статистику як</string>
@@ -1454,6 +1456,7 @@
     <string name="ccli_col_title">Назва</string>
     <string name="ccli_col_author">Автор</string>
     <string name="ccli_col_songbook">Збірник</string>
+    <string name="ccli_col_ccli">CCLI №</string>
     <string name="ccli_col_used">Вик.</string>
     <string name="ccli_col_first">Перший</string>
     <string name="ccli_col_last">Останній</string>

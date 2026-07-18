@@ -1170,6 +1170,8 @@
     <string name="times_displayed">keer</string>
     <string name="menu_statistics">Statistieken</string>
     <string name="export_to_xls">Exporteren naar XLS</string>
+    <string name="statistics_song_count">%1$d liederen</string>
+    <string name="statistics_verse_count">%1$d verzen</string>
     <string name="statistics_exported_success">Statistieken succesvol geëxporteerd.</string>
     <string name="statistics_exported_error">Exporteren van statistieken mislukt.</string>
     <string name="file_chooser_save_statistics">Statistieken opslaan als</string>
@@ -1518,6 +1520,7 @@
     <string name="ccli_col_title">Titel</string>
     <string name="ccli_col_author">Auteur</string>
     <string name="ccli_col_songbook">Liedboek</string>
+    <string name="ccli_col_ccli">CCLI #</string>
     <string name="ccli_col_used">Gebruikt</string>
     <string name="ccli_col_first">Eerste</string>
     <string name="ccli_col_last">Laatste</string>

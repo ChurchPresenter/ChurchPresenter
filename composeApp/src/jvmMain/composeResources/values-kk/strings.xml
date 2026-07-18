@@ -908,6 +908,8 @@
     <string name="times_displayed">рет</string>
     <string name="menu_statistics">Статистика</string>
     <string name="export_to_xls">XLS форматына экспорттау</string>
+    <string name="statistics_song_count">%1$d әнұран</string>
+    <string name="statistics_verse_count">%1$d аят</string>
     <string name="statistics_exported_success">Статистика сәтті экспортталды.</string>
     <string name="statistics_exported_error">Статистиканы экспорттау сәтсіз аяқталды.</string>
     <string name="file_chooser_save_statistics">Статистиканы сақтау</string>
@@ -1454,6 +1456,7 @@
     <string name="ccli_col_title">Тақырып</string>
     <string name="ccli_col_author">Автор</string>
     <string name="ccli_col_songbook">Жырнама</string>
+    <string name="ccli_col_ccli">CCLI №</string>
     <string name="ccli_col_used">Қолд.</string>
     <string name="ccli_col_first">Бірінші</string>
     <string name="ccli_col_last">Соңғы</string>

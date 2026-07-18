@@ -1170,6 +1170,8 @@
     <string name="times_displayed">vezes</string>
     <string name="menu_statistics">Estatísticas</string>
     <string name="export_to_xls">Exportar para XLS</string>
+    <string name="statistics_song_count">%1$d músicas</string>
+    <string name="statistics_verse_count">%1$d versículos</string>
     <string name="statistics_exported_success">Estatísticas exportadas com sucesso.</string>
     <string name="statistics_exported_error">Falha ao exportar estatísticas.</string>
     <string name="file_chooser_save_statistics">Salvar Estatísticas Como</string>
@@ -1518,6 +1520,7 @@
     <string name="ccli_col_title">Título</string>
     <string name="ccli_col_author">Autor</string>
     <string name="ccli_col_songbook">Hinário</string>
+    <string name="ccli_col_ccli">CCLI #</string>
     <string name="ccli_col_used">Usado</string>
     <string name="ccli_col_first">Primeiro</string>
     <string name="ccli_col_last">Último</string>

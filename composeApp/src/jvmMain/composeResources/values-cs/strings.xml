@@ -945,6 +945,8 @@
     <string name="times_displayed">krát</string>
     <string name="menu_statistics">Statistiky</string>
     <string name="export_to_xls">Exportovat do XLS</string>
+    <string name="statistics_song_count">%1$d písní</string>
+    <string name="statistics_verse_count">%1$d veršů</string>
     <string name="statistics_exported_success">Statistiky úspěšně exportovány.</string>
     <string name="statistics_exported_error">Statistiky se nepodařilo exportovat.</string>
     <string name="file_chooser_save_statistics">Uložit statistiky jako</string>
@@ -1488,6 +1490,7 @@
     <string name="ccli_col_title">Název</string>
     <string name="ccli_col_author">Autor</string>
     <string name="ccli_col_songbook">Zpěvník</string>
+    <string name="ccli_col_ccli">CCLI #</string>
     <string name="ccli_col_used">Použito</string>
     <string name="ccli_col_first">První</string>
     <string name="ccli_col_last">Poslední</string>

@@ -1170,6 +1170,8 @@
     <string name="times_displayed">veces</string>
     <string name="menu_statistics">Estadísticas</string>
     <string name="export_to_xls">Exportar a XLS</string>
+    <string name="statistics_song_count">%1$d cantos</string>
+    <string name="statistics_verse_count">%1$d versículos</string>
     <string name="statistics_exported_success">Estadísticas exportadas correctamente.</string>
     <string name="statistics_exported_error">Error al exportar las estadísticas.</string>
     <string name="file_chooser_save_statistics">Guardar estadísticas como</string>
@@ -1518,6 +1520,7 @@
     <string name="ccli_col_title">Título</string>
     <string name="ccli_col_author">Autor</string>
     <string name="ccli_col_songbook">Cancionero</string>
+    <string name="ccli_col_ccli">CCLI #</string>
     <string name="ccli_col_used">Usado</string>
     <string name="ccli_col_first">Primero</string>
     <string name="ccli_col_last">Último</string>

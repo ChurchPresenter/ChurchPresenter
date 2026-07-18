@@ -907,6 +907,8 @@
     <string name="times_displayed">razy</string>
     <string name="menu_statistics">Statystyki</string>
     <string name="export_to_xls">Eksportuj do XLS</string>
+    <string name="statistics_song_count">%1$d pieśni</string>
+    <string name="statistics_verse_count">%1$d wersetów</string>
     <string name="statistics_exported_success">Statystyki wyeksportowane pomyślnie.</string>
     <string name="statistics_exported_error">Nie udało się wyeksportować statystyk.</string>
     <string name="file_chooser_save_statistics">Zapisz statystyki jako</string>
@@ -1453,6 +1455,7 @@
     <string name="ccli_col_title">Tytuł</string>
     <string name="ccli_col_author">Autor</string>
     <string name="ccli_col_songbook">Śpiewnik</string>
+    <string name="ccli_col_ccli">CCLI #</string>
     <string name="ccli_col_used">Użyto</string>
     <string name="ccli_col_first">Pierwsze</string>
     <string name="ccli_col_last">Ostatnie</string>

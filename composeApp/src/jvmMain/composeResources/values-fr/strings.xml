@@ -1170,6 +1170,8 @@
     <string name="times_displayed">fois</string>
     <string name="menu_statistics">Statistiques</string>
     <string name="export_to_xls">Exporter en XLS</string>
+    <string name="statistics_song_count">%1$d cantiques</string>
+    <string name="statistics_verse_count">%1$d versets</string>
     <string name="statistics_exported_success">Statistiques exportées avec succès.</string>
     <string name="statistics_exported_error">Échec de l'exportation des statistiques.</string>
     <string name="file_chooser_save_statistics">Enregistrer les statistiques sous</string>
@@ -1518,6 +1520,7 @@
     <string name="ccli_col_title">Titre</string>
     <string name="ccli_col_author">Auteur</string>
     <string name="ccli_col_songbook">Recueil</string>
+    <string name="ccli_col_ccli">CCLI #</string>
     <string name="ccli_col_used">Utilisé</string>
     <string name="ccli_col_first">Premier</string>
     <string name="ccli_col_last">Dernier</string>
