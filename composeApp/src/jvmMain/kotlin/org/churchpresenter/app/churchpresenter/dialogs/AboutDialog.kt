@@ -1,6 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -76,13 +84,14 @@ fun AboutDialog(
     DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 400.dp, 410.dp),
-            width = 400.dp,
-            height = 410.dp
+            position = centeredOnMainWindow(mainWindowState, 420.dp, 490.dp),
+            width = 420.dp,
+            height = 490.dp
         ),
         title = stringResource(Res.string.about_title),
         resizable = false
     ) {
+        AppThemeWrapper(theme = theme) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -92,9 +101,31 @@ fun AboutDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                // App icon on a gradient tile
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    lerp(MaterialTheme.colorScheme.primary, Color.Black, 0.45f),
+                                    MaterialTheme.colorScheme.primary
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.ic_app_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(44.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = stringResource(Res.string.app_name),
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -196,6 +227,7 @@ fun AboutDialog(
                     Text(stringResource(Res.string.action_ok))
                 }
             }
+        }
         }
     }
 }
