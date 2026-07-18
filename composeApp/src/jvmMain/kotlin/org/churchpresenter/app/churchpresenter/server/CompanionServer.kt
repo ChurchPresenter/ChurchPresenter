@@ -703,6 +703,15 @@ data class PendingConnectionRequest(
 class CompanionServer {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    /**
+     * Serializes background presentation renders for the companion API. A schedule with several
+     * presentations would otherwise render every deck concurrently (one IO coroutine each), and
+     * each deck holds a full POI [SlideShow] plus a 1920px frame buffer — a few heavy decks at
+     * once exhaust the heap (OutOfMemoryError). Rendering one deck at a time caps peak memory to a
+     * single deck's footprint; the renders just queue.
+     */
+    private val presentationRenderMutex = Mutex()
+
     private var _qaEventJob: kotlinx.coroutines.Job? = null
     var qaManager: QAManager? = null
         set(value) {
@@ -1670,6 +1679,19 @@ class CompanionServer {
                 slideTotal = jpegSlides.size,
                 slides     = slideDtos
             )
+        } catch (oom: OutOfMemoryError) {
+            // A background companion-API render must never take down the live app. OOM is an
+            // Error, not an Exception, so the catch below wouldn't stop it escaping the coroutine
+            // as an uncaught crash. Degrade to a warning and drop this presentation's render — the
+            // client falls back to the 404-retry path (rendering still pending) just as it would
+            // for any other render failure.
+            CrashReporter.reportWarning(
+                "Presentation: Out of memory rendering ${file.extension.lowercase()} for companion API (server)",
+                tags = mapOf(
+                    "subsystem" to "presentation",
+                    "file.type" to file.extension.lowercase()
+                )
+            )
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -1709,7 +1731,10 @@ class CompanionServer {
                         _renderingPresentations.putIfAbsent(presentationId, Unit) == null) {
                         scope.launch(Dispatchers.IO) {
                             try {
-                                renderPresentationForServer(presentationId, item.filePath)
+                                // One render at a time — see presentationRenderMutex.
+                                presentationRenderMutex.withLock {
+                                    renderPresentationForServer(presentationId, item.filePath)
+                                }
                             } finally {
                                 _renderingPresentations.remove(presentationId)
                             }
