@@ -25,6 +25,7 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.math.sqrt
 
 /**
  * Produces pixels for a [Deck]. Holds the source document open across calls (one open per deck,
@@ -40,6 +41,30 @@ class DeckRasterizer(
 
     companion object {
         const val DEFAULT_TARGET_WIDTH_PX = 1920
+
+        /**
+         * Upper bound on one rendered slide raster. Rendering fixes the width to the target and
+         * lets the height follow the page aspect ratio — a pathological page (a very tall banner /
+         * "infinite canvas" deck) would otherwise produce a multi-hundred-MB image and OOM, made
+         * worse by [flattenToRgb]'s second full-size copy. Normal 16:9 decks render at ~1920×1080
+         * (~2M px), far under these caps, so their output is unchanged.
+         */
+        const val MAX_RENDER_PIXELS = 8_000_000
+        const val MAX_RENDER_DIMENSION = 8192
+
+        /**
+         * Scale that renders a [pageWidthPt]×[pageHeightPt] page at [targetWidthPx] wide, reduced
+         * proportionally (aspect ratio preserved) if that would exceed [MAX_RENDER_DIMENSION] on
+         * either axis or [MAX_RENDER_PIXELS] total. A degraded page renders at lower resolution
+         * instead of exhausting the heap.
+         */
+        fun boundedRenderScale(pageWidthPt: Double, pageHeightPt: Double, targetWidthPx: Int): Double {
+            if (pageWidthPt <= 0.0 || pageHeightPt <= 0.0) return 1.0
+            val byWidth = targetWidthPx / pageWidthPt
+            val byDimension = MAX_RENDER_DIMENSION / maxOf(pageWidthPt, pageHeightPt)
+            val byArea = sqrt(MAX_RENDER_PIXELS / (pageWidthPt * pageHeightPt))
+            return minOf(byWidth, byDimension, byArea).takeIf { it > 0.0 } ?: 1.0
+        }
 
         /**
          * Flattens any translucency onto [background] — required before JPEG encoding
@@ -167,8 +192,8 @@ class DeckRasterizer(
             pdfDocument = document
             PDFRenderer(document).also { pdfRenderer = it }
         }
-        val pageWidthPt = pdfDocument!!.getPage(pageIndex).mediaBox.width
-        val scale = targetWidthPx / pageWidthPt
+        val mediaBox = pdfDocument!!.getPage(pageIndex).mediaBox
+        val scale = boundedRenderScale(mediaBox.width.toDouble(), mediaBox.height.toDouble(), targetWidthPx).toFloat()
         return renderer.renderImage(pageIndex, scale, ImageType.RGB)
     }
 
@@ -178,7 +203,7 @@ class DeckRasterizer(
         val show = slideShow ?: PowerPointDeckSupport.open(file).also { slideShow = it }
         val slide = show.slides[slideIndex]
         val pageSize = show.pageSize
-        val scale = targetWidthPx.toDouble() / pageSize.width
+        val scale = boundedRenderScale(pageSize.width.toDouble(), pageSize.height.toDouble(), targetWidthPx)
         val width = (pageSize.width * scale).toInt().coerceAtLeast(1)
         val height = (pageSize.height * scale).toInt().coerceAtLeast(1)
         // ARGB: a slide without an opaque background keeps its transparency instead of the old
@@ -214,8 +239,8 @@ class DeckRasterizer(
             pdfDocument = document
             PDFRenderer(document).also { pdfRenderer = it }
         }
-        val pageWidthPt = pdfDocument!!.getPage(pageIndex).mediaBox.width
-        val scale = targetWidthPx / pageWidthPt
+        val mediaBox = pdfDocument!!.getPage(pageIndex).mediaBox
+        val scale = boundedRenderScale(mediaBox.width.toDouble(), mediaBox.height.toDouble(), targetWidthPx).toFloat()
         return renderer.renderImage(pageIndex, scale, ImageType.RGB)
     }
 
