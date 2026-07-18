@@ -126,8 +126,11 @@ fun LivePreviewPanel(
         for (i in 0 until displayCount) {
             val screenAssignment = proj.getAssignment(i)
 
-            // Skip displays set to "None"
-            if (screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
+            // Skip displays the user set to "None" — but never skip dev-fallback slots (i >=
+            // realWindowCount): those are auto-resolved to None only because no hardware exists,
+            // yet main.kt still opens a window for them, so they must appear in the preview too.
+            val isDevFallbackSlot = devWindowedFallback && i >= realWindowCount
+            if (!isDevFallbackSlot && screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
 
             SingleDisplayPreview(
                 screenIndex = i,
