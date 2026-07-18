@@ -78,6 +78,7 @@ import churchpresenter.composeapp.generated.resources.copy_url_transparent
 import churchpresenter.composeapp.generated.resources.copy_url_black_bg
 import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.content_announcements
+import churchpresenter.composeapp.generated.resources.tab_canvas
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.content_bible
 import churchpresenter.composeapp.generated.resources.content_bible_background
@@ -293,6 +294,7 @@ fun ProjectionSettingsTab(
     val streamingLabel = stringResource(Res.string.content_streaming)
     val announcementsLabel = stringResource(Res.string.content_announcements)
     val dictionaryLabel = stringResource(Res.string.tab_dictionary)
+    val canvasLabel = stringResource(Res.string.tab_canvas)
     val songLaLabel = stringResource(Res.string.projection_content_song_la)
     val bibleBackgroundLabel = stringResource(Res.string.content_bible_background)
     val songsBackgroundLabel = stringResource(Res.string.content_songs_background)
@@ -317,6 +319,7 @@ fun ProjectionSettingsTab(
         ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),
         ContentCol(announcementsLabel, { it.showAnnouncements }, { a, v -> a.copy(showAnnouncements = v) }),
         ContentCol("Web", { it.showWebsite }, { a, v -> a.copy(showWebsite = v) }),
+        ContentCol(canvasLabel, { it.showCanvas }, { a, v -> a.copy(showCanvas = v) }),
         ContentCol("Q&A", { it.showQA }, { a, v -> a.copy(showQA = v) }),
         ContentCol("STT", { it.showSTT }, { a, v -> a.copy(showSTT = v) }),
         ContentCol(dictionaryLabel, { it.showDictionary }, { a, v -> a.copy(showDictionary = v) }),

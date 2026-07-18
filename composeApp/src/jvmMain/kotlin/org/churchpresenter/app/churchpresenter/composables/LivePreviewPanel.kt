@@ -245,8 +245,8 @@ private fun SingleDisplayPreview(
         Presenting.MEDIA -> screenAssignment.showMedia
         Presenting.LOWER_THIRD -> screenAssignment.showStreaming
         Presenting.ANNOUNCEMENTS -> screenAssignment.showAnnouncements
-        Presenting.WEBSITE -> true
-        Presenting.CANVAS -> true
+        Presenting.WEBSITE -> screenAssignment.showWebsite
+        Presenting.CANVAS -> screenAssignment.showCanvas
         Presenting.QA -> screenAssignment.showQA
         Presenting.STT -> screenAssignment.showSTT
         Presenting.DICTIONARY -> screenAssignment.showDictionary

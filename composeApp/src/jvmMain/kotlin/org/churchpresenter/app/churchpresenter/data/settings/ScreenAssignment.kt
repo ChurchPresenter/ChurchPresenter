@@ -29,6 +29,7 @@ data class ScreenAssignment(
     val showQA: Boolean = true,
     val showSTT: Boolean = true,
     val showDictionary: Boolean = true,
+    val showCanvas: Boolean = true,
     val showFullscreenBackground: Boolean = true, // show configured background in fullscreen mode
     val showLowerThirdBackground: Boolean = true, // show configured background in lower third mode
     val showBibleBackground: Boolean = true, // additional layer on top of showFullscreenBackground/showLowerThirdBackground
