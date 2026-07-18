@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,16 +15,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.EventBusy
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -39,6 +48,8 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -161,12 +172,12 @@ fun RemoteEventDialog(
         RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_api_qa_admin_connect)
         else                            -> stringResource(Res.string.remote_api_request_title)
     }
-    val icon = when (event.type) {
-        RemoteEventType.ADD_TO_SCHEDULE -> "📋"
-        RemoteEventType.REMOVE_FROM_SCHEDULE -> "🗑️"
-        RemoteEventType.PROJECT         -> "📡"
-        RemoteEventType.PRESENTATION_CONNECT -> "📱"
-        RemoteEventType.QA_ADMIN_CONNECT -> "📱"
+    val typeIcon: ImageVector = when (event.type) {
+        RemoteEventType.ADD_TO_SCHEDULE -> Icons.Filled.CalendarMonth
+        RemoteEventType.REMOVE_FROM_SCHEDULE -> Icons.Filled.EventBusy
+        RemoteEventType.PROJECT         -> Icons.Filled.Cast
+        RemoteEventType.PRESENTATION_CONNECT,
+        RemoteEventType.QA_ADMIN_CONNECT -> Icons.Filled.Smartphone
         RemoteEventType.QA_ADD,
         RemoteEventType.QA_EDIT,
         RemoteEventType.QA_DELETE,
@@ -174,8 +185,14 @@ fun RemoteEventDialog(
         RemoteEventType.QA_DENY,
         RemoteEventType.QA_DONE,
         RemoteEventType.QA_DISPLAY,
-        RemoteEventType.QA_CLEAR_DISPLAY -> "💬"
-        else                            -> "🔔"
+        RemoteEventType.QA_CLEAR_DISPLAY -> Icons.Filled.QuestionAnswer
+        else                            -> Icons.Filled.Notifications
+    }
+    // Go-live/project actions read as blue; schedule edits read as amber, matching the design.
+    val typeAccent: Color = when (event.type) {
+        RemoteEventType.ADD_TO_SCHEDULE,
+        RemoteEventType.REMOVE_FROM_SCHEDULE -> REMOTE_SCHEDULE_AMBER
+        else -> MaterialTheme.colorScheme.primary
     }
     val bodyTitle = event.title.ifBlank {
         when (event.type) {
@@ -219,13 +236,21 @@ fun RemoteEventDialog(
             ) {
                 // ── Header ────────────────────────────────────────────────────
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Text(icon, style = MaterialTheme.typography.headlineSmall)
-                    Spacer(Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(typeAccent.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(typeIcon, contentDescription = null, tint = typeAccent, modifier = Modifier.size(20.dp))
+                    }
+                    Spacer(Modifier.width(10.dp))
                     Text(
                         text = actionLabel,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = typeAccent,
                         modifier = Modifier.weight(1f)
                     )
                     // Badge showing how many are queued behind this one
@@ -243,6 +268,19 @@ fun RemoteEventDialog(
                                 fontWeight = FontWeight.Bold
                             )
                         }
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    // Prominent one-tap allow (mirrors the ✓ button below)
+                    Button(
+                        onClick = onAllow,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = REMOTE_ALLOW_GREEN,
+                            contentColor = Color.White
+                        ),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
+                    ) {
+                        Text(stringResource(Res.string.allow), fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -344,7 +382,7 @@ fun RemoteEventDialog(
                             tooltip = stringResource(Res.string.block_for_session),
                             onClick = onBlockForSession,
                             icon = Icons.Filled.RemoveCircle,
-                            style = ActionIconStyle.ErrorOutlined
+                            style = ActionIconStyle.ErrorFilled
                         )
                     }
 
@@ -367,7 +405,7 @@ fun RemoteEventDialog(
                                 tooltip = stringResource(Res.string.allow_permanently),
                                 onClick = onAllowPermanently,
                                 icon = Icons.Filled.Star,
-                                style = ActionIconStyle.SecondaryTonal
+                                style = ActionIconStyle.SuccessFilled
                             )
                         }
                         ActionIconButton(
@@ -383,11 +421,15 @@ fun RemoteEventDialog(
     }
 }
 
+private val REMOTE_SCHEDULE_AMBER = Color(0xFFF5B301)
+private val REMOTE_ALLOW_GREEN = Color(0xFF43A047)
+
 private enum class ActionIconStyle {
     ErrorOutlined,
+    ErrorFilled,
     Outlined,
     PrimaryOutlined,
-    SecondaryTonal,
+    SuccessFilled,
     PrimaryFilled
 }
 
@@ -414,6 +456,14 @@ private fun ActionIconButton(
                 border = BorderStroke(1.dp, errorColor.copy(alpha = 0.5f))
             ) { Icon(icon, contentDescription = tooltip) }
 
+            ActionIconStyle.ErrorFilled -> FilledIconButton(
+                onClick = onClick,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = errorColor,
+                    contentColor = MaterialTheme.colorScheme.onError
+                )
+            ) { Icon(icon, contentDescription = tooltip) }
+
             ActionIconStyle.Outlined -> OutlinedIconButton(
                 onClick = onClick,
                 colors = IconButtonDefaults.outlinedIconButtonColors()
@@ -425,11 +475,11 @@ private fun ActionIconButton(
                 border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.5f))
             ) { Icon(icon, contentDescription = tooltip) }
 
-            ActionIconStyle.SecondaryTonal -> FilledTonalIconButton(
+            ActionIconStyle.SuccessFilled -> FilledIconButton(
                 onClick = onClick,
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = REMOTE_ALLOW_GREEN,
+                    contentColor = Color.White
                 )
             ) { Icon(icon, contentDescription = tooltip) }
 
