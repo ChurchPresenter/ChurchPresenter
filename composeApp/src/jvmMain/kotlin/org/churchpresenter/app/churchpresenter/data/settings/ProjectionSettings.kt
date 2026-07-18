@@ -15,6 +15,11 @@ data class ProjectionSettings(
     // Browser Source outputs are virtual (no physical display/DeckLink device), so unlike
     // screenAssignments they are not auto-synced to detected hardware — added/removed freely.
     val browserSourceOutputs: List<ScreenAssignment> = emptyList(),
+    // Number of simulated dev-fallback presenter windows to open when there is no real output
+    // (single-monitor dev machine). Lets several independent outputs be simulated on one screen
+    // for developing/testing per-output features. Only takes effect in the dev fallback; ignored
+    // when real displays/DeckLink devices exist. Clamped to at least 1 at the use sites.
+    val devWindowCount: Int = 1,
 ) {
     fun getAssignment(index: Int): ScreenAssignment =
         screenAssignments.getOrElse(index) { ScreenAssignment() }

@@ -695,6 +695,7 @@
     <string name="dev_window_label">Dev Window</string>
     <string name="detected_screens">Detected screens: %1$d</string>
     <string name="presenter_windows_count">Presenter windows: %1$d</string>
+    <string name="projection_simulate_outputs">Simulate outputs</string>
     <string name="content_bible">Bible</string>
     <string name="content_songs">Songs</string>
     <string name="content_bible_background">Bible Background</string>

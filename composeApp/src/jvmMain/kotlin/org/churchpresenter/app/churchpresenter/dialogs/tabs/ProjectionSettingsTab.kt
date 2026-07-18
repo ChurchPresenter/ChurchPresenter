@@ -37,6 +37,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.app.churchpresenter.models.Scene
 import androidx.compose.material3.Switch
@@ -102,6 +103,7 @@ import churchpresenter.composeapp.generated.resources.media_vlc_install
 import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
 import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
+import churchpresenter.composeapp.generated.resources.projection_simulate_outputs
 import churchpresenter.composeapp.generated.resources.projection_content_song_la
 import churchpresenter.composeapp.generated.resources.projection_content_song_la_tooltip
 import churchpresenter.composeapp.generated.resources.projection_position_help
@@ -176,7 +178,8 @@ fun ProjectionSettingsTab(
     // with no DeckLink device, main.kt opens an extra windowed "dev" output at assignment slot 0.
     // Without this, that window would have no row here to configure it.
     val devWindowedFallback = (!BuildConfig.IS_RELEASE || DevFlags.forceDevWindow) && realWindowCount == 0
-    val presenterWindowCount = realWindowCount + if (devWindowedFallback) 1 else 0
+    val devWindowCount = proj.devWindowCount.coerceAtLeast(1)
+    val presenterWindowCount = realWindowCount + if (devWindowedFallback) devWindowCount else 0
 
     // Extend the assignments list and resolve any unassigned (-1 auto) to actual non-primary displays.
     val nonPrimaryDevices = remember(screenDevicesAll, primaryDevice) {
@@ -385,6 +388,20 @@ fun ProjectionSettingsTab(
                     text = stringResource(Res.string.presenter_windows_count, presenterWindowCount),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
+                )
+            }
+            // Dev-only: simulate several independent output windows on a single-monitor machine.
+            // Only meaningful in the dev fallback (no real display/DeckLink output exists).
+            if (devWindowedFallback) {
+                NumberSettingsTextField(
+                    label = stringResource(Res.string.projection_simulate_outputs),
+                    initialText = devWindowCount,
+                    range = 1..8,
+                    onValueChange = { count ->
+                        onSettingsChange { s ->
+                            s.copy(projectionSettings = s.projectionSettings.copy(devWindowCount = count))
+                        }
+                    },
                 )
             }
             Spacer(modifier = Modifier.weight(1f))

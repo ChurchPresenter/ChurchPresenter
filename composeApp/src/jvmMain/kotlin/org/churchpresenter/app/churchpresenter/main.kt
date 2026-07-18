@@ -3348,14 +3348,29 @@ private fun PresenterWindows(
     // device to open a real output window on. Show Output 1 as an ordinary window instead of not
     // rendering at all, driven by the same "Toggle Presenter Displays" button/state.
     val devWindowedFallback = (!BuildConfig.IS_RELEASE || DevFlags.forceDevWindow) && windowCount == 0
-    for (i in 0 until (windowCount + if (devWindowedFallback) 1 else 0)) {
+    // On a machine with no real output, open DevFlags.devWindowCount fallback windows (default 1).
+    // A count > 1 simulates several independent outputs on one monitor for developing/testing
+    // per-output features — each window is its own output slot (index, assignment, screen lock).
+    val devFallbackCount = if (devWindowedFallback) proj.devWindowCount.coerceAtLeast(1) else 0
+    for (i in 0 until (windowCount + devFallbackCount)) {
         if (devWindowedFallback && i >= windowCount) {
-            val screenAssignment = proj.getAssignment(0)
-            val effectiveMode = screenLocks[0] ?: presentingMode
-            val fallbackWindowState = remember { WindowState(width = 960.dp, height = 540.dp) }
+            val fallbackIndex = i - windowCount
+            val screenAssignment = proj.getAssignment(fallbackIndex)
+            val effectiveMode = screenLocks[fallbackIndex] ?: presentingMode
+            // Cascade the windows so multiple dev outputs don't stack exactly on top of each other.
+            val fallbackWindowState = remember(fallbackIndex) {
+                WindowState(
+                    width = 960.dp,
+                    height = 540.dp,
+                    position = WindowPosition(
+                        x = (40 + fallbackIndex * 48).dp,
+                        y = (40 + fallbackIndex * 48).dp,
+                    ),
+                )
+            }
             Window(
                 visible = showPresenterWindow,
-                title = stringResource(Res.string.presenter_view_title, 1),
+                title = stringResource(Res.string.presenter_view_title, fallbackIndex + 1),
                 icon = painterResource(Res.drawable.ic_app_icon),
                 onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
                 state = fallbackWindowState,
@@ -3363,7 +3378,7 @@ private fun PresenterWindows(
                 resizable = true,
                 alwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
             ) {
-                presenterOutputContent(screenAssignment, effectiveMode, null)
+                presenterOutputContent(screenAssignment, effectiveMode, fallbackIndex + 1)
             }
             continue
         }

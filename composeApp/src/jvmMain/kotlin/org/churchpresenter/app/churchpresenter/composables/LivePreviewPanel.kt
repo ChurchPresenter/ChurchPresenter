@@ -84,7 +84,9 @@ import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
@@ -110,7 +112,11 @@ fun LivePreviewPanel(
 ) {
     val proj = appSettings.projectionSettings
     val deckLinkCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
-    val displayCount = ((rememberScreenDevices().size - 1) + deckLinkCount).coerceAtLeast(0)
+    val realWindowCount = ((rememberScreenDevices().size - 1) + deckLinkCount).coerceAtLeast(0)
+    // Mirror main.kt's dev-fallback: with no real output, preview the dev fallback window(s) so the
+    // right-pane preview matches what's actually opened. devWindowCount lets several be previewed.
+    val devWindowedFallback = (!BuildConfig.IS_RELEASE || DevFlags.forceDevWindow) && realWindowCount == 0
+    val displayCount = realWindowCount + if (devWindowedFallback) proj.devWindowCount.coerceAtLeast(1) else 0
     val mediaViewModel = LocalMediaViewModel.current
 
     Column(
