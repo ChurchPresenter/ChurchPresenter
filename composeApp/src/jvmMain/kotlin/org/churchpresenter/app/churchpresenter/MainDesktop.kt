@@ -189,7 +189,8 @@ data class ScheduleActions(
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
     val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> },
-    val addAnnouncement: (item: ScheduleItem.AnnouncementItem) -> Unit = { }
+    val addAnnouncement: (item: ScheduleItem.AnnouncementItem) -> Unit = { },
+    val addWebsite: (url: String, title: String) -> Unit = { _, _ -> }
 )
 
 @Composable
@@ -1520,7 +1521,8 @@ fun MainDesktop(
                                             item.timerExpiredText, item.timerMode, item.targetHour,
                                             item.targetMinute, item.targetSecond, item.liveClockFormat
                                         )
-                                    }
+                                    },
+                                    addWebsite = actions.addWebsite
                                 )
                             )
                         },

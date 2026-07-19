@@ -1018,6 +1018,9 @@ fun main() {
                                                 is ScheduleItem.AnnouncementItem ->
                                                     currentScheduleActions.addAnnouncement(item)
 
+                                                is ScheduleItem.WebsiteItem ->
+                                                    currentScheduleActions.addWebsite(item.url, item.title)
+
                                                 else -> Unit
                                             }
                                             pending.decision.complete(true)
@@ -1095,6 +1098,9 @@ fun main() {
 
                                                 is ScheduleItem.AnnouncementItem ->
                                                     currentScheduleActions.addAnnouncement(item)
+
+                                                is ScheduleItem.WebsiteItem ->
+                                                    currentScheduleActions.addWebsite(item.url, item.title)
 
                                                 else -> Unit
                                             }
@@ -2781,6 +2787,14 @@ private fun executeProjectItem(
                 presenterManager.setAnnouncementText(item.text)
             }
             presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+            presenterManager.setShowPresenterWindow(true)
+        }
+
+        is ScheduleItem.WebsiteItem -> {
+            scheduleActions.addWebsite(item.url, item.title)
+            presenterManager.setWebsiteUrl(item.url)
+            presenterManager.setWebPageTitle(item.title)
+            presenterManager.setPresentingMode(Presenting.WEBSITE)
             presenterManager.setShowPresenterWindow(true)
         }
 

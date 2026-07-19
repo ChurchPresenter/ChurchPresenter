@@ -585,6 +585,9 @@ data class RemoteItemDto(
     val targetMinute: Int? = null,
     val targetSecond: Int? = null,
     val liveClockFormat: String? = null,
+    // website — url is the discriminator
+    val url: String? = null,
+    val websiteTitle: String? = null,
     // display text (optional, ignored during parsing)
     val displayText: String? = null
 )
@@ -686,6 +689,13 @@ fun RemoteItemDto.toScheduleItem(): ScheduleItem? {
                 targetMinute      = targetMinute ?: 0,
                 targetSecond      = targetSecond ?: 0,
                 liveClockFormat   = liveClockFormat ?: "HH:mm:ss"
+            )
+        // Website — must have url
+        url != null ->
+            ScheduleItem.WebsiteItem(
+                id    = safeId,
+                url   = url,
+                title = websiteTitle ?: url
             )
         else -> null
     }
