@@ -5,9 +5,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+
+/**
+ * Wire model returned by the dictionary REST endpoints — the bundled [StrongsEntry]
+ * enriched with the live occurrence count (from the interlinear index) and the
+ * root Strong's number parsed from the definition.
+ */
+@Serializable
+data class StrongsEntryDto(
+    val number: String,
+    val word: String,
+    val transliteration: String,
+    val pronunciation: String,
+    val definition: String,
+    val kjvUsage: String,
+    val occurrences: Int,
+    val root: String,
+)
 
 /**
  * Loads the bundled Strong's dictionary JSON (`files/dictionary/strongs_h*.json`,
@@ -21,7 +40,34 @@ object StrongsDictionaryRepository {
     private val mutex = Mutex()
     private val cache = mutableMapOf<String, List<StrongsEntry>>()
 
+    private val interlinear = InterlinearRepository()
+    private val strongsRef = Regex("[HG]\\d{1,5}")
+
     private fun normalizeLang(lang: String?): String = if (lang?.lowercase() == "ru") "ru" else "en"
+
+    /** Loads both interlinear indexes (once) so occurrence counts are available. */
+    private suspend fun ensureInterlinear() {
+        interlinear.ensureHebrewLoaded()
+        interlinear.ensureGreekLoaded()
+    }
+
+    /** Total word-instance occurrences of a Strong's number across scripture. */
+    private fun occurrencesOf(number: String): Int = interlinear.getVersesForEntry(number).size
+
+    /** First Strong's reference in the definition other than the entry's own number, or "". */
+    private fun rootOf(entry: StrongsEntry): String =
+        strongsRef.findAll(entry.definition).map { it.value }.firstOrNull { it != entry.number } ?: ""
+
+    private fun StrongsEntry.toDto(): StrongsEntryDto = StrongsEntryDto(
+        number = number,
+        word = word,
+        transliteration = transliteration,
+        pronunciation = pronunciation,
+        definition = definition,
+        kjvUsage = kjvUsage,
+        occurrences = occurrencesOf(number),
+        root = rootOf(this),
+    )
 
     /** All entries (Hebrew + Greek) for the given language, loaded once and cached. */
     @OptIn(ExperimentalResourceApi::class)
@@ -43,9 +89,10 @@ object StrongsDictionaryRepository {
     }
 
     /** Look up a single entry by its Strong's number (e.g. "H430", "G26"). Case-insensitive. */
-    suspend fun lookup(number: String, lang: String?): StrongsEntry? {
+    suspend fun lookup(number: String, lang: String?): StrongsEntryDto? {
+        ensureInterlinear()
         val target = number.trim().uppercase()
-        return all(lang).firstOrNull { it.number.uppercase() == target }
+        return all(lang).firstOrNull { it.number.uppercase() == target }?.toDto()
     }
 
     /**
@@ -58,7 +105,8 @@ object StrongsDictionaryRepository {
         lang: String?,
         filter: String,
         limit: Int,
-    ): List<StrongsEntry> {
+    ): List<StrongsEntryDto> {
+        ensureInterlinear()
         val all = all(lang)
         val byLang = when (filter.lowercase()) {
             "hebrew" -> all.filter { it.isHebrew }
@@ -82,6 +130,6 @@ object StrongsDictionaryRepository {
                     .thenBy { it.numericValue }
             )
         }
-        return matched.take(limit.coerceIn(1, 500))
+        return matched.take(limit.coerceIn(1, 500)).map { it.toDto() }
     }
 }

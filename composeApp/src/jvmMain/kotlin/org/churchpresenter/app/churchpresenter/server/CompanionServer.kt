@@ -2418,7 +2418,7 @@ class CompanionServer {
                         return@get
                     }
                     call.respondText(
-                        json.encodeToString(ListSerializer(StrongsEntry.serializer()), results),
+                        json.encodeToString(ListSerializer(StrongsEntryDto.serializer()), results),
                         ContentType.Application.Json
                     )
                 }
@@ -2446,7 +2446,7 @@ class CompanionServer {
                         return@get
                     }
                     call.respondText(
-                        json.encodeToString(StrongsEntry.serializer(), entry),
+                        json.encodeToString(StrongsEntryDto.serializer(), entry),
                         ContentType.Application.Json
                     )
                 }
