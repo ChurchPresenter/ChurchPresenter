@@ -880,6 +880,7 @@ fun main() {
                     key = appSettings.serverSettings.apiKey
                 )
                 companionServer.updateFileUploadEnabled(appSettings.serverSettings.fileUploadEnabled)
+                companionServer.updateMaxMediaUploadMb(appSettings.serverSettings.maxMediaUploadMb)
                 companionServer.updateAtemConfig(
                     appSettings.atemSettings,
                     appSettings.streamingSettings.lowerThirdFolder
@@ -1994,6 +1995,7 @@ fun main() {
                                             key = updated.serverSettings.apiKey
                                         )
                                         companionServer.updateFileUploadEnabled(updated.serverSettings.fileUploadEnabled)
+                                        companionServer.updateMaxMediaUploadMb(updated.serverSettings.maxMediaUploadMb)
                                         companionServer.updateAtemConfig(
                                             updated.atemSettings,
                                             updated.streamingSettings.lowerThirdFolder

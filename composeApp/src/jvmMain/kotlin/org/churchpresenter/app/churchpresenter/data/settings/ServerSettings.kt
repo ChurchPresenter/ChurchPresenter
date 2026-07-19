@@ -14,5 +14,7 @@ data class ServerSettings(
     val serverHost: String = "",
     /** When false, POST /api/presentations/upload and POST /api/pictures/upload
      *  return 403 and no files are written to disk. */
-    val fileUploadEnabled: Boolean = false
+    val fileUploadEnabled: Boolean = false,
+    /** Maximum media-file upload size (in MB) accepted from companion devices. */
+    val maxMediaUploadMb: Int = Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB
 )

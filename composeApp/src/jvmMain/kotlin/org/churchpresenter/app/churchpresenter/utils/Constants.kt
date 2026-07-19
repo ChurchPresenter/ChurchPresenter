@@ -216,6 +216,10 @@ object Constants {
     // Audio file extensions (VLC supports all common formats)
     val AUDIO_EXTENSIONS = setOf("mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "opus")
     val VIDEO_EXTENSIONS = setOf("mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v")
+    /** Default max media-file upload size accepted from a companion device (700 MB).
+     *  Operator-overridable via AppSettings.maxMediaUploadMb. */
+    const val DEFAULT_MAX_MEDIA_UPLOAD_MB = 700
+    const val MAX_MEDIA_UPLOAD_BYTES = DEFAULT_MAX_MEDIA_UPLOAD_MB.toLong() * 1024 * 1024
 
     // Display Mode Types (for screen assignments)
     const val DISPLAY_MODE_FULLSCREEN = "fullscreen"

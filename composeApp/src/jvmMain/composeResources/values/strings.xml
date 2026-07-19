@@ -1171,6 +1171,8 @@
     <string name="browser_source_note_in_server_settings">Individual Browser Source outputs (Projection settings) can independently require this key.</string>
     <string name="allow_file_upload">Allow File Upload</string>
     <string name="allow_file_upload_description">Allow mobile devices to upload files (photos and presentations) to this computer.</string>
+    <string name="max_media_upload_label">Max media upload (MB)</string>
+    <string name="max_media_upload_description">Media files larger than this are rejected. Default %1$d MB (about a 5-minute HD clip) — enough for bumpers and countdowns, not full movies.</string>
     <string name="api_key_label">API Key</string>
     <string name="api_key_hint">Enter a secret key…</string>
     <string name="generate_api_key">Generate</string>

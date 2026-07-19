@@ -92,6 +92,8 @@ import churchpresenter.composeapp.generated.resources.api_key_protection
 import churchpresenter.composeapp.generated.resources.browser_source_note_in_server_settings
 import churchpresenter.composeapp.generated.resources.allow_file_upload
 import churchpresenter.composeapp.generated.resources.allow_file_upload_description
+import churchpresenter.composeapp.generated.resources.max_media_upload_label
+import churchpresenter.composeapp.generated.resources.max_media_upload_description
 import churchpresenter.composeapp.generated.resources.blocked_clients
 import churchpresenter.composeapp.generated.resources.blocked_clients_description
 import churchpresenter.composeapp.generated.resources.client_label_cancel
@@ -166,6 +168,10 @@ fun ServerSettingsTab(
 
     LaunchedEffect(settings.serverSettings.fileUploadEnabled) {
         companionServer.updateFileUploadEnabled(settings.serverSettings.fileUploadEnabled)
+    }
+
+    LaunchedEffect(settings.serverSettings.maxMediaUploadMb) {
+        companionServer.updateMaxMediaUploadMb(settings.serverSettings.maxMediaUploadMb)
     }
 
     Box(
@@ -433,6 +439,36 @@ fun ServerSettingsTab(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                // ── Max media upload size (only relevant when uploads are enabled) ──
+                if (settings.serverSettings.fileUploadEnabled) {
+                    var maxMbText by remember(settings.serverSettings.maxMediaUploadMb) {
+                        mutableStateOf(settings.serverSettings.maxMediaUploadMb.toString())
+                    }
+                    SettingRow(label = stringResource(Res.string.max_media_upload_label)) {
+                        SettingsTextField(
+                            value = maxMbText,
+                            onValueChange = { v ->
+                                if (v.length <= 5 && v.all(Char::isDigit)) {
+                                    maxMbText = v
+                                    v.toIntOrNull()?.takeIf { it > 0 }?.let { mb ->
+                                        onSettingsChange { s ->
+                                            s.copy(serverSettings = s.serverSettings.copy(maxMediaUploadMb = mb))
+                                        }
+                                    }
+                                }
+                            },
+                            modifier = Modifier.width(100.dp),
+                            singleLine = true,
+                            placeholder = { Text(Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB.toString()) }
+                        )
+                    }
+                    Text(
+                        text = stringResource(Res.string.max_media_upload_description, Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             // ── Card 2: Remote Clients ────────────────────────────────────────

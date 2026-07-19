@@ -18,6 +18,7 @@ import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.partialcontent.PartialContent
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respondFile
+import io.ktor.server.request.receiveStream
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
@@ -53,6 +54,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -489,6 +491,7 @@ data class DevicePermissionsDto(
     val canPresent: Boolean = true,
     val canAddToSchedule: Boolean = true,
     val canUploadFiles: Boolean = true,
+    val maxMediaUploadMb: Int = Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB,
 )
 
 @Serializable
@@ -1262,6 +1265,8 @@ class CompanionServer {
 
     // File upload permission (updated from settings without restart)
     private val _fileUploadEnabled = MutableStateFlow(true)
+    // Max media-upload size in MB (updated from settings without restart)
+    private val _maxMediaUploadMb = MutableStateFlow(Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB)
 
     // Outgoing WebSocket broadcast channel. Buffer sized generously: it is shared by every
     // connected client's collector, and DROP_OLDEST means an overflow silently loses a message
@@ -1459,6 +1464,11 @@ class CompanionServer {
     fun updateFileUploadEnabled(enabled: Boolean) {
         _fileUploadEnabled.value = enabled
         InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "file_upload_enabled", "enabled" to enabled))
+    }
+
+    /** Update the max media-upload size (MB) without restarting the server. */
+    fun updateMaxMediaUploadMb(mb: Int) {
+        _maxMediaUploadMb.value = mb.coerceAtLeast(1)
     }
 
     /**
@@ -2221,6 +2231,7 @@ class CompanionServer {
                                 canPresent       = true,
                                 canAddToSchedule = true,
                                 canUploadFiles   = _fileUploadEnabled.value,
+                                maxMediaUploadMb = _maxMediaUploadMb.value,
                             ),
                         )
                     )
@@ -2749,12 +2760,13 @@ class CompanionServer {
                 }
 
                 /**
-                 * POST /api/media/upload
-                 * Body: { "name": "clip.mp4", "data": "data:video/mp4;base64,…" }
+                 * POST /api/media/upload?name=clip.mp4
+                 * Body: the raw file bytes (application/octet-stream), streamed straight to disk.
                  *
-                 * Decodes the base64 data-URI, saves the file to ~/.churchpresenter/device_media/,
-                 * and returns the absolute path so the companion can then Go Live / Add to
-                 * Schedule a local MediaItem pointing at it. The desktop plays the file directly.
+                 * Streaming (rather than a base64 JSON body) keeps memory flat on both ends so
+                 * large video files don't OOM the phone or the desktop. Saves to
+                 * ~/.churchpresenter/device_media/ and returns the absolute path so the companion
+                 * can Go Live / Add to Schedule a local MediaItem pointing at it.
                  *
                  * Response: { "ok": true, "path": "<abs path>", "name": "<title>", "mediaType": "local|audio" }
                  */
@@ -2765,32 +2777,24 @@ class CompanionServer {
                         return@post
                     }
                     try {
+                        val maxBytes = _maxMediaUploadMb.value.toLong() * 1024 * 1024
                         val contentLength = call.request.headers["Content-Length"]?.toLongOrNull() ?: 0L
-                        if (contentLength > 250 * 1024 * 1024) { // 250 MB limit (base64 wire size)
-                            call.respond(HttpStatusCode.PayloadTooLarge, """{"error":"file too large (max ~180 MB)"}""")
+                        if (contentLength > maxBytes) {
+                            call.respond(HttpStatusCode.PayloadTooLarge, """{"error":"file too large (max ${_maxMediaUploadMb.value} MB)"}""")
                             return@post
                         }
-                        val body   = call.receiveText()
-                        val parsed = json.parseToJsonElement(body) as? JsonObject
-                        val name   = (parsed?.get("name") as? JsonPrimitive)?.content
-                        val data   = (parsed?.get("data") as? JsonPrimitive)?.content
-                        if (name.isNullOrBlank() || data.isNullOrBlank()) {
-                            call.respond(HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
+                        val rawName = call.request.queryParameters["name"]
+                        if (rawName.isNullOrBlank()) {
+                            call.respond(HttpStatusCode.BadRequest, """{"error":"name query parameter is required"}""")
                             return@post
                         }
-                        val safeName = File(name).name.ifBlank { "upload.mp4" }
+                        val safeName = File(rawName).name.ifBlank { "upload.mp4" }
                         val ext = safeName.substringAfterLast('.', "").lowercase()
                         // Accept exactly what the desktop media player (VLC) can play.
                         if (ext !in Constants.VIDEO_EXTENSIONS && ext !in Constants.AUDIO_EXTENSIONS) {
                             call.respond(HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
                             return@post
                         }
-                        val base64Match = Regex("^data:[^;]+;base64,(.+)$").find(data)
-                        if (base64Match == null) {
-                            call.respond(HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
-                            return@post
-                        }
-                        val fileBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
                         val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_media").also { it.mkdirs() }
                         val uniqueName = if (File(uploadDir, safeName).exists()) {
                             val ts   = System.currentTimeMillis()
@@ -2798,13 +2802,18 @@ class CompanionServer {
                             "${base}_$ts.$ext"
                         } else safeName
                         val file = File(uploadDir, uniqueName)
-                        file.writeBytes(fileBytes)
+                        // Stream the request body to disk with a fixed buffer (constant memory).
+                        val written = withContext(Dispatchers.IO) {
+                            call.receiveStream().use { input ->
+                                file.outputStream().use { out -> input.copyTo(out, bufferSize = 1 shl 20) }
+                            }
+                        }
                         val mediaType = if (ext in Constants.AUDIO_EXTENSIONS) Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
                         val uploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                         scope.launch { onInstantAction.emit(RemoteInstantAction(
                             actionType = "upload",
                             title = file.name,
-                            detail = "${fileBytes.size / 1024} KB",
+                            detail = "${written / 1024} KB",
                             clientId = uploadClientId
                         )) }
                         val escapedPath = file.absolutePath.replace("\\", "\\\\").replace("\"", "\\\"")
