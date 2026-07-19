@@ -1007,6 +1007,14 @@ fun main() {
                                                         item.mediaType
                                                     )
 
+                                                is ScheduleItem.DictionaryItem ->
+                                                    currentScheduleActions.addDictionary(
+                                                        item.number,
+                                                        item.word,
+                                                        item.transliteration,
+                                                        item.definition
+                                                    )
+
                                                 else -> Unit
                                             }
                                             pending.decision.complete(true)
@@ -1072,6 +1080,14 @@ fun main() {
                                                         item.mediaUrl,
                                                         item.mediaTitle,
                                                         item.mediaType
+                                                    )
+
+                                                is ScheduleItem.DictionaryItem ->
+                                                    currentScheduleActions.addDictionary(
+                                                        item.number,
+                                                        item.word,
+                                                        item.transliteration,
+                                                        item.definition
                                                     )
 
                                                 else -> Unit
