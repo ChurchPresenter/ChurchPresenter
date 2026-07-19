@@ -1015,6 +1015,9 @@ fun main() {
                                                         item.definition
                                                     )
 
+                                                is ScheduleItem.AnnouncementItem ->
+                                                    currentScheduleActions.addAnnouncement(item)
+
                                                 else -> Unit
                                             }
                                             pending.decision.complete(true)
@@ -1089,6 +1092,9 @@ fun main() {
                                                         item.transliteration,
                                                         item.definition
                                                     )
+
+                                                is ScheduleItem.AnnouncementItem ->
+                                                    currentScheduleActions.addAnnouncement(item)
 
                                                 else -> Unit
                                             }
@@ -1323,6 +1329,9 @@ fun main() {
                                             (clientId.isNotBlank() && sessionAllowedClients.contains(clientId))
                                         ) {
                                             val item = pending.item
+                                            if (item is ScheduleItem.AnnouncementItem) {
+                                                appSettings = appSettings.withAnnouncement(item)
+                                            }
                                             executeProjectItem(
                                                 item,
                                                 currentScheduleActions,
@@ -1360,6 +1369,9 @@ fun main() {
                                             clientLabel = remoteClientManager.getLabel(clientId)
                                         )
                                         val allow: () -> Unit = {
+                                            if (item is ScheduleItem.AnnouncementItem) {
+                                                appSettings = appSettings.withAnnouncement(item)
+                                            }
                                             executeProjectItem(
                                                 item,
                                                 currentScheduleActions,
@@ -2632,6 +2644,45 @@ private fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (i
  * Executes a project request — adds to schedule and sets presenter state.
  * Fixes the original bug where SongItem projection never selected the song in the Songs tab.
  */
+/**
+ * Copies a remotely-projected [ScheduleItem.AnnouncementItem]'s style into
+ * [AppSettings.announcementsSettings] so the live output renders with the
+ * announcement's own colour / font / animation rather than the desktop's
+ * current settings.
+ */
+private fun AppSettings.withAnnouncement(item: ScheduleItem.AnnouncementItem): AppSettings =
+    copy(
+        announcementsSettings = announcementsSettings.copy(
+            text                = item.text,
+            textColor           = item.textColor,
+            backgroundColor     = item.backgroundColor,
+            fontSize            = item.fontSize,
+            fontType            = item.fontType,
+            bold                = item.bold,
+            italic              = item.italic,
+            underline           = item.underline,
+            shadow              = item.shadow,
+            shadowColor         = item.shadowColor,
+            shadowSize          = item.shadowSize,
+            shadowOpacity       = item.shadowOpacity,
+            horizontalAlignment = item.horizontalAlignment,
+            position            = item.position,
+            animationType       = item.animationType,
+            animationDuration   = item.animationDuration,
+            loopCount           = item.loopCount,
+            timerHours          = item.timerHours,
+            timerMinutes        = item.timerMinutes,
+            timerSeconds        = item.timerSeconds,
+            timerTextColor      = item.timerTextColor,
+            timerExpiredText    = item.timerExpiredText,
+            timerMode           = item.timerMode,
+            targetHour          = item.targetHour,
+            targetMinute        = item.targetMinute,
+            targetSecond        = item.targetSecond,
+            liveClockFormat     = item.liveClockFormat
+        )
+    )
+
 private fun executeProjectItem(
     item: ScheduleItem,
     scheduleActions: ScheduleActions,
@@ -2713,6 +2764,23 @@ private fun executeProjectItem(
                 )
             )
             presenterManager.setPresentingMode(Presenting.DICTIONARY)
+            presenterManager.setShowPresenterWindow(true)
+        }
+
+        is ScheduleItem.AnnouncementItem -> {
+            if (item.isTimer) {
+                val total = item.timerHours * 3600 + item.timerMinutes * 60 + item.timerSeconds
+                when (item.timerMode) {
+                    Constants.TIMER_MODE_COUNT_UP -> presenterManager.startAnnouncementCountUp(0)
+                    Constants.TIMER_MODE_CLOCK -> presenterManager.startAnnouncementSpecificTime(item.targetHour, item.targetMinute, item.targetSecond)
+                    Constants.TIMER_MODE_CLOCK_DISPLAY -> presenterManager.startAnnouncementClockDisplay(item.liveClockFormat)
+                    else -> presenterManager.startAnnouncementCountdown(total, item.timerExpiredText)
+                }
+                presenterManager.setAnnouncementTickerLive(true)
+            } else {
+                presenterManager.setAnnouncementText(item.text)
+            }
+            presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
             presenterManager.setShowPresenterWindow(true)
         }
 

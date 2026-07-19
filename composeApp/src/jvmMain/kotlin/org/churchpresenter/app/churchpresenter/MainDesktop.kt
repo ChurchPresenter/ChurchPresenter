@@ -188,7 +188,8 @@ data class ScheduleActions(
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
-    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> }
+    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> },
+    val addAnnouncement: (item: ScheduleItem.AnnouncementItem) -> Unit = { }
 )
 
 @Composable
@@ -1506,7 +1507,20 @@ fun MainDesktop(
                                     addPresentation = actions.addPresentation,
                                     addMedia = actions.addMedia,
                                     addScene = actions.addScene,
-                                    addDictionary = actions.addDictionary
+                                    addDictionary = actions.addDictionary,
+                                    addAnnouncement = { item ->
+                                        actions.addAnnouncement(
+                                            item.text, item.textColor, item.backgroundColor,
+                                            item.fontSize, item.fontType, item.bold, item.italic,
+                                            item.underline, item.shadow, item.shadowColor,
+                                            item.shadowSize, item.shadowOpacity, item.horizontalAlignment,
+                                            item.position, item.animationType, item.animationDuration,
+                                            item.loopCount, item.isTimer, item.timerHours,
+                                            item.timerMinutes, item.timerSeconds, item.timerTextColor,
+                                            item.timerExpiredText, item.timerMode, item.targetHour,
+                                            item.targetMinute, item.targetSecond, item.liveClockFormat
+                                        )
+                                    }
                                 )
                             )
                         },

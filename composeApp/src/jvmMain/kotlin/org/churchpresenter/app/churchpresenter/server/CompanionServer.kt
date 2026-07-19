@@ -567,6 +567,24 @@ data class RemoteItemDto(
     val strongsNumber: String? = null,
     val transliteration: String? = null,
     val definition: String? = null,
+    // announcement / timer — announcementText is the discriminator ("" for a pure timer)
+    val announcementText: String? = null,
+    val textColor: String? = null,
+    val backgroundColor: String? = null,
+    val fontSize: Int? = null,
+    val animationType: String? = null,
+    val animationDuration: Int? = null,
+    val isTimer: Boolean? = null,
+    val timerHours: Int? = null,
+    val timerMinutes: Int? = null,
+    val timerSeconds: Int? = null,
+    val timerTextColor: String? = null,
+    val timerExpiredText: String? = null,
+    val timerMode: String? = null,
+    val targetHour: Int? = null,
+    val targetMinute: Int? = null,
+    val targetSecond: Int? = null,
+    val liveClockFormat: String? = null,
     // display text (optional, ignored during parsing)
     val displayText: String? = null
 )
@@ -646,6 +664,28 @@ fun RemoteItemDto.toScheduleItem(): ScheduleItem? {
                 word            = title ?: "",
                 transliteration = transliteration ?: "",
                 definition      = definition ?: ""
+            )
+        // Announcement / timer — must have announcementText (may be "")
+        announcementText != null ->
+            ScheduleItem.AnnouncementItem(
+                id                = safeId,
+                text              = announcementText,
+                textColor         = textColor ?: "#FFFFFF",
+                backgroundColor   = backgroundColor ?: "#000000",
+                fontSize          = fontSize ?: 48,
+                animationType     = animationType ?: "SLIDE_FROM_BOTTOM",
+                animationDuration = animationDuration ?: 500,
+                isTimer           = isTimer ?: false,
+                timerHours        = timerHours ?: 0,
+                timerMinutes      = timerMinutes ?: 0,
+                timerSeconds      = timerSeconds ?: 0,
+                timerTextColor    = timerTextColor ?: (textColor ?: "#FFFFFF"),
+                timerExpiredText  = timerExpiredText ?: "",
+                timerMode         = timerMode ?: Constants.TIMER_MODE_DURATION,
+                targetHour        = targetHour ?: 0,
+                targetMinute      = targetMinute ?: 0,
+                targetSecond      = targetSecond ?: 0,
+                liveClockFormat   = liveClockFormat ?: "HH:mm:ss"
             )
         else -> null
     }
