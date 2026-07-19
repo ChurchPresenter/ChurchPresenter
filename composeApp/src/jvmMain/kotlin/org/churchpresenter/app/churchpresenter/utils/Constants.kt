@@ -263,6 +263,8 @@ object Constants {
     const val ENDPOINT_BIBLE_FILE        = "/api/bible/file"
     const val ENDPOINT_LOWER_THIRDS      = "/api/lowerthirds"
     const val ENDPOINT_BACKGROUNDS       = "/api/backgrounds"
+    const val ENDPOINT_DICTIONARY        = "/api/dictionary"
+    const val ENDPOINT_DICTIONARY_ENTRY  = "/api/dictionary/{number}"
 
     // Background asset slot names — shared vocabulary between CompanionServer's
     // GET /api/backgrounds/asset/{slot} and InstanceLinkClient's fetchBackgroundAsset(), since a

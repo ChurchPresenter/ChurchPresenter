@@ -563,6 +563,10 @@ data class RemoteItemDto(
     val mediaUrl: String? = null,
     val mediaTitle: String? = null,
     val mediaType: String? = null,
+    // dictionary (Strong's) — strongsNumber is the discriminator; word carried in `title`
+    val strongsNumber: String? = null,
+    val transliteration: String? = null,
+    val definition: String? = null,
     // display text (optional, ignored during parsing)
     val displayText: String? = null
 )
@@ -633,6 +637,15 @@ fun RemoteItemDto.toScheduleItem(): ScheduleItem? {
                 mediaUrl   = mediaUrl,
                 mediaTitle = mediaTitle ?: mediaUrl,
                 mediaType  = mediaType ?: "local"
+            )
+        // Dictionary (Strong's) — must have strongsNumber
+        strongsNumber != null ->
+            ScheduleItem.DictionaryItem(
+                id              = safeId,
+                number          = strongsNumber,
+                word            = title ?: "",
+                transliteration = transliteration ?: "",
+                definition      = definition ?: ""
             )
         else -> null
     }
@@ -2384,6 +2397,58 @@ class CompanionServer {
                             verseTotal = filteredBooks.sumOf { b -> b.chapters.sumOf { it.verseTotal } }
                         ))
                     }
+                }
+
+                // ── Strong's dictionary endpoints ─────────────────────────────
+
+                /**
+                 * GET /api/dictionary?q=&lang=en|ru&filter=all|hebrew|greek&limit=100
+                 * Returns a JSON array of matching [StrongsEntry] objects.
+                 */
+                get(Constants.ENDPOINT_DICTIONARY) {
+                    if (!checkApiKey(call)) return@get
+                    val q      = call.request.queryParameters["q"] ?: ""
+                    val lang   = call.request.queryParameters["lang"]
+                    val filter = call.request.queryParameters["filter"] ?: "all"
+                    val limit  = call.request.queryParameters["limit"]?.toIntOrNull() ?: 100
+                    val results = try {
+                        StrongsDictionaryRepository.search(q, lang, filter, limit)
+                    } catch (e: Exception) {
+                        call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"dictionary unavailable"}""")
+                        return@get
+                    }
+                    call.respondText(
+                        json.encodeToString(ListSerializer(StrongsEntry.serializer()), results),
+                        ContentType.Application.Json
+                    )
+                }
+
+                /**
+                 * GET /api/dictionary/{number}?lang=en|ru
+                 * Returns a single [StrongsEntry] (e.g. /api/dictionary/H430), or 404.
+                 */
+                get(Constants.ENDPOINT_DICTIONARY_ENTRY) {
+                    if (!checkApiKey(call)) return@get
+                    val number = call.parameters["number"]
+                    if (number.isNullOrBlank()) {
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing number"}""")
+                        return@get
+                    }
+                    val lang = call.request.queryParameters["lang"]
+                    val entry = try {
+                        StrongsDictionaryRepository.lookup(number, lang)
+                    } catch (e: Exception) {
+                        call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"dictionary unavailable"}""")
+                        return@get
+                    }
+                    if (entry == null) {
+                        call.respond(HttpStatusCode.NotFound, """{"error":"entry not found"}""")
+                        return@get
+                    }
+                    call.respondText(
+                        json.encodeToString(StrongsEntry.serializer(), entry),
+                        ContentType.Application.Json
+                    )
                 }
 
                 // ── Presentation endpoints ────────────────────────────────────

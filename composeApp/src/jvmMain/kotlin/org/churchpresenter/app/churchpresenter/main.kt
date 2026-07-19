@@ -2686,6 +2686,20 @@ private fun executeProjectItem(
             presenterManager.setShowPresenterWindow(true)
         }
 
+        is ScheduleItem.DictionaryItem -> {
+            presenterManager.setDisplayedDictionaryEntry(
+                StrongsEntry(
+                    number = item.number,
+                    word = item.word,
+                    transliteration = item.transliteration,
+                    pronunciation = "",
+                    definition = item.definition
+                )
+            )
+            presenterManager.setPresentingMode(Presenting.DICTIONARY)
+            presenterManager.setShowPresenterWindow(true)
+        }
+
         else -> Unit
     }
 }
