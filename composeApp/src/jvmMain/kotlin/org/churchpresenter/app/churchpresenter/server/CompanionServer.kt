@@ -880,6 +880,31 @@ class CompanionServer {
         ))
     }
 
+    /**
+     * Broadcasts the desktop media player's playback state to companions (mobile Media tab).
+     * Position ticks continuously, so callers poll this on a fixed cadence.
+     */
+    fun broadcastMediaState(
+        isLive: Boolean,
+        isLoaded: Boolean,
+        isPlaying: Boolean,
+        title: String,
+        positionMs: Long,
+        durationMs: Long,
+        volume: Float,
+        muted: Boolean,
+        mediaType: String,
+        source: String,
+    ) {
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_MEDIA_STATE_CHANGED,
+            payload = """{"isLive":$isLive,"isLoaded":$isLoaded,"isPlaying":$isPlaying,""" +
+                """"title":"${jsonEscape(title)}","positionMs":$positionMs,"durationMs":$durationMs,""" +
+                """"volume":$volume,"muted":$muted,"mediaType":"${jsonEscape(mediaType)}",""" +
+                """"source":"${jsonEscape(source)}"}"""
+        ))
+    }
+
     /** Emitted when remote taps Go Live. */
     val onPresentationGoLive = MutableSharedFlow<Unit>(
         extraBufferCapacity = 4,
@@ -1373,6 +1398,15 @@ class CompanionServer {
     val onPreviousPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val onNextSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val onPreviousSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+    // Media transport controls from a companion remote
+    val onMediaPlayPause = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaStop = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaSeekForward = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaSeekBackward = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaSeekTo = MutableSharedFlow<Long>(extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaSetVolume = MutableSharedFlow<Float>(extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaMuteToggle = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     /**
      * Emitted for every instant (no-approval) action so the UI can show an activity toast.
@@ -2714,6 +2748,75 @@ class CompanionServer {
                     }
                 }
 
+                /**
+                 * POST /api/media/upload
+                 * Body: { "name": "clip.mp4", "data": "data:video/mp4;base64,…" }
+                 *
+                 * Decodes the base64 data-URI, saves the file to ~/.churchpresenter/device_media/,
+                 * and returns the absolute path so the companion can then Go Live / Add to
+                 * Schedule a local MediaItem pointing at it. The desktop plays the file directly.
+                 *
+                 * Response: { "ok": true, "path": "<abs path>", "name": "<title>", "mediaType": "local|audio" }
+                 */
+                post(Constants.ENDPOINT_MEDIA_UPLOAD) {
+                    if (!checkApiKey(call)) return@post
+                    if (!_fileUploadEnabled.value) {
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
+                        return@post
+                    }
+                    try {
+                        val contentLength = call.request.headers["Content-Length"]?.toLongOrNull() ?: 0L
+                        if (contentLength > 250 * 1024 * 1024) { // 250 MB limit (base64 wire size)
+                            call.respond(HttpStatusCode.PayloadTooLarge, """{"error":"file too large (max ~180 MB)"}""")
+                            return@post
+                        }
+                        val body   = call.receiveText()
+                        val parsed = json.parseToJsonElement(body) as? JsonObject
+                        val name   = (parsed?.get("name") as? JsonPrimitive)?.content
+                        val data   = (parsed?.get("data") as? JsonPrimitive)?.content
+                        if (name.isNullOrBlank() || data.isNullOrBlank()) {
+                            call.respond(HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
+                            return@post
+                        }
+                        val safeName = File(name).name.ifBlank { "upload.mp4" }
+                        val ext = safeName.substringAfterLast('.', "").lowercase()
+                        // Accept exactly what the desktop media player (VLC) can play.
+                        if (ext !in Constants.VIDEO_EXTENSIONS && ext !in Constants.AUDIO_EXTENSIONS) {
+                            call.respond(HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
+                            return@post
+                        }
+                        val base64Match = Regex("^data:[^;]+;base64,(.+)$").find(data)
+                        if (base64Match == null) {
+                            call.respond(HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
+                            return@post
+                        }
+                        val fileBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
+                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_media").also { it.mkdirs() }
+                        val uniqueName = if (File(uploadDir, safeName).exists()) {
+                            val ts   = System.currentTimeMillis()
+                            val base = safeName.substringBeforeLast('.', safeName)
+                            "${base}_$ts.$ext"
+                        } else safeName
+                        val file = File(uploadDir, uniqueName)
+                        file.writeBytes(fileBytes)
+                        val mediaType = if (ext in Constants.AUDIO_EXTENSIONS) Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
+                        val uploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                        scope.launch { onInstantAction.emit(RemoteInstantAction(
+                            actionType = "upload",
+                            title = file.name,
+                            detail = "${fileBytes.size / 1024} KB",
+                            clientId = uploadClientId
+                        )) }
+                        val escapedPath = file.absolutePath.replace("\\", "\\\\").replace("\"", "\\\"")
+                        call.respondText(
+                            """{"ok":true,"path":"$escapedPath","name":"${file.nameWithoutExtension.replace("\"", "\\\"")}","mediaType":"$mediaType"}""",
+                            ContentType.Application.Json
+                        )
+                    } catch (e: Exception) {
+                        call.respond(HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
+                    }
+                }
+
                 // ── Presentation remote control endpoints ─────────────────────
 
                 /** GET /presentation-remote — mobile remote control web page */
@@ -3281,6 +3384,40 @@ class CompanionServer {
                                     }
                                     Constants.WS_CMD_PREVIOUS_SLIDE -> {
                                         scope.launch { onPreviousSlide.emit(Unit) }
+                                        sendCommandAck(msg.commandId, ok = true)
+                                    }
+                                    Constants.WS_CMD_MEDIA_PLAY_PAUSE -> {
+                                        scope.launch { onMediaPlayPause.emit(Unit) }
+                                        sendCommandAck(msg.commandId, ok = true)
+                                    }
+                                    Constants.WS_CMD_MEDIA_STOP -> {
+                                        scope.launch { onMediaStop.emit(Unit) }
+                                        sendCommandAck(msg.commandId, ok = true)
+                                    }
+                                    Constants.WS_CMD_MEDIA_SEEK_FORWARD -> {
+                                        scope.launch { onMediaSeekForward.emit(Unit) }
+                                        sendCommandAck(msg.commandId, ok = true)
+                                    }
+                                    Constants.WS_CMD_MEDIA_SEEK_BACKWARD -> {
+                                        scope.launch { onMediaSeekBackward.emit(Unit) }
+                                        sendCommandAck(msg.commandId, ok = true)
+                                    }
+                                    Constants.WS_CMD_MEDIA_SEEK_TO -> {
+                                        val ms = msg.payload.trim().toLongOrNull()
+                                        if (ms != null) {
+                                            scope.launch { onMediaSeekTo.emit(ms) }
+                                            sendCommandAck(msg.commandId, ok = true)
+                                        } else sendCommandAck(msg.commandId, ok = false, reason = "invalid_payload")
+                                    }
+                                    Constants.WS_CMD_MEDIA_SET_VOLUME -> {
+                                        val v = msg.payload.trim().toFloatOrNull()
+                                        if (v != null) {
+                                            scope.launch { onMediaSetVolume.emit(v) }
+                                            sendCommandAck(msg.commandId, ok = true)
+                                        } else sendCommandAck(msg.commandId, ok = false, reason = "invalid_payload")
+                                    }
+                                    Constants.WS_CMD_MEDIA_MUTE_TOGGLE -> {
+                                        scope.launch { onMediaMuteToggle.emit(Unit) }
                                         sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {

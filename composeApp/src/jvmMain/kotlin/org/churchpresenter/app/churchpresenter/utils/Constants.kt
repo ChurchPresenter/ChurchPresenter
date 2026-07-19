@@ -215,6 +215,7 @@ object Constants {
 
     // Audio file extensions (VLC supports all common formats)
     val AUDIO_EXTENSIONS = setOf("mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "opus")
+    val VIDEO_EXTENSIONS = setOf("mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v")
 
     // Display Mode Types (for screen assignments)
     const val DISPLAY_MODE_FULLSCREEN = "fullscreen"
@@ -260,6 +261,7 @@ object Constants {
     const val ENDPOINT_WS                = "/ws"
     const val ENDPOINT_BROWSER_SOURCE    = "/browser-source"
     const val ENDPOINT_MEDIA_STREAM      = "/api/media/stream"
+    const val ENDPOINT_MEDIA_UPLOAD      = "/api/media/upload"
     const val ENDPOINT_BIBLE_FILE        = "/api/bible/file"
     const val ENDPOINT_LOWER_THIRDS      = "/api/lowerthirds"
     const val ENDPOINT_BACKGROUNDS       = "/api/backgrounds"
@@ -294,6 +296,7 @@ object Constants {
     const val WS_EVENT_PRESENTATION_AUTO_SCROLL_CHANGED   = "presentation_auto_scroll_changed"
     const val WS_EVENT_PRESENTATION_LOOP_CHANGED          = "presentation_looping_changed"
     const val WS_EVENT_LIVE_STATE_CHANGED                 = "live_state_changed"
+    const val WS_EVENT_MEDIA_STATE_CHANGED                = "media_state_changed"
 
     // WebSocket command types (client → server)
     const val WS_CMD_SELECT_SONG            = "select_song"
@@ -314,6 +317,14 @@ object Constants {
     const val WS_CMD_PREVIOUS_PICTURE       = "previous_picture"
     const val WS_CMD_NEXT_SLIDE             = "next_slide"
     const val WS_CMD_PREVIOUS_SLIDE         = "previous_slide"
+    // Media transport controls (companion "just controls" remote — no video on the device)
+    const val WS_CMD_MEDIA_PLAY_PAUSE       = "media_play_pause"
+    const val WS_CMD_MEDIA_STOP             = "media_stop"
+    const val WS_CMD_MEDIA_SEEK_FORWARD     = "media_seek_forward"
+    const val WS_CMD_MEDIA_SEEK_BACKWARD    = "media_seek_backward"
+    const val WS_CMD_MEDIA_SEEK_TO          = "media_seek_to"       // payload = position in ms
+    const val WS_CMD_MEDIA_SET_VOLUME       = "media_set_volume"    // payload = 0.0 – 1.0
+    const val WS_CMD_MEDIA_MUTE_TOGGLE      = "media_mute_toggle"
 
     // Instant-select endpoints (no approval dialog)
     const val ENDPOINT_BIBLE_SELECT         = "/api/bible/select"

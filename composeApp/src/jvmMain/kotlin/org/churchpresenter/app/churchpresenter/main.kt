@@ -718,6 +718,47 @@ fun main() {
                 presenterManager.setSlideFrozen(presentationFrozen)
             }
         }
+        // Broadcast media playback state to companions (mobile Media tab). Position ticks
+        // continuously, so poll on a fixed cadence rather than per-frame.
+        LaunchedEffect(Unit) {
+            var wasLoaded = false
+            while (true) {
+                val loaded = mediaViewModel.isLoaded
+                if (loaded) {
+                    companionServer.broadcastMediaState(
+                        isLive = presenterManager.presentingMode.value == Presenting.MEDIA,
+                        isLoaded = true,
+                        isPlaying = mediaViewModel.isPlaying,
+                        title = mediaViewModel.mediaTitle,
+                        positionMs = mediaViewModel.currentPosition,
+                        durationMs = mediaViewModel.duration,
+                        volume = mediaViewModel.volume,
+                        muted = mediaViewModel.isMuted,
+                        mediaType = mediaViewModel.mediaType,
+                        source = mediaViewModel.mediaUrl,
+                    )
+                    wasLoaded = true
+                } else if (wasLoaded) {
+                    // One final "not loaded" so the mobile clears its now-playing view.
+                    companionServer.broadcastMediaState(
+                        isLive = false, isLoaded = false, isPlaying = false,
+                        title = "", positionMs = 0L, durationMs = 0L,
+                        volume = mediaViewModel.volume, muted = mediaViewModel.isMuted,
+                        mediaType = mediaViewModel.mediaType, source = "",
+                    )
+                    wasLoaded = false
+                }
+                delay(500)
+            }
+        }
+        // Media transport controls from a companion remote (mobile Media tab).
+        LaunchedEffect(Unit) { companionServer.onMediaPlayPause.collect { mediaViewModel.togglePlayPause() } }
+        LaunchedEffect(Unit) { companionServer.onMediaStop.collect { mediaViewModel.stop() } }
+        LaunchedEffect(Unit) { companionServer.onMediaSeekForward.collect { mediaViewModel.seekForward() } }
+        LaunchedEffect(Unit) { companionServer.onMediaSeekBackward.collect { mediaViewModel.seekBackward() } }
+        LaunchedEffect(Unit) { companionServer.onMediaSeekTo.collect { mediaViewModel.seekTo(it) } }
+        LaunchedEffect(Unit) { companionServer.onMediaSetVolume.collect { mediaViewModel.setVolume(it) } }
+        LaunchedEffect(Unit) { companionServer.onMediaMuteToggle.collect { mediaViewModel.toggleMute() } }
         val presentingModeValue = presenterManager.presentingMode.value
         LaunchedEffect(presentingModeValue) {
             companionServer.updatePresentationLiveStatus(presentingModeValue == Presenting.PRESENTATION)
