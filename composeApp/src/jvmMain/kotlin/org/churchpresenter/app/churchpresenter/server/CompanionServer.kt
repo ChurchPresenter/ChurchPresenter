@@ -200,6 +200,19 @@ data class ScheduleItemDto(
     val text: String? = null,
     val textColor: String? = null,
     val backgroundColor: String? = null,
+    // announcement / timer (lets a companion reconstruct the composer from a schedule item)
+    val fontSize: Int? = null,
+    val animationType: String? = null,
+    val animationDuration: Int? = null,
+    val isTimer: Boolean? = null,
+    val timerMode: String? = null,
+    val timerHours: Int? = null,
+    val timerMinutes: Int? = null,
+    val timerSeconds: Int? = null,
+    val timerExpiredText: String? = null,
+    val targetHour: Int? = null,
+    val targetMinute: Int? = null,
+    val liveClockFormat: String? = null,
     // picture
     val folderPath: String? = null,
     val folderName: String? = null,
@@ -1866,7 +1879,13 @@ class CompanionServer {
                 )
                 is ScheduleItem.AnnouncementItem -> ScheduleItemDto(
                     id = item.id, type = "announcement", displayText = item.displayText,
-                    text = item.text, textColor = item.textColor, backgroundColor = item.backgroundColor
+                    text = item.text, textColor = item.textColor, backgroundColor = item.backgroundColor,
+                    fontSize = item.fontSize, animationType = item.animationType,
+                    animationDuration = item.animationDuration, isTimer = item.isTimer,
+                    timerMode = item.timerMode, timerHours = item.timerHours,
+                    timerMinutes = item.timerMinutes, timerSeconds = item.timerSeconds,
+                    timerExpiredText = item.timerExpiredText, targetHour = item.targetHour,
+                    targetMinute = item.targetMinute, liveClockFormat = item.liveClockFormat
                 )
                 is ScheduleItem.WebsiteItem -> ScheduleItemDto(
                     id = item.id, type = "website", displayText = item.displayText,
