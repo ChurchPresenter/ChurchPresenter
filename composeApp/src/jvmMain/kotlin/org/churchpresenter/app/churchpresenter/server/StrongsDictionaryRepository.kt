@@ -99,12 +99,21 @@ object StrongsDictionaryRepository {
      * Search entries by number, word, transliteration, definition or KJV usage.
      * [filter] is "all" | "hebrew" | "greek". Results are capped at [limit].
      * An empty [query] returns the first [limit] entries (optionally filtered).
+     *
+     * When [book] is supplied, results are additionally restricted to the Strong's
+     * numbers that occur within that Bible reference, narrowing progressively:
+     * book only → whole book, +[chapter] → that chapter, +[verse] → a single verse.
+     * [book]/[chapter]/[verse] use canonical KJV book numbering (Genesis=1 … Revelation=66),
+     * which matches both the interlinear index and the `/api/bible` `book-id`.
      */
     suspend fun search(
         query: String,
         lang: String?,
         filter: String,
         limit: Int,
+        book: Int? = null,
+        chapter: Int? = null,
+        verse: Int? = null,
     ): List<StrongsEntryDto> {
         ensureInterlinear()
         val all = all(lang)
@@ -113,11 +122,15 @@ object StrongsDictionaryRepository {
             "greek" -> all.filter { it.isGreek }
             else -> all
         }
+        val byRef = if (book != null) {
+            val valid = interlinear.getStrongsForBookChapter(book, chapter, verse)
+            byLang.filter { it.number in valid }
+        } else byLang
         val q = query.trim().lowercase()
         val matched = if (q.isEmpty()) {
-            byLang
+            byRef
         } else {
-            byLang.filter { e ->
+            byRef.filter { e ->
                 e.number.lowercase() == q ||
                 e.number.lowercase().contains(q) ||
                 e.word.lowercase().contains(q) ||

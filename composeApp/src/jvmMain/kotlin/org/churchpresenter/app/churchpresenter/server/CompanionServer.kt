@@ -2517,16 +2517,25 @@ class CompanionServer {
 
                 /**
                  * GET /api/dictionary?q=&lang=en|ru&filter=all|hebrew|greek&limit=100
+                 *        [&book=1[&chapter=1[&verse=1]]]
                  * Returns a JSON array of matching [StrongsEntry] objects.
+                 *
+                 * The optional book/chapter/verse params (canonical KJV numbering,
+                 * Genesis=1 … Revelation=66 — same as /api/bible book-id) restrict
+                 * results to the Strong's numbers occurring in that reference,
+                 * narrowing progressively as chapter and verse are added.
                  */
                 get(Constants.ENDPOINT_DICTIONARY) {
                     if (!checkApiKey(call)) return@get
-                    val q      = call.request.queryParameters["q"] ?: ""
-                    val lang   = call.request.queryParameters["lang"]
-                    val filter = call.request.queryParameters["filter"] ?: "all"
-                    val limit  = call.request.queryParameters["limit"]?.toIntOrNull() ?: 100
+                    val q       = call.request.queryParameters["q"] ?: ""
+                    val lang    = call.request.queryParameters["lang"]
+                    val filter  = call.request.queryParameters["filter"] ?: "all"
+                    val limit   = call.request.queryParameters["limit"]?.toIntOrNull() ?: 100
+                    val book    = call.request.queryParameters["book"]?.toIntOrNull()
+                    val chapter = call.request.queryParameters["chapter"]?.toIntOrNull()
+                    val verse   = call.request.queryParameters["verse"]?.toIntOrNull()
                     val results = try {
-                        StrongsDictionaryRepository.search(q, lang, filter, limit)
+                        StrongsDictionaryRepository.search(q, lang, filter, limit, book, chapter, verse)
                     } catch (e: Exception) {
                         call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"dictionary unavailable"}""")
                         return@get
