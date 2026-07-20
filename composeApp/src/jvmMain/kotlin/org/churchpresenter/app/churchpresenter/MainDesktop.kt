@@ -1531,6 +1531,10 @@ fun MainDesktop(
                         },
                         onScheduleChanged = onScheduleChanged,
                         theme = theme,
+                        itemZoomPercent = appSettings.scheduleItemZoomPercent,
+                        onItemZoomChange = { percent ->
+                            onSettingsChange { settings -> settings.copy(scheduleItemZoomPercent = percent) }
+                        },
                         planningCenterSettings = appSettings.planningCenterSettings,
                         onPlanningCenterTokensRefreshed = { accessToken, refreshToken, expiresAtEpochMs ->
                             onSettingsChange { settings ->

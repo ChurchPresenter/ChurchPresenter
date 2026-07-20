@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,6 +30,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
@@ -38,6 +40,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,17 +52,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.isShiftPressed
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.zIndex
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
@@ -67,11 +76,10 @@ import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
 import churchpresenter.composeapp.generated.resources.file_filter_schedule
 import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_down_double
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_arrow_up_double
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_delete
+import churchpresenter.composeapp.generated.resources.ic_drag_dots
 import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_label
@@ -81,6 +89,8 @@ import churchpresenter.composeapp.generated.resources.ic_note
 import churchpresenter.composeapp.generated.resources.ic_redo
 import churchpresenter.composeapp.generated.resources.ic_save
 import churchpresenter.composeapp.generated.resources.ic_undo
+import churchpresenter.composeapp.generated.resources.ic_zoom_in
+import churchpresenter.composeapp.generated.resources.ic_zoom_out
 import churchpresenter.composeapp.generated.resources.pause_duration_ms
 import churchpresenter.composeapp.generated.resources.planning_center_import_title
 import churchpresenter.composeapp.generated.resources.schedule
@@ -96,19 +106,21 @@ import churchpresenter.composeapp.generated.resources.autosave_restore_message
 import churchpresenter.composeapp.generated.resources.autosave_restore_title
 import churchpresenter.composeapp.generated.resources.schedule_add_files
 import churchpresenter.composeapp.generated.resources.schedule_drop_hint
+import churchpresenter.composeapp.generated.resources.schedule_drop_to_remove
 import churchpresenter.composeapp.generated.resources.tooltip_add_label
 import churchpresenter.composeapp.generated.resources.tooltip_clear_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_edit_label
 import churchpresenter.composeapp.generated.resources.tooltip_go_live
 import churchpresenter.composeapp.generated.resources.tooltip_move_down
-import churchpresenter.composeapp.generated.resources.tooltip_move_to_bottom
-import churchpresenter.composeapp.generated.resources.tooltip_move_to_top
+import churchpresenter.composeapp.generated.resources.tooltip_schedule_zoom_in
+import churchpresenter.composeapp.generated.resources.tooltip_schedule_zoom_out
 import churchpresenter.composeapp.generated.resources.tooltip_move_up
 import churchpresenter.composeapp.generated.resources.tooltip_new_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_remove
 import churchpresenter.composeapp.generated.resources.tooltip_remove_from_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
+import kotlin.math.abs
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.data.settings.PlanningCenterSettings
@@ -164,6 +176,26 @@ data class ScheduleTabActions(
     val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> }
 )
 
+/**
+ * Card zoom rungs, as a percentage of the normal card size. The two rungs just below 100 exist
+ * to strip the card down before it starts shrinking: 99 drops the action buttons, 98 collapses
+ * the card to a single line (see [ZOOM_HIDE_ACTIONS_BELOW] / [ZOOM_SINGLE_LINE_AT_OR_BELOW]).
+ */
+private val ZOOM_LEVELS = listOf(70, 80, 90, 98, 99, 100, 110, 120, 130, 140, 150)
+private const val ZOOM_DEFAULT = 100
+private const val ZOOM_HIDE_ACTIONS_BELOW = 100
+private const val ZOOM_SINGLE_LINE_AT_OR_BELOW = 98
+
+/** How far the pointer must travel on a card's icon before it becomes a reorder drag. */
+private val DRAG_HANDLE_THRESHOLD = 4.dp
+
+/** Height of the drop-here-to-remove zone at the bottom of the list, shown while dragging. */
+private val DELETE_ZONE_HEIGHT = 56.dp
+
+/** The rung nearest [percent], so a value persisted before the ladder existed still resolves. */
+private fun nearestZoomIndex(percent: Int): Int =
+    ZOOM_LEVELS.indices.minBy { abs(ZOOM_LEVELS[it] - percent) }
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ScheduleTab(
@@ -191,6 +223,8 @@ fun ScheduleTab(
     onAddLabel: () -> Unit = {},
     onAddWebsite: () -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM,
+    itemZoomPercent: Int = ZOOM_DEFAULT,
+    onItemZoomChange: (Int) -> Unit = {},
     planningCenterSettings: PlanningCenterSettings = PlanningCenterSettings(),
     onPlanningCenterTokensRefreshed: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long) -> Unit = { _, _, _ -> },
     onPlanningCenterConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit = { _, _, _, _ -> },
@@ -371,7 +405,7 @@ fun ScheduleTab(
             )
         }
 
-        // Schedule header + move arrows (buttons wrap as a group)
+        // Schedule header + zoom controls (buttons wrap as a group)
         FlowRow(
             modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -385,33 +419,22 @@ fun ScheduleTab(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(end = 6.dp)
             )
-            // Wrap all 4 buttons in a Row so FlowRow treats them as one item
+            // Card zoom controls (own Row so FlowRow wraps them as one group)
+            val zoomIndex = nearestZoomIndex(itemZoomPercent)
             Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_arrow_up_double),
-                    text = stringResource(Res.string.tooltip_move_to_top),
-                    onClick = { viewModel.selectedItemId?.let { viewModel.moveItemToTop(it) } },
+                    painter = painterResource(Res.drawable.ic_zoom_out),
+                    text = stringResource(Res.string.tooltip_schedule_zoom_out),
+                    onClick = { onItemZoomChange(ZOOM_LEVELS[zoomIndex - 1]) },
+                    enabled = zoomIndex > 0,
                     buttonSize = 32.dp,
                     iconTint = MaterialTheme.colorScheme.onSurface
                 )
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_arrow_up),
-                    text = stringResource(Res.string.tooltip_move_up),
-                    onClick = { viewModel.selectedItemId?.let { viewModel.moveItemUp(it) } },
-                    buttonSize = 32.dp,
-                    iconTint = MaterialTheme.colorScheme.onSurface
-                )
-                TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_arrow_down),
-                    text = stringResource(Res.string.tooltip_move_down),
-                    onClick = { viewModel.selectedItemId?.let { viewModel.moveItemDown(it) } },
-                    buttonSize = 32.dp,
-                    iconTint = MaterialTheme.colorScheme.onSurface
-                )
-                TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_arrow_down_double),
-                    text = stringResource(Res.string.tooltip_move_to_bottom),
-                    onClick = { viewModel.selectedItemId?.let { viewModel.moveItemToBottom(it) } },
+                    painter = painterResource(Res.drawable.ic_zoom_in),
+                    text = stringResource(Res.string.tooltip_schedule_zoom_in),
+                    onClick = { onItemZoomChange(ZOOM_LEVELS[zoomIndex + 1]) },
+                    enabled = zoomIndex < ZOOM_LEVELS.lastIndex,
                     buttonSize = 32.dp,
                     iconTint = MaterialTheme.colorScheme.onSurface
                 )
@@ -420,15 +443,121 @@ fun ScheduleTab(
 
         // Schedule items list with drag-and-drop support
         val viewModelState = rememberUpdatedState(viewModel)
-        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+        var listHeightPx by remember { mutableStateOf(0) }
+        Box(
+            modifier = Modifier.weight(1f).fillMaxWidth()
+                .onSizeChanged { listHeightPx = it.height }
+        ) {
             val listState = rememberLazyListState()
 
-            // Drag-to-reorder state: shift+click+drag
+            // Drag-to-reorder state: shift+click+drag anywhere on a card, or plain drag on its icon
             var draggingFromIndex by remember { mutableStateOf(-1) }
             var dropTargetIndex by remember { mutableStateOf<Int?>(null) }
             var isDragActive by remember { mutableStateOf(false) }
             var dragCursorY by remember { mutableStateOf(0f) }
             var dragItemHeight by remember { mutableStateOf(50f) }
+            var isOverDeleteZone by remember { mutableStateOf(false) }
+
+            // Card zoom: applied per item by overriding LocalDensity around ScheduleItemRow.
+            // Below 100% the card also sheds parts, before it starts shrinking.
+            val baseDensity = LocalDensity.current
+            val zoomedDensity = remember(baseDensity, itemZoomPercent) {
+                Density(baseDensity.density * itemZoomPercent / 100f, baseDensity.fontScale)
+            }
+            val showCardActions = itemZoomPercent >= ZOOM_HIDE_ACTIONS_BELOW
+            val singleLineCards = itemZoomPercent <= ZOOM_SINGLE_LINE_AT_OR_BELOW
+
+            // Reorder gesture, shared by the whole-card shift+drag and the per-card icon handle.
+            // The handle path arms only after real movement so a plain click still selects the card.
+            val dragThresholdPx = with(baseDensity) { DRAG_HANDLE_THRESHOLD.toPx() }
+            val deleteZonePx = with(baseDensity) { DELETE_ZONE_HEIGHT.toPx() }
+            fun Modifier.reorderGesture(index: Int, requireShift: Boolean): Modifier =
+                pointerInput(index, requireShift) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val pressEvent = awaitPointerEvent(PointerEventPass.Initial)
+                            if (pressEvent.type != PointerEventType.Press) continue
+                            if (requireShift && !pressEvent.keyboardModifiers.isShiftPressed) continue
+                            if (requireShift) pressEvent.changes.forEach { it.consume() }
+
+                            var lastPos = pressEvent.changes.first().position
+                            var travelled = if (requireShift) dragThresholdPx else 0f
+                            var armed = false
+                            var dragging = true
+                            // Idempotent: called on the normal drop path AND from finally, so a
+                            // cancelled gesture (node disposed mid-drag) can never strand the
+                            // state — a stuck isDragActive freezes the whole sidebar.
+                            fun endDrag() {
+                                if (draggingFromIndex == index) draggingFromIndex = -1
+                                dropTargetIndex = null
+                                isDragActive = false
+                                isOverDeleteZone = false
+                                dragCursorY = 0f
+                            }
+                            try {
+                            while (dragging) {
+                                // Another card already owns this drag (a shift+press on the grip
+                                // reaches both gestures) — don't arm a second one over it
+                                if (!armed && travelled >= dragThresholdPx && !isDragActive) {
+                                    val itemInfo = listState.layoutInfo.visibleItemsInfo
+                                        .firstOrNull { it.index == index }
+                                    draggingFromIndex = index
+                                    isDragActive = true
+                                    dropTargetIndex = index
+                                    dragItemHeight = itemInfo?.size?.toFloat() ?: 50f
+                                    dragCursorY = if (itemInfo != null) {
+                                        itemInfo.offset + itemInfo.size / 2f
+                                    } else lastPos.y
+                                    armed = true
+                                }
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                if (armed) event.changes.forEach { it.consume() }
+                                // A drop outside every card's bounds can arrive as something
+                                // other than Release, so treat "nothing pressed" as the end too
+                                val finished = event.type == PointerEventType.Release ||
+                                    event.changes.none { it.pressed }
+                                if (finished) {
+                                    if (armed && draggingFromIndex == index) {
+                                        val droppedId = scheduleItems.getOrNull(index)?.id
+                                        if (isOverDeleteZone && droppedId != null) {
+                                            viewModel.removeItem(droppedId)
+                                            if (viewModel.selectedItemId == droppedId) {
+                                                viewModel.clearSelection()
+                                            }
+                                        } else {
+                                            val to = dropTargetIndex ?: index
+                                            if (index != to) viewModel.moveItem(index, to)
+                                        }
+                                    }
+                                    dragging = false
+                                } else if (event.type == PointerEventType.Move) {
+                                    val pos = event.changes.firstOrNull()?.position ?: continue
+                                    val deltaY = (pos - lastPos).y
+                                    lastPos = pos
+                                    if (!armed) {
+                                        travelled += abs(deltaY)
+                                        continue
+                                    }
+                                    dragCursorY += deltaY
+                                    // Over the delete zone the card is being removed, not reordered
+                                    isOverDeleteZone = listHeightPx > 0 &&
+                                        dragCursorY >= listHeightPx - deleteZonePx
+                                    if (!isOverDeleteZone) {
+                                        val target = listState.layoutInfo.visibleItemsInfo
+                                            .firstOrNull { info ->
+                                                dragCursorY >= info.offset &&
+                                                dragCursorY <= info.offset + info.size
+                                            }
+                                        if (target != null) dropTargetIndex = target.index
+                                    }
+                                }
+                            }
+                            } finally {
+                                if (armed) endDrag()
+                            }
+                        }
+                    }
+                }
 
             // Register AWT DropTarget on the window for file drag-and-drop
             DisposableEffect(Unit) {
@@ -484,62 +613,15 @@ fun ScheduleTab(
                         modifier = Modifier
                             .fillMaxWidth()
                             .alpha(if (isDraggingThis) 0.35f else 1f)
-                            .pointerInput(item.id) {
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val pressEvent = awaitPointerEvent(PointerEventPass.Initial)
-                                        if (pressEvent.type != PointerEventType.Press) continue
-                                        if (!pressEvent.keyboardModifiers.isShiftPressed) continue
-
-                                        pressEvent.changes.forEach { it.consume() }
-                                        val startPos = pressEvent.changes.first().position
-
-                                        val itemInfo = listState.layoutInfo.visibleItemsInfo
-                                            .firstOrNull { it.index == index }
-                                        draggingFromIndex = index
-                                        isDragActive = true
-                                        dropTargetIndex = index
-                                        dragItemHeight = itemInfo?.size?.toFloat() ?: 50f
-                                        dragCursorY = if (itemInfo != null) {
-                                            itemInfo.offset.toFloat() + startPos.y
-                                        } else startPos.y
-
-                                        var lastPos = startPos
-                                        var dragging = true
-                                        while (dragging) {
-                                            val event = awaitPointerEvent(PointerEventPass.Initial)
-                                            event.changes.forEach { it.consume() }
-                                            when (event.type) {
-                                                PointerEventType.Move -> {
-                                                    val pos = event.changes.firstOrNull()?.position ?: continue
-                                                    dragCursorY += (pos - lastPos).y
-                                                    lastPos = pos
-                                                    val target = listState.layoutInfo.visibleItemsInfo
-                                                        .firstOrNull { info ->
-                                                            dragCursorY >= info.offset &&
-                                                            dragCursorY <= info.offset + info.size
-                                                        }
-                                                    if (target != null) dropTargetIndex = target.index
-                                                }
-                                                PointerEventType.Release -> {
-                                                    val from = draggingFromIndex
-                                                    val to = dropTargetIndex ?: from
-                                                    if (from >= 0 && from != to) viewModel.moveItem(from, to)
-                                                    draggingFromIndex = -1
-                                                    dropTargetIndex = null
-                                                    isDragActive = false
-                                                    dragCursorY = 0f
-                                                    dragging = false
-                                                }
-                                                else -> {}
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            .reorderGesture(index, requireShift = true)
                     ) {
+                        // Scaling the density scales every dp and sp inside the card at once
+                        CompositionLocalProvider(LocalDensity provides zoomedDensity) {
                         ScheduleItemRow(
                             item = item,
+                            dragHandleModifier = Modifier.reorderGesture(index, requireShift = false),
+                            showActions = showCardActions,
+                            singleLine = singleLineCards,
                             isSelected = item.id == selectedItemId,
                             note = viewModel.getNote(item.id),
                             onSelect = {
@@ -575,6 +657,7 @@ fun ScheduleTab(
                             },
                             onNoteChanged = { viewModel.setNote(item.id, it) }
                         )
+                        }
                     }
 
                     if (index < scheduleItems.size - 1) {
@@ -591,6 +674,35 @@ fun ScheduleTab(
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                 adapter = rememberScrollbarAdapter(scrollState = listState)
             )
+
+            // Drop-here-to-remove zone, only while a card is being dragged
+            if (isDragActive) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(DELETE_ZONE_HEIGHT)
+                        .zIndex(5f)
+                        .background(
+                            MaterialTheme.colorScheme.error.copy(alpha = if (isOverDeleteZone) 0.9f else 0.25f),
+                            RoundedCornerShape(4.dp)
+                        ),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_delete),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onError
+                    )
+                    Text(
+                        text = stringResource(Res.string.schedule_drop_to_remove),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onError
+                    )
+                }
+            }
 
             // Floating drag preview — elevated card follows cursor
             if (isDragActive) {
@@ -751,6 +863,12 @@ private fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel) 
 @Composable
 private fun ScheduleItemRow(
     item: ScheduleItem,
+    /** Applied to the type-indicator icon, which doubles as the drag-to-reorder handle. */
+    dragHandleModifier: Modifier = Modifier,
+    /** Below 100% zoom the action-button row (and with it the note editor) is dropped. */
+    showActions: Boolean = true,
+    /** At 98% zoom and below the card collapses to just its icon and primary line. */
+    singleLine: Boolean = false,
     isSelected: Boolean,
     note: String,
     onSelect: () -> Unit,
@@ -788,10 +906,20 @@ private fun ScheduleItemRow(
             .fillMaxWidth()
             .background(rowBackgroundColor)
     ) {
+        // The trailing Go Live button lives OUTSIDE the content row's clickable (an Initial-pass
+        // handler would eat its clicks — see the comment above), so they sit side by side here.
+        Row(verticalAlignment = Alignment.CenterVertically) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 2.dp)
+                .weight(1f)
+                .padding(
+                    // Tight on the left so the grip dots sit at the very edge of the card
+                    start = 2.dp,
+                    end = if (showActions) 12.dp else 4.dp,
+                    top = if (singleLine) 4.dp else 8.dp,
+                    // Without the action row below, the card needs its own bottom padding
+                    bottom = if (showActions) 2.dp else if (singleLine) 4.dp else 8.dp
+                )
                 .then(
                     if (item !is ScheduleItem.LabelItem) {
                         Modifier.initialPassCombinedClickable(
@@ -803,25 +931,39 @@ private fun ScheduleItemRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Type indicator
-            Text(
-                text = when (item) {
-                    is ScheduleItem.SongItem -> "♪"
-                    is ScheduleItem.BibleVerseItem -> "✝"
-                    is ScheduleItem.LabelItem -> "🏷"
-                    is ScheduleItem.PictureItem -> "📷"
-                    is ScheduleItem.PresentationItem -> "📊"
-                    is ScheduleItem.MediaItem -> "🎬"
-                    is ScheduleItem.LowerThirdItem -> "▼"
-                    is ScheduleItem.AnnouncementItem -> "📢"
-                    is ScheduleItem.WebsiteItem -> "🌐"
-                    is ScheduleItem.SceneItem -> "🎬"
-                    is ScheduleItem.DictionaryItem -> "📖"
-                },
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.width(24.dp)
-            )
+            // Grip dots + type indicator — together they form the drag-to-reorder handle
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .pointerHoverIcon(PointerIcon.Hand)
+                    .then(dragHandleModifier)
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_drag_dots),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                    modifier = Modifier.width(4.dp).height(16.dp)
+                )
+                Text(
+                    text = when (item) {
+                        is ScheduleItem.SongItem -> "♪"
+                        is ScheduleItem.BibleVerseItem -> "✝"
+                        is ScheduleItem.LabelItem -> "🏷"
+                        is ScheduleItem.PictureItem -> "📷"
+                        is ScheduleItem.PresentationItem -> "📊"
+                        is ScheduleItem.MediaItem -> "🎬"
+                        is ScheduleItem.LowerThirdItem -> "▼"
+                        is ScheduleItem.AnnouncementItem -> "📢"
+                        is ScheduleItem.WebsiteItem -> "🌐"
+                        is ScheduleItem.SceneItem -> "🎬"
+                        is ScheduleItem.DictionaryItem -> "📖"
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.width(24.dp)
+                )
+            }
 
             // Item content (row-wide click handling now lives on the outer Column above,
             // so both this content area and the button toolbar row below are selectable)
@@ -856,9 +998,12 @@ private fun ScheduleItemRow(
                             fontWeight = FontWeight.Medium,
                             color = textColor
                         )
-                        if (item.songbook.isNotBlank()) {
+                        if (item.songbook.isNotBlank() && !singleLine) {
                             Text(
                                 maxLines = 1,
+                                // Songbook names are often long paths/editions whose distinguishing
+                                // part is at the END, so clip the front instead of the tail
+                                overflow = TextOverflow.StartEllipsis,
                                 text = item.songbook,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
@@ -878,7 +1023,9 @@ private fun ScheduleItemRow(
                     }
                 }
 
-                when (item) {
+                when {
+                    singleLine -> {} // collapsed card: primary line only
+                    else -> when (item) {
                     is ScheduleItem.SongItem -> {} // already handled above
                     is ScheduleItem.BibleVerseItem -> Text(
                         maxLines = 1,
@@ -950,9 +1097,10 @@ private fun ScheduleItemRow(
                                 else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                 }
+                }
 
                 // Note preview when collapsed
-                if (note.isNotEmpty() && !noteExpanded) {
+                if (note.isNotEmpty() && !noteExpanded && !singleLine) {
                     Text(
                         text = note,
                         style = MaterialTheme.typography.bodySmall,
@@ -964,8 +1112,34 @@ private fun ScheduleItemRow(
                 }
             }
         }
+        // With the action row hidden, Go Live (Edit for labels) stays on the content row itself
+        if (!showActions) {
+            if (item is ScheduleItem.LabelItem) {
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_edit),
+                    text = stringResource(Res.string.tooltip_edit_label),
+                    onClick = onEditLabel,
+                    modifier = Modifier.padding(end = 8.dp),
+                    buttonSize = 24.dp,
+                    iconSize = 14.dp,
+                    iconTint = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_play),
+                    text = stringResource(Res.string.tooltip_go_live),
+                    onClick = onPresent,
+                    modifier = Modifier.padding(end = 8.dp),
+                    buttonSize = 24.dp,
+                    iconSize = 16.dp,
+                    iconTint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        }
 
-        // Action buttons (second, more compact line)
+        // Action buttons (second, more compact line) — dropped below 100% zoom
+        if (showActions) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1125,6 +1299,7 @@ private fun ScheduleItemRow(
                     iconTint = MaterialTheme.colorScheme.error
                 )
             }
+        }
         }
     }
 }

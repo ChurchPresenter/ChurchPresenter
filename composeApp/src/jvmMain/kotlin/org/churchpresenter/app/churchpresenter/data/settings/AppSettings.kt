@@ -26,6 +26,7 @@ data class AppSettings(
     val mediaStorageDirectory: String = "",
     val schedulePanelWidthDp: Int = 280,
     val schedulePanelCollapsed: Boolean = false,
+    val scheduleItemZoomPercent: Int = 100,
     val previewPanelWidthDp: Int = 280,
     val previewPanelCollapsed: Boolean = false,
     val maximizedLayout: WindowLayoutSettings = WindowLayoutSettings(),

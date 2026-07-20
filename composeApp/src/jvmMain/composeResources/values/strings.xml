@@ -576,6 +576,9 @@
     <string name="tooltip_move_up">Move Up</string>
     <string name="tooltip_move_down">Move Down</string>
     <string name="tooltip_move_to_bottom">Move to Bottom</string>
+    <string name="schedule_drop_to_remove">Drop here to remove</string>
+    <string name="tooltip_schedule_zoom_in">Zoom In</string>
+    <string name="tooltip_schedule_zoom_out">Zoom Out</string>
     <string name="tooltip_add_to_schedule">Add to Schedule</string>
     <string name="tooltip_remove_from_schedule">Remove from Schedule</string>
     <string name="tooltip_clear_schedule">Clear Schedule</string>
