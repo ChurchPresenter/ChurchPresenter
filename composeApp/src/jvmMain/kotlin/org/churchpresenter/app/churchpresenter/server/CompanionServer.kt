@@ -2574,6 +2574,57 @@ class CompanionServer {
                     )
                 }
 
+                /**
+                 * GET /api/dictionary/{number}/verses?limit=25[&book=1[&chapter=1[&verse=1]]]
+                 * Returns the verses (reference + translation text) in which the
+                 * Strong's number appears, for the entry sheet's "Appears in" list.
+                 *
+                 * Optional book/chapter/verse (canonical KJV numbering) order the
+                 * references in that scope first, so the verse being filtered leads.
+                 */
+                get(Constants.ENDPOINT_DICTIONARY_VERSES) {
+                    if (!checkApiKey(call)) return@get
+                    val number = call.parameters["number"]
+                    if (number.isNullOrBlank()) {
+                        call.respond(HttpStatusCode.BadRequest, """{"error":"missing number"}""")
+                        return@get
+                    }
+                    val limit   = call.request.queryParameters["limit"]?.toIntOrNull() ?: 25
+                    val book    = call.request.queryParameters["book"]?.toIntOrNull()
+                    val chapter = call.request.queryParameters["chapter"]?.toIntOrNull()
+                    val verse   = call.request.queryParameters["verse"]?.toIntOrNull()
+                    val bible = _bible.value
+                    if (bible == null) {
+                        call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"bible not loaded"}""")
+                        return@get
+                    }
+                    val (total, refs) = try {
+                        StrongsDictionaryRepository.versesFor(number, limit, book, chapter, verse)
+                    } catch (e: Exception) {
+                        call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"dictionary unavailable"}""")
+                        return@get
+                    }
+                    val verses = refs.map { ref ->
+                        val bId = ref.substring(0, 3).toInt()
+                        val ch  = ref.substring(3, 6).toInt()
+                        val vs  = ref.substring(6, 9).toInt()
+                        val bookName = bible.getBookName(bId) ?: "Book $bId"
+                        val text = bible.getChapterVerses(bId, ch)
+                            .firstOrNull { it.verseNumber == vs }?.verseText ?: ""
+                        DictionaryVerseDto(
+                            bookName = bookName, chapter = ch, verse = vs,
+                            reference = "$bookName $ch:$vs", text = text
+                        )
+                    }
+                    call.respondText(
+                        json.encodeToString(
+                            DictionaryVersesResponse.serializer(),
+                            DictionaryVersesResponse(number = number, total = total, verses = verses)
+                        ),
+                        ContentType.Application.Json
+                    )
+                }
+
                 // ── Presentation endpoints ────────────────────────────────────
 
                 /**

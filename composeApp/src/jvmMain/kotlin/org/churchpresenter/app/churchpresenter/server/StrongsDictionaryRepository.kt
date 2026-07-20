@@ -28,6 +28,27 @@ data class StrongsEntryDto(
     val root: String,
 )
 
+/** One verse in which a Strong's number appears, for the "Appears in" list. */
+@Serializable
+data class DictionaryVerseDto(
+    val bookName: String,
+    val chapter: Int,
+    val verse: Int,
+    /** Human reference, e.g. "Genesis 1:1". */
+    val reference: String,
+    /** English (translation) verse text; blank if the loaded Bible lacks it. */
+    val text: String,
+)
+
+/** Response for `GET /api/dictionary/{number}/verses`. */
+@Serializable
+data class DictionaryVersesResponse(
+    val number: String,
+    /** Total number of verses the number appears in (the list itself is capped). */
+    val total: Int,
+    val verses: List<DictionaryVerseDto>,
+)
+
 /**
  * Loads the bundled Strong's dictionary JSON (`files/dictionary/strongs_h*.json`,
  * `strongs_g*.json`) and serves search / lookup over it for the companion REST API.
@@ -144,5 +165,37 @@ object StrongsDictionaryRepository {
             )
         }
         return matched.take(limit.coerceIn(1, 500)).map { it.toDto() }
+    }
+
+    /**
+     * Returns the verse references in which [number] appears, capped at [limit].
+     * First element of the returned pair is the *total* occurrence count (before cap).
+     *
+     * When [book] is supplied, references within that reference scope are ordered
+     * first (book-only → whole book, +[chapter] → that chapter, +[verse] → that
+     * verse), so the verse the caller is filtering by leads the list. Canonical
+     * order is preserved within each group. [book]/[chapter]/[verse] use canonical
+     * KJV numbering (Genesis=1 … Revelation=66).
+     */
+    suspend fun versesFor(
+        number: String,
+        limit: Int,
+        book: Int? = null,
+        chapter: Int? = null,
+        verse: Int? = null,
+    ): Pair<Int, List<String>> {
+        ensureInterlinear()
+        // distinct(): a number occurring twice in one verse is added twice by the
+        // index, but "Appears in" lists each verse once (and total counts verses).
+        val refs = interlinear.getVersesForEntry(number.trim().uppercase()).map { it.ref }.distinct()
+        val ordered = if (book != null) {
+            val (inScope, rest) = refs.partition { ref ->
+                ref.substring(0, 3).toInt() == book &&
+                    (chapter == null || ref.substring(3, 6).toInt() == chapter) &&
+                    (verse == null || ref.substring(6, 9).toInt() == verse)
+            }
+            inScope + rest
+        } else refs
+        return refs.size to ordered.take(limit.coerceIn(1, 200))
     }
 }
