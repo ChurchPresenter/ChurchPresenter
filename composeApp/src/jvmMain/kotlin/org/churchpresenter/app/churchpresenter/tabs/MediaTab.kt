@@ -51,12 +51,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
@@ -504,13 +518,8 @@ fun MediaTab(
                 }
             }
 
-            if (viewModel.duration > 0) {
-                Text(
-                    text = "${viewModel.formatTime(viewModel.currentPosition)} / ${viewModel.formatTime(viewModel.duration)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
-                )
-            }
+            // (Elapsed / total time now flank the seek bar below, so the combined time is
+            // no longer shown here.)
 
             // Divider
             Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
@@ -585,13 +594,17 @@ fun MediaTab(
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-        // ── Seek slider ───────────────────────────────────────────────
+        // ── Seek bar ──────────────────────────────────────────────────
         if (viewModel.duration > 0) {
-            Slider(
-                value = viewModel.currentPosition.toFloat(),
-                onValueChange = { viewModel.seekTo(it.toLong()) },
-                valueRange = 0f..viewModel.duration.toFloat(),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
+            MediaSeekBar(
+                position = viewModel.currentPosition,
+                duration = viewModel.duration,
+                // No buffered-position feed from the player yet; wire this to VLC's cached
+                // position later to reveal the loaded-ahead region.
+                bufferedPosition = viewModel.currentPosition,
+                onSeek = { viewModel.seekTo(it) },
+                formatTime = { viewModel.formatTime(it) },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)
             )
         } else if (viewModel.isLoaded && viewModel.isPlaying) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -639,5 +652,118 @@ fun MediaTab(
                 }
             }
         }
+    }
+}
+
+/**
+ * Slim media seek bar: a 5px rounded track with a teal gradient played fill, a subtle grey
+ * loaded-ahead (buffered) region, and elapsed/total times flanking it (elapsed bold-accented,
+ * total muted). The white drag handle fades and scales in only on hover/drag, so the bar stays
+ * clean at rest. Tap or drag anywhere on the track to seek.
+ */
+@Composable
+private fun MediaSeekBar(
+    position: Long,
+    duration: Long,
+    bufferedPosition: Long,
+    onSeek: (Long) -> Unit,
+    formatTime: (Long) -> String,
+    modifier: Modifier = Modifier,
+) {
+    val playedFraction = if (duration > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f
+    val bufferedFraction = if (duration > 0) (bufferedPosition.toFloat() / duration).coerceIn(0f, 1f) else 0f
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
+    var dragging by remember { mutableStateOf(false) }
+    val active = hovered || dragging
+    val handleAlpha by animateFloatAsState(if (active) 1f else 0f, label = "seekHandleAlpha")
+    val handleScale by animateFloatAsState(if (active) 1f else 0.35f, label = "seekHandleScale")
+
+    val primary = MaterialTheme.colorScheme.primary
+    val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
+    val bufferedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.28f)
+    val playedStart = primary.copy(alpha = 0.65f)
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text(
+            text = formatTime(position),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = primary,
+            maxLines = 1,
+            textAlign = TextAlign.End,
+            modifier = Modifier.widthIn(min = 42.dp)
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(20.dp)
+                .hoverable(interactionSource)
+                .pointerInput(duration) {
+                    detectTapGestures { offset ->
+                        if (duration > 0 && size.width > 0) {
+                            onSeek((offset.x / size.width * duration).toLong().coerceIn(0L, duration))
+                        }
+                    }
+                }
+                .pointerInput(duration) {
+                    detectHorizontalDragGestures(
+                        onDragStart = { offset ->
+                            dragging = true
+                            if (duration > 0 && size.width > 0) {
+                                onSeek((offset.x / size.width * duration).toLong().coerceIn(0L, duration))
+                            }
+                        },
+                        onDragEnd = { dragging = false },
+                        onDragCancel = { dragging = false },
+                        onHorizontalDrag = { change, _ ->
+                            if (duration > 0 && size.width > 0) {
+                                onSeek((change.position.x / size.width * duration).toLong().coerceIn(0L, duration))
+                            }
+                        }
+                    )
+                },
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val trackH = 5.dp.toPx()
+                val cy = size.height / 2f
+                val top = cy - trackH / 2f
+                val radius = CornerRadius(trackH / 2f, trackH / 2f)
+                // Base track
+                drawRoundRect(color = trackColor, topLeft = Offset(0f, top), size = Size(size.width, trackH), cornerRadius = radius)
+                // Buffered (loaded-ahead) region
+                if (bufferedFraction > 0f) {
+                    drawRoundRect(color = bufferedColor, topLeft = Offset(0f, top), size = Size(size.width * bufferedFraction, trackH), cornerRadius = radius)
+                }
+                // Played region — teal gradient
+                if (playedFraction > 0f) {
+                    val playedW = size.width * playedFraction
+                    drawRoundRect(
+                        brush = Brush.horizontalGradient(listOf(playedStart, primary), startX = 0f, endX = playedW.coerceAtLeast(trackH)),
+                        topLeft = Offset(0f, top),
+                        size = Size(playedW, trackH),
+                        cornerRadius = radius
+                    )
+                }
+                // Hover handle — white knob, fades/scales in only on hover or drag
+                if (handleAlpha > 0.01f) {
+                    val hx = (size.width * playedFraction).coerceIn(0f, size.width)
+                    drawCircle(color = Color.White.copy(alpha = handleAlpha), radius = 6.dp.toPx() * handleScale, center = Offset(hx, cy))
+                }
+            }
+        }
+        Text(
+            text = formatTime(duration),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            modifier = Modifier.widthIn(min = 42.dp)
+        )
     }
 }
