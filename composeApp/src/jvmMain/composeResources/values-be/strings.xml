@@ -2052,4 +2052,6 @@
     <string name="content_outputs_section_content">Кантэнт</string>
     <string name="content_outputs_section_backgrounds">Фоны</string>
     <string name="content_outputs_done">Гатова</string>
+    <string name="content_outputs_preview">Гэты выхад паказвае</string>
+    <string name="content_outputs_preview_empty">Нічога не ўключана — выхад застанецца пустым</string>
 </resources>

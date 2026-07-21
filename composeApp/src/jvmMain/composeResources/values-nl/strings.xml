@@ -2080,4 +2080,6 @@
     <string name="content_outputs_section_content">Inhoud</string>
     <string name="content_outputs_section_backgrounds">Achtergronden</string>
     <string name="content_outputs_done">Klaar</string>
+    <string name="content_outputs_preview">Deze uitvoer toont</string>
+    <string name="content_outputs_preview_empty">Niets ingeschakeld — deze uitvoer blijft leeg</string>
 </resources>

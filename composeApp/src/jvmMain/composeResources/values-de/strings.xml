@@ -2053,4 +2053,6 @@
     <string name="content_outputs_section_content">Inhalt</string>
     <string name="content_outputs_section_backgrounds">Hintergründe</string>
     <string name="content_outputs_done">Fertig</string>
+    <string name="content_outputs_preview">Diese Ausgabe zeigt</string>
+    <string name="content_outputs_preview_empty">Nichts aktiviert — diese Ausgabe bleibt leer</string>
 </resources>

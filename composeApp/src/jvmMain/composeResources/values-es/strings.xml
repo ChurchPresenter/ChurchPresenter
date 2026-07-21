@@ -2080,4 +2080,6 @@
     <string name="content_outputs_section_content">Contenido</string>
     <string name="content_outputs_section_backgrounds">Fondos</string>
     <string name="content_outputs_done">Listo</string>
+    <string name="content_outputs_preview">Esta salida muestra</string>
+    <string name="content_outputs_preview_empty">Nada activado: esta salida permanecerá en blanco</string>
 </resources>

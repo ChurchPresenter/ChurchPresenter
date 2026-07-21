@@ -2053,4 +2053,6 @@
     <string name="content_outputs_section_content">Мазмұн</string>
     <string name="content_outputs_section_backgrounds">Фондар</string>
     <string name="content_outputs_done">Дайын</string>
+    <string name="content_outputs_preview">Бұл шығыс көрсетеді</string>
+    <string name="content_outputs_preview_empty">Ештеңе қосылмаған — бұл шығыс бос қалады</string>
 </resources>

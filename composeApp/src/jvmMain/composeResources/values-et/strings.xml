@@ -2085,4 +2085,6 @@
     <string name="content_outputs_section_content">Sisu</string>
     <string name="content_outputs_section_backgrounds">Taustad</string>
     <string name="content_outputs_done">Valmis</string>
+    <string name="content_outputs_preview">See väljund kuvab</string>
+    <string name="content_outputs_preview_empty">Midagi pole lubatud — see väljund jääb tühjaks</string>
 </resources>

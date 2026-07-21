@@ -3,6 +3,9 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.draw.clip
@@ -105,6 +108,8 @@ import churchpresenter.composeapp.generated.resources.content_outputs_enabled_su
 import churchpresenter.composeapp.generated.resources.content_outputs_quick_select
 import churchpresenter.composeapp.generated.resources.content_outputs_select_all
 import churchpresenter.composeapp.generated.resources.content_outputs_clear_all
+import churchpresenter.composeapp.generated.resources.content_outputs_preview
+import churchpresenter.composeapp.generated.resources.content_outputs_preview_empty
 import churchpresenter.composeapp.generated.resources.content_outputs_section_content
 import churchpresenter.composeapp.generated.resources.content_outputs_section_backgrounds
 import churchpresenter.composeapp.generated.resources.content_outputs_done
@@ -865,6 +870,7 @@ fun ProjectionSettingsTab(
                         stringResource(Res.string.screen_col_label, i + 1)
                     ContentOutputsDialog(
                         title = stringResource(Res.string.content_outputs_for, screenLabel),
+                        screenLabel = screenLabel,
                         assignment = assignment,
                         contentGroup = contentGroup,
                         backgroundGroup = backgroundGroup,
@@ -1237,8 +1243,10 @@ fun ProjectionSettingsTab(
                                 )
                             }
                             if (showContentDialog) {
+                                val browserSourceLabel = stringResource(Res.string.browser_source_output_label, i + 1)
                                 ContentOutputsDialog(
-                                    title = stringResource(Res.string.content_outputs_for, stringResource(Res.string.browser_source_output_label, i + 1)),
+                                    title = stringResource(Res.string.content_outputs_for, browserSourceLabel),
+                                    screenLabel = browserSourceLabel,
                                     assignment = output,
                                     contentGroup = contentGroup,
                                     backgroundGroup = backgroundGroup,
@@ -1665,6 +1673,114 @@ private fun ContentLangCell(
     }
 }
 
+/**
+ * Monitor mock summarising what an output actually shows: every enabled content type (and the
+ * Bible/Songs language mode) is drawn as a chip inside a 16:9 screen, so the operator can read the
+ * result at a glance instead of scanning a long checkbox list.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ContentOutputsMonitorPreview(
+    modifier: Modifier,
+    screenLabel: String,
+    assignment: ScreenAssignment,
+    contentGroup: List<ContentCol>,
+    backgroundGroup: List<ContentCol>,
+    bibleLabel: String,
+    songsLabel: String,
+    bibleLangModes: List<Pair<String, String>>,
+    songLangModes: List<Pair<String, String>>,
+) {
+    val chips = buildList {
+        if (assignment.bibleMode != Constants.SONG_LANG_OFF) {
+            val mode = bibleLangModes.find { it.first == assignment.bibleMode }?.second
+            add(if (mode != null) "$bibleLabel · $mode" else bibleLabel)
+        }
+        if (assignment.songMode != Constants.SONG_LANG_OFF) {
+            val mode = songLangModes.find { it.first == assignment.songMode }?.second
+            add(if (mode != null) "$songsLabel · $mode" else songsLabel)
+        }
+        (contentGroup + backgroundGroup).forEach { if (it.getter(assignment)) add(it.label) }
+    }
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ContentOutputsSectionHeader(stringResource(Res.string.content_outputs_preview))
+        Spacer(modifier = Modifier.height(8.dp))
+        // Bezel
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                .padding(6.dp)
+        ) {
+            // 16:9 is the MINIMUM height — with many content types enabled the chips need more
+            // room, and a hard aspectRatio would clip them out of sight.
+            val screenMinHeight = maxWidth * 9f / 16f
+            // Screen
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = screenMinHeight)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color.Black)
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = screenLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.6f),
+                    maxLines = 1
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                if (chips.isEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.content_outputs_preview_empty),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.4f)
+                    )
+                } else {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        chips.forEach { chip ->
+                            Text(
+                                text = chip,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        // Stand
+        Box(
+            modifier = Modifier
+                .width(48.dp)
+                .height(8.dp)
+                .background(MaterialTheme.colorScheme.outline)
+        )
+        Box(
+            modifier = Modifier
+                .width(88.dp)
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(MaterialTheme.colorScheme.outline)
+        )
+    }
+}
+
 /** Renders one content/background toggle, applying the Web-on-DeckLink / Web-snapshot tooltip rules. */
 @Composable
 private fun ContentOutputsToggle(
@@ -1704,6 +1820,7 @@ private fun ContentOutputsToggle(
 @Composable
 private fun ContentOutputsDialog(
     title: String,
+    screenLabel: String,
     assignment: ScreenAssignment,
     contentGroup: List<ContentCol>,
     backgroundGroup: List<ContentCol>,
@@ -1722,7 +1839,7 @@ private fun ContentOutputsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        modifier = Modifier.width(560.dp),
+        modifier = Modifier.width(840.dp),
         shape = RoundedCornerShape(12.dp),
         properties = DialogProperties(usePlatformDefaultWidth = false),
         title = {
@@ -1759,8 +1876,10 @@ private fun ContentOutputsDialog(
             }
         },
         text = {
+          Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(
                 modifier = Modifier
+                    .weight(1f)
                     .heightIn(max = 520.dp)
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -1843,6 +1962,20 @@ private fun ContentOutputsDialog(
                     }
                 }
             }
+
+            // Live summary of what this output actually shows, drawn inside a monitor mock.
+            ContentOutputsMonitorPreview(
+                modifier = Modifier.width(280.dp),
+                screenLabel = screenLabel,
+                assignment = assignment,
+                contentGroup = contentGroup,
+                backgroundGroup = backgroundGroup,
+                bibleLabel = bibleLabel,
+                songsLabel = songsLabel,
+                bibleLangModes = bibleLangModes,
+                songLangModes = songLangModes,
+            )
+          }
         },
         confirmButton = {
             Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {

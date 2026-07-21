@@ -2081,4 +2081,6 @@
     <string name="content_outputs_section_content">Conteúdo</string>
     <string name="content_outputs_section_backgrounds">Fundos</string>
     <string name="content_outputs_done">Concluído</string>
+    <string name="content_outputs_preview">Esta saída mostra</string>
+    <string name="content_outputs_preview_empty">Nada ativado — esta saída ficará em branco</string>
 </resources>

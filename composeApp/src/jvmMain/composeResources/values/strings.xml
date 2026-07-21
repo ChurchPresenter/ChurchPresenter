@@ -733,6 +733,8 @@
     <string name="content_outputs_section_content">Content</string>
     <string name="content_outputs_section_backgrounds">Backgrounds</string>
     <string name="content_outputs_done">Done</string>
+    <string name="content_outputs_preview">This Output Shows</string>
+    <string name="content_outputs_preview_empty">Nothing enabled — this output stays blank</string>
 
     <!-- Browser Source Outputs (OBS/vMix overlay) -->
     <string name="browser_source_outputs">Browser Source Outputs</string>

@@ -2062,4 +2062,6 @@
     <string name="content_outputs_section_content">Obsah</string>
     <string name="content_outputs_section_backgrounds">Pozadí</string>
     <string name="content_outputs_done">Hotovo</string>
+    <string name="content_outputs_preview">Tento výstup zobrazuje</string>
+    <string name="content_outputs_preview_empty">Nic není zapnuto — tento výstup zůstane prázdný</string>
 </resources>

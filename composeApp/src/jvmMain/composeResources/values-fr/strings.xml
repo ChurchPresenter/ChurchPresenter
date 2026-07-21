@@ -2080,4 +2080,6 @@
     <string name="content_outputs_section_content">Contenu</string>
     <string name="content_outputs_section_backgrounds">Arrière-plans</string>
     <string name="content_outputs_done">Terminé</string>
+    <string name="content_outputs_preview">Cette sortie affiche</string>
+    <string name="content_outputs_preview_empty">Rien d'activé — cette sortie restera vide</string>
 </resources>

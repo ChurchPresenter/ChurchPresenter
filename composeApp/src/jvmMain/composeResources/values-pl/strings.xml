@@ -2052,4 +2052,6 @@
     <string name="content_outputs_section_content">Treść</string>
     <string name="content_outputs_section_backgrounds">Tła</string>
     <string name="content_outputs_done">Gotowe</string>
+    <string name="content_outputs_preview">To wyjście pokazuje</string>
+    <string name="content_outputs_preview_empty">Nic nie włączono — to wyjście pozostanie puste</string>
 </resources>

@@ -2082,4 +2082,6 @@
     <string name="content_outputs_section_content">Conținut</string>
     <string name="content_outputs_section_backgrounds">Fundaluri</string>
     <string name="content_outputs_done">Gata</string>
+    <string name="content_outputs_preview">Această ieșire afișează</string>
+    <string name="content_outputs_preview_empty">Nimic activat — această ieșire rămâne goală</string>
 </resources>

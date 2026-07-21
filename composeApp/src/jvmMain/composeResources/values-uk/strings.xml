@@ -2052,4 +2052,6 @@
     <string name="content_outputs_section_content">Контент</string>
     <string name="content_outputs_section_backgrounds">Фони</string>
     <string name="content_outputs_done">Готово</string>
+    <string name="content_outputs_preview">Цей вихід показує</string>
+    <string name="content_outputs_preview_empty">Нічого не ввімкнено — вихід залишиться порожнім</string>
 </resources>
