@@ -433,7 +433,8 @@ fun ProjectionSettingsTab(
         Spacer(modifier = Modifier.height(4.dp))
 
         // Grid table — screens are rows (left), content types are columns (top)
-        val screenLabelWidth = 58.dp
+        // Wide enough for the longest label ("Dev Window") to stay on a single line
+        val screenLabelWidth = 90.dp
         val displayDropdownWidth = 100.dp
 
         // Header row: Screen label + Display + Key Output + Display Mode + Content Outputs.
@@ -493,6 +494,7 @@ fun ProjectionSettingsTab(
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
                     modifier = Modifier.width(screenLabelWidth)
                 )
 
