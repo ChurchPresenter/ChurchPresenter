@@ -19,7 +19,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,6 +40,7 @@ import churchpresenter.composeapp.generated.resources.slideshow_settings
 import churchpresenter.composeapp.generated.resources.transition_duration
 import churchpresenter.composeapp.generated.resources.transition_settings
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -81,7 +81,7 @@ fun MediaSettingsTab(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.width(140.dp)
             )
-            Slider(
+            SlimSlider(
                 value = settings.pictureSettings.autoScrollInterval,
                 onValueChange = { value ->
                     onSettingsChange { s ->
@@ -89,13 +89,8 @@ fun MediaSettingsTab(
                     }
                 },
                 valueRange = 1f..30f,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = "${settings.pictureSettings.autoScrollInterval.toInt()}${stringResource(Res.string.seconds_suffix)}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.width(40.dp)
+                modifier = Modifier.weight(1f),
+                trailingLabel = "${settings.pictureSettings.autoScrollInterval.toInt()}${stringResource(Res.string.seconds_suffix)}"
             )
         }
 
@@ -143,7 +138,7 @@ fun MediaSettingsTab(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.width(140.dp)
             )
-            Slider(
+            SlimSlider(
                 value = settings.pictureSettings.transitionDuration,
                 onValueChange = { rawValue ->
                     // Snap to 50ms increments
@@ -153,14 +148,8 @@ fun MediaSettingsTab(
                     }
                 },
                 valueRange = 100f..2000f,
-                steps = 37, // (2000-100)/50 = 38 values, so 37 steps
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = "${settings.pictureSettings.transitionDuration.toInt()}${stringResource(Res.string.milliseconds_suffix)}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.width(60.dp)
+                modifier = Modifier.weight(1f),
+                trailingLabel = "${settings.pictureSettings.transitionDuration.toInt()}${stringResource(Res.string.milliseconds_suffix)}"
             )
         }
 

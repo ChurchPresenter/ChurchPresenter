@@ -34,7 +34,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -406,13 +405,13 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
     }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(stringResource(Res.string.canvas_line_spacing), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Slider(
+        SlimSlider(
             value = source.lineSpacing / 100f,
             onValueChange = { onUpdate(source.copy(lineSpacing = (it * 100).toInt())) },
             valueRange = 0.5f..3f,
+            trailingLabel = "${source.lineSpacing}%",
             modifier = Modifier.weight(1f)
         )
-        Text("${source.lineSpacing}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(40.dp))
     }
     FontDropdown(
         label = stringResource(Res.string.canvas_font),
@@ -1652,14 +1651,15 @@ private fun PropertyFloatField(label: String, value: Float, modifier: Modifier =
 private fun PropertySlider(label: String, value: Float, min: Float, max: Float, onValueChange: (Float) -> Unit) {
     Column {
         Text(
-            "$label: ${"%.2f".format(value)}",
+            label,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Slider(
+        SlimSlider(
             value = value,
             onValueChange = onValueChange,
             valueRange = min..max,
+            trailingLabel = if (min == 0f && max == 1f) "${(value * 100).toInt()}%" else "%.2f".format(value),
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -1678,7 +1678,7 @@ private fun PropertySliderWithInput(label: String, value: Float, min: Float, max
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Slider(
+            SlimSlider(
                 value = value.coerceIn(min, max),
                 onValueChange = {
                     textValue = it.toInt().toString()
@@ -1972,13 +1972,13 @@ private fun BibleProperties(
     // Line spacing
     Text(stringResource(Res.string.canvas_line_spacing), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Slider(
+        SlimSlider(
             value = source.lineSpacing / 100f,
             onValueChange = { onUpdate(source.copy(lineSpacing = (it * 100).toInt())) },
             valueRange = 0.5f..3f,
+            trailingLabel = "${source.lineSpacing}%",
             modifier = Modifier.weight(1f)
         )
-        Text("${source.lineSpacing}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(40.dp))
     }
 }
 

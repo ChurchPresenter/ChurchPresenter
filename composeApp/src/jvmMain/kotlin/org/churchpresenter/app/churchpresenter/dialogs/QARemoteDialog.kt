@@ -32,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -100,6 +99,7 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.QASettings
@@ -449,12 +449,13 @@ fun QARemoteDialog(
                             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                                 Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                                 Spacer(Modifier.width(4.dp))
-                                Slider(
+                                SlimSlider(
                                     value = qaSettings.qrBackgroundOpacity / 100f,
                                     onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundOpacity = (it * 100).toInt())) } },
-                                    modifier = Modifier.weight(1f)
+                                    valueRange = 0f..1f,
+                                    modifier = Modifier.weight(1f),
+                                    trailingLabel = "${qaSettings.qrBackgroundOpacity}%"
                                 )
-                                Text("${qaSettings.qrBackgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
                             }
                         }
 
@@ -545,12 +546,13 @@ fun QARemoteDialog(
                                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                                     Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                                     Spacer(Modifier.width(4.dp))
-                                    Slider(
+                                    SlimSlider(
                                         value = qaSettings.backgroundOpacity / 100f,
                                         onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundOpacity = (it * 100).toInt())) } },
-                                        modifier = Modifier.weight(1f)
+                                        valueRange = 0f..1f,
+                                        modifier = Modifier.weight(1f),
+                                        trailingLabel = "${qaSettings.backgroundOpacity}%"
                                     )
-                                    Text("${qaSettings.backgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
                                 }
                             }
                         }

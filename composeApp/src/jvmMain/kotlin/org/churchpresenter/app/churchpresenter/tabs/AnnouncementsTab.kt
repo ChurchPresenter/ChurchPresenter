@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
@@ -76,7 +77,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -1119,26 +1119,18 @@ fun AnnouncementsTab(
                             )
                         }
                         } // end inner Row (animation + loop count)
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "${"%.1f".format((sliderSum - durationMs) / 1000f)}s",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
-                            Slider(
-                                value = (sliderSum - durationMs.toFloat()),
-                                onValueChange = { v ->
-                                    val dur = (sliderSum - v)
-                                    val snapped = (dur / sliderMin).toInt() * sliderMin.toInt()
-                                    viewModel.setAnimationDuration(snapped.coerceIn(sliderMin.toInt(), sliderMax.toInt()))
-                                    viewModel.saveToSettings(onSettingsChange)
-                                },
-                                valueRange = sliderMin..sliderMax,
-                                steps = 58,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                        SlimSlider(
+                            value = (sliderSum - durationMs.toFloat()),
+                            onValueChange = { v ->
+                                val dur = (sliderSum - v)
+                                val snapped = (dur / sliderMin).toInt() * sliderMin.toInt()
+                                viewModel.setAnimationDuration(snapped.coerceIn(sliderMin.toInt(), sliderMax.toInt()))
+                                viewModel.saveToSettings(onSettingsChange)
+                            },
+                            valueRange = sliderMin..sliderMax,
+                            trailingLabel = "${"%.1f".format((sliderSum - durationMs) / 1000f)}s",
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 } // end right column
             } // end two-column Row

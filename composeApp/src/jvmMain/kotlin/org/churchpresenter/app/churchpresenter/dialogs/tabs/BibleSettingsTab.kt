@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -81,6 +80,7 @@ import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import androidx.compose.material3.TextButton
@@ -269,21 +269,15 @@ private fun LeftColumn(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.width(120.dp)
             )
-            Slider(
+            SlimSlider(
                 value = settings.bibleSettings.transitionDuration,
                 onValueChange = { rawValue ->
                     val snapped = (rawValue / 50f).toInt() * 50f
                     onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(transitionDuration = snapped)) }
                 },
                 valueRange = 100f..2000f,
-                steps = 37,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = "${settings.bibleSettings.transitionDuration.toInt()}$msSuffix",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.width(60.dp)
+                modifier = Modifier.weight(1f),
+                trailingLabel = "${settings.bibleSettings.transitionDuration.toInt()}$msSuffix"
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {

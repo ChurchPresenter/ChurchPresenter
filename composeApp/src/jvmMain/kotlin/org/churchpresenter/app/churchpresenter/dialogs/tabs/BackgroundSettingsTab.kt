@@ -33,7 +33,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -90,6 +89,7 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
@@ -587,41 +587,44 @@ private fun BackgroundColumn(
         }
         Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
             Text(
-                text = "${stringResource(Res.string.gradient_top_opacity)}: ${(config.gradientTopOpacity * 100).toInt()}%",
+                text = stringResource(Res.string.gradient_top_opacity),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Slider(
+            SlimSlider(
                 value = config.gradientTopOpacity,
                 onValueChange = { onConfigChange(config.copy(gradientTopOpacity = it)) },
                 valueRange = 0f..1f,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                trailingLabel = "${(config.gradientTopOpacity * 100).toInt()}%"
             )
         }
         Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
             Text(
-                text = "${stringResource(Res.string.gradient_bottom_opacity)}: ${(config.gradientBottomOpacity * 100).toInt()}%",
+                text = stringResource(Res.string.gradient_bottom_opacity),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Slider(
+            SlimSlider(
                 value = config.gradientBottomOpacity,
                 onValueChange = { onConfigChange(config.copy(gradientBottomOpacity = it)) },
                 valueRange = 0f..1f,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                trailingLabel = "${(config.gradientBottomOpacity * 100).toInt()}%"
             )
         }
         Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
             Text(
-                text = "${stringResource(Res.string.gradient_position)}: ${(config.gradientPosition * 100).toInt()}%",
+                text = stringResource(Res.string.gradient_position),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Slider(
+            SlimSlider(
                 value = config.gradientPosition,
                 onValueChange = { onConfigChange(config.copy(gradientPosition = it)) },
                 valueRange = 0f..1f,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                trailingLabel = "${(config.gradientPosition * 100).toInt()}%"
             )
         }
     }
@@ -786,15 +789,16 @@ private fun OpacitySlider(
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Text(
-            text = "${stringResource(Res.string.background_opacity)}: ${(value * 100).toInt()}%",
+            text = stringResource(Res.string.background_opacity),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Slider(
+        SlimSlider(
             value = value,
             onValueChange = onValueChange,
             valueRange = 0f..1f,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            trailingLabel = "${(value * 100).toInt()}%"
         )
     }
 }

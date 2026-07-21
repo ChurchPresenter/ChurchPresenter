@@ -100,7 +100,6 @@ import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.milliseconds_suffix
 import churchpresenter.composeapp.generated.resources.song_transition_settings
 import churchpresenter.composeapp.generated.resources.transition_duration
-import androidx.compose.material3.Slider
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
@@ -110,6 +109,7 @@ import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
@@ -548,21 +548,15 @@ private fun LeftColumn(
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.width(120.dp)
         )
-        Slider(
+        SlimSlider(
             value = settings.songSettings.transitionDuration,
             onValueChange = { rawValue ->
                 val snapped = (rawValue / 50f).toInt() * 50f
                 onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(transitionDuration = snapped)) }
             },
             valueRange = 100f..2000f,
-            steps = 37,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = "${settings.songSettings.transitionDuration.toInt()}$msSuffix",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.width(60.dp)
+            modifier = Modifier.weight(1f),
+            trailingLabel = "${settings.songSettings.transitionDuration.toInt()}$msSuffix"
         )
     }
 

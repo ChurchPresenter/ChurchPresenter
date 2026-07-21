@@ -24,7 +24,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -87,6 +86,7 @@ import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.StyledTextField
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -398,12 +398,13 @@ fun STTSettingsDialog(
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                             Text(stringResource(Res.string.stt_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                             Spacer(Modifier.width(4.dp))
-                            Slider(
+                            SlimSlider(
                                 value = sttSettings.backgroundOpacity / 100f,
                                 onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundOpacity = (it * 100).toInt())) } },
-                                modifier = Modifier.weight(1f)
+                                valueRange = 0f..1f,
+                                modifier = Modifier.weight(1f),
+                                trailingLabel = "${sttSettings.backgroundOpacity}%"
                             )
-                            Text("${sttSettings.backgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
                         }
                     }
                 }

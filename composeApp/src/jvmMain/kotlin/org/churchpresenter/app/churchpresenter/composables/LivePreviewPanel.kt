@@ -33,7 +33,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -640,16 +639,12 @@ private fun MediaPreviewControls(
         }
 
         if (duration > 0) {
-            Slider(
+            SlimSlider(
                 value = currentPosition.toFloat(),
                 onValueChange = { onSeekTo(it.toLong()) },
                 valueRange = 0f..duration.toFloat(),
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = formatTime(currentPosition),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                modifier = Modifier.weight(1f),
+                trailingLabel = formatTime(currentPosition)
             )
         } else {
             Spacer(modifier = Modifier.weight(1f))

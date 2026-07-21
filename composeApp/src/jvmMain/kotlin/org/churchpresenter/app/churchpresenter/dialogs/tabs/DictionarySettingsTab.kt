@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Switch
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -44,6 +42,7 @@ import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextFie
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource
@@ -176,17 +175,12 @@ fun DictionarySettingsTab(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Slider(
+                        SlimSlider(
                             value = ds.cardBackgroundOpacity,
                             onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundOpacity = it)) } },
                             valueRange = 0f..1f,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = "${(ds.cardBackgroundOpacity * 100).toInt()}%",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.width(36.dp)
+                            modifier = Modifier.weight(1f),
+                            trailingLabel = "${(ds.cardBackgroundOpacity * 100).toInt()}%"
                         )
                     }
                 }
@@ -309,17 +303,12 @@ fun DictionarySettingsTab(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Slider(
+                            SlimSlider(
                                 value = ds.transitionDuration,
                                 onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(transitionDuration = it)) } },
                                 valueRange = 100f..2000f,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                text = "${ds.transitionDuration.toInt()} ${stringResource(Res.string.milliseconds_suffix)}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.width(60.dp)
+                                modifier = Modifier.weight(1f),
+                                trailingLabel = "${ds.transitionDuration.toInt()} ${stringResource(Res.string.milliseconds_suffix)}"
                             )
                         }
                     }

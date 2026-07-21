@@ -36,7 +36,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -127,6 +126,7 @@ import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SharedVideoOutputDisplay
+import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
@@ -551,8 +551,13 @@ fun MediaTab(
                                 IconButton(onClick = { viewModel.toggleMute() }, modifier = Modifier.size(24.dp)) {
                                     Icon(painterResource(if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up), contentDescription = null, modifier = Modifier.size(18.dp))
                                 }
-                                Slider(value = if (viewModel.isMuted) 0f else viewModel.volume, onValueChange = { viewModel.setVolume(it) }, valueRange = 0f..1f, modifier = Modifier.width(160.dp))
-                                Text("${(viewModel.effectiveVolume * 100).toInt()}%", style = MaterialTheme.typography.labelMedium, modifier = Modifier.width(32.dp))
+                                SlimSlider(
+                                    value = if (viewModel.isMuted) 0f else viewModel.volume,
+                                    onValueChange = { viewModel.setVolume(it) },
+                                    valueRange = 0f..1f,
+                                    modifier = Modifier.width(160.dp),
+                                    trailingLabel = "${(viewModel.effectiveVolume * 100).toInt()}%"
+                                )
                             }
                         }
                     }
