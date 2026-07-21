@@ -1582,6 +1582,7 @@
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Hintergrund</string>
     <string name="projection_content_lt_background">Lower-Third-Hintergrund</string>
+    <string name="projection_content_stt_tooltip">Sprache-zu-Text — Live-Untertitel und Übersetzung</string>
     <string name="projection_web_decklink_tooltip">Webbrowser kann nicht auf DeckLink-Ausgängen rendern</string>
     <string name="browser_source_content_unavailable_tooltip">Für die Browser-Source-Ausgabe noch nicht verfügbar</string>
     <string name="projection_web_go_live_tooltip">Erfordert einen normalen Display (kein DeckLink) mit aktiviertem Web in den Projektionseinstellungen</string>

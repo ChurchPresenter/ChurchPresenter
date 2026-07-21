@@ -9,6 +9,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Icon
@@ -86,6 +87,8 @@ import churchpresenter.composeapp.generated.resources.copy_url_black_bg
 import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.content_announcements
 import churchpresenter.composeapp.generated.resources.tab_canvas
+import churchpresenter.composeapp.generated.resources.tab_qa
+import churchpresenter.composeapp.generated.resources.tab_stt
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.content_bible
 import churchpresenter.composeapp.generated.resources.content_bible_background
@@ -122,8 +125,12 @@ import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
 import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
 import churchpresenter.composeapp.generated.resources.projection_simulate_outputs
+import churchpresenter.composeapp.generated.resources.projection_content_background
+import churchpresenter.composeapp.generated.resources.projection_content_lt_background
 import churchpresenter.composeapp.generated.resources.projection_content_song_la
+import churchpresenter.composeapp.generated.resources.projection_content_web
 import churchpresenter.composeapp.generated.resources.projection_content_song_la_tooltip
+import churchpresenter.composeapp.generated.resources.projection_content_stt_tooltip
 import churchpresenter.composeapp.generated.resources.projection_position_help
 import churchpresenter.composeapp.generated.resources.projection_target_display
 import churchpresenter.composeapp.generated.resources.right
@@ -312,7 +319,13 @@ fun ProjectionSettingsTab(
     val announcementsLabel = stringResource(Res.string.content_announcements)
     val dictionaryLabel = stringResource(Res.string.tab_dictionary)
     val canvasLabel = stringResource(Res.string.tab_canvas)
+    val webLabel = stringResource(Res.string.projection_content_web)
+    val qaLabel = stringResource(Res.string.tab_qa)
+    val sttLabel = stringResource(Res.string.tab_stt)
+    val sttTooltip = stringResource(Res.string.projection_content_stt_tooltip)
     val songLaLabel = stringResource(Res.string.projection_content_song_la)
+    val backgroundLabel = stringResource(Res.string.projection_content_background)
+    val ltBackgroundLabel = stringResource(Res.string.projection_content_lt_background)
     val bibleBackgroundLabel = stringResource(Res.string.content_bible_background)
     val songsBackgroundLabel = stringResource(Res.string.content_songs_background)
     val backgroundLayeredTooltip = stringResource(Res.string.content_background_layered_tooltip)
@@ -327,13 +340,13 @@ fun ProjectionSettingsTab(
         ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
         ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),
         ContentCol(announcementsLabel, { it.showAnnouncements }, { a, v -> a.copy(showAnnouncements = v) }),
-        ContentCol("Web", { it.showWebsite }, { a, v -> a.copy(showWebsite = v) }),
+        ContentCol(webLabel, { it.showWebsite }, { a, v -> a.copy(showWebsite = v) }, isWeb = true),
         ContentCol(canvasLabel, { it.showCanvas }, { a, v -> a.copy(showCanvas = v) }),
-        ContentCol("Q&A", { it.showQA }, { a, v -> a.copy(showQA = v) }),
-        ContentCol("STT", { it.showSTT }, { a, v -> a.copy(showSTT = v) }),
+        ContentCol(qaLabel, { it.showQA }, { a, v -> a.copy(showQA = v) }),
+        ContentCol(sttLabel, { it.showSTT }, { a, v -> a.copy(showSTT = v) }, tooltip = sttTooltip),
         ContentCol(dictionaryLabel, { it.showDictionary }, { a, v -> a.copy(showDictionary = v) }),
-        ContentCol("Background", { it.showFullscreenBackground }, { a, v -> a.copy(showFullscreenBackground = v) }),
-        ContentCol("Lower Third Background", { it.showLowerThirdBackground }, { a, v -> a.copy(showLowerThirdBackground = v) }),
+        ContentCol(backgroundLabel, { it.showFullscreenBackground }, { a, v -> a.copy(showFullscreenBackground = v) }),
+        ContentCol(ltBackgroundLabel, { it.showLowerThirdBackground }, { a, v -> a.copy(showLowerThirdBackground = v) }),
         ContentCol(bibleBackgroundLabel, { it.showBibleBackground }, { a, v -> a.copy(showBibleBackground = v) }, tooltip = backgroundLayeredTooltip),
         ContentCol(songsBackgroundLabel, { it.showSongsBackground }, { a, v -> a.copy(showSongsBackground = v) }, tooltip = backgroundLayeredTooltip),
     )
@@ -1508,7 +1521,9 @@ data class ContentCol(
     val getter: (ScreenAssignment) -> Boolean,
     val setter: (ScreenAssignment, Boolean) -> ScreenAssignment,
     val enabled: (ScreenAssignment) -> Boolean = { true },
-    val tooltip: String? = null
+    val tooltip: String? = null,
+    /** Marks the Web column — its label is localized, so it can't be identified by text. */
+    val isWeb: Boolean = false
 )
 
 /**
@@ -1622,9 +1637,18 @@ private fun ContentLangCell(
             OutlinedButton(
                 shape = RoundedCornerShape(6.dp),
                 onClick = { expanded = true },
+                // Explicit primary-tinted border: the default outline is easy to miss against the
+                // cell's surfaceVariant background, so the dropdown reads as plain text.
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(text = currentLabel, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                Spacer(modifier = Modifier.width(2.dp))
+                Icon(
+                    Icons.Filled.ArrowDropDown,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
             }
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 modes.forEach { (value, l) ->
@@ -1652,7 +1676,7 @@ private fun ContentOutputsToggle(
     webSnapshotTooltip: String,
     onApply: (ScreenAssignment) -> Unit,
 ) {
-    val isWeb = col.label == "Web"
+    val isWeb = col.isWeb
     val webDisabledOnDeckLink = !isBrowserSource && isWeb && assignment.targetType == "decklink"
     val enabled = col.enabled(assignment) && !webDisabledOnDeckLink
     val checked = col.getter(assignment) && !webDisabledOnDeckLink

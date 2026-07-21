@@ -1614,6 +1614,7 @@
     <string name="projection_content_web">Веб</string>
     <string name="projection_content_background">Фон</string>
     <string name="projection_content_lt_background">Фон нижней трети</string>
+    <string name="projection_content_stt_tooltip">Речь в текст — субтитры в реальном времени и перевод</string>
     <string name="projection_web_decklink_tooltip">Веб-браузер не может отображать на выходах DeckLink</string>
     <string name="browser_source_content_unavailable_tooltip">Пока недоступно для выхода Browser Source</string>
     <string name="projection_web_go_live_tooltip">Требуется обычный дисплей (не DeckLink) с включённым веб-режимом в настройках проекции</string>

@@ -453,6 +453,7 @@
     <string name="projection_content_web">Veeb</string>
     <string name="projection_content_background">Taust</string>
     <string name="projection_content_lt_background">Alumise kolmandiku taust</string>
+    <string name="projection_content_stt_tooltip">Kõne tekstiks — reaalajas subtiitrid ja tõlge</string>
     <string name="projection_web_decklink_tooltip">Veebibrauser ei saa renderdada DeckLink väljunditel</string>
     <string name="browser_source_content_unavailable_tooltip">Brauseriallika väljundi jaoks pole veel saadaval</string>
     <string name="projection_decklink_io_conflict_tooltip">Kasutusel ka sisendina — ei pruugi töötada seadmetel, mis ei toeta samaaegset sisend/väljundit</string>

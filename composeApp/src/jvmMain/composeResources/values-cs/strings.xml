@@ -1621,6 +1621,7 @@
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Pozadí</string>
     <string name="projection_content_lt_background">Pozadí spodní třetiny</string>
+    <string name="projection_content_stt_tooltip">Převod řeči na text — živé titulky a překlad</string>
     <string name="projection_web_decklink_tooltip">Webový prohlížeč nemůže renderovat na výstupech DeckLink</string>
     <string name="browser_source_content_unavailable_tooltip">Zatím není k dispozici pro výstup Browser Source</string>
     <string name="projection_web_go_live_tooltip">Vyžaduje běžný displej (ne DeckLink) s povoleným webem v nastavení projekce</string>

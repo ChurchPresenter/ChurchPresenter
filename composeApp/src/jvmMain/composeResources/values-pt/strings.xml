@@ -428,6 +428,7 @@
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Plano de Fundo</string>
     <string name="projection_content_lt_background">Fundo de Lower Third</string>
+    <string name="projection_content_stt_tooltip">Voz para texto — legendas ao vivo e tradução</string>
     <string name="projection_web_decklink_tooltip">O navegador web não pode renderizar em saídas DeckLink</string>
     <string name="browser_source_content_unavailable_tooltip">Ainda não disponível para a saída de Browser Source</string>
     <string name="projection_web_go_live_tooltip">Requer um monitor comum (não DeckLink) com Web habilitado nas configurações de projeção</string>

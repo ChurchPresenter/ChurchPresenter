@@ -1582,6 +1582,7 @@
     <string name="projection_content_web">Sieć</string>
     <string name="projection_content_background">Tło</string>
     <string name="projection_content_lt_background">Tło dolnej trzeciej</string>
+    <string name="projection_content_stt_tooltip">Zamiana mowy na tekst — napisy na żywo i tłumaczenie</string>
     <string name="projection_web_decklink_tooltip">Przeglądarka internetowa nie może renderować na wyjściach DeckLink</string>
     <string name="browser_source_content_unavailable_tooltip">Jeszcze niedostępne dla wyjścia Browser Source</string>
     <string name="projection_web_go_live_tooltip">Wymaga zwykłego wyświetlacza (bez DeckLink) z włączoną opcją Web w ustawieniach projekcji</string>

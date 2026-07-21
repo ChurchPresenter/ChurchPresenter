@@ -428,6 +428,7 @@
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Arrière-plan</string>
     <string name="projection_content_lt_background">Arrière-plan du bandeau inférieur</string>
+    <string name="projection_content_stt_tooltip">Reconnaissance vocale — sous-titres en direct et traduction</string>
     <string name="projection_web_decklink_tooltip">Le navigateur web ne peut pas s'afficher sur les sorties DeckLink</string>
     <string name="browser_source_content_unavailable_tooltip">Pas encore disponible pour la sortie Browser Source</string>
     <string name="projection_web_go_live_tooltip">Nécessite un écran standard (non DeckLink) avec le Web activé dans les paramètres de projection</string>

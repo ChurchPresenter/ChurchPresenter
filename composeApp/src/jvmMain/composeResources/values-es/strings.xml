@@ -428,6 +428,7 @@
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Fondo</string>
     <string name="projection_content_lt_background">Fondo del rótulo inferior</string>
+    <string name="projection_content_stt_tooltip">Voz a texto: subtítulos en vivo y traducción</string>
     <string name="projection_web_decklink_tooltip">El navegador web no puede renderizar en salidas DeckLink</string>
     <string name="browser_source_content_unavailable_tooltip">Aún no disponible para la salida de Browser Source</string>
     <string name="projection_web_go_live_tooltip">Requiere una pantalla normal (no DeckLink) con Web habilitado en la configuración de proyección</string>

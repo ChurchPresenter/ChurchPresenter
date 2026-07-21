@@ -428,6 +428,7 @@
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Achtergrond</string>
     <string name="projection_content_lt_background">Lower Third achtergrond</string>
+    <string name="projection_content_stt_tooltip">Spraak naar tekst — live ondertiteling en vertaling</string>
     <string name="projection_web_decklink_tooltip">Webbrowser kan niet renderen op DeckLink-uitgangen</string>
     <string name="browser_source_content_unavailable_tooltip">Nog niet beschikbaar voor Browser Source-uitvoer</string>
     <string name="projection_web_go_live_tooltip">Vereist een gewoon beeldscherm (geen DeckLink) met Web ingeschakeld in projectie-instellingen</string>

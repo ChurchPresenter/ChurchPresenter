@@ -444,6 +444,7 @@
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Fundal</string>
     <string name="projection_content_lt_background">Fundal Lower Third</string>
+    <string name="projection_content_stt_tooltip">Vorbire în text — subtitrări live și traducere</string>
     <string name="projection_web_decklink_tooltip">Browserul web nu poate randa pe ieșirile DeckLink</string>
     <string name="browser_source_content_unavailable_tooltip">Încă nu este disponibil pentru ieșirea Browser Source</string>
     <string name="projection_web_go_live_tooltip">Necesită un ecran obișnuit (non-DeckLink) cu Web activat în setările de proiecție</string>
