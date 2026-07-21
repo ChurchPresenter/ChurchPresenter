@@ -2040,5 +2040,15 @@
     <string name="planning_center_import_matched">✓ Dopasowano</string>
     <string name="planning_center_import_button">Importuj zaznaczone</string>
     <string name="planning_center_import_file_count">%1$d plik(ów)</string>
+    <!-- Content Outputs dialog -->
+    <string name="content_outputs">Wyjścia treści</string>
+    <string name="content_outputs_for">Wyjścia treści — %1$s</string>
+    <string name="content_outputs_enabled_short">%1$d z %2$d włączonych</string>
+    <string name="content_outputs_enabled_subtitle">Włączono %1$d z %2$d typów treści na tym ekranie</string>
+    <string name="content_outputs_quick_select">Szybki wybór</string>
+    <string name="content_outputs_select_all">Zaznacz wszystko</string>
+    <string name="content_outputs_clear_all">Wyczyść wszystko</string>
+    <string name="content_outputs_section_content">Treść</string>
+    <string name="content_outputs_section_backgrounds">Tła</string>
+    <string name="content_outputs_done">Gotowe</string>
 </resources>
-

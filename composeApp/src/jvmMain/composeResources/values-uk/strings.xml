@@ -2040,5 +2040,15 @@
     <string name="planning_center_import_matched">✓ Знайдено відповідність</string>
     <string name="planning_center_import_button">Імпортувати обране</string>
     <string name="planning_center_import_file_count">Файлів: %1$d</string>
+    <!-- Content Outputs dialog -->
+    <string name="content_outputs">Виведення контенту</string>
+    <string name="content_outputs_for">Виведення контенту — %1$s</string>
+    <string name="content_outputs_enabled_short">%1$d з %2$d увімкнено</string>
+    <string name="content_outputs_enabled_subtitle">На цьому екрані ввімкнено %1$d з %2$d типів контенту</string>
+    <string name="content_outputs_quick_select">Швидкий вибір</string>
+    <string name="content_outputs_select_all">Обрати всі</string>
+    <string name="content_outputs_clear_all">Очистити все</string>
+    <string name="content_outputs_section_content">Контент</string>
+    <string name="content_outputs_section_backgrounds">Фони</string>
+    <string name="content_outputs_done">Готово</string>
 </resources>
-

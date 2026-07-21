@@ -2041,5 +2041,15 @@
     <string name="planning_center_import_matched">✓ Zugeordnet</string>
     <string name="planning_center_import_button">Ausgewählte importieren</string>
     <string name="planning_center_import_file_count">%1$d Datei(en)</string>
+    <!-- Content Outputs dialog -->
+    <string name="content_outputs">Inhaltsausgaben</string>
+    <string name="content_outputs_for">Inhaltsausgaben — %1$s</string>
+    <string name="content_outputs_enabled_short">%1$d von %2$d aktiviert</string>
+    <string name="content_outputs_enabled_subtitle">%1$d von %2$d Inhaltstypen auf diesem Bildschirm aktiviert</string>
+    <string name="content_outputs_quick_select">Schnellauswahl</string>
+    <string name="content_outputs_select_all">Alle auswählen</string>
+    <string name="content_outputs_clear_all">Alle löschen</string>
+    <string name="content_outputs_section_content">Inhalt</string>
+    <string name="content_outputs_section_backgrounds">Hintergründe</string>
+    <string name="content_outputs_done">Fertig</string>
 </resources>
-

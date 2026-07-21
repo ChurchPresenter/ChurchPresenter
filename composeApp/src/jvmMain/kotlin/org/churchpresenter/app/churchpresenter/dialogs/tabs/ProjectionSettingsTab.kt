@@ -3,6 +3,16 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,11 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.HorizontalScrollbar
-import androidx.compose.foundation.LocalScrollbarStyle
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -58,6 +64,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_browser_source_output
@@ -88,6 +95,16 @@ import churchpresenter.composeapp.generated.resources.content_pictures
 import churchpresenter.composeapp.generated.resources.content_songs
 import churchpresenter.composeapp.generated.resources.content_songs_background
 import churchpresenter.composeapp.generated.resources.content_streaming
+import churchpresenter.composeapp.generated.resources.content_outputs
+import churchpresenter.composeapp.generated.resources.content_outputs_for
+import churchpresenter.composeapp.generated.resources.content_outputs_enabled_short
+import churchpresenter.composeapp.generated.resources.content_outputs_enabled_subtitle
+import churchpresenter.composeapp.generated.resources.content_outputs_quick_select
+import churchpresenter.composeapp.generated.resources.content_outputs_select_all
+import churchpresenter.composeapp.generated.resources.content_outputs_clear_all
+import churchpresenter.composeapp.generated.resources.content_outputs_section_content
+import churchpresenter.composeapp.generated.resources.content_outputs_section_backgrounds
+import churchpresenter.composeapp.generated.resources.content_outputs_done
 import churchpresenter.composeapp.generated.resources.detected_screens
 import churchpresenter.composeapp.generated.resources.dev_window_label
 import churchpresenter.composeapp.generated.resources.display_fullscreen
@@ -300,14 +317,6 @@ fun ProjectionSettingsTab(
     val songsBackgroundLabel = stringResource(Res.string.content_songs_background)
     val backgroundLayeredTooltip = stringResource(Res.string.content_background_layered_tooltip)
 
-    data class ContentCol(
-        val label: String,
-        val getter: (ScreenAssignment) -> Boolean,
-        val setter: (ScreenAssignment, Boolean) -> ScreenAssignment,
-        val enabled: (ScreenAssignment) -> Boolean = { true },
-        val tooltip: String? = null
-    )
-
     val songLaTooltip = stringResource(Res.string.projection_content_song_la_tooltip)
     val contentCols = listOf(
         ContentCol(songLaLabel, { it.songLookAhead }, { a, v ->
@@ -328,6 +337,11 @@ fun ProjectionSettingsTab(
         ContentCol(bibleBackgroundLabel, { it.showBibleBackground }, { a, v -> a.copy(showBibleBackground = v) }, tooltip = backgroundLayeredTooltip),
         ContentCol(songsBackgroundLabel, { it.showSongsBackground }, { a, v -> a.copy(showSongsBackground = v) }, tooltip = backgroundLayeredTooltip),
     )
+    // Split for the Content Outputs dialog: the last four toggles are the layered backgrounds,
+    // everything before them is regular content. Bible/Songs language modes are handled
+    // separately (dropdowns, not booleans).
+    val backgroundGroup = contentCols.takeLast(4)
+    val contentGroup = contentCols.dropLast(4)
 
     val fullScreenLabel = stringResource(Res.string.display_fullscreen)
     val lowerThirdLabel = stringResource(Res.string.display_lower_third_horizontal)
@@ -422,12 +436,9 @@ fun ProjectionSettingsTab(
         val screenLabelWidth = 58.dp
         val displayDropdownWidth = 100.dp
 
-        val contentScrollState = rememberScrollState()
-
-        // Header row: Screen label + Display + Key Output + content columns + display mode.
-        // Every label sits in a fixed-height, bottom-aligned Box so columns whose title wraps
-        // to 2 lines (e.g. "Pictures/Presentation") don't push single-line titles out of
-        // alignment — all labels' bottoms line up right above the divider.
+        // Header row: Screen label + Display + Key Output + Display Mode + Content Outputs.
+        // Every label sits in a fixed-height, bottom-aligned Box so all labels' bottoms line up
+        // right above the divider.
         Row(verticalAlignment = Alignment.CenterVertically) {
             Spacer(modifier = Modifier.width(screenLabelWidth))
             Box(modifier = Modifier.width(displayDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
@@ -448,45 +459,22 @@ fun ProjectionSettingsTab(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            Row(modifier = Modifier.weight(1f).horizontalScroll(contentScrollState), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Box(modifier = Modifier.width(langDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
-                    Text(
-                        text = stringResource(Res.string.display_mode),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Box(modifier = Modifier.width(langDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
-                    Text(
-                        text = bibleLabel,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Box(modifier = Modifier.width(langDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
-                    Text(
-                        text = songsLabel,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                contentCols.forEach { col ->
-                    Box(modifier = Modifier.width(cellWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
-                        Text(
-                            text = col.label,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
+            Box(modifier = Modifier.width(langDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                Text(
+                    text = stringResource(Res.string.display_mode),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(modifier = Modifier.weight(1f).height(contentLabelHeight), contentAlignment = Alignment.BottomStart) {
+                Text(
+                    text = stringResource(Res.string.content_outputs),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
 
@@ -798,170 +786,93 @@ fun ProjectionSettingsTab(
                     }
                 }
 
-                // Scrollable content: Display mode + Bible/Songs dropdowns + checkboxes
+                // Display mode dropdown (fixed column)
                 @OptIn(ExperimentalMaterial3Api::class)
-                Row(
-                    modifier = Modifier.weight(1f).horizontalScroll(contentScrollState),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
-                        var displayModeExpanded by remember { mutableStateOf(false) }
-                        OutlinedButton(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = { displayModeExpanded = true },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = displayModes.find { it.second == assignment.displayMode }?.first ?: fullScreenLabel,
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
+                    var displayModeExpanded by remember { mutableStateOf(false) }
+                    OutlinedButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = { displayModeExpanded = true },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = displayModes.find { it.second == assignment.displayMode }?.first ?: fullScreenLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = displayModeExpanded,
+                        onDismissRequest = { displayModeExpanded = false }
+                    ) {
+                        displayModes.forEach { (label, modeValue) ->
+                            DropdownMenuItem(
+                                text = { Text(label, style = MaterialTheme.typography.bodySmall) },
+                                onClick = {
+                                    displayModeExpanded = false
+                                    val updated = assignment.copy(displayMode = modeValue)
+                                    onSettingsChange { s ->
+                                        s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                                    }
+                                }
                             )
                         }
-                        DropdownMenu(
-                            expanded = displayModeExpanded,
-                            onDismissRequest = { displayModeExpanded = false }
-                        ) {
-                            displayModes.forEach { (label, modeValue) ->
-                                DropdownMenuItem(
-                                    text = { Text(label, style = MaterialTheme.typography.bodySmall) },
-                                    onClick = {
-                                        displayModeExpanded = false
-                                        val updated = assignment.copy(displayMode = modeValue)
-                                        onSettingsChange { s ->
-                                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
-                                        }
-                                    }
-                                )
-                            }
-                        }
                     }
-                    Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
-                        var bibleModeExpanded by remember { mutableStateOf(false) }
-                        OutlinedButton(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = { bibleModeExpanded = true },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = bibleLangModes.find { it.first == assignment.bibleMode }?.second ?: offLabel,
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = bibleModeExpanded,
-                            onDismissRequest = { bibleModeExpanded = false }
-                        ) {
-                            bibleLangModes.forEach { (value, label) ->
-                                DropdownMenuItem(
-                                    text = { Text(label, style = MaterialTheme.typography.bodySmall) },
-                                    onClick = {
-                                        bibleModeExpanded = false
-                                        onSettingsChange { s ->
-                                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, assignment.copy(bibleMode = value)))
-                                        }
-                                    }
-                                )
-                            }
-                        }
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Content Outputs — opens a modal listing every content type + background.
+                // Replaces the old horizontally-scrolling checkbox grid.
+                var showContentDialog by remember { mutableStateOf(false) }
+                val enabledCount = contentOutputsEnabledCount(assignment, contentGroup, backgroundGroup)
+                val totalCount = 2 + contentGroup.size + backgroundGroup.size
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                    OutlinedButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = { showContentDialog = true },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(Res.string.content_outputs_enabled_short, enabledCount, totalCount),
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
-                    Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
-                        var songModeExpanded by remember { mutableStateOf(false) }
-                        OutlinedButton(
-                            shape = RoundedCornerShape(6.dp),
-                            onClick = { songModeExpanded = true },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = songLangModes.find { it.first == assignment.songMode }?.second ?: offLabel,
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = songModeExpanded,
-                            onDismissRequest = { songModeExpanded = false }
-                        ) {
-                            songLangModes.forEach { (value, label) ->
-                                DropdownMenuItem(
-                                    text = { Text(label, style = MaterialTheme.typography.bodySmall) },
-                                    onClick = {
-                                        songModeExpanded = false
-                                        onSettingsChange { s ->
-                                            val updated = if (value == Constants.SONG_LANG_OFF)
-                                                assignment.copy(songMode = value, songLookAhead = false)
-                                            else
-                                                assignment.copy(songMode = value)
-                                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
-                                        }
-                                    }
-                                )
+                }
+                if (showContentDialog) {
+                    val screenLabel = if (devWindowedFallback && i == 0)
+                        stringResource(Res.string.dev_window_label)
+                    else
+                        stringResource(Res.string.screen_col_label, i + 1)
+                    ContentOutputsDialog(
+                        title = stringResource(Res.string.content_outputs_for, screenLabel),
+                        assignment = assignment,
+                        contentGroup = contentGroup,
+                        backgroundGroup = backgroundGroup,
+                        bibleLabel = bibleLabel,
+                        songsLabel = songsLabel,
+                        bibleLangModes = bibleLangModes,
+                        songLangModes = songLangModes,
+                        webDeckLinkTooltip = stringResource(Res.string.projection_web_decklink_tooltip),
+                        webSnapshotTooltip = stringResource(Res.string.browser_source_website_snapshot_tooltip),
+                        isBrowserSource = false,
+                        onApply = { updated ->
+                            onSettingsChange { s ->
+                                s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
                             }
-                        }
-                    }
-                    contentCols.forEach { col ->
-                        val isWebOnDeckLink = col.label == "Web" && assignment.targetType == "decklink"
-                        Box(modifier = Modifier.width(cellWidth), contentAlignment = Alignment.Center) {
-                            if (isWebOnDeckLink) {
-                                TooltipBox(
-                                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                                    tooltip = { PlainTooltip { Text(stringResource(Res.string.projection_web_decklink_tooltip)) } },
-                                    state = rememberTooltipState()
-                                ) {
-                                    Checkbox(checked = false, enabled = false, onCheckedChange = {})
-                                }
-                            } else {
-                                val checkbox = @Composable {
-                                    Checkbox(
-                                        checked = col.getter(assignment),
-                                        enabled = col.enabled(assignment),
-                                        onCheckedChange = { checked ->
-                                            val updated = col.setter(assignment, checked)
-                                            onSettingsChange { s ->
-                                                s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
-                                            }
-                                        }
-                                    )
-                                }
-                                if (col.tooltip != null) {
-                                    TooltipBox(
-                                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                                        tooltip = { PlainTooltip { Text(col.tooltip) } },
-                                        state = rememberTooltipState()
-                                    ) { checkbox() }
-                                } else {
-                                    checkbox()
-                                }
-                            }
-                        }
-                    }
-                } // end scrollable Row
+                        },
+                        onDismiss = { showContentDialog = false }
+                    )
+                }
 
             } // end data Row
 
             if (i < numScreens - 1) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), thickness = 1.dp)
-            }
-        }
-
-        // Scrollbar for content columns
-        Row {
-            Spacer(modifier = Modifier.width(screenLabelWidth + displayDropdownWidth * 2))
-            Box(modifier = Modifier.weight(1f)) {
-                HorizontalScrollbar(
-                    adapter = rememberScrollbarAdapter(contentScrollState),
-                    modifier = Modifier.fillMaxWidth().height(12.dp),
-                    style = LocalScrollbarStyle.current.copy(
-                        thickness = 10.dp,
-                        unhoverColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                        hoverColor = MaterialTheme.colorScheme.primary
-                    )
-                )
             }
         }
 
@@ -1127,13 +1038,12 @@ fun ProjectionSettingsTab(
                     )
                 }
 
-                val rowScrollState = rememberScrollState()
                 // Dim (not disable) the rest of this card's controls when the output is off, so
                 // it's obvious at a glance which outputs are inactive — the controls underneath
                 // still work normally if the output is re-enabled.
                 Column(modifier = Modifier.alpha(if (output.browserSourceEnabled) 1f else 0.5f)) {
                 Row(verticalAlignment = Alignment.Top) {
-                    Row(modifier = Modifier.weight(1f).horizontalScroll(rowScrollState), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         @OptIn(ExperimentalMaterial3Api::class)
                         Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
@@ -1169,91 +1079,6 @@ fun ProjectionSettingsTab(
                                         onClick = {
                                             displayModeExpanded = false
                                             val updated = output.copy(displayMode = modeValue)
-                                            onSettingsChange { s ->
-                                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                        Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
-                                Text(
-                                    text = bibleLabel,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                            var bibleModeExpanded by remember { mutableStateOf(false) }
-                            OutlinedButton(
-                                shape = RoundedCornerShape(6.dp),
-                                onClick = { bibleModeExpanded = true },
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = bibleLangModes.find { it.first == output.bibleMode }?.second ?: offLabel,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    maxLines = 1
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = bibleModeExpanded,
-                                onDismissRequest = { bibleModeExpanded = false }
-                            ) {
-                                bibleLangModes.forEach { (value, label) ->
-                                    DropdownMenuItem(
-                                        text = { Text(label, style = MaterialTheme.typography.bodySmall) },
-                                        onClick = {
-                                            bibleModeExpanded = false
-                                            val updated = output.copy(bibleMode = value)
-                                            onSettingsChange { s ->
-                                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                        Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
-                                Text(
-                                    text = songsLabel,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                            var songModeExpanded by remember { mutableStateOf(false) }
-                            OutlinedButton(
-                                shape = RoundedCornerShape(6.dp),
-                                onClick = { songModeExpanded = true },
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = songLangModes.find { it.first == output.songMode }?.second ?: offLabel,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    maxLines = 1
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = songModeExpanded,
-                                onDismissRequest = { songModeExpanded = false }
-                            ) {
-                                songLangModes.forEach { (value, label) ->
-                                    DropdownMenuItem(
-                                        text = { Text(label, style = MaterialTheme.typography.bodySmall) },
-                                        onClick = {
-                                            songModeExpanded = false
-                                            val updated = if (value == Constants.SONG_LANG_OFF)
-                                                output.copy(songMode = value, songLookAhead = false)
-                                            else
-                                                output.copy(songMode = value)
                                             onSettingsChange { s ->
                                                 s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
                                             }
@@ -1345,46 +1170,6 @@ fun ProjectionSettingsTab(
                             }
                         }
                         @OptIn(ExperimentalMaterial3Api::class)
-                        contentCols.forEach { col ->
-                            // Web content on a Browser Source mirrors the main output's snapshot —
-                            // functional, but worth a tooltip explaining when it's actually live.
-                            val isWebSnapshotCol = col.label == "Web"
-                            Column(modifier = Modifier.width(cellWidth), horizontalAlignment = Alignment.CenterHorizontally) {
-                                Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
-                                    Text(
-                                        text = col.label,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                                val checkbox: @Composable () -> Unit = {
-                                    Checkbox(
-                                        checked = col.getter(output),
-                                        enabled = col.enabled(output),
-                                        onCheckedChange = { checked ->
-                                            val updated = col.setter(output, checked)
-                                            onSettingsChange { s ->
-                                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                                            }
-                                        }
-                                    )
-                                }
-                                if (isWebSnapshotCol) {
-                                    TooltipBox(
-                                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                                        tooltip = { PlainTooltip { Text(stringResource(Res.string.browser_source_website_snapshot_tooltip)) } },
-                                        state = rememberTooltipState()
-                                    ) {
-                                        checkbox()
-                                    }
-                                } else {
-                                    checkbox()
-                                }
-                            }
-                        }
-                        @OptIn(ExperimentalMaterial3Api::class)
                         Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
                                 Text(
@@ -1412,20 +1197,52 @@ fun ProjectionSettingsTab(
                                 )
                             }
                         }
-                    }
-                }
-
-                Row {
-                    Box(modifier = Modifier.weight(1f)) {
-                        HorizontalScrollbar(
-                            adapter = rememberScrollbarAdapter(rowScrollState),
-                            modifier = Modifier.fillMaxWidth().height(10.dp),
-                            style = LocalScrollbarStyle.current.copy(
-                                thickness = 8.dp,
-                                unhoverColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                                hoverColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
+                        // Content Outputs — opens a modal listing every content type + background.
+                        Column(modifier = Modifier.weight(1f)) {
+                            Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomStart) {
+                                Text(
+                                    text = stringResource(Res.string.content_outputs),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            var showContentDialog by remember { mutableStateOf(false) }
+                            val enabledCount = contentOutputsEnabledCount(output, contentGroup, backgroundGroup)
+                            val totalCount = 2 + contentGroup.size + backgroundGroup.size
+                            OutlinedButton(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = { showContentDialog = true },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = stringResource(Res.string.content_outputs_enabled_short, enabledCount, totalCount),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                            if (showContentDialog) {
+                                ContentOutputsDialog(
+                                    title = stringResource(Res.string.content_outputs_for, stringResource(Res.string.browser_source_output_label, i + 1)),
+                                    assignment = output,
+                                    contentGroup = contentGroup,
+                                    backgroundGroup = backgroundGroup,
+                                    bibleLabel = bibleLabel,
+                                    songsLabel = songsLabel,
+                                    bibleLangModes = bibleLangModes,
+                                    songLangModes = songLangModes,
+                                    webDeckLinkTooltip = stringResource(Res.string.projection_web_decklink_tooltip),
+                                    webSnapshotTooltip = stringResource(Res.string.browser_source_website_snapshot_tooltip),
+                                    isBrowserSource = true,
+                                    onApply = { updated ->
+                                        onSettingsChange { s ->
+                                            s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                        }
+                                    },
+                                    onDismiss = { showContentDialog = false }
+                                )
+                            }
+                        }
                     }
                 }
                 } // end alpha-dimmed Column
@@ -1680,5 +1497,332 @@ fun ProjectionSettingsTab(
     }
 }
 
+/**
+ * One toggleable content type shown in the Content Outputs dialog. Getter/setter operate on a
+ * [ScreenAssignment] (a physical screen assignment or a browser-source output — both share the type).
+ */
+data class ContentCol(
+    val label: String,
+    val getter: (ScreenAssignment) -> Boolean,
+    val setter: (ScreenAssignment, Boolean) -> ScreenAssignment,
+    val enabled: (ScreenAssignment) -> Boolean = { true },
+    val tooltip: String? = null
+)
 
+/**
+ * Count of enabled content types for the "N of M enabled" summary: Bible and Songs count when their
+ * language mode isn't Off, plus every boolean content/background toggle that's on.
+ */
+private fun contentOutputsEnabledCount(
+    a: ScreenAssignment,
+    contentGroup: List<ContentCol>,
+    backgroundGroup: List<ContentCol>
+): Int {
+    var n = 0
+    if (a.bibleMode != Constants.SONG_LANG_OFF) n++
+    if (a.songMode != Constants.SONG_LANG_OFF) n++
+    (contentGroup + backgroundGroup).forEach { if (it.getter(a)) n++ }
+    return n
+}
+
+@Composable
+private fun ContentOutputsSectionHeader(text: String) {
+    Text(
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = 1.sp
+    )
+}
+
+/**
+ * A single boolean content toggle rendered as a rounded "chip" — checkbox + label, the whole chip
+ * clickable. Wrapped in a tooltip when one is provided; the weight modifier is applied to the
+ * outermost node so the two-column grid lines up.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ContentToggleCell(
+    modifier: Modifier,
+    label: String,
+    checked: Boolean,
+    enabled: Boolean,
+    tooltip: String?,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    // The weight modifier MUST sit on a plain layout node (the Box) that is a direct child of the
+    // parent Row. Putting weight on a TooltipBox instead does not participate in the Row's weight
+    // distribution and starves the sibling cell of width — that was the bug that hid every item
+    // paired after a tooltipped one (Pictures/Presentation after Song LA, Songs Background after
+    // Bible Background).
+    Box(modifier = modifier) {
+        val cell: @Composable () -> Unit = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 0.7f else 0.35f))
+                    .clickable(enabled = enabled) { onCheckedChange(!checked) }
+                    .padding(start = 4.dp, end = 10.dp, top = 2.dp, bottom = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Checkbox(checked = checked, onCheckedChange = null, enabled = enabled)
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        if (tooltip != null) {
+            TooltipBox(
+                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                tooltip = { PlainTooltip { Text(tooltip) } },
+                state = rememberTooltipState(),
+                modifier = Modifier.fillMaxWidth()
+            ) { cell() }
+        } else {
+            cell()
+        }
+    }
+}
+
+/** Bible/Songs language-mode chip — label + a compact dropdown (Off / 1 / 2 / Both). */
+@Composable
+private fun ContentLangCell(
+    modifier: Modifier,
+    label: String,
+    modes: List<Pair<String, String>>,
+    currentMode: String,
+    onSelect: (String) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val currentLabel = modes.find { it.first == currentMode }?.second ?: modes.first().second
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
+            .padding(start = 10.dp, end = 6.dp, top = 2.dp, bottom = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            modifier = Modifier.weight(1f)
+        )
+        Box {
+            OutlinedButton(
+                shape = RoundedCornerShape(6.dp),
+                onClick = { expanded = true },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(text = currentLabel, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            }
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                modes.forEach { (value, l) ->
+                    DropdownMenuItem(
+                        text = { Text(l, style = MaterialTheme.typography.bodySmall) },
+                        onClick = {
+                            expanded = false
+                            onSelect(value)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Renders one content/background toggle, applying the Web-on-DeckLink / Web-snapshot tooltip rules. */
+@Composable
+private fun ContentOutputsToggle(
+    modifier: Modifier,
+    col: ContentCol,
+    assignment: ScreenAssignment,
+    isBrowserSource: Boolean,
+    webDeckLinkTooltip: String,
+    webSnapshotTooltip: String,
+    onApply: (ScreenAssignment) -> Unit,
+) {
+    val isWeb = col.label == "Web"
+    val webDisabledOnDeckLink = !isBrowserSource && isWeb && assignment.targetType == "decklink"
+    val enabled = col.enabled(assignment) && !webDisabledOnDeckLink
+    val checked = col.getter(assignment) && !webDisabledOnDeckLink
+    val tooltip = when {
+        webDisabledOnDeckLink -> webDeckLinkTooltip
+        isWeb && isBrowserSource -> webSnapshotTooltip
+        else -> col.tooltip
+    }
+    ContentToggleCell(
+        modifier = modifier,
+        label = col.label,
+        checked = checked,
+        enabled = enabled,
+        tooltip = tooltip,
+        onCheckedChange = { v -> onApply(col.setter(assignment, v)) }
+    )
+}
+
+/**
+ * Modal listing every content type + background for one output (a physical screen or browser
+ * source). Replaces the old horizontally-scrolling per-row checkbox grid. Bible/Songs stay as
+ * language dropdowns; everything else is a boolean toggle. Changes apply live.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ContentOutputsDialog(
+    title: String,
+    assignment: ScreenAssignment,
+    contentGroup: List<ContentCol>,
+    backgroundGroup: List<ContentCol>,
+    bibleLabel: String,
+    songsLabel: String,
+    bibleLangModes: List<Pair<String, String>>,
+    songLangModes: List<Pair<String, String>>,
+    webDeckLinkTooltip: String,
+    webSnapshotTooltip: String,
+    isBrowserSource: Boolean,
+    onApply: (ScreenAssignment) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val total = 2 + contentGroup.size + backgroundGroup.size
+    val enabled = contentOutputsEnabledCount(assignment, contentGroup, backgroundGroup)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.width(560.dp),
+        shape = RoundedCornerShape(12.dp),
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.Tv,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = title, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = stringResource(Res.string.content_outputs_enabled_subtitle, enabled, total),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(Res.string.content_outputs_done),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 520.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Quick select
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ContentOutputsSectionHeader(stringResource(Res.string.content_outputs_quick_select))
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = {
+                            var a = assignment
+                            (contentGroup + backgroundGroup).forEach { a = it.setter(a, true) }
+                            a = a.copy(
+                                bibleMode = if (a.bibleMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.bibleMode,
+                                songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode
+                            )
+                            onApply(a)
+                        },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    ) { Text(stringResource(Res.string.content_outputs_select_all), style = MaterialTheme.typography.labelSmall) }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    OutlinedButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = {
+                            var a = assignment
+                            (contentGroup + backgroundGroup).forEach { a = it.setter(a, false) }
+                            a = a.copy(
+                                bibleMode = Constants.SONG_LANG_OFF,
+                                songMode = Constants.SONG_LANG_OFF,
+                                songLookAhead = false
+                            )
+                            onApply(a)
+                        },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    ) { Text(stringResource(Res.string.content_outputs_clear_all), style = MaterialTheme.typography.labelSmall) }
+                }
+
+                // Content
+                ContentOutputsSectionHeader(stringResource(Res.string.content_outputs_section_content))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ContentLangCell(
+                        modifier = Modifier.weight(1f),
+                        label = bibleLabel,
+                        modes = bibleLangModes,
+                        currentMode = assignment.bibleMode,
+                        onSelect = { value -> onApply(assignment.copy(bibleMode = value)) }
+                    )
+                    ContentLangCell(
+                        modifier = Modifier.weight(1f),
+                        label = songsLabel,
+                        modes = songLangModes,
+                        currentMode = assignment.songMode,
+                        onSelect = { value ->
+                            val updated = if (value == Constants.SONG_LANG_OFF)
+                                assignment.copy(songMode = value, songLookAhead = false)
+                            else
+                                assignment.copy(songMode = value)
+                            onApply(updated)
+                        }
+                    )
+                }
+                contentGroup.chunked(2).forEach { pair ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        pair.forEach { col ->
+                            ContentOutputsToggle(Modifier.weight(1f), col, assignment, isBrowserSource, webDeckLinkTooltip, webSnapshotTooltip, onApply)
+                        }
+                        if (pair.size == 1) Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+
+                // Backgrounds
+                ContentOutputsSectionHeader(stringResource(Res.string.content_outputs_section_backgrounds))
+                backgroundGroup.chunked(2).forEach { pair ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        pair.forEach { col ->
+                            ContentOutputsToggle(Modifier.weight(1f), col, assignment, isBrowserSource, webDeckLinkTooltip, webSnapshotTooltip, onApply)
+                        }
+                        if (pair.size == 1) Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                Text(stringResource(Res.string.content_outputs_done), style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    )
+}
 

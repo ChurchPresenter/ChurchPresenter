@@ -2068,4 +2068,15 @@
     <string name="planning_center_import_matched">✓ Gekoppeld</string>
     <string name="planning_center_import_button">Selectie importeren</string>
     <string name="planning_center_import_file_count">%1$d bestand(en)</string>
+    <!-- Content Outputs dialog -->
+    <string name="content_outputs">Inhoudsuitvoer</string>
+    <string name="content_outputs_for">Inhoudsuitvoer — %1$s</string>
+    <string name="content_outputs_enabled_short">%1$d van %2$d ingeschakeld</string>
+    <string name="content_outputs_enabled_subtitle">%1$d van %2$d inhoudstypen ingeschakeld op dit scherm</string>
+    <string name="content_outputs_quick_select">Snelle selectie</string>
+    <string name="content_outputs_select_all">Alles selecteren</string>
+    <string name="content_outputs_clear_all">Alles wissen</string>
+    <string name="content_outputs_section_content">Inhoud</string>
+    <string name="content_outputs_section_backgrounds">Achtergronden</string>
+    <string name="content_outputs_done">Klaar</string>
 </resources>

@@ -2068,4 +2068,15 @@
     <string name="planning_center_import_matched">✓ Correspondance trouvée</string>
     <string name="planning_center_import_button">Importer la sélection</string>
     <string name="planning_center_import_file_count">%1$d fichier(s)</string>
+    <!-- Content Outputs dialog -->
+    <string name="content_outputs">Sorties de contenu</string>
+    <string name="content_outputs_for">Sorties de contenu — %1$s</string>
+    <string name="content_outputs_enabled_short">%1$d sur %2$d activés</string>
+    <string name="content_outputs_enabled_subtitle">%1$d sur %2$d types de contenu activés sur cet écran</string>
+    <string name="content_outputs_quick_select">Sélection rapide</string>
+    <string name="content_outputs_select_all">Tout sélectionner</string>
+    <string name="content_outputs_clear_all">Tout effacer</string>
+    <string name="content_outputs_section_content">Contenu</string>
+    <string name="content_outputs_section_backgrounds">Arrière-plans</string>
+    <string name="content_outputs_done">Terminé</string>
 </resources>

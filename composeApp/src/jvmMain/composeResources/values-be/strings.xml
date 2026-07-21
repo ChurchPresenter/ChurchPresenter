@@ -2040,5 +2040,15 @@
     <string name="planning_center_import_matched">✓ Супадае</string>
     <string name="planning_center_import_button">Імпартаваць абранае</string>
     <string name="planning_center_import_file_count">%1$d файл(аў)</string>
+    <!-- Content Outputs dialog -->
+    <string name="content_outputs">Вывад кантэнту</string>
+    <string name="content_outputs_for">Вывад кантэнту — %1$s</string>
+    <string name="content_outputs_enabled_short">%1$d з %2$d уключана</string>
+    <string name="content_outputs_enabled_subtitle">На гэтым экране ўключана %1$d з %2$d тыпаў кантэнту</string>
+    <string name="content_outputs_quick_select">Хуткі выбар</string>
+    <string name="content_outputs_select_all">Выбраць усе</string>
+    <string name="content_outputs_clear_all">Ачысціць усё</string>
+    <string name="content_outputs_section_content">Кантэнт</string>
+    <string name="content_outputs_section_backgrounds">Фоны</string>
+    <string name="content_outputs_done">Гатова</string>
 </resources>
-

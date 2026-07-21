@@ -721,6 +721,18 @@
     <string name="projection_auto_display">Auto</string>
     <string name="projection_display_label">Display %1$d (%2$dx%3$d)</string>
 
+    <!-- Content Outputs dialog -->
+    <string name="content_outputs">Content Outputs</string>
+    <string name="content_outputs_for">Content Outputs — %1$s</string>
+    <string name="content_outputs_enabled_short">%1$d of %2$d enabled</string>
+    <string name="content_outputs_enabled_subtitle">%1$d of %2$d content types enabled on this screen</string>
+    <string name="content_outputs_quick_select">Quick Select</string>
+    <string name="content_outputs_select_all">Select All</string>
+    <string name="content_outputs_clear_all">Clear All</string>
+    <string name="content_outputs_section_content">Content</string>
+    <string name="content_outputs_section_backgrounds">Backgrounds</string>
+    <string name="content_outputs_done">Done</string>
+
     <!-- Browser Source Outputs (OBS/vMix overlay) -->
     <string name="browser_source_outputs">Browser Source Outputs</string>
     <string name="browser_source_outputs_help">Virtual outputs served as a web page — paste the URL into a Browser Source to overlay live content, transparent background supported.</string>

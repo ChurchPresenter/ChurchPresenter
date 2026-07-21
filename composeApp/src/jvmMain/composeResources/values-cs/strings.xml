@@ -2050,5 +2050,15 @@
     <string name="planning_center_import_matched">✓ Nalezena shoda</string>
     <string name="planning_center_import_button">Importovat vybrané</string>
     <string name="planning_center_import_file_count">%1$d souborů</string>
+    <!-- Content Outputs dialog -->
+    <string name="content_outputs">Výstupy obsahu</string>
+    <string name="content_outputs_for">Výstupy obsahu — %1$s</string>
+    <string name="content_outputs_enabled_short">%1$d z %2$d povoleno</string>
+    <string name="content_outputs_enabled_subtitle">Na této obrazovce povoleno %1$d z %2$d typů obsahu</string>
+    <string name="content_outputs_quick_select">Rychlý výběr</string>
+    <string name="content_outputs_select_all">Vybrat vše</string>
+    <string name="content_outputs_clear_all">Vymazat vše</string>
+    <string name="content_outputs_section_content">Obsah</string>
+    <string name="content_outputs_section_backgrounds">Pozadí</string>
+    <string name="content_outputs_done">Hotovo</string>
 </resources>
-

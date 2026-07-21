@@ -2070,4 +2070,15 @@
     <string name="planning_center_import_matched">✓ Potrivit</string>
     <string name="planning_center_import_button">Importă Selecția</string>
     <string name="planning_center_import_file_count">%1$d fișier(e)</string>
+    <!-- Content Outputs dialog -->
+    <string name="content_outputs">Ieșiri de conținut</string>
+    <string name="content_outputs_for">Ieșiri de conținut — %1$s</string>
+    <string name="content_outputs_enabled_short">%1$d din %2$d activate</string>
+    <string name="content_outputs_enabled_subtitle">%1$d din %2$d tipuri de conținut activate pe acest ecran</string>
+    <string name="content_outputs_quick_select">Selectare rapidă</string>
+    <string name="content_outputs_select_all">Selectează Tot</string>
+    <string name="content_outputs_clear_all">Șterge Tot</string>
+    <string name="content_outputs_section_content">Conținut</string>
+    <string name="content_outputs_section_backgrounds">Fundaluri</string>
+    <string name="content_outputs_done">Gata</string>
 </resources>

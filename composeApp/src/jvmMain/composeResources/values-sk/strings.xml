@@ -2070,4 +2070,15 @@
     <string name="planning_center_import_matched">✓ Nájdená zhoda</string>
     <string name="planning_center_import_button">Importovať vybrané</string>
     <string name="planning_center_import_file_count">%1$d súborov</string>
+    <!-- Content Outputs dialog -->
+    <string name="content_outputs">Výstupy obsahu</string>
+    <string name="content_outputs_for">Výstupy obsahu — %1$s</string>
+    <string name="content_outputs_enabled_short">%1$d z %2$d povolené</string>
+    <string name="content_outputs_enabled_subtitle">Na tejto obrazovke povolených %1$d z %2$d typov obsahu</string>
+    <string name="content_outputs_quick_select">Rýchly výber</string>
+    <string name="content_outputs_select_all">Vybrať všetko</string>
+    <string name="content_outputs_clear_all">Vymazať všetko</string>
+    <string name="content_outputs_section_content">Obsah</string>
+    <string name="content_outputs_section_backgrounds">Pozadia</string>
+    <string name="content_outputs_done">Hotovo</string>
 </resources>

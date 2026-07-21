@@ -2041,5 +2041,15 @@
     <string name="planning_center_import_matched">✓ Сәйкестендірілді</string>
     <string name="planning_center_import_button">Таңдалғанды импорттау</string>
     <string name="planning_center_import_file_count">%1$d файл</string>
+    <!-- Content Outputs dialog -->
+    <string name="content_outputs">Мазмұн шығысы</string>
+    <string name="content_outputs_for">Мазмұн шығысы — %1$s</string>
+    <string name="content_outputs_enabled_short">%2$d ішінен %1$d қосулы</string>
+    <string name="content_outputs_enabled_subtitle">Осы экранда %2$d мазмұн түрінің %1$d қосулы</string>
+    <string name="content_outputs_quick_select">Жылдам таңдау</string>
+    <string name="content_outputs_select_all">Барлығын таңдау</string>
+    <string name="content_outputs_clear_all">Барлығын тазалау</string>
+    <string name="content_outputs_section_content">Мазмұн</string>
+    <string name="content_outputs_section_backgrounds">Фондар</string>
+    <string name="content_outputs_done">Дайын</string>
 </resources>
-
