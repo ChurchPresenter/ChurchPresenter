@@ -6,6 +6,14 @@ import org.churchpresenter.app.churchpresenter.utils.UpdateCheckInterval
 
 @Serializable
 data class AppSettings(
+    /**
+     * Schema version of this settings document, used by `SettingsManager` to decide which
+     * migrations still need to run. A file written before versioning existed has no such key and
+     * is therefore treated as version 0 — every migration runs, exactly as it did before.
+     *
+     * See [CURRENT_SETTINGS_VERSION] for the bump procedure.
+     */
+    val settingsVersion: Int = CURRENT_SETTINGS_VERSION,
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
     val dictionarySettings: DictionarySettings = DictionarySettings(),
@@ -58,4 +66,16 @@ data class AppSettings(
     val participateInPrereleases: Boolean = false,
     val updateCheckInterval: UpdateCheckInterval = UpdateCheckInterval.EVERY_LAUNCH,
     val lastUpdateCheckTimestamp: Long = 0L
-)
+) {
+    companion object {
+        /**
+         * The schema version this build writes. Bump by one whenever a settings field changes in a
+         * way plain defaults can't absorb — a rename, a type change, or a restructure — and add the
+         * matching step to `SettingsManager`'s migration chain with that same target version.
+         *
+         * Purely *additive* fields need no bump: `ignoreUnknownKeys` plus a default already handles
+         * those in both directions.
+         */
+        const val CURRENT_SETTINGS_VERSION = 5
+    }
+}

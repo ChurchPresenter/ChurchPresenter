@@ -3,8 +3,11 @@ package org.churchpresenter.app.churchpresenter.data
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlinx.serialization.decodeFromString
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.AppSettings.Companion.CURRENT_SETTINGS_VERSION
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
@@ -41,18 +44,44 @@ class SettingsManager {
         }
     }
 
+    /**
+     * The raw-JSON migration steps, in the order they must be applied, each tagged with the schema
+     * version it produces. A step only runs when the document's version is below its target, so a
+     * file already at [CURRENT_SETTINGS_VERSION] is decoded without any rewriting at all — where
+     * previously every step re-scanned the whole document on every single load.
+     *
+     * These are listed in the exact order the previous nested-call chain applied them, which is not
+     * their chronological order — preserved verbatim so this rework changes no behaviour. Note one
+     * pre-existing consequence of that order, left as-is rather than silently altered: version 1
+     * rewrites entries *inside* `screenAssignments`, but version 2 is what creates that array from
+     * the older `screen1-4Assignment` fields. A document old enough to still carry those numbered
+     * fields therefore never gets its `showBible`/`showSongs` booleans converted. Such a document
+     * is unlikely to exist (the booleans postdate the array), and reordering would change what
+     * those users load, so the behaviour is documented rather than "fixed" on assumption.
+     *
+     * Version 5 ([migrateHiddenTabs]) has no entry here — it operates on the decoded object rather
+     * than the raw text, and so runs separately in [migrateAndDecode].
+     */
+    private val rawMigrations: List<Pair<Int, (String) -> String>> = listOf(
+        1 to ::migrateScreenAssignmentModes,
+        2 to ::migrateProjectionSettings,
+        3 to ::migrateCompanionSatelliteStartPage,
+        4 to ::migrateCompanionSatelliteRowColumnRangeBackToCount,
+    )
+
     fun loadSettings(): AppSettings {
         cachedSettings?.let { return it }
         return try {
             if (settingsFile.exists()) {
                 val raw = settingsFile.readText()
-                val migrated = migrateCompanionSatelliteRowColumnRangeBackToCount(
-                    migrateCompanionSatelliteStartPage(migrateProjectionSettings(migrateScreenAssignmentModes(raw)))
-                )
                 try {
-                    val settings = jsonFormat.decodeFromString<AppSettings>(migrated)
-                    migrateHiddenTabs(settings, raw)
+                    migrateAndDecode(raw, backupSource = settingsFile)
                 } catch (e: Exception) {
+                    // The document is unreadable — malformed JSON, a truncated write from a
+                    // hard power-off, a bad hand-edit. Returning defaults here silently discards
+                    // the user's entire configuration, so keep a copy they (or we) can recover
+                    // from before the next save overwrites the original.
+                    preserveUnreadableFile()
                     AppSettings()
                 }
             } else {
@@ -64,7 +93,80 @@ class SettingsManager {
     }
 
     /**
-     * Ensures new tabs (like QA) are hidden by default for existing users.
+     * Brings a settings document up to [CURRENT_SETTINGS_VERSION] and decodes it. Shared by the
+     * normal startup load and by Settings → Import, so an exported file from an older build is
+     * migrated on import rather than silently losing every field a migration would have converted.
+     *
+     * @param backupSource when non-null, the on-disk file to snapshot before any migration or
+     *   version-downgrade rewrite. Import passes null — the user's chosen source file is not ours
+     *   to write next to, and it is left untouched regardless.
+     * @throws Exception if the document cannot be parsed; callers decide how to recover.
+     */
+    fun migrateAndDecode(raw: String, backupSource: File? = null): AppSettings {
+        val fromVersion = readSettingsVersion(raw)
+
+        if (fromVersion > CURRENT_SETTINGS_VERSION) {
+            // Written by a NEWER build than this one — a downgrade, or a config copied from a
+            // machine that is further ahead. `ignoreUnknownKeys` drops whatever this build doesn't
+            // recognise, and the next save writes that stripped document back permanently, so
+            // snapshot the full-fidelity original first. The decoded version field deliberately
+            // keeps its higher number: the newer build's own migrations have already run against
+            // this data and must not run a second time when it is loaded there again.
+            backupSource?.let { backupBeforeRewrite(it, fromVersion) }
+            return jsonFormat.decodeFromString<AppSettings>(raw)
+        }
+
+        if (fromVersion == CURRENT_SETTINGS_VERSION) {
+            return jsonFormat.decodeFromString<AppSettings>(raw)
+        }
+
+        backupSource?.let { backupBeforeRewrite(it, fromVersion) }
+        var migrated = raw
+        for ((toVersion, step) in rawMigrations) {
+            if (toVersion > fromVersion) migrated = step(migrated)
+        }
+        var settings = jsonFormat.decodeFromString<AppSettings>(migrated)
+        if (fromVersion < 5) settings = migrateHiddenTabs(settings, raw)
+        return settings.copy(settingsVersion = CURRENT_SETTINGS_VERSION)
+    }
+
+    /** Reads the document's schema version without decoding it; absent or unparseable means 0
+     * (pre-versioning), which runs the full migration chain — the pre-versioning behaviour. */
+    private fun readSettingsVersion(raw: String): Int =
+        try {
+            (jsonFormat.parseToJsonElement(raw).jsonObject["settingsVersion"] as? JsonPrimitive)
+                ?.content?.toIntOrNull() ?: 0
+        } catch (_: Exception) {
+            0
+        }
+
+    /** Snapshots [source] as `settings.json.v<version>.bak` before this build rewrites it into a
+     * different schema. Never overwrites an existing snapshot: the oldest copy for a given version
+     * is the one taken before any lossy rewrite, so it is the one worth keeping. */
+    private fun backupBeforeRewrite(source: File, version: Int) {
+        try {
+            val target = File(appDataDir, "settings.json.v$version.bak")
+            if (!target.exists()) Files.copy(source.toPath(), target.toPath())
+        } catch (_: Exception) {
+            // A failed backup must never block startup — carry on with the load.
+        }
+    }
+
+    /** Copies (never moves) an undecodable settings.json aside so the original survives the
+     * default-settings save that follows. Timestamped, so repeated failed launches don't collapse
+     * into a single copy. */
+    private fun preserveUnreadableFile() {
+        try {
+            val stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
+            val target = File(appDataDir, "settings.json.corrupt-$stamp")
+            if (!target.exists()) Files.copy(settingsFile.toPath(), target.toPath())
+        } catch (_: Exception) {
+            // Best effort only.
+        }
+    }
+
+    /**
+     * Schema version 5. Ensures new tabs (like QA) are hidden by default for existing users.
      * If the raw JSON has no "qaSettings" key, the user has never interacted with Q&A,
      * so we add "QA" to hiddenTabs if it's not already there.
      */
@@ -79,7 +181,8 @@ class SettingsManager {
         return result
     }
 
-    /** Converts old showBible:false/showSongs:false booleans to bibleMode:"off"/songMode:"off" strings. */
+    /** Schema version 1. Converts old showBible:false/showSongs:false booleans to
+     * bibleMode:"off"/songMode:"off" strings. */
     private fun migrateScreenAssignmentModes(raw: String): String {
         if (!raw.contains("\"showBible\"") && !raw.contains("\"showSongs\"")) return raw
         val root = try { jsonFormat.parseToJsonElement(raw).jsonObject } catch (_: Exception) { return raw }
@@ -111,7 +214,7 @@ class SettingsManager {
         return newRoot.toString()
     }
 
-    /** Renames the old single companionSatelliteConnections[] fields (rows/columns/bitmapSize) to
+    /** Schema version 3. Renames the old single companionSatelliteConnections[] fields (rows/columns/bitmapSize) to
      * their tab-prefixed placement-specific equivalents, so existing users' configured values
      * survive the placement-per-connection rework instead of silently resetting via
      * ignoreUnknownKeys. TAB is the migration target for all of these since it was the only
@@ -144,7 +247,8 @@ class SettingsManager {
         return newRoot.toString()
     }
 
-    /** Converts each placement's briefly-introduced start/end row/column RANGE fields back into a
+    /** Schema version 4. Converts each placement's briefly-introduced start/end row/column RANGE
+     * fields back into a
      * plain rows/columns COUNT, so anyone who saved settings while that experiment was live doesn't
      * lose their configured grid size via ignoreUnknownKeys. That start/end scheme (backed by
      * LAYOUT_MANIFEST registration, letting a placement show an arbitrary sub-rectangle of a larger
@@ -199,7 +303,7 @@ class SettingsManager {
         return newRoot.toString()
     }
 
-    /** Migrates old screen1-4Assignment fields to screenAssignments list. */
+    /** Schema version 2. Migrates old screen1-4Assignment fields to screenAssignments list. */
     private fun migrateProjectionSettings(raw: String): String {
         val root = try { jsonFormat.parseToJsonElement(raw).jsonObject } catch (_: Exception) { return raw }
         val proj = root["projectionSettings"]?.jsonObject ?: return raw

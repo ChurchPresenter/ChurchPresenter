@@ -122,10 +122,6 @@ private val exportJsonFormat = Json {
     prettyPrint = true
 }
 
-private val importJsonFormat = Json {
-    ignoreUnknownKeys = true
-}
-
 @Composable
 fun SystemSettingsTab(
     currentTheme: ThemeMode,
@@ -653,8 +649,11 @@ fun SystemSettingsTab(
                             if (confirmResult == JOptionPane.YES_OPTION) {
                                 try {
                                     val json = file.readText()
-                                    val imported = importJsonFormat.decodeFromString(AppSettings.serializer(), json)
                                     val settingsManager = SettingsManager()
+                                    // Migrate on import, not just on startup — an export taken
+                                    // from an older build is in an older schema, and decoding it
+                                    // directly would drop every field a migration converts.
+                                    val imported = settingsManager.migrateAndDecode(json)
                                     settingsManager.saveSettings(imported)
                                     // Stop the server gracefully so in-flight WebSocket sessions
                                     // (e.g. a connected companion app) close cleanly instead of
