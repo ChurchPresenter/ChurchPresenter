@@ -49,7 +49,7 @@ object StockMediaClient {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    private val http by lazy {
+    private val defaultHttp by lazy {
         HttpClient(CIO) {
             install(HttpTimeout) {
                 requestTimeoutMillis = 20_000
@@ -58,7 +58,17 @@ object StockMediaClient {
         }
     }
 
-    private val downloadDir = File(System.getProperty("user.home"), ".churchpresenter/stock-backgrounds")
+    /** Test seam: when set, requests go here instead of the real network client. Null in production. */
+    internal var httpOverride: HttpClient? = null
+
+    private val http: HttpClient get() = httpOverride ?: defaultHttp
+
+    private val defaultDownloadDir = File(System.getProperty("user.home"), ".churchpresenter/stock-backgrounds")
+
+    /** Test seam: when set, downloads land here instead of under the user's home. Null in production. */
+    internal var downloadDirOverride: File? = null
+
+    private val downloadDir: File get() = downloadDirOverride ?: defaultDownloadDir
 
     // --- Pexels DTOs ---
 

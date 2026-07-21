@@ -115,6 +115,7 @@ plugins {
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.sentry)
+    jacoco
 }
 
 // Sentry source context: uploads a source bundle at build time so stack traces show
@@ -192,6 +193,12 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+        }
+        jvmTest.dependencies {
+            implementation(libs.mockk)
+            implementation(libs.ktor.client.mock)
+            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+            implementation(compose.uiTest)
         }
         jvmMain.dependencies {
             implementation(libs.kotlinx.coroutines.swing)
@@ -550,6 +557,120 @@ kotlin {
             resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/resources")
         }
     }
+}
+
+// Unit tests must never need a display: they run on headless CI runners and must not pop up an
+// AWT window or fail on a missing X server. Compose text measurement (used by the auto-fit tests)
+// works fine headless, but only if AWT is told so before it initialises. Mirrors the same setting
+// the PresentationEngine sub-build already uses for its suite.
+tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+    systemProperty("java.awt.headless", "true")
+
+    // Point the whole test JVM at a throwaway home directory. Several singletons resolve
+    // ~/.churchpresenter paths in a `by lazy` or a constructor -- captured ONCE per JVM -- so
+    // without this a test could permanently latch onto (and write into, or delete from) the
+    // developer's real settings, autosave, QA state or STT training logs. Individual tests may
+    // still override user.home per-test; they restore to this fake one, not the real one.
+    val testHome = layout.buildDirectory.dir("test-home").get().asFile
+    doFirst { testHome.mkdirs() }
+    systemProperty("user.home", testHome.absolutePath)
+
+    // Keep tests OUT of the production Sentry project. `sentry.properties` is on the runtime
+    // classpath with a real DSN, and the Sentry SDK auto-initialises from it as soon as any
+    // Sentry API is touched — which happens indirectly via CrashReporter.breadcrumb() from
+    // ordinary app code. Without this, a test run reports events (and release-health sessions)
+    // as if it were a real install. An empty DSN leaves the SDK permanently disabled.
+    systemProperty("sentry.dsn", "")
+    systemProperty("sentry.enable-external-configuration", "false")
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+}
+
+// ── Test coverage (JaCoCo) ────────────────────────────────────────────────────
+// Run: ./gradlew :composeApp:jacocoTestReport
+// HTML: composeApp/build/reports/jacoco/jacocoTestReport/html/index.html
+//
+// The jacoco plugin instruments every Test task automatically, so `jvmTest` needs no extra
+// wiring — but the report itself does, because this is a Kotlin Multiplatform build: there is no
+// conventional `test`/`main` pair for the plugin's default report to attach to. Hence an explicit
+// task pointing at the jvm compilation's own output.
+jacoco {
+    toolVersion = "0.8.13" // 0.8.12+ is required for JDK 21 class files
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    group = "verification"
+    description = "Generates a coverage report for the app's own code from the jvmTest suite."
+    dependsOn("jvmTest")
+    // Point at the agent's .exec output explicitly. The `executionData(task)` overload resolves
+    // to the task's own binary-results directory here, not the JacocoTaskExtension destination,
+    // and fails with "Unable to read execution data file .../test-results/jvmTest/binary".
+    executionData.setFrom(layout.buildDirectory.file("jacoco/jvmTest.exec"))
+
+    // CRITICAL: composeApp mounts all five sub-builds' sources through kotlin.srcDir (see the
+    // sourceSets block above), so their classes land in the SAME output directory as the app's.
+    // Reporting on everything would drown the app's real number in ~tens of thousands of lines of
+    // submodule code that has its own separate suites. Restrict to this app's package root; the
+    // submodules are measured by their own builds.
+    classDirectories.setFrom(
+        fileTree(layout.buildDirectory.dir("classes/kotlin/jvm/main")) {
+            include("org/churchpresenter/**")
+            // Generated code -- no value in measuring, and it would inflate the denominator.
+            exclude("**/BuildConfig*")
+            // Compose emits synthetic ComposableSingletons holder classes per file.
+            exclude("**/ComposableSingletons*")
+        }
+    )
+    sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
+
+    reports {
+        html.required.set(true)
+        xml.required.set(true)  // for CI/coverage services
+        csv.required.set(false)
+    }
+
+    finalizedBy("printCoverageLink")
+}
+
+// Prints the headline number and a clickable file:// link so the report doesn't have to be hunted
+// for under build/. Deliberately a SEPARATE task rather than a doLast on jacocoTestReport: a
+// doLast is skipped when the report is UP-TO-DATE, so re-running `check` would silently print
+// nothing. This task declares no outputs, so it never goes up-to-date and always prints.
+tasks.register("printCoverageLink") {
+    val reportDir = layout.buildDirectory.dir("reports/jacoco/jacocoTestReport")
+    doLast {
+        val dir = reportDir.get().asFile
+        val htmlIndex = dir.resolve("html/index.html")
+        if (!htmlIndex.exists()) return@doLast
+
+        // Regex rather than a DOM parse: the JaCoCo XML declares an external DTD, which a
+        // DocumentBuilder tries to resolve over the network. The report-wide totals are the LAST
+        // counter elements in the document, so the final LINE match is the overall figure.
+        val summary = runCatching {
+            val xml = dir.resolve("jacocoTestReport.xml")
+            if (!xml.exists()) return@runCatching null
+            val last = Regex("""<counter type="LINE" missed="(\d+)" covered="(\d+)"/>""")
+                .findAll(xml.readText()).lastOrNull() ?: return@runCatching null
+            val missed = last.groupValues[1].toInt()
+            val covered = last.groupValues[2].toInt()
+            val total = covered + missed
+            if (total == 0) null
+            else "%.1f%% of lines (%d/%d)".format(100.0 * covered / total, covered, total)
+        }.getOrNull()
+
+        logger.lifecycle("")
+        if (summary != null) logger.lifecycle("Coverage: $summary")
+        // Three slashes: File.toURI() yields "file:/path", which many terminals refuse to linkify.
+        logger.lifecycle("Report:   file://${htmlIndex.absolutePath}")
+    }
+}
+
+// `check` runs the tests anyway, so generating the coverage report from the same run is nearly
+// free -- and it makes the link appear at the end of the standard pre-commit command.
+tasks.named("check") {
+    dependsOn("jacocoTestReport")
 }
 
 tasks.named("compileKotlinJvm") {
