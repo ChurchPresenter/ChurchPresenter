@@ -14,6 +14,8 @@ import kotlin.test.assertTrue
  * two themes sharing one, which is what turns the menu into a list of identical rows.
  *
  * The table is a private top-level function, so it is reached by reflection on its file class.
+ * The control built on top of it — the button, the menu and what a click applies — is covered in
+ * [ThemeSwitcherRenderTest], which drives it in a real composition.
  */
 class ThemeSwitcherTest {
 
