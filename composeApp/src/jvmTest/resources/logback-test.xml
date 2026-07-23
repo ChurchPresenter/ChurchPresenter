@@ -1,0 +1,25 @@
+<configuration>
+    <!-- Test-only logging. Logback prefers logback-test.xml over logback.xml on the
+         classpath, so this shadows the production config during `:composeApp:jvmTest`.
+
+         Deliberately has NO SentryAppender: the production logback SentryAppender
+         auto-initialises Sentry from sentry.properties (which carries a real DSN on a
+         developer machine) on the first ERROR logged. That turned every test that logs
+         an error, exercises CrashReporter, or throws uncaught — CrashReporterTest,
+         PicturesViewModelTest and others — into a production Sentry event. Dropping the
+         appender leaves Sentry.isEnabled() false for the whole suite, so nothing ships. -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Keep noisy third-party libraries quiet, matching the production config. -->
+    <logger name="io.netty" level="ERROR"/>
+    <logger name="org.apache" level="ERROR"/>
+    <logger name="io.ktor" level="WARN"/>
+
+    <root level="WARN">
+        <appender-ref ref="Console"/>
+    </root>
+</configuration>

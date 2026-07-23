@@ -107,6 +107,22 @@ class PicturesViewModelTest {
     }
 
     @Test
+    fun `loading a folder twice does not duplicate images`() {
+        // PicturesTab keys its LazyVerticalGrid by absolutePath; a duplicate path there is a fatal
+        // IllegalArgumentException at render time. A repeated load (re-entrant calls, or the file
+        // watcher racing the initial load) must stay idempotent — no path may appear twice.
+        image("a.jpg"); image("b.jpg")
+        val vm = vm()
+
+        vm.selectFolder(folder)
+        vm.loadImagesFromFolder(folder) // a second load without an intervening clear
+
+        assertEquals(listOf("a.jpg", "b.jpg"), vm.names)
+        val paths = vm.images.map { it.absolutePath }
+        assertEquals(paths.size, paths.toSet().size, "image paths must be unique (grid key invariant)")
+    }
+
+    @Test
     fun `every supported image format is picked up, whatever the case of its extension`() {
         image("photo.jpg"); image("photo2.JPEG"); image("shot.PNG"); image("anim.gif"); image("old.bmp")
         val vm = vm()

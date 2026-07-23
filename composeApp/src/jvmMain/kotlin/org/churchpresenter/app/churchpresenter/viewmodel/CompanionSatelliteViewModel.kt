@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import companionsatellite.CompanionConnectionStatus
 import companionsatellite.CompanionSatelliteClient
+import io.sentry.SentryLevel
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState
@@ -192,9 +193,15 @@ class CompanionSatelliteViewModel {
                             CompanionConnectionStatus.DISCONNECTED ->
                                 CrashReporter.breadcrumb("Companion Satellite disconnected (${slot.connectionId}/${slot.placement})", category = "integration")
                             CompanionConnectionStatus.ERROR ->
-                                CrashReporter.reportWarning(
-                                    "Companion Satellite connection error: ${error ?: "unknown"}",
-                                    tags = mapOf("subsystem" to "companion_satellite", "placement" to slot.placement.name)
+                                // A connection error here is normal churn for an auto-reconnecting
+                                // satellite (server unreachable/slow/restarting): environmental, not an
+                                // app bug, and already shown in-app via errorMessage. Record it as a
+                                // warning breadcrumb — kept for context if a real crash follows — rather
+                                // than a Sentry issue, which isn't actionable and floods the quota.
+                                CrashReporter.breadcrumb(
+                                    "Companion Satellite connection error (${slot.connectionId}/${slot.placement}): ${error ?: "unknown"}",
+                                    category = "integration",
+                                    level = SentryLevel.WARNING
                                 )
                             CompanionConnectionStatus.CONNECTING -> {}
                         }
