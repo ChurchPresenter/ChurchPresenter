@@ -113,6 +113,30 @@ CI is `.github/workflows/test.yml` (push/PR); it runs these plus the module suit
 `submodules: true`, or the app won't compile.
 
 When writing tests here:
+- **Unreachable code is a refactor, not a dead end.** When a class is uncovered because it needs a
+  display, a bus, a network or a device, do not conclude it cannot be tested. Almost none of such a
+  class is actually the unreachable call — the rest is ordinary logic sitting around it. Split it:
+  - Pull each decision into its own function — what the dialog/request is configured with, what
+    its answer is turned into — and test those directly.
+  - Then shrink the unreachable call itself to **one step of its own**, and take the sequence
+    around it as a function with that step as a **parameter**. Tests pass a stand-in and exercise
+    the real order, the real wiring and the real helpers; only the one call stays uncovered.
+    `SwingFileChooser.openWith`/`saveWith`/`showOwned` is the worked example.
+  - **Count the lambdas.** JaCoCo scores every lambda as its own method, so a helper taking four
+    function parameters adds four uncovered methods at each call site and can score *worse* than
+    the inline code it replaced. Take one function parameter — the unreachable step — and call the
+    rest directly. Measure before and after; the report is the arbiter, not the intent.
+  - What must NOT be done to reach coverage: adding a mutable `internal var` seam on a singleton
+    (leaks between tests — see the flaky-test rule below), or asserting that a stub was called
+    instead of that something works. If a test can only prove a mock was invoked, don't write it.
+- **Prefer `internal` over reflection to reach non-public code.** `jvmTest` is a friend of
+  `jvmMain`, so an `internal` member is callable straight from a test. Reflection costs a lookup
+  per call, throws at runtime instead of failing to compile when a signature changes, loses the
+  types (casts, `Array<Any?>`, `javaPrimitiveType`), and hides renames from the IDE. Widen the
+  member to `internal` and call it. Reflection is the fallback for what genuinely cannot be
+  widened — a private top-level function, or code that must stay private for a reason worth
+  stating. Existing reflection in `PlatformFileChooserTest`/`CrashReporterTest` predates this rule
+  and is not precedent for new tests.
 - **NEVER use `Thread.sleep` or `delay` to wait for async work.** A fixed pause asserts on timing,
   not behaviour, and flakes on a loaded CI machine. Wait for the condition itself — a bounded
   poll on observable state with a timeout that throws, or a callback/flag the code under test
