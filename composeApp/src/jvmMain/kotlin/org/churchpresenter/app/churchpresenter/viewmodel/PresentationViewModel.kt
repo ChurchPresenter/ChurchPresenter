@@ -22,6 +22,7 @@ import presentation.engine.cache.SlideDiskCache
 import presentation.engine.model.Deck
 import presentation.engine.model.DeckFormat
 import presentation.engine.model.DeckLoadError
+import java.awt.image.BufferedImage
 import java.io.File
 
 /**
@@ -130,6 +131,24 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var activeLoadJob: Job? = null
+
+    /**
+     * Parses a deck file. Overridable per-instance so tests can drive the load-failure and
+     * warning-degrade branches of [renderSlides] without a fixture that reproduces each engine
+     * error; production always uses the real [PresentationLoader]. An instance seam, not a
+     * singleton one — each ViewModel has its own, so nothing leaks between tests.
+     */
+    internal var loadDeck: (File) -> LoadResult = { PresentationLoader.load(it) }
+
+    /**
+     * Rasterizes one slide to an image — the single step of [renderSlides] that needs a real
+     * graphics pipeline. Overridable per-instance so tests can drive the per-slide-failure and
+     * no-slides branches with a real deck and a real rasterizer, failing only at the frame render;
+     * production always calls straight through to [DeckRasterizer]. A per-instance seam, so nothing
+     * leaks between tests.
+     */
+    internal var renderSlideFrame: (DeckRasterizer, Int) -> BufferedImage =
+        { rasterizer, index -> rasterizer.renderFinalFrame(index) }
 
     private fun clearCurrentSlideState() {
         _slideFiles.clear()
@@ -315,7 +334,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
             // Parse the deck even on a cache hit — cheap (metadata only), and later workstreams
             // need layers/timelines that are never cached. A parse failure of a previously
             // cached file still shows the cached static slides.
-            val parsed = (PresentationLoader.load(file) as? LoadResult.Success)?.deck
+            val parsed = (loadDeck(file) as? LoadResult.Success)?.deck
             withContext(Dispatchers.Main) {
                 clearCurrentSlideState()
                 _totalSlides.value = cached.slideFiles.size
@@ -341,7 +360,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         var writer: SlideDiskCache.Writer? = null
         var success = false
         try {
-            val deck = when (val result = PresentationLoader.load(file)) {
+            val deck = when (val result = loadDeck(file)) {
                 is LoadResult.Failure -> {
                     withContext(Dispatchers.Main) { _loadError.value = result.error.toUiError() }
                     reportLoadFailure(file, result)
@@ -363,7 +382,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
             DeckRasterizer(deck, renderWidth).use { rasterizer ->
                 for (slide in deck.slides) {
                     try {
-                        val frame = rasterizer.renderFinalFrame(slide.index)
+                        val frame = renderSlideFrame(rasterizer, slide.index)
                         val slideFile = cacheWriter.putSlide(
                             index = slide.index,
                             image = frame,
@@ -422,7 +441,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
         )
     }
 
-    private fun DeckLoadError.toUiError(): PresentationLoadError = when (this) {
+    internal fun DeckLoadError.toUiError(): PresentationLoadError = when (this) {
         DeckLoadError.PASSWORD_PROTECTED -> PresentationLoadError.PASSWORD_PROTECTED
         DeckLoadError.EMPTY_DOCUMENT -> PresentationLoadError.EMPTY_DOCUMENT
         DeckLoadError.UNSUPPORTED_FORMAT, DeckLoadError.PARSE_FAILED -> PresentationLoadError.RENDER_FAILED
