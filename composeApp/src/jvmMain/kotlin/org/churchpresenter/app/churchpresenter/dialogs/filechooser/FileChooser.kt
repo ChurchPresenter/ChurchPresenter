@@ -91,12 +91,19 @@ abstract class FileChooser {
 
     companion object {
         val platformInstance: FileChooser by lazy {
-            val osName = System.getProperty(Constants.SystemProperties.OS_NAME).lowercase()
-            if ("nix" in osName || "nux" in osName) {
-                XdgFileChooser
-            } else {
-                FileKitFileChooser
-            }
+            platformFor(System.getProperty(Constants.SystemProperties.OS_NAME))
+        }
+
+        /**
+         * Which chooser [osName] calls for: Linux talks to the XDG desktop portal, everything else
+         * gets a native dialog through FileKit.
+         *
+         * Picking wrong is not a graceful failure — the XDG chooser on a machine with no session
+         * bus cannot open a dialog at all, so every Open and Save in the app stops working.
+         */
+        internal fun platformFor(osName: String): FileChooser {
+            val name = osName.lowercase()
+            return if ("nix" in name || "nux" in name) XdgFileChooser else FileKitFileChooser
         }
     }
 }
