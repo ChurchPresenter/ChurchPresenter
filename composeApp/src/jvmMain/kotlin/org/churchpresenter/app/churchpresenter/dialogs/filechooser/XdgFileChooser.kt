@@ -8,6 +8,7 @@ import org.freedesktop.dbus.annotations.DBusInterfaceName
 import org.freedesktop.dbus.annotations.Position
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusInterface
+import org.freedesktop.dbus.matchrules.DBusMatchRule
 import org.freedesktop.dbus.matchrules.DBusMatchRuleBuilder
 import org.freedesktop.dbus.types.UInt32
 import org.freedesktop.dbus.types.Variant
@@ -39,8 +40,121 @@ object XdgFileChooser : FileChooser() {
         filters: List<FileNameExtensionFilter>,
         title: String
     ): Path? {
-        return openFileChooser(location, filters, title, suggestedName, selectDirectory = false, multiple = false, DBusFileChooser::SaveFile)?.singleOrNull()
+        return saveSelection(
+            openFileChooser(location, filters, title, suggestedName, selectDirectory = false, multiple = false, DBusFileChooser::SaveFile)
+        )
     }
+
+    /**
+     * The one path a save produced, or null.
+     *
+     * A save dialog can only name one file, so anything else coming back from the portal is a
+     * result that cannot be honoured — treated as no save rather than picking one arbitrarily.
+     */
+    internal fun saveSelection(paths: List<Path>?): Path? = paths?.singleOrNull()
+
+    /**
+     * The filters as the portal wants them: one struct per filter, each carrying glob patterns.
+     *
+     * The portal matches patterns literally, so every extension is expanded to a case-insensitive
+     * glob by [asAnyCaseRegex]. Pattern type `0` marks a glob rather than a MIME type.
+     */
+    internal fun toDBusFilters(filters: List<FileNameExtensionFilter>): Array<DBusFilter> =
+        filters.map { filter ->
+            DBusFilter(
+                filter.description,
+                filter.extensions.map { ext ->
+                    DBusFilter.Pattern(UInt32(0), "*.${ext.asAnyCaseRegex()}")
+                }.toTypedArray()
+            )
+        }.toTypedArray()
+
+    /** Everything the portal is told about the dialog to open. */
+    internal fun buildOptions(
+        path: Path,
+        filters: List<FileNameExtensionFilter>,
+        suggestedName: String?,
+        selectDirectory: Boolean,
+        multiple: Boolean,
+        token: String
+    ): Map<String, Variant<*>> {
+        val options = mutableMapOf<String, Variant<*>>()
+        options[Constants.DBus.Options.MULTIPLE] = Variant(multiple)
+        options[Constants.DBus.Options.DIRECTORY] = Variant(selectDirectory)
+        options[Constants.DBus.Options.CURRENT_FOLDER] = Variant(path.toString())
+        options[Constants.DBus.Options.FILTERS] = Variant(toDBusFilters(filters))
+        // Only a save dialog suggests a name; an open dialog must not send the key at all
+        if (suggestedName != null) {
+            options[Constants.DBus.Options.CURRENT_NAME] = Variant(suggestedName)
+        }
+        options[Constants.DBus.Options.HANDLE_TOKEN] = Variant(token)
+        return options
+    }
+
+    /**
+     * The object path the portal will emit its Response signal on.
+     *
+     * Derived from the connection's unique bus name (`:1.42` → `1_42`) and the handle token, per
+     * https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Request.html.
+     * Getting this wrong means the handler is registered for a path that never fires and the
+     * dialog hangs forever rather than failing.
+     */
+    internal fun requestPath(uniqueName: String, token: String): String {
+        val sender = uniqueName.drop(1).replace('.', '_')
+        return "/org/freedesktop/portal/desktop/request/$sender/$token"
+    }
+
+    /**
+     * Reads the portal's Response signal: `params[0]` is the response code (0 means the operator
+     * picked something) and `params[1]` carries the selected `uris`. Anything else is a cancel.
+     */
+    @Suppress("UNCHECKED_CAST")
+    internal fun parseResponse(params: Array<out Any?>): List<String>? {
+        val response = params[0] as UInt32
+        val results = params[1] as Map<String, Variant<*>>
+        if (response.toInt() != 0) return null
+        return (results["uris"]?.value as? List<String>)?.toList()
+    }
+
+    /** The portal answers with `file://` URIs; callers deal in paths. */
+    internal fun toPaths(uris: List<String>?): List<Path>? = uris?.map { Path.of(URI.create(it)) }
+
+    /**
+     * The rule that catches the portal's Response signal for [requestPath].
+     *
+     * Every field has to match what the portal emits — a wrong interface or member name leaves the
+     * handler listening for a signal that never comes, and the dialog hangs rather than failing.
+     */
+    internal fun responseMatchRule(requestPath: String): DBusMatchRule =
+        DBusMatchRuleBuilder.create()
+            .withType("signal")
+            .withInterface("org.freedesktop.portal.Request")
+            .withMember("Response")
+            .withPath(requestPath)
+            .build()
+
+    /**
+     * The whole portal request: build the options for [token], work out the path the answer will
+     * arrive on, hand both to [ask], and turn the uris it returns into paths.
+     *
+     * [ask] is a parameter rather than a direct call so the sequence can be exercised without a
+     * session bus; in production it registers the signal handler and invokes the portal method.
+     */
+    internal suspend fun requestPaths(
+        path: Path,
+        filters: List<FileNameExtensionFilter>,
+        suggestedName: String?,
+        selectDirectory: Boolean,
+        multiple: Boolean,
+        uniqueName: String,
+        token: String,
+        ask: suspend (options: Map<String, Variant<*>>, requestPath: String) -> List<String>?
+    ): List<Path>? = toPaths(
+        ask(
+            buildOptions(path, filters, suggestedName, selectDirectory, multiple, token),
+            requestPath(uniqueName, token)
+        )
+    )
 
     private suspend inline fun openFileChooser(
         path: Path,
@@ -49,7 +163,8 @@ object XdgFileChooser : FileChooser() {
         suggestedName: String?,
         selectDirectory: Boolean,
         multiple: Boolean,
-        dbusMethod: DBusFileChooser.(String, String, Map<String, Variant<*>>) -> DBusPath
+        // crossinline: invoked from inside the request lambda below, so it cannot return non-locally
+        crossinline dbusMethod: DBusFileChooser.(String, String, Map<String, Variant<*>>) -> DBusPath
     ): List<Path>? = DBusConnectionBuilder.forSessionBus().build().use { conn ->
         val fileChooser = conn.getRemoteObject(
             Constants.DBus.DESKTOP_OBJECT_NAME,
@@ -57,55 +172,17 @@ object XdgFileChooser : FileChooser() {
             DBusFileChooser::class.java
         )
 
-        val options = mutableMapOf<String, Variant<*>>()
-        options[Constants.DBus.Options.MULTIPLE] = Variant(multiple)
-        options[Constants.DBus.Options.DIRECTORY] = Variant(selectDirectory)
-        options[Constants.DBus.Options.CURRENT_FOLDER] = Variant(path.toString())
-        options[Constants.DBus.Options.FILTERS] = Variant(
-            filters.map { filter ->
-                DBusFilter(
-                    filter.description,
-                    filter.extensions.map { ext ->
-                        DBusFilter.Pattern(UInt32(0), "*.${ext.asAnyCaseRegex()}")
-                    }.toTypedArray()
-                )
-            }.toTypedArray()
-        )
-        if (suggestedName != null) {
-            options[Constants.DBus.Options.CURRENT_NAME] = Variant(suggestedName)
-        }
-
-        val token = Random.nextULong().toString(16)
-        options[Constants.DBus.Options.HANDLE_TOKEN] = Variant(token)
-
-        // https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Request.html
-        val sender = conn.uniqueName.drop(1).replace('.', '_')
-        val requestPath = "/org/freedesktop/portal/desktop/request/$sender/$token"
-
-        val result = CompletableDeferred<List<String>?>()
-
-        val rule = DBusMatchRuleBuilder.create()
-            .withType("signal")
-            .withInterface("org.freedesktop.portal.Request")
-            .withMember("Response")
-            .withPath(requestPath)
-            .build()
-        @Suppress("UNCHECKED_CAST")
-        conn.addGenericSigHandler(rule) { signal ->
-            val params = signal.parameters
-            val response = params[0] as UInt32
-            val results = params[1] as Map<String, Variant<*>>
-            if (response.toInt() == 0) {
-                val uris = results["uris"]?.value as? List<String>
-                result.complete(uris?.toList())
-            } else {
-                result.complete(null)
+        requestPaths(
+            path, filters, suggestedName, selectDirectory, multiple,
+            conn.uniqueName, Random.nextULong().toString(16)
+        ) { options, requestPath ->
+            val result = CompletableDeferred<List<String>?>()
+            conn.addGenericSigHandler(responseMatchRule(requestPath)) { signal ->
+                result.complete(parseResponse(signal.parameters))
             }
+            fileChooser.dbusMethod("", title, options)
+            result.await()
         }
-
-        fileChooser.dbusMethod("", title, options)
-
-        result.await()?.map { Path.of(URI.create(it)) }
     }
 
     /**
@@ -113,11 +190,11 @@ object XdgFileChooser : FileChooser() {
      * See https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.FileChooser.html for details.
      */
     @Suppress("unused")
-    private class DBusFilter(
+    internal class DBusFilter(
         @Position(0) val name: String,
         @Position(1) val patterns: Array<Pattern>
     ) : Struct() {
-        class Pattern(
+        internal class Pattern(
             @Position(0) val type: UInt32,
             @Position(1) val pattern: String
         ) : Struct()
