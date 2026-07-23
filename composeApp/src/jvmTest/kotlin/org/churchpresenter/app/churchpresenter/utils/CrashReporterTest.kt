@@ -58,6 +58,25 @@ class CrashReporterTest {
         assertFalse(CrashReporter.isEnabled())
     }
 
+    /**
+     * The real leak guard. `isEnabled()` above only samples one instant, and the production
+     * logback SentryAppender initialises Sentry *lazily* on the first ERROR/WARN — so this whole
+     * suite once shipped its throwaway exceptions to production Sentry while `isEnabled` still
+     * read false at the top. The structural fix is jvmTest's own logback-test.xml with no Sentry
+     * appender; assert that no SentryAppender is attached anywhere so re-adding one fails loudly.
+     */
+    @Test
+    fun `no SentryAppender is attached to logback during tests`() {
+        val context = org.slf4j.LoggerFactory.getILoggerFactory() as ch.qos.logback.classic.LoggerContext
+        val offenders = context.loggerList
+            .flatMap { logger -> logger.iteratorForAppenders().asSequence().toList() }
+            .filter { it.javaClass.name.contains("Sentry", ignoreCase = true) }
+        assertTrue(
+            offenders.isEmpty(),
+            "logback-test.xml must not wire a Sentry appender — found: ${offenders.map { it.javaClass.name }}"
+        )
+    }
+
     @Test
     fun `every telemetry entry point is a silent no-op with Sentry disabled`() {
         // None of these may throw — they are called from UI and render paths.

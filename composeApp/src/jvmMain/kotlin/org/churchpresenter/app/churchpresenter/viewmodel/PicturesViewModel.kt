@@ -99,7 +99,7 @@ class PicturesViewModel(
 
     fun selectFolder(folder: File) {
         _selectedFolder.value = folder
-        clearImages()
+        clearImages() // also cancels the previous folder's watcher
         loadImagesFromFolder(folder)
         startWatching(folder)
     }
@@ -114,7 +114,9 @@ class PicturesViewModel(
             file.isFile && file.extension.lowercase() in imageExtensions
         }?.sortedBy { it.name } ?: emptyList()
 
-        _images.addAll(imageFiles)
+        // Add only files not already present so a re-entrant/repeated load stays idempotent — a
+        // duplicate path in _images would crash the LazyVerticalGrid keyed by absolutePath.
+        _images.addAll(imageFiles.filter { it !in _images })
 
         // Load thumbnails in background
         scope.launch {
@@ -363,11 +365,26 @@ class PicturesViewModel(
         watchJob = scope.launch {
             try {
                 val watchService = FileSystems.getDefault().newWatchService()
-                folder.toPath().register(
-                    watchService,
-                    StandardWatchEventKinds.ENTRY_CREATE,
-                    StandardWatchEventKinds.ENTRY_DELETE
-                )
+                // On macOS the JDK uses PollingWatchService, which stats every existing entry at
+                // registration time. A file deleted concurrently makes register() throw
+                // NoSuchFileException, so retry a few times before giving up on watching.
+                var registered = false
+                var attempt = 0
+                while (isActive && !registered) {
+                    try {
+                        folder.toPath().register(
+                            watchService,
+                            StandardWatchEventKinds.ENTRY_CREATE,
+                            StandardWatchEventKinds.ENTRY_DELETE
+                        )
+                        registered = true
+                    } catch (e: java.io.IOException) {
+                        if (++attempt >= 3 || !folder.isDirectory) {
+                            watchService.close()
+                            return@launch
+                        }
+                    }
+                }
                 while (isActive) {
                     val key = watchService.take()
                     var changed = false
@@ -381,7 +398,10 @@ class PicturesViewModel(
                         val file = File(folder, fileName)
                         when (kind) {
                             StandardWatchEventKinds.ENTRY_CREATE -> {
-                                if (file.exists() && file.isFile && file !in _images) {
+                                // isActive gates the add: cancellation is cooperative, so a watcher
+                                // cancelled by clearImages() can still be mid-pollEvents() here — an
+                                // add now would land in _images after the reload and duplicate a path.
+                                if (isActive && file.exists() && file.isFile && file !in _images) {
                                     // Insert in sorted order, keep selected image stable
                                     val insertIndex = _images.indexOfFirst { it.name > file.name }
                                     if (insertIndex >= 0) {
@@ -423,6 +443,8 @@ class PicturesViewModel(
                 // Expected on dispose
             } catch (_: InterruptedException) {
                 // Expected on cancel
+            } catch (_: java.io.IOException) {
+                // Folder became unavailable mid-watch (deleted/unmounted). Watching is best-effort.
             }
         }
     }

@@ -9,6 +9,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkConstructor
 import io.mockk.unmockkObject
 import io.mockk.verify
+import io.sentry.SentryLevel
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionSurfacePlacement
 import org.churchpresenter.app.churchpresenter.models.CompanionSurfaceSlot
@@ -29,9 +30,10 @@ import kotlin.test.assertTrue
  * Three rules carry the weight here. Each placement must register under a *distinct* device id, or
  * two placements fight over the same "current page" in Companion. A placement whose grid shape was
  * edited must be torn down and re-registered, because the protocol has no "change my grid" message
- * — only a fresh ADD-DEVICE. And connection failures must be reported once per episode, not once
- * per retry, since the reconnect loop cycles CONNECTING/ERROR every couple of seconds forever while
- * a host is unreachable.
+ * — only a fresh ADD-DEVICE. And connection failures must leave a warning breadcrumb once per
+ * episode, not once per retry, since the reconnect loop cycles CONNECTING/ERROR every couple of
+ * seconds forever while a host is unreachable. (These are environmental, so they are breadcrumbs
+ * for later crash context, not standalone Sentry issues — hence the WARNING-level discriminator.)
  *
  * `CompanionSatelliteClient` is replaced with `mockkConstructor`, so no TCP socket is ever opened
  * and no reconnect loop runs. Companion's own callbacks (status, buttons, brightness) are invoked
@@ -503,7 +505,7 @@ class CompanionSatelliteViewModelTest {
             reportStatus(vm, tab, CompanionConnectionStatus.ERROR, "Connection refused")
         }
 
-        verify(exactly = 1) { CrashReporter.reportWarning(any(), any(), any()) }
+        verify(exactly = 1) { CrashReporter.breadcrumb(any(), any(), SentryLevel.WARNING) }
     }
 
     @Test
@@ -516,7 +518,7 @@ class CompanionSatelliteViewModelTest {
         reportStatus(vm, tab, CompanionConnectionStatus.CONNECTED)
         reportStatus(vm, tab, CompanionConnectionStatus.ERROR, "Connection refused")
 
-        verify(exactly = 2) { CrashReporter.reportWarning(any(), any(), any()) }
+        verify(exactly = 2) { CrashReporter.breadcrumb(any(), any(), SentryLevel.WARNING) }
     }
 
     @Test
@@ -526,7 +528,7 @@ class CompanionSatelliteViewModelTest {
 
         repeat(3) { reportStatus(vm, slot(CompanionSurfacePlacement.TAB), CompanionConnectionStatus.CONNECTING) }
 
-        verify(exactly = 0) { CrashReporter.reportWarning(any(), any(), any()) }
+        verify(exactly = 0) { CrashReporter.breadcrumb(any(), any(), SentryLevel.WARNING) }
     }
 
     // ── Tearing down ────────────────────────────────────────────────────────────
