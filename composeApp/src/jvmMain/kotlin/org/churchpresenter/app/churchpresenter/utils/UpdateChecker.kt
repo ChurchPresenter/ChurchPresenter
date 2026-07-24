@@ -83,9 +83,18 @@ object UpdateChecker {
      * When [includePrereleases] is true, releases flagged `prerelease` on GitHub are
      * eligible too; otherwise they're skipped exactly like drafts.
      */
-    suspend fun checkForUpdate(includePrereleases: Boolean): UpdateCheckResult = withContext(Dispatchers.IO) {
-        try {
-            val url = URI(RELEASES_API_URL).toURL()
+    suspend fun checkForUpdate(includePrereleases: Boolean): UpdateCheckResult =
+        checkForUpdate(includePrereleases, RELEASES_API_URL)
+
+    internal suspend fun checkForUpdate(includePrereleases: Boolean, apiUrl: String): UpdateCheckResult =
+        withContext(Dispatchers.IO) {
+            val body = fetchReleasesFrom(apiUrl) ?: return@withContext UpdateCheckResult.UpToDate
+            selectUpdate(body, includePrereleases, BuildConfig.APP_VERSION)
+        }
+
+    internal fun fetchReleasesFrom(apiUrl: String): String? {
+        return try {
+            val url = URI(apiUrl).toURL()
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.setRequestProperty("Accept", "application/vnd.github+json")
@@ -93,11 +102,18 @@ object UpdateChecker {
             connection.connectTimeout = 5_000
             connection.readTimeout = 5_000
 
-            if (connection.responseCode != 200) return@withContext UpdateCheckResult.UpToDate
+            if (connection.responseCode != 200) return null
 
             val body = connection.inputStream.bufferedReader().readText()
             connection.disconnect()
+            body
+        } catch (_: Exception) {
+            null
+        }
+    }
 
+    internal fun selectUpdate(body: String, includePrereleases: Boolean, currentVersion: String): UpdateCheckResult {
+        return try {
             // GitHub returns releases sorted by created_at descending.
             val releases = json.parseToJsonElement(body).jsonArray
             for (rel in releases) {
@@ -114,7 +130,7 @@ object UpdateChecker {
                 // First OS-matching release = latest build available for this OS.
                 val latestVersion = (obj["tag_name"]?.jsonPrimitive?.contentOrNull ?: continue)
                     .removePrefix("v")
-                return@withContext if (isNewerVersion(latestVersion, BuildConfig.APP_VERSION)) {
+                return if (isNewerVersion(latestVersion, currentVersion)) {
                     UpdateCheckResult.Available(
                         UpdateInfo(
                             latestVersion = latestVersion,

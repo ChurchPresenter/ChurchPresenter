@@ -11,6 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -53,13 +54,29 @@ object LiveMapReporter {
     // Explicitly checks for "linux" rather than treating it as the else-case,
     // matching the website's own os validation (unrecognized -> "unknown"
     // rather than assumed) instead of guessing for anything unexpected.
-    private val os: String = System.getProperty("os.name", "").lowercase().let {
+    private val os: String = osTag(System.getProperty("os.name", ""))
+
+    internal fun osTag(osName: String): String = osName.lowercase().let {
         when {
             it.contains("win") -> "windows"
             it.contains("mac") -> "macos"
             it.contains("linux") -> "linux"
             else -> "unknown"
         }
+    }
+
+    internal fun buildPingUrl(
+        os: String,
+        version: String,
+        updateCheckInterval: UpdateCheckInterval?,
+        isDevBuild: Boolean,
+    ): String = buildString {
+        append(PING_URL)
+        append("?platform=desktop")
+        append("&os=$os")
+        append("&version=$version")
+        if (updateCheckInterval != null) append("&updateCheck=${updateCheckInterval.name.lowercase()}")
+        if (isDevBuild) append("&src=dev")
     }
 
     /**
@@ -72,34 +89,37 @@ object LiveMapReporter {
      * not tied to analytics opt-in/out.
      */
     fun pingOnOpen(installId: String? = null, updateCheckInterval: UpdateCheckInterval? = null) {
-        val url = buildString {
-            append(PING_URL)
-            append("?platform=desktop")
-            append("&os=$os")
-            append("&version=${BuildConfig.APP_VERSION}")
-            if (updateCheckInterval != null) append("&updateCheck=${updateCheckInterval.name.lowercase()}")
-            if (isDevBuild) append("&src=dev")
+        val url = buildPingUrl(os, BuildConfig.APP_VERSION, updateCheckInterval, isDevBuild)
+        scope.launch { ping(url, installId) }
+    }
+
+    internal suspend fun ping(url: String, installId: String?) {
+        suspend fun tryPing(): Boolean = try {
+            http.get(url) {
+                if (!installId.isNullOrBlank()) header("X-Install-Id", installId)
+            }
+            true
+        } catch (_: Exception) {
+            // Non-fatal — silently ignore network errors.
+            false
         }
-        scope.launch {
-            suspend fun tryPing(): Boolean = try {
-                http.get(url) {
-                    if (!installId.isNullOrBlank()) header("X-Install-Id", installId)
-                }
-                true
-            } catch (_: Exception) {
-                // Non-fatal — silently ignore network errors.
-                false
-            }
+        pingWithRetry(::tryPing)
+    }
 
-            repeat(QUICK_ATTEMPTS) { attempt ->
-                if (tryPing()) return@launch
-                if (attempt < QUICK_ATTEMPTS - 1) delay(QUICK_RETRY_DELAY)
-            }
-
-            repeat(SLOW_ATTEMPTS) {
-                delay(SLOW_RETRY_DELAY)
-                if (tryPing()) return@launch
-            }
+    internal suspend fun pingWithRetry(
+        tryPing: suspend () -> Boolean,
+        quickAttempts: Int = QUICK_ATTEMPTS,
+        quickDelay: Duration = QUICK_RETRY_DELAY,
+        slowAttempts: Int = SLOW_ATTEMPTS,
+        slowDelay: Duration = SLOW_RETRY_DELAY,
+    ) {
+        repeat(quickAttempts) { attempt ->
+            if (tryPing()) return
+            if (attempt < quickAttempts - 1) delay(quickDelay)
+        }
+        repeat(slowAttempts) {
+            delay(slowDelay)
+            if (tryPing()) return
         }
     }
 }

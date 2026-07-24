@@ -212,6 +212,16 @@ newline""",
         assertTrue(row.isNull("suggestedVerse") || row.str("suggestedVerse") == "1")
     }
 
+    @Test
+    fun `a chapter-level suggestion records suggestedVerse null`() {
+        val s = useSession("outcome-noverse")
+        TrainingDataLogger.logSuggestionOutcome(
+            suggestedBook = 19, suggestedChapter = 23, suggestedVerse = null, action = "accepted",
+        )
+        val row = rows("suggestion-outcomes-", s).last()
+        assertTrue(row.containsKey("suggestedVerse") && row.isNull("suggestedVerse"))
+    }
+
     // ── operator flags ──────────────────────────────────────────────────────────
 
     @Test
@@ -229,6 +239,19 @@ newline""",
         assertEquals("4", row.str("verseEnd"))
         assertEquals("seg-9", row.str("segmentId"))
         assertEquals("reverse", row.str("matchType"))
+    }
+
+    @Test
+    fun `an operator flag with no session id records sessionId null`() {
+        TrainingDataLogger.sessionId = null
+        TrainingDataLogger.logOperatorFlag(kind = "premature", book = 1, chapter = 1)
+        val file = assertNotNull(
+            logDir.listFiles()?.filter { it.name.startsWith("operator-flags-") }
+                ?.maxByOrNull { it.lastModified() },
+            "expected a timestamp-named fallback file",
+        )
+        val row = file.readLines().last().let { Json.parseToJsonElement(it) as JsonObject }
+        assertTrue(row.isNull("sessionId"))
     }
 
     @Test
@@ -254,5 +277,76 @@ newline""",
         assertEquals(1, rows("live-references-", s).count { it.str("type") != "session" })
         assertEquals(1, rows("suggestion-outcomes-", s).count { it.str("type") != "session" })
         assertEquals(1, rows("operator-flags-", s).count { it.str("type") != "session" })
+    }
+
+    // ── retention sweep ─────────────────────────────────────────────────────────
+
+    /**
+     * The cleanup runs once per process (an AtomicBoolean latch), and by the time the suite first
+     * writes, the dir is usually empty — so the delete loop never executes under normal test flow.
+     * Reset the latch to false (reading the field, then calling the AtomicBoolean's own `set`) so the
+     * real production sweep runs against a controlled set of files. This reproduces exactly the
+     * fresh-process state, not a state the code can't otherwise reach.
+     */
+    private fun resetCleanupLatch() {
+        val field = TrainingDataLogger::class.java.getDeclaredField("cleanedUp").apply { isAccessible = true }
+        (field.get(TrainingDataLogger) as java.util.concurrent.atomic.AtomicBoolean).set(false)
+    }
+
+    private fun writeAged(name: String, daysOld: Long): File =
+        File(logDir, name).apply {
+            writeText("{}\n")
+            setLastModified(System.currentTimeMillis() - daysOld * 24 * 60 * 60 * 1000)
+        }
+
+    @Test
+    fun `cleanup deletes dated logs past the age cutoff and keeps recent ones`() {
+        logDir.mkdirs()
+        val oldLive = writeAged("live-references-old.jsonl", daysOld = 40)
+        val oldOutcome = writeAged("suggestion-outcomes-old.jsonl", daysOld = 40)
+        val oldFlag = writeAged("operator-flags-old.jsonl", daysOld = 40)
+        val oldDb = writeAged("snapshot-old.db", daysOld = 40)
+        val oldDbTmp = writeAged("snapshot-old.db.tmp", daysOld = 40)
+        val recentLive = writeAged("live-references-new.jsonl", daysOld = 1)
+        val recentDb = writeAged("snapshot-new.db", daysOld = 1)
+
+        resetCleanupLatch()
+        TrainingDataLogger.cleanupOldLogsOnce()
+
+        for (gone in listOf(oldLive, oldOutcome, oldFlag, oldDb, oldDbTmp)) {
+            assertTrue(!gone.exists(), "expected ${gone.name} (40 days old) to be swept")
+        }
+        for (kept in listOf(recentLive, recentDb)) {
+            assertTrue(kept.exists(), "expected ${kept.name} (1 day old) to survive")
+        }
+    }
+
+    @Test
+    fun `cleanup leaves unrelated files untouched even when old`() {
+        // Only the three known prefixes and the .db snapshots are subject to retention; anything
+        // else the operator or another tool left in the folder must never be deleted.
+        logDir.mkdirs()
+        val unrelated = writeAged("notes.txt", daysOld = 60)
+        val oddJsonl = writeAged("something-else-old.jsonl", daysOld = 60) // .jsonl but wrong prefix
+
+        resetCleanupLatch()
+        TrainingDataLogger.cleanupOldLogsOnce()
+
+        assertTrue(unrelated.exists(), "a non-log file must not be swept")
+        assertTrue(oddJsonl.exists(), "a .jsonl without a known prefix must not be swept")
+    }
+
+    @Test
+    fun `cleanup runs at most once per process`() {
+        logDir.mkdirs()
+        resetCleanupLatch()
+        TrainingDataLogger.cleanupOldLogsOnce() // consumes the latch
+
+        // A file aged past the cutoff created AFTER the latch is spent must survive: the guard
+        // short-circuits the second call before it reaches the sweep.
+        val afterLatch = writeAged("live-references-stale.jsonl", daysOld = 40)
+        TrainingDataLogger.cleanupOldLogsOnce()
+
+        assertTrue(afterLatch.exists(), "a spent latch must skip the sweep entirely")
     }
 }

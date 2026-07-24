@@ -64,6 +64,26 @@ class PlanningCenterDownloadTest {
         dir = Files.createTempDirectory("cp-pco-download-test").toFile()
         server = FakeAttachmentHost(ServerSocket(0).use { it.localPort }, payload)
         server.start()
+        awaitListening(server.port)
+    }
+
+    /**
+     * `engine.start(wait = false)` returns before Netty has bound the port, so the first request can
+     * beat the server up and come back as a NetworkError (connection refused) instead of Success.
+     * Wait for the positive signal — the port accepting a TCP connection — before any test runs.
+     * Localhost binds in a few ms; the deadline only exists to fail loudly if the server never came up.
+     */
+    private fun awaitListening(port: Int) {
+        val deadline = System.currentTimeMillis() + 5000
+        while (System.currentTimeMillis() < deadline) {
+            try {
+                java.net.Socket().use { it.connect(java.net.InetSocketAddress("127.0.0.1", port), 200) }
+                return
+            } catch (_: Exception) {
+                Thread.sleep(10)
+            }
+        }
+        throw IllegalStateException("fake attachment host never came up on port $port")
     }
 
     @AfterTest

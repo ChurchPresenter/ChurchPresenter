@@ -13,19 +13,22 @@ import java.nio.file.ClosedWatchServiceException
 import java.nio.file.FileSystems
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
+import java.nio.file.WatchService
 
 class SongFolderWatcher(
     private val scope: CoroutineScope,
     private val onSongsChanged: () -> Unit
 ) {
     private var watchJob: Job? = null
+    @Volatile private var watchService: WatchService? = null
 
     fun watchDirectory(rootDir: File) {
-        watchJob?.cancel()
+        stop()
         if (!rootDir.exists() || !rootDir.isDirectory) return
 
+        val watchService = FileSystems.getDefault().newWatchService()
+        this.watchService = watchService
         watchJob = scope.launch(Dispatchers.IO) {
-            val watchService = FileSystems.getDefault().newWatchService()
             try {
                 // Recursively watch root and all subdirectories
                 fun registerDir(dir: File) {
@@ -101,6 +104,13 @@ class SongFolderWatcher(
     }
 
     fun dispose() {
+        stop()
+    }
+
+    private fun stop() {
         watchJob?.cancel()
+        watchJob = null
+        watchService?.let { runCatching { it.close() } }
+        watchService = null
     }
 }

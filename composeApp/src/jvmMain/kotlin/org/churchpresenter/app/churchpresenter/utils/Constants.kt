@@ -32,11 +32,11 @@ fun rememberScreenDevices(): Array<GraphicsDevice> {
 /** Returns the presenter screen bounds (first non-primary screen if available, else primary). */
 fun presenterScreenBounds(): Rectangle {
     val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
-    val screens = ge.screenDevices
-    val primary = ge.defaultScreenDevice
-    val nonPrimary = screens.firstOrNull { it != primary }
-    return (nonPrimary ?: primary).defaultConfiguration.bounds
+    return presenterBoundsOf(ge.screenDevices, ge.defaultScreenDevice)
 }
+
+internal fun presenterBoundsOf(screens: Array<GraphicsDevice>, primary: GraphicsDevice): Rectangle =
+    (screens.firstOrNull { it != primary } ?: primary).defaultConfiguration.bounds
 
 /** Find a screen index by stored bounds. Returns null if no match. */
 fun findScreenIndexByBounds(screens: Array<GraphicsDevice>, x: Int, y: Int, w: Int, h: Int): Int? {
@@ -48,10 +48,10 @@ fun findScreenIndexByBounds(screens: Array<GraphicsDevice>, x: Int, y: Int, w: I
 }
 
 /** Returns the aspect ratio of the presenter screen. */
-fun presenterAspectRatio(): Float {
-    val bounds = presenterScreenBounds()
-    return bounds.width.toFloat() / bounds.height.toFloat()
-}
+fun presenterAspectRatio(): Float = aspectRatioOf(presenterScreenBounds())
+
+internal fun aspectRatioOf(bounds: Rectangle): Float =
+    bounds.width.toFloat() / bounds.height.toFloat()
 
 /** Formats an aspect ratio as a common name (e.g. "16:9") or decimal fallback (e.g. "1.78:1"). */
 fun formatAspectRatio(width: Int, height: Int): String {

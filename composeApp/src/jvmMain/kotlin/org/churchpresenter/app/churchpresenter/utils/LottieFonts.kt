@@ -50,8 +50,11 @@ object LottieFonts : LottieFontManager {
         fontFiles.values.flatMap { (regular, bold) -> listOfNotNull(regular, bold) }
             .map { "/fonts/$it" }
 
+    internal fun wantsBold(weight: FontWeight, name: String): Boolean =
+        weight >= FontWeight.SemiBold || name.endsWith("-Bold")
+
     override suspend fun font(font: LottieFontSpec): Font? {
-        val wantBold = font.weight >= FontWeight.SemiBold || font.name.endsWith("-Bold")
+        val wantBold = wantsBold(font.weight, font.name)
         val key = "${font.family}|$wantBold|${font.style}"
         synchronized(cache) { if (cache.containsKey(key)) return cache[key] }
         val resolved = loadFont(font.family, wantBold, font.style)
@@ -59,7 +62,7 @@ object LottieFonts : LottieFontManager {
         return resolved
     }
 
-    private fun loadFont(family: String, wantBold: Boolean, style: FontStyle): Font? {
+    internal fun loadFont(family: String, wantBold: Boolean, style: FontStyle): Font? {
         val bytes = bundledFontBytes(family, wantBold)
             ?: systemFontBytes(family, wantBold)
             ?: return null
@@ -67,7 +70,7 @@ object LottieFonts : LottieFontManager {
         return Font(identity = "$family-$weight-$style", data = bytes, weight = weight, style = style)
     }
 
-    private fun bundledFontBytes(family: String, wantBold: Boolean): ByteArray? {
+    internal fun bundledFontBytes(family: String, wantBold: Boolean): ByteArray? {
         val (regularFile, boldFile) = fontFiles[family] ?: return null
         // Families without a bold cut serve the regular data declared at the requested weight,
         // so the renderer synthesizes the heavier stroke instead of falling back entirely.
@@ -85,6 +88,6 @@ object LottieFonts : LottieFontManager {
      * this object used to scan itself). A bold request falls back to the regular cut (the
      * requested FontWeight then synthesizes the heavier stroke).
      */
-    private fun systemFontBytes(family: String, wantBold: Boolean): ByteArray? =
+    internal fun systemFontBytes(family: String, wantBold: Boolean): ByteArray? =
         SlideFontRegistry.findSystemFontFile(family, wantBold)?.readBytes()
 }

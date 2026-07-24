@@ -12,9 +12,11 @@ import java.awt.Desktop
  * to re-activate the app, leaving all menus disabled until refocus. Explicitly
  * bring the window to front and ask AppKit to activate the app once.
  */
+internal fun isMacOs(osName: String): Boolean = osName.lowercase().contains("mac")
+
 @Composable
 fun FrameWindowScope.MacMenuBarActivationFix() {
-    if (!System.getProperty("os.name", "").lowercase().contains("mac")) return
+    if (!isMacOs(System.getProperty("os.name", ""))) return
     LaunchedEffect(Unit) {
         delay(300)   // let AppKit settle after the previous window closed
         try {
