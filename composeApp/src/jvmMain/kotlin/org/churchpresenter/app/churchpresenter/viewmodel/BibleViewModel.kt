@@ -74,7 +74,7 @@ data class DetectedReference(
 
 /** Label matching the engine's own matchType strings ("explicit"/"continuation"/"chapter-scan"/
  * "chapter-history"/"reverse"), for training-log correlation — see TrainingDataLogger.logLiveReference. */
-private fun DetectionSource.toMatchTypeLabel(): String = when (this) {
+internal fun DetectionSource.toMatchTypeLabel(): String = when (this) {
     DetectionSource.EXPLICIT -> "explicit"
     DetectionSource.CONTINUATION -> "continuation"
     DetectionSource.CHAPTER_SCAN -> "chapter-scan"
@@ -1385,7 +1385,7 @@ class BibleViewModel(
      * Scores how well [name] matches the query (both already lowercased). Spaces are ignored on a
      * second pass so e.g. "1cor"/"1 co" still match "1 corinthians". Higher is better; 0 = no match.
      */
-    private fun scoreNameMatch(name: String, norm: String, normNoSpace: String): Int {
+    internal fun scoreNameMatch(name: String, norm: String, normNoSpace: String): Int {
         val nameNoSpace = name.replace(" ", "")
         return when {
             name == norm || nameNoSpace == normNoSpace -> 100
@@ -1401,7 +1401,7 @@ class BibleViewModel(
      * (displayed) names and, for cross-language support, the standard English names. Ties are
      * broken by the shortest book name, then canonical order (so "john" beats "1 john"/"2 john").
      */
-    private fun rankedBookMatches(token: String): List<Pair<Int, Int>> {
+    internal fun rankedBookMatches(token: String): List<Pair<Int, Int>> {
         val norm = token.trim().lowercase().replace(Regex("\\s+"), " ")
         if (norm.isEmpty()) return emptyList()
         val normNoSpace = norm.replace(" ", "")
@@ -1442,7 +1442,7 @@ class BibleViewModel(
      * match — i.e. an exact match, or a unique top score — so live typing doesn't flicker through
      * books on ambiguous input like "jo" (Joshua/Job/Joel/Jonah/John all tie) or "cor" (1 & 2 Cor).
      */
-    private fun resolveBookForLiveNav(token: String): Int {
+    internal fun resolveBookForLiveNav(token: String): Int {
         val norm = token.trim().lowercase()
         if (norm.isEmpty()) return -1
         _books.value.indexOfFirst { it.lowercase() == norm }.takeIf { it >= 0 }?.let { return it }
@@ -1854,7 +1854,7 @@ class BibleViewModel(
         return bible.getVerseDetails(bible.getBookId(bookIndex), chapter, verse)?.second
     }
 
-    private fun buildDetectionLabel(bookIndex: Int, chapter: Int, vs: Int?, ve: Int?): String {
+    internal fun buildDetectionLabel(bookIndex: Int, chapter: Int, vs: Int?, ve: Int?): String {
         val bookName = _books.value.getOrNull(bookIndex) ?: return "$chapter"
         val versePart = when {
             vs != null && ve != null && ve > vs -> ":$vs-$ve"
