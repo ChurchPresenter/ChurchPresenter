@@ -149,6 +149,29 @@ When writing tests here:
   (Not a flaky test: `:composeApp:jvmTest` itself sometimes fails with
   `NoSuchFileException: .../test-results/jvmTest/binary/in-progress-results-*.bin` — that is
   Gradle losing its own scratch file, unrelated to any assertion. Re-run.)
+- **`mockk`/`spyk`/reflection are a LAST RESORT, not a first reach.** Reach for a real fixture, a
+  plain fake (a stand-in lambda, a constructed data class), or widening a member to `internal`
+  first — those exercise real behaviour and don't rot when signatures change. Only when the branch
+  needs an object that genuinely cannot be built or driven any other way is a mock justified:
+  - A real example worth it: `PresenterManager.presentationShowSlide`'s animated branches need an
+    animated `Deck` (a real one means a POI-built PPTX with a `<p:transition>` and a `DeckRasterizer`
+    that renders — slow, graphics, flaky headless) and a `PresentationPlayer` that cannot be
+    constructed from a mock deck (its ctor rasterizes). `mockk<Deck>`/`mockk<PresentationPlayer>`
+    injected via the `internal presentationPlayer` field is the only way in.
+  - A counter-example NOT worth it: `SongsViewModel`'s remote follower path looks mock-shaped but is
+    fully reachable with plain fakes — a real `SongCatalogResponse` and a `fetchDetail` lambda
+    returning a constructed `SongDetailDto`, driven through `setInstanceLinkSource` → `selectSong`.
+    No mock. Prefer this.
+  - Even with a mock, **assert the real outcome** — which object ends up live, the resulting state,
+    an identity (`assertSame`) — over `verify { mock.method() }`. A lone "a stub was called"
+    assertion tests nothing; a supporting `verify` alongside a real-state assertion is fine.
+  - Use **reflection to READ** private `_` backing state in an assertion when it has no getter —
+    never to WRITE it to force a state the public API cannot produce (that just exercises dead
+    defensive code). Widening to `internal` is preferred over reflection where the field can be
+    widened; keep `_`-prefixed backing fields private.
+  - `mockk` of a final class pays a one-time JVM instrumentation cost (~1s) on first use; it is
+    amortised across the suite but can push an *isolated* first run near the 1s bar — check it, and
+    prefer non-mock approaches partly for this reason.
 - **Isolate `user.home` before constructing a ViewModel** — several resolve file paths from it at
   construction and then write or delete there. `CrashReporter`, `InstanceLinkLogger` and
   `TrainingDataLogger` resolve theirs once per JVM, so touch them before any swap or they latch

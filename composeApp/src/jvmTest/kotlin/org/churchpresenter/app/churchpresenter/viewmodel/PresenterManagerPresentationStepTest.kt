@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
@@ -7,6 +10,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import presentation.engine.LoadResult
 import presentation.engine.PresentationLoader
 import presentation.engine.model.Deck
+import presentation.engine.model.Slide
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -56,6 +60,56 @@ class PresenterManagerPresentationStepTest {
             doc.save(file)
         }
         return (PresentationLoader.load(file) as LoadResult.Success).deck
+    }
+
+    /**
+     * An animated deck and a stand-in player, as a LAST RESORT: an animated `Deck` needs a real
+     * PPTX/Keynote with a transition and a `DeckRasterizer` that renders (graphics, slow, flaky
+     * headless), and a real `PresentationPlayer` cannot be built from a mock deck (its constructor
+     * rasterizes). So `presentationShowSlide`'s animated idempotence/reuse branches are reached with
+     * mocks — but the assertions are on the real outcome (which player instance ends up live, and
+     * whether it was torn down), not merely that a mock method was called.
+     */
+    private fun animatedDeck(): Deck {
+        val slide = mockk<Slide>()
+        every { slide.timeline } returns null
+        every { slide.transition } returns mockk() // non-null -> the deck counts as animated
+        return mockk<Deck> { every { slides } returns listOf(slide) }
+    }
+
+    private fun stubPlayer(deck: Deck, showingIndex: Int): PresentationPlayer =
+        mockk<PresentationPlayer>(relaxed = true).also {
+            every { it.deck } returns deck
+            every { it.currentSlideIndex } returns showingIndex
+        }
+
+    @Test
+    fun `re-showing the live animated slide leaves its player running`() {
+        val pm = manager()
+        val deck = animatedDeck()
+        val player = stubPlayer(deck, showingIndex = 0)
+        pm.setPresentingMode(Presenting.PRESENTATION)
+        pm.presentationPlayer = player
+
+        pm.presentationShowSlide(deck, slideIndex = 0) // same slide, visible -> idempotent
+
+        assertSame(player, pm.presentationPlayer, "the live slide's animation must not be torn down and restarted")
+        verify(exactly = 0) { player.close() }
+        verify(exactly = 0) { player.showSlide(any(), any()) }
+    }
+
+    @Test
+    fun `showing a different slide of the same deck reuses the player`() {
+        val pm = manager()
+        val deck = animatedDeck()
+        val player = stubPlayer(deck, showingIndex = 5) // currently on slide 5
+        pm.setPresentingMode(Presenting.PRESENTATION)
+        pm.presentationPlayer = player
+
+        pm.presentationShowSlide(deck, slideIndex = 0) // different slide -> not idempotent, reuse
+
+        assertSame(player, pm.presentationPlayer, "the same deck's player is reused, not rebuilt")
+        verify { player.showSlide(0, any()) }
     }
 
     // ── A non-animated deck never starts the player ──────────────────────────────
