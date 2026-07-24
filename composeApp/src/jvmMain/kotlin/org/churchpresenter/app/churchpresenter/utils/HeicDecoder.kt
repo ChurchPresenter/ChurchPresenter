@@ -51,7 +51,7 @@ object HeicDecoder {
 
     // ── Fallback: ImageIO ────────────────────────────────────────────────────
 
-    private fun convertWithImageIO(heicFile: File): ByteArray? {
+    internal fun convertWithImageIO(heicFile: File): ByteArray? {
         return try {
             val bufferedImage = ImageIO.read(heicFile) ?: return null
             val out = ByteArrayOutputStream()

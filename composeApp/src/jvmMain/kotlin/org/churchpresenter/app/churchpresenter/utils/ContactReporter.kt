@@ -82,21 +82,31 @@ object ContactReporter {
                 contentType(ContentType.Application.Json)
                 setBody(json.encodeToString(ContactRequest.serializer(), request))
             }
-            when (response.status.value) {
-                200 -> Outcome.Success
-                429 -> Outcome.RateLimited
-                in 400..499 -> {
-                    val error = runCatching {
-                        json.decodeFromString(ErrorBody.serializer(), response.bodyAsText()).error
-                    }.getOrNull()
-                    Outcome.Invalid(error)
-                }
-                else -> Outcome.Failure
-            }
+            // A 4xx is the only status that needs the body read for its reason, so it is mapped here
+            // (the one place with the response in hand) rather than inside [classifyStatus].
+            classifyStatus(response.status.value)
+                ?: Outcome.Invalid(parseErrorMessage(response.bodyAsText()))
         } catch (_: Exception) {
             // Connection refused / no route / DNS / timeout — surfaced as a network error
             // so the UI can tell the user to check their connection.
             Outcome.NetworkError
         }
     }
+
+    /**
+     * Maps an HTTP status to its terminal [Outcome], or null for a 4xx whose reason still has to be
+     * read out of the response body. This is the decision that routes the user to retry, to the web
+     * form, or to fix their input — split out from [submit] so it is testable without a socket.
+     */
+    internal fun classifyStatus(status: Int): Outcome? = when (status) {
+        200 -> Outcome.Success
+        429 -> Outcome.RateLimited
+        in 400..499 -> null
+        else -> Outcome.Failure
+    }
+
+    /** Lifts the server's human-readable reason out of a 4xx JSON body, or null if it isn't there. */
+    internal fun parseErrorMessage(body: String): String? = runCatching {
+        json.decodeFromString(ErrorBody.serializer(), body).error
+    }.getOrNull()
 }

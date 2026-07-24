@@ -19,20 +19,87 @@ import java.time.format.DateTimeFormatter
  */
 object DeviceInfoReport {
 
-    fun generate(settings: AppSettings): String = buildString {
-        val now = LocalDateTime.now()
+    internal data class DeviceFacts(
+        val appVersion: String,
+        val buildType: String,
+        val installId: String,
+        val didCrashLastRun: Boolean,
+        val consecutiveCrashes: Int,
+        val videoBackgroundsDisabled: Boolean,
+        val screens: List<String>,
+        val deckLinkAvailable: Boolean,
+        val deckLinkDevices: List<String>,
+        val vlcAvailable: Boolean,
+        val vlcReason: String,
+        val jcefInitialized: Boolean,
+        val jcefMacUnsupported: Boolean,
+        val songFolderCount: Int,
+        val totalSongs: Int,
+        val bibleCount: Int,
+        val analyticsEnabled: Boolean,
+    )
+
+    internal fun screenLine(index: Int, width: Int, height: Int, refreshRate: Int, primary: Boolean): String =
+        "  ${index + 1}. ${width}x${height} @${refreshRate}Hz${if (primary) " (primary)" else ""}"
+
+    internal fun deviceLine(index: Int, name: String): String = "  ${index + 1}. $name"
+
+    fun generate(settings: AppSettings): String = render(settings, gather(settings), LocalDateTime.now())
+
+    internal fun gather(settings: AppSettings): DeviceFacts {
         val appVersion = try { BuildConfig.VERSION_DISPLAY } catch (_: Exception) { "unknown" }
         val buildType = try { if (BuildConfig.IS_RELEASE) "release" else "dev" } catch (_: Exception) { "unknown" }
 
+        val screens = try {
+            val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+            ge.screenDevices.mapIndexed { index, device ->
+                val mode = device.displayMode
+                screenLine(index, mode.width, mode.height, mode.refreshRate, device == ge.defaultScreenDevice)
+            }
+        } catch (_: Exception) { emptyList() }
+
+        val deckLinkAvailable = try { DeckLinkManager.isAvailable() } catch (_: Exception) { false }
+        val deckLinkDevices = if (deckLinkAvailable) {
+            try { DeckLinkManager.listDevices().map { deviceLine(it.index, it.name) } } catch (_: Exception) { emptyList() }
+        } else emptyList()
+
+        val vlcAvailable = try { isVlcAvailable } catch (_: Exception) { false }
+
+        val fileManager = FileManager()
+        val songFolders = try { fileManager.getSongFoldersInDirectory(settings.songSettings.storageDirectory) } catch (_: Exception) { emptyList() }
+        val bibleFiles = try { fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory) } catch (_: Exception) { emptyList() }
+
+        return DeviceFacts(
+            appVersion = appVersion,
+            buildType = buildType,
+            installId = CrashReporter.installId(),
+            didCrashLastRun = CrashReporter.didCrashLastRun,
+            consecutiveCrashes = CrashReporter.consecutiveCrashes,
+            videoBackgroundsDisabled = CrashReporter.videoBackgroundsDisabled,
+            screens = screens,
+            deckLinkAvailable = deckLinkAvailable,
+            deckLinkDevices = deckLinkDevices,
+            vlcAvailable = vlcAvailable,
+            vlcReason = vlcUnavailableReason,
+            jcefInitialized = CefManager.initialized,
+            jcefMacUnsupported = CefManager.macOsUnsupported,
+            songFolderCount = songFolders.size,
+            totalSongs = songFolders.sumOf { it.second },
+            bibleCount = bibleFiles.size,
+            analyticsEnabled = CrashReporter.isEnabled(),
+        )
+    }
+
+    internal fun render(settings: AppSettings, facts: DeviceFacts, now: LocalDateTime): String = buildString {
         appendLine("=== ChurchPresenter Diagnostic Report ===")
         appendLine("Generated: ${now.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}")
         appendLine()
 
         appendLine("-- App --")
-        appendLine("Version: $appVersion ($buildType)")
-        appendLine("Install ID: ${CrashReporter.installId()}")
-        appendLine("Crashed last run: ${CrashReporter.didCrashLastRun} (consecutive crashes: ${CrashReporter.consecutiveCrashes})")
-        appendLine("Video backgrounds disabled (crash guard): ${CrashReporter.videoBackgroundsDisabled}")
+        appendLine("Version: ${facts.appVersion} (${facts.buildType})")
+        appendLine("Install ID: ${facts.installId}")
+        appendLine("Crashed last run: ${facts.didCrashLastRun} (consecutive crashes: ${facts.consecutiveCrashes})")
+        appendLine("Video backgrounds disabled (crash guard): ${facts.videoBackgroundsDisabled}")
         appendLine()
 
         appendLine("-- System --")
@@ -46,40 +113,26 @@ object DeviceInfoReport {
         appendLine()
 
         appendLine("-- Displays --")
-        val screens = try {
-            val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
-            ge.screenDevices.mapIndexed { index, device ->
-                val mode = device.displayMode
-                val primary = device == ge.defaultScreenDevice
-                "  ${index + 1}. ${mode.width}x${mode.height} @${mode.refreshRate}Hz${if (primary) " (primary)" else ""}"
-            }
-        } catch (_: Exception) { emptyList() }
-        if (screens.isEmpty()) appendLine("  (unable to enumerate)") else screens.forEach { appendLine(it) }
+        if (facts.screens.isEmpty()) appendLine("  (unable to enumerate)") else facts.screens.forEach { appendLine(it) }
         appendLine()
 
         appendLine("-- DeckLink --")
-        val deckLinkAvailable = try { DeckLinkManager.isAvailable() } catch (_: Exception) { false }
-        appendLine("Driver available: $deckLinkAvailable")
-        if (deckLinkAvailable) {
-            val devices = try { DeckLinkManager.listDevices() } catch (_: Exception) { emptyList() }
-            if (devices.isEmpty()) appendLine("  (no devices detected)")
-            else devices.forEach { appendLine("  ${it.index + 1}. ${it.name}") }
+        appendLine("Driver available: ${facts.deckLinkAvailable}")
+        if (facts.deckLinkAvailable) {
+            if (facts.deckLinkDevices.isEmpty()) appendLine("  (no devices detected)")
+            else facts.deckLinkDevices.forEach { appendLine(it) }
         }
         appendLine()
 
         appendLine("-- Video / Web --")
-        val vlcAvailable = try { isVlcAvailable } catch (_: Exception) { false }
-        appendLine("VLC: ${if (vlcAvailable) "available" else "unavailable (${vlcUnavailableReason.ifBlank { "unknown reason" }})"}")
-        appendLine("Web browser (JCEF): ${if (CefManager.initialized) "initialized" else "not initialized"}${if (CefManager.macOsUnsupported) " (macOS version too old)" else ""}")
+        appendLine("VLC: ${if (facts.vlcAvailable) "available" else "unavailable (${facts.vlcReason.ifBlank { "unknown reason" }})"}")
+        appendLine("Web browser (JCEF): ${if (facts.jcefInitialized) "initialized" else "not initialized"}${if (facts.jcefMacUnsupported) " (macOS version too old)" else ""}")
         appendLine()
 
         appendLine("-- Libraries --")
-        val fileManager = FileManager()
-        val songFolders = try { fileManager.getSongFoldersInDirectory(settings.songSettings.storageDirectory) } catch (_: Exception) { emptyList() }
-        val bibleFiles = try { fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory) } catch (_: Exception) { emptyList() }
-        appendLine("Song libraries (songbooks): ${songFolders.size}")
-        appendLine("Total songs: ${songFolders.sumOf { it.second }}")
-        appendLine("Bibles: ${bibleFiles.size}")
+        appendLine("Song libraries (songbooks): ${facts.songFolderCount}")
+        appendLine("Total songs: ${facts.totalSongs}")
+        appendLine("Bibles: ${facts.bibleCount}")
         appendLine()
 
         appendLine("-- Outputs & Integrations --")
@@ -89,6 +142,6 @@ object DeviceInfoReport {
         appendLine("OBS: ${if (settings.obsSettings.enabled) "enabled" else "disabled"}")
         appendLine("Companion server: ${if (settings.serverSettings.enabled) "enabled" else "disabled"}")
         appendLine("Instance Link: ${if (settings.instanceLink.enabled) "enabled" else "disabled"}")
-        appendLine("Analytics reporting: ${if (CrashReporter.isEnabled()) "enabled" else "disabled"}")
+        appendLine("Analytics reporting: ${if (facts.analyticsEnabled) "enabled" else "disabled"}")
     }
 }

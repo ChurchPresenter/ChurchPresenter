@@ -114,4 +114,133 @@ class DeviceInfoReportTest {
         val b = report().lines().filterNot { it.startsWith("Generated:") || it.startsWith("Memory:") }
         assertEquals(a, b)
     }
+
+    private val fixedTime = java.time.LocalDateTime.of(2026, 1, 1, 9, 30)
+
+    private fun facts(
+        screens: List<String> = emptyList(),
+        deckLinkAvailable: Boolean = false,
+        deckLinkDevices: List<String> = emptyList(),
+        vlcAvailable: Boolean = false,
+        vlcReason: String = "",
+        jcefInitialized: Boolean = false,
+        jcefMacUnsupported: Boolean = false,
+        songFolderCount: Int = 0,
+        totalSongs: Int = 0,
+        bibleCount: Int = 0,
+        analyticsEnabled: Boolean = false,
+    ) = DeviceInfoReport.DeviceFacts(
+        appVersion = "1.2.3", buildType = "release", installId = "inst-id",
+        didCrashLastRun = false, consecutiveCrashes = 0, videoBackgroundsDisabled = false,
+        screens = screens, deckLinkAvailable = deckLinkAvailable, deckLinkDevices = deckLinkDevices,
+        vlcAvailable = vlcAvailable, vlcReason = vlcReason,
+        jcefInitialized = jcefInitialized, jcefMacUnsupported = jcefMacUnsupported,
+        songFolderCount = songFolderCount, totalSongs = totalSongs, bibleCount = bibleCount,
+        analyticsEnabled = analyticsEnabled,
+    )
+
+    private fun render(f: DeviceInfoReport.DeviceFacts) = DeviceInfoReport.render(AppSettings(), f, fixedTime)
+
+    @Test
+    fun `present displays are listed instead of the unenumerable message`() {
+        val text = render(facts(screens = listOf("  1. 1920x1080 @60Hz (primary)", "  2. 1280x720 @30Hz")))
+        assertTrue("  1. 1920x1080 @60Hz (primary)" in text)
+        assertTrue("  2. 1280x720 @30Hz" in text)
+        assertFalse("(unable to enumerate)" in text)
+    }
+
+    @Test
+    fun `an available deckLink lists its devices`() {
+        val text = render(facts(deckLinkAvailable = true, deckLinkDevices = listOf("  1. DeckLink Mini")))
+        assertTrue("Driver available: true" in text)
+        assertTrue("  1. DeckLink Mini" in text)
+        assertFalse("(no devices detected)" in text)
+    }
+
+    @Test
+    fun `an available deckLink with no devices says so`() {
+        val text = render(facts(deckLinkAvailable = true, deckLinkDevices = emptyList()))
+        assertTrue("Driver available: true" in text)
+        assertTrue("  (no devices detected)" in text)
+    }
+
+    @Test
+    fun `an unavailable deckLink lists nothing`() {
+        val text = render(facts(deckLinkAvailable = false))
+        assertTrue("Driver available: false" in text)
+        assertFalse("(no devices detected)" in text)
+    }
+
+    @Test
+    fun `available VLC reads plainly`() {
+        assertTrue("VLC: available" in render(facts(vlcAvailable = true)))
+    }
+
+    @Test
+    fun `unavailable VLC includes the reason`() {
+        assertTrue("VLC: unavailable (libvlc not found)" in render(facts(vlcAvailable = false, vlcReason = "libvlc not found")))
+    }
+
+    @Test
+    fun `unavailable VLC with a blank reason falls back to unknown`() {
+        assertTrue("VLC: unavailable (unknown reason)" in render(facts(vlcAvailable = false, vlcReason = "")))
+    }
+
+    @Test
+    fun `initialized JCEF is reported without a caveat`() {
+        val text = render(facts(jcefInitialized = true))
+        assertTrue("Web browser (JCEF): initialized" in text)
+        assertFalse("macOS version too old" in text)
+    }
+
+    @Test
+    fun `uninitialized JCEF on old macOS notes the version`() {
+        assertTrue(
+            "Web browser (JCEF): not initialized (macOS version too old)"
+                in render(facts(jcefInitialized = false, jcefMacUnsupported = true)),
+        )
+    }
+
+    @Test
+    fun `uninitialized JCEF without the macOS caveat`() {
+        val text = render(facts(jcefInitialized = false, jcefMacUnsupported = false))
+        assertTrue("Web browser (JCEF): not initialized" in text)
+        assertFalse("macOS version too old" in text)
+    }
+
+    @Test
+    fun `library counts come straight from the gathered facts`() {
+        val text = render(facts(songFolderCount = 3, totalSongs = 57, bibleCount = 2))
+        assertTrue("Song libraries (songbooks): 3" in text)
+        assertTrue("Total songs: 57" in text)
+        assertTrue("Bibles: 2" in text)
+    }
+
+    @Test
+    fun `analytics state is reported both ways`() {
+        assertTrue("Analytics reporting: enabled" in render(facts(analyticsEnabled = true)))
+        assertTrue("Analytics reporting: disabled" in render(facts(analyticsEnabled = false)))
+    }
+
+    @Test
+    fun `app facts come from the snapshot, not live singletons`() {
+        val text = render(facts())
+        assertTrue("Version: 1.2.3 (release)" in text)
+        assertTrue("Install ID: inst-id" in text)
+    }
+
+    @Test
+    fun `a primary screen line is one-based and marked primary`() {
+        assertEquals("  1. 1920x1080 @60Hz (primary)", DeviceInfoReport.screenLine(0, 1920, 1080, 60, true))
+    }
+
+    @Test
+    fun `a secondary screen line carries no suffix`() {
+        assertEquals("  2. 1280x720 @30Hz", DeviceInfoReport.screenLine(1, 1280, 720, 30, false))
+    }
+
+    @Test
+    fun `a device line is one-based and named`() {
+        assertEquals("  1. DeckLink Mini Recorder", DeviceInfoReport.deviceLine(0, "DeckLink Mini Recorder"))
+    }
 }

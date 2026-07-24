@@ -73,13 +73,13 @@ object X11WindowCapture {
         @JvmField var map_installed: Int = 0
         @JvmField var map_state: Int = 0
         @JvmField var all_event_masks: NativeLong = NativeLong(0)
-        @JvmField var your_event_masks: NativeLong = NativeLong(0)
+        @JvmField var your_event_mask: NativeLong = NativeLong(0)
         @JvmField var do_not_propagate_mask: NativeLong = NativeLong(0)
         @JvmField var override_redirect: Int = 0
         @JvmField var screen: Pointer? = null
     }
 
-    private interface X11 : Library {
+    internal interface X11 : Library {
         fun XOpenDisplay(name: String?): Pointer?
         fun XGetWindowAttributes(display: Pointer, window: NativeLong, attrs: XWindowAttributes): Int
         fun XGetImage(display: Pointer, drawable: NativeLong, x: Int, y: Int,
@@ -119,13 +119,21 @@ object X11WindowCapture {
         if (!isAvailable()) return null
         val dpy = display ?: return null
         val lib = x11 ?: return null
-        val wid = NativeLong(windowId)
+        return captureWith(lib, dpy, windowId)
+    }
 
+    internal fun captureWith(
+        lib: X11,
+        dpy: Pointer,
+        windowId: Long,
+        redirected: MutableSet<Long> = redirectedWindows,
+    ): BufferedImage? {
+        val wid = NativeLong(windowId)
         return try {
             // Redirect window to off-screen pixmap if not already
-            if (windowId !in redirectedWindows) {
+            if (windowId !in redirected) {
                 lib.XCompositeRedirectWindow(dpy, wid, CompositeRedirectAutomatic)
-                redirectedWindows.add(windowId)
+                redirected.add(windowId)
             }
 
             // Get window attributes for size
@@ -146,22 +154,25 @@ object X11WindowCapture {
 
             if (imagePtr == null) return null
 
-            // Convert to BufferedImage
-            val img = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
-            for (y in 0 until h) {
-                for (x in 0 until w) {
-                    val pixel = lib.XGetPixel(imagePtr, x, y).toLong()
-                    val r = ((pixel shr 16) and 0xFF).toInt()
-                    val g = ((pixel shr 8) and 0xFF).toInt()
-                    val b = (pixel and 0xFF).toInt()
-                    img.setRGB(x, y, (255 shl 24) or (r shl 16) or (g shl 8) or b)
-                }
-            }
-
+            val img = ximageToImage(lib, imagePtr, w, h)
             lib.XDestroyImage(imagePtr)
             img
         } catch (_: Throwable) {
             null
         }
+    }
+
+    internal fun ximageToImage(lib: X11, imagePtr: Pointer, w: Int, h: Int): BufferedImage {
+        val img = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
+        for (y in 0 until h) {
+            for (x in 0 until w) {
+                val pixel = lib.XGetPixel(imagePtr, x, y).toLong()
+                val r = ((pixel shr 16) and 0xFF).toInt()
+                val g = ((pixel shr 8) and 0xFF).toInt()
+                val b = (pixel and 0xFF).toInt()
+                img.setRGB(x, y, (255 shl 24) or (r shl 16) or (g shl 8) or b)
+            }
+        }
+        return img
     }
 }

@@ -621,6 +621,9 @@ tasks.register<JacocoReport>("jacocoTestReport") {
             exclude("**/BuildConfig*")
             // Compose emits synthetic ComposableSingletons holder classes per file.
             exclude("**/ComposableSingletons*")
+            // Compose + AWT startup side-effect (delayed window activation) with no headless-testable
+            // body; only its os gate is unit-tested (see MacWindowActivationTest).
+            exclude("**/MacWindowActivationKt*")
         }
     )
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
