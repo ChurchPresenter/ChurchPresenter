@@ -430,7 +430,7 @@ class PresenterManager {
     private val _presentationFrame = mutableStateOf<PresentationFrame?>(null)
     val presentationFrame: State<PresentationFrame?> = _presentationFrame
 
-    private var presentationPlayer: PresentationPlayer? = null
+    internal var presentationPlayer: PresentationPlayer? = null
 
     /**
      * Points playback at [deck]/[slideIndex]. Decks with no timing at all (plain PDFs, static
@@ -478,7 +478,7 @@ class PresenterManager {
     fun rewindPresentationStep(deck: Deck, slideIndex: Int): Boolean =
         steppablePlayer(deck, slideIndex)?.rewind() ?: false
 
-    private fun steppablePlayer(deck: Deck, slideIndex: Int): PresentationPlayer? {
+    internal fun steppablePlayer(deck: Deck, slideIndex: Int): PresentationPlayer? {
         val player = presentationPlayer ?: return null
         if (player.deck !== deck || player.currentSlideIndex != slideIndex) return null
         // A cleared display blanks the mode-driven output — steps would be invisible there.
@@ -867,7 +867,7 @@ class PresenterManager {
         if (remainingSeconds != null) _timerRemainingSeconds.value = remainingSeconds
     }
 
-    private fun pushAnnouncementTextIfLive(text: String) {
+    internal fun pushAnnouncementTextIfLive(text: String) {
         val anyScreenOnAnnouncements = _presentingMode.value == Presenting.ANNOUNCEMENTS ||
             _screenLocks.value.values.any { it == Presenting.ANNOUNCEMENTS }
         if (anyScreenOnAnnouncements && _announcementTickerLive.value) setAnnouncementText(text)

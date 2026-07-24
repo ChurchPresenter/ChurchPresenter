@@ -74,7 +74,7 @@ data class DetectedReference(
 
 /** Label matching the engine's own matchType strings ("explicit"/"continuation"/"chapter-scan"/
  * "chapter-history"/"reverse"), for training-log correlation — see TrainingDataLogger.logLiveReference. */
-private fun DetectionSource.toMatchTypeLabel(): String = when (this) {
+internal fun DetectionSource.toMatchTypeLabel(): String = when (this) {
     DetectionSource.EXPLICIT -> "explicit"
     DetectionSource.CONTINUATION -> "continuation"
     DetectionSource.CHAPTER_SCAN -> "chapter-scan"
@@ -1854,7 +1854,7 @@ class BibleViewModel(
         return bible.getVerseDetails(bible.getBookId(bookIndex), chapter, verse)?.second
     }
 
-    private fun buildDetectionLabel(bookIndex: Int, chapter: Int, vs: Int?, ve: Int?): String {
+    internal fun buildDetectionLabel(bookIndex: Int, chapter: Int, vs: Int?, ve: Int?): String {
         val bookName = _books.value.getOrNull(bookIndex) ?: return "$chapter"
         val versePart = when {
             vs != null && ve != null && ve > vs -> ":$vs-$ve"

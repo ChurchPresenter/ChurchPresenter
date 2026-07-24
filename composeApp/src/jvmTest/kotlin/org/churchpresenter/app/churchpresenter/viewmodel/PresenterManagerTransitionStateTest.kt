@@ -7,6 +7,7 @@ import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -166,6 +167,61 @@ class PresenterManagerTransitionStateTest {
         pm.setDevWindowAlwaysOnTop(true)
 
         assertTrue(pm.devWindowAlwaysOnTop.value)
+        assertSilent()
+    }
+
+    @Test
+    fun `the displayed, next and previous slide bitmaps are settable and silent`() {
+        val pm = manager()
+        val shown = ImageBitmap(4, 4)
+        val upcoming = ImageBitmap(4, 4)
+        val faded = ImageBitmap(4, 4)
+
+        pm.setDisplayedSlide(shown)
+        pm.setNextSlide(upcoming)
+        pm.setPreviousDisplayedSlide(faded)
+
+        assertSame(shown, pm.displayedSlide.value)
+        assertSame(upcoming, pm.nextSlide.value)
+        assertSame(faded, pm.previousDisplayedSlide.value)
+        assertSilent()
+    }
+
+    @Test
+    fun `clearing a slide bitmap back to null is a real state`() {
+        val pm = manager()
+        pm.setDisplayedSlide(ImageBitmap(2, 2))
+
+        pm.setDisplayedSlide(null)
+
+        assertNull(pm.displayedSlide.value, "a blanked slide between decks is a state, not a no-op")
+        assertSilent()
+    }
+
+    // ── Presenter (dev) window visibility ────────────────────────────────────────
+
+    @Test
+    fun `showing the presenter window is settable and silent`() {
+        val pm = manager()
+
+        pm.setShowPresenterWindow(true)
+        assertTrue(pm.showPresenterWindow.value)
+
+        pm.setShowPresenterWindow(false)
+        assertFalse(pm.showPresenterWindow.value)
+        assertSilent()
+    }
+
+    @Test
+    fun `toggling the presenter window flips its visibility each call`() {
+        val pm = manager()
+        val start = pm.showPresenterWindow.value
+
+        pm.togglePresenterWindow()
+        assertEquals(!start, pm.showPresenterWindow.value, "one toggle flips it")
+
+        pm.togglePresenterWindow()
+        assertEquals(start, pm.showPresenterWindow.value, "a second toggle returns it")
         assertSilent()
     }
 }
