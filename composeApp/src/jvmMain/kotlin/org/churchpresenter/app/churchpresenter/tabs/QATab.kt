@@ -128,6 +128,7 @@ import churchpresenter.composeapp.generated.resources.qa_done
 import churchpresenter.composeapp.generated.resources.qa_incoming_approved
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TabGoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.QARemoteDialog
@@ -597,7 +598,9 @@ fun QATab(
                                     presenterManager.setDisplayedQuestion(null)
                                     presenting(Presenting.NONE)
                                 }
-                            }
+                            },
+                            appSettings = appSettings,
+                            presenterManager = presenterManager,
                         )
                         HorizontalDivider()
                     }
@@ -695,6 +698,8 @@ private fun QuestionRow(
     onEdit: (String) -> Unit,
     onDisplay: () -> Unit,
     onDelete: () -> Unit,
+    appSettings: AppSettings? = null,
+    presenterManager: PresenterManager? = null,
 ) {
     val bgColor = if (isDisplayed) Color(0xFF43A047).copy(alpha = 0.1f) else Color.Transparent
     val statusColor = when (question.status) {
@@ -876,7 +881,13 @@ private fun QuestionRow(
                         }
                         QuestionStatus.APPROVED -> {
                             if (!isDisplayed) {
-                                GoLiveButton(onClick = onDisplay, tooltipText = strGoLive)
+                                TabGoLiveButton(
+                                    appSettings = appSettings,
+                                    presenterManager = presenterManager,
+                                    liveMode = Presenting.QA,
+                                    isEnabled = { it.showQA },
+                                    onGoLive = { onDisplay() },
+                                )
                             }
                             QAIconButton(tooltip = if (isDisplayed) strDoneClear else strMarkDone, onClick = onMarkDone) {
                                 Icon(

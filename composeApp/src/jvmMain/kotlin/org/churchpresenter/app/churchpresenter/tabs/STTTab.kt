@@ -48,7 +48,6 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.stt_connect
 import churchpresenter.composeapp.generated.resources.stt_disconnect
-import churchpresenter.composeapp.generated.resources.stt_go_live
 import churchpresenter.composeapp.generated.resources.stt_live_preview
 import churchpresenter.composeapp.generated.resources.stt_not_connected
 import churchpresenter.composeapp.generated.resources.stt_server_url
@@ -60,7 +59,7 @@ import churchpresenter.composeapp.generated.resources.stt_translation_label
 import churchpresenter.composeapp.generated.resources.stt_waiting_for_transcription
 import churchpresenter.composeapp.generated.resources.tooltip_stt_settings
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TabGoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.StyledTextField
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.STTSettingsDialog
@@ -170,12 +169,13 @@ fun STTTab(
             )
 
             // Go Live
-            GoLiveButton(
-                onClick = {
-                    presenting(Presenting.STT)
-                },
+            TabGoLiveButton(
+                appSettings = appSettings,
+                presenterManager = presenterManager,
+                liveMode = Presenting.STT,
+                isEnabled = { it.showSTT },
+                onGoLive = { presenting(Presenting.STT) },
                 enabled = connected && !isLive,
-                tooltipText = stringResource(Res.string.stt_go_live)
             )
         }
 

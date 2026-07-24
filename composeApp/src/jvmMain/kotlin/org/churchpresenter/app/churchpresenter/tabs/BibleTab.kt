@@ -195,7 +195,9 @@ import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.ProjectionGoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.rememberGoLiveDisplays
+import org.churchpresenter.app.churchpresenter.models.GoLiveTarget
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
@@ -1366,7 +1368,6 @@ fun BibleTab(
         } else {
             val holdLiveStr = stringResource(Res.string.hold_live)
             val swapBiblesStr = stringResource(Res.string.swap_bibles)
-            val goLiveStr = stringResource(Res.string.go_live)
             val addScheduleStr = stringResource(Res.string.add_to_schedule)
 
             FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
@@ -1378,7 +1379,7 @@ fun BibleTab(
                     .fillMaxWidth()
                     .heightIn(min = 31.dp)
                     .background(MaterialTheme.colorScheme.surface)
-                    .padding(start = 4.dp),
+                    .padding(start = 4.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(modifier = Modifier.width(with(density) { colWBook.toDp() }).padding(start = 12.dp)) {
@@ -1532,10 +1533,18 @@ fun BibleTab(
                         },
                         tooltipText = addScheduleStr
                     )
-                    // Go Live (amber)
-                    GoLiveButton(
-                        onClick = { goLiveWithHistory(); focusRequester.requestFocus() },
-                        tooltipText = goLiveStr
+                    // Go Live with per-output display picker. Bible is gated per output by showBible.
+                    val goLiveDisplays = rememberGoLiveDisplays(appSettings) { it.showBible }
+                    ProjectionGoLiveButton(
+                        isLive = isPresenting,
+                        selectedTarget = presenterManager?.goLiveTarget?.value ?: GoLiveTarget.All,
+                        displays = goLiveDisplays,
+                        onGoLive = { target ->
+                            presenterManager?.setGoLiveTarget(target)
+                            goLiveWithHistory()
+                            focusRequester.requestFocus()
+                        },
+                        onSelectTarget = { presenterManager?.setGoLiveTarget(it) },
                     )
                 }
             }

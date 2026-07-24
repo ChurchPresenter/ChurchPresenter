@@ -122,7 +122,7 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TabGoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.SharedVideoOutputDisplay
@@ -576,8 +576,13 @@ fun MediaTab(
                     )
                 }
                 if (presenterManager != null) {
-                    GoLiveButton(
-                        onClick = {
+                    TabGoLiveButton(
+                        appSettings = appSettings,
+                        presenterManager = presenterManager,
+                        liveMode = Presenting.MEDIA,
+                        isEnabled = { it.showMedia },
+                        enabled = viewModel.isLoaded,
+                        onGoLive = {
                             presenterManager.setPresentingMode(Presenting.MEDIA)
                             presenterManager.setShowPresenterWindow(true)
                             presenterManager.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
@@ -591,8 +596,6 @@ fun MediaTab(
                                 )
                             )
                         },
-                        enabled = viewModel.isLoaded,
-                        tooltipText = stringResource(Res.string.go_live)
                     )
                 }
             }

@@ -98,7 +98,7 @@ import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TabGoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -179,6 +179,7 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -192,6 +193,7 @@ fun SongsTab(
     hostWindow: AwtWindow? = null,
     viewModel: SongsViewModel,
     appSettings: AppSettings,
+    presenterManager: PresenterManager? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((songNumber: Int, title: String, songbook: String, songId: String) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. Go-live with a
@@ -1452,7 +1454,6 @@ fun SongsTab(
         ) {
             // Header row with action buttons — switches to icon-only when width is tight
             val editSongStr    = stringResource(Res.string.edit_song)
-            val goLiveStr      = stringResource(Res.string.go_live)
             val addScheduleStr = stringResource(Res.string.add_to_schedule)
 
             val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && selectedSectionIndex >= 0
@@ -1561,10 +1562,12 @@ fun SongsTab(
                     )
                 }
 
-                GoLiveButton(
-                    onClick = { sendToPresenter(goLive = true); onPresenting(Presenting.LYRICS); tabFocusRequester.requestFocus() },
-                    enabled = hasSongSelected,
-                    tooltipText = goLiveStr
+                TabGoLiveButton(
+                    appSettings = appSettings,
+                    presenterManager = presenterManager,
+                    liveMode = Presenting.LYRICS,
+                    isEnabled = { it.showSongs },
+                    onGoLive = { sendToPresenter(goLive = true); onPresenting(Presenting.LYRICS); tabFocusRequester.requestFocus() },
                 )
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
