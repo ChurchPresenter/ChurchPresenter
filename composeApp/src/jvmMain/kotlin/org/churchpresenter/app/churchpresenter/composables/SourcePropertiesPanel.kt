@@ -1140,13 +1140,57 @@ private fun listCameraDevicesWithDeckLink(deckLinkDeviceFormat: String = "DeckLi
     return devices
 }
 
-private data class CameraFormat(
+internal data class CameraFormat(
     val width: Int,
     val height: Int,
     val fps: Int,
     val displayName: String = "${width}x${height} @ ${fps}fps",
     val encodedValue: String = "${width}x${height}@${fps}"
 )
+
+// The regex parsing below is pure and reused across two Linux tools; kept out of the process calls so
+// the (error-prone) line matching is unit-tested directly from captured sample output.
+private val CAMERA_SIZE_PATTERN = Regex("""(\d{3,5})x(\d{3,5})""")
+private val CAMERA_FPS_PATTERN = Regex("""(\d+(?:\.\d+)?)\s*fps""")
+
+/**
+ * Sizes and frame rates from `ffmpeg -f v4l2 -list_formats` output: every line carrying a `WxH` adds
+ * one format, taking a same-line `N fps` if present (else 30). Unmatched lines are skipped.
+ */
+internal fun parseFfmpegV4l2Formats(output: String): Set<Triple<Int, Int, Int>> = buildSet {
+    for (line in output.lines()) {
+        val size = CAMERA_SIZE_PATTERN.find(line) ?: continue
+        val w = size.groupValues[1].toIntOrNull() ?: continue
+        val h = size.groupValues[2].toIntOrNull() ?: continue
+        val fps = CAMERA_FPS_PATTERN.find(line)?.groupValues?.get(1)?.toDoubleOrNull()?.toInt() ?: 30
+        add(Triple(w, h, fps))
+    }
+}
+
+/**
+ * Sizes and frame rates from `v4l2-ctl --list-formats-ext` output, where a `WxH` appears on its own
+ * line and the frame rates for it follow on later `N fps` lines — so each fps line pairs with the
+ * most recent size seen.
+ */
+internal fun parseV4l2CtlFormats(output: String): Set<Triple<Int, Int, Int>> = buildSet {
+    var lastW = 0
+    var lastH = 0
+    for (line in output.lines()) {
+        CAMERA_SIZE_PATTERN.find(line)?.let {
+            lastW = it.groupValues[1].toIntOrNull() ?: 0
+            lastH = it.groupValues[2].toIntOrNull() ?: 0
+        }
+        val fps = CAMERA_FPS_PATTERN.find(line)
+        if (fps != null && lastW > 0 && lastH > 0) {
+            add(Triple(lastW, lastH, fps.groupValues[1].toDoubleOrNull()?.toInt() ?: 30))
+        }
+    }
+}
+
+/** Largest area first, then highest frame rate; mapped to the display model. */
+internal fun sortedCameraFormats(sizes: Set<Triple<Int, Int, Int>>): List<CameraFormat> =
+    sizes.sortedWith(compareByDescending<Triple<Int, Int, Int>> { it.first * it.second }.thenByDescending { it.third })
+        .map { (w, h, fps) -> CameraFormat(w, h, fps) }
 
 /** Cache format listings so we don't re-open the device every time the source recomposes. */
 private val cameraFormatCache = mutableMapOf<String, List<CameraFormat>>()
@@ -1208,17 +1252,7 @@ private fun listV4l2Formats(device: String): List<CameraFormat> {
             .redirectErrorStream(true).start()
         val output = process.inputStream.bufferedReader().readText()
         process.waitFor()
-        // Match lines like: 1920x1080 or similar, and fps values
-        val sizePattern = Regex("""(\d{3,5})x(\d{3,5})""")
-        for (line in output.lines()) {
-            val sizeMatch = sizePattern.find(line) ?: continue
-            val w = sizeMatch.groupValues[1].toIntOrNull() ?: continue
-            val h = sizeMatch.groupValues[2].toIntOrNull() ?: continue
-            // v4l2 format lines may include fps info
-            val fpsMatch = Regex("""(\d+(?:\.\d+)?)\s*fps""").find(line)
-            val fps = fpsMatch?.groupValues?.get(1)?.toDoubleOrNull()?.toInt() ?: 30
-            formats.add(Triple(w, h, fps))
-        }
+        formats.addAll(parseFfmpegV4l2Formats(output))
     } catch (e: Exception) {
         System.err.println("[Camera] Error listing v4l2 formats: ${e.message}")
     }
@@ -1229,27 +1263,10 @@ private fun listV4l2Formats(device: String): List<CameraFormat> {
                 .redirectErrorStream(true).start()
             val output = process.inputStream.bufferedReader().readText()
             process.waitFor()
-            val sizePattern = Regex("""(\d{3,5})x(\d{3,5})""")
-            val fpsPattern = Regex("""(\d+(?:\.\d+)?)\s*fps""")
-            var lastW = 0
-            var lastH = 0
-            for (line in output.lines()) {
-                val sizeMatch = sizePattern.find(line)
-                if (sizeMatch != null) {
-                    lastW = sizeMatch.groupValues[1].toIntOrNull() ?: 0
-                    lastH = sizeMatch.groupValues[2].toIntOrNull() ?: 0
-                }
-                val fpsMatch = fpsPattern.find(line)
-                if (fpsMatch != null && lastW > 0 && lastH > 0) {
-                    val fps = fpsMatch.groupValues[1].toDoubleOrNull()?.toInt() ?: 30
-                    formats.add(Triple(lastW, lastH, fps))
-                }
-            }
+            formats.addAll(parseV4l2CtlFormats(output))
         } catch (_: Exception) {}
     }
-    return formats
-        .sortedWith(compareByDescending<Triple<Int, Int, Int>> { it.first * it.second }.thenByDescending { it.third })
-        .map { (w, h, fps) -> CameraFormat(w, h, fps) }
+    return sortedCameraFormats(formats)
 }
 
 private fun listAvfoundationFormats(deviceIndex: String): List<CameraFormat> {
