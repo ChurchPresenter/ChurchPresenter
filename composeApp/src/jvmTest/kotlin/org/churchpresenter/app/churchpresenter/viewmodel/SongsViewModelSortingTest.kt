@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import kotlinx.coroutines.Dispatchers
+
 import org.churchpresenter.app.churchpresenter.data.SongFileParser
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -58,7 +60,7 @@ class SongsViewModelSortingTest {
     }
 
     private fun viewModel(): SongsViewModel {
-        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)))
+        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)), dispatcher = Dispatchers.Default, enableFolderWatcher = false)
         created.add(vm)
         awaitUntil("songs") { vm.filteredSongItems.value.size == 3 }
         return vm
@@ -213,7 +215,7 @@ class SongsViewModelSortingTest {
                 SongItem(number = "0042", title = "Padded", songbook = "Hymnal", lyrics = listOf("l")),
                 File(File(padded, "Hymnal"), "0042 - Padded.song").absolutePath,
             )
-            val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = padded.absolutePath)))
+            val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = padded.absolutePath)), dispatcher = Dispatchers.Default, enableFolderWatcher = false)
                 .also { created.add(it) }
             awaitUntil("padded song") { vm.filteredSongItems.value.isNotEmpty() }
 

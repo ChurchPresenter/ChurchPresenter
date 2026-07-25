@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import kotlinx.coroutines.Dispatchers
+
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
 import org.churchpresenter.app.churchpresenter.server.SongDto
@@ -43,7 +45,7 @@ class SongsFilteringTest {
             songBooks = entries.size,
             total = entries.sumOf { it.songs.size },
         )
-        return SongsViewModel(AppSettings()).also {
+        return SongsViewModel(AppSettings(), dispatcher = Dispatchers.Default, enableFolderWatcher = false).also {
             created.add(it)
             it.setInstanceLinkSource(active = true, catalog = catalog, fetchDetail = null)
         }

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import kotlinx.coroutines.Dispatchers
+
 import org.churchpresenter.app.churchpresenter.data.SongFileParser
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -64,7 +66,7 @@ class SongsViewModelLibraryTest {
     }
 
     private fun viewModel(): SongsViewModel {
-        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)))
+        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)), dispatcher = Dispatchers.Default, enableFolderWatcher = false)
         created.add(vm)
         awaitUntil("songs to load") { vm.filteredSongItems.value.isNotEmpty() }
         return vm
@@ -105,7 +107,7 @@ class SongsViewModelLibraryTest {
 
     @Test
     fun `an empty storage directory yields no songs`() {
-        val vm = SongsViewModel(AppSettings()).also { created.add(it) }
+        val vm = SongsViewModel(AppSettings(), dispatcher = Dispatchers.Default, enableFolderWatcher = false).also { created.add(it) }
         awaitUntil("the load to finish") { !vm.isLoading.value }
         assertTrue(vm.filteredSongItems.value.isEmpty())
     }
@@ -259,7 +261,7 @@ class SongsViewModelLibraryTest {
         val vm = viewModel()
         assertFalse(vm.createSong(SongItem(number = "1", title = "No Book", songbook = "", lyrics = listOf("l"))))
 
-        val unconfigured = SongsViewModel(AppSettings()).also { created.add(it) }
+        val unconfigured = SongsViewModel(AppSettings(), dispatcher = Dispatchers.Default, enableFolderWatcher = false).also { created.add(it) }
         assertFalse(unconfigured.createSong(SongItem(number = "1", title = "T", songbook = "Hymnal", lyrics = listOf("l"))))
     }
 
@@ -360,7 +362,7 @@ class SongsViewModelLibraryTest {
 
     @Test
     fun `adding to the schedule with nothing selected reports failure`() {
-        val vm = SongsViewModel(AppSettings()).also { created.add(it) }
+        val vm = SongsViewModel(AppSettings(), dispatcher = Dispatchers.Default, enableFolderWatcher = false).also { created.add(it) }
         var called = false
         assertFalse(vm.addCurrentSongToSchedule { _, _, _, _ -> called = true })
         assertFalse(called)

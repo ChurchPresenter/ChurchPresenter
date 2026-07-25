@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -188,7 +189,7 @@ private fun TitleSlideColumn(
             Checkbox(
                 checked = settings.songSettings.titleSlideEnabled,
                 onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleSlideEnabled = it)) } },
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp).testTag("song_titleSlideEnabled")
             )
             Text(stringResource(Res.string.enabled), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 8.dp))
         }
@@ -333,7 +334,8 @@ private fun LeftColumn(
         ) {
             Checkbox(
                 checked = settings.songSettings.songNumberBeforeTitle,
-                onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberBeforeTitle = it)) } }
+                onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberBeforeTitle = it)) } },
+                modifier = Modifier.testTag("song_songNumberBeforeTitle")
             )
             Text(stringResource(Res.string.number_before_title), style = MaterialTheme.typography.bodyMedium)
         }
@@ -567,7 +569,7 @@ private fun LeftColumn(
             Checkbox(
                 checked = settings.songSettings.fadeIn,
                 onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fadeIn = it)) } },
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp).testTag("song_fadeIn")
             )
             Text(
                 text = stringResource(Res.string.fade_in),
@@ -580,7 +582,7 @@ private fun LeftColumn(
             Checkbox(
                 checked = settings.songSettings.fadeOut,
                 onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fadeOut = it)) } },
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp).testTag("song_fadeOut")
             )
             Text(
                 text = stringResource(Res.string.fade_out),
@@ -593,7 +595,7 @@ private fun LeftColumn(
             Checkbox(
                 checked = settings.songSettings.crossfade,
                 onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(crossfade = it)) } },
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp).testTag("song_crossfade")
             )
             Text(
                 text = stringResource(Res.string.animation_crossfade),
@@ -751,7 +753,8 @@ private fun RightColumn(
                 onSettingsChange { s ->
                     s.copy(songSettings = s.songSettings.copy(wordWrap = it))
                 }
-            }
+            },
+            modifier = Modifier.testTag("song_wordWrap")
         )
         Text(
             text = stringResource(Res.string.word_wrap),
@@ -835,7 +838,7 @@ private fun RightColumn(
                     Checkbox(
                         checked = settings.songSettings.lyricsFontSizeAutoFit,
                         onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSizeAutoFit = it)) } },
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp).testTag("song_lyricsFontSizeAutoFit")
                     )
                     Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
                 }
@@ -993,7 +996,7 @@ private fun RightColumn(
                     Checkbox(
                         checked = settings.songSettings.lyricsLowerThirdFontSizeAutoFit,
                         onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSizeAutoFit = it)) } },
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp).testTag("song_lyricsLowerThirdFontSizeAutoFit")
                     )
                     Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
                 }
@@ -1169,7 +1172,7 @@ private fun LookAheadColumn(
                     Checkbox(
                         checked = settings.songSettings.lookAheadFontSizeAutoFit,
                         onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadFontSizeAutoFit = it)) } },
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp).testTag("song_lookAheadFontSizeAutoFit")
                     )
                     Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
                 }
@@ -1231,7 +1234,7 @@ private fun LookAheadColumn(
                     Checkbox(
                         checked = settings.songSettings.lookAheadNextFontSizeAutoFit,
                         onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextFontSizeAutoFit = it)) } },
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp).testTag("song_lookAheadNextFontSizeAutoFit")
                     )
                     Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
                 }
@@ -1343,7 +1346,7 @@ private fun LookAheadColumn(
                     Checkbox(
                         checked = settings.songSettings.lowerThirdLookAheadFontSizeAutoFit,
                         onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadFontSizeAutoFit = it)) } },
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp).testTag("song_lowerThirdLookAheadFontSizeAutoFit")
                     )
                     Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
                 }
@@ -1405,7 +1408,7 @@ private fun LookAheadColumn(
                     Checkbox(
                         checked = settings.songSettings.lowerThirdLookAheadNextFontSizeAutoFit,
                         onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextFontSizeAutoFit = it)) } },
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp).testTag("song_lowerThirdLookAheadNextFontSizeAutoFit")
                     )
                     Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
                 }

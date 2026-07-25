@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -26,7 +27,15 @@ import java.io.File
 
 class SongsViewModel(
     private var appSettings: AppSettings,
-    private val onSongsLoaded: ((List<SongItem>) -> Unit)? = null
+    private val onSongsLoaded: ((List<SongItem>) -> Unit)? = null,
+    // Test seams (production defaults reproduce the shipping behaviour):
+    //  - [dispatcher] backs the view-model scope. It is Dispatchers.Main in the app so state updates
+    //    land on the UI thread; tests pass Dispatchers.Default so many view models loading at once
+    //    don't all queue behind each other on the single Swing event thread and time out.
+    //  - [enableFolderWatcher] starts the directory watcher that reloads on file changes. Tests turn
+    //    it off so a blocking watch loop and its self-triggered reloads don't race the assertions.
+    dispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val enableFolderWatcher: Boolean = true,
 ) {
     private val _songsData = mutableStateOf(Songs())
     val songsData: State<Songs> = _songsData
@@ -34,7 +43,7 @@ class SongsViewModel(
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
 
-    private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val viewModelScope = CoroutineScope(dispatcher + SupervisorJob())
     private var loadSongsJob: kotlinx.coroutines.Job? = null
     private val songFolderWatcher = SongFolderWatcher(viewModelScope) { loadSongs() }
     private val _allSongItems = mutableStateOf<List<SongItem>>(emptyList())
@@ -260,7 +269,7 @@ class SongsViewModel(
                 }
 
                 // Start watching the song directory for changes
-                if (storageDir.isNotEmpty()) {
+                if (enableFolderWatcher && storageDir.isNotEmpty()) {
                     songFolderWatcher.watchDirectory(File(storageDir))
                 }
             } finally {

@@ -381,9 +381,10 @@ fun SceneCanvas(
 
 // --- Snap computation ---
 
-private data class SnapResult(val x: Float, val y: Float, val snapLines: List<SnapLine>)
+internal data class SnapResult(val x: Float, val y: Float, val snapLines: List<SnapLine>)
 
-private fun computeSnap(
+// internal (not private) so the snap geometry can be unit-tested directly; no behaviour change.
+internal fun computeSnap(
     x: Float, y: Float, w: Float, h: Float,
     sources: List<SceneSource>, excludeId: String,
     canvasWidth: Float, canvasHeight: Float

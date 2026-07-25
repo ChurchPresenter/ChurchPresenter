@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import kotlinx.coroutines.Dispatchers
+
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
 import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
@@ -66,7 +68,7 @@ class SongsViewModelRemoteFollowerTest {
 
     /** A follower whose fetch is [detailFor], counting every call. */
     private fun follower(detailFor: (String, String) -> SongDetailDto?): SongsViewModel {
-        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)))
+        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)), dispatcher = Dispatchers.Default, enableFolderWatcher = false)
         created.add(vm)
         vm.setInstanceLinkSource(
             active = true,
@@ -133,7 +135,7 @@ class SongsViewModelRemoteFollowerTest {
 
     @Test
     fun `with no fetch function configured a selection fetches nothing`() {
-        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)))
+        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)), dispatcher = Dispatchers.Default, enableFolderWatcher = false)
         created.add(vm)
         vm.setInstanceLinkSource(active = true, catalog = catalog(), fetchDetail = null)
         awaitUntil("the mirrored catalog") { vm.filteredSongItems.value.isNotEmpty() }
