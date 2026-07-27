@@ -280,5 +280,8 @@ object BookNames {
         "ENG" to ENGLISH
     )
 
-    val RTL_LANGUAGES = setOf("ARA", "HEB", "SYR", "CKB", "SHU")
+    val RTL_LANGUAGES = setOf("ARA", "HEB", "SYR", "CKB", "SHU", "ARC", "FAS", "PER", "URD", "PUS", "DIV", "YID")
+
+    fun isRightToLeft(language: String?): Boolean =
+        language?.trim()?.uppercase() in RTL_LANGUAGES
 }
