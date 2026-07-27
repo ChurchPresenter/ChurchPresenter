@@ -23,7 +23,12 @@ data class ParsedBible(
     val name: String,
     val description: String,
     val language: String?,
-    val books: List<BibleBook>
+    val books: List<BibleBook>,
+    /** Zefania `<INFORMATION>` metadata. Defaulted so existing callers are unaffected. */
+    val title: String = "",
+    val identifier: String = "",
+    val rights: String = "",
+    val source: String = ""
 )
 
 object XmlToSpbConverter {
@@ -149,10 +154,12 @@ object XmlToSpbConverter {
     }
 
     private fun parseZefania(root: org.w3c.dom.Element, xmlFile: File): ParsedBible {
-        val bibleName = root.getAttribute("biblename").ifBlank { "Unknown" }
-
         var description = ""
         var language: String? = null
+        var title = ""
+        var identifier = ""
+        var rights = ""
+        var source = ""
 
         val infoNodes = root.getElementsByTagName("INFORMATION")
         if (infoNodes.length > 0) {
@@ -161,6 +168,10 @@ object XmlToSpbConverter {
                 val child = info.childNodes.item(i)
                 when (child.nodeName) {
                     "description" -> description = child.textContent ?: ""
+                    "title" -> title = child.textContent?.trim() ?: ""
+                    "identifier" -> identifier = child.textContent?.trim() ?: ""
+                    "rights" -> rights = child.textContent?.trim() ?: ""
+                    "source" -> source = child.textContent?.trim() ?: ""
                     "language" -> {
                         val xmlLang = (child.textContent ?: "").trim().uppercase()
                         val pathLower = xmlFile.absolutePath.lowercase()
@@ -186,6 +197,10 @@ object XmlToSpbConverter {
                 else -> null
             }
         }
+
+        // Some modules leave `biblename` empty but fill `<title>`; without this they end up
+        // literally called "Unknown".
+        val bibleName = root.getAttribute("biblename").ifBlank { title }.ifBlank { "Unknown" }
 
         val books = mutableListOf<BibleBook>()
         val bookNodes = root.getElementsByTagName("BIBLEBOOK")
@@ -222,24 +237,33 @@ object XmlToSpbConverter {
             books.add(BibleBook(bookNum, bookName, chapters))
         }
 
-        return ParsedBible(bibleName, description, language, books)
+        return ParsedBible(bibleName, description, language, books, title, identifier, rights, source)
     }
 
-    fun convert(xmlFile: File, outputFile: File) {
-        val bible = parse(xmlFile)
+    fun convert(xmlFile: File, outputFile: File) = write(parse(xmlFile), outputFile)
 
-        val abbreviation = bible.name.split(" ")
-            .filter { it.isNotBlank() }
-            .joinToString("") { it.first().toString() }
+    /**
+     * Writes [bible] out as an `.spb` module.
+     *
+     * Split from [convert] so an already-parsed Bible can be written without re-reading the XML,
+     * and so callers can show progress: [onProgress] reports 0..1 as books are written, which for
+     * a full 66-book Bible is seconds rather than instant.
+     */
+    fun write(bible: ParsedBible, outputFile: File, onProgress: (Float) -> Unit = {}) {
+        // Shared with the app's install-time naming rule so the header and the file name agree.
+        val abbreviation = BibleCatalogNaming.abbreviation(bible.name)
 
-        val rtl = if (bible.language in setOf("ARA", "HEB", "SYR", "CKB", "SHU")) "1" else ""
+        val rtl = if (BookNames.isRightToLeft(bible.language)) "1" else ""
 
         outputFile.bufferedWriter(Charsets.UTF_8).use { w ->
             w.write("##spDataVersion:\t1\n")
             w.write("##Title:\t${bible.name}\n")
             w.write("##Abbreviation:\t$abbreviation\n")
-            w.write("##Information:\t${bible.description}\n")
+            w.write("##Information:\t${bible.description.oneLine()}\n")
             w.write("##RightToLeft:\t$rtl\n")
+            // Attribution travels with the file, so it survives the user copying it elsewhere.
+            if (bible.rights.isNotBlank()) w.write("##Copyright:\t${bible.rights.oneLine()}\n")
+            if (bible.source.isNotBlank()) w.write("##Source:\t${bible.source.oneLine()}\n")
 
             for (book in bible.books) {
                 w.write("${book.number}\t${book.name}\t${book.chapters.size}\n")
@@ -250,7 +274,7 @@ object XmlToSpbConverter {
             val useLxxMapping = bible.language?.uppercase() in LXX_PSALM_LANGUAGES
             val psalmsBookNum = 19
 
-            for (book in bible.books) {
+            for ((index, book) in bible.books.withIndex()) {
                 for (chapter in book.chapters) {
                     // For LXX Psalms, detect if verse 1 is a standalone superscription.
                     // If so, code it as V000 and offset subsequent verse numbers by -1.
@@ -266,9 +290,17 @@ object XmlToSpbConverter {
                         w.write("$verseId\t${book.number}\t${chapter.number}\t${verse.number}\t${verse.text}\n")
                     }
                 }
+                onProgress((index + 1).toFloat() / bible.books.size)
             }
         }
     }
+
+    /**
+     * Header values are tab-separated single lines, so a `<description>` or `<rights>` containing
+     * newlines or tabs would corrupt the file structure.
+     */
+    private fun String.oneLine(): String =
+        replace('\n', ' ').replace('\r', ' ').replace('\t', ' ').trim()
 
     fun convertBatch(xmlFiles: List<File>, outputDir: File): List<Pair<File, File>> {
         outputDir.mkdirs()
