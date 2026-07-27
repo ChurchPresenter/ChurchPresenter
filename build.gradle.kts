@@ -1,9 +1,13 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    kotlin("jvm") version "2.1.10"
-    id("org.jetbrains.compose") version "1.7.3"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.10"
+    // Kept in step with the app (gradle/libs.versions.toml): this module's sources are also
+    // compiled INTO composeApp via kotlin.srcDir, so a version skew means code that builds in one
+    // build fails in the other — which is exactly how ui/App.kt came to be broken here while the
+    // app compiled it fine.
+    kotlin("jvm") version "2.3.10"
+    id("org.jetbrains.compose") version "1.10.2"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.3.10"
 }
 
 group = "org.churchpresenter"
