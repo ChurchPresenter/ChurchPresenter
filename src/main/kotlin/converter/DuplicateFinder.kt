@@ -298,8 +298,16 @@ object DuplicateFinder {
                 if (trimmed == "---") {
                     inFrontmatter = !inFrontmatter
                     if (!inFrontmatter) frontmatterDone = true
+                    continue
                 }
-                continue
+                if (inFrontmatter) continue
+                // No frontmatter block in this file, so parsing starts right here. This used to
+                // `continue` unconditionally, which swallowed the ENTIRE file when it had no
+                // `---` block — and MarkdownToSongConverter omits frontmatter whenever a song has
+                // no author/composer/copyright, so its own output read back as a song with no
+                // title (filename fallback) and no lyrics at all. Duplicate detection then
+                // silently degraded to filename matching for exactly those files.
+                frontmatterDone = true
             }
             if (trimmed.equals("[Primary]", ignoreCase = true)) {
                 foundPrimary = true

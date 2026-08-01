@@ -23,8 +23,13 @@ data class DocConversionResult(
 
 object MarkdownToSongConverter {
 
+    // `(?iu)`, not `(?i)`: a bare inline `(?i)` is ASCII-only case folding, so `Куплет`/`Припев`
+    // as anyone actually writes them did not match while lower-case `куплет` did — a Russian
+    // document then imported as one section holding every lyric AND every label line. The
+    // metadata patterns below escape this because Kotlin's RegexOption.IGNORE_CASE implies
+    // UNICODE_CASE; this one takes no options, so the flag has to be in the pattern.
     private val sectionLabelRegex = Regex(
-        """(?i)^(?:#{1,4}\s+)?(?:\*\*)?""" +
+        """(?iu)^(?:#{1,4}\s+)?(?:\*\*)?""" +
         """(verse|vers|strophe|куплет|строфа|chorus|refrain|припев|хор|bridge|мост|""" +
         """pre-chorus|prechorus|ending|outro|окончание|конец|intro|вступление|coda|tag)""" +
         """(?:\s+(\d+))?(?:\*\*)?[:\s]*$"""
