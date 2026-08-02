@@ -256,8 +256,26 @@ object MarkdownToSongConverter {
     private fun parseSections(lines: List<String>): List<SongSection> {
         val sections = mutableListOf<SongSection>()
         var currentLabel: String? = null
+        // Whether [currentLabel] came from a real section marker ("Chorus", "Куплет 1", a
+        // sub-heading) rather than being auto-assigned to lyrics that arrived unlabelled.
+        //
+        // This distinction is what makes the paragraph splits below reachable at all. They used to
+        // be guarded on `currentLabel == null`, but the fall-through at the bottom assigns
+        // "Verse N" to the first lyric line, so the label was never null again and a document with
+        // no section markers imported as ONE section holding the entire song — which the app then
+        // shows as a single slide. Only an *explicit* label should suppress paragraph splitting.
+        var labelIsExplicit = false
         var currentLines = mutableListOf<String>()
         var verseCounter = 1
+
+        /** Closes the section in progress, if it holds anything. */
+        fun flush() {
+            val label = currentLabel
+            if (label != null && currentLines.any { it.isNotBlank() }) {
+                sections.add(SongSection(label, currentLines.dropLastWhile { it.isBlank() }))
+                if (!labelIsExplicit) verseCounter++
+            }
+        }
 
         for (line in lines) {
             val trimmed = line.trim()
@@ -265,21 +283,17 @@ object MarkdownToSongConverter {
             // Check for section label
             val labelMatch = sectionLabelRegex.find(trimmed)
             if (labelMatch != null) {
-                // Save previous section
-                if (currentLabel != null && currentLines.any { it.isNotBlank() }) {
-                    sections.add(SongSection(currentLabel, currentLines.dropLastWhile { it.isBlank() }))
-                }
+                flush()
                 currentLabel = formatLabel(labelMatch.groupValues[1], labelMatch.groupValues[2])
+                labelIsExplicit = true
                 currentLines = mutableListOf()
                 continue
             }
 
-            // Check for numbered patterns like "1." or "2." at start of paragraph
-            if (currentLabel == null && trimmed.matches(Regex("""^\d+\.\s*$"""))) {
-                if (currentLines.any { it.isNotBlank() }) {
-                    sections.add(SongSection("Verse ${verseCounter++}", currentLines.dropLastWhile { it.isBlank() }))
-                }
-                currentLabel = "Verse $verseCounter"
+            // A bare "1." / "2." marker starts the next verse of an unlabelled document.
+            if (!labelIsExplicit && trimmed.matches(Regex("""^\d+\.\s*$"""))) {
+                flush()
+                currentLabel = null
                 currentLines = mutableListOf()
                 continue
             }
@@ -291,18 +305,19 @@ object MarkdownToSongConverter {
                     .replace(Regex("""^\*\*(.+)\*\*$"""), "$1")
                 val innerLabelMatch = sectionLabelRegex.find(headingText)
                 if (innerLabelMatch != null) {
-                    if (currentLabel != null && currentLines.any { it.isNotBlank() }) {
-                        sections.add(SongSection(currentLabel, currentLines.dropLastWhile { it.isBlank() }))
-                    }
+                    flush()
                     currentLabel = formatLabel(innerLabelMatch.groupValues[1], innerLabelMatch.groupValues[2])
+                    labelIsExplicit = true
                     currentLines = mutableListOf()
                     continue
                 }
             }
 
-            // Blank line might signal a new paragraph = new verse (if no labels found)
-            if (trimmed.isBlank() && currentLabel == null && currentLines.any { it.isNotBlank() }) {
-                sections.add(SongSection("Verse ${verseCounter++}", currentLines.dropLastWhile { it.isBlank() }))
+            // In an unlabelled document a blank line ends the paragraph, and each paragraph is a
+            // verse. Under an explicit label a blank line is kept as part of that section instead.
+            if (trimmed.isBlank() && !labelIsExplicit && currentLines.any { it.isNotBlank() }) {
+                flush()
+                currentLabel = null
                 currentLines = mutableListOf()
                 continue
             }
@@ -310,6 +325,7 @@ object MarkdownToSongConverter {
             if (trimmed.isNotBlank()) {
                 if (currentLabel == null) {
                     currentLabel = "Verse $verseCounter"
+                    labelIsExplicit = false
                 }
                 // Strip markdown formatting from lyrics
                 currentLines.add(stripMarkdown(trimmed))
@@ -318,10 +334,7 @@ object MarkdownToSongConverter {
             }
         }
 
-        // Add last section
-        if (currentLabel != null && currentLines.any { it.isNotBlank() }) {
-            sections.add(SongSection(currentLabel, currentLines.dropLastWhile { it.isBlank() }))
-        }
+        flush()
 
         // Post-process: detect repeated sections as Chorus
         return detectChorus(sections)
