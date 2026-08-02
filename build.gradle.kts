@@ -8,6 +8,7 @@ plugins {
     kotlin("jvm") version "2.3.10"
     id("org.jetbrains.compose") version "1.10.2"
     id("org.jetbrains.kotlin.plugin.compose") version "2.3.10"
+    jacoco
 }
 
 group = "org.churchpresenter"
@@ -20,6 +21,25 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.45.3.0")
     implementation("org.apache.pdfbox:pdfbox:2.0.33")
     implementation("org.apache.poi:poi-ooxml:5.3.0")
+
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+// Coverage for this module's own logic. The UI package is excluded: it is Compose desktop
+// composables that need a real display, and the app's own report has the same carve-out.
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports { xml.required.set(true); html.required.set(true) }
+    classDirectories.setFrom(
+        fileTree(layout.buildDirectory.dir("classes/kotlin/main")) {
+            exclude("ui/**", "MainKt*")
+        }
+    )
 }
 
 compose.desktop {
