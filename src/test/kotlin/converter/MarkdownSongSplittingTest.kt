@@ -15,17 +15,11 @@ import kotlin.test.assertTrue
  * one unusable song or forty usable ones. The strategies are tried in order — level-1 headings,
  * then horizontal rules — and each is exercised here on its own.
  *
- * **Known gap, deliberately not asserted here.** `parseSections` also *means* to split unlabelled
- * paragraphs into verses — on a blank line, on a bare `1.` marker, and by relabelling a repeated
- * block as the chorus. None of those three branches can ever run: the fall-through that collects a
- * lyric line sets `currentLabel = "Verse N"` on the first content line, and all three are guarded
- * by `currentLabel == null`. So a document with no section labels imports as one verse holding the
- * entire song, which the app then shows as a single slide.
- *
- * Tests for that are absent rather than written against the broken output, because a test that
- * asserts a defect is what keeps the defect — this repo has been bitten by exactly that before.
- * Fixing it changes how existing documents import, so it deserves a deliberate decision rather
- * than arriving as a side effect of adding tests.
+ * The unlabelled shapes below were previously unreachable: `parseSections` guarded them on
+ * `currentLabel == null`, but the fall-through that collects a lyric line assigned "Verse N" on
+ * the first content line, so the guard was never true again and a document with no section markers
+ * imported as ONE section holding the whole song. The guard is now on whether the label came from
+ * a real section marker, which is what those branches always meant.
  */
 class MarkdownSongSplittingTest {
 
@@ -148,6 +142,110 @@ class MarkdownSongSplittingTest {
     }
 
     // ── Unlabelled section shapes ─────────────────────────────────────────────
+
+    @Test
+    fun `blank-line separated paragraphs become verses when nothing is labelled`() {
+        val song = MarkdownToSongConverter.parseMarkdown(
+            """
+            # Unlabelled
+
+            First paragraph line one
+            First paragraph line two
+
+            Second paragraph line one
+            Second paragraph line two
+            """.trimIndent(),
+            "u.md",
+        ).single()
+
+        assertEquals(2, song.sections.size, "one verse per paragraph: ${song.sections.map { it.label }}")
+        assertEquals(listOf("Verse 1", "Verse 2"), song.sections.map { it.label })
+        assertEquals(
+            listOf("First paragraph line one", "First paragraph line two"),
+            song.sections.first().lines,
+        )
+    }
+
+    @Test
+    fun `bare numbered markers start their own verses`() {
+        val song = MarkdownToSongConverter.parseMarkdown(
+            """
+            # Numbered
+
+            1.
+            First verse line
+
+            2.
+            Second verse line
+            """.trimIndent(),
+            "n.md",
+        ).single()
+
+        assertEquals(2, song.sections.size, "got ${song.sections.map { it.label }}")
+        assertTrue(song.sections.all { it.label.startsWith("Verse") })
+        assertTrue(song.sections.flatMap { it.lines }.none { it.matches(Regex("""^\d+\.$""")) },
+            "the marker itself is consumed, not kept as a lyric")
+    }
+
+    @Test
+    fun `a repeated block is relabelled as the chorus and written once`() {
+        // Documents often write the chorus out after every verse instead of labelling it. This
+        // only became reachable once unlabelled paragraphs split into separate sections at all.
+        val song = MarkdownToSongConverter.parseMarkdown(
+            """
+            # Repeated
+
+            Verse one words here
+            Second line of verse one
+
+            The repeated refrain line
+            And its second line
+
+            Verse two words here
+            Second line of verse two
+
+            The repeated refrain line
+            And its second line
+            """.trimIndent(),
+            "r.md",
+        ).single()
+
+        assertTrue(
+            song.sections.any { it.label.contains("Chorus", ignoreCase = true) },
+            "the repeat was recognised: ${song.sections.map { it.label }}",
+        )
+        assertEquals(
+            1,
+            song.sections.count { s -> s.lines.any { it.contains("repeated refrain") } },
+            "the chorus is written once, not once per repetition",
+        )
+    }
+
+    @Test
+    fun `a labelled document keeps its blank lines inside its sections`() {
+        // The paragraph split must not fire under an explicit label, or a verse with a stanza
+        // break in it would be torn into two.
+        val song = MarkdownToSongConverter.parseMarkdown(
+            """
+            # Labelled
+
+            Verse 1
+            First line
+
+            Still verse one after a gap
+
+            Chorus
+            Refrain line
+            """.trimIndent(),
+            "l.md",
+        ).single()
+
+        assertEquals(listOf("Verse 1", "Chorus"), song.sections.map { it.label })
+        assertTrue(
+            song.sections.first().lines.any { it.contains("Still verse one") },
+            "the gap did not split the labelled verse: ${song.sections.first().lines}",
+        )
+    }
 
     @Test
     fun `markdown emphasis is stripped from lyric lines`() {
