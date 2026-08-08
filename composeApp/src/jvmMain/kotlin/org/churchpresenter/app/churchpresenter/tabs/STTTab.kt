@@ -69,6 +69,7 @@ import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import androidx.compose.ui.text.AnnotatedString
 import org.jetbrains.compose.resources.stringResource
 
@@ -130,9 +131,9 @@ fun STTTab(
             Box(
                 modifier = Modifier.size(12.dp).clip(CircleShape).background(
                     when {
-                        connected -> Color(0xFF43A047)
-                        connecting || reconnecting -> Color(0xFFFFA726)
-                        else -> Color(0xFFE53935)
+                        connected -> MaterialTheme.semantic.success
+                        connecting || reconnecting -> MaterialTheme.semantic.warning
+                        else -> MaterialTheme.colorScheme.error
                     }
                 )
             )
@@ -142,8 +143,8 @@ fun STTTab(
                     onClick = { sttManager.disconnect() },
                     tooltipText = stringResource(Res.string.stt_disconnect),
                     icon = Icons.Default.Stop,
-                    containerColor = Color(0xFFE53935),
-                    contentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
                 )
             } else {
                 ActionIconButton(
@@ -156,8 +157,8 @@ fun STTTab(
                     enabled = !connecting && urlInput.isNotBlank(),
                     tooltipText = stringResource(Res.string.stt_connect),
                     icon = Icons.Default.PlayArrow,
-                    containerColor = Color(0xFF43A047),
-                    contentColor = Color.White
+                    containerColor = MaterialTheme.semantic.success,
+                    contentColor = MaterialTheme.semantic.onSuccess
                 )
             }
 

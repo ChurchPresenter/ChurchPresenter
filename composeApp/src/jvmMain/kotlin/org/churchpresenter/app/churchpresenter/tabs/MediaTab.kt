@@ -719,6 +719,8 @@ private fun MediaSeekBar(
     val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
     val bufferedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.28f)
     val playedStart = primary.copy(alpha = 0.65f)
+    // Hoisted for the Canvas below, which cannot read the theme itself.
+    val handleColor = MaterialTheme.colorScheme.onPrimary
 
     Row(
         modifier = modifier,
@@ -786,10 +788,10 @@ private fun MediaSeekBar(
                         cornerRadius = radius
                     )
                 }
-                // Hover handle — white knob, fades/scales in only on hover or drag
+                // Hover handle — fades/scales in only on hover or drag
                 if (handleAlpha > 0.01f) {
                     val hx = (size.width * playedFraction).coerceIn(0f, size.width)
-                    drawCircle(color = Color.White.copy(alpha = handleAlpha), radius = 6.dp.toPx() * handleScale, center = Offset(hx, cy))
+                    drawCircle(color = handleColor.copy(alpha = handleAlpha), radius = 6.dp.toPx() * handleScale, center = Offset(hx, cy))
                 }
             }
         }

@@ -2,11 +2,15 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -17,9 +21,12 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.unit.Dp
 import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ProjectionSettings
+import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 /**
@@ -58,30 +65,43 @@ internal fun announcementsTab(
     withPresenter: Boolean = true,
     withOnAddToSchedule: Boolean = true,
     projectionSettings: ProjectionSettings = ProjectionSettings(),
+    settings: (AppSettings) -> AppSettings = { it },
+    width: Dp? = null,
+    themeMode: ThemeMode? = null,
     block: ComposeUiTest.(presenter: PresenterManager, reports: AnnouncementReports) -> Unit,
 ) {
     val presenter = PresenterManager()
     val reports = AnnouncementReports()
     runComposeUiTest {
         setContent {
-            var settings by remember {
-                mutableStateOf(AppSettings(announcementsSettings = initial, projectionSettings = projectionSettings))
-            }
-            MaterialTheme {
-                AnnouncementsTab(
-                    appSettings = settings,
-                    onSettingsChange = { transform ->
-                        settings = transform(settings)
-                        reports.settingsChanges++
-                        reports.settings = settings.announcementsSettings
-                    },
-                    presenterManager = presenter.takeIf { withPresenter },
-                    onAddToSchedule = if (withOnAddToSchedule) { { s: AnnouncementsSettings -> reports.scheduled += s } } else null,
+            var appSettings by remember {
+                mutableStateOf(
+                    settings(AppSettings(announcementsSettings = initial, projectionSettings = projectionSettings))
                 )
+            }
+            ThemedForTest(themeMode) {
+                Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                    AnnouncementsTab(
+                        appSettings = appSettings,
+                        onSettingsChange = { transform ->
+                            appSettings = transform(appSettings)
+                            reports.settingsChanges++
+                            reports.settings = appSettings.announcementsSettings
+                        },
+                        presenterManager = presenter.takeIf { withPresenter },
+                        onAddToSchedule = if (withOnAddToSchedule) { { s: AnnouncementsSettings -> reports.scheduled += s } } else null,
+                    )
+                }
             }
         }
         block(presenter, reports)
     }
+}
+
+@Composable
+private fun ThemedForTest(themeMode: ThemeMode?, content: @Composable () -> Unit) {
+    if (themeMode == null) MaterialTheme(content = content)
+    else ChurchPresenterTheme(themeMode = themeMode, content = content)
 }
 
 // ── Labels, as the tab renders them ─────────────────────────────────────────────────────────────

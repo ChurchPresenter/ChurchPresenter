@@ -263,6 +263,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.nextLiveVerseNumber
 import org.churchpresenter.app.churchpresenter.viewmodel.verseNumberOf
 import org.churchpresenter.app.churchpresenter.viewmodel.verseSpan
 import org.churchpresenter.app.churchpresenter.viewmodel.verseTextOf
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -1158,6 +1159,8 @@ fun BibleTab(
             // ── Detected references — at most 4 rows tall, scrolls beyond ──
             val detRowHeight = 24.dp
             val detMaxVisibleRows = 4
+            // Hoisted: drawBehind is not composable, so the theme colour is read here and captured.
+            val markerColor = MaterialTheme.semantic.marker
             if (detectedReferences.isNotEmpty()) {
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             val detScroll = rememberScrollState()
@@ -1177,7 +1180,7 @@ fun BibleTab(
                             else MaterialTheme.colorScheme.surface
                         )
                         .drawBehind {
-                            if (isSelected) drawRect(color = Color(0xFFC4972A), size = Size(4f, size.height))
+                            if (isSelected) drawRect(color = markerColor, size = Size(4f, size.height))
                         }
                         .initialPassCombinedClickable(
                             onClick = { selectedDetectionIdx = idx; viewModel.applyDetectedReference(ref); focusRequester.requestFocus() },
@@ -1875,6 +1878,7 @@ fun BibleTab(
                         AnimatedVisibility(visible = historyExpanded) {
                             val historyListState = rememberLazyListState()
                             LaunchedEffect(viewModel.history.size) { historyListState.scrollToItem(0) }
+                            val markerColor = MaterialTheme.semantic.marker
                             Box(modifier = Modifier.fillMaxWidth().height(120.dp)) {
                                 LazyColumn(state = historyListState, modifier = Modifier.fillMaxSize().padding(end = 8.dp)) {
                                     itemsIndexed(viewModel.history) { idx, entry ->
@@ -1893,7 +1897,7 @@ fun BibleTab(
                                                     else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                                 )
                                                 .drawBehind {
-                                                    if (idx == selectedHistoryIdx) drawRect(color = Color(0xFFC4972A), size = Size(4f, size.height))
+                                                    if (idx == selectedHistoryIdx) drawRect(color = markerColor, size = Size(4f, size.height))
                                                 }
                                                 .initialPassCombinedClickable(
                                                     onClick = {

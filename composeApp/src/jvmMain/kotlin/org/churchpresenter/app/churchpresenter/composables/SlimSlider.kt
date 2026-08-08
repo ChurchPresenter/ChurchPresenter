@@ -67,6 +67,8 @@ fun SlimSlider(
     val primary = MaterialTheme.colorScheme.primary
     val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
     val playedStart = primary.copy(alpha = 0.65f)
+    // Hoisted for the Canvas below, which cannot read the theme itself.
+    val handleColor = MaterialTheme.colorScheme.onPrimary
 
     fun seekToX(x: Float, width: Int) {
         if (!enabled || width <= 0) return
@@ -117,7 +119,7 @@ fun SlimSlider(
                 }
                 if (handleAlpha > 0.01f) {
                     val hx = (size.width * fraction).coerceIn(0f, size.width)
-                    drawCircle(color = Color.White.copy(alpha = handleAlpha), radius = 6.dp.toPx() * handleScale, center = Offset(hx, cy))
+                    drawCircle(color = handleColor.copy(alpha = handleAlpha), radius = 6.dp.toPx() * handleScale, center = Offset(hx, cy))
                 }
             }
         }

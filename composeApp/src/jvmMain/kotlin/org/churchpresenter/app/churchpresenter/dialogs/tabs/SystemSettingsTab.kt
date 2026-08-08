@@ -40,7 +40,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -107,6 +106,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window
 import javax.swing.JOptionPane
@@ -859,10 +859,10 @@ private fun DirectoryPicker(
                         .size(12.dp)
                         .background(
                             when (status) {
-                                DirStatus.CHECKING -> Color(0xFF9E9E9E)
-                                DirStatus.WRITABLE -> Color(0xFF4CAF50)
-                                DirStatus.READ_ONLY -> Color(0xFFFFC107)
-                                DirStatus.NOT_FOUND, DirStatus.INVALID -> Color(0xFFF44336)
+                                DirStatus.CHECKING -> MaterialTheme.colorScheme.onSurfaceVariant
+                                DirStatus.WRITABLE -> MaterialTheme.semantic.success
+                                DirStatus.READ_ONLY -> MaterialTheme.semantic.warning
+                                DirStatus.NOT_FOUND, DirStatus.INVALID -> MaterialTheme.colorScheme.error
                             },
                             shape = CircleShape
                         )

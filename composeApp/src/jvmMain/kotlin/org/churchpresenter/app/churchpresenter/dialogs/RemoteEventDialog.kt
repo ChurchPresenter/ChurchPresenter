@@ -60,6 +60,7 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.allow
 import churchpresenter.composeapp.generated.resources.allow_for_session
@@ -188,7 +189,7 @@ internal fun resolveRemoteEventPresentation(
     // Go-live/project actions read as blue; schedule edits read as amber, matching the design.
     val typeAccent: Color = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE,
-        RemoteEventType.REMOVE_FROM_SCHEDULE -> REMOTE_SCHEDULE_AMBER
+        RemoteEventType.REMOVE_FROM_SCHEDULE -> MaterialTheme.semantic.warning
         else -> MaterialTheme.colorScheme.primary
     }
     val bodyTitle = event.title.ifBlank {
@@ -349,8 +350,8 @@ internal fun RemoteEventDialogContent(
                         onClick = onAllow,
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = REMOTE_ALLOW_GREEN,
-                            contentColor = Color.White
+                            containerColor = MaterialTheme.semantic.success,
+                            contentColor = MaterialTheme.semantic.onSuccess
                         ),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
                     ) {
@@ -494,9 +495,6 @@ internal fun RemoteEventDialogContent(
         }
     }
 
-private val REMOTE_SCHEDULE_AMBER = Color(0xFFF5B301)
-private val REMOTE_ALLOW_GREEN = Color(0xFF43A047)
-
 private enum class ActionIconStyle {
     ErrorOutlined,
     ErrorFilled,
@@ -551,8 +549,8 @@ private fun ActionIconButton(
             ActionIconStyle.SuccessFilled -> FilledIconButton(
                 onClick = onClick,
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = REMOTE_ALLOW_GREEN,
-                    contentColor = Color.White
+                    containerColor = MaterialTheme.semantic.success,
+                    contentColor = MaterialTheme.semantic.onSuccess
                 )
             ) { Icon(icon, contentDescription = tooltip) }
 

@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -71,6 +70,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.OBSSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -203,9 +203,9 @@ fun OBSSettingsTab(
 
                         val (statusText, statusColor) = when (status) {
                             OBSWebSocketManager.ConnectionStatus.CONNECTED ->
-                                stringResource(Res.string.obs_status_connected) to Color(0xFF4CAF50)
+                                stringResource(Res.string.obs_status_connected) to MaterialTheme.semantic.success
                             OBSWebSocketManager.ConnectionStatus.CONNECTING ->
-                                stringResource(Res.string.obs_status_connecting) to Color(0xFFFFC107)
+                                stringResource(Res.string.obs_status_connecting) to MaterialTheme.semantic.warning
                             OBSWebSocketManager.ConnectionStatus.ERROR ->
                                 "${stringResource(Res.string.obs_status_error)}: $errorMessage" to MaterialTheme.colorScheme.error
                             OBSWebSocketManager.ConnectionStatus.DISCONNECTED ->

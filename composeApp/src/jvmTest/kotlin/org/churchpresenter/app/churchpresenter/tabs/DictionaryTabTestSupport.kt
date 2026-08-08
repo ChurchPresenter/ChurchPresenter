@@ -2,7 +2,12 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -14,6 +19,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.unit.Dp
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockkConstructor
@@ -22,6 +28,8 @@ import io.mockk.unmockkObject
 import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
 import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryFixture
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
 
@@ -89,6 +97,8 @@ internal fun dictionaryTab(
     withOnGoLive: Boolean = true,
     /** Extra Greek entries, for a test needing a shape the standing corpus does not have. */
     extraEntries: List<StrongsEntry> = emptyList(),
+    width: Dp? = null,
+    themeMode: ThemeMode? = null,
     block: ComposeUiTest.(vm: DictionaryViewModel, reports: DictionaryReports) -> Unit,
 ) {
     DictionaryFixture.stubResources(extraEntries)
@@ -115,7 +125,11 @@ internal fun dictionaryTab(
     try {
         runComposeUiTest {
             setContent {
-                MaterialTheme {
+                ThemedForTest(themeMode) {
+                    // The tab paints no ground of its own — in the app it sits on the window's
+                    // `colorScheme.background`.
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
                     DictionaryTab(
                         viewModel = vm,
                         onAddToSchedule = if (withOnAddToSchedule) { { number, word, transliteration, definition ->
@@ -129,6 +143,8 @@ internal fun dictionaryTab(
                             reports.verseClicks += Triple(book, chapter, verse)
                         },
                     )
+                    }
+                    }
                 }
             }
             // The tab kicks off the load itself; wait for the entries rather than for a duration.
@@ -140,6 +156,12 @@ internal fun dictionaryTab(
         unmockkConstructor(InterlinearRepository::class)
         unmockkObject(churchpresenter.composeapp.generated.resources.Res)
     }
+}
+
+@Composable
+private fun ThemedForTest(themeMode: ThemeMode?, content: @Composable () -> Unit) {
+    if (themeMode == null) MaterialTheme(content = content)
+    else ChurchPresenterTheme(themeMode = themeMode, content = content)
 }
 
 // ── Labels, as the tab renders them ─────────────────────────────────────────────────────────────

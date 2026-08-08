@@ -25,11 +25,13 @@ import kotlin.test.assertTrue
  */
 class DictionaryStrongsLinksTest {
 
-    /** Hebrew links are amber, Greek blue — the literal is pinned once, here. */
+    // The two link colours are now the theme's, passed in by the caller; these stand in for them so
+    // the test pins which reference gets which, not what either one is.
     private val hebrew = Color(0xFFB45309)
+    private val greek = Color(0xFF1D4ED8)
 
     private fun build(text: String, onClick: (String) -> Unit = {}): AnnotatedString =
-        buildStrongsAnnotatedString(text, onClick)
+        buildStrongsAnnotatedString(text, hebrew, greek, onClick)
 
     private fun AnnotatedString.links(): List<AnnotatedString.Range<LinkAnnotation>> =
         getLinkAnnotations(0, length)

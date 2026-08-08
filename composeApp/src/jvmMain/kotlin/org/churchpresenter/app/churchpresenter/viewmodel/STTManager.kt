@@ -104,6 +104,13 @@ class STTManager {
     // transitions are one testable step each: reaching them through a real socket needs a live STT
     // server, but which flags a given event sets is ordinary logic.
 
+    /** An attempt has started: connecting, with any previous failure or retry cleared. */
+    internal fun applyConnecting() {
+        _connecting.value = true
+        _connectError.value = false
+        _reconnecting.value = false
+    }
+
     /** A socket connection came up: live, and no longer connecting/failed/retrying. */
     internal fun applyConnected() {
         _connected.value = true
@@ -159,9 +166,7 @@ class STTManager {
         socket?.close()
         socket = null
 
-        _connecting.value = true
-        _connectError.value = false
-        _reconnecting.value = false
+        applyConnecting()
 
         scope.launch(Dispatchers.IO) {
             try {

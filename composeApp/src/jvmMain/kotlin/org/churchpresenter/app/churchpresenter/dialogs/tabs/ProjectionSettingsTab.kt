@@ -656,8 +656,8 @@ fun ProjectionSettingsTab(
                                 shape = RoundedCornerShape(6.dp),
                                 onClick = { dropdownExpanded = true },
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF8888)),
-                                border = BorderStroke(1.dp, Color(0xFFFF8888))
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
                             ) {
                                 Text(
                                     text = currentOption.shortLabel,
@@ -812,8 +812,8 @@ fun ProjectionSettingsTab(
                                 shape = RoundedCornerShape(6.dp),
                                 onClick = { keyExpanded = true },
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF8888)),
-                                border = BorderStroke(1.dp, Color(0xFFFF8888))
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
                             ) {
                                 Text(
                                     text = currentKeyOption.shortLabel,
@@ -1154,7 +1154,7 @@ fun ProjectionSettingsTab(
                                     }
                                 }
                             ) {
-                                Text(stringResource(Res.string.remove), color = Color(0xFFE53935))
+                                Text(stringResource(Res.string.remove), color = MaterialTheme.colorScheme.error)
                             }
                         },
                         dismissButton = {

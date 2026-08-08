@@ -963,7 +963,7 @@ private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneS
             if (DeckLinkManager.isOutputActive(source.deckLinkIndex)) {
                 Text(
                     text = stringResource(Res.string.canvas_decklink_io_warning),
-                    color = Color(0xFFFF8888),
+                    color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(vertical = 4.dp)
                 )
@@ -2261,8 +2261,8 @@ private fun FontDropdown(
                     style = LocalScrollbarStyle.current.copy(
                         thickness = 8.dp,
                         minimalHeight = 24.dp,
-                        unhoverColor = Color.Gray.copy(alpha = 0.5f),
-                        hoverColor = Color.Gray.copy(alpha = 0.9f)
+                        unhoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                        hoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                     )
                 )
             }

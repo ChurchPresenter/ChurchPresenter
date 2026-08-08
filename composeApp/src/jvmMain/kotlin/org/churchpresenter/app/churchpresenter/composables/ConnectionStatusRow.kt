@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.instance_link_status_connected
@@ -20,6 +19,7 @@ import churchpresenter.composeapp.generated.resources.instance_link_status_conne
 import churchpresenter.composeapp.generated.resources.instance_link_status_disconnected
 import churchpresenter.composeapp.generated.resources.instance_link_status_error
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -39,10 +39,10 @@ fun ConnectionStatusRow(
     modifier: Modifier = Modifier
 ) {
     val (color, defaultLabelRes) = when (status) {
-        InstanceLinkStatus.CONNECTED -> Color(0xFF4CAF50) to Res.string.instance_link_status_connected
-        InstanceLinkStatus.CONNECTING -> Color(0xFFFFC107) to Res.string.instance_link_status_connecting
-        InstanceLinkStatus.ERROR -> Color(0xFFF44336) to Res.string.instance_link_status_error
-        InstanceLinkStatus.DISCONNECTED -> Color(0xFF9E9E9E) to Res.string.instance_link_status_disconnected
+        InstanceLinkStatus.CONNECTED -> MaterialTheme.semantic.success to Res.string.instance_link_status_connected
+        InstanceLinkStatus.CONNECTING -> MaterialTheme.semantic.warning to Res.string.instance_link_status_connecting
+        InstanceLinkStatus.ERROR -> MaterialTheme.colorScheme.error to Res.string.instance_link_status_error
+        InstanceLinkStatus.DISCONNECTED -> MaterialTheme.colorScheme.onSurfaceVariant to Res.string.instance_link_status_disconnected
     }
     val label = when {
         status == InstanceLinkStatus.CONNECTED && connectedLabel != null -> connectedLabel

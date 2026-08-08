@@ -159,6 +159,7 @@ import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.generate_lower_third
 import churchpresenter.composeapp.generated.resources.aspect_ratio_mismatch
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import java.awt.Window
 import java.io.File
 import javax.swing.SwingUtilities
@@ -561,7 +562,7 @@ fun LowerThirdTab(
                                     "${cw}×${ch}", "${s.renderWidth}×${s.renderHeight}"
                                 ),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFFFFC107)
+                                color = MaterialTheme.semantic.warning
                             )
                         }
                         val fitScale = minOf(s.renderWidth.toFloat() / cw, s.renderHeight.toFloat() / ch)
@@ -574,7 +575,7 @@ fun LowerThirdTab(
                                     "${s.renderWidth}×${s.renderHeight}"
                                 ),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFFFFC107)
+                                color = MaterialTheme.semantic.warning
                             )
                         }
                     }
@@ -687,7 +688,7 @@ fun LowerThirdTab(
                             Text(
                                 stringResource(Res.string.atem_ready),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF4CAF50)
+                                color = MaterialTheme.semantic.success
                             )
                         }
                     }

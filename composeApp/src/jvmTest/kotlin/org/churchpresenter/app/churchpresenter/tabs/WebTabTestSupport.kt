@@ -5,6 +5,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -16,6 +17,8 @@ import androidx.compose.ui.unit.Dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 internal class WebReports {
@@ -42,6 +45,7 @@ internal fun webTab(
      * single-row branch.
      */
     width: Dp? = null,
+    themeMode: ThemeMode? = null,
     block: ComposeUiTest.(presenter: PresenterManager, reports: WebReports) -> Unit,
 ) {
     TestSingletons.latchToTestHome()
@@ -49,7 +53,7 @@ internal fun webTab(
     val reports = WebReports()
     runComposeUiTest {
         setContent {
-            MaterialTheme {
+            ThemedForTest(themeMode) {
                 Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
                     WebTab(
                         presenterManager = presenterManager,
@@ -83,6 +87,7 @@ internal fun webTab(
 internal fun webTabWithoutPresenter(
     settings: (AppSettings) -> AppSettings = { it },
     selectedWebsiteItem: ScheduleItem.WebsiteItem? = null,
+    themeMode: ThemeMode? = null,
     block: ComposeUiTest.(reports: WebReports) -> Unit,
 ) {
     TestSingletons.latchToTestHome()
@@ -90,7 +95,7 @@ internal fun webTabWithoutPresenter(
     val reports = WebReports()
     runComposeUiTest {
         setContent {
-            MaterialTheme {
+            ThemedForTest(themeMode) {
                 WebTab(
                     presenterManager = null,
                     selectedWebsiteItem = selectedWebsiteItem,
@@ -108,6 +113,12 @@ internal fun webTabWithoutPresenter(
         }
         block(reports)
     }
+}
+
+@Composable
+private fun ThemedForTest(themeMode: ThemeMode?, content: @Composable () -> Unit) {
+    if (themeMode == null) MaterialTheme(content = content)
+    else ChurchPresenterTheme(themeMode = themeMode, content = content)
 }
 
 internal object WebLabel {

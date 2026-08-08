@@ -102,6 +102,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.viewmodel.PlanningCenterImportViewModel
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image as SkiaImage
 
@@ -382,13 +383,13 @@ internal fun PlanningCenterImportDialogContent(
                 }
                 Spacer(Modifier.width(12.dp))
                 Box(
-                    modifier = Modifier.size(8.dp).clip(CircleShape).background(PC_CONNECTED_GREEN)
+                    modifier = Modifier.size(8.dp).clip(CircleShape).background(MaterialTheme.semantic.success)
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
                     stringResource(Res.string.planning_center_status_connected, settings.connectedPersonName.ifBlank { "?" }),
                     style = MaterialTheme.typography.bodySmall,
-                    color = PC_CONNECTED_GREEN
+                    color = MaterialTheme.semantic.success
                 )
                 Spacer(Modifier.width(10.dp))
                 OutlinedButton(
@@ -519,7 +520,7 @@ internal fun PlanningCenterImportDialogContent(
                                                 checked = entry.selected,
                                                 onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
                                             )
-                                            PlanItemTypeIcon(Icons.AutoMirrored.Filled.Label, tint = PC_HEADER_AMBER)
+                                            PlanItemTypeIcon(Icons.AutoMirrored.Filled.Label, tint = MaterialTheme.semantic.warning)
                                             Text(
                                                 pco.title,
                                                 style = MaterialTheme.typography.titleSmall,
@@ -799,8 +800,6 @@ internal fun PlanningCenterImportDialogContent(
     }
 }
 
-private val PC_CONNECTED_GREEN = Color(0xFF4CAF50)
-private val PC_HEADER_AMBER = Color(0xFFF5B301)
 
 private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "bmp", "webp")
 private val VIDEO_EXTENSIONS = setOf("mp4", "avi", "mov", "mkv", "webm")
@@ -827,14 +826,14 @@ private fun MatchedTag() {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(PC_CONNECTED_GREEN.copy(alpha = 0.15f))
+            .background(MaterialTheme.semantic.successContainer)
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
         // The string already carries a leading "✓".
         Text(
             stringResource(Res.string.planning_center_import_matched),
             style = MaterialTheme.typography.labelMedium,
-            color = PC_CONNECTED_GREEN
+            color = MaterialTheme.semantic.onSuccessContainer
         )
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,6 +22,12 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Reusable IconButton with tooltip that appears on hover, hidden when partially off-screen.
+ *
+ * [iconTint] defaults to `LocalContentColor`, which [IconButton] sets from [colors] — so an icon is
+ * drawn in the theme's content colour, and dimmed by the *disabled* one when `enabled` is false.
+ * Every drawable in `composeResources/drawable` bakes `android:fillColor="#FF000000"`, so an
+ * untinted `Image` painted a hard black glyph regardless of theme or state: invisible against the
+ * dark theme, and a disabled button that looked exactly as live as an enabled one.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -61,7 +68,7 @@ fun TooltipIconButton(
                 painter = painter,
                 contentDescription = text,
                 modifier = Modifier.size(iconSize),
-                colorFilter = iconTint?.let { ColorFilter.tint(it) }
+                colorFilter = ColorFilter.tint(iconTint ?: LocalContentColor.current)
             )
         }
     }

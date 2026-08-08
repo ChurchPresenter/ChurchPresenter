@@ -137,6 +137,7 @@ import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -454,7 +455,7 @@ fun QATab(
                     Text(
                         stringResource(Res.string.qa_displaying, displayedQuestion.text.take(50)),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -696,7 +697,7 @@ private fun QuestionRow(
     onDisplay: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val bgColor = if (isDisplayed) Color(0xFF43A047).copy(alpha = 0.1f) else Color.Transparent
+    val bgColor = if (isDisplayed) MaterialTheme.semantic.successContainer.copy(alpha = 0.35f) else Color.Transparent
     val statusColor = when (question.status) {
         QuestionStatus.PENDING -> MaterialTheme.colorScheme.tertiary
         QuestionStatus.APPROVED -> MaterialTheme.colorScheme.inverseSurface

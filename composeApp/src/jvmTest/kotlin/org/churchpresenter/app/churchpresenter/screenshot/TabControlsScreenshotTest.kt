@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.width
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_edit
+import churchpresenter.composeapp.generated.resources.ic_refresh
 import org.jetbrains.compose.resources.painterResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -24,6 +25,7 @@ import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.app.churchpresenter.composables.FocusLostRescueState
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import kotlin.test.Test
 
 class TabControlsScreenshotTest {
@@ -125,6 +127,36 @@ class TabControlsScreenshotTest {
             AddToScheduleButton(onClick = {}, tooltipText = "Add to Schedule")
             GoLiveButton(onClick = {}, tooltipText = "Go Live")
         }
+    }
+
+    // ── TooltipIconButton ───────────────────────────────────────────────────────────────────────
+    // The plain icon button behind a tooltip, used across the Web toolbar, the media transport and
+    // the schedule row. Unlike ActionIconButton it carries no container of its own, so what there is
+    // to see is the icon, its tint, and how the disabled state dims it.
+
+    @Test
+    fun `tooltip icon button`() = captureComponent(SECTION, "tooltip_icon") {
+        TooltipIconButton(painter = painterResource(Res.drawable.ic_refresh), text = "Refresh", onClick = {})
+    }
+
+    @Test
+    fun `tooltip icon button disabled`() = captureComponent(SECTION, "tooltip_icon_disabled") {
+        TooltipIconButton(
+            painter = painterResource(Res.drawable.ic_refresh),
+            text = "Refresh",
+            onClick = {},
+            enabled = false,
+        )
+    }
+
+    @Test
+    fun `tooltip icon button tinted`() = captureComponent(SECTION, "tooltip_icon_tinted") {
+        TooltipIconButton(
+            painter = painterResource(Res.drawable.ic_refresh),
+            text = "Refresh",
+            onClick = {},
+            iconTint = MaterialTheme.colorScheme.primary,
+        )
     }
 
     @Test

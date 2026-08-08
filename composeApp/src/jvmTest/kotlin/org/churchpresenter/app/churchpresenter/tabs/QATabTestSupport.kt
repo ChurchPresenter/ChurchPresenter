@@ -2,7 +2,12 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -14,9 +19,12 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.unit.Dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import java.io.File
@@ -52,6 +60,8 @@ internal fun qaTab(
     serverUrl: String = "http://192.0.2.1:8080",
     settings: AppSettings = AppSettings(),
     seed: QAManager.() -> Unit = {},
+    width: Dp? = null,
+    themeMode: ThemeMode? = null,
     block: ComposeUiTest.(qa: QAManager, presenter: PresenterManager, reports: QAReports) -> Unit,
 ) {
     TestSingletons.latchToTestHome()
@@ -65,7 +75,12 @@ internal fun qaTab(
         qa.seed()
         runComposeUiTest {
             setContent {
-                MaterialTheme {
+                ThemedForTest(themeMode) {
+                    // The tab paints no ground of its own — in the app it sits on the window's
+                    // `colorScheme.background` (MainDesktop). Without this the capture is
+                    // transparent everywhere the tab does not draw, which reads as a black page.
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
                     QATab(
                         qaManager = qa,
                         presenterManager = presenter,
@@ -77,6 +92,8 @@ internal fun qaTab(
                             reports.settingsAfterChange = transform(settings)
                         },
                     )
+                    }
+                    }
                 }
             }
             block(qa, presenter, reports)
@@ -85,6 +102,12 @@ internal fun qaTab(
         realHome?.let { System.setProperty("user.home", it) }
         tempHome.deleteRecursively()
     }
+}
+
+@Composable
+private fun ThemedForTest(themeMode: ThemeMode?, content: @Composable () -> Unit) {
+    if (themeMode == null) MaterialTheme(content = content)
+    else ChurchPresenterTheme(themeMode = themeMode, content = content)
 }
 
 /** Opens a session and posts [texts] as a phone would, returning nothing — read them off the manager. */

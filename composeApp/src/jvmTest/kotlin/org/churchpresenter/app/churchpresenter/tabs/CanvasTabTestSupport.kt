@@ -2,7 +2,11 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -11,9 +15,12 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.unit.Dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.SceneSource
+import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import java.io.File
@@ -50,6 +57,9 @@ internal class CanvasReports {
 @OptIn(ExperimentalTestApi::class)
 internal fun canvasTab(
     seed: SceneViewModel.() -> Unit = {},
+    settings: (AppSettings) -> AppSettings = { it },
+    width: Dp? = null,
+    themeMode: ThemeMode? = null,
     block: ComposeUiTest.(vm: SceneViewModel, reports: CanvasReports) -> Unit,
 ) {
     TestSingletons.latchToTestHome()
@@ -63,14 +73,16 @@ internal fun canvasTab(
         vm.seed()
         runComposeUiTest {
             setContent {
-                MaterialTheme {
-                    CanvasTab(
-                        appSettings = AppSettings(),
-                        onSettingsChange = { reports.settingsChanges++ },
-                        presenterManager = presenter,
-                        sceneViewModel = vm,
-                        onAddToSchedule = { id, name -> reports.scheduled += id to name },
-                    )
+                ThemedForTest(themeMode) {
+                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                        CanvasTab(
+                            appSettings = settings(AppSettings()),
+                            onSettingsChange = { reports.settingsChanges++ },
+                            presenterManager = presenter,
+                            sceneViewModel = vm,
+                            onAddToSchedule = { id, name -> reports.scheduled += id to name },
+                        )
+                    }
                 }
             }
             block(vm, reports)
@@ -79,6 +91,12 @@ internal fun canvasTab(
         realHome?.let { System.setProperty("user.home", it) }
         tempHome.deleteRecursively()
     }
+}
+
+@Composable
+private fun ThemedForTest(themeMode: ThemeMode?, content: @Composable () -> Unit) {
+    if (themeMode == null) MaterialTheme(content = content)
+    else ChurchPresenterTheme(themeMode = themeMode, content = content)
 }
 
 // ── Labels, as the tab renders them ─────────────────────────────────────────────────────────────

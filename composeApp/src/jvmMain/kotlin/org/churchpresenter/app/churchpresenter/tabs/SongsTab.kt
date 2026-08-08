@@ -197,6 +197,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.songCreditLine
 import org.churchpresenter.app.churchpresenter.viewmodel.songTitleLine
 import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -1140,7 +1141,7 @@ fun SongsTab(
                                                     else
                                                         stringResource(Res.string.add_to_favorites),
                                                     modifier = Modifier.size(16.dp),
-                                                    tint = if (isFav) Color(0xFFFFC107)
+                                                    tint = if (isFav) MaterialTheme.semantic.favorite
                                                            else MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
@@ -1182,7 +1183,7 @@ fun SongsTab(
                                         painter = painterResource(if (isFav) Res.drawable.ic_star_filled else Res.drawable.ic_star),
                                         contentDescription = null,
                                         modifier = Modifier.size(18.dp),
-                                        tint = if (isFav) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurfaceVariant
+                                        tint = if (isFav) MaterialTheme.semantic.favorite else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 },
                                 onClick = {
@@ -1212,13 +1213,13 @@ fun SongsTab(
                             )
                             HorizontalDivider()
                             DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.delete_saved_string), color = Color(0xFFE53935)) },
+                                text = { Text(stringResource(Res.string.delete_saved_string), color = MaterialTheme.colorScheme.error) },
                                 leadingIcon = {
                                     Icon(
                                         painter = painterResource(Res.drawable.ic_delete),
                                         contentDescription = null,
                                         modifier = Modifier.size(18.dp),
-                                        tint = Color(0xFFE53935)
+                                        tint = MaterialTheme.colorScheme.error
                                     )
                                 },
                                 onClick = {
@@ -1816,7 +1817,7 @@ fun SongsTab(
                         showDeleteConfirm = false
                         songToDelete = null
                     }) {
-                        Text(stringResource(Res.string.delete_saved_string), color = Color(0xFFE53935))
+                        Text(stringResource(Res.string.delete_saved_string), color = MaterialTheme.colorScheme.error)
                     }
                 },
                 dismissButton = {

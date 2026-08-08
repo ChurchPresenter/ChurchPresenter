@@ -67,7 +67,21 @@ class QAManager {
 
     // ── Actions ──────────────────────────────────────────────────────
 
-    fun submitQuestion(text: String, name: String = "", clientIp: String = "", cooldownSeconds: Int = 30, deviceId: String = ""): Question? = synchronized(this) {
+    /**
+     * Records a question as a phone's POST would.
+     *
+     * [timestamp] is defaulted to the wall clock and only ever passed by a caller that needs a fixed
+     * one — the screenshot suite, whose images would otherwise differ every minute because each row
+     * prints its own `HH:mm`. Every real caller leaves it alone.
+     */
+    fun submitQuestion(
+        text: String,
+        name: String = "",
+        clientIp: String = "",
+        cooldownSeconds: Int = 30,
+        deviceId: String = "",
+        timestamp: Long = System.currentTimeMillis(),
+    ): Question? = synchronized(this) {
         if (!_sessionActive.value || text.isBlank()) return@synchronized null
 
         // Cooldown check
@@ -83,7 +97,7 @@ class QAManager {
             text = text.trim(),
             submitterName = name.trim(),
             submitterDeviceId = deviceId,
-            timestamp = System.currentTimeMillis()
+            timestamp = timestamp
         )
         _questions.add(question)
         emitEvent(QAEvent.QuestionSubmitted(question))
@@ -91,12 +105,12 @@ class QAManager {
         question
     }
 
-    fun addQuestion(text: String): Question? = synchronized(this) {
+    fun addQuestion(text: String, timestamp: Long = System.currentTimeMillis()): Question? = synchronized(this) {
         if (text.isBlank()) return@synchronized null
         val question = Question(
             id = UUID.randomUUID().toString(),
             text = text.trim(),
-            timestamp = System.currentTimeMillis()
+            timestamp = timestamp
         )
         _questions.add(question)
         emitEvent(QAEvent.QuestionSubmitted(question))

@@ -115,7 +115,6 @@ import org.churchpresenter.app.churchpresenter.composables.SectionInk
 import org.churchpresenter.app.churchpresenter.composables.SongChordPreview
 import org.churchpresenter.app.churchpresenter.composables.SongSectionKind
 import org.churchpresenter.app.churchpresenter.composables.buildPreviewSections
-import org.churchpresenter.app.churchpresenter.composables.isLightSurface
 import org.churchpresenter.app.churchpresenter.composables.sectionKindOf
 import org.churchpresenter.app.churchpresenter.composables.songStatsOf
 import org.churchpresenter.app.churchpresenter.data.SongItem
@@ -822,7 +821,6 @@ private fun InsertChip(label: String, onClick: () -> Unit) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SyntaxLegend(modifier: Modifier = Modifier) {
-    val light = isLightSurface()
     FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -834,8 +832,8 @@ private fun SyntaxLegend(modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.align(Alignment.CenterVertically),
         )
-        LegendChip("[Verse 1]", SectionInk.of(SongSectionKind.VERSE, light))
-        LegendChip("{Chorus}", SectionInk.of(SongSectionKind.CHORUS, light))
+        LegendChip("[Verse 1]", SectionInk.of(SongSectionKind.VERSE))
+        LegendChip("{Chorus}", SectionInk.of(SongSectionKind.CHORUS))
         LegendChip("[G]lyric", MaterialTheme.colorScheme.primary)
         Text(
             text = stringResource(Res.string.song_syntax_chord_hint),
@@ -864,9 +862,8 @@ private fun LegendChip(text: String, ink: Color) {
  */
 @Composable
 private fun rememberLyricsHighlight(): VisualTransformation {
-    val light = isLightSurface()
-    val verse = SectionInk.of(SongSectionKind.VERSE, light)
-    val chorus = SectionInk.of(SongSectionKind.CHORUS, light)
+    val verse = SectionInk.of(SongSectionKind.VERSE)
+    val chorus = SectionInk.of(SongSectionKind.CHORUS)
     val chord = MaterialTheme.colorScheme.primary
     return remember(verse, chorus, chord) {
         VisualTransformation { text ->

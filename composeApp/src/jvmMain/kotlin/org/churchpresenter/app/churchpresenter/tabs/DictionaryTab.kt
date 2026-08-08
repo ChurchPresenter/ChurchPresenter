@@ -118,11 +118,9 @@ import org.churchpresenter.app.churchpresenter.data.InterlinearWord
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryLanguageFilter
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-
-private val hebrewNumberColor = Color(0xFFB45309)
-private val greekNumberColor = Color(0xFF1D4ED8)
 
 @Composable
 fun DictionaryTab(
@@ -399,7 +397,7 @@ private fun DictionaryEntryRow(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    val numberColor = if (entry.isHebrew) hebrewNumberColor else greekNumberColor
+    val numberColor = if (entry.isHebrew) MaterialTheme.semantic.hebrew else MaterialTheme.semantic.greek
     val bgColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
     else Color.Transparent
 
@@ -569,7 +567,7 @@ private fun DictionaryDetailPane(
                 )
             }
         } else {
-        val numberColor = if (entry.isHebrew) hebrewNumberColor else greekNumberColor
+        val numberColor = if (entry.isHebrew) MaterialTheme.semantic.hebrew else MaterialTheme.semantic.greek
         val languageLabel = if (entry.isHebrew)
             stringResource(Res.string.dictionary_filter_hebrew).uppercase()
         else
@@ -1041,12 +1039,20 @@ private val strongsPattern = Regex("[HGhg]\\d+")
 
 // `internal` so the link-splitting can be tested directly: it is a pure function over the text, and
 // driving it through the composable would assert on a rendered tree instead of on the ranges.
-internal fun buildStrongsAnnotatedString(text: String, onClick: (String) -> Unit) = buildAnnotatedString {
+//
+// The two link colours are passed in rather than read here: this is not a composable, so it cannot
+// reach the theme, and hard-coding them would put the app's only Hebrew/Greek accent outside it.
+internal fun buildStrongsAnnotatedString(
+    text: String,
+    hebrew: Color,
+    greek: Color,
+    onClick: (String) -> Unit,
+) = buildAnnotatedString {
     var lastEnd = 0
     for (match in strongsPattern.findAll(text)) {
         append(text.substring(lastEnd, match.range.first))
         val upper = match.value.uppercase()
-        val linkColor = if (upper.startsWith("H")) hebrewNumberColor else greekNumberColor
+        val linkColor = if (upper.startsWith("H")) hebrew else greek
         withLink(
             LinkAnnotation.Clickable(
                 tag = upper,
@@ -1080,7 +1086,9 @@ private fun DetailSection(
         )
         if (onStrongsClick != null) {
             val cb = onStrongsClick
-            val annotated = remember(body) { buildStrongsAnnotatedString(body, cb) }
+            val hebrew = MaterialTheme.semantic.hebrew
+            val greek = MaterialTheme.semantic.greek
+            val annotated = remember(body, hebrew, greek) { buildStrongsAnnotatedString(body, hebrew, greek, cb) }
             Text(
                 text = annotated,
                 style = MaterialTheme.typography.bodyMedium,

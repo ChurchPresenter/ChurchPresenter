@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +51,7 @@ import org.churchpresenter.app.churchpresenter.utils.ChordSegment
 import org.churchpresenter.app.churchpresenter.utils.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.SongSectionWordGroup
 import org.churchpresenter.app.churchpresenter.utils.SongSectionWords
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
 /** How a section reads in the preview — the colour tells verses from choruses at a glance. */
@@ -139,33 +139,24 @@ fun songStatsOf(sections: List<PreviewSection>): SongStats {
 }
 
 /**
- * Ink for each section kind, held as a light/dark pair.
+ * Ink for each section kind.
  *
- * These stay fixed rather than following the theme accent: they are a legend — verse, chorus,
- * bridge, tag — and a legend that changes colour with the theme stops being one. Each pair is
- * picked to hold its contrast on both grounds.
+ * A legend — verse, chorus, bridge, tag — so these do not follow the theme *accent*; a legend whose
+ * colours move with the accent stops being one. They do follow light and dark, which is why they are
+ * theme tokens rather than literals here: the pair that holds its contrast on a light ground is not
+ * the pair that holds it on a dark one, and the theme is the one place that knows which is in force.
  */
 internal object SectionInk {
-    private val VerseLight = Color(0xFF8A5A00)
-    private val VerseDark = Color(0xFFE8A33D)
-    private val ChorusLight = Color(0xFF7B3FA6)
-    private val ChorusDark = Color(0xFFD9A0F0)
-    private val BridgeLight = Color(0xFF13704C)
-    private val BridgeDark = Color(0xFF6FD69A)
-    private val TagLight = Color(0xFF9E3B26)
-    private val TagDark = Color(0xFFF5A08E)
-
-    internal fun of(kind: SongSectionKind, light: Boolean): Color = when (kind) {
-        SongSectionKind.VERSE -> if (light) VerseLight else VerseDark
-        SongSectionKind.CHORUS -> if (light) ChorusLight else ChorusDark
-        SongSectionKind.BRIDGE -> if (light) BridgeLight else BridgeDark
-        SongSectionKind.TAG -> if (light) TagLight else TagDark
+    @Composable
+    internal fun of(kind: SongSectionKind): Color = with(MaterialTheme.semantic) {
+        when (kind) {
+            SongSectionKind.VERSE -> chordVerse
+            SongSectionKind.CHORUS -> chordChorus
+            SongSectionKind.BRIDGE -> chordBridge
+            SongSectionKind.TAG -> chordTag
+        }
     }
 }
-
-/** True when the surface behind the dialog is a light one, so the inks above can pick a side. */
-@Composable
-internal fun isLightSurface(): Boolean = MaterialTheme.colorScheme.surface.luminance() > 0.5f
 
 /**
  * A section's name as a coloured chip with a rule running off it — verse amber, chorus purple,
@@ -176,7 +167,7 @@ internal fun isLightSurface(): Boolean = MaterialTheme.colorScheme.surface.lumin
  */
 @Composable
 fun SectionLabelRow(label: String, modifier: Modifier = Modifier) {
-    val ink = SectionInk.of(sectionKindOf(label), isLightSurface())
+    val ink = SectionInk.of(sectionKindOf(label))
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -239,7 +230,6 @@ fun SongChordPreview(
         ChordTransposer.chordsIn(text, steps, flats).toSet()
     }
     val palette = remember(currentKey) { ChordTransposer.diatonicChords(currentKey) }
-    val light = isLightSurface()
 
     Column(modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainerLow)) {
 

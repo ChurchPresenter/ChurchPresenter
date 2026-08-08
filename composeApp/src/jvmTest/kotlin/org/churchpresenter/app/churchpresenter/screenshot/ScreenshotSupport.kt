@@ -2,10 +2,10 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
@@ -112,6 +112,14 @@ internal fun stackedThemes(
  *
  * [drive] runs before the shot — click to open a menu, type into a field. [rootIndex] 1 then shoots
  * the popup that opened.
+ *
+ * The content sits on a **[Surface]**, not on a `Box` with a surface-coloured background. The two
+ * paint the same pixels but only the Surface publishes `LocalContentColor`, and a component that
+ * leaves a colour unspecified — every `Labeled*` row's label, by design, so a call site can tint it —
+ * falls back to that. Without one the fallback is Material's default of plain black, which is
+ * invisible against the dark theme: `labeledControls` was recorded that way and its labels came out
+ * black-on-black. Every tab in the app draws inside a Surface, so this is also what the component
+ * really looks like there.
  */
 internal fun captureComponent(
     section: String,
@@ -123,11 +131,9 @@ internal fun captureComponent(
     runComposeUiTest {
         setContent {
             ChurchPresenterTheme(themeMode = mode) {
-                Box(
-                    Modifier
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(12.dp)
-                ) { content() }
+                Surface(color = MaterialTheme.colorScheme.surface) {
+                    Box(Modifier.padding(12.dp)) { content() }
+                }
             }
         }
         drive()

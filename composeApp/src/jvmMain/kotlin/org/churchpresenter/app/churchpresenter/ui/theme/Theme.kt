@@ -461,6 +461,7 @@ fun ChurchPresenterTheme(
         )
     ) {
         CompositionLocalProvider(
+            LocalSemanticColors provides semanticColorsFor(colorScheme),
             LocalScrollbarStyle provides ScrollbarStyle(
                 minimalHeight = 16.dp,
                 thickness = 5.dp,

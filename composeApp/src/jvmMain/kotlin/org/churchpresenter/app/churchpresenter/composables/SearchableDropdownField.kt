@@ -300,8 +300,8 @@ fun SearchableDropdownField(
                     style = LocalScrollbarStyle.current.copy(
                         thickness = 8.dp,
                         minimalHeight = 24.dp,
-                        unhoverColor = Color.Gray.copy(alpha = 0.5f),
-                        hoverColor = Color.Gray.copy(alpha = 0.9f)
+                        unhoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                        hoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                     )
                 )
             }

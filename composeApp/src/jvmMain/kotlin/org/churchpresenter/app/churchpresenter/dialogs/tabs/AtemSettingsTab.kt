@@ -31,7 +31,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -79,6 +78,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.server.AtemClient
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 
 @Composable
 fun AtemSettingsTab(
@@ -289,9 +289,9 @@ fun AtemSettingsTab(
 
                     val (statusText, statusColor) = when {
                         isTesting ->
-                            stringResource(Res.string.atem_status_connecting) to Color(0xFFFFC107)
+                            stringResource(Res.string.atem_status_connecting) to MaterialTheme.semantic.warning
                         connectionStatus == "connected" ->
-                            stringResource(Res.string.atem_status_connected) to Color(0xFF4CAF50)
+                            stringResource(Res.string.atem_status_connected) to MaterialTheme.semantic.success
                         connectionStatus == "error" ->
                             stringResource(Res.string.atem_status_error, connectionError ?: "") to MaterialTheme.colorScheme.error
                         else ->
@@ -305,7 +305,7 @@ fun AtemSettingsTab(
                         Text(
                             stringResource(Res.string.atem_detected_video_mode, detectedMode),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF4CAF50)
+                            color = MaterialTheme.semantic.success
                         )
                     }
                 }

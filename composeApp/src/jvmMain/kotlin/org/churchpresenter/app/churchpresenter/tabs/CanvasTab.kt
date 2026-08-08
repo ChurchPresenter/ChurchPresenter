@@ -73,6 +73,10 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Warning
 import churchpresenter.composeapp.generated.resources.ic_add
@@ -416,10 +420,11 @@ fun CanvasTab(
                                     onClick = { sceneViewModel.toggleSourceVisibility(source.id) },
                                     modifier = Modifier.size(20.dp)
                                 ) {
-                                    Text(
-                                        if (source.visible) "\uD83D\uDC41" else "\u2014",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    Icon(
+                                        if (source.visible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                        contentDescription = stringResource(Res.string.canvas_toggle_visibility),
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -437,10 +442,11 @@ fun CanvasTab(
                                     onClick = { sceneViewModel.toggleSourceLock(source.id) },
                                     modifier = Modifier.size(20.dp)
                                 ) {
-                                    Text(
-                                        if (source.locked) "\uD83D\uDD12" else "\uD83D\uDD13",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    Icon(
+                                        if (source.locked) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                                        contentDescription = stringResource(Res.string.canvas_toggle_lock),
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }

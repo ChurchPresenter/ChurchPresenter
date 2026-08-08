@@ -45,6 +45,7 @@ import org.churchpresenter.app.churchpresenter.models.CompanionSurfacePlacement
 import org.churchpresenter.app.churchpresenter.models.CompanionSurfaceSlot
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -81,7 +82,7 @@ fun CompanionSurfacePanel(
             ) {
                 val (statusText, statusColor) = when (state.status) {
                     CompanionConnectionStatus.CONNECTING ->
-                        stringResource(Res.string.companion_satellite_status_connecting) to Color(0xFFFFC107)
+                        stringResource(Res.string.companion_satellite_status_connecting) to MaterialTheme.semantic.warning
                     CompanionConnectionStatus.ERROR ->
                         stringResource(Res.string.companion_satellite_status_error, state.errorMessage) to MaterialTheme.colorScheme.error
                     else ->

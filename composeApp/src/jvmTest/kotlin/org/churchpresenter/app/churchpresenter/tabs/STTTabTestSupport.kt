@@ -2,7 +2,12 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
@@ -12,9 +17,12 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.unit.Dp
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.STTSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.json.JSONObject
@@ -55,6 +63,8 @@ internal class STTReports {
 internal fun sttTab(
     settings: STTSettings = STTSettings(serverUrl = SILENT_STT_URL),
     seed: STTManager.() -> Unit = {},
+    width: Dp? = null,
+    themeMode: ThemeMode? = null,
     block: ComposeUiTest.(stt: STTManager, presenter: PresenterManager, reports: STTReports) -> Unit,
 ) {
     val appSettings = AppSettings(sttSettings = settings)
@@ -65,7 +75,12 @@ internal fun sttTab(
         stt.seed()
         runComposeUiTest {
             setContent {
-                MaterialTheme {
+                ThemedForTest(themeMode) {
+                    // The tab paints no ground of its own — in the app it sits on the window's
+                    // `colorScheme.background`, and without that the capture is transparent
+                    // everywhere the tab does not draw.
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
                     STTTab(
                         sttManager = stt,
                         presenterManager = presenter,
@@ -76,6 +91,8 @@ internal fun sttTab(
                             reports.settingsAfterChange = transform(appSettings)
                         },
                     )
+                    }
+                    }
                 }
             }
             block(stt, presenter, reports)
@@ -83,6 +100,12 @@ internal fun sttTab(
     } finally {
         runCatching { stt.dispose() }
     }
+}
+
+@Composable
+private fun ThemedForTest(themeMode: ThemeMode?, content: @Composable () -> Unit) {
+    if (themeMode == null) MaterialTheme(content = content)
+    else ChurchPresenterTheme(themeMode = themeMode, content = content)
 }
 
 /**

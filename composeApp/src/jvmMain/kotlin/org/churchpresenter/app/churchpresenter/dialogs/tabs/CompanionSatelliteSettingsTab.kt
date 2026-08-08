@@ -29,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -75,6 +74,7 @@ import org.churchpresenter.app.churchpresenter.models.CompanionSurfaceSlot
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 
 @Composable
 fun CompanionSatelliteSettingsTab(
@@ -223,7 +223,7 @@ private fun CompanionConnectionCard(
                         if (state.status != CompanionConnectionStatus.CONNECTED) {
                             val (statusText, statusColor) = when (state.status) {
                                 CompanionConnectionStatus.CONNECTING ->
-                                    stringResource(Res.string.companion_satellite_status_connecting) to Color(0xFFFFC107)
+                                    stringResource(Res.string.companion_satellite_status_connecting) to MaterialTheme.semantic.warning
                                 CompanionConnectionStatus.ERROR ->
                                     stringResource(Res.string.companion_satellite_status_error, state.errorMessage) to MaterialTheme.colorScheme.error
                                 else ->

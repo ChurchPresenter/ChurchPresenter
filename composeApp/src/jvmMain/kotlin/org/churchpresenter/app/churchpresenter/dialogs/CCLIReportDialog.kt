@@ -150,9 +150,8 @@ import java.util.Date
 import java.util.Locale
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 
-private val VERSE_BAR_COLOR = Color(0xFF43A047)
-private val BUSIEST_CARD_COLOR = Color(0xFFFF9800)
 
 @Composable
 fun CCLIReportDialog(
@@ -497,7 +496,7 @@ internal fun BibleReportContent(verses: List<VerseSummary>) {
 @Composable
 internal fun ActivityContent(activity: List<ActivityPoint>) {
     val primary = MaterialTheme.colorScheme.primary
-    val verseColor = VERSE_BAR_COLOR
+    val verseColor = MaterialTheme.semantic.success
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         if (activity.isEmpty() || activity.all { it.songCount + it.verseCount == 0 }) {
@@ -515,7 +514,7 @@ internal fun ActivityContent(activity: List<ActivityPoint>) {
             StatCard(
                 stringResource(Res.string.ccli_stat_busiest),
                 if (busiest != null) "${busiest.label} (${busiest.songCount + busiest.verseCount})" else "—",
-                BUSIEST_CARD_COLOR
+                MaterialTheme.semantic.warning
             )
         }
 
