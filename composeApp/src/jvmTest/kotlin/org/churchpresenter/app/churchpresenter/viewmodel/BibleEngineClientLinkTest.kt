@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.websocket.WebSockets as ClientWebSockets
+import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -11,6 +15,7 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
@@ -57,6 +62,9 @@ class BibleEngineClientLinkTest {
         val sessions = CopyOnWriteArrayList<DefaultWebSocketServerSession>()
         val connectionCount = AtomicInteger()
 
+        /** Long enough for a healthy loopback handshake; only reached when the fixture is broken. */
+        private val PROBE_TIMEOUT_MS = 5_000L
+
         /** Valid only after [start]. */
         var port: Int = 0
             private set
@@ -81,6 +89,51 @@ class BibleEngineClientLinkTest {
             // resolvedConnectors() suspends until the bind completes, so this is the port Netty is
             // actually listening on.
             port = runBlocking { server.engine.resolvedConnectors().first().port }
+            proveUsable()
+        }
+
+        /**
+         * Opens and closes one real WebSocket against the fixture before any test uses it.
+         *
+         * **A bound port is not a working endpoint**, and this class has failed on exactly that gap.
+         * A full-suite run answered every connect with `Connection reset` — not *refused* — for the
+         * whole 15s budget, so something was listening on that port and tearing the upgrade down.
+         * `resolvedConnectors()` cannot see that, and the client then looked guilty for a fault that
+         * was never its own.
+         *
+         * This does not claim to know the cause; three explanations have already been disproved (the
+         * server not being up — a reset is not a refusal; a pooled connection to a closed port; and
+         * port reuse across tests — 120 rounds of the start/stop/port-0 cycle produced neither reuse
+         * nor a single failure). What it does is move the failure to where it can be read: if the
+         * fixture cannot talk to itself, setup says so and names the port, in under a second instead
+         * of after a 15s timeout that blames the wrong component.
+         */
+        private fun proveUsable() {
+            val probe = HttpClient(CIO) { install(ClientWebSockets) }
+            val reached = runCatching {
+                runBlocking {
+                    withTimeoutOrNull(PROBE_TIMEOUT_MS) {
+                        probe.webSocket(host = "127.0.0.1", port = port, path = "/bible-engine") { }
+                        true
+                    }
+                }
+            }
+            runCatching { probe.close() }
+            // The probe's own connection must not be counted as a client under test.
+            sessions.clear()
+            received.clear()
+            connectionCount.set(0)
+
+            val answered = reached.getOrElse { cause ->
+                throw IllegalStateException(
+                    "fake engine on port $port is bound but unusable — " +
+                        "${cause.javaClass.simpleName}: ${cause.message}",
+                    cause,
+                )
+            }
+            checkNotNull(answered) {
+                "fake engine on port $port accepted no WebSocket within ${PROBE_TIMEOUT_MS}ms"
+            }
         }
 
         fun push(text: String) = runBlocking { sessions.toList().forEach { it.send(Frame.Text(text)) } }
