@@ -224,6 +224,109 @@ class PresenterFullScreenScreenshotTest {
         )
     }
 
+    // ── The title and number, which carry their own size and colour ─────────────────────────────
+    // Independently configurable from the lyrics, and the commonest reason a slide reads badly is a
+    // number or title set to the same weight as the words it sits beside.
+
+    @Test
+    fun `a number set apart from the lyrics`() = shoot("song_number_styled") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = songSettings(
+                showNumber = Constants.EVERY_PAGE,
+                songNumberColor = "#FFD54F",
+                songNumberFontSize = 140,
+                songNumberBold = true,
+            ),
+        )
+    }
+
+    /** The number small and quiet at the other corner, rather than large in the default one. */
+    @Test
+    fun `a small number in the opposite corner`() = shoot("song_number_small") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = songSettings(
+                showNumber = Constants.EVERY_PAGE,
+                songNumberColor = "#8A8A94",
+                songNumberFontSize = 28,
+                songNumberHorizontalAlignment = Constants.LEFT,
+                songNumberPosition = Constants.ABOVE_VERSE,
+            ),
+        )
+    }
+
+    @Test
+    fun `a title set apart from the lyrics`() = shoot("song_title_styled") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = songSettings(
+                titleDisplay = Constants.EVERY_PAGE,
+                titlePosition = Constants.ABOVE_VERSE,
+                titleColor = "#90CAF9",
+                titleFontSize = 44,
+                titleBold = true,
+            ),
+        )
+    }
+
+    /** A number large enough to run out of its corner — what overflow does to it. */
+    @Test
+    fun `a number too large for its corner`() = shoot("song_number_overflow") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = songSettings(
+                showNumber = Constants.EVERY_PAGE,
+                songNumberFontSize = 400,
+                songNumberColor = "#FFD54F",
+            ),
+        )
+    }
+
+    /** A title longer than the frame at a size that will not shrink. */
+    @Test
+    fun `a title too long for the frame`() = shoot("song_title_overflow") {
+        SongPresenter(
+            lyricSection = song().copy(title = LONG_TITLE),
+            appSettings = songSettings(
+                titleDisplay = Constants.EVERY_PAGE,
+                titlePosition = Constants.ABOVE_VERSE,
+                titleFontSize = 120,
+            ),
+        )
+    }
+
+    /** Title and number over a photograph with their own shadows — the legibility case. */
+    @Test
+    fun `title and number shadowed over a photograph`() = shoot("song_title_number_shadow_on_image") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = songSettings(
+                titleDisplay = Constants.EVERY_PAGE,
+                titlePosition = Constants.ABOVE_VERSE,
+                titleColor = "#FFD54F",
+                titleShadow = true,
+                showNumber = Constants.EVERY_PAGE,
+                songNumberShadow = true,
+                lyricsShadow = true,
+            ).copy(backgroundSettings = BackgroundSettings(songBackground = imageBackground())),
+        )
+    }
+
+    /** The same over a photograph with every shadow off, for the comparison. */
+    @Test
+    fun `title and number unshadowed over a photograph`() = shoot("song_title_number_on_image") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = songSettings(
+                titleDisplay = Constants.EVERY_PAGE,
+                titlePosition = Constants.ABOVE_VERSE,
+                titleColor = "#FFD54F",
+                showNumber = Constants.EVERY_PAGE,
+            ).copy(backgroundSettings = BackgroundSettings(songBackground = imageBackground())),
+        )
+    }
+
     // ── Songs: what is behind the words ─────────────────────────────────────────────────────────
 
     @Test
@@ -458,6 +561,65 @@ class PresenterFullScreenScreenshotTest {
         )
     }
 
+    /** The reference in its own size and colour — it is not the verse and should not read as it. */
+    @Test
+    fun `a reference set apart from the verse`() = shoot("bible_reference_styled") {
+        BiblePresenter(
+            selectedVerses = listOf(verse()),
+            appSettings = bibleSettings(
+                referenceColor = "#FFD54F",
+                referenceFontSize = 36,
+                referenceBold = true,
+            ),
+        )
+    }
+
+    /** The other way round: a reference larger than the verse, centred over it. */
+    @Test
+    fun `a reference larger than the verse`() = shoot("bible_reference_large") {
+        BiblePresenter(
+            selectedVerses = listOf(verse()),
+            appSettings = bibleSettings(
+                referencePosition = "Above",
+                referenceFontSize = 96,
+                referenceColor = "#90CAF9",
+                referenceHorizontalAlignment = Constants.CENTER,
+            ),
+        )
+    }
+
+    /** A reference at a size the frame cannot hold. */
+    @Test
+    fun `a reference too large for the frame`() = shoot("bible_reference_overflow") {
+        BiblePresenter(
+            selectedVerses = listOf(verse()),
+            appSettings = bibleSettings(referenceFontSize = 300, referenceColor = "#FFD54F"),
+        )
+    }
+
+    /** Verse and reference shadowed over a photograph, and the same without, to compare. */
+    @Test
+    fun `scripture and reference shadowed over a photograph`() = shoot("bible_reference_shadow_on_image") {
+        BiblePresenter(
+            selectedVerses = listOf(verse()),
+            appSettings = bibleSettings(
+                textShadow = true,
+                referenceShadow = true,
+                referenceColor = "#FFD54F",
+                referenceFontSize = 40,
+            ).copy(backgroundSettings = BackgroundSettings(bibleBackground = imageBackground())),
+        )
+    }
+
+    @Test
+    fun `scripture and reference unshadowed over a photograph`() = shoot("bible_reference_on_image") {
+        BiblePresenter(
+            selectedVerses = listOf(verse()),
+            appSettings = bibleSettings(referenceColor = "#FFD54F", referenceFontSize = 40)
+                .copy(backgroundSettings = BackgroundSettings(bibleBackground = imageBackground())),
+        )
+    }
+
     @Test
     fun `scripture centred`() = shoot("bible_align_center") {
         BiblePresenter(
@@ -688,6 +850,15 @@ class PresenterFullScreenScreenshotTest {
         lyricsShadowOpacity: Int = SongSettings().lyricsShadowOpacity,
         titleSlideEnabled: Boolean = false,
         titleFontSize: Int = SongSettings().titleFontSize,
+        titleColor: String = SongSettings().titleColor,
+        titleBold: Boolean = false,
+        songNumberFontSize: Int = SongSettings().songNumberFontSize,
+        songNumberColor: String = SongSettings().songNumberColor,
+        songNumberBold: Boolean = false,
+        songNumberPosition: String = SongSettings().songNumberPosition,
+        songNumberHorizontalAlignment: String = SongSettings().songNumberHorizontalAlignment,
+        songNumberShadow: Boolean = false,
+        titleShadow: Boolean = false,
         marginTop: Int = SongSettings().marginTop,
         marginBottom: Int = SongSettings().marginBottom,
         marginLeft: Int = SongSettings().marginLeft,
@@ -715,6 +886,15 @@ class PresenterFullScreenScreenshotTest {
             lyricsShadowOpacity = lyricsShadowOpacity,
             titleSlideEnabled = titleSlideEnabled,
             titleFontSize = titleFontSize,
+            titleColor = titleColor,
+            titleBold = titleBold,
+            songNumberFontSize = songNumberFontSize,
+            songNumberColor = songNumberColor,
+            songNumberBold = songNumberBold,
+            songNumberPosition = songNumberPosition,
+            songNumberHorizontalAlignment = songNumberHorizontalAlignment,
+            songNumberShadow = songNumberShadow,
+            titleShadow = titleShadow,
             marginTop = marginTop,
             marginBottom = marginBottom,
             marginLeft = marginLeft,
@@ -756,6 +936,10 @@ class PresenterFullScreenScreenshotTest {
         referencePosition: String = BibleSettings().primaryReferencePosition,
         showAbbreviation: Boolean = false,
         textFontSize: Int = BibleSettings().primaryBibleFontSize,
+        referenceFontSize: Int = BibleSettings().primaryReferenceFontSize,
+        referenceBold: Boolean = false,
+        referenceShadow: Boolean = false,
+        referenceHorizontalAlignment: String = BibleSettings().primaryReferenceHorizontalAlignment,
     ) = AppSettings(
         bibleSettings = BibleSettings(
             // Without this the translation list is empty, no entry matches the verse's own
@@ -768,6 +952,10 @@ class PresenterFullScreenScreenshotTest {
             primaryBibleFontSize = textFontSize,
             primaryBibleHorizontalAlignment = textHorizontalAlignment,
             primaryReferenceColor = referenceColor,
+            primaryReferenceFontSize = referenceFontSize,
+            primaryReferenceBold = referenceBold,
+            primaryReferenceShadow = referenceShadow,
+            primaryReferenceHorizontalAlignment = referenceHorizontalAlignment,
             primaryReferencePosition = referencePosition,
             primaryShowAbbreviation = showAbbreviation,
         ),
@@ -929,6 +1117,8 @@ class PresenterFullScreenScreenshotTest {
             "'Twas grace that taught my heart to fear, and grace my fears relieved",
             "How precious did that grace appear the hour I first believed",
         )
+
+        const val LONG_TITLE = "Amazing Grace, How Sweet the Sound That Saved a Wretch Like Me"
 
         const val NOTICE = "Prayer meeting Wednesday at 7pm in the hall"
 
