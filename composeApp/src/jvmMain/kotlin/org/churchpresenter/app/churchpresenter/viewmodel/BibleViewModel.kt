@@ -1011,6 +1011,42 @@ class BibleViewModel(
         }
     }
 
+    /**
+     * Navigates to a canonical (KJV-numbered) reference, such as a bundled cross-reference.
+     *
+     * Cross-references and the sequence log are both stored canonically, but the loaded module may
+     * number its own text differently — Synodal Psalms run one behind KJV's for most of the book —
+     * so the reference is translated into this Bible's display numbering before anything is
+     * selected. [Bible.getVerseDetailsByCode] does that, resolving the exact verse by its internal
+     * code where it can; the engine path uses the same bridge.
+     *
+     * Passing [goLiveSource] makes this go live as well as select, through the same deferred token
+     * the history panel and detection chips use — so a cross-reference go-live is recorded in
+     * history, statistics, the training log and the sequence log exactly like any other.
+     *
+     * @return false when the reference does not resolve in the loaded module — an NT-only or
+     * abridged module simply does not contain some of what TSK points at, and the caller is
+     * expected to show that row as unavailable rather than as one that does nothing when clicked.
+     */
+    fun selectVerseByCanonicalRef(
+        bookId: Int,
+        chapter: Int,
+        verse: Int,
+        goLiveSource: String? = null,
+    ): Boolean {
+        val bible = _primaryBible.value ?: return false
+        if (bible.getDisplayIndexForBookId(bookId) < 0) return false
+
+        val details = bible.getVerseDetailsByCode(bookId, chapter, verse)
+        return selectVerseByDetails(
+            bookName = details?.bookName ?: "",
+            chapter = details?.displayChapter ?: chapter,
+            verseNumber = details?.displayVerse ?: verse,
+            goLiveSource = goLiveSource,
+            bookId = bookId,
+        )
+    }
+
     fun getChaptersForCurrentBook(): List<String> {
         _primaryBible.value?.let { bible ->
             // getChapterCount expects 0-based book index

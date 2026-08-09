@@ -77,6 +77,10 @@
     <string name="shadow_opacity">Intensity (%)</string>
     <string name="hold_live">Hold Live</string>
     <string name="bible_split_browse_mode">Split Browse Mode</string>
+    <string name="bible_cross_references">Cross References</string>
+    <string name="bible_cross_references_title">Refs</string>
+    <string name="bible_cross_references_none">No cross references</string>
+    <string name="bible_cross_references_often_next">Often next</string>
     <string name="bible_live_view">Live</string>
     <string name="fade_in">Fade In</string>
     <string name="fade_out">Fade Out</string>

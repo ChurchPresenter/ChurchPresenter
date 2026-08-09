@@ -40,6 +40,7 @@ import churchpresenter.composeapp.generated.resources.bible_multi_layout
 import churchpresenter.composeapp.generated.resources.bible_translation_divider
 import churchpresenter.composeapp.generated.resources.bible_translation_spacing
 import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
+import churchpresenter.composeapp.generated.resources.bible_cross_references
 import churchpresenter.composeapp.generated.resources.bible_transition_settings
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.font_size
@@ -401,6 +402,20 @@ private fun LeftColumn(
                 },
             controlModifier = Modifier.size(24.dp),
             label = stringResource(Res.string.bible_split_browse_mode),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+
+    SettingsSection(title = stringResource(Res.string.bible_cross_references)) {
+        LabeledCheckbox(
+            checked = settings.bibleSettings.crossReferencesPanel,
+            onCheckedChange = { enabled ->
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(crossReferencesPanel = enabled)) }
+            },
+            controlModifier = Modifier.size(24.dp),
+            label = stringResource(Res.string.bible_cross_references),
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,

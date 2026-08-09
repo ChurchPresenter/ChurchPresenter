@@ -107,6 +107,41 @@ class BibleViewModelNavigationTest {
         assertFalse(vm.selectVerseByDetails("Habakkuk", 3, 2), "a book not in this module cannot be shown")
     }
 
+    // ── selectVerseByCanonicalRef ───────────────────────────────────────────────
+
+    @Test
+    fun `navigating by canonical reference lands on the verse`() {
+        val token = vm.verseSelectionToken.value
+        // 43 is John's canonical id — what a cross-reference and the sequence log both store.
+        assertTrue(vm.selectVerseByCanonicalRef(43, 3, 16))
+        awaitToken(token)
+
+        assertEquals(2, vm.selectedBookIndex.value)
+        assertEquals(3, vm.selectedChapter.value)
+        assertEquals(16, selectedVerseNumber())
+    }
+
+    @Test
+    fun `a canonical reference to a book this module lacks reports failure`() {
+        // Habakkuk is canonical book 35 and is not in this fixture. The panel greys such a row
+        // rather than drawing one that does nothing when clicked.
+        assertFalse(vm.selectVerseByCanonicalRef(35, 3, 2))
+    }
+
+    @Test
+    fun `a canonical reference goes live only when a source is given`() {
+        val liveToken = vm.autoFollowLiveToken.value
+
+        val token = vm.verseSelectionToken.value
+        assertTrue(vm.selectVerseByCanonicalRef(43, 3, 16))
+        awaitToken(token)
+        assertEquals(liveToken, vm.autoFollowLiveToken.value, "selecting alone must not go live")
+
+        assertTrue(vm.selectVerseByCanonicalRef(43, 3, 17, goLiveSource = "crossref"))
+        awaitUntil("the go-live token to bump") { vm.autoFollowLiveToken.value > liveToken }
+        assertEquals("crossref", vm.autoFollowLiveSource.value)
+    }
+
     @Test
     fun `verse matching distinguishes 3 from 13 and 23`() {
         // The reason the implementation matches on "N. " with a trailing space.

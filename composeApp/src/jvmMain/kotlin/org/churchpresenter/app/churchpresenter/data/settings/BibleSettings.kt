@@ -215,6 +215,13 @@ data class BibleSettings(
     val transitionDuration: Float = 500f,
     val splitBrowseMode: Boolean = false,
     val splitLivePanelWidth: Int = 300,
+    /**
+     * Shows a narrow column of related and often-followed references beside the verse list.
+     *
+     * Off by default: it costs horizontal space that most operators have already spent on the
+     * verse text, and it is only useful to someone who wants it.
+     */
+    val crossReferencesPanel: Boolean = false,
 ) {
     /**
      * The translations to present, in order. The first is the navigation bible.
