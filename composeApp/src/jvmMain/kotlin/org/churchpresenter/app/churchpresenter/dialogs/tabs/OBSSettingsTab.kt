@@ -65,6 +65,7 @@ import churchpresenter.composeapp.generated.resources.obs_status_connecting
 import churchpresenter.composeapp.generated.resources.obs_status_disconnected
 import churchpresenter.composeapp.generated.resources.obs_status_error
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.OBSSettings
@@ -91,6 +92,7 @@ fun OBSSettingsTab(
     val status by obsManager.status
     val errorMessage by obsManager.errorMessage
 
+    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -100,7 +102,7 @@ fun OBSSettingsTab(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // ── Connection card ────────────────────────────────────────────────
@@ -313,5 +315,6 @@ fun OBSSettingsTab(
                 }
             }
         }
+        SettingsScrollbar(scrollState)
     }
 }

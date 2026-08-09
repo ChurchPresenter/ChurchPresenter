@@ -269,10 +269,12 @@ class OptionsContentTest {
     ) {
         onNodeWithText("OBS").assertExists()
 
-        onNodeWithText("OBS").performClick()
+        // The last two tabs sit past the right edge of the strip at this window width — which is
+        // what the strip's own overflow arrows are for, so scroll them in the way a user would.
+        onNodeWithText("OBS").performScrollTo().performClick()
         onNodeWithText("OBS").assertIsSelected()
 
-        onNodeWithText("Companion Satellite").performClick()
+        onNodeWithText("Companion Satellite").performScrollTo().performClick()
         onNodeWithText("Companion Satellite").assertIsSelected()
     }
 

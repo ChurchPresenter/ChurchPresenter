@@ -65,6 +65,7 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ScanningRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -124,6 +125,7 @@ fun LowerThirdSettingsTab(
     val noLottieFilesStr = stringResource(Res.string.no_lottie_files)
     val scanningDirectoryStr = stringResource(Res.string.scanning_directory)
 
+    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -133,7 +135,7 @@ fun LowerThirdSettingsTab(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(scrollState),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
@@ -152,65 +154,58 @@ fun LowerThirdSettingsTab(
             )
             Spacer(modifier = Modifier.height(8.dp))
             val listAccentColor = MaterialTheme.colorScheme.primary
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp)
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .background(MaterialTheme.colorScheme.surface)
-                ) {
-                    if (lottieFiles == null && lottieFolder.isNotEmpty()) {
-                        // "No Lottie files" is a verdict about the folder; until the read finishes
-                        // it would be an unearned one.
-                        Box(
-                            modifier = Modifier.fillMaxWidth().height(250.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            ScanningRow(scanningDirectoryStr)
-                        }
-                    } else if (lottieFilesInDirectory.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth().height(250.dp),
-                            contentAlignment = Alignment.Center
+                if (lottieFiles == null && lottieFolder.isNotEmpty()) {
+                    // "No Lottie files" is a verdict about the folder; until the read finishes
+                    // it would be an unearned one.
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(250.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        ScanningRow(scanningDirectoryStr)
+                    }
+                } else if (lottieFilesInDirectory.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(250.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (lottieFolder.isEmpty()) noDirectorySelectedStr else noLottieFilesStr,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    lottieFilesInDirectory.forEach { fileName ->
+                        val isSelected = fileName == selectedFile
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.surfaceVariant
+                                    else MaterialTheme.colorScheme.surface
+                                )
+                                .drawBehind {
+                                    if (isSelected) drawRect(color = listAccentColor, size = Size(4f, size.height))
+                                }
+                                .clickable { viewModel.selectFile(fileName) }
+                                .padding(vertical = 8.dp, horizontal = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = if (lottieFolder.isEmpty()) noDirectorySelectedStr else noLottieFilesStr,
+                                text = fileName,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
+                                        else MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
-                    } else {
-                        lottieFilesInDirectory.forEach { fileName ->
-                            val isSelected = fileName == selectedFile
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(
-                                        if (isSelected) MaterialTheme.colorScheme.surfaceVariant
-                                        else MaterialTheme.colorScheme.surface
-                                    )
-                                    .drawBehind {
-                                        if (isSelected) drawRect(color = listAccentColor, size = Size(4f, size.height))
-                                    }
-                                    .clickable { viewModel.selectFile(fileName) }
-                                    .padding(vertical = 8.dp, horizontal = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = fileName,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
-                                            else MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        }
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     }
                 }
             }
@@ -366,6 +361,7 @@ fun LowerThirdSettingsTab(
             }
         }
     }
+        SettingsScrollbar(scrollState)
     }
 }
 

@@ -109,6 +109,7 @@ import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentBu
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
@@ -135,6 +136,7 @@ fun SongSettingsTab(
 ) {
     val availableFonts = rememberSystemFonts()
 
+    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -142,7 +144,7 @@ fun SongSettingsTab(
             .padding(14.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Left Column
@@ -174,6 +176,7 @@ fun SongSettingsTab(
                 LookAheadColumn(settings, onSettingsChange, availableFonts)
             }
         }
+        SettingsScrollbar(scrollState)
     }
 }
 

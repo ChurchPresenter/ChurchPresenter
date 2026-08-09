@@ -99,6 +99,7 @@ import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextFie
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingRowFirstControlOffset
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
@@ -143,11 +144,12 @@ fun BibleSettingsTab(
     val bibleFilesInDirectory = listing?.files.orEmpty()
     val bibleFileDisplayNames = listing?.displayNames.orEmpty()
 
+    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(14.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Column(
@@ -187,6 +189,7 @@ fun BibleSettingsTab(
                 }
             }
         }
+        SettingsScrollbar(scrollState)
     }
 }
 

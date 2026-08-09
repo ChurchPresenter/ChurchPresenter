@@ -70,6 +70,7 @@ import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentBu
 import org.churchpresenter.app.churchpresenter.composables.MetronomeDot
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
@@ -99,6 +100,7 @@ fun StageMonitorSettingsTab(
         onSettingsChange { s -> s.copy(stageMonitorSettings = s.stageMonitorSettings.block()) }
     }
 
+    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -106,7 +108,7 @@ fun StageMonitorSettingsTab(
             .padding(14.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
@@ -168,6 +170,7 @@ fun StageMonitorSettingsTab(
                 }
             }
         }
+        SettingsScrollbar(scrollState)
     }
 }
 

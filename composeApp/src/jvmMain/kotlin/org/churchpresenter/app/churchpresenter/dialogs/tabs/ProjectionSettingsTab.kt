@@ -185,6 +185,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.detectVlcInstallPath
@@ -502,6 +503,7 @@ fun ProjectionSettingsTab(
     // mode, etc.) sit flush with the bottom of the tallest label (e.g. "Pictures/Presentation",
     // which wraps to 2 lines) — keeping every checkbox/radio button in the row aligned.
 
+    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -511,7 +513,7 @@ fun ProjectionSettingsTab(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
     ScreenAssignmentCard(
@@ -796,6 +798,7 @@ fun ProjectionSettingsTab(
 
     }
     }
+    SettingsScrollbar(scrollState)
     }
 }
 

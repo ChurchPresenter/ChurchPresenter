@@ -72,6 +72,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
@@ -112,6 +113,7 @@ fun AtemSettingsTab(
     var isTesting by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
+    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -121,7 +123,7 @@ fun AtemSettingsTab(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // ── Connection card ──────────────────────────────────────────────
@@ -562,6 +564,7 @@ fun AtemSettingsTab(
             }
             }
         }
+        SettingsScrollbar(scrollState)
     }
 }
 
