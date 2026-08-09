@@ -233,6 +233,7 @@ import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedCl
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import org.churchpresenter.app.churchpresenter.data.bibleDisplayNames
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
@@ -301,6 +302,8 @@ fun BibleTab(
     isPresenting: Boolean = false,
     presenterManager: PresenterManager? = null,
     statisticsManager: StatisticsManager? = null,
+    /** Learns what tends to follow what, to suggest it in the cross-reference panel. */
+    verseSequenceLog: VerseSequenceLog? = null,
     sttManager: STTManager? = null,
     bibleEngineClient: BibleEngineClient? = null,
     dialogDismissSignal: Int = 0,
@@ -504,6 +507,16 @@ fun BibleTab(
             // If this go-live overrode the engine's top suggestion, log it as a correction (engine
             // said X, operator showed Y) — labeled training data for false positives.
             viewModel.logGoLiveCorrection(viewModel.selectedBookIndex.value, primaryVerse.chapter, verseStart)
+            // Learn what follows what, for the cross-reference panel's "often next" suggestions.
+            // Anchored on the span's start verse and on canonical numbering, so a range and a
+            // single verse key the same way and a translation switch does not split the history.
+            verseSequenceLog?.let { log ->
+                viewModel.canonicalRefForDisplay(
+                    viewModel.selectedBookIndex.value, primaryVerse.chapter, verseStart,
+                )?.let { (book, chapter, verse) ->
+                    if (verse != null) log.recordGoLive(book, chapter, verse)
+                }
+            }
         }
         if (viewModel.multiVerseEnabled.value) {
             viewModel.clearMultiVerseSelection()

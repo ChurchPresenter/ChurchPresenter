@@ -96,6 +96,7 @@ import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
 import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkToastHost
 import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
@@ -327,6 +328,7 @@ fun main() {
         var appReady by remember { mutableStateOf(false) }
         val settingsManager = remember { SettingsManager() }
         val statisticsManager = remember { StatisticsManager() }
+        val verseSequenceLog = remember { VerseSequenceLog() }
         var appSettings by remember {
             mutableStateOf(settingsManager.loadSettings().let {
                 it.copy(presentationRemoteSettings = it.presentationRemoteSettings.copy(remoteControlEnabled = false))
@@ -1294,6 +1296,7 @@ fun main() {
                                     livePreviewAppSettings = effectiveAppSettings,
                                     presenterManager = presenterManager,
                                     statisticsManager = statisticsManager,
+                                    verseSequenceLog = verseSequenceLog,
                                     onScheduleActionsReady = { scheduleActions = it },
                                     presenting = { mode ->
                                         presenterManager.setPresentingMode(mode)

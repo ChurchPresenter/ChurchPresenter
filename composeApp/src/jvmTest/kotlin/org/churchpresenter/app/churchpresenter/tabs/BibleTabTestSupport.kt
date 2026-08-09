@@ -35,6 +35,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import java.io.File
 import java.nio.file.Files
 
@@ -140,6 +141,13 @@ internal fun bibleTab(
      * `user.home` first — see [bibleTabWithStatistics].
      */
     statistics: StatisticsManager? = null,
+    /**
+     * Passed as the tab's [VerseSequenceLog] when non-null.
+     *
+     * Its default store is under `~/.churchpresenter`, so build one over a temp file rather than
+     * calling `VerseSequenceLog()`.
+     */
+    sequenceLog: VerseSequenceLog? = null,
     /** Instance Link Controller mode: non-null makes the tab mirror every go-live to the primary. */
     onInstanceLinkSendVerse: ((SelectedVerse) -> Unit)? = null,
     onInstanceLinkSendBibleHold: ((Boolean) -> Unit)? = null,
@@ -193,6 +201,7 @@ internal fun bibleTab(
                         sttManager = stt,
                         presenterManager = presenter,
                         statisticsManager = statistics,
+                        verseSequenceLog = sequenceLog,
                         onInstanceLinkSendVerse = onInstanceLinkSendVerse?.let { send ->
                             { book, chapter, verseNumber, verseText, verseRange ->
                                 send(

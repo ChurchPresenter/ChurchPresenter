@@ -120,6 +120,7 @@ import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
 import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
 import org.churchpresenter.app.churchpresenter.dialogs.CrashFeedbackDialog
@@ -216,6 +217,7 @@ fun MainDesktop(
     livePreviewAppSettings: AppSettings = appSettings,
     presenterManager: PresenterManager,
     statisticsManager: StatisticsManager? = null,
+    verseSequenceLog: VerseSequenceLog? = null,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -1578,6 +1580,7 @@ fun MainDesktop(
                                 isPresenting = presentingMode == Presenting.BIBLE,
                                 presenterManager = presenterManager,
                                 statisticsManager = statisticsManager,
+                                verseSequenceLog = verseSequenceLog,
                                 dialogDismissSignal = dialogDismissSignal,
                                 sttManager = sttManager,
                                 bibleEngineClient = bibleEngineClient
