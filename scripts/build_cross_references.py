@@ -389,10 +389,42 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    links = sum(len(value.split()) for value in refs.values())
+    links = validate(args.out)
     print(f"{len(refs)} verses, {links} links, {truncated} verses truncated "
           f"to {MAX_TARGETS_PER_VERSE}, {args.out.stat().st_size / 1e6:.2f} MB -> {args.out}")
     return 0
+
+
+def validate(path: Path) -> int:
+    """Re-read the written file and check every reference in it.
+
+    This is where the shipped data is verified. The app's own test suite deliberately does not:
+    parsing a quarter of a million links would dominate its runtime, and it stubs bundled
+    resources rather than reading them. So a regeneration that produces nonsense has to fail
+    here, at the point it happens, rather than reaching a service.
+    """
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if data.get("v") != 1:
+        raise SystemExit(f"{path}: unexpected format version {data.get('v')!r}")
+
+    links = 0
+    for key, value in data["r"].items():
+        source = (int(key[:3]), int(key[3:6]), int(key[6:]))
+        if len(key) != 9 or not in_range(*source):
+            raise SystemExit(f"{path}: {key} is not a verse")
+        if not value:
+            raise SystemExit(f"{path}: {key} has an empty target list")
+        for target in value.split():
+            start, _, end = target.partition("-")
+            book, chapter, verse = int(start[:3]), int(start[3:6]), int(start[6:])
+            if len(start) != 9 or not in_range(book, chapter, verse):
+                raise SystemExit(f"{path}: {key} -> {target} is not a verse")
+            if (book, chapter, verse) == source:
+                raise SystemExit(f"{path}: {key} references itself")
+            if end and (int(end) <= verse or not in_range(book, chapter, int(end))):
+                raise SystemExit(f"{path}: {key} -> {target} has an impossible range")
+            links += 1
+    return links
 
 
 if __name__ == "__main__":
