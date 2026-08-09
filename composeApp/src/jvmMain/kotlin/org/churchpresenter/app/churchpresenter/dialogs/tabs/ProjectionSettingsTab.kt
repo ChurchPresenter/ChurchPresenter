@@ -186,6 +186,7 @@ import java.io.File
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.detectVlcInstallPath
@@ -513,7 +514,8 @@ fun ProjectionSettingsTab(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState),
+            .verticalScroll(scrollState)
+            .padding(end = SettingsScrollbarGutter),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
     ScreenAssignmentCard(

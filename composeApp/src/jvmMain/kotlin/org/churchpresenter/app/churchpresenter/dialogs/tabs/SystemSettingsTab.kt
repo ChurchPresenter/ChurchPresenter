@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.app.churchpresenter.composables.ScanningRow
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -167,7 +168,8 @@ fun SystemSettingsTab(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState),
+            .verticalScroll(scrollState)
+            .padding(end = SettingsScrollbarGutter),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Bible Storage Directory

@@ -65,6 +65,7 @@ import churchpresenter.composeapp.generated.resources.companion_satellite_status
 import companionsatellite.CompanionConnectionStatus
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -116,7 +117,8 @@ fun CompanionSatelliteSettingsTab(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState),
+                .verticalScroll(scrollState)
+                .padding(end = SettingsScrollbarGutter),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             connections.forEach { connection ->

@@ -129,6 +129,7 @@ import churchpresenter.composeapp.generated.resources.server_host_note
 import churchpresenter.composeapp.generated.resources.server_url_label
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
+import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.data.settings.ServerSettings
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
@@ -192,7 +193,8 @@ fun ServerSettingsTab(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState),
+                .verticalScroll(scrollState)
+                .padding(end = SettingsScrollbarGutter),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // ── Card 1: Server ────────────────────────────────────────────────
