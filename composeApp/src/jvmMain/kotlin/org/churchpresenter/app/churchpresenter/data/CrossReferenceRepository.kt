@@ -2,6 +2,8 @@ package org.churchpresenter.app.churchpresenter.data
 
 import churchpresenter.composeapp.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -44,33 +46,46 @@ class CrossReferenceRepository(
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
-    /** [refKey] → its targets, parsed at load so a click parses nothing. */
-    private val index = HashMap<Int, List<CrossRef>>()
+    /**
+     * [refKey] → its targets, parsed at load so a click parses nothing.
+     *
+     * Replaced wholesale when a load finishes rather than filled in place, and read through a
+     * `@Volatile` field, so [forVerse] either sees the previous contents or the complete new ones —
+     * never a map another thread is still writing into.
+     */
+    @Volatile private var index: Map<Int, List<CrossRef>> = emptyMap()
 
     @Volatile private var loaded = false
-    @Volatile private var loading = false
+
+    /** Serialises loads so a second caller waits for the first rather than racing it. */
+    private val loadMutex = Mutex()
 
     /**
-     * Reads the dataset once. Subsequent calls return immediately, including while the first is
-     * still in flight — the panel re-runs this on every verse selection.
+     * Reads the dataset once; later calls return immediately.
+     *
+     * A caller arriving while a load is in flight **waits for it** rather than returning early.
+     * Returning early would hand that caller an index that is not there yet — the panel resolves
+     * its rows the moment this returns, so it would render "no cross references" for a verse that
+     * has them, and nothing would re-run to correct it until the selection changed again.
+     *
+     * A failed or cancelled load publishes nothing and leaves [loaded] false, so the next call
+     * tries again from scratch — a half-parsed index is never visible.
      */
     suspend fun ensureLoaded() {
-        if (loaded || loading) return
-        loading = true
-        withContext(Dispatchers.IO) {
-            try {
+        if (loaded) return
+        loadMutex.withLock {
+            if (loaded) return
+            withContext(Dispatchers.IO) {
                 val file = json.decodeFromString(
                     CrossReferenceFile.serializer(), loader().decodeToString(),
                 )
+                val parsed = HashMap<Int, List<CrossRef>>(file.refs.size)
                 for ((key, targets) in file.refs) {
                     val source = parseKey(key) ?: continue
-                    index[source] = targets.split(' ').mapNotNull(::parseTarget)
+                    parsed[source] = targets.split(' ').mapNotNull(::parseTarget)
                 }
+                index = parsed
                 loaded = true
-            } finally {
-                // Cleared either way: a failed read must not leave the repository permanently
-                // "loading" and so permanently empty for the rest of the run.
-                loading = false
             }
         }
     }
@@ -90,11 +105,10 @@ class CrossReferenceRepository(
         return index[refKey(bookId, chapter, verse)]?.toList() ?: emptyList()
     }
 
-    /** Clears the index and the load-once flags, so the next [ensureLoaded] re-reads. */
+    /** Clears the index and the load-once flag, so the next [ensureLoaded] re-reads. */
     internal fun resetForTest() {
-        index.clear()
+        index = emptyMap()
         loaded = false
-        loading = false
     }
 
     companion object {

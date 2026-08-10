@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -93,6 +97,34 @@ class CrossReferenceRepositoryTest {
         repository.ensureLoaded()
 
         assertEquals(1, loads)
+    }
+
+    @Test
+    fun `a caller arriving mid-load waits for it instead of seeing an empty index`() = runTest {
+        // The panel resolves its rows the instant ensureLoaded returns, so a second caller that
+        // returned early while the first load was still in flight would render "no cross
+        // references" for a verse that has them — and nothing re-runs to correct it until the
+        // selection changes again.
+        val started = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+        var loads = 0
+        val repository = CrossReferenceRepository {
+            loads++
+            started.complete(Unit)
+            release.await()
+            fixture.toByteArray()
+        }
+
+        val first = launch { repository.ensureLoaded() }
+        started.await() // the load is genuinely in flight — not merely scheduled
+
+        val second = async { repository.ensureLoaded(); repository.forVerse(43, 3, 16).size }
+        runCurrent() // second gets to run as far as it can while the load is still blocked
+
+        release.complete(Unit)
+        assertEquals(2, second.await(), "the second caller must see the loaded index")
+        first.join()
+        assertEquals(1, loads, "waiting, not a second read of the 3 MB file")
     }
 
     @Test

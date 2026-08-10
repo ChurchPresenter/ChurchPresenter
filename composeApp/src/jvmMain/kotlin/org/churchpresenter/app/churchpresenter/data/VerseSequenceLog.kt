@@ -92,9 +92,10 @@ class VerseSequenceLog(
                 ))
             }
 
+            val capped = capKeys(pairs)
             state = state.copy(
-                pairs = capKeys(pairs),
-                seen = seen,
+                pairs = capped,
+                seen = capSeen(capped, seen, target),
                 last = target,
                 lastAt = now,
             )
@@ -172,6 +173,29 @@ class VerseSequenceLog(
             )
             .take(MAX_SUCCESSORS)
             .associate { it.key to it.value }
+
+    /**
+     * Drops recency stamps for verses nothing can ask about any more.
+     *
+     * [VerseSequenceFile.seen] is only ever read for a *successor* — by [successors] to break ties
+     * between equal counts, and by [capSuccessors] to decide what to evict. Without this it gained
+     * an entry for every distinct verse ever shown and never lost one, so the one part of the file
+     * [capKeys] and [capSuccessors] do not bound would grow to every verse of the Bible and be
+     * re-serialised and rewritten on every single go-live.
+     *
+     * [current] is kept even when it is nobody's successor yet, so the verse just shown does not
+     * lose the stamp it was given a line earlier.
+     */
+    private fun capSeen(
+        pairs: Map<String, Map<String, Int>>,
+        seen: Map<String, Long>,
+        current: String,
+    ): Map<String, Long> {
+        val reachable = HashSet<String>()
+        reachable.add(current)
+        pairs.values.forEach { reachable.addAll(it.keys) }
+        return seen.filterKeys(reachable::contains)
+    }
 
     /** Bounds the file over years of use by dropping the least-used sources first. */
     private fun capKeys(pairs: Map<String, Map<String, Int>>): Map<String, Map<String, Int>> =

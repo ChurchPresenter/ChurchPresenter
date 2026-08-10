@@ -118,6 +118,37 @@ class VerseSequenceLogTest {
         )
     }
 
+    @Test
+    fun `recency stamps are kept only for verses something can point at`() {
+        val log = log()
+
+        // Twelve services, one verse each: no pair is ever formed, so there is nothing any of them
+        // could be a successor of. Without pruning, every verse ever shown stayed in the file for
+        // good and was rewritten to disk on every go-live.
+        repeat(12) { index ->
+            log.goLive(Triple(40, 1, index + 1))
+            advance(91)
+        }
+
+        assertEquals(
+            setOf("040001012"),
+            log.snapshot().seen.keys,
+            "only the verse just shown is still of any use",
+        )
+    }
+
+    @Test
+    fun `a learned successor keeps the stamp its ranking depends on`() {
+        val log = log()
+
+        repeat(2) { log.goLive(john316); advance(2); log.goLive(romans623); advance(2) }
+
+        assertTrue(
+            "045006023" in log.snapshot().seen,
+            "pruning must not take the recency the tie-break reads",
+        )
+    }
+
     // ── What must not be learned ──────────────────────────────────────────────
 
     @Test
