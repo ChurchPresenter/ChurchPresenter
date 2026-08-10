@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -98,7 +99,7 @@ data class BrowserSourceFrame(
     val png: ByteArray,
 )
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class)
 class BrowserSourceVideoRenderer(
     private val presenterManager: PresenterManager,
     private val appSettingsState: State<AppSettings>,
@@ -317,6 +318,11 @@ class BrowserSourceVideoRenderer(
      * Dropping a *dirty-rect* frame this way is only safe because of [FULL_FRAME_RESEED_MS] —
      * each delta is only valid applied on top of the state the previous one produced, so on its
      * own a dropped delta would leave a client permanently wrong in that region.
+     *
+     * That the replayed frame is usually a delta is also why the render loop clears this cache
+     * when it parks (see [shouldRenderTick]): with no subscribers left there is no canvas for the
+     * next client to apply it to, so replaying it would paint a fragment of the old content until
+     * the wake-up full frame arrives.
      */
     val frames = MutableSharedFlow<BrowserSourceFrame>(
         replay = 1,
@@ -355,19 +361,25 @@ class BrowserSourceVideoRenderer(
                 var hasPrevious = false
                 var lastSeenSubscriberCount = 0
                 var lastFullFrameAtMs = 0L
+                var parked = false
                 while (true) {
-                    // A newly-attached HTTP client (OBS/vMix reconnect, or a debug tab opened
-                    // mid-service) must be seeded with a full frame before any dirty-rect delta
-                    // means anything to it, so force one whenever the subscriber count rises —
-                    // even on a tick where content didn't otherwise change.
                     val subscriberCount = frames.subscriptionCount.value
 
                     if (!shouldRenderTick(screenAssignmentState.value.browserSourceEnabled, subscriberCount)) {
-                        // Forget the baseline: whoever connects next has an empty canvas, so the
-                        // next rendered frame has to be a full one regardless. Dropping it here
-                        // means that happens via decideTick's existing first-frame path rather
-                        // than by diffing against pixels no client ever received.
-                        hasPrevious = false
+                        if (!parked) {
+                            parked = true
+                            // Forget the baseline: whoever connects next has an empty canvas, so
+                            // the next rendered frame has to be a full one regardless. Dropping it
+                            // here means that happens via decideTick's existing first-frame path
+                            // rather than by diffing against pixels no client ever received.
+                            hasPrevious = false
+                            // And drop what [frames] would replay. The last thing emitted before
+                            // parking is usually a dirty-rect delta, which only means anything
+                            // applied on top of the canvas the client before it had built up — so
+                            // replaying it to the *next* client paints a fragment of old content
+                            // at that rectangle until the wake-up full frame lands a poll later.
+                            frames.resetReplayCache()
+                        }
                         lastSeenSubscriberCount = subscriberCount
                         // Keep the virtual animation clock on real time so a client that connects
                         // after a long park doesn't resume mid-animation at a stale timestamp.
@@ -376,6 +388,7 @@ class BrowserSourceVideoRenderer(
                         continue
                     }
 
+                    parked = false
                     timeNanos += frameNanos
                     Snapshot.sendApplyNotifications()
                     val img = scene.render(timeNanos)
@@ -385,6 +398,10 @@ class BrowserSourceVideoRenderer(
                         img.close()
                     }
 
+                    // A newly-attached HTTP client (OBS/vMix reconnect, or a debug tab opened
+                    // mid-service) must be seeded with a full frame before any dirty-rect delta
+                    // means anything to it, so force one whenever the subscriber count rises —
+                    // even on a tick where content didn't otherwise change.
                     val newSubscriberJoined = subscriberCount > lastSeenSubscriberCount
                     lastSeenSubscriberCount = subscriberCount
 
