@@ -35,6 +35,55 @@ class BibleTest {
 
     private fun bible() = SpbFixture.loadedBible(dir)
 
+    // ── Book abbreviations ──────────────────────────────────────────────────────
+
+    /**
+     * The short form shown in the cross-reference column, derived from the module's own book name
+     * so it is always in the module's language rather than the app's.
+     */
+    @Test
+    fun `a one-word book shortens to its opening letters`() {
+        val b = bible()
+        assertEquals("Gen", b.generateAbbreviation("Genesis"))
+        assertEquals("Job", b.generateAbbreviation("Job"), "three letters or fewer stay whole")
+        assertEquals("Ruth", b.generateAbbreviation("Ruth"), "four letters stay whole")
+        assertEquals("Быт", b.generateAbbreviation("Бытие"), "the rule is not English-specific")
+    }
+
+    @Test
+    fun `a numbered book keeps its number`() {
+        val b = bible()
+        // Initials would give "1C" and "1К" — unreadable, and 1 and 2 Corinthians look identical
+        // once the eye is scanning a column of them.
+        assertEquals("1 Cor", b.generateAbbreviation("1 Corinthians"))
+        assertEquals("2 Sam", b.generateAbbreviation("2 Samuel"))
+        assertEquals("1 Кор", b.generateAbbreviation("1 Коринфянам"))
+        assertEquals("3 John", b.generateAbbreviation("3 John"))
+    }
+
+    @Test
+    fun `a multi-word book takes its significant word`() {
+        val b = bible()
+        assertEquals("Song", b.generateAbbreviation("Song of Solomon"), "four letters stay whole")
+        assertEquals("Пес", b.generateAbbreviation("Песнь Песней"), "five are cut to three")
+    }
+
+    @Test
+    fun `a name with nothing worth shortening falls back to initials`() {
+        val b = bible()
+        assertEquals("AAB", b.generateAbbreviation("A a b"))
+        assertEquals("", b.generateAbbreviation("   "), "a blank name has no abbreviation")
+    }
+
+    @Test
+    fun `the module exposes an abbreviation per book`() {
+        val b = bible()
+        assertEquals("Gen", b.getBookAbbreviation(1))
+        assertEquals("Psa", b.getBookAbbreviation(19))
+        assertEquals("John", b.getBookAbbreviation(43))
+        assertNull(b.getBookAbbreviation(35), "a book this module lacks has none")
+    }
+
     // ── Loading ─────────────────────────────────────────────────────────────────
 
     @Test

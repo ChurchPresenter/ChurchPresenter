@@ -12,6 +12,7 @@ data class WindowLayoutSettings(
     val splitLivePanelWidth: Int = 300,
     val bibleColWidthBook: Int = 200,
     val bibleColWidthChapter: Int = 120,
+    val bibleColWidthCrossRef: Int = 240,
     val lowerThirdListWidthDp: Int = 240,
     val canvasLeftPanelWidthDp: Int = 200,
     val canvasRightPanelWidthDp: Int = 200,

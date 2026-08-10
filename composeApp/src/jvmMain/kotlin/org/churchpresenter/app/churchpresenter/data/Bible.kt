@@ -20,28 +20,36 @@ class Bible {
     private val codeIndex = HashMap<String, BibleVerse>()
 
     /**
-     * Generate abbreviation for a book name
-     * Takes first 3 letters or first letter of each word for compound names
+     * A short form of a book name, in whatever language the module names its books.
+     *
+     * Single words shorten to their first three or four characters ("Genesis" → "Gen", "Бытие" →
+     * "Быт"). A name that leads with a numeral keeps it and shortens the word after it
+     * ("1 Corinthians" → "1 Cor", "1 Коринфянам" → "1 Кор"), which is the form these books are
+     * conventionally written in and is what makes them tellable apart at a glance. Anything else
+     * multi-word takes the significant word — the first one longer than three characters, so
+     * "Song of Solomon" → "Song" rather than "SoS".
+     *
+     * Initials remain the fallback for names with no word worth shortening.
      */
-    private fun generateAbbreviation(bookName: String): String {
+    internal fun generateAbbreviation(bookName: String): String {
         if (bookName.isBlank()) return ""
 
         val words = bookName.trim().split(Regex("\\s+"))
         return when {
             // Single word: take first 3-4 characters
-            words.size == 1 -> {
-                val word = words[0]
-                when {
-                    word.length <= 3 -> word
-                    word.length == 4 -> word.take(4)
-                    else -> word.take(3)
-                }
-            }
-            // Multiple words: take first letter of each word (up to 4 letters)
-            else -> {
-                words.take(4).map { it.first().uppercase() }.joinToString("")
-            }
+            words.size == 1 -> shortenWord(words[0])
+            // "1 Corinthians", "2 Samuel" — the numeral is the whole point of the name.
+            words.size >= 2 && words[0].all { it.isDigit() } ->
+                "${words[0]} ${shortenWord(words[1])}"
+            else -> words.firstOrNull { it.length > 3 }?.let(::shortenWord)
+                ?: words.take(4).joinToString("") { it.first().uppercase() }
         }
+    }
+
+    /** One word shortened: kept whole at three characters or fewer, else its first three or four. */
+    private fun shortenWord(word: String): String = when {
+        word.length <= 4 -> word
+        else -> word.take(3)
     }
 
     /**
@@ -471,6 +479,15 @@ class Bible {
      * Returns the book name for the given 1-based book id, or null if not found.
      */
     fun getBookName(bookId: Int): String? = books.firstOrNull { it.bookId == bookId.toString() }?.book
+
+    /**
+     * Returns the short form of the book name for the given 1-based book id, or null if not found.
+     *
+     * In the module's own language, since it is derived from the name the module gives the book —
+     * which is what a reference shown beside this module's verse text has to be written in.
+     */
+    fun getBookAbbreviation(bookId: Int): String? =
+        books.firstOrNull { it.bookId == bookId.toString() }?.abbreviation?.takeIf { it.isNotBlank() }
 
     /**
      * Returns the SPB book ID for the given 0-based display index.

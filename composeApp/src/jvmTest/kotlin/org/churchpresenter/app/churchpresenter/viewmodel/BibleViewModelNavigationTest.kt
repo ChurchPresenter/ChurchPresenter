@@ -10,6 +10,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -126,6 +127,22 @@ class BibleViewModelNavigationTest {
         // Habakkuk is canonical book 35 and is not in this fixture. The panel greys such a row
         // rather than drawing one that does nothing when clicked.
         assertFalse(vm.selectVerseByCanonicalRef(35, 3, 2))
+    }
+
+    @Test
+    fun `a canonical reference reads back in the module's own words`() {
+        val ref = vm.moduleRefFor(43, 3, 16)
+
+        assertEquals("John", ref?.abbreviation, "the short name the module's own book name gives")
+        assertEquals(3, ref?.chapter)
+        assertEquals(16, ref?.verse)
+        assertEquals("John three verse 16 text about light and truth.", ref?.text)
+    }
+
+    @Test
+    fun `a reference the module does not contain reads back as nothing`() {
+        assertNull(vm.moduleRefFor(35, 3, 2), "Habakkuk is not in this module")
+        assertNull(vm.moduleRefFor(43, 3, 999), "nor is a verse past the end of a chapter it has")
     }
 
     @Test

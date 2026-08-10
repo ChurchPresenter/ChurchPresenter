@@ -294,6 +294,14 @@ class BibleViewModel(
     // Recently emitted keys so repeated engine events don't add duplicate rows.
     private val recentDetectionKeys = ArrayDeque<String>()
 
+    /** A reference as the loaded module writes it, with its verse text. See [moduleRefFor]. */
+    data class ModuleRef(
+        val abbreviation: String,
+        val chapter: Int,
+        val verse: Int,
+        val text: String,
+    )
+
     // History of presented verses (most recent first)
     data class HistoryEntry(
         val bookName: String,
@@ -1035,15 +1043,39 @@ class BibleViewModel(
         goLiveSource: String? = null,
     ): Boolean {
         val bible = _primaryBible.value ?: return false
-        if (bible.getDisplayIndexForBookId(bookId) < 0) return false
+        // Not getDisplayIndexForBookId: it falls back to (bookId - 1) rather than reporting a miss,
+        // so it never says no. The verse lookup does.
+        val details = bible.getVerseDetailsByCode(bookId, chapter, verse) ?: return false
 
-        val details = bible.getVerseDetailsByCode(bookId, chapter, verse)
         return selectVerseByDetails(
-            bookName = details?.bookName ?: "",
-            chapter = details?.displayChapter ?: chapter,
-            verseNumber = details?.displayVerse ?: verse,
+            bookName = details.bookName,
+            chapter = details.displayChapter,
+            verseNumber = details.displayVerse,
             goLiveSource = goLiveSource,
             bookId = bookId,
+        )
+    }
+
+    /**
+     * How a canonical reference reads in the loaded module: its own short book name, its own
+     * chapter and verse numbering, and the verse text.
+     *
+     * The cross-reference dataset and the sequence log both store KJV numbering, but a module may
+     * number and name differently — so a reference shown beside that module's text has to be
+     * translated into it, or a Synodal psalm is labelled with a KJV number the operator cannot
+     * find. Null when the module has no such verse, which is the same condition
+     * [selectVerseByCanonicalRef] refuses on.
+     *
+     * Every lookup behind this is an indexed map read, so it is cheap enough to call per row.
+     */
+    fun moduleRefFor(bookId: Int, chapter: Int, verse: Int): ModuleRef? {
+        val bible = _primaryBible.value ?: return null
+        val details = bible.getVerseDetailsByCode(bookId, chapter, verse) ?: return null
+        return ModuleRef(
+            abbreviation = bible.getBookAbbreviation(bookId) ?: details.bookName,
+            chapter = details.displayChapter,
+            verse = details.displayVerse,
+            text = details.verseText,
         )
     }
 

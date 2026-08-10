@@ -280,12 +280,11 @@ import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * Width of the cross-reference column. Fixed rather than resizable: its content is "Rom 5:8", and
- * a drag handle would need a third persisted width in both the windowed and maximized layouts to
- * let someone resize that. 132dp fits "1 Cor 13:4-7" at bodySmall; longer labels ellipsize.
- */
-private val CROSS_REF_PANEL_WIDTH = 132.dp
+/** Narrowest useful cross-reference column: a reference and the first word or two of its verse. */
+private val CROSS_REF_MIN_WIDTH = 120.dp
+
+/** Widest: past this the column is taking space from the verse text it exists to support. */
+private val CROSS_REF_MAX_WIDTH = 500.dp
 
 /** How many verses of a multi-verse selection contribute cross-references. */
 private const val CROSS_REF_RANGE_ANCHORS = 3
@@ -300,6 +299,10 @@ internal fun withBibleColumnWidths(settings: AppSettings, isMaximized: Boolean, 
 internal fun withBibleSplitPanelWidth(settings: AppSettings, isMaximized: Boolean, widthDp: Int): AppSettings =
     if (isMaximized) settings.copy(maximizedLayout = settings.maximizedLayout.copy(splitLivePanelWidth = widthDp))
     else settings.copy(windowedLayout = settings.windowedLayout.copy(splitLivePanelWidth = widthDp))
+
+internal fun withBibleCrossRefPanelWidth(settings: AppSettings, isMaximized: Boolean, widthDp: Int): AppSettings =
+    if (isMaximized) settings.copy(maximizedLayout = settings.maximizedLayout.copy(bibleColWidthCrossRef = widthDp))
+    else settings.copy(windowedLayout = settings.windowedLayout.copy(bibleColWidthCrossRef = widthDp))
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -432,13 +435,27 @@ fun BibleTab(
      * to has to bring back that verse's own references rather than leave the previous list up.
      */
     var crossRefAnchorEpoch by remember { mutableStateOf(0) }
+    /**
+     * Fallback labels for references the loaded module does not contain, in the app's language.
+     *
+     * Every other label comes from the module itself, but a module with no Habakkuk cannot name
+     * Habakkuk — and a row with no label at all would be worse than one in the wrong language.
+     * Read here rather than in the panel because `stringResource` cannot be called from the effect
+     * that resolves the rows.
+     */
+    val fallbackAbbreviations = BibleBookAbbreviations.abbreviationResourceIds.map { resource ->
+        BibleBookAbbreviations.parseVariants(stringResource(resource)).firstOrNull().orEmpty()
+    }
+    // Re-resolve when the module changes, so labels and previews follow a translation switch.
+    // LaunchedEffect does not observe Compose State reads, so this has to be a key of its own.
+    val moduleBooks = viewModel.books.value
 
     // Resolve the column's contents for whatever is selected. Keyed on the selection, so a fast
     // arrow-key scroll cancels the in-flight resolution rather than queueing one per verse; and
     // gated on the setting, so the 3 MB dataset is never read while the panel is off.
     LaunchedEffect(
         crossRefsEnabled, selectedBookIndex, selectedChapter, selectedVerseIndex,
-        verseSelectionToken, crossRefAnchorEpoch,
+        verseSelectionToken, crossRefAnchorEpoch, moduleBooks, fallbackAbbreviations,
     ) {
         if (!crossRefsEnabled) {
             crossRefRows = emptyList()
@@ -467,13 +484,13 @@ fun BibleTab(
         // for and what was written use the same key.
         val learned = anchors.first().let { (book, chapter, verse) ->
             verseSequenceLog?.successors(book, chapter, verse).orEmpty()
-        }.map { CrossRefRow(it.bookId, it.chapter, it.verse, endVerse = null, learned = true) }
+        }.map { crossRefRow(viewModel, fallbackAbbreviations, it.bookId, it.chapter, it.verse, null, learned = true) }
 
         crossRefRepository.ensureLoaded()
         val static = mergeCrossRefs(
             anchors.map { (book, chapter, verse) -> crossRefRepository.forVerse(book, chapter, verse) },
             limit = CROSS_REF_STATIC_LIMIT,
-        ).map { CrossRefRow(it.bookId, it.chapter, it.verse, it.endVerse, learned = false) }
+        ).map { crossRefRow(viewModel, fallbackAbbreviations, it.bookId, it.chapter, it.verse, it.endVerse, learned = false) }
 
         // A reference already offered as a habit is not repeated as a bare cross-reference.
         val learnedKeys = learned.map { Triple(it.bookId, it.chapter, it.verse) }.toSet()
@@ -763,6 +780,15 @@ fun BibleTab(
     fun saveColWSplit() {
         val widthDp = with(density) { colWSplit.toDp().value.toInt() }
         onSettingsChangeState.value { s -> withBibleSplitPanelWidth(s, isMaximized, widthDp) }
+    }
+
+    var colWCrossRef by remember(currentLayout.bibleColWidthCrossRef, isMaximized) {
+        mutableStateOf(with(density) { currentLayout.bibleColWidthCrossRef.dp.toPx() })
+    }
+
+    fun saveColWCrossRef() {
+        val widthDp = with(density) { colWCrossRef.toDp().value.toInt() }
+        onSettingsChangeState.value { s -> withBibleCrossRefPanelWidth(s, isMaximized, widthDp) }
     }
 
 
@@ -1819,10 +1845,11 @@ fun BibleTab(
                     // The verse list keeps a 100dp floor. The cross-reference column is a new
                     // sibling in this Row, so its width has to come out of what the live panel may
                     // claim — otherwise both panels on in a narrow window squeeze the verses out.
-                    val crossRefReserve = if (crossRefsEnabled) CROSS_REF_PANEL_WIDTH + 1.dp else 0.dp
+                    val crossRefReserve =
+                        if (crossRefsEnabled) colWCrossRef + with(density) { 5.dp.toPx() } else 0f
                     val effectiveSplitWidth = if (isSplitActive)
                         colWSplit.coerceAtMost(
-                            (constraints.maxWidth - with(density) { (100.dp + 6.dp + crossRefReserve).toPx() }).coerceAtLeast(0f)
+                            (constraints.maxWidth - crossRefReserve - with(density) { (100.dp + 6.dp).toPx() }).coerceAtLeast(0f)
                         )
                     else 0f
                     Row(modifier = Modifier.fillMaxSize()) {
@@ -1936,7 +1963,12 @@ fun BibleTab(
                         // Cross-reference column — between the verse list and the live panel, so
                         // the same slot serves both layouts.
                         if (crossRefsEnabled) {
-                            VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            DragHandle(onDragEnd = ::saveColWCrossRef) { amount ->
+                                colWCrossRef = (colWCrossRef - amount).coerceIn(
+                                    with(density) { CROSS_REF_MIN_WIDTH.toPx() },
+                                    with(density) { CROSS_REF_MAX_WIDTH.toPx() },
+                                )
+                            }
                             CrossReferencePanel(
                                 rows = crossRefRows,
                                 selectedIndex = selectedCrossRefIdx,
@@ -1958,7 +1990,7 @@ fun BibleTab(
                                     }
                                     focusRequester.requestFocus()
                                 },
-                                modifier = Modifier.width(CROSS_REF_PANEL_WIDTH).fillMaxHeight(),
+                                modifier = Modifier.width(with(density) { colWCrossRef.toDp() }).fillMaxHeight(),
                             )
                         }
 
@@ -2078,7 +2110,7 @@ fun BibleTab(
     }
 }
 
-/** One row of the cross-reference column: where it points, and whether it was learned. */
+/** One row of the cross-reference column, resolved against the loaded module. */
 private data class CrossRefRow(
     val bookId: Int,
     val chapter: Int,
@@ -2086,7 +2118,51 @@ private data class CrossRefRow(
     val endVerse: Int?,
     /** True for "often next" — drawn from the operator's own go-lives rather than from TSK. */
     val learned: Boolean,
+    /** The reference as this module writes it, e.g. "Rom 5:8". */
+    val label: String,
+    /** The start of the verse, or empty when the module does not have it. */
+    val preview: String,
+    /** False when the module has no such verse: the row is shown, but greyed and inert. */
+    val available: Boolean,
 )
+
+/**
+ * Builds one row, translating the canonical reference into the loaded module's own words.
+ *
+ * A module that lacks the book still gets a row — labelled from the app's own abbreviations and
+ * marked unavailable — because silently dropping it would leave the operator wondering why a
+ * passage they know is cross-referenced shows nothing.
+ */
+private fun crossRefRow(
+    viewModel: BibleViewModel,
+    fallbackAbbreviations: List<String>,
+    bookId: Int,
+    chapter: Int,
+    verse: Int,
+    endVerse: Int?,
+    learned: Boolean,
+): CrossRefRow {
+    val moduleRef = viewModel.moduleRefFor(bookId, chapter, verse)
+    val abbreviation = moduleRef?.abbreviation
+        ?: fallbackAbbreviations.getOrNull(bookId - 1).orEmpty()
+    return CrossRefRow(
+        bookId = bookId,
+        chapter = chapter,
+        verse = verse,
+        endVerse = endVerse,
+        learned = learned,
+        // The module's own numbering where it has an opinion: a Synodal psalm is labelled with the
+        // number its operator will find in it, not the KJV number the dataset stores.
+        label = formatCrossRefLabel(
+            abbreviation,
+            moduleRef?.chapter ?: chapter,
+            moduleRef?.verse ?: verse,
+            endVerse,
+        ),
+        preview = moduleRef?.text.orEmpty(),
+        available = moduleRef != null,
+    )
+}
 
 /**
  * The narrow column of references beside the verse list.
@@ -2096,8 +2172,9 @@ private data class CrossRefRow(
  * label and a divider and distinguished by a leading dot, so it still reads as one list — during a
  * service the eye should find the reference, not navigate a layout.
  *
- * Book names are abbreviated because the column is 132dp wide; the labels are read from the
- * existing per-book abbreviation resources, so they follow the app's language.
+ * Each row carries an abbreviated reference and the start of the verse, both already resolved
+ * against the loaded module — so they read in the module's language and its own numbering, and
+ * this composable renders rather than resolves.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -2108,11 +2185,6 @@ private fun CrossReferencePanel(
     onDoubleClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // 66 resource reads, re-run only when the language changes. Reading them in composition avoids
-    // BibleBookAbbreviations' getString path, which throws under a headless test.
-    val abbreviations = BibleBookAbbreviations.abbreviationResourceIds.map { resource ->
-        BibleBookAbbreviations.parseVariants(stringResource(resource)).firstOrNull().orEmpty()
-    }
     val listState = rememberLazyListState()
     val markerColor = MaterialTheme.semantic.marker
     val firstLearned = rows.indexOfFirst { it.learned }
@@ -2168,9 +2240,14 @@ private fun CrossReferencePanel(
                             .drawBehind {
                                 if (idx == selectedIndex) drawRect(color = markerColor, size = Size(4f, size.height))
                             }
-                            .initialPassCombinedClickable(
-                                onClick = { onClick(idx) },
-                                onDoubleClick = { onDoubleClick(idx) },
+                            // An unavailable row is inert: clicking it could only fail, and a row
+                            // that responds to nothing reads as a broken app rather than as a
+                            // reference this translation happens not to carry.
+                            .then(
+                                if (row.available) Modifier.initialPassCombinedClickable(
+                                    onClick = { onClick(idx) },
+                                    onDoubleClick = { onDoubleClick(idx) },
+                                ) else Modifier
                             )
                             .padding(horizontal = 8.dp, vertical = 4.dp),
                     ) {
@@ -2180,11 +2257,16 @@ private fun CrossReferencePanel(
                                     .background(MaterialTheme.colorScheme.secondary, CircleShape)
                             )
                         }
+                        val referenceColor =
+                            if (row.available) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
                         Text(
-                            text = formatCrossRefLabel(
-                                abbreviations.getOrNull(row.bookId - 1).orEmpty(),
-                                row.chapter, row.verse, row.endVerse,
-                            ),
+                            text = buildAnnotatedString {
+                                withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = referenceColor)) {
+                                    append(row.label)
+                                }
+                                if (row.preview.isNotEmpty()) append("  ${row.preview}")
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
