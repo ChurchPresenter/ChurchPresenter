@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.CrashReportSweep
 import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
@@ -21,16 +22,24 @@ import org.churchpresenter.app.churchpresenter.tabs.bibleTab
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class BibleTabScreenshotTest {
 
     private val managers = mutableListOf<STTManager>()
 
+    /** The load-error state reports itself; shooting it must not leave the report behind. */
+    private val sweep = CrashReportSweep()
+
+    @BeforeTest
+    fun mark() = sweep.mark()
+
     @AfterTest
     fun cleanUp() {
         managers.forEach { runCatching { it.dispose() } }
         managers.clear()
+        sweep.sweep()
     }
 
     private fun connectedStt() = STTManager().also {
@@ -57,11 +66,13 @@ class BibleTabScreenshotTest {
         stt: STTManager? = null,
         rootIndex: Int = 0,
         crossReferences: CrossReferenceRepository? = null,
+        /** Modules to write alongside the primary — see `bibleTab`'s parameter of the same name. */
+        extraModules: List<String> = emptyList(),
         drive: ComposeUiTest.(BibleViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         bibleTab(
             settings = settings, width = width, stt = stt, themeMode = mode,
-            crossReferences = crossReferences,
+            crossReferences = crossReferences, extraModules = extraModules,
         ) { vm, _ ->
             drive(vm)
             captureTo(file, rootIndex)
@@ -136,13 +147,17 @@ class BibleTabScreenshotTest {
     fun `narrow window`() = shoot("narrow_window", width = 420.dp)
 
     @Test
-    fun `a second translation adds the swap control`() =
-        shoot("translation_swap_available", settings = { stack(it, "test.spb", "second.spb") })
+    fun `a second translation adds the swap control`() = shoot(
+        "translation_swap_available",
+        settings = { stack(it, "test.spb", "second.spb") },
+        extraModules = listOf("second.spb"),
+    )
 
     @Test
     fun `the translation order panel`() = shoot(
         "translation_order_panel",
         settings = { stack(it, "test.spb", "second.spb", "third.spb") },
+        extraModules = listOf("second.spb", "third.spb"),
         rootIndex = 1,
     ) {
         onNodeWithText("TRANSLATION ORDER").performClick()
@@ -228,6 +243,20 @@ class BibleTabScreenshotTest {
     fun `no bible configured`() = shoot(
         "no_bible_configured",
         settings = { it.copy(bibleSettings = BibleSettings(storageDirectory = it.bibleSettings.storageDirectory)) },
+    )
+
+    /**
+     * The state directly above: an empty tab, but with the reason for it named.
+     *
+     * Worth its own image precisely because `no_bible_configured` looks so similar — the two are
+     * the same layout and a reviewer should be able to see that the difference is stated on screen.
+     * `deleted.spb` is configured and never written, which is the one failure a screenshot can set
+     * up without a byte-level fixture.
+     */
+    @Test
+    fun `a translation that could not be read`() = shoot(
+        "load_error",
+        settings = { stack(it, "test.spb", "deleted.spb") },
     )
 
     private companion object {

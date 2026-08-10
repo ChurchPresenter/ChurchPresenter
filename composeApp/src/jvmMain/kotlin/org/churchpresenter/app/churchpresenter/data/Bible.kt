@@ -1,11 +1,36 @@
 package org.churchpresenter.app.churchpresenter.data
 
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
 
 data class ChapterResult(val previewIds: List<String>, val verses: List<String>)
+
+/**
+ * Why a module could not be read, in whole or in part.
+ *
+ * A load never throws — every caller loads several modules at once and one bad file must not take
+ * the others down with it — so this is how a failure travels back out. It is what the Bible tab
+ * shows the operator and what [CrashReporter] has already recorded by the time it exists.
+ *
+ * @property resourcePath what was asked for — the absolute path, or a classpath resource name.
+ * @property reason the exception's own message, kept verbatim; it is the only thing that says
+ *   *why*, and it is what someone asking for help has to send in.
+ * @property partial true when some of the module parsed before the failure. Whatever did parse is
+ *   kept and shown as far as it goes, so a file truncated three books in still opens on those
+ *   three books rather than on nothing.
+ */
+data class BibleLoadError(
+    val resourcePath: String,
+    val reason: String,
+    val partial: Boolean,
+) {
+    /** The file's own name, which is what the operator recognises — not the whole path. */
+    val fileName: String
+        get() = resourcePath.substringAfterLast('/').substringAfterLast('\\')
+}
 
 class Bible {
     private var bibleAbbreviation: String = ""
@@ -18,6 +43,14 @@ class Bible {
     private val codeToDisplayMap = HashMap<Long, Long>()
     // Index: full internal code id (BXXXCXXXVXXX) -> the verse, for exact cross-Bible lookups
     private val codeIndex = HashMap<String, BibleVerse>()
+
+    /**
+     * Why the last load failed, or null when it succeeded — see [BibleLoadError].
+     *
+     * Cleared at the start of every load, so it always describes the most recent one.
+     */
+    var loadError: BibleLoadError? = null
+        private set
 
     /**
      * A short form of a book name, in whatever language the module names its books.
@@ -84,19 +117,24 @@ class Bible {
      */
     fun loadBooksOnly(resourcePath: String) {
         books.clear()
+        loadError = null
+        val bookHeaderRegex = Regex("^(\\d+)\\s+(.+?)\\s+(\\d+)$")
+        val headerOrder = mutableListOf<Int>()
+        val parsedBookNames = mutableMapOf<Int, String>()
+        val parsedChapterCounts = mutableMapOf<Int, Int>()
         try {
             val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
             val reader = if (inputStream != null) {
                 inputStream.bufferedReader(StandardCharsets.UTF_8)
             } else {
                 val path = Paths.get(resourcePath)
-                if (!Files.exists(path)) return
+                if (!Files.exists(path)) {
+                    throw FileNotFoundException(
+                        "loadBooksOnly: module not found on classpath or filesystem: $resourcePath"
+                    )
+                }
                 Files.newBufferedReader(path, StandardCharsets.UTF_8)
             }
-            val bookHeaderRegex = Regex("^(\\d+)\\s+(.+?)\\s+(\\d+)$")
-            val headerOrder = mutableListOf<Int>()
-            val parsedBookNames = mutableMapOf<Int, String>()
-            val parsedChapterCounts = mutableMapOf<Int, Int>()
             reader.use { r ->
                 for (rawLine in r.lineSequence()) {
                     val line = rawLine.trimEnd('\r', '\n')
@@ -113,18 +151,36 @@ class Bible {
                     }
                 }
             }
-            if (headerOrder.isNotEmpty()) {
-                for (b in headerOrder) {
-                    val name = parsedBookNames[b] ?: "Book $b"
-                    books.add(BibleBook(
-                        book = name,
-                        bookId = b.toString(),
-                        chapterCount = parsedChapterCounts[b] ?: 0,
-                        abbreviation = generateAbbreviation(name)
-                    ))
-                }
-            }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            recordLoadFailure(e, resourcePath, parsedAnything = headerOrder.isNotEmpty())
+        }
+        // Built from whatever the scan managed to read: on a header that fails partway through,
+        // that is the books it got to, not nothing.
+        for (b in headerOrder) {
+            val name = parsedBookNames[b] ?: "Book $b"
+            books.add(BibleBook(
+                book = name,
+                bookId = b.toString(),
+                chapterCount = parsedChapterCounts[b] ?: 0,
+                abbreviation = generateAbbreviation(name)
+            ))
+        }
+    }
+
+    /**
+     * Records a failed load and reports it, once, in the one place both load paths funnel through.
+     *
+     * The exception is deliberately not rethrown. A load failure has to reach the operator as a
+     * message beside the book list, not as an exception unwinding through a coroutine that is
+     * loading several translations at once — see [BibleLoadError].
+     */
+    private fun recordLoadFailure(e: Exception, resourcePath: String, parsedAnything: Boolean) {
+        loadError = BibleLoadError(
+            resourcePath = resourcePath,
+            reason = e.message?.takeIf { it.isNotBlank() } ?: e.toString(),
+            partial = parsedAnything,
+        )
+        CrashReporter.reportException(e, "Loading Bible module $resourcePath")
     }
 
     // New: load from a BibleQuote .spb plain text module
@@ -132,7 +188,13 @@ class Bible {
     fun loadFromSpb(resourcePath: String, bookNames: List<String> = emptyList()) {
         operatorBible.clear()
         books.clear()
+        loadError = null
 
+        // Declared out here so a failure partway through still has whatever parsed to build from.
+        val bookChapterMap = mutableMapOf<Int, MutableSet<Int>>()
+        val headerOrder = mutableListOf<Int>()
+        val parsedBookNames = mutableMapOf<Int, String>()
+        var bibleTitle: String? = null
 
         try {
             val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
@@ -151,10 +213,6 @@ class Bible {
             val codeRegex = Regex("^B(\\d{3})C(\\d{3})V(\\d{3})$")
             val verseLineRegex = Regex("^(B(\\d{3})C(\\d{3})V(\\d{3}))\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(.*)")
             val bookHeaderRegex = Regex("^(\\d+)\\s+(.+?)\\s+(\\d+)$")
-            val bookChapterMap = mutableMapOf<Int, MutableSet<Int>>()
-            val headerOrder = mutableListOf<Int>()
-            val parsedBookNames = mutableMapOf<Int, String>()
-            var bibleTitle: String? = null
 
             var currentCode: String? = null
             val sb = StringBuilder()
@@ -283,49 +341,56 @@ class Bible {
                 }
             }
 
-            // Build book list preserving header order from the SPB file
-            val maxBook = if (bookChapterMap.isEmpty()) 0 else bookChapterMap.keys.maxOrNull() ?: 0
-            val headerBookIds = headerOrder.toSet()
-            // First: books in header order
-            for (b in headerOrder) {
-                val chapterCount = bookChapterMap[b]?.maxOrNull() ?: 0
-                val name = when {
-                    parsedBookNames.containsKey(b) -> parsedBookNames.getValue(b)
-                    bookNames.size >= b -> bookNames[b - 1]
-                    else -> "Book $b"
-                }
-                books.add(BibleBook(
-                    book = name,
-                    bookId = b.toString(),
-                    chapterCount = chapterCount,
-                    abbreviation = generateAbbreviation(name)
-                ))
+        } catch (e: Exception) {
+            recordLoadFailure(
+                e, resourcePath,
+                parsedAnything = operatorBible.isNotEmpty() || headerOrder.isNotEmpty(),
+            )
+        }
+
+        // Build book list preserving header order from the SPB file. Outside the try: on a
+        // module that stops being readable partway through, the books and verses that did
+        // parse are still indexed and still shown, as far as they go.
+        val maxBook = if (bookChapterMap.isEmpty()) 0 else bookChapterMap.keys.maxOrNull() ?: 0
+        val headerBookIds = headerOrder.toSet()
+        // First: books in header order
+        for (b in headerOrder) {
+            val chapterCount = bookChapterMap[b]?.maxOrNull() ?: 0
+            val name = when {
+                parsedBookNames.containsKey(b) -> parsedBookNames.getValue(b)
+                bookNames.size >= b -> bookNames[b - 1]
+                else -> "Book $b"
             }
-            // Then: any books found in verse data but missing from header
-            for (b in 1..maxBook) {
-                if (b in headerBookIds) continue
-                if (!bookChapterMap.containsKey(b)) continue
-                val chapterCount = bookChapterMap[b]?.maxOrNull() ?: 0
-                val name = when {
-                    bookNames.size >= b -> bookNames[b - 1]
-                    else -> "Book $b"
-                }
-                books.add(BibleBook(
-                    book = name,
-                    bookId = b.toString(),
-                    chapterCount = chapterCount,
-                    abbreviation = generateAbbreviation(name)
-                ))
+            books.add(BibleBook(
+                book = name,
+                bookId = b.toString(),
+                chapterCount = chapterCount,
+                abbreviation = generateAbbreviation(name)
+            ))
+        }
+        // Then: any books found in verse data but missing from header
+        for (b in 1..maxBook) {
+            if (b in headerBookIds) continue
+            if (!bookChapterMap.containsKey(b)) continue
+            val chapterCount = bookChapterMap[b]?.maxOrNull() ?: 0
+            val name = when {
+                bookNames.size >= b -> bookNames[b - 1]
+                else -> "Book $b"
             }
+            books.add(BibleBook(
+                book = name,
+                bookId = b.toString(),
+                chapterCount = chapterCount,
+                abbreviation = generateAbbreviation(name)
+            ))
+        }
 
-            // Store full title and abbreviation
-            this.bibleTitle = bibleTitle ?: resourcePath.substringBeforeLast(".").substringAfterLast("/").substringAfterLast("\\")
-            bibleAbbreviation = extractBibleAbbreviation(bibleTitle, resourcePath)
+        // Store full title and abbreviation
+        this.bibleTitle = bibleTitle ?: resourcePath.substringBeforeLast(".").substringAfterLast("/").substringAfterLast("\\")
+        bibleAbbreviation = extractBibleAbbreviation(bibleTitle, resourcePath)
 
-            // Build chapter index for O(1) lookup in getChapter()
-            buildChapterIndex()
-
-        } catch (_: Exception) {}
+        // Build chapter index for O(1) lookup in getChapter()
+        buildChapterIndex()
     }
 
     /** Encodes (bookId, chapterNum) as a single Long key for the HashMap. */

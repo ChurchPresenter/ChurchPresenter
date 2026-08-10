@@ -217,10 +217,27 @@ internal fun ComposeUiTest.hasLtButton(label: String): Boolean =
         .fetchSemanticsNodes(atLeastOneRootRequired = false)
         .isNotEmpty()
 
-/** Selects a preset from the list by its name. */
+/**
+ * Selects a preset from the list by its name, and waits for its animation to finish loading.
+ *
+ * The wait is the point. Clicking a preset only starts the Lottie parse; `canPlay` — and with it
+ * every action in the tab — stays false until that finishes, off the composition thread, so
+ * `waitForIdle` can return with the preset chosen and nothing yet playable. Whether a test sees
+ * that gap comes down to how much else the JVM was doing, which is why it shows up when suites run
+ * together and never in isolation. [openAtemDialog] carried its own copy of this wait for exactly
+ * that reason; it belongs here, where every caller gets it.
+ *
+ * The Go Live button is the signal because it is enabled on `canPlay` itself. Every fixture in this
+ * file is a valid Lottie, so the wait always ends on the button rather than on the timeout.
+ */
 internal fun ComposeUiTest.selectPreset(name: String) {
     onAllNodesWithText(name)[0].performClick()
     waitForIdle()
+    waitUntil("the chosen preset finished loading", 5_000L) {
+        onAllNodes(hasContentDescription(LowerThirdLabel.GO_LIVE) and isEnabled())
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .isNotEmpty()
+    }
 }
 
 /** The upload button's tooltip, which is also its content description. */

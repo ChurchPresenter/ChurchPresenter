@@ -177,6 +177,11 @@ import churchpresenter.composeapp.generated.resources.bible_translation_order_hi
 import churchpresenter.composeapp.generated.resources.bible_translation_order_more
 import churchpresenter.composeapp.generated.resources.bible_translation_order_panel_subtitle
 import churchpresenter.composeapp.generated.resources.bible_translation_order_panel_title
+import churchpresenter.composeapp.generated.resources.bible_load_failed_detail
+import churchpresenter.composeapp.generated.resources.bible_load_failed_partial_hint
+import churchpresenter.composeapp.generated.resources.bible_load_failed_partial_title
+import churchpresenter.composeapp.generated.resources.bible_load_failed_report_hint
+import churchpresenter.composeapp.generated.resources.bible_load_failed_title
 import churchpresenter.composeapp.generated.resources.bible_verse_selection_hint
 import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
@@ -201,6 +206,7 @@ import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.ic_swap
+import churchpresenter.composeapp.generated.resources.ic_warning
 import churchpresenter.composeapp.generated.resources.mode
 import churchpresenter.composeapp.generated.resources.move_translation_down
 import churchpresenter.composeapp.generated.resources.move_translation_up
@@ -239,6 +245,7 @@ import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedCl
 import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
 import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
 import org.churchpresenter.app.churchpresenter.data.BibleBookAbbreviations
+import org.churchpresenter.app.churchpresenter.data.BibleLoadError
 import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
 import org.churchpresenter.app.churchpresenter.data.formatCrossRefLabel
 import org.churchpresenter.app.churchpresenter.data.aggregateCrossRefs
@@ -380,6 +387,7 @@ fun BibleTab(
     val continuationSpeed by viewModel.continuationSpeed
 
     val books by viewModel.books
+    val loadErrors by viewModel.loadErrors
     val selectedBookIndex by viewModel.selectedBookIndex
     val selectedChapter by viewModel.selectedChapter
     val selectedVerseIndex by viewModel.selectedVerseIndex
@@ -956,6 +964,15 @@ fun BibleTab(
             .focusable()
             .onPreviewKeyEvent { handleKeyEvent(it) }
     ) {
+        // Above everything, because it explains an empty book list — which is what the rest of the
+        // tab would otherwise be showing with no reason given.
+        if (loadErrors.isNotEmpty()) {
+            BibleLoadErrorBanner(
+                errors = loadErrors,
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp),
+            )
+        }
+
         // ── Search row ────────────────────────────────────────────────
         val searchPlaceholder = stringResource(Res.string.bible_smart_search_hint)
         BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 8.dp)) {
@@ -2258,6 +2275,62 @@ private fun crossRefRow(
         available = moduleRef != null,
         count = count,
     )
+}
+
+/**
+ * Says, above the book list, that a translation could not be read.
+ *
+ * A module that will not parse otherwise arrives as a Bible with no books in it, which looks
+ * exactly like a Bible folder that has not been set up yet — so the one thing this has to do is
+ * name the file and give the reason, and say where the rest of the detail went. A partial read
+ * gets its own wording: what is on screen is real, it just stops early.
+ */
+@Composable
+private fun BibleLoadErrorBanner(errors: List<BibleLoadError>, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        shape = RoundedCornerShape(8.dp),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_warning),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp).padding(top = 1.dp),
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                val anyPartial = errors.any { it.partial }
+                Text(
+                    text = stringResource(
+                        if (anyPartial) Res.string.bible_load_failed_partial_title
+                        else Res.string.bible_load_failed_title
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                errors.forEach { error ->
+                    Text(
+                        text = stringResource(Res.string.bible_load_failed_detail, error.fileName, error.reason),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                if (anyPartial) {
+                    Text(
+                        text = stringResource(Res.string.bible_load_failed_partial_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                Text(
+                    text = stringResource(Res.string.bible_load_failed_report_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+    }
 }
 
 /**

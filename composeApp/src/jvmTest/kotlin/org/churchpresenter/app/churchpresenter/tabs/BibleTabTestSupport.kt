@@ -136,6 +136,15 @@ internal fun bibleTab(
      * module the tab is reading from.
      */
     secondContent: String? = null,
+    /**
+     * Extra modules written into the folder, by file name.
+     *
+     * A test that names translations through [settings] has to write them, or the tab reports them
+     * as translations that could not be read — which is correct, and is exactly what
+     * `BibleTabLoadErrorTest` drives on purpose, so a test about something else must not trip it by
+     * accident. The content does not matter to those tests, so it defaults to the shared fixture.
+     */
+    extraModules: List<String> = emptyList(),
     settings: (AppSettings) -> AppSettings = { it },
     /**
      * Passed to the tab as its [STTManager] when non-null.
@@ -194,6 +203,7 @@ internal fun bibleTab(
     try {
         SpbFixture.spbFile(dir, content = content)
         secondContent?.let { SpbFixture.spbFile(dir, name = SECOND_MODULE, content = it) }
+        extraModules.forEach { SpbFixture.spbFile(dir, name = it, content = content) }
         val initialSettings = settings(
             AppSettings(
                 bibleSettings = BibleSettings(

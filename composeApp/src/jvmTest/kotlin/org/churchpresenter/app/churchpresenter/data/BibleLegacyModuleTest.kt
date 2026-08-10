@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import org.churchpresenter.app.churchpresenter.CrashReportSweep
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -30,14 +31,19 @@ class BibleLegacyModuleTest {
 
     private lateinit var dir: File
 
+    /** A failed load reports itself; these tests must not leave the report behind. */
+    private val sweep = CrashReportSweep()
+
     @BeforeTest
     fun createDir() {
+        sweep.mark()
         dir = Files.createTempDirectory("cp-bible-legacy-test").toFile()
     }
 
     @AfterTest
     fun deleteDir() {
         dir.deleteRecursively()
+        sweep.sweep()
     }
 
     private fun bible(content: String, bookNames: List<String> = emptyList()): Bible {

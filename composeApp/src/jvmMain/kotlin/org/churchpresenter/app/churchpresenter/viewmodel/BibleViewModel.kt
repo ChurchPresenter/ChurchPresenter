@@ -27,6 +27,7 @@ import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
+import org.churchpresenter.app.churchpresenter.data.BibleLoadError
 import org.churchpresenter.app.churchpresenter.data.BibleSearch
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import java.io.File
@@ -191,6 +192,16 @@ class BibleViewModel(
 
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
+
+    /**
+     * The modules from the last load that could not be read, in the order they were configured.
+     *
+     * A module that fails to parse yields an empty [Bible], not an absent one, so nothing else in
+     * this state says a translation is missing rather than blank. This is what the Bible tab shows
+     * so the operator is told which file failed and why, instead of being handed an empty book list.
+     */
+    private val _loadErrors = mutableStateOf<List<BibleLoadError>>(emptyList())
+    val loadErrors: State<List<BibleLoadError>> = _loadErrors
 
     // Increments only when the user explicitly selects a verse — never on book/chapter/load resets.
     // BibleTab keys its onVerseSelected LaunchedEffect on this so presenter is not updated
@@ -407,6 +418,13 @@ class BibleViewModel(
 
     companion object {
         private const val CANONICAL_BOOK_COUNT = 66
+        /** Stands in for an exception message when the module file is simply not there to open. */
+        internal const val MODULE_FILE_MISSING = "Module file not found"
+        /**
+         * Stands in when the load itself threw. `Bible.loadFromSpb` does not propagate, so this
+         * covers only a failure outside it — running out of memory on a very large module, say.
+         */
+        internal const val MODULE_LOAD_THREW = "Module could not be loaded"
         private const val CLICK_DEBOUNCE_MS = 300L
         private const val LIVE_SEARCH_DEBOUNCE_MS = 300L
         // Speech-driven detection tuning.
@@ -636,6 +654,8 @@ class BibleViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             _isFullyLoadedFlow.value = false
+            // Whatever failed last time is not evidence about this load; phase 2 fills this in.
+            _loadErrors.value = emptyList()
             try {
                 val useReplica = remoteModeActive && syncMode == BibleSyncMode.FULL_REPLICA
                 val configuredTranslations = appSettings.bibleSettings.translationList()
@@ -669,6 +689,22 @@ class BibleViewModel(
                             .takeIf { it.exists() }
                             ?.let { translation.fileName to it }
                     }
+                }
+
+                // A configured translation whose file is no longer on disk never reaches a load at
+                // all — it is filtered out above — so it has to be reported from here or it goes
+                // by in silence, exactly like a module that fails to parse.
+                val missingTranslations = if (useReplica) emptyList() else {
+                    val present = translationSources.map { it.first }.toSet()
+                    configuredTranslations
+                        .filter { it.fileName.isNotEmpty() && it.fileName !in present }
+                        .map {
+                            BibleLoadError(
+                                resourcePath = File(appSettings.bibleSettings.storageDirectory, it.fileName).absolutePath,
+                                reason = MODULE_FILE_MISSING,
+                                partial = false,
+                            )
+                        }
                 }
 
                 // ── Phase 1: load book names only (header scan — very fast) ──────────
@@ -715,6 +751,18 @@ class BibleViewModel(
                     else configuredTranslations.getOrNull(1)?.fileName ?: orderedIdentities.getOrNull(1)
                 val primary = primaryIdentity?.let { loadedByFile[it] }
                 val secondary = secondaryIdentity?.let { loadedByFile[it] }
+
+                // Every way a module can come back unusable, gathered in one place: it was not
+                // there to open, it threw out of the load, or it read but reported a failure.
+                // Without this the operator sees an empty book list and no reason for it.
+                _loadErrors.value = missingTranslations + orderedIdentities.mapNotNull { identity ->
+                    val path = translationSources.first { it.first == identity }.second
+                    val bible = loadedByFile[identity]
+                    when {
+                        bible == null -> BibleLoadError(path.absolutePath, MODULE_LOAD_THREW, partial = false)
+                        else -> bible.loadError
+                    }
+                }
 
                 // Only relevant while following another instance — a purely local load (not connected)
                 // has nothing to compare against a primary's log, so it's not logged here.

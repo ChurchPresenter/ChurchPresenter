@@ -17,6 +17,11 @@
     <string name="bible_search_mode_text">Text</string>
     <string name="bible_search_mode_tooltip">Tap to switch — Auto: jump to references, search everything else. Reference: navigate only. Text: always search verse text.</string>
     <string name="bible_verse_selection_hint">Ctrl+Click to toggle, Shift+Click for range</string>
+    <string name="bible_load_failed_title">This translation could not be read</string>
+    <string name="bible_load_failed_partial_title">This translation was only partly readable</string>
+    <string name="bible_load_failed_detail">%1$s — %2$s</string>
+    <string name="bible_load_failed_partial_hint">Only the part that could be read is shown. Books or verses after the damaged point are missing.</string>
+    <string name="bible_load_failed_report_hint">The details are in the crash report folder — attach the newest file when reporting this.</string>
     <string name="replace">Replace with</string>
     <string name="search_songs">Search songs...</string>
     <string name="song_book">Song Book</string>
