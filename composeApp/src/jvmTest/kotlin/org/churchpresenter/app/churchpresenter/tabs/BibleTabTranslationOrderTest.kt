@@ -171,11 +171,12 @@ class BibleTabTranslationOrderTest {
             waitForIdle()
             assertEquals(listOf("second.spb", "test.spb", "third.spb"), reports.orderAfterChange())
 
+            // The harness now feeds each change back, as the host does, so the second click starts
+            // from the order the first one produced. Row 1 is "test.spb" by this point, and moving
+            // it down puts it last.
             onAllNodesWithContentDescription("Move translation down")[1].performClick()
             waitForIdle()
-            // The tab does not hold settings, so the second click starts from the original order
-            // again — what is asserted is the transform each click produces, not an accumulation.
-            assertEquals(listOf("test.spb", "third.spb", "second.spb"), reports.orderAfterChange())
+            assertEquals(listOf("second.spb", "third.spb", "test.spb"), reports.orderAfterChange())
         }
 
     // ── The drag grip ───────────────────────────────────────────────────────────

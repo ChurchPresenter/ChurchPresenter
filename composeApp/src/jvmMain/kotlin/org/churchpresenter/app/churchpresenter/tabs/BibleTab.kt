@@ -449,9 +449,18 @@ fun BibleTab(
     val fallbackAbbreviations = BibleBookAbbreviations.abbreviationResourceIds.map { resource ->
         BibleBookAbbreviations.parseVariants(stringResource(resource)).firstOrNull().orEmpty()
     }
-    // Re-resolve when the module changes, so labels and previews follow a translation switch.
-    // LaunchedEffect does not observe Compose State reads, so this has to be a key of its own.
-    val moduleBooks = viewModel.books.value
+    /**
+     * The module every label and preview in the column is resolved against.
+     *
+     * The *instance* is the signal, not the book list. `loadBibles` publishes in phases: a
+     * books-only `Bible` from a header scan first, the fully parsed one after. Only the second has
+     * a verse index, so against the first every reference resolves to null — which the column
+     * renders as unavailable: no preview, and a label in the app's language rather than the
+     * module's. Keying on `books` misses that second phase entirely, because `getCanonicalBooks`
+     * returns an equal list from both, and the column stays half-resolved until something else
+     * happens to re-key the effect.
+     */
+    val loadedModule = viewModel.primaryBible.value
 
     /** The canonical verses the column is describing. */
     var crossRefAnchors by remember { mutableStateOf<List<Triple<Int, Int, Int>>>(emptyList()) }
@@ -486,7 +495,16 @@ fun BibleTab(
     // Follow the browse selection, for every path that moves it — the verse list, the schedule,
     // the Companion API, auto-follow. This does NOT clear the run: looking ahead in the verse list
     // while a passage is being read should not throw away what has been read.
-    LaunchedEffect(selectedBookIndex, selectedChapter, selectedVerseIndex, verseSelectionToken, crossRefAnchorEpoch) {
+    //
+    // [verses] is a key because at first composition the module has not loaded: the opening
+    // selection is already Genesis 1:1 but there is no verse text to read a number off and no
+    // index to map it to a canonical reference, so the anchor comes out empty. Nothing else here
+    // changes when the load finishes, so without this key the column stayed blank until the
+    // operator clicked something.
+    LaunchedEffect(
+        selectedBookIndex, selectedChapter, selectedVerseIndex, verses,
+        verseSelectionToken, crossRefAnchorEpoch, loadedModule,
+    ) {
         val selectedNumbers = viewModel.getSelectedVerseNumbers().ifEmpty {
             listOfNotNull(verses.getOrNull(selectedVerseIndex)?.let(::verseNumberOf))
         }
@@ -512,7 +530,7 @@ fun BibleTab(
         crossRefsEnabled, crossRefAnchors, crossRefPassageMode, crossRefRun,
         // Picking the very verse this column sent you to changes no anchor, so without the epoch
         // the pin below would hold the previous list up for ever.
-        crossRefAnchorEpoch, moduleBooks, fallbackAbbreviations,
+        crossRefAnchorEpoch, loadedModule, fallbackAbbreviations,
     ) {
         if (!crossRefsEnabled || crossRefAnchors.isEmpty()) {
             crossRefRows = emptyList()

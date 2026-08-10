@@ -117,6 +117,21 @@ class BibleTabCrossReferenceTest {
             assertFalse(showsExactly(BibleLabel.CROSS_REFS), "off by default")
         }
 
+    /**
+     * The tab opens on Genesis 1:1 and the column should already describe it, with nothing clicked.
+     *
+     * This passes either way under `Dispatchers.Unconfined`, where the module is loaded before
+     * anything composes — it is a guard on the opening state rather than a reproduction. The bug it
+     * was written for turned out to share a cause with the swap above (the column watching the book
+     * list, which does not change when the fully parsed module replaces the books-only one), and
+     * `swapping translations re-resolves the labels and previews` is the test with teeth for it.
+     */
+    @Test
+    fun `the column is filled in for the verse the tab opens on`() =
+        bibleTab(settings = ::withPanel, crossReferences = references()) { _, _ ->
+            assertTrue(showsContainingText("John 3:16  For God so loved the world."))
+        }
+
     @Test
     fun `the column lists what the selected verse points at`() =
         bibleTab(settings = ::withPanel, crossReferences = references()) { _, _ ->
@@ -148,6 +163,49 @@ class BibleTabCrossReferenceTest {
 
             assertTrue(showsExactly(BibleLabel.CROSS_REFS_EMPTY))
             assertTrue(showsExactly(BibleLabel.CROSS_REFS), "the column keeps its place in the layout")
+        }
+
+    // ── Following the loaded module ───────────────────────────────────────────
+
+    /** The same books and verses as the shared fixture, worded differently. */
+    private val otherTranslation = SpbFixture.buildContent(
+        title = "Second Bible",
+        books = listOf(
+            SpbFixture.Book(1, "Genesis", 2),
+            SpbFixture.Book(19, "Psalms", 23),
+            SpbFixture.Book(43, "John", 3),
+        ),
+        verses = listOf(
+            SpbFixture.Verse(1, 1, 1, "At the first God made the heaven and the earth."),
+            SpbFixture.Verse(1, 1, 2, "And the earth was waste and without form."),
+            SpbFixture.Verse(19, 23, 1, "The Lord takes care of me as his sheep."),
+            SpbFixture.Verse(43, 3, 16, "For God had such love for the world."),
+        ),
+    )
+
+    @Test
+    fun `swapping translations re-resolves the labels and previews`() =
+        bibleTab(
+            secondContent = otherTranslation,
+            settings = ::withPanel,
+            crossReferences = references(),
+        ) { _, _ ->
+            onNodeWithText("1. In the beginning God created the heaven and the earth.").performClick()
+            waitForIdle()
+            assertTrue(showsContainingText("John 3:16  For God so loved the world."))
+
+            actionButton(BibleLabel.SWAP).performClick()
+            waitForIdle()
+
+            // The column resolves against whatever module is loaded, so the preview has to be the
+            // new one's wording. This is where it used to stop: loadBibles publishes a books-only
+            // Bible first, every reference resolves to null against it, and the effect watched the
+            // book list — which is equal across both phases — so the half-resolved rows stayed up
+            // until something else happened to re-key it.
+            assertTrue(
+                showsContainingText("John 3:16  For God had such love for the world."),
+                "the preview follows the module that is now loaded",
+            )
         }
 
     // ── Interaction ───────────────────────────────────────────────────────────
