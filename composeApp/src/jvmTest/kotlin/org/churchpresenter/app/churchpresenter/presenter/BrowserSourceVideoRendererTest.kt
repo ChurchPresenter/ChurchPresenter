@@ -26,6 +26,60 @@ class BrowserSourceVideoRendererTest {
     private fun solid(width: Int, height: Int, argb: Int) = IntArray(width * height) { argb }
 
     @Test
+    fun `shouldRenderTick is false when nothing is connected`() {
+        // The case that cost 57.5% of a core: outputs configured, app launched, no OBS client.
+        assertFalse(BrowserSourceVideoRenderer.shouldRenderTick(enabled = true, subscriberCount = 0))
+    }
+
+    @Test
+    fun `shouldRenderTick is false when the output is switched off`() {
+        // browserSourceEnabled gated serving but never production, so a disabled output used to
+        // render at full rate for a client that would have been refused anyway.
+        assertFalse(BrowserSourceVideoRenderer.shouldRenderTick(enabled = false, subscriberCount = 3))
+    }
+
+    @Test
+    fun `shouldRenderTick is false when disabled even with no subscribers`() {
+        assertFalse(BrowserSourceVideoRenderer.shouldRenderTick(enabled = false, subscriberCount = 0))
+    }
+
+    @Test
+    fun `shouldRenderTick is true only for an enabled output with a subscriber`() {
+        assertTrue(BrowserSourceVideoRenderer.shouldRenderTick(enabled = true, subscriberCount = 1))
+        assertTrue(BrowserSourceVideoRenderer.shouldRenderTick(enabled = true, subscriberCount = 12))
+    }
+
+    @Test
+    fun `the idle poll is slower than the fastest tick rate`() {
+        // Parking has to be cheaper than ticking or it defeats the point; 60fps is the ceiling
+        // tickDelayMs can reach (16ms), so the poll must be well above it.
+        assertTrue(BrowserSourceVideoRenderer.IDLE_POLL_MS > renderer(fps = 60).tickDelayMs)
+    }
+
+    @Test
+    fun `a client connecting after an idle park is reseeded with a full frame`() {
+        // The loop drops its baseline while parked, so the first tick after waking takes
+        // decideTick's previous == null path — a full frame, not a delta against pixels the
+        // new client never received.
+        val frame = solid(4, 4, 0xFF00FF00.toInt())
+        val decision = BrowserSourceVideoRenderer.decideTick(
+            intBuf = frame,
+            previous = null,
+            width = 4,
+            height = 4,
+            newSubscriberJoined = true,
+            elapsedMs = 10_000L,
+            lastFullFrameAtMs = 10_000L,
+        )
+        assertNotNull(decision)
+        assertTrue(decision.forceFullFrame)
+        assertEquals(0, decision.rect.x)
+        assertEquals(0, decision.rect.y)
+        assertEquals(4, decision.rect.w)
+        assertEquals(4, decision.rect.h)
+    }
+
+    @Test
     fun `BrowserSourceFrame equality is reference-based on the png bytes`() {
         val a = BrowserSourceFrame(0, 0, 4, 4, 4, 4, byteArrayOf(1, 2, 3))
         val b = BrowserSourceFrame(0, 0, 4, 4, 4, 4, byteArrayOf(1, 2, 3))
