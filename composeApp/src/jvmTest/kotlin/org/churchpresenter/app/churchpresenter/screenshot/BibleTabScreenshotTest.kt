@@ -166,6 +166,31 @@ class BibleTabScreenshotTest {
     }
 
     @Test
+    fun `cross references pooled over a passage`() = shoot(
+        "cross_references_passage",
+        settings = { it.copy(bibleSettings = it.bibleSettings.copy(crossReferencesPanel = true)) },
+        crossReferences = CrossReferenceRepository {
+            """{"v":1,"r":{
+                 "001001001":"019023001 043003016",
+                 "001001002":"019023001 045005008",
+                 "001001003":"019023001"
+               }}""".toByteArray()
+        },
+    ) { _ ->
+        // Read three verses in sequence, which is what turns the column into a passage view.
+        for (line in listOf(
+            "1. In the beginning God created the heaven and the earth.",
+            "2. And the earth was without form, and void.",
+            "3. And God said, Let there be light.",
+        )) {
+            onNodeWithText(line).performClick()
+            waitForIdle()
+            actionButton(BibleLabel.GO_LIVE).performClick()
+            waitForIdle()
+        }
+    }
+
+    @Test
     fun `cross references beside the split panel`() = shoot(
         "cross_references_split",
         settings = {

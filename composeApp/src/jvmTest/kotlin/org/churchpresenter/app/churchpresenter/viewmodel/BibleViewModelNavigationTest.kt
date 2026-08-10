@@ -146,6 +146,15 @@ class BibleViewModelNavigationTest {
     }
 
     @Test
+    fun `a canonical reference can be resolved from a book name`() {
+        // What the live-chapter panel holds: a name, because what is live may be a different book
+        // from what is being browsed.
+        assertEquals(Triple(43, 3, 16), vm.canonicalRefForBookName("John", 3, 16))
+        assertEquals(Triple(43, 3, 16), vm.canonicalRefForBookName("jOhN", 3, 16))
+        assertNull(vm.canonicalRefForBookName("Habakkuk", 3, 2), "a book this module lacks")
+    }
+
+    @Test
     fun `a canonical reference goes live only when a source is given`() {
         val liveToken = vm.autoFollowLiveToken.value
 

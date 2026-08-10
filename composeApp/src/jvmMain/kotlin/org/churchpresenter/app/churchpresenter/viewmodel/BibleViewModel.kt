@@ -1867,6 +1867,29 @@ class BibleViewModel(
     }
 
     /**
+     * The display index of a book named as this module names it, or -1.
+     *
+     * The live-chapter panel holds a book *name* rather than an index, because what is live may be
+     * a different book from what is being browsed.
+     */
+    fun displayIndexForBookName(bookName: String): Int =
+        _books.value.indexOfFirst { it.equals(bookName, ignoreCase = true) }
+
+    /**
+     * Canonical ref for a reference named the way this module names it.
+     *
+     * The counterpart to [canonicalRefForDisplay] for callers holding a name instead of a browse
+     * index — the live panel above all, where using the browse index would name the wrong book
+     * entirely whenever the two sides have diverged.
+     */
+    fun canonicalRefForBookName(bookName: String, chapter: Int, verse: Int): Triple<Int, Int, Int>? {
+        val displayIndex = displayIndexForBookName(bookName).takeIf { it >= 0 } ?: return null
+        val (book, mappedChapter, mappedVerse) =
+            canonicalRefForDisplay(displayIndex, chapter, verse) ?: return null
+        return mappedVerse?.let { Triple(book, mappedChapter, it) }
+    }
+
+    /**
      * Records a go-live in the ground-truth training log. [displayBookIndex]/[chapter]/[verseStart]/
      * [verseEnd] are what is on screen, in the primary Bible's own numbering; this maps them into the
      * engine's canonical numbering first (see [canonicalRefForDisplay]) so the log and the engine's

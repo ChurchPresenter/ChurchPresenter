@@ -169,6 +169,101 @@ class CrossReferenceRepositoryTest {
         assertEquals(emptyList(), mergeCrossRefs(emptyList(), limit = 5))
     }
 
+    // ── Aggregating a reading ─────────────────────────────────────────────────
+
+    @Test
+    fun `references are grouped into the passages they land in`() {
+        // Three read verses, all pointing into Luke 3 at different places.
+        val read = listOf(
+            listOf(CrossRef(42, 3, 23)),
+            listOf(CrossRef(42, 3, 31)),
+            listOf(CrossRef(42, 3, 38)),
+        )
+
+        assertEquals(
+            listOf(PassageRef(42, 3, startVerse = 23, endVerse = 38, sourceCount = 3)),
+            aggregateCrossRefs(read, limit = 8),
+            "one passage spanning what the reading pointed at, not three separate verses",
+        )
+    }
+
+    @Test
+    fun `a passage only one verse points at keeps a single-verse label`() {
+        val read = listOf(listOf(CrossRef(42, 3, 23)))
+
+        assertEquals(
+            listOf(PassageRef(42, 3, startVerse = 23, endVerse = null, sourceCount = 1)),
+            aggregateCrossRefs(read, limit = 8),
+        )
+    }
+
+    @Test
+    fun `what more of the reading agrees on ranks higher`() {
+        val read = listOf(
+            listOf(CrossRef(42, 3, 23), CrossRef(1, 5, 1)),
+            listOf(CrossRef(42, 3, 24)),
+            listOf(CrossRef(42, 3, 25)),
+        )
+
+        assertEquals(
+            listOf(42 to 3, 1 to 5),
+            aggregateCrossRefs(read, limit = 8).map { it.bookId to it.chapter },
+        )
+    }
+
+    @Test
+    fun `one verse citing a chapter many times does not outrank a passage that agrees`() {
+        val read = listOf(
+            // A single verse enthusiastic about Genesis 5.
+            (1..6).map { CrossRef(1, 5, it) },
+            listOf(CrossRef(42, 3, 23)),
+            listOf(CrossRef(42, 3, 24)),
+        )
+
+        val aggregated = aggregateCrossRefs(read, limit = 8)
+        assertEquals(42, aggregated.first().bookId, "two verses agreeing beat one verse repeating")
+        assertEquals(2, aggregated.first().sourceCount)
+        assertEquals(1, aggregated[1].sourceCount, "six references from one verse still count once")
+    }
+
+    @Test
+    fun `equal agreement comes out in Bible order`() {
+        val read = listOf(listOf(CrossRef(45, 5, 8), CrossRef(1, 1, 1), CrossRef(19, 23, 1)))
+
+        assertEquals(
+            listOf(1, 19, 45),
+            aggregateCrossRefs(read, limit = 8).map { it.bookId },
+        )
+    }
+
+    @Test
+    fun `a target range widens the passage it lands in`() {
+        val read = listOf(listOf(CrossRef(42, 3, 23, endVerse = 38)))
+
+        val passage = aggregateCrossRefs(read, limit = 8).single()
+        assertEquals(23, passage.startVerse)
+        assertEquals(38, passage.endVerse)
+    }
+
+    @Test
+    fun `aggregation stops at the limit`() {
+        val read = listOf((1..20).map { CrossRef(it, 1, 1) })
+
+        assertEquals(5, aggregateCrossRefs(read, limit = 5).size)
+        assertEquals(emptyList(), aggregateCrossRefs(emptyList(), limit = 5))
+    }
+
+    @Test
+    fun `chapters of the same book stay separate passages`() {
+        val read = listOf(listOf(CrossRef(42, 2, 1), CrossRef(42, 3, 23)))
+
+        assertEquals(
+            listOf(2, 3),
+            aggregateCrossRefs(read, limit = 8).map { it.chapter },
+            "Luke 2 and Luke 3 are different places to turn to",
+        )
+    }
+
     @Test
     fun `a range with the same start and end is not the same reference as a single verse`() {
         // They label differently ("Ps 33:6" vs "Ps 33:6-6"), so dedupe must not conflate them.

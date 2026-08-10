@@ -162,3 +162,69 @@ internal fun mergeCrossRefs(perVerse: List<List<CrossRef>>, limit: Int): List<Cr
     }
     return merged
 }
+
+/** A passage that several verses of a reading point at, and how many of them do. */
+data class PassageRef(
+    val bookId: Int,
+    val chapter: Int,
+    val startVerse: Int,
+    val endVerse: Int?,
+    /** How many of the read verses reference this passage — the reason it is ranked where it is. */
+    val sourceCount: Int,
+)
+
+/**
+ * The passages a whole reading points at, strongest first.
+ *
+ * A preacher reading Matthew 1:1-10 and then moving to another gospel does not continue from the
+ * *last verse* — they go wherever the same ground is covered. Listing each verse's references
+ * separately answers the wrong question at that moment: what is wanted is where the passage as a
+ * whole points, with whatever several of its verses agree on at the top.
+ *
+ * So references are grouped by target book **and chapter** — that grouping is what turns thirty
+ * scattered verse references into "Luke 3" as somewhere to go — and each group is labelled with
+ * the span from its lowest target verse to its highest.
+ *
+ * [PassageRef.sourceCount] counts the *read* verses that point into a chapter, not the references
+ * landing there, so one verse citing six verses of Luke 3 does not outrank six verses that each
+ * cite it once. Agreement across the passage is the signal; a single verse's enthusiasm is not.
+ *
+ * @param perVerse one list of references per verse of the reading, in reading order.
+ */
+internal fun aggregateCrossRefs(perVerse: List<List<CrossRef>>, limit: Int): List<PassageRef> {
+    class Group {
+        var start = Int.MAX_VALUE
+        var end = 0
+        val sources = HashSet<Int>()
+    }
+
+    val groups = LinkedHashMap<Long, Group>()
+    perVerse.forEachIndexed { sourceIndex, refs ->
+        for (ref in refs) {
+            val group = groups.getOrPut(ref.bookId.toLong() * 1_000 + ref.chapter) { Group() }
+            group.start = minOf(group.start, ref.verse)
+            group.end = maxOf(group.end, ref.endVerse ?: ref.verse)
+            group.sources.add(sourceIndex)
+        }
+    }
+
+    return groups.entries
+        .map { (key, group) ->
+            val bookId = (key / 1_000).toInt()
+            val chapter = (key % 1_000).toInt()
+            PassageRef(
+                bookId = bookId,
+                chapter = chapter,
+                startVerse = group.start,
+                // A single verse keeps a null end, so it labels as "Luke 3:23" not "Luke 3:23-23".
+                endVerse = group.end.takeIf { it > group.start },
+                sourceCount = group.sources.size,
+            )
+        }
+        .sortedWith(
+            compareByDescending<PassageRef> { it.sourceCount }
+                .thenBy { it.bookId }
+                .thenBy { it.chapter }
+        )
+        .take(limit)
+}

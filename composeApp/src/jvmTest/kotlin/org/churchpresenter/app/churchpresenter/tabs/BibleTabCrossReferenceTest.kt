@@ -6,6 +6,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
@@ -231,6 +232,147 @@ class BibleTabCrossReferenceTest {
             assertEquals(2, vm.selectedBookIndex.value)
         }
     }
+
+    // ── Reading a passage ─────────────────────────────────────────────────────
+
+    /**
+     * Genesis 1:1, 1:2 and 1:3 all point into Psalm 23; only 1:1 points into John 3.
+     *
+     * So reading the three should rank Psalms above John, which is the whole point of aggregating:
+     * what the passage keeps returning to beats what one verse mentioned once.
+     */
+    private fun passageReferences() = CrossReferenceRepository {
+        """{"v":1,"r":{
+             "001001001":"019023001 043003016",
+             "001001002":"019023002",
+             "001001003":"019023003"
+           }}""".toByteArray()
+    }
+
+    /** A module containing every verse those references point at, so none render as unavailable. */
+    private val passageModule = SpbFixture.buildContent(
+        title = "Test Bible",
+        books = listOf(
+            SpbFixture.Book(1, "Genesis", 2),
+            SpbFixture.Book(19, "Psalms", 23),
+            SpbFixture.Book(43, "John", 3),
+        ),
+        verses = listOf(
+            SpbFixture.Verse(1, 1, 1, "In the beginning God created the heaven and the earth."),
+            SpbFixture.Verse(1, 1, 2, "And the earth was without form, and void."),
+            SpbFixture.Verse(1, 1, 3, "And God said, Let there be light."),
+            SpbFixture.Verse(19, 23, 1, "The LORD is my shepherd; I shall not want."),
+            SpbFixture.Verse(19, 23, 2, "He maketh me to lie down in green pastures."),
+            SpbFixture.Verse(19, 23, 3, "He restoreth my soul."),
+            SpbFixture.Verse(43, 3, 16, "For God so loved the world."),
+        ),
+    )
+
+    /**
+     * Selects [verseLine] in the verse list and takes it live.
+     *
+     * The browser's copy specifically: in split browse mode the same line is also in the live
+     * panel, and `livePanelVerse` exists for that one. Leftmost is the browser.
+     */
+    private fun ComposeUiTest.goLiveOn(verseLine: String) {
+        val nodes = onAllNodesWithText(verseLine).fetchSemanticsNodes(atLeastOneRootRequired = false)
+        val leftmost = nodes.indices.minByOrNull { nodes[it].boundsInRoot.left }
+            ?: error("no verse line reading \"$verseLine\" is on screen")
+        onAllNodesWithText(verseLine)[leftmost].performClick()
+        waitForIdle()
+        actionButton(BibleLabel.GO_LIVE).performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `reading a run of verses pools their references`() =
+        bibleTab(content = passageModule, settings = ::withPanel, crossReferences = passageReferences()) { _, _ ->
+            goLiveOn("1. In the beginning God created the heaven and the earth.")
+            // One verse read: still that verse's own references.
+            assertFalse(showsContainingText("Passage"), "one verse is not yet a passage")
+
+            goLiveOn("2. And the earth was without form, and void.")
+            goLiveOn("3. And God said, Let there be light.")
+
+            assertTrue(showsExactly("Passage 1:1-3"), "the header names what was read")
+            // Psalm 23 is pointed at by all three; John 3 by only the first.
+            assertTrue(showsContainingText("Psa 23:1-3"), "scattered targets collapse into a span")
+            assertEquals(listOf("×3", "×1"), renderedText().filter { it.startsWith("×") })
+        }
+
+    @Test
+    fun `moving to another book starts a new passage`() =
+        bibleTab(content = passageModule, settings = ::withPanel, crossReferences = passageReferences()) { _, _ ->
+            goLiveOn("1. In the beginning God created the heaven and the earth.")
+            goLiveOn("2. And the earth was without form, and void.")
+            assertTrue(showsExactly("Passage 1:1-2"))
+
+            // Jump to John: the reading has moved on, so the pooled list goes with it.
+            onNodeWithText("John").performClick()
+            waitForIdle()
+            onNodeWithText("3").performClick()
+            waitForIdle()
+            goLiveOn("16. For God so loved the world.")
+
+            assertFalse(showsContainingText("Passage"), "a new reading is one verse long")
+        }
+
+    @Test
+    fun `browsing ahead shows that verse without discarding the reading`() =
+        bibleTab(content = passageModule, settings = ::withPanel, crossReferences = passageReferences()) { _, _ ->
+            goLiveOn("1. In the beginning God created the heaven and the earth.")
+            goLiveOn("2. And the earth was without form, and void.")
+            assertTrue(showsExactly("Passage 1:1-2"))
+
+            // Looking ahead is not reading: the column describes that verse alone...
+            onNodeWithText("3. And God said, Let there be light.").performClick()
+            waitForIdle()
+            assertFalse(showsContainingText("Passage"))
+            assertTrue(showsContainingText("Psa 23:3  He restoreth my soul."), "verse 3's own reference")
+
+            // ...and taking it live continues the passage rather than starting over.
+            actionButton(BibleLabel.GO_LIVE).performClick()
+            waitForIdle()
+            assertTrue(showsExactly("Passage 1:1-3"))
+        }
+
+    // ── Split browse mode ─────────────────────────────────────────────────────
+
+    private fun withSplitPanel(settings: AppSettings) = settings.copy(
+        bibleSettings = settings.bibleSettings.copy(
+            crossReferencesPanel = true, splitBrowseMode = true,
+        ),
+    )
+
+    @Test
+    fun `the column follows a click in the live panel, not the browser`() =
+        bibleTab(content = passageModule, settings = ::withSplitPanel, crossReferences = passageReferences()) { vm, _ ->
+            // Move the browser to John while the live panel still holds Genesis. This is the state
+            // where reading the browse selection names the wrong book entirely.
+            goLiveOn("1. In the beginning God created the heaven and the earth.")
+            onNodeWithText("John").performClick()
+            waitForIdle()
+            assertEquals(2, vm.selectedBookIndex.value, "the browser moved to John")
+
+            livePanelVerse("3. And God said, Let there be light.").performClick()
+            waitForIdle()
+
+            // Genesis 1:1 and 1:3 pooled — the live panel's book. Had it followed the browser it
+            // would be describing John 1:1, which this fixture gives no references at all.
+            assertTrue(showsExactly("Passage 1:1-3"))
+            assertTrue(showsContainingText("Psa 23:1-3"))
+            assertFalse(showsExactly(BibleLabel.CROSS_REFS_EMPTY))
+        }
+
+    @Test
+    fun `a live panel click continues the passage being read`() =
+        bibleTab(content = passageModule, settings = ::withSplitPanel, crossReferences = passageReferences()) { _, _ ->
+            goLiveOn("1. In the beginning God created the heaven and the earth.")
+            livePanelVerse("2. And the earth was without form, and void.").performClick()
+            waitForIdle()
+
+            assertTrue(showsExactly("Passage 1:1-2"), "clicking in the live panel is reading on")
+        }
 
     // ── Learned suggestions ───────────────────────────────────────────────────
 
