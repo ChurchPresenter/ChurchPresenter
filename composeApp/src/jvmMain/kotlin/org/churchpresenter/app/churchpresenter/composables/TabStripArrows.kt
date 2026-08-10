@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_arrow_left
 import churchpresenter.composeapp.generated.resources.ic_arrow_right
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -43,8 +44,12 @@ private val ARROW_ICON_SIZE = 18.dp
  */
 @Composable
 fun TabStripBackArrow(scrollState: ScrollState) {
+    // Outside the `if`, so it belongs to the strip rather than to the button: an arrow disappears
+    // the moment its own scroll reaches the end, and a scope remembered inside the `if` would be
+    // cancelled at that moment — killing the animation that was still finishing the move.
+    val coroutineScope = rememberCoroutineScope()
     if (scrollState.maxValue > 0 && scrollState.value > 0) {
-        TabStripArrow(Res.drawable.ic_arrow_left, TAB_STRIP_ARROW_BACK_TAG, scrollState) {
+        TabStripArrow(Res.drawable.ic_arrow_left, TAB_STRIP_ARROW_BACK_TAG, coroutineScope, scrollState) {
             (scrollState.value - TAB_SCROLL_STEP).coerceAtLeast(0)
         }
     }
@@ -53,8 +58,9 @@ fun TabStripBackArrow(scrollState: ScrollState) {
 /** The forward half of [TabStripBackArrow]; see its documentation. */
 @Composable
 fun TabStripForwardArrow(scrollState: ScrollState) {
+    val coroutineScope = rememberCoroutineScope()
     if (scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue) {
-        TabStripArrow(Res.drawable.ic_arrow_right, TAB_STRIP_ARROW_FORWARD_TAG, scrollState) {
+        TabStripArrow(Res.drawable.ic_arrow_right, TAB_STRIP_ARROW_FORWARD_TAG, coroutineScope, scrollState) {
             (scrollState.value + TAB_SCROLL_STEP).coerceAtMost(scrollState.maxValue)
         }
     }
@@ -65,10 +71,10 @@ fun TabStripForwardArrow(scrollState: ScrollState) {
 private fun TabStripArrow(
     icon: DrawableResource,
     tag: String,
+    coroutineScope: CoroutineScope,
     scrollState: ScrollState,
     target: () -> Int,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     IconButton(
         onClick = { coroutineScope.launch { scrollState.animateScrollTo(target()) } },
         modifier = Modifier.size(ARROW_BUTTON_SIZE).testTag(tag),
