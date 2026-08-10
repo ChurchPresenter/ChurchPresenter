@@ -10,13 +10,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -27,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,8 +43,6 @@ import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.symbol_cancel
 import churchpresenter.composeapp.generated.resources.symbol_ok
 import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.ic_arrow_left
-import churchpresenter.composeapp.generated.resources.ic_arrow_right
 import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.options
@@ -80,16 +73,13 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
+import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
+import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import kotlinx.coroutines.launch
-
-/** How far one press of a tab-strip overflow arrow scrolls, matching the main window's tab strip. */
-private const val TAB_SCROLL_STEP = 200
 
 @Composable
 fun OptionsDialog(
@@ -179,7 +169,6 @@ internal fun OptionsDialogContent(
     var selectedTabIndex by remember(initialTab) { mutableStateOf(initialTab) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
     val tabScrollState = remember { ScrollState(0) }
-    val coroutineScope = rememberCoroutineScope()
 
         AppThemeWrapper(theme = theme) {
             Surface(
@@ -195,27 +184,7 @@ internal fun OptionsDialogContent(
                             .background(MaterialTheme.colorScheme.surface),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (tabScrollState.maxValue > 0 && tabScrollState.value > 0) {
-                            IconButton(
-                                onClick = {
-                                    coroutineScope.launch {
-                                        tabScrollState.animateScrollTo(
-                                            (tabScrollState.value - TAB_SCROLL_STEP).coerceAtLeast(0)
-                                        )
-                                    }
-                                },
-                                modifier = Modifier.size(28.dp),
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.onSurface
-                                ),
-                            ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_arrow_left),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                )
-                            }
-                        }
+                        TabStripBackArrow(tabScrollState)
                         PrimaryScrollableTabRow(
                             selectedTabIndex = safeTabIndex,
                             modifier = Modifier.weight(1f),
@@ -287,28 +256,7 @@ internal fun OptionsDialogContent(
                                 text = { Text(stringResource(Res.string.companion_satellite_settings)) }
                             )
                         }
-                        if (tabScrollState.maxValue > 0 && tabScrollState.value < tabScrollState.maxValue) {
-                            IconButton(
-                                onClick = {
-                                    coroutineScope.launch {
-                                        tabScrollState.animateScrollTo(
-                                            (tabScrollState.value + TAB_SCROLL_STEP)
-                                                .coerceAtMost(tabScrollState.maxValue)
-                                        )
-                                    }
-                                },
-                                modifier = Modifier.size(28.dp),
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.onSurface
-                                ),
-                            ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_arrow_right),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                )
-                            }
-                        }
+                        TabStripForwardArrow(tabScrollState)
                     }
 
                     // Tab Content

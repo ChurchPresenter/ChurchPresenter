@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithTag
@@ -15,7 +16,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.waitUntilAtLeastOneExists
+import androidx.compose.ui.test.waitUntilDoesNotExist
 import org.churchpresenter.app.churchpresenter.TestSingletons
+import org.churchpresenter.app.churchpresenter.composables.TAB_STRIP_ARROW_BACK_TAG
+import org.churchpresenter.app.churchpresenter.composables.TAB_STRIP_ARROW_FORWARD_TAG
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -261,6 +266,21 @@ class OptionsContentTest {
 
         assertEquals(true, result.saved?.obsSettings?.enabled)
         assertEquals(2, result.saved?.companionSatelliteConnections?.size)
+    }
+
+    @Test
+    fun `the tab strip's overflow arrows appear with the overflow and scroll it`() = dialog {
+        // A dozen tabs do not fit this dialog's width, which is the whole reason the arrows exist:
+        // there is somewhere to go forward to, and nowhere to go back to until we have.
+        onNodeWithTag(TAB_STRIP_ARROW_BACK_TAG).assertDoesNotExist()
+        onNodeWithTag(TAB_STRIP_ARROW_FORWARD_TAG).assertExists()
+
+        onNodeWithTag(TAB_STRIP_ARROW_FORWARD_TAG).performClick()
+        waitUntilAtLeastOneExists(hasTestTag(TAB_STRIP_ARROW_BACK_TAG))
+
+        // Back the same distance returns the strip to its start, which is what removes the arrow.
+        onNodeWithTag(TAB_STRIP_ARROW_BACK_TAG).performClick()
+        waitUntilDoesNotExist(hasTestTag(TAB_STRIP_ARROW_BACK_TAG))
     }
 
     @Test

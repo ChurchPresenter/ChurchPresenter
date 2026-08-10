@@ -1,0 +1,85 @@
+package org.churchpresenter.app.churchpresenter.composables
+
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ic_arrow_left
+import churchpresenter.composeapp.generated.resources.ic_arrow_right
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+
+internal const val TAB_STRIP_ARROW_BACK_TAG = "tabStripArrowBack"
+internal const val TAB_STRIP_ARROW_FORWARD_TAG = "tabStripArrowForward"
+
+/** How far one press of an overflow arrow scrolls a tab strip. */
+private const val TAB_SCROLL_STEP = 200
+
+private val ARROW_BUTTON_SIZE = 28.dp
+private val ARROW_ICON_SIZE = 18.dp
+
+/**
+ * The overflow arrows for a scrollable tab strip, for the strip to place either side of its
+ * [PrimaryScrollableTabRow][androidx.compose.material3.PrimaryScrollableTabRow].
+ *
+ * Both the main window's strip ([org.churchpresenter.app.churchpresenter.tabs.TabSection]) and the
+ * settings dialog's hold more tabs than they can show, and a scrollable tab row gives no hint that
+ * there are more past its edge. These are that hint — and being the same two composables in both
+ * places, the two strips cannot drift apart in step size, sizing or when an arrow appears.
+ *
+ * Each shows only when there is somewhere to go in its direction, so a strip that fits shows
+ * neither and costs nothing but the two `maxValue` reads.
+ *
+ * @param scrollState the same state passed to the tab row's `scrollState`.
+ */
+@Composable
+fun TabStripBackArrow(scrollState: ScrollState) {
+    if (scrollState.maxValue > 0 && scrollState.value > 0) {
+        TabStripArrow(Res.drawable.ic_arrow_left, TAB_STRIP_ARROW_BACK_TAG, scrollState) {
+            (scrollState.value - TAB_SCROLL_STEP).coerceAtLeast(0)
+        }
+    }
+}
+
+/** The forward half of [TabStripBackArrow]; see its documentation. */
+@Composable
+fun TabStripForwardArrow(scrollState: ScrollState) {
+    if (scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue) {
+        TabStripArrow(Res.drawable.ic_arrow_right, TAB_STRIP_ARROW_FORWARD_TAG, scrollState) {
+            (scrollState.value + TAB_SCROLL_STEP).coerceAtMost(scrollState.maxValue)
+        }
+    }
+}
+
+/** @param target where to scroll to, read at click time rather than at composition. */
+@Composable
+private fun TabStripArrow(
+    icon: DrawableResource,
+    tag: String,
+    scrollState: ScrollState,
+    target: () -> Int,
+) {
+    val coroutineScope = rememberCoroutineScope()
+    IconButton(
+        onClick = { coroutineScope.launch { scrollState.animateScrollTo(target()) } },
+        modifier = Modifier.size(ARROW_BUTTON_SIZE).testTag(tag),
+        colors = IconButtonDefaults.iconButtonColors(
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            modifier = Modifier.size(ARROW_ICON_SIZE),
+        )
+    }
+}

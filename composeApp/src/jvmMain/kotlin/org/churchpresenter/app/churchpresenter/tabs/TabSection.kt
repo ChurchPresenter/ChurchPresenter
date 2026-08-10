@@ -2,17 +2,12 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -21,8 +16,6 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.announcements
 import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.ic_arrow_left
-import churchpresenter.composeapp.generated.resources.ic_arrow_right
 import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.presentation
@@ -34,8 +27,8 @@ import churchpresenter.composeapp.generated.resources.tab_stt
 import churchpresenter.composeapp.generated.resources.crossword_tab
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.tab_companion_surface
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
+import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -46,31 +39,12 @@ fun TabSection(
     onTabSelected: (Int) -> Unit,
 ) {
     val scrollState = remember { ScrollState(0) }
-    val coroutineScope = rememberCoroutineScope()
 
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (scrollState.maxValue > 0 && scrollState.value > 0) {
-            IconButton(
-                onClick = {
-                    coroutineScope.launch {
-                        scrollState.animateScrollTo((scrollState.value - 200).coerceAtLeast(0))
-                    }
-                },
-                modifier = Modifier.size(28.dp),
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ),
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_arrow_left),
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-            }
-        }
+        TabStripBackArrow(scrollState)
 
         PrimaryScrollableTabRow(
             selectedTabIndex = selectedTabIndex,
@@ -104,27 +78,7 @@ fun TabSection(
             }
         }
 
-        if (scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue) {
-            IconButton(
-                onClick = {
-                    coroutineScope.launch {
-                        scrollState.animateScrollTo(
-                            (scrollState.value + 200).coerceAtMost(scrollState.maxValue)
-                        )
-                    }
-                },
-                modifier = Modifier.size(28.dp),
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ),
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_arrow_right),
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-            }
-        }
+        TabStripForwardArrow(scrollState)
     }
 }
 
