@@ -446,13 +446,12 @@ fun BibleTab(
      * Read here rather than in the panel because `stringResource` cannot be called from the effect
      * that resolves the rows.
      *
-     * Resolved only while the column is on — it is off by default — and the 66 splits are
-     * remembered against the resource strings themselves, so a language change redoes them and an
-     * ordinary recomposition of this tab, of which there are a great many, does not.
+     * The 66 splits are remembered against the resource strings themselves, so a language change
+     * redoes them and an ordinary recomposition of this tab, of which there are a great many, does
+     * not.
      */
     val fallbackAbbreviationResources =
-        if (crossRefsEnabled) BibleBookAbbreviations.abbreviationResourceIds.map { stringResource(it) }
-        else emptyList()
+        BibleBookAbbreviations.abbreviationResourceIds.map { stringResource(it) }
     val fallbackAbbreviations = remember(fallbackAbbreviationResources) {
         fallbackAbbreviationResources.map { BibleBookAbbreviations.parseVariants(it).firstOrNull().orEmpty() }
     }
@@ -508,15 +507,10 @@ fun BibleTab(
     // index to map it to a canonical reference, so the anchor comes out empty. Nothing else here
     // changes when the load finishes, so without this key the column stayed blank until the
     // operator clicked something.
-    //
-    // Gated on the setting like the resolution below it: with the column off nothing reads these
-    // anchors, and the mapping is three index lookups per selection change on a tab whose
-    // selection changes constantly. Turning the column on re-runs this, so it is never stale.
     LaunchedEffect(
-        crossRefsEnabled, selectedBookIndex, selectedChapter, selectedVerseIndex, verses,
+        selectedBookIndex, selectedChapter, selectedVerseIndex, verses,
         verseSelectionToken, crossRefAnchorEpoch, loadedModule,
     ) {
-        if (!crossRefsEnabled) return@LaunchedEffect
         val selectedNumbers = viewModel.getSelectedVerseNumbers().ifEmpty {
             listOfNotNull(verses.getOrNull(selectedVerseIndex)?.let(::verseNumberOf))
         }

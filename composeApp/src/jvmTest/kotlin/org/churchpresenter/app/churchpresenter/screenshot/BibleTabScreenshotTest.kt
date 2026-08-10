@@ -2,6 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.ComposeUiTest
@@ -155,6 +158,17 @@ class BibleTabScreenshotTest {
         waitForIdle()
     }
 
+    /**
+     * Waits for the column to have resolved its rows.
+     *
+     * The references are read through a repository that loads off the main thread, so `waitForIdle`
+     * — which waits for composition, not for that — can return with the column still showing "No
+     * cross references". Shooting then photographs the empty state, and whether it does is a matter
+     * of which side of a race the capture lands on.
+     */
+    private fun ComposeUiTest.awaitCrossReferences() =
+        waitUntilAtLeastOneExists(hasText("Rom 5:8", substring = true))
+
     @Test
     fun `cross references`() = shoot(
         "cross_references",
@@ -162,7 +176,7 @@ class BibleTabScreenshotTest {
         crossReferences = crossReferenceFixture(),
     ) { vm ->
         vm.selectVerse(0)
-        waitForIdle()
+        awaitCrossReferences()
     }
 
     @Test
@@ -199,11 +213,16 @@ class BibleTabScreenshotTest {
         crossReferences = crossReferenceFixture(),
     ) { vm ->
         vm.selectVerse(0)
-        waitForIdle()
+        awaitCrossReferences()
     }
 
     @Test
-    fun `auto-follow panel`() = shoot("auto_follow_panel", stt = connectedStt())
+    fun `auto-follow panel`() = shoot("auto_follow_panel", stt = connectedStt()) { _ ->
+        // The mic button is the point of this shot and appears a recomposition after the manager
+        // reports connected, so waiting for it is the difference between photographing the panel
+        // and photographing the moment before it.
+        waitUntilAtLeastOneExists(hasContentDescription(BibleLabel.STT_DISCONNECT))
+    }
 
     @Test
     fun `no bible configured`() = shoot(
