@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
@@ -52,12 +53,26 @@ class BibleTabScreenshotTest {
         width: Dp? = null,
         stt: STTManager? = null,
         rootIndex: Int = 0,
+        crossReferences: CrossReferenceRepository? = null,
         drive: ComposeUiTest.(BibleViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
-        bibleTab(settings = settings, width = width, stt = stt, themeMode = mode) { vm, _ ->
+        bibleTab(
+            settings = settings, width = width, stt = stt, themeMode = mode,
+            crossReferences = crossReferences,
+        ) { vm, _ ->
             drive(vm)
             captureTo(file, rootIndex)
         }
+    }
+
+    /**
+     * Cross-references for Genesis 1:1, as a fixture.
+     *
+     * The shipped dataset would work, but then the image would change whenever that file did, and
+     * a reviewer could not tell a layout change from a data change.
+     */
+    private fun crossReferenceFixture() = CrossReferenceRepository {
+        """{"v":1,"r":{"001001001":"043003016 019023001 045005008 019023001-003"}}""".toByteArray()
     }
 
     @Test
@@ -137,6 +152,28 @@ class BibleTabScreenshotTest {
         settings = { it.copy(bibleSettings = it.bibleSettings.copy(splitBrowseMode = true)) },
     ) { vm ->
         vm.selectVerse(1)
+        waitForIdle()
+    }
+
+    @Test
+    fun `cross references`() = shoot(
+        "cross_references",
+        settings = { it.copy(bibleSettings = it.bibleSettings.copy(crossReferencesPanel = true)) },
+        crossReferences = crossReferenceFixture(),
+    ) { vm ->
+        vm.selectVerse(0)
+        waitForIdle()
+    }
+
+    @Test
+    fun `cross references beside the split panel`() = shoot(
+        "cross_references_split",
+        settings = {
+            it.copy(bibleSettings = it.bibleSettings.copy(crossReferencesPanel = true, splitBrowseMode = true))
+        },
+        crossReferences = crossReferenceFixture(),
+    ) { vm ->
+        vm.selectVerse(0)
         waitForIdle()
     }
 

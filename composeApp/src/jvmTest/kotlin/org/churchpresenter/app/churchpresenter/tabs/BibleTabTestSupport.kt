@@ -34,6 +34,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import java.io.File
@@ -148,6 +149,14 @@ internal fun bibleTab(
      * calling `VerseSequenceLog()`.
      */
     sequenceLog: VerseSequenceLog? = null,
+    /**
+     * Passed as the tab's [CrossReferenceRepository] when non-null.
+     *
+     * Left null the tab falls back to the shared instance over the real 3 MB dataset, which would
+     * make a test depend on what TSK happens to say about a verse. Cross-reference tests build
+     * their own over a fixture instead.
+     */
+    crossReferences: CrossReferenceRepository? = null,
     /** Instance Link Controller mode: non-null makes the tab mirror every go-live to the primary. */
     onInstanceLinkSendVerse: ((SelectedVerse) -> Unit)? = null,
     onInstanceLinkSendBibleHold: ((Boolean) -> Unit)? = null,
@@ -202,6 +211,7 @@ internal fun bibleTab(
                         presenterManager = presenter,
                         statisticsManager = statistics,
                         verseSequenceLog = sequenceLog,
+                        crossReferences = crossReferences,
                         onInstanceLinkSendVerse = onInstanceLinkSendVerse?.let { send ->
                             { book, chapter, verseNumber, verseText, verseRange ->
                                 send(
@@ -238,6 +248,9 @@ internal object BibleLabel {
     const val GO_LIVE = "Go Live"
     const val ADD_TO_SCHEDULE = "Add to Schedule"
     const val HISTORY = "History"
+    const val CROSS_REFS = "Refs"
+    const val CROSS_REFS_EMPTY = "No cross references"
+    const val OFTEN_NEXT = "Often next"
     const val CLEAR_HISTORY = "Clear"
     const val ENTIRE_BIBLE = "Entire Bible"
     const val CURRENT_BOOK = "Current Book"

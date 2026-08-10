@@ -87,7 +87,14 @@ import java.util.Locale
  */
 object BibleBookAbbreviations {
 
-    private val abbreviationResourceIds: List<StringResource> = listOf(
+    /**
+     * One entry per canonical book, in order, each a pipe-separated list of accepted spellings.
+     *
+     * `internal` so a composable can read the first variant of each with `stringResource` for a
+     * short label. Everything else here resolves them with `getString`, which needs a coroutine
+     * and throws under a headless test; reading them in composition does neither.
+     */
+    internal val abbreviationResourceIds: List<StringResource> = listOf(
         Res.string.bible_book_abbrev_1, Res.string.bible_book_abbrev_2, Res.string.bible_book_abbrev_3,
         Res.string.bible_book_abbrev_4, Res.string.bible_book_abbrev_5, Res.string.bible_book_abbrev_6,
         Res.string.bible_book_abbrev_7, Res.string.bible_book_abbrev_8, Res.string.bible_book_abbrev_9,

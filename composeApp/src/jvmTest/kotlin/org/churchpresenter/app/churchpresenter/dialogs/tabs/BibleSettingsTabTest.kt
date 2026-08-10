@@ -225,11 +225,12 @@ class BibleSettingsTabTest {
     private object Box {
         const val SHOW_IN_LOWER_THIRD = 0
         const val SPLIT_BROWSE = 1
-        const val FADE_IN = 2
-        const val FADE_OUT = 3
-        const val CROSSFADE = 4
-        const val PRIMARY_ABBREVIATION = 5
-        const val SECONDARY_ABBREVIATION = 6
+        const val CROSS_REFERENCES = 2
+        const val FADE_IN = 3
+        const val FADE_OUT = 4
+        const val CROSSFADE = 5
+        const val PRIMARY_ABBREVIATION = 6
+        const val SECONDARY_ABBREVIATION = 7
     }
 
     /** Clicks checkbox [index] and returns the bible settings that produced. */
@@ -255,6 +256,19 @@ class BibleSettingsTabTest {
 
         assertEquals(true, after.splitBrowseMode, "split browse starts off and turns on")
         assertEquals(before.copy(splitBrowseMode = true), after)
+    }
+
+    @Test
+    fun `cross references toggles only its own flag`() = runComposeUiTest {
+        val harness = showTab()
+        val before = harness.current.bibleSettings
+
+        val after = toggle(Box.CROSS_REFERENCES, harness)
+        if (after.crossReferencesPanel) onAllNodes(isToggleable())[Box.CROSS_REFERENCES].assertIsOn()
+        else onAllNodes(isToggleable())[Box.CROSS_REFERENCES].assertIsOff()
+
+        assertEquals(true, after.crossReferencesPanel, "the cross-reference column starts off and turns on")
+        assertEquals(before.copy(crossReferencesPanel = true), after)
     }
 
     @Test
