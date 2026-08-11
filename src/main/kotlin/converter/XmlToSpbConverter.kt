@@ -90,68 +90,39 @@ object XmlToSpbConverter {
         return hasTitle || withoutBrackets.isEmpty()
     }
 
+    /**
+     * Reads either dialect this converter understands, choosing between them by the file's root.
+     *
+     * The Beblia check comes first and costs only a read up to the first start element, so the
+     * Zefania path's whole-file DOM parse is never paid to find out it was the wrong parser.
+     */
     fun parse(xmlFile: File): ParsedBible {
+        if (BebliaParser.looksLikeBeblia(xmlFile)) return BebliaParser.parse(xmlFile)
+
         val factory = DocumentBuilderFactory.newInstance()
         factory.isNamespaceAware = false
         val builder = factory.newDocumentBuilder()
         val doc = builder.parse(xmlFile)
-        val root = doc.documentElement
-
-        return if (root.nodeName == "bible" && root.hasAttribute("translation")) {
-            parseSimpleBibleXml(root, xmlFile)
-        } else {
-            parseZefania(root, xmlFile)
-        }
+        return parseZefania(doc.documentElement, xmlFile)
     }
 
-    private fun parseSimpleBibleXml(root: org.w3c.dom.Element, xmlFile: File): ParsedBible {
-        val translationName = root.getAttribute("translation").ifBlank { "Unknown" }
-
-        val language = when {
-            translationName.contains("Russian", ignoreCase = true) -> "RUS"
-            translationName.contains("Ukrainian", ignoreCase = true) -> "UKR"
-            else -> "RUS"
-        }
-
-        val books = mutableListOf<BibleBook>()
-        val bookNodes = root.getElementsByTagName("book")
-
-        for (b in 0 until bookNodes.length) {
-            val bookElem = bookNodes.item(b)
-            val bookNum = bookElem.attributes.getNamedItem("number")?.nodeValue?.toIntOrNull() ?: continue
-            val bookName = BookNames.LANGUAGE_LOOKUPS[language]?.get(bookNum)
-                ?: BookNames.ENGLISH[bookNum]
-                ?: "Book $bookNum"
-
-            val chapters = mutableListOf<BibleChapter>()
-            val chapterNodes = bookElem.childNodes
-
-            for (c in 0 until chapterNodes.length) {
-                val chapElem = chapterNodes.item(c)
-                if (chapElem.nodeName != "chapter") continue
-
-                val chapNum = chapElem.attributes.getNamedItem("number")?.nodeValue?.toIntOrNull() ?: 0
-                val verses = mutableListOf<BibleVerse>()
-                val verseNodes = chapElem.childNodes
-
-                for (v in 0 until verseNodes.length) {
-                    val versElem = verseNodes.item(v)
-                    if (versElem.nodeName != "verse") continue
-
-                    val versNum = versElem.attributes.getNamedItem("number")?.nodeValue?.toIntOrNull() ?: 0
-                    val rawText = versElem.textContent ?: ""
-                    val versText = applyPatch(rawText, language, bookNum, chapNum, versNum)
-                    verses.add(BibleVerse(versNum, versText))
-                }
-
-                chapters.add(BibleChapter(chapNum, verses))
-            }
-
-            books.add(BibleBook(bookNum, bookName, chapters))
-        }
-
-        return ParsedBible(translationName, "", language, books)
-    }
+    /**
+     * Reads a Holy Bible XML file with catalogue metadata supplied by the caller.
+     *
+     * The download browser knows the translation's language, title and copyright from its catalogue,
+     * where the file itself carries no language code at all and spells its other metadata three
+     * different ways — so what the caller passes wins, and blanks fall back to the file. See
+     * [BebliaParser] for the format and for why book names come out in English for most languages.
+     */
+    fun parseBeblia(
+        xmlFile: File,
+        language: String? = null,
+        name: String = "",
+        rights: String = "",
+        source: String = "",
+        identifier: String = "",
+        onProgress: (Float) -> Unit = {},
+    ): ParsedBible = BebliaParser.parse(xmlFile, language, name, rights, source, identifier, onProgress)
 
     private fun parseZefania(root: org.w3c.dom.Element, xmlFile: File): ParsedBible {
         var description = ""
@@ -311,7 +282,8 @@ object XmlToSpbConverter {
         }
     }
 
-    private fun applyPatch(text: String, language: String?, bookNum: Int, chapNum: Int, versNum: Int): String {
+    /** Shared with [BebliaParser], which reads its verses without ever building a DOM node. */
+    internal fun applyPatch(text: String, language: String?, bookNum: Int, chapNum: Int, versNum: Int): String {
         val patch = VersePatches.PATCHES[Triple(bookNum, chapNum, versNum)] ?: return text
         if (patch.language != null && patch.language != language?.uppercase()) return text
         if (patch.matchText != null) return if (text == patch.matchText) patch.correctedText else text
