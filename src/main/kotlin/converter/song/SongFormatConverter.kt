@@ -1,0 +1,144 @@
+package converter.song
+
+import java.io.File
+
+/** What one conversion produced: the files written, plus anything that went wrong along the way. */
+data class SongConversionResult(
+    val outputFiles: List<File>,
+    val errors: List<String> = emptyList()
+)
+
+/**
+ * What an input file turns out to contain. Deliberately structured rather than pre-formatted: the
+ * converter layer has no access to the string bundle, so the UI does the wording.
+ */
+data class SongPreviewInfo(
+    val title: String = "",
+    val sectionCount: Int = 0,
+    val songCount: Int = 0,
+    val verseOrder: List<String> = emptyList()
+)
+
+/**
+ * One song format the converter can read.
+ *
+ * Adding a format means adding an implementation here and an entry in the UI's source rail —
+ * nothing else in the app needs to know the format exists.
+ */
+interface SongFormatConverter {
+    /** Stable identifier, shared with the rail entry that selects this format. */
+    val id: String
+
+    /** Extensions offered by the file picker, without the leading dot. */
+    val extensions: List<String>
+
+    /** True when one input expands into many files, so it needs an output folder of its own. */
+    val needsOutputFolder: Boolean
+
+    /** False for formats where a single input is the whole library. */
+    val allowsMultipleFiles: Boolean get() = true
+
+    /** Converts one input, writing beside it when [outputDir] is null. */
+    fun convert(input: File, outputDir: File?): SongConversionResult
+
+    /** What the input holds, for the preview list. */
+    fun describe(input: File): SongPreviewInfo
+
+    /** What this input is written out as. */
+    fun outputNameFor(input: File): String
+}
+
+object SongFormatConverters {
+    val all: List<SongFormatConverter> =
+        listOf(SongBeamerFormat, FreeWorshipFormat, SoftProjectorFormat, DocumentFormat)
+
+    fun byId(id: String): SongFormatConverter =
+        all.firstOrNull { it.id == id } ?: SongBeamerFormat
+}
+
+/** SongBeamer `.sng` text files — one song per file. */
+object SongBeamerFormat : SongFormatConverter {
+    override val id = "songbeamer"
+    override val extensions = listOf("sng")
+    override val needsOutputFolder = false
+
+    override fun convert(input: File, outputDir: File?): SongConversionResult {
+        val outFile = File(outputDir ?: input.parentFile, outputNameFor(input))
+        SngToSongConverter.convert(input, outFile)
+        return SongConversionResult(listOf(outFile))
+    }
+
+    override fun describe(input: File): SongPreviewInfo {
+        val song = SngToSongConverter.parse(input)
+        return SongPreviewInfo(song.title, sectionCount = song.sections.size, verseOrder = song.verseOrder)
+    }
+
+    override fun outputNameFor(input: File) = input.nameWithoutExtension + ".song"
+}
+
+/** Free Worship exports — OpenLyrics XML, one song per file. */
+object FreeWorshipFormat : SongFormatConverter {
+    override val id = "freeworship"
+    override val extensions = listOf("xml")
+    override val needsOutputFolder = false
+
+    override fun convert(input: File, outputDir: File?): SongConversionResult {
+        val outFile = File(outputDir ?: input.parentFile, outputNameFor(input))
+        FreeWorshipConverter.convert(input, outFile)
+        return SongConversionResult(listOf(outFile))
+    }
+
+    override fun describe(input: File): SongPreviewInfo {
+        val song = FreeWorshipConverter.parse(input)
+        return SongPreviewInfo(song.title, sectionCount = song.sections.size, verseOrder = song.verseOrder)
+    }
+
+    override fun outputNameFor(input: File) = FreeWorshipConverter.outputNameFor(input)
+}
+
+/** SoftProjector `.sps` song books — one input becomes a folder of songs. */
+object SoftProjectorFormat : SongFormatConverter {
+    override val id = "softprojector"
+    override val extensions = listOf("sps")
+    override val needsOutputFolder = true
+    override val allowsMultipleFiles = false
+
+    override fun convert(input: File, outputDir: File?): SongConversionResult {
+        requireNotNull(outputDir) { "SoftProjector song books need an output folder" }
+        val result = SpsToSongConverter.convert(input, outputDir)
+        val folder = File(result.songbookFolder)
+        val written = folder.listFiles { f -> f.extension.equals("song", ignoreCase = true) }?.toList().orEmpty()
+        return SongConversionResult(written, result.errors)
+    }
+
+    override fun describe(input: File): SongPreviewInfo {
+        val result = SpsToSongConverter.parse(input)
+        return SongPreviewInfo(result.songbookName, songCount = result.songs.size)
+    }
+
+    override fun outputNameFor(input: File) = SpsToSongConverter.getTargetFolderName(input)
+}
+
+/** PDF, PowerPoint and Word documents, split into songs by their headings. */
+object DocumentFormat : SongFormatConverter {
+    override val id = "documents"
+    override val extensions = listOf("pdf", "docx", "pptx")
+    override val needsOutputFolder = true
+
+    override fun convert(input: File, outputDir: File?): SongConversionResult {
+        requireNotNull(outputDir) { "Documents need an output folder" }
+        val extracted = DocumentTextExtractor.extract(input)
+        if (!extracted.success) {
+            return SongConversionResult(emptyList(), listOfNotNull(extracted.errorMessage))
+        }
+        val result = MarkdownToSongConverter.convert(extracted.text, input.name, outputDir)
+        return SongConversionResult(result.outputFiles, result.errors)
+    }
+
+    override fun describe(input: File): SongPreviewInfo {
+        val (_, songs) = MarkdownToSongConverter.preview(input)
+        return SongPreviewInfo(songCount = songs.size)
+    }
+
+    override fun outputNameFor(input: File) = input.nameWithoutExtension
+}

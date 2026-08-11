@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -29,7 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
@@ -43,9 +43,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.filled.Refresh
@@ -69,12 +67,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -88,48 +84,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import converter.DuplicateFinder
-import converter.TextUtils
-import converter.DuplicateGroup
-import converter.DocumentTextExtractor
-import converter.MarkdownToSongConverter
-import converter.ParsedSong
-import converter.SngToSongConverter
-import converter.SpsToSongConverter
-import converter.SpbVersePatcher
-import converter.XmlToSpbConverter
+import converter.library.DuplicateFinder
+import converter.library.TextUtils
+import converter.library.DuplicateGroup
+import converter.song.DocumentTextExtractor
+import converter.song.MarkdownToSongConverter
+import converter.song.ParsedSong
+import converter.song.DocumentFormat
+import converter.song.SoftProjectorFormat
+import converter.song.SongFormatConverter
+import converter.song.SongFormatConverters
+import converter.song.SongPreviewInfo
+import converter.song.SpsToSongConverter
+import converter.bible.SpbVersePatcher
+import converter.bible.XmlToSpbConverter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.Desktop
 import java.io.File
+import java.util.Locale
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
 
 private val ButtonShape = RoundedCornerShape(6.dp)
 
+/** Cards and forms stop widening past this — on a wide window a full-bleed row reads as empty band. */
+private val CONTENT_MAX_WIDTH = 820.dp
+
 @Composable
 fun App() {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf(Strings.tabBibles, Strings.tabSongs, Strings.tabDuplicates, Strings.tabRename)
-    val tabIcons = listOf(Icons.Default.Book, Icons.Default.MusicNote, Icons.Default.ContentCopy, Icons.Default.DriveFileRenameOutline)
 
     Scaffold { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            PrimaryTabRow(selectedTabIndex = selectedTab) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        text = { Text(title) },
-                        icon = { Icon(tabIcons[index], contentDescription = title) }
-                    )
-                }
-            }
+            ConverterTabRow(tabs, selectedTab) { selectedTab = it }
 
             when (selectedTab) {
                 0 -> BibleConverterTab()
@@ -144,296 +140,395 @@ fun App() {
 enum class ConvertState { SELECT, PREVIEW, CONVERTING, DONE }
 
 // =============================================================================
-// Songs Tab — unified SNG + SPS
+// Songs Tab — "convert from" rail plus a stepped conversion panel
 // =============================================================================
 
 @Composable
 fun SongsTab() {
-    // SNG state
-    var sngFiles by remember { mutableStateOf<List<File>>(emptyList()) }
-    var sngOutputDir by remember { mutableStateOf<File?>(null) }
-    var sngPreview by remember { mutableStateOf<List<PreviewItem>>(emptyList()) }
-    var sngLog by remember { mutableStateOf<List<String>>(emptyList()) }
-    var sngState by remember { mutableStateOf(ConvertState.SELECT) }
+    var query by remember { mutableStateOf("") }
+    var selectedId by remember { mutableStateOf(SongSources.default.id) }
+    val source = SongSources.byId(selectedId)
 
-    // SPS state
-    var spsFile by remember { mutableStateOf<File?>(null) }
-    var spsOutputDir by remember { mutableStateOf<File?>(null) }
-    var spsPreview by remember { mutableStateOf<SpsPreviewData?>(null) }
-    var spsLog by remember { mutableStateOf<List<String>>(emptyList()) }
-    var spsState by remember { mutableStateOf(ConvertState.SELECT) }
+    Row(modifier = Modifier.fillMaxSize()) {
+        SourceRail(
+            query = query,
+            onQueryChange = { query = it },
+            selectedId = selectedId,
+            onSelect = { selectedId = it },
+            modifier = Modifier.width(274.dp).fillMaxHeight()
+        )
+        VerticalDivider()
+        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+            SourceHeader(source)
+            when (source.id) {
+                SongSources.SOFTPROJECTOR -> SoftProjectorPanel()
+                SongSources.DOCUMENTS -> DocumentsPanel(source)
+                else -> BatchFilePanel(source, SongFormatConverters.byId(source.id))
+            }
+        }
+    }
+}
 
-    // Document state
-    var docFiles by remember { mutableStateOf<List<File>>(emptyList()) }
-    var docOutputDir by remember { mutableStateOf<File?>(null) }
-    var docParsedSongs by remember { mutableStateOf<List<ParsedSong>>(emptyList()) }
-    var docMarkdown by remember { mutableStateOf("") }
-    var docLog by remember { mutableStateOf<List<String>>(emptyList()) }
-    var docState by remember { mutableStateOf(ConvertState.SELECT) }
-    var docShowMarkdown by remember { mutableStateOf(false) }
+/** The searchable "Convert from" list of every format people migrate from. */
+@Composable
+private fun SourceRail(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    selectedId: String,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val matches = SongSources.matching(query)
+    Column(modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainerLow)) {
+        Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 11.dp, bottom = 9.dp)) {
+            Text(
+                Strings.convertFrom.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+            ConverterTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = Strings.searchFormats,
+                leadingIcon = Icons.Default.Search,
+                height = 32.dp
+            )
+        }
+        if (matches.isEmpty()) {
+            Text(
+                Strings.noFormatMatches(query),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 30.dp),
+                textAlign = TextAlign.Center
+            )
+            return@Column
+        }
+        val railState = rememberLazyListState()
+        Box(modifier = Modifier.weight(1f)) {
+            LazyColumn(
+                state = railState,
+                modifier = Modifier.fillMaxSize().padding(start = 8.dp, end = 8.dp, bottom = 12.dp)
+            ) {
+                for (group in SourceGroup.entries) {
+                    val items = matches.filter { it.group == group }
+                    if (items.isEmpty()) continue
+                    item(key = "group_${group.name}") { RailGroupLabel(SongSources.groupLabel(group)) }
+                    items(items.size, key = { items[it].id }) { index ->
+                        val entry = items[index]
+                        SourceRailRow(entry, entry.id == selectedId) { onSelect(entry.id) }
+                        Spacer(Modifier.height(2.dp))
+                    }
+                    item(key = "gap_${group.name}") { Spacer(Modifier.height(10.dp)) }
+                }
+                item(key = "request_format") {
+                    Spacer(Modifier.height(2.dp))
+                    RequestFormatNote()
+                }
+            }
+            VerticalScrollbar(
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                adapter = rememberScrollbarAdapter(railState)
+            )
+        }
+    }
+}
 
+/** Identity strip above the conversion steps: which format, and what it turns into. */
+@Composable
+private fun SourceHeader(source: SongSource) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            SourceInitialsTile(source.initials, selected = true, size = 38.dp)
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        source.name,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                    ExtensionBadge(source.ext)
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    ExtensionBadge(".song", emphasized = true)
+                }
+                Text(
+                    source.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 3.dp)
+                )
+            }
+        }
+        HorizontalDivider()
+    }
+}
+
+/**
+ * Steps 1–2 plus the action bar for any format that converts a list of input files into one
+ * `.song` file each — SongBeamer and Free Worship today.
+ */
+@Composable
+private fun BatchFilePanel(source: SongSource, format: SongFormatConverter) {
+    var files by remember { mutableStateOf<List<File>>(emptyList()) }
+    var summary by remember { mutableStateOf("") }
+    var outputDir by remember { mutableStateOf<File?>(null) }
+    var previewItems by remember { mutableStateOf<List<PreviewItem>>(emptyList()) }
+    var log by remember { mutableStateOf<List<String>>(emptyList()) }
+    var state by remember { mutableStateOf(ConvertState.SELECT) }
+    var completed by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // ── SNG Section ──────────────────────────────────────────────────
-        item {
-            Text(Strings.sngTitle, style = MaterialTheme.typography.headlineSmall)
-            Text(
-                Strings.sngDesc,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(8.dp))
-        }
+    fun clearResults() {
+        previewItems = emptyList(); log = emptyList(); state = ConvertState.SELECT; completed = 0
+    }
 
+    fun choose(picked: List<File>, label: String) {
+        if (picked.isEmpty()) return
+        files = picked
+        summary = label
+        clearResults()
+    }
+
+    fun runConvert() {
+        state = ConvertState.CONVERTING
+        completed = 0
+        scope.launch {
+            val messages = mutableListOf<String>()
+            for (file in files) {
+                messages += withContext(Dispatchers.IO) {
+                    try {
+                        val result = format.convert(file, outputDir)
+                        result.outputFiles.map { "OK: ${file.name} -> ${it.name}" } +
+                            result.errors.map { "ERROR: ${file.name} - $it" }
+                    } catch (e: Exception) {
+                        listOf("ERROR: ${file.name} - ${e.message}")
+                    }
+                }
+                completed++
+            }
+            log = messages
+            state = ConvertState.DONE
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
         item {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(shape = ButtonShape, onClick = {
-                    val files = pickFiles("SNG Files", "sng", multiSelection = true)
-                    if (files.isNotEmpty()) {
-                        sngFiles = files; sngState = ConvertState.SELECT; sngPreview = emptyList(); sngLog = emptyList()
+            Column {
+                StepHeader(
+                    index = 1,
+                    complete = files.isNotEmpty(),
+                    label = Strings.stepSourceFiles,
+                    hint = if (files.isEmpty()) source.ext else ""
+                )
+                if (files.isEmpty()) {
+                    FileDropZone(Strings.dropFilesHere(source.ext), source.accepts) {
+                        Button(shape = ButtonShape, onClick = {
+                            val picked = pickFiles(pickerLabel(source), *format.extensions.toTypedArray(), multiSelection = format.allowsMultipleFiles)
+                            choose(picked, Strings.filesSelected(picked.size))
+                        }) {
+                            Icon(Icons.Default.FileOpen, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
+                            Text(Strings.selectFiles)
+                        }
+                        OutlinedButton(shape = ButtonShape, onClick = {
+                            val dir = pickDirectory() ?: return@OutlinedButton
+                            val picked = findFilesRecursive(dir, format.extensions.first())
+                            choose(picked, Strings.folderSelected(dir.absolutePath, picked.size))
+                        }) {
+                            Icon(Icons.Default.Folder, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
+                            Text(Strings.selectFolder)
+                        }
                     }
-                }) {
-                    Icon(Icons.Default.FileOpen, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                    Text(Strings.selectSngFiles)
-                }
-                Button(shape = ButtonShape, onClick = {
-                    val dir = pickDirectory()
-                    if (dir != null) {
-                        val files = dir.listFiles { f -> f.extension.equals("sng", ignoreCase = true) }?.toList() ?: emptyList()
-                        sngFiles = files; sngState = ConvertState.SELECT; sngPreview = emptyList(); sngLog = emptyList()
-                    }
-                }) {
-                    Icon(Icons.Default.Folder, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                    Text(Strings.selectFolder)
-                }
-                if (sngFiles.isNotEmpty()) {
-                    Text(Strings.fileCount(sngFiles.size), style = MaterialTheme.typography.bodySmall)
+                } else {
+                    SelectedFilesCard(
+                        summary = summary,
+                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(it.length())) },
+                        onChange = {
+                            val picked = pickFiles(pickerLabel(source), *format.extensions.toTypedArray(), multiSelection = format.allowsMultipleFiles)
+                            choose(picked, Strings.filesSelected(picked.size))
+                        },
+                        onClear = { files = emptyList(); summary = ""; clearResults() }
+                    )
                 }
             }
         }
 
         item {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(shape = ButtonShape, onClick = {
-                    val dir = pickDirectory(); if (dir != null) { sngOutputDir = dir }
-                }) {
-                    Icon(Icons.Default.FolderOpen, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                    Text(Strings.outputFolder)
-                }
-                Text(
-                    sngOutputDir?.absolutePath ?: Strings.sameAsInput,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            Column {
+                StepHeader(index = 2, complete = outputDir != null, label = Strings.stepDestination)
+                val needsFolder = format.needsOutputFolder
+                DestinationRow(
+                    path = outputDir?.absolutePath
+                        ?: if (needsFolder) Strings.chooseOutputFolder else Strings.sameAsInput,
+                    chosen = outputDir != null,
+                    warning = if (needsFolder && outputDir == null) Strings.outputManyFilesWarning else null,
+                    onBrowse = { pickDirectory()?.let { outputDir = it } }
                 )
             }
         }
 
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                when (sngState) {
-                    ConvertState.SELECT -> {
-                        OutlinedButton(shape = ButtonShape, onClick = {
-                            sngPreview = buildSongPreview(sngFiles, sngOutputDir); sngState = ConvertState.PREVIEW
-                        }, enabled = sngFiles.isNotEmpty()) {
-                            Icon(Icons.Default.Preview, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(Strings.preview)
-                        }
+            ConversionActionBar(
+                state = state,
+                canPreview = files.isNotEmpty(),
+                canConvert = files.isNotEmpty() && (outputDir != null || !format.needsOutputFolder),
+                convertLabel = if (state == ConvertState.PREVIEW) Strings.convertNFiles(files.size) else Strings.convert,
+                doneLabel = if (state == ConvertState.DONE) Strings.nConverted(log.count { it.startsWith("OK") }) else null,
+                onPreview = { previewItems = buildFormatPreview(format, files, outputDir); state = ConvertState.PREVIEW },
+                onConvert = { runConvert() },
+                onStartOver = { files = emptyList(); summary = ""; clearResults() }
+            )
+        }
+
+        if (state == ConvertState.CONVERTING) {
+            item {
+                ConversionProgressRow(
+                    Strings.convertingFiles(files.size),
+                    if (files.isEmpty()) null else completed.toFloat() / files.size
+                )
+            }
+        }
+
+        if (state == ConvertState.PREVIEW && previewItems.isNotEmpty()) {
+            item { Text(Strings.previewLabel, style = MaterialTheme.typography.titleSmall) }
+            items(previewItems) { item -> PreviewRow(item) }
+        }
+        if (state == ConvertState.DONE && log.isNotEmpty()) {
+            item {
+                val ok = log.count { it.startsWith("OK") }
+                val err = log.count { it.startsWith("ERROR") }
+                Text(
+                    Strings.doneConverted(ok, err),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (err > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                )
+            }
+            items(log) { msg -> LogLine(msg) }
+        }
+    }
+}
+
+/** SoftProjector: one .sps song book explodes into a folder of .song files. */
+@Composable
+private fun SoftProjectorPanel() {
+    val spsSource = SongSources.byId(SongSources.SOFTPROJECTOR)
+    var spsFile by remember { mutableStateOf<File?>(null) }
+    var outputDir by remember { mutableStateOf<File?>(null) }
+    var preview by remember { mutableStateOf<SpsPreviewData?>(null) }
+    var log by remember { mutableStateOf<List<String>>(emptyList()) }
+    var state by remember { mutableStateOf(ConvertState.SELECT) }
+    val scope = rememberCoroutineScope()
+
+    fun runConvert() {
+        state = ConvertState.CONVERTING
+        scope.launch {
+            log = withContext(Dispatchers.IO) {
+                try {
+                    val result = SpsToSongConverter.convert(spsFile!!, outputDir!!)
+                    val msgs = mutableListOf(
+                        Strings.songbookPrefix(result.songbookFolder.substringAfterLast('/').substringAfterLast('\\')),
+                        Strings.songsConverted(result.songsConverted),
+                        Strings.outputPrefix(result.songbookFolder)
+                    )
+                    result.errors.forEach { msgs.add("ERROR: $it") }
+                    if (result.errors.isEmpty()) msgs.add("OK: ${Strings.allSongsConverted}")
+                    msgs
+                } catch (e: Exception) {
+                    listOf("ERROR: ${e.message}")
+                }
+            }
+            state = ConvertState.DONE
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        item {
+            Column {
+                StepHeader(
+                    index = 1,
+                    complete = spsFile != null,
+                    label = Strings.stepSourceFiles,
+                    hint = if (spsFile == null) ".sps" else ""
+                )
+                val chosen = spsFile
+                if (chosen == null) {
+                    FileDropZone(Strings.dropFilesHere(".sps"), SongSources.byId(SongSources.SOFTPROJECTOR).accepts) {
                         Button(shape = ButtonShape, onClick = {
-                            sngState = ConvertState.CONVERTING
-                            scope.launch {
-                                sngLog = withContext(Dispatchers.IO) {
-                                    sngFiles.map { file ->
-                                        try {
-                                            val outDir = sngOutputDir ?: file.parentFile
-                                            val outFile = File(outDir, file.nameWithoutExtension + ".song")
-                                            SngToSongConverter.convert(file, outFile)
-                                            "OK: ${file.name} -> ${outFile.name}"
-                                        } catch (e: Exception) { "ERROR: ${file.name} - ${e.message}" }
-                                    }
-                                }
-                                sngState = ConvertState.DONE
-                            }
-                        }, enabled = sngFiles.isNotEmpty()) {
-                            Icon(Icons.Default.Transform, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                            Text(Strings.convert)
-                        }
-                    }
-                    ConvertState.PREVIEW -> {
-                        Button(shape = ButtonShape, onClick = {
-                            sngState = ConvertState.CONVERTING
-                            scope.launch {
-                                sngLog = withContext(Dispatchers.IO) {
-                                    sngFiles.map { file ->
-                                        try {
-                                            val outDir = sngOutputDir ?: file.parentFile
-                                            val outFile = File(outDir, file.nameWithoutExtension + ".song")
-                                            SngToSongConverter.convert(file, outFile)
-                                            "OK: ${file.name} -> ${outFile.name}"
-                                        } catch (e: Exception) { "ERROR: ${file.name} - ${e.message}" }
-                                    }
-                                }
-                                sngState = ConvertState.DONE
+                            pickFiles(pickerLabel(spsSource), *SoftProjectorFormat.extensions.toTypedArray(), multiSelection = false).firstOrNull()?.let {
+                                spsFile = it; preview = null; log = emptyList(); state = ConvertState.SELECT
                             }
                         }) {
-                            Icon(Icons.Default.Transform, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                            Text(Strings.convertNFiles(sngFiles.size))
-                        }
-                        OutlinedButton(shape = ButtonShape, onClick = { sngState = ConvertState.SELECT; sngPreview = emptyList() }) { Text(Strings.back) }
-                    }
-                    ConvertState.CONVERTING -> {
-                        Button(shape = ButtonShape, enabled = false, onClick = {}) {
-                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                            Spacer(Modifier.width(8.dp)); Text(Strings.converting)
+                            Icon(Icons.Default.FileOpen, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
+                            Text(Strings.selectFiles)
                         }
                     }
-                    ConvertState.DONE -> {
-                        OutlinedButton(shape = ButtonShape, onClick = {
-                            sngState = ConvertState.SELECT; sngFiles = emptyList(); sngPreview = emptyList(); sngLog = emptyList()
-                        }) { Text(Strings.startOver) }
-                    }
-                }
-            }
-        }
-
-        // SNG preview/results
-        if (sngState == ConvertState.PREVIEW && sngPreview.isNotEmpty()) {
-            item { Text(Strings.previewLabel, style = MaterialTheme.typography.titleSmall) }
-            items(sngPreview) { item -> PreviewRow(item) }
-        }
-        if (sngState == ConvertState.DONE && sngLog.isNotEmpty()) {
-            item {
-                val ok = sngLog.count { it.startsWith("OK") }; val err = sngLog.count { it.startsWith("ERROR") }
-                Text(Strings.doneConverted(ok, err), style = MaterialTheme.typography.titleSmall,
-                    color = if (err > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
-            }
-            items(sngLog) { msg -> LogLine(msg) }
-        }
-
-        // ── Divider ──────────────────────────────────────────────────────
-        item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp)) }
-
-        // ── SPS Section ──────────────────────────────────────────────────
-        item {
-            Text(Strings.spsTitle, style = MaterialTheme.typography.headlineSmall)
-            Text(
-                Strings.spsDesc,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(8.dp))
-        }
-
-        item {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(shape = ButtonShape, onClick = {
-                    val files = pickFiles("SPS Files", "sps", multiSelection = false)
-                    if (files.isNotEmpty()) {
-                        spsFile = files.first(); spsState = ConvertState.SELECT; spsPreview = null; spsLog = emptyList()
-                    }
-                }) {
-                    Icon(Icons.Default.FileOpen, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                    Text(Strings.selectSpsFile)
-                }
-                if (spsFile != null) {
-                    Text(spsFile!!.name, style = MaterialTheme.typography.bodySmall)
+                } else {
+                    SelectedFilesCard(
+                        summary = chosen.name,
+                        entries = listOf(SelectedEntry(chosen.name, formatFileSize(chosen.length()))),
+                        onChange = {
+                            pickFiles(pickerLabel(spsSource), *SoftProjectorFormat.extensions.toTypedArray(), multiSelection = false).firstOrNull()?.let {
+                                spsFile = it; preview = null; log = emptyList(); state = ConvertState.SELECT
+                            }
+                        },
+                        onClear = { spsFile = null; preview = null; log = emptyList(); state = ConvertState.SELECT }
+                    )
                 }
             }
         }
 
         item {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(shape = ButtonShape, onClick = {
-                    val dir = pickDirectory(); if (dir != null) { spsOutputDir = dir }
-                }) {
-                    Icon(Icons.Default.FolderOpen, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                    Text(Strings.outputFolder)
-                }
-                Text(
-                    spsOutputDir?.absolutePath ?: Strings.mustSelectOutput,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (spsOutputDir == null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+            Column {
+                StepHeader(index = 2, complete = outputDir != null, label = Strings.stepDestination)
+                DestinationRow(
+                    path = outputDir?.absolutePath ?: Strings.chooseOutputFolder,
+                    chosen = outputDir != null,
+                    warning = if (outputDir == null) Strings.outputManyFilesWarning else null,
+                    onBrowse = { pickDirectory()?.let { outputDir = it } }
                 )
             }
         }
 
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                when (spsState) {
-                    ConvertState.SELECT -> {
-                        OutlinedButton(shape = ButtonShape, onClick = {
-                            spsPreview = buildSpsPreview(spsFile!!, spsOutputDir!!); spsState = ConvertState.PREVIEW
-                        }, enabled = spsFile != null && spsOutputDir != null) {
-                            Icon(Icons.Default.Preview, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(Strings.preview)
-                        }
-                        Button(shape = ButtonShape, onClick = {
-                            spsState = ConvertState.CONVERTING
-                            scope.launch {
-                                spsLog = withContext(Dispatchers.IO) {
-                                    try {
-                                        val result = SpsToSongConverter.convert(spsFile!!, spsOutputDir!!)
-                                        val msgs = mutableListOf(
-                                            "Songbook: ${result.songbookFolder.substringAfterLast('/').substringAfterLast('\\')}",
-                                            "Songs converted: ${result.songsConverted}",
-                                            "Output: ${result.songbookFolder}"
-                                        )
-                                        result.errors.forEach { msgs.add("ERROR: $it") }
-                                        if (result.errors.isEmpty()) msgs.add("OK: All songs converted successfully")
-                                        msgs
-                                    } catch (e: Exception) { listOf("ERROR: ${e.message}") }
-                                }
-                                spsState = ConvertState.DONE
-                            }
-                        }, enabled = spsFile != null && spsOutputDir != null) {
-                            Icon(Icons.Default.Transform, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                            Text(Strings.convert)
-                        }
-                    }
-                    ConvertState.PREVIEW -> {
-                        Button(shape = ButtonShape, onClick = {
-                            spsState = ConvertState.CONVERTING
-                            scope.launch {
-                                spsLog = withContext(Dispatchers.IO) {
-                                    try {
-                                        val result = SpsToSongConverter.convert(spsFile!!, spsOutputDir!!)
-                                        val msgs = mutableListOf(
-                                            "Songbook: ${spsPreview?.songbookName}",
-                                            "Songs converted: ${result.songsConverted}",
-                                            "Output: ${result.songbookFolder}"
-                                        )
-                                        result.errors.forEach { msgs.add("ERROR: $it") }
-                                        if (result.errors.isEmpty()) msgs.add("OK: All songs converted successfully")
-                                        msgs
-                                    } catch (e: Exception) { listOf("ERROR: ${e.message}") }
-                                }
-                                spsState = ConvertState.DONE
-                            }
-                        }, enabled = spsPreview?.error == null) {
-                            Icon(Icons.Default.Transform, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                            Text(Strings.convertNSongs(spsPreview?.songCount ?: 0))
-                        }
-                        OutlinedButton(shape = ButtonShape, onClick = { spsState = ConvertState.SELECT; spsPreview = null }) { Text(Strings.back) }
-                    }
-                    ConvertState.CONVERTING -> {
-                        Button(shape = ButtonShape, enabled = false, onClick = {}) {
-                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                            Spacer(Modifier.width(8.dp)); Text(Strings.converting)
-                        }
-                    }
-                    ConvertState.DONE -> {
-                        OutlinedButton(shape = ButtonShape, onClick = {
-                            spsState = ConvertState.SELECT; spsFile = null; spsPreview = null; spsLog = emptyList()
-                        }) { Text(Strings.startOver) }
-                    }
-                }
-            }
+            val ready = spsFile != null && outputDir != null
+            ConversionActionBar(
+                state = state,
+                canPreview = ready,
+                canConvert = ready && preview?.error == null,
+                convertLabel = if (state == ConvertState.PREVIEW) {
+                    Strings.convertNSongs(preview?.songCount ?: 0)
+                } else Strings.convert,
+                doneLabel = if (state == ConvertState.DONE && log.none { it.startsWith("ERROR") }) Strings.doneLabel else null,
+                onPreview = { preview = buildSpsPreview(spsFile!!, outputDir!!); state = ConvertState.PREVIEW },
+                onConvert = { runConvert() },
+                onStartOver = { spsFile = null; preview = null; log = emptyList(); state = ConvertState.SELECT }
+            )
         }
 
-        // SPS preview
-        if (spsState == ConvertState.PREVIEW) {
-            spsPreview?.let { p ->
+        if (state == ConvertState.CONVERTING) {
+            item { ConversionProgressRow(Strings.converting, null) }
+        }
+
+        if (state == ConvertState.PREVIEW) {
+            preview?.let { p ->
                 if (p.error != null) {
                     item { Text(Strings.errorPrefix(p.error), color = MaterialTheme.colorScheme.error) }
                 } else {
@@ -447,215 +542,212 @@ fun SongsTab() {
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             if (p.folderExists) {
-                                Text(Strings.outputFolderOverwrite,
-                                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                                Text(
+                                    Strings.outputFolderOverwrite,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
                             }
                         }
                     }
                     if (p.sampleTitles.isNotEmpty()) {
                         item { Text(Strings.songsLabel, style = MaterialTheme.typography.titleSmall) }
                         items(p.sampleTitles) { title ->
-                            Text(title, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                title,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
             }
         }
-        if (spsState == ConvertState.DONE && spsLog.isNotEmpty()) {
+        if (state == ConvertState.DONE && log.isNotEmpty()) {
             item {
-                val hasErr = spsLog.any { it.startsWith("ERROR") }
-                Text(if (hasErr) Strings.completedWithErrors else Strings.doneLabel, style = MaterialTheme.typography.titleSmall,
-                    color = if (hasErr) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
-            }
-            items(spsLog) { msg -> LogLine(msg) }
-        }
-
-        // ── Divider ──────────────────────────────────────────────────────
-        item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp)) }
-
-        // ── Document Section ──────────────────────────────────────────────
-        item {
-            Text(Strings.docTitle, style = MaterialTheme.typography.headlineSmall)
-            Text(
-                Strings.docDesc,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(8.dp))
-        }
-
-        item {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(shape = ButtonShape, onClick = {
-                    val files = pickFiles("Documents (PDF, DOCX, PPTX)", "pdf", "docx", "pptx", multiSelection = true)
-                    if (files.isNotEmpty()) {
-                        docFiles = files; docState = ConvertState.SELECT
-                        docParsedSongs = emptyList(); docLog = emptyList(); docMarkdown = ""
-                    }
-                }) {
-                    Icon(Icons.Default.FileOpen, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                    Text(Strings.selectDocFiles)
-                }
-                if (docFiles.isNotEmpty()) {
-                    Text(Strings.fileCount(docFiles.size), style = MaterialTheme.typography.bodySmall)
-                }
-            }
-        }
-
-        item {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(shape = ButtonShape, onClick = {
-                    val dir = pickDirectory(); if (dir != null) { docOutputDir = dir }
-                }) {
-                    Icon(Icons.Default.FolderOpen, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                    Text(Strings.outputFolder)
-                }
+                val hasErr = log.any { it.startsWith("ERROR") }
                 Text(
-                    docOutputDir?.absolutePath ?: Strings.mustSelectOutput,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (docOutputDir == null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                    if (hasErr) Strings.completedWithErrors else Strings.doneLabel,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (hasErr) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                )
+            }
+            items(log) { msg -> LogLine(msg) }
+        }
+    }
+}
+
+/** PDF / PPTX / DOCX: text is extracted, split into songs, then written out. */
+@Composable
+private fun DocumentsPanel(source: SongSource) {
+    var files by remember { mutableStateOf<List<File>>(emptyList()) }
+    var outputDir by remember { mutableStateOf<File?>(null) }
+    var parsedSongs by remember { mutableStateOf<List<ParsedSong>>(emptyList()) }
+    var markdown by remember { mutableStateOf("") }
+    var log by remember { mutableStateOf<List<String>>(emptyList()) }
+    var state by remember { mutableStateOf(ConvertState.SELECT) }
+    var showMarkdown by remember { mutableStateOf(false) }
+    var completed by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
+
+    fun clearResults() {
+        parsedSongs = emptyList(); markdown = ""; log = emptyList(); state = ConvertState.SELECT; completed = 0
+    }
+
+    fun pick(): List<File> = pickFiles(pickerLabel(source), *DocumentFormat.extensions.toTypedArray(), multiSelection = true)
+
+    fun runConvert() {
+        state = ConvertState.CONVERTING
+        completed = 0
+        scope.launch {
+            val msgs = mutableListOf<String>()
+            for (file in files) {
+                msgs += withContext(Dispatchers.IO) {
+                    try {
+                        val result = DocumentTextExtractor.extract(file)
+                        if (!result.success) {
+                            listOf("ERROR: ${file.name} - ${result.errorMessage}")
+                        } else {
+                            val convResult = MarkdownToSongConverter.convert(result.text, file.name, outputDir!!)
+                            convResult.outputFiles.map { "OK: ${file.name} -> ${it.name}" } +
+                                convResult.errors.map { "ERROR: ${file.name} - $it" }
+                        }
+                    } catch (e: Exception) {
+                        listOf("ERROR: ${file.name} - ${e.message}")
+                    }
+                }
+                completed++
+            }
+            log = msgs
+            state = ConvertState.DONE
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        item {
+            Column {
+                StepHeader(
+                    index = 1,
+                    complete = files.isNotEmpty(),
+                    label = Strings.stepSourceFiles,
+                    hint = if (files.isEmpty()) source.ext else ""
+                )
+                if (files.isEmpty()) {
+                    FileDropZone(Strings.dropFilesHere(source.ext), source.accepts) {
+                        Button(shape = ButtonShape, onClick = {
+                            val picked = pick()
+                            if (picked.isNotEmpty()) { files = picked; clearResults() }
+                        }) {
+                            Icon(Icons.Default.FileOpen, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
+                            Text(Strings.selectFiles)
+                        }
+                    }
+                } else {
+                    SelectedFilesCard(
+                        summary = Strings.filesSelected(files.size),
+                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(it.length())) },
+                        onChange = {
+                            val picked = pick()
+                            if (picked.isNotEmpty()) { files = picked; clearResults() }
+                        },
+                        onClear = { files = emptyList(); clearResults() }
+                    )
+                }
+            }
+        }
+
+        item {
+            Column {
+                StepHeader(index = 2, complete = outputDir != null, label = Strings.stepDestination)
+                DestinationRow(
+                    path = outputDir?.absolutePath ?: Strings.chooseOutputFolder,
+                    chosen = outputDir != null,
+                    warning = if (outputDir == null) Strings.outputManyFilesWarning else null,
+                    onBrowse = { pickDirectory()?.let { outputDir = it } }
                 )
             }
         }
 
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                when (docState) {
-                    ConvertState.SELECT -> {
-                        OutlinedButton(shape = ButtonShape, onClick = {
-                            docState = ConvertState.CONVERTING
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    val allSongs = mutableListOf<ParsedSong>()
-                                    val textParts = mutableListOf<String>()
-                                    for (file in docFiles) {
-                                        val (text, songs) = MarkdownToSongConverter.preview(file)
-                                        textParts.add("── ${file.name} ──\n$text")
-                                        allSongs.addAll(songs)
-                                    }
-                                    docMarkdown = textParts.joinToString("\n\n")
-                                    docParsedSongs = allSongs
-                                }
-                                docState = ConvertState.PREVIEW
+            ConversionActionBar(
+                state = state,
+                canPreview = files.isNotEmpty(),
+                canConvert = files.isNotEmpty() && outputDir != null,
+                convertLabel = if (state == ConvertState.PREVIEW) {
+                    Strings.convertNSongs(parsedSongs.size)
+                } else Strings.convert,
+                doneLabel = if (state == ConvertState.DONE) Strings.nConverted(log.count { it.startsWith("OK") }) else null,
+                onPreview = {
+                    state = ConvertState.CONVERTING
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            val allSongs = mutableListOf<ParsedSong>()
+                            val textParts = mutableListOf<String>()
+                            for (file in files) {
+                                val (text, songs) = MarkdownToSongConverter.preview(file)
+                                textParts.add("── ${file.name} ──\n$text")
+                                allSongs.addAll(songs)
                             }
-                        }, enabled = docFiles.isNotEmpty()) {
-                            Icon(Icons.Default.Preview, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(Strings.preview)
+                            markdown = textParts.joinToString("\n\n")
+                            parsedSongs = allSongs
                         }
-                        Button(shape = ButtonShape, onClick = {
-                            docState = ConvertState.CONVERTING
-                            scope.launch {
-                                docLog = withContext(Dispatchers.IO) {
-                                    val msgs = mutableListOf<String>()
-                                    for (file in docFiles) {
-                                        try {
-                                            val result = DocumentTextExtractor.extract(file)
-                                            if (!result.success) {
-                                                msgs.add("ERROR: ${file.name} - ${result.errorMessage}")
-                                                continue
-                                            }
-                                            val convResult = MarkdownToSongConverter.convert(result.text, file.name, docOutputDir!!)
-                                            for (outFile in convResult.outputFiles) {
-                                                msgs.add("OK: ${file.name} -> ${outFile.name}")
-                                            }
-                                            convResult.errors.forEach { msgs.add("ERROR: ${file.name} - $it") }
-                                        } catch (e: Exception) {
-                                            msgs.add("ERROR: ${file.name} - ${e.message}")
-                                        }
-                                    }
-                                    msgs
-                                }
-                                docState = ConvertState.DONE
-                            }
-                        }, enabled = docFiles.isNotEmpty() && docOutputDir != null) {
-                            Icon(Icons.Default.Transform, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                            Text(Strings.convert)
-                        }
+                        state = ConvertState.PREVIEW
                     }
-                    ConvertState.PREVIEW -> {
-                        Button(shape = ButtonShape, onClick = {
-                            docState = ConvertState.CONVERTING
-                            scope.launch {
-                                docLog = withContext(Dispatchers.IO) {
-                                    val msgs = mutableListOf<String>()
-                                    for (file in docFiles) {
-                                        try {
-                                            val result = DocumentTextExtractor.extract(file)
-                                            if (!result.success) {
-                                                msgs.add("ERROR: ${file.name} - ${result.errorMessage}")
-                                                continue
-                                            }
-                                            val convResult = MarkdownToSongConverter.convert(result.text, file.name, docOutputDir!!)
-                                            for (outFile in convResult.outputFiles) {
-                                                msgs.add("OK: ${file.name} -> ${outFile.name}")
-                                            }
-                                            convResult.errors.forEach { msgs.add("ERROR: ${file.name} - $it") }
-                                        } catch (e: Exception) {
-                                            msgs.add("ERROR: ${file.name} - ${e.message}")
-                                        }
-                                    }
-                                    msgs
-                                }
-                                docState = ConvertState.DONE
-                            }
-                        }, enabled = docOutputDir != null) {
-                            Icon(Icons.Default.Transform, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                            Text(Strings.convertNSongs(docParsedSongs.size))
-                        }
-                        OutlinedButton(shape = ButtonShape, onClick = { docState = ConvertState.SELECT; docParsedSongs = emptyList(); docMarkdown = "" }) { Text(Strings.back) }
-                    }
-                    ConvertState.CONVERTING -> {
-                        Button(shape = ButtonShape, enabled = false, onClick = {}) {
-                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                            Spacer(Modifier.width(8.dp)); Text(Strings.converting)
-                        }
-                    }
-                    ConvertState.DONE -> {
-                        OutlinedButton(shape = ButtonShape, onClick = {
-                            docState = ConvertState.SELECT; docFiles = emptyList()
-                            docParsedSongs = emptyList(); docLog = emptyList(); docMarkdown = ""
-                        }) { Text(Strings.startOver) }
-                    }
-                }
+                },
+                onConvert = { runConvert() },
+                onStartOver = { files = emptyList(); clearResults() }
+            )
+        }
+
+        if (state == ConvertState.CONVERTING) {
+            item {
+                ConversionProgressRow(
+                    Strings.convertingFiles(files.size),
+                    if (files.isEmpty()) null else completed.toFloat() / files.size
+                )
             }
         }
 
-        // Document preview
-        if (docState == ConvertState.PREVIEW && docParsedSongs.isNotEmpty()) {
+        if (state == ConvertState.PREVIEW && parsedSongs.isNotEmpty()) {
             item {
                 Column {
-                    Text(Strings.songsExtracted(docParsedSongs.size), style = MaterialTheme.typography.titleSmall)
+                    Text(Strings.songsExtracted(parsedSongs.size), style = MaterialTheme.typography.titleSmall)
                     Spacer(Modifier.height(4.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         FilterChip(
-                            selected = !docShowMarkdown,
-                            onClick = { docShowMarkdown = false },
+                            selected = !showMarkdown,
+                            onClick = { showMarkdown = false },
                             label = { Text(Strings.docPreviewSong) }
                         )
                         FilterChip(
-                            selected = docShowMarkdown,
-                            onClick = { docShowMarkdown = true },
+                            selected = showMarkdown,
+                            onClick = { showMarkdown = true },
                             label = { Text(Strings.docPreviewMarkdown) }
                         )
                     }
                 }
             }
-            if (docShowMarkdown) {
+            if (showMarkdown) {
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                     ) {
                         Text(
-                            docMarkdown,
+                            markdown,
                             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                             modifier = Modifier.padding(10.dp).horizontalScroll(rememberScrollState())
                         )
                     }
                 }
             } else {
-                items(docParsedSongs) { song ->
+                items(parsedSongs) { song ->
                     Card(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
                     ) {
                         Column(modifier = Modifier.padding(10.dp)) {
@@ -680,13 +772,61 @@ fun SongsTab() {
                 }
             }
         }
-        if (docState == ConvertState.DONE && docLog.isNotEmpty()) {
+        if (state == ConvertState.DONE && log.isNotEmpty()) {
             item {
-                val ok = docLog.count { it.startsWith("OK") }; val err = docLog.count { it.startsWith("ERROR") }
-                Text(Strings.doneConverted(ok, err), style = MaterialTheme.typography.titleSmall,
-                    color = if (err > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
+                val ok = log.count { it.startsWith("OK") }
+                val err = log.count { it.startsWith("ERROR") }
+                Text(
+                    Strings.doneConverted(ok, err),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (err > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                )
             }
-            items(docLog) { msg -> LogLine(msg) }
+            items(log) { msg -> LogLine(msg) }
+        }
+    }
+}
+
+/** Preview / Convert / Start over, plus the "n converted" pill once a run finishes. */
+@Composable
+private fun ConversionActionBar(
+    state: ConvertState,
+    canPreview: Boolean,
+    canConvert: Boolean,
+    convertLabel: String,
+    doneLabel: String?,
+    onPreview: () -> Unit,
+    onConvert: () -> Unit,
+    onStartOver: () -> Unit
+) {
+    Column {
+        HorizontalDivider(modifier = Modifier.padding(bottom = 14.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+            when (state) {
+                ConvertState.SELECT, ConvertState.PREVIEW -> {
+                    OutlinedButton(shape = ButtonShape, onClick = onPreview, enabled = canPreview) {
+                        Icon(Icons.Default.Preview, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
+                        Text(Strings.preview)
+                    }
+                    Button(shape = ButtonShape, onClick = onConvert, enabled = canConvert) {
+                        Icon(Icons.Default.Transform, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
+                        Text(convertLabel)
+                    }
+                }
+                ConvertState.CONVERTING -> {
+                    Button(shape = ButtonShape, enabled = false, onClick = {}) {
+                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(8.dp)); Text(Strings.converting)
+                    }
+                }
+                ConvertState.DONE -> {
+                    OutlinedButton(shape = ButtonShape, onClick = onStartOver) { Text(Strings.startOver) }
+                }
+            }
+            Spacer(Modifier.weight(1f))
+            if (state == ConvertState.DONE && doneLabel != null) {
+                DoneChip(doneLabel)
+            }
         }
     }
 }
@@ -707,22 +847,19 @@ fun BibleConverterTab() {
     var fixState by remember { mutableStateOf(ConvertState.SELECT) }
     var fixLog by remember { mutableStateOf<List<String>>(emptyList()) }
 
+    val scrollState = rememberScrollState()
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        // fillMaxHeight, not fillMaxSize: the latter pins min width to the parent too, which would
+        // override the max below and leave the cards spanning the whole window.
+        modifier = Modifier.fillMaxHeight().widthIn(max = CONTENT_MAX_WIDTH)
+            .verticalScroll(scrollState).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(Strings.bibleTitle, style = MaterialTheme.typography.headlineSmall)
-        Text(
-            Strings.bibleDesc,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(Modifier.height(8.dp))
-
+      SectionCard(Strings.bibleTitle, Strings.bibleDesc) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(shape = ButtonShape, onClick = {
-                val files = pickFiles("XML Bible Files", "xml", multiSelection = true)
+                val files = pickFiles(Strings.xmlBibleFiles, "xml", multiSelection = true)
                 if (files.isNotEmpty()) {
                     inputFiles = files; state = ConvertState.SELECT; previewItems = emptyList(); logMessages = emptyList()
                 }
@@ -730,7 +867,7 @@ fun BibleConverterTab() {
                 Icon(Icons.Default.FileOpen, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
                 Text(Strings.selectXmlFiles)
             }
-            Button(shape = ButtonShape, onClick = {
+            OutlinedButton(shape = ButtonShape, onClick = {
                 val dir = pickDirectory()
                 if (dir != null) {
                     val files = findXmlFilesRecursive(dir)
@@ -745,19 +882,12 @@ fun BibleConverterTab() {
             }
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(shape = ButtonShape, onClick = {
-                val dir = pickDirectory(); if (dir != null) { outputDir = dir }
-            }) {
-                Icon(Icons.Default.FolderOpen, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                Text(Strings.outputFolder)
-            }
-            Text(
-                outputDir?.absolutePath ?: Strings.sameAsInput,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        DestinationRow(
+            path = outputDir?.absolutePath ?: Strings.sameAsInput,
+            chosen = outputDir != null,
+            warning = null,
+            onBrowse = { pickDirectory()?.let { outputDir = it } }
+        )
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             when (state) {
@@ -826,45 +956,22 @@ fun BibleConverterTab() {
         when (state) {
             ConvertState.PREVIEW -> {
                 Text(Strings.previewLabel, style = MaterialTheme.typography.titleSmall)
-                Surface(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh
-                ) {
-                    LazyColumn(modifier = Modifier.padding(8.dp)) {
-                        items(previewItems) { item -> PreviewRow(item) }
-                    }
-                }
+                previewItems.forEach { item -> PreviewRow(item) }
             }
             ConvertState.DONE -> {
                 val ok = logMessages.count { it.startsWith("OK") }; val err = logMessages.count { it.startsWith("ERROR") }
                 Text(Strings.doneConverted(ok, err), style = MaterialTheme.typography.titleSmall,
                     color = if (err > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
-                Surface(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh
-                ) {
-                    LazyColumn(modifier = Modifier.padding(8.dp)) {
-                        items(logMessages) { msg -> LogLine(msg) }
-                    }
-                }
+                logMessages.forEach { msg -> LogLine(msg) }
             }
             else -> {}
         }
+      }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-
-        Text(Strings.fixVersesTitle, style = MaterialTheme.typography.titleMedium)
-        Text(
-            Strings.fixVersesDesc,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
+      SectionCard(Strings.fixVersesTitle, Strings.fixVersesDesc) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(shape = ButtonShape, onClick = {
-                val files = pickFiles("SPB Bible Files", "spb", multiSelection = true)
+                val files = pickFiles(Strings.spbBibleFiles, "spb", multiSelection = true)
                 if (files.isNotEmpty()) {
                     spbFiles = files; fixState = ConvertState.SELECT; fixLog = emptyList()
                 }
@@ -872,12 +979,7 @@ fun BibleConverterTab() {
                 Icon(Icons.Default.FileOpen, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
                 Text(Strings.selectSpbFiles)
             }
-            if (spbFiles.isNotEmpty()) {
-                Text(Strings.fileCount(spbFiles.size), style = MaterialTheme.typography.bodySmall)
-            }
-        }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             when (fixState) {
                 ConvertState.SELECT -> {
                     Button(shape = ButtonShape, onClick = {
@@ -912,6 +1014,10 @@ fun BibleConverterTab() {
                 }
                 ConvertState.PREVIEW -> {}
             }
+
+            if (spbFiles.isNotEmpty()) {
+                Text(Strings.fileCount(spbFiles.size), style = MaterialTheme.typography.bodySmall)
+            }
         }
 
         if (fixState == ConvertState.DONE && fixLog.isNotEmpty()) {
@@ -924,6 +1030,12 @@ fun BibleConverterTab() {
             )
             fixLog.forEach { msg -> LogLine(msg) }
         }
+      }
+    }
+        VerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+            adapter = rememberScrollbarAdapter(scrollState)
+        )
     }
 }
 
@@ -1019,7 +1131,10 @@ fun DuplicateFinderTab() {
             modifier = Modifier.width(360.dp).fillMaxHeight().verticalScroll(leftScrollState),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(Strings.dupesTitle, style = MaterialTheme.typography.headlineSmall)
+            Text(
+                Strings.dupesTitle,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
             Text(
                 Strings.dupesDesc,
                 style = MaterialTheme.typography.bodySmall,
@@ -1048,28 +1163,31 @@ fun DuplicateFinderTab() {
             }
 
             // Match options
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Checkbox(checked = matchByNumber, onCheckedChange = { matchByNumber = it },
-                    enabled = scanState != ScanState.SCANNING)
-                Text(Strings.matchByNumber, style = MaterialTheme.typography.bodySmall)
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Checkbox(checked = matchByTitle, onCheckedChange = { matchByTitle = it },
-                    enabled = scanState != ScanState.SCANNING)
-                Text(Strings.matchByTitle, style = MaterialTheme.typography.bodySmall)
-            }
+            OptionToggleRow(
+                checked = matchByNumber,
+                label = Strings.matchByNumber,
+                enabled = scanState != ScanState.SCANNING
+            ) { matchByNumber = !matchByNumber }
+            OptionToggleRow(
+                checked = matchByTitle,
+                label = Strings.matchByTitle,
+                enabled = scanState != ScanState.SCANNING
+            ) { matchByTitle = !matchByTitle }
 
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(Strings.threshold, style = MaterialTheme.typography.bodySmall)
-                Slider(
+            Column {
+                Text(
+                    Strings.similarityThreshold,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                SlimSlider(
                     value = threshold,
                     onValueChange = { threshold = it },
                     valueRange = 0.3f..1.0f,
-                    steps = 13,
-                    modifier = Modifier.weight(1f),
-                    enabled = scanState != ScanState.SCANNING
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = scanState != ScanState.SCANNING,
+                    trailingLabel = "${(threshold * 100).toInt()}%"
                 )
-                Text("${(threshold * 100).toInt()}%", style = MaterialTheme.typography.bodySmall)
             }
 
             // Scan button
@@ -1309,15 +1427,15 @@ fun DuplicateFinderTab() {
                     }
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(Strings.minSim, style = MaterialTheme.typography.bodySmall)
-                    Slider(
+                    SlimSlider(
                         value = filterMinSimilarity,
                         onValueChange = { filterMinSimilarity = it },
-                        valueRange = 0f..1f, steps = 19,
-                        modifier = Modifier.weight(1f)
+                        valueRange = 0f..1f,
+                        modifier = Modifier.weight(1f),
+                        trailingLabel = "${(filterMinSimilarity * 100).toInt()}%"
                     )
-                    Text("${(filterMinSimilarity * 100).toInt()}%", style = MaterialTheme.typography.bodySmall)
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1659,10 +1777,7 @@ fun DuplicateFinderTab() {
             color = MaterialTheme.colorScheme.surfaceContainerHigh
         ) {
             if (scanState != ScanState.DONE) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(Strings.resultsPlaceholder, style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+                EmptyStatePanel(Icons.Default.ContentCopy, Strings.dupesEmptyState)
             } else {
                 Column {
                     Row(
@@ -1869,13 +1984,16 @@ fun BulkRenameTab() {
     val scope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier.fillMaxHeight().widthIn(max = CONTENT_MAX_WIDTH).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(Strings.renameTitle, style = MaterialTheme.typography.headlineSmall)
+        Text(
+            Strings.renameTitle,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+        )
         Text(
             Strings.renameDesc,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
@@ -1897,28 +2015,47 @@ fun BulkRenameTab() {
             }
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Checkbox(checked = stripNumbers, onCheckedChange = { stripNumbers = it },
-                enabled = state != ConvertState.CONVERTING)
-            Text(Strings.stripNumbers, style = MaterialTheme.typography.bodySmall)
-        }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Checkbox(checked = renameToFirstVerse, onCheckedChange = { renameToFirstVerse = it },
-                enabled = state != ConvertState.CONVERTING)
-            Text(Strings.renameFirstVerse, style = MaterialTheme.typography.bodySmall)
-        }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(Strings.caseLabel, style = MaterialTheme.typography.bodySmall)
-            val caseOptions = listOf("None" to Strings.caseNone, "Sentence case" to Strings.caseSentence, "Title Case" to Strings.caseTitle, "lowercase" to Strings.caseLower, "UPPERCASE" to Strings.caseUpper)
-            caseOptions.forEach { (id, label) ->
-                FilterChip(
-                    selected = caseOption == id,
-                    onClick = { caseOption = id },
-                    label = { Text(label, style = MaterialTheme.typography.labelSmall) },
-                    enabled = state != ConvertState.CONVERTING
+        OptionToggleRow(
+            checked = stripNumbers,
+            label = Strings.stripNumbers,
+            enabled = state != ConvertState.CONVERTING
+        ) { stripNumbers = !stripNumbers }
+        OptionToggleRow(
+            checked = renameToFirstVerse,
+            label = Strings.renameFirstVerse,
+            enabled = state != ConvertState.CONVERTING
+        ) { renameToFirstVerse = !renameToFirstVerse }
+
+        Column {
+            Text(
+                Strings.letterCase,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                val caseOptions = listOf(
+                    "None" to Strings.caseNone,
+                    "Sentence case" to Strings.caseSentence,
+                    "Title Case" to Strings.caseTitle,
+                    "lowercase" to Strings.caseLower,
+                    "UPPERCASE" to Strings.caseUpper
                 )
+                caseOptions.forEach { (id, label) ->
+                    FilterChip(
+                        selected = caseOption == id,
+                        onClick = { caseOption = id },
+                        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                        enabled = state != ConvertState.CONVERTING
+                    )
+                }
             }
         }
+
+        RenameExampleCard(
+            before = Strings.renameExampleBefore,
+            after = renameExample(stripNumbers, renameToFirstVerse, caseOption)
+        )
 
         // Live-update preview when options change
         LaunchedEffect(stripNumbers, renameToFirstVerse, caseOption) {
@@ -2254,6 +2391,15 @@ private val leadingNumberRegex = Regex("""^\d+\s*-\s*""")
 private val verseHeaderRegex = Regex("""^\[.+\d.*\]$""", RegexOption.IGNORE_CASE)
 private val invalidFilenameChars = Regex("""[\\/:*?"<>|]""")
 
+/** The worked example on the Rename tab, run through the options currently ticked. */
+private fun renameExample(stripNumbers: Boolean, renameToFirstVerse: Boolean, caseOption: String): String {
+    var base = Strings.renameExampleBefore.removeSuffix(".song")
+    if (stripNumbers) base = leadingNumberRegex.replace(base, "")
+    if (renameToFirstVerse) base = Strings.renameExampleFirstLine
+    if (caseOption != "None") base = applyCase(base, caseOption)
+    return "$base.song"
+}
+
 private fun applyCase(name: String, caseOption: String): String = when (caseOption) {
     "Sentence case" -> name.lowercase().replaceFirstChar { it.titlecase() }
     "Title Case" -> name.split(" ").joinToString(" ") { word ->
@@ -2400,18 +2546,30 @@ private fun LogLine(msg: String) {
 // Preview builders
 // =============================================================================
 
-private fun buildSongPreview(files: List<File>, outputDir: File?): List<PreviewItem> {
+
+/** Words the converter layer's structured preview data, which carries no strings of its own. */
+private fun describePreview(info: SongPreviewInfo): String {
+    val parts = mutableListOf<String>()
+    if (info.title.isNotBlank()) parts.add("\"${info.title}\"")
+    if (info.sectionCount > 0) parts.add(Strings.sectionCount(info.sectionCount))
+    if (info.songCount > 0) parts.add(Strings.songCount(info.songCount))
+    if (info.verseOrder.isNotEmpty()) parts.add(Strings.verseOrderPrefix(info.verseOrder.joinToString(", ")))
+    return parts.joinToString(" | ")
+}
+
+private fun buildFormatPreview(
+    format: SongFormatConverter,
+    files: List<File>,
+    outputDir: File?
+): List<PreviewItem> {
     return files.map { file ->
         val outDir = outputDir ?: file.parentFile
-        val outFile = File(outDir, file.nameWithoutExtension + ".song")
+        val outFile = File(outDir, format.outputNameFor(file))
         val details = try {
-            val song = SngToSongConverter.parse(file)
-            val parts = mutableListOf<String>()
-            if (song.title.isNotBlank()) parts.add("\"${song.title}\"")
-            parts.add("${song.sections.size} section(s)")
-            if (song.verseOrder.isNotEmpty()) parts.add("order: ${song.verseOrder.joinToString(", ")}")
-            parts.joinToString(" | ")
-        } catch (e: Exception) { "Parse error: ${e.message}" }
+            describePreview(format.describe(file))
+        } catch (e: Exception) {
+            Strings.parseError(e.message.orEmpty())
+        }
         PreviewItem(file.name, file.absolutePath, outFile.name, outFile.absolutePath, details, outFile.exists())
     }
 }
@@ -2427,6 +2585,7 @@ private fun buildSpsPreview(spsFile: File, outputDir: File): SpsPreviewData {
         SpsPreviewData("", 0, "", false, emptyList(), error = e.message)
     }
 }
+
 
 private fun buildBiblePreview(files: List<File>, outputDir: File?): List<PreviewItem> {
     return files.map { file ->
@@ -2452,6 +2611,9 @@ private fun buildBiblePreview(files: List<File>, outputDir: File?): List<Preview
 
 private val defaultDir: File = File(System.getProperty("user.home"), "Downloads")
 
+/** File-chooser filter label: the product name and its extension, both untranslated by nature. */
+private fun pickerLabel(source: SongSource): String = "${source.name} (${source.ext})"
+
 private fun pickFiles(description: String, vararg extensions: String, multiSelection: Boolean): List<File> {
     val chooser = JFileChooser(defaultDir).apply {
         fileFilter = FileNameExtensionFilter(description, *extensions)
@@ -2471,8 +2633,21 @@ private fun pickDirectory(): File? {
     return if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) chooser.selectedFile else null
 }
 
-private fun findXmlFilesRecursive(dir: File): List<File> {
-    return dir.walkTopDown().filter { it.isFile && it.extension.equals("xml", ignoreCase = true) }.toList()
+private fun findXmlFilesRecursive(dir: File): List<File> = findFilesRecursive(dir, "xml")
+
+private fun findFilesRecursive(dir: File, extension: String): List<File> =
+    dir.walkTopDown()
+        .filter { it.isFile && it.extension.equals(extension, ignoreCase = true) }
+        .sortedBy { it.absolutePath }
+        .toList()
+
+/** How many of the chosen files the "source files" card lists before it stops. */
+private const val FILE_LIST_LIMIT = 200
+
+private fun formatFileSize(bytes: Long): String = when {
+    bytes >= 1024 * 1024 -> String.format(Locale.ROOT, "%.1f MB", bytes / (1024.0 * 1024.0))
+    bytes >= 1024 -> String.format(Locale.ROOT, "%d KB", bytes / 1024)
+    else -> String.format(Locale.ROOT, "%d B", bytes)
 }
 
 // =============================================================================
