@@ -118,6 +118,16 @@ class BibleCatalogBrowserScreenshotTest {
         confirm()
     }
 
+    /** The one failure that offers a way out: a slow link, and a Retry beside the message. */
+    @Test
+    fun `an install that kept stopping`() = shoot(
+        "install_stalled",
+        installOutcome = BibleInstallOutcome.DownloadStalled,
+    ) {
+        install(0)
+        confirm()
+    }
+
     /** One already in the Bible folder is badged rather than offered again. */
     @Test
     fun `one already installed`() = shoot("installed", installedFiles = listOf(MODULES[0].fileName))

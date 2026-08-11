@@ -2,6 +2,9 @@ package org.churchpresenter.app.churchpresenter.data
 
 import converter.XmlToSpbConverter
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.io.File
 
@@ -53,15 +56,17 @@ object ZefaniaSource : BibleSource {
         module: BibleModule,
         targetDir: File,
         onProgress: (InstallProgress) -> Unit,
-    ): BibleInstallOutcome = installZefania(module, targetDir, BibleInstallSupport.defaultHttp, onProgress)
+    ): BibleInstallOutcome =
+        installZefania(module, targetDir, BibleInstallSupport.defaultHttp, onProgress = onProgress)
 
     internal suspend fun installZefania(
         module: BibleModule,
         targetDir: File,
         http: HttpClient,
+        retryFloorMs: Long = BibleInstallSupport.DEFAULT_DOWNLOAD_RETRY_FLOOR_MS,
         onProgress: (InstallProgress) -> Unit,
-    ): BibleInstallOutcome {
-        if (!BibleInstallSupport.usableDirectory(targetDir)) return BibleInstallOutcome.NoDirectory
+    ): BibleInstallOutcome = withContext(Dispatchers.IO) {
+        if (!BibleInstallSupport.usableDirectory(targetDir)) return@withContext BibleInstallOutcome.NoDirectory
 
         val scratch = BibleInstallSupport.scratchIn(targetDir)
         try {
@@ -76,14 +81,32 @@ object ZefaniaSource : BibleSource {
                     destination = zipFile,
                     http = http,
                     expectedBytes = module.sizeBytes,
+                    retryFloorMs = retryFloorMs,
                 ) { onProgress(InstallProgress(InstallPhase.DOWNLOADING, it)) }
+            } catch (e: CancellationException) {
+                // Closing the dialog cancels the install. That is the user's doing, not a fault.
+                throw e
+            } catch (e: BibleInstallSupport.DownloadStalledException) {
+                CrashReporter.reportWarning(
+                    "Zefania download stalled (${module.fileStem})",
+                    throwable = e,
+                    tags = mapOf(
+                        "subsystem" to "bible_install",
+                        "module" to module.fileStem,
+                        "reason" to "stalled",
+                        "attempts" to e.attempts.toString(),
+                        "bytes_written" to e.bytesWritten.toString(),
+                        "expected_bytes" to module.sizeBytes.toString(),
+                    )
+                )
+                return@withContext BibleInstallOutcome.DownloadStalled
             } catch (e: Exception) {
                 CrashReporter.reportWarning(
                     "Zefania download failed (${module.fileStem})",
                     throwable = e,
                     tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
                 )
-                return BibleInstallOutcome.NetworkError
+                return@withContext BibleInstallOutcome.NetworkError
             }
 
             if (result.status !in 200..299) {
@@ -91,10 +114,10 @@ object ZefaniaSource : BibleSource {
                     "Zefania download returned HTTP ${result.status} (${module.fileStem})",
                     tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
                 )
-                return BibleInstallOutcome.HttpError(result.status)
+                return@withContext BibleInstallOutcome.HttpError(result.status)
             }
             if (module.sizeBytes > 0 && result.bytesWritten != module.sizeBytes) {
-                return BibleInstallOutcome.ChecksumMismatch
+                return@withContext BibleInstallOutcome.ChecksumMismatch
             }
             // The git blob hash comes free with the tree listing, so integrity is checked end to
             // end without the archive publishing a checksum of its own. It also rejects the two
@@ -102,14 +125,14 @@ object ZefaniaSource : BibleSource {
             if (module.checksum.isNotBlank() &&
                 !BibleInstallSupport.gitBlobSha1(zipFile).equals(module.checksum, ignoreCase = true)
             ) {
-                return BibleInstallOutcome.ChecksumMismatch
+                return@withContext BibleInstallOutcome.ChecksumMismatch
             }
 
             onProgress(InstallProgress(InstallPhase.EXTRACTING, BibleInstallSupport.DOWNLOAD_END))
             val xmlFile = BibleInstallSupport
                 .extractEntries(zipFile, scratch) { it.endsWith(".xml", ignoreCase = true) }
                 .values.maxByOrNull { it.length() }
-                ?: return BibleInstallOutcome.CorruptArchive
+                ?: return@withContext BibleInstallOutcome.CorruptArchive
             onProgress(InstallProgress(InstallPhase.EXTRACTING, BibleInstallSupport.EXTRACT_END))
 
             val parsed = try {
@@ -120,10 +143,10 @@ object ZefaniaSource : BibleSource {
                     throwable = e,
                     tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
                 )
-                return BibleInstallOutcome.ConversionFailed
+                return@withContext BibleInstallOutcome.ConversionFailed
             }
             if (parsed.books.isEmpty() || parsed.books.sumOf { b -> b.chapters.sumOf { it.verses.size } } == 0) {
-                return BibleInstallOutcome.ConversionFailed
+                return@withContext BibleInstallOutcome.ConversionFailed
             }
 
             XmlToSpbConverter.write(parsed, spbPart) { fraction ->
@@ -135,7 +158,7 @@ object ZefaniaSource : BibleSource {
                     )
                 )
             }
-            if (!BibleInstallSupport.looksLikeModule(spbPart)) return BibleInstallOutcome.ConversionFailed
+            if (!BibleInstallSupport.looksLikeModule(spbPart)) return@withContext BibleInstallOutcome.ConversionFailed
 
             onProgress(InstallProgress(InstallPhase.INSTALLING, BibleInstallSupport.CONVERT_END))
             val destination = File(targetDir, module.fileName)
@@ -147,10 +170,15 @@ object ZefaniaSource : BibleSource {
                     throwable = e,
                     tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
                 )
-                return BibleInstallOutcome.WriteFailed
+                return@withContext BibleInstallOutcome.WriteFailed
             }
             onProgress(InstallProgress(InstallPhase.INSTALLING, 1f))
-            return BibleInstallOutcome.Success(destination, parsed.name, parsed.books.size, parsed.rights)
+            return@withContext BibleInstallOutcome.Success(
+                destination,
+                parsed.name,
+                parsed.books.size,
+                parsed.rights
+            )
         } finally {
             scratch.deleteRecursively()
         }

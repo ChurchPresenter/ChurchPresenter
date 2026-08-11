@@ -3,9 +3,11 @@ package org.churchpresenter.app.churchpresenter.data
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.runBlocking
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -87,6 +89,42 @@ class ZefaniaSourceTest {
 
     private fun httpFailing() = HttpClient(MockEngine { throw java.io.IOException("no route to host") })
 
+    /**
+     * A server that stops part-way through the first answer and serves the tail when asked for it —
+     * a throttled link, as far as the download can tell.
+     */
+    private fun httpStallingThenServing(body: ByteArray) = HttpClient(
+        MockEngine { request ->
+            val start = request.headers[HttpHeaders.Range]
+                ?.substringAfter("bytes=")?.substringBefore('-')?.toIntOrNull() ?: 0
+            if (start == 0) {
+                respond(
+                    content = ByteReadChannel(body.copyOfRange(0, body.size / 2)),
+                    headers = headersOf(HttpHeaders.ContentLength, body.size.toString()),
+                )
+            } else {
+                respond(
+                    content = ByteReadChannel(body.copyOfRange(start, body.size)),
+                    status = HttpStatusCode.PartialContent,
+                    headers = Headers.build {
+                        append(HttpHeaders.ContentLength, (body.size - start).toString())
+                        append(HttpHeaders.ContentRange, "bytes $start-${body.size - 1}/${body.size}")
+                    },
+                )
+            }
+        },
+    )
+
+    /** A server that promises the module and then delivers nothing, every time. */
+    private fun httpNeverDelivering(body: ByteArray) = HttpClient(
+        MockEngine {
+            respond(
+                content = ByteReadChannel(ByteArray(0)),
+                headers = headersOf(HttpHeaders.ContentLength, body.size.toString()),
+            )
+        },
+    )
+
     /** The real git blob hash of [bytes], as the tree listing would publish it. */
     private fun blobShaOf(bytes: ByteArray): String {
         val temp = File(dir, "blob-sha-scratch").apply { writeBytes(bytes) }
@@ -110,7 +148,8 @@ class ZefaniaSourceTest {
     )
 
     private fun install(http: HttpClient, module: BibleModule = module()) = runBlocking {
-        ZefaniaSource.installZefania(module, targetDir, http) {}
+        // Zero backoff: the retry is what is under test, not how long it waits before it.
+        ZefaniaSource.installZefania(module, targetDir, http, retryFloorMs = 0L) {}
     }
 
     @Test
@@ -136,6 +175,32 @@ class ZefaniaSourceTest {
         assertTrue(text.contains("##Copyright:\tpublic domain"), "the licence travels with the file")
         assertTrue(text.contains("1\tThe First Book of Moses\t1"), "the module's own book name is used for English")
         assertTrue(text.contains("B001C001V001\t1\t1\t1\tIn the beginning God created the heavens and the earth."))
+    }
+
+    @Test
+    fun `a download that stops half way still installs, and the file is whole`() {
+        val bytes = zipOf("module.xml" to xmlBible())
+
+        val outcome = assertIs<BibleInstallOutcome.Success>(
+            install(
+                httpStallingThenServing(bytes),
+                module(checksum = blobShaOf(bytes), sizeBytes = bytes.size.toLong()),
+            )
+        )
+
+        // The hash and the size are checked against the tree listing, so a spliced or short file
+        // could not reach Success — this asserts the resumed download is byte-for-byte right.
+        assertEquals(1, outcome.books)
+    }
+
+    @Test
+    fun `a download that never gets going is reported as stalled, not as being offline`() {
+        val bytes = zipOf("module.xml" to xmlBible())
+
+        val outcome = install(httpNeverDelivering(bytes), module(sizeBytes = bytes.size.toLong()))
+
+        assertEquals(BibleInstallOutcome.DownloadStalled, outcome)
+        assertTrue(targetDir.listFiles()!!.isEmpty())
     }
 
     @Test

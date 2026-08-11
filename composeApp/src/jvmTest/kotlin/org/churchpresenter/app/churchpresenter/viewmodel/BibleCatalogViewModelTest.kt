@@ -476,6 +476,7 @@ class BibleCatalogViewModelTest {
     fun `each install failure keeps its own cause and installs nothing`() {
         val cases = mapOf(
             BibleInstallOutcome.NetworkError to BibleDownloadError.NETWORK_ERROR,
+            BibleInstallOutcome.DownloadStalled to BibleDownloadError.DOWNLOAD_STALLED,
             BibleInstallOutcome.HttpError(404) to BibleDownloadError.HTTP_ERROR,
             BibleInstallOutcome.ChecksumMismatch to BibleDownloadError.CHECKSUM_MISMATCH,
             BibleInstallOutcome.CorruptArchive to BibleDownloadError.CORRUPT_ARCHIVE,
@@ -497,6 +498,36 @@ class BibleCatalogViewModelTest {
             assertFalse(model.isInstalled(module("ENG_ACV")), "for $outcome")
             assertNull(model.installingKey)
         }
+    }
+
+    @Test
+    fun `retrying a stalled download runs the same install again`() {
+        val source = FakeSource(installOutcome = BibleInstallOutcome.DownloadStalled)
+        val model = vm(source)
+        var installed: String? = null
+
+        model.install(module("ENG_ACV")) { installed = it }
+        settle()
+        assertEquals(BibleDownloadError.DOWNLOAD_STALLED, model.installError)
+
+        source.installOutcome = BibleInstallOutcome.Success(File("ENG_ACV.spb"), "A Conservative Version", 66, "PD")
+        model.retryLastInstall { installed = it }
+        settle()
+
+        assertEquals(2, source.installCalls.get())
+        assertNull(model.installError)
+        assertEquals("ENG_ACV.spb", installed)
+    }
+
+    @Test
+    fun `a retry with nothing to retry does nothing`() {
+        val source = FakeSource()
+        val model = vm(source)
+
+        model.retryLastInstall {}
+        settle()
+
+        assertEquals(0, source.installCalls.get())
     }
 
     @Test

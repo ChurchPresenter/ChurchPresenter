@@ -78,6 +78,7 @@ import churchpresenter.composeapp.generated.resources.bible_catalog_download_err
 import churchpresenter.composeapp.generated.resources.bible_catalog_download_error_generic
 import churchpresenter.composeapp.generated.resources.bible_catalog_download_error_incomplete
 import churchpresenter.composeapp.generated.resources.bible_catalog_download_error_network
+import churchpresenter.composeapp.generated.resources.bible_catalog_download_error_stalled
 import churchpresenter.composeapp.generated.resources.bible_catalog_download_error_write
 import churchpresenter.composeapp.generated.resources.bible_catalog_empty
 import churchpresenter.composeapp.generated.resources.bible_catalog_empty_hint
@@ -254,7 +255,7 @@ internal fun BibleCatalogBrowserDialogContent(
             SearchField(viewModel)
             Spacer(Modifier.height(12.dp))
 
-            Messages(viewModel)
+            Messages(viewModel, onRetryInstall = { viewModel.retryLastInstall(markInstalledEverywhere) })
 
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 when {
@@ -773,7 +774,7 @@ private fun SearchField(viewModel: BibleCatalogViewModel) {
 }
 
 @Composable
-private fun Messages(viewModel: BibleCatalogViewModel) {
+private fun Messages(viewModel: BibleCatalogViewModel, onRetryInstall: () -> Unit) {
     if (viewModel.isStale) {
         Text(
             text = stringResource(Res.string.bible_catalog_stale_notice),
@@ -791,11 +792,20 @@ private fun Messages(viewModel: BibleCatalogViewModel) {
         Spacer(Modifier.height(8.dp))
     }
     viewModel.installError?.let { error ->
-        Text(
-            text = stringResource(installErrorStringRes(error)),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.error
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(installErrorStringRes(error)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+            // Only the stalled case: everything else has already been tried as many times as it is
+            // worth trying, and a Retry beside "couldn't be converted" only invites a second wait.
+            if (error == BibleDownloadError.DOWNLOAD_STALLED) {
+                TextButton(onClick = onRetryInstall) {
+                    Text(stringResource(Res.string.bible_catalog_retry))
+                }
+            }
+        }
         Spacer(Modifier.height(8.dp))
     }
 }
@@ -1026,6 +1036,7 @@ private fun catalogErrorStringRes(error: BibleCatalogError): StringResource = wh
 
 private fun installErrorStringRes(error: BibleDownloadError): StringResource = when (error) {
     BibleDownloadError.NETWORK_ERROR -> Res.string.bible_catalog_download_error_network
+    BibleDownloadError.DOWNLOAD_STALLED -> Res.string.bible_catalog_download_error_stalled
     BibleDownloadError.HTTP_ERROR -> Res.string.bible_catalog_download_error_generic
     BibleDownloadError.CHECKSUM_MISMATCH -> Res.string.bible_catalog_download_error_incomplete
     BibleDownloadError.CORRUPT_ARCHIVE -> Res.string.bible_catalog_download_error_archive

@@ -24,7 +24,10 @@ import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 enum class BibleCatalogError { NETWORK_ERROR, RATE_LIMITED, FAILURE }
 
 enum class BibleDownloadError {
-    NETWORK_ERROR, HTTP_ERROR, CHECKSUM_MISMATCH, CORRUPT_ARCHIVE, CONVERSION_FAILED, WRITE_FAILED, NO_DIRECTORY
+    NETWORK_ERROR,
+    /** The download kept stopping part-way. The one failure worth offering a retry for. */
+    DOWNLOAD_STALLED,
+    HTTP_ERROR, CHECKSUM_MISMATCH, CORRUPT_ARCHIVE, CONVERSION_FAILED, WRITE_FAILED, NO_DIRECTORY
 }
 
 /** What to tell the user after a translation installed successfully. */
@@ -111,6 +114,9 @@ class BibleCatalogViewModel(
         private set
 
     private var loadJob: Job? = null
+
+    /** The module [retryLastInstall] would run again. Not state — nothing draws from it. */
+    private var lastInstallAttempt: BibleModule? = null
 
     val visibleModules: List<BibleModule>
         get() {
@@ -214,6 +220,7 @@ class BibleCatalogViewModel(
         // One install at a time: cancelling midway would leave a half-converted file behind, so a
         // second click while one is running is ignored rather than queued.
         if (installingKey != null) return
+        lastInstallAttempt = module
 
         viewModelScope.launch {
             installingKey = module.key
@@ -237,6 +244,7 @@ class BibleCatalogViewModel(
                 }
                 is BibleInstallOutcome.HttpError -> installError = BibleDownloadError.HTTP_ERROR
                 BibleInstallOutcome.NetworkError -> installError = BibleDownloadError.NETWORK_ERROR
+                BibleInstallOutcome.DownloadStalled -> installError = BibleDownloadError.DOWNLOAD_STALLED
                 BibleInstallOutcome.ChecksumMismatch -> installError = BibleDownloadError.CHECKSUM_MISMATCH
                 BibleInstallOutcome.CorruptArchive -> installError = BibleDownloadError.CORRUPT_ARCHIVE
                 BibleInstallOutcome.ConversionFailed -> installError = BibleDownloadError.CONVERSION_FAILED
@@ -247,6 +255,17 @@ class BibleCatalogViewModel(
             installPhase = null
             installProgress = 0f
         }
+    }
+
+    /**
+     * Runs the last install again — what the Retry beside a stalled download does.
+     *
+     * Held here rather than in the dialog because each source tab has its own view model and its own
+     * [installError], so the failed module and the message offering to retry it must be the same
+     * tab's.
+     */
+    fun retryLastInstall(onInstalled: (fileName: String) -> Unit) {
+        lastInstallAttempt?.let { install(it, onInstalled) }
     }
 
     fun dismissInstalledNotice() {

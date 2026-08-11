@@ -68,8 +68,13 @@ class BibleCatalogBrowserContentTest {
         var writesInstalledFile: Boolean = false,
     ) : BibleSource {
         override val sourceId = BibleSourceId.EBIBLE
+
+        var installCalls = 0
+            private set
+
         override suspend fun catalog(nowMillis: Long) = parkedCatalog?.await() ?: catalogOutcome
         override suspend fun install(module: BibleModule, targetDir: File, onProgress: (InstallProgress) -> Unit): BibleInstallOutcome {
+            installCalls++
             emitProgress?.let(onProgress)
             val outcome = parkedInstall?.await() ?: installOutcome
             if (writesInstalledFile && outcome is BibleInstallOutcome.Success) {
@@ -630,9 +635,49 @@ class BibleCatalogBrowserContentTest {
     }
 
     @Test
+    fun `a stalled download offers a retry that installs on the second try`() {
+        val source = FakeSource(
+            catalogOutcome = BibleCatalogOutcome.Success(listOf(module())),
+            installOutcome = BibleInstallOutcome.DownloadStalled,
+        )
+        dialog(source = source) { _, _ ->
+            onNodeWithText("Download").performClick()
+            onNodeWithText("I understand — Download").performClick()
+            settle()
+            waitForIdle()
+
+            source.installOutcome = BibleInstallOutcome.Success(File("x.spb"), "Installed Title", 66, "")
+            onNodeWithText("Retry").performClick()
+            settle()
+            waitForIdle()
+
+            assertEquals(2, source.installCalls)
+            onNodeWithText("Installed \"Installed Title\" — 66 books.").assertExists()
+        }
+    }
+
+    @Test
+    fun `only a stalled download offers a retry`() {
+        // A conversion failure will fail the same way next time; offering to repeat it wastes a wait.
+        dialog(
+            catalogOutcome = BibleCatalogOutcome.Success(listOf(module())),
+            installOutcome = BibleInstallOutcome.ConversionFailed,
+        ) { _, _ ->
+            onNodeWithText("Download").performClick()
+            onNodeWithText("I understand — Download").performClick()
+            settle()
+            waitForIdle()
+
+            onNodeWithText("Retry").assertDoesNotExist()
+        }
+    }
+
+    @Test
     fun `each install failure shows its own message`() {
         val cases = listOf(
             BibleInstallOutcome.NetworkError to "Download failed — check your connection",
+            BibleInstallOutcome.DownloadStalled to
+                "The download kept stopping — your connection may be slow or restricted.",
             BibleInstallOutcome.HttpError(500) to "Download failed. Please try again.",
             BibleInstallOutcome.ChecksumMismatch to "The download was incomplete and was discarded. Please try again.",
             BibleInstallOutcome.CorruptArchive to "The downloaded file was damaged and was discarded. Please try again.",

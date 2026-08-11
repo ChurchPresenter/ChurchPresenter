@@ -110,6 +110,11 @@ sealed interface BibleInstallOutcome {
     data class Success(val file: File, val title: String, val books: Int, val rights: String) : BibleInstallOutcome
     data class HttpError(val status: Int) : BibleInstallOutcome
     data object NetworkError : BibleInstallOutcome
+    /**
+     * Every attempt timed out part-way through the body. Distinct from [NetworkError]: the link
+     * works, it just keeps stopping — so the answer is to try again, not to check the cable.
+     */
+    data object DownloadStalled : BibleInstallOutcome
     /** The bytes that arrived don't match the size or hash the catalogue listed. */
     data object ChecksumMismatch : BibleInstallOutcome
     /** Not an archive, or nothing usable inside it. */

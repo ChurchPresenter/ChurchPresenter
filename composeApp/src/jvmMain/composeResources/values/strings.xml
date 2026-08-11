@@ -1521,6 +1521,7 @@
     <string name="bible_catalog_phase_converting">Converting…</string>
     <string name="bible_catalog_phase_installing">Installing…</string>
     <string name="bible_catalog_download_error_network">Download failed — check your connection</string>
+    <string name="bible_catalog_download_error_stalled">The download kept stopping — your connection may be slow or restricted.</string>
     <string name="bible_catalog_download_error_incomplete">The download was incomplete and was discarded. Please try again.</string>
     <string name="bible_catalog_download_error_archive">The downloaded file was damaged and was discarded. Please try again.</string>
     <string name="bible_catalog_download_error_convert">This Bible couldn't be converted and was not installed.</string>

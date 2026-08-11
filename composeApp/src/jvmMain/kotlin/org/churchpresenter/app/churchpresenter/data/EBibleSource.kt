@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
@@ -209,12 +210,14 @@ object EBibleSource : BibleSource {
         module: BibleModule,
         targetDir: File,
         onProgress: (InstallProgress) -> Unit,
-    ): BibleInstallOutcome = installEBible(module, targetDir, BibleInstallSupport.defaultHttp, onProgress)
+    ): BibleInstallOutcome =
+        installEBible(module, targetDir, BibleInstallSupport.defaultHttp, onProgress = onProgress)
 
     internal suspend fun installEBible(
         module: BibleModule,
         targetDir: File,
         http: HttpClient,
+        retryFloorMs: Long = BibleInstallSupport.DEFAULT_DOWNLOAD_RETRY_FLOOR_MS,
         onProgress: (InstallProgress) -> Unit,
     ): BibleInstallOutcome = withContext(Dispatchers.IO) {
         if (!BibleInstallSupport.usableDirectory(targetDir)) return@withContext BibleInstallOutcome.NoDirectory
@@ -232,7 +235,25 @@ object EBibleSource : BibleSource {
                     destination = zipFile,
                     http = http,
                     expectedBytes = module.sizeBytes,
+                    retryFloorMs = retryFloorMs,
                 ) { onProgress(InstallProgress(InstallPhase.DOWNLOADING, it)) }
+            } catch (e: CancellationException) {
+                // Closing the dialog cancels the install. That is the user's doing, not a fault.
+                throw e
+            } catch (e: BibleInstallSupport.DownloadStalledException) {
+                CrashReporter.reportWarning(
+                    "eBible download stalled (${module.fileStem})",
+                    throwable = e,
+                    tags = mapOf(
+                        "subsystem" to "bible_install",
+                        "module" to module.fileStem,
+                        "reason" to "stalled",
+                        "attempts" to e.attempts.toString(),
+                        "bytes_written" to e.bytesWritten.toString(),
+                        "expected_bytes" to module.sizeBytes.toString(),
+                    )
+                )
+                return@withContext BibleInstallOutcome.DownloadStalled
             } catch (e: Exception) {
                 CrashReporter.reportWarning(
                     "eBible download failed (${module.fileStem})",

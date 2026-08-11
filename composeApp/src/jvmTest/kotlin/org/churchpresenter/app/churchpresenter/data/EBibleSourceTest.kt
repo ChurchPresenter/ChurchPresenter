@@ -3,9 +3,11 @@ package org.churchpresenter.app.churchpresenter.data
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.runBlocking
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -476,7 +478,57 @@ class EBibleSourceTest {
     )
 
     private fun install(http: HttpClient, module: BibleModule = module()) = runBlocking {
-        EBibleSource.installEBible(module, targetDir, http) {}
+        // Zero backoff: the retry is what is under test, not how long it waits before it.
+        EBibleSource.installEBible(module, targetDir, http, retryFloorMs = 0L) {}
+    }
+
+    /** A server that stops part-way through the first answer and serves the tail when asked. */
+    private fun httpStallingThenServing(body: ByteArray) = HttpClient(
+        MockEngine { request ->
+            val start = request.headers[HttpHeaders.Range]
+                ?.substringAfter("bytes=")?.substringBefore('-')?.toIntOrNull() ?: 0
+            if (start == 0) {
+                respond(
+                    content = ByteReadChannel(body.copyOfRange(0, body.size / 2)),
+                    headers = headersOf(HttpHeaders.ContentLength, body.size.toString()),
+                )
+            } else {
+                respond(
+                    content = ByteReadChannel(body.copyOfRange(start, body.size)),
+                    status = HttpStatusCode.PartialContent,
+                    headers = Headers.build {
+                        append(HttpHeaders.ContentLength, (body.size - start).toString())
+                        append(HttpHeaders.ContentRange, "bytes $start-${body.size - 1}/${body.size}")
+                    },
+                )
+            }
+        },
+    )
+
+    @Test
+    fun `a download that stops half way still installs`() {
+        val bytes = zipOf("engbsb_usfx.xml" to usfx(), "BookNames.xml" to bookNames())
+
+        val outcome = assertIs<BibleInstallOutcome.Success>(install(httpStallingThenServing(bytes)))
+
+        assertEquals(2, outcome.books)
+        assertTrue(outcome.file.readText().contains("B001C001V001\t1\t1\t1\tIn the beginning"))
+    }
+
+    @Test
+    fun `a download that never gets going is reported as stalled, not as being offline`() {
+        val bytes = zipOf("engbsb_usfx.xml" to usfx())
+        val http = HttpClient(
+            MockEngine {
+                respond(
+                    content = ByteReadChannel(ByteArray(0)),
+                    headers = headersOf(HttpHeaders.ContentLength, bytes.size.toString()),
+                )
+            },
+        )
+
+        assertEquals(BibleInstallOutcome.DownloadStalled, install(http))
+        assertTrue(targetDir.listFiles()!!.isEmpty())
     }
 
     @Test
