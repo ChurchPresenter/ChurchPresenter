@@ -303,25 +303,8 @@ object ZefaniaRepositoryIndex {
         return (parseIndex(body, readMeta(cacheFile).second) as? IndexOutcome.Success)?.index
     }
 
-    private fun metaFile(cacheFile: File) = File(cacheFile.parentFile, cacheFile.name + ".meta")
+    private fun readMeta(cacheFile: File) = BibleInstallSupport.BibleIndexCache.readMeta(cacheFile)
 
-    /**
-     * When the listing was fetched, and its ETag.
-     *
-     * Kept beside the cache rather than read from the file's timestamp: a copied user profile, a
-     * restored backup or a sync tool all rewrite mtimes, and any of those would silently make a
-     * years-old listing look current.
-     */
-    private fun readMeta(cacheFile: File): Pair<Long, String> {
-        val text = runCatching { metaFile(cacheFile).readText() }.getOrNull() ?: return 0L to ""
-        val fetchedAt = text.substringBefore('\n').trim().toLongOrNull() ?: 0L
-        return fetchedAt to text.substringAfter('\n', "").trim()
-    }
-
-    private fun writeMeta(cacheFile: File, fetchedAt: Long, etag: String) {
-        runCatching {
-            cacheFile.parentFile?.mkdirs()
-            metaFile(cacheFile).writeText("$fetchedAt\n$etag")
-        }
-    }
+    private fun writeMeta(cacheFile: File, fetchedAt: Long, etag: String) =
+        BibleInstallSupport.BibleIndexCache.writeMeta(cacheFile, fetchedAt, etag)
 }

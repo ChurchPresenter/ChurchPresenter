@@ -582,6 +582,89 @@ class BibleCatalogBrowserContentTest {
     }
 
     @Test
+    fun `the licence dialog explains that the Holy Bible XML archive has not checked its copyrights`() = dialog(
+        catalogOutcome = BibleCatalogOutcome.Success(
+            listOf(module(sourceId = BibleSourceId.BEBLIA, copyright = "Public Domain"))
+        ),
+    ) { _, _ ->
+        onNodeWithText("Download").performClick()
+
+        // Unlike Zefania, this archive states a copyright up front — and still cannot vouch for it,
+        // which is why the badge is the unverified one rather than "Redistributable".
+        onNodeWithText("Licence unverified".uppercase()).assertExists()
+        onNodeWithText("none of the statements have been checked", substring = true).assertExists()
+    }
+
+    @Test
+    fun `the licence dialog warns when book names will come out in English`() = dialog(
+        // Mizo: real verse text, but no book-name table in the app, and the archive's files name
+        // books by number alone.
+        catalogOutcome = BibleCatalogOutcome.Success(
+            listOf(module(sourceId = BibleSourceId.BEBLIA, language = "LUS", languageName = "Lushai"))
+        ),
+    ) { _, _ ->
+        onNodeWithText("Download").performClick()
+        onNodeWithText("Book names will appear in English", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a translation in a language the app has book names for gets no such warning`() = dialog(
+        catalogOutcome = BibleCatalogOutcome.Success(
+            listOf(module(sourceId = BibleSourceId.BEBLIA, language = "ENG"))
+        ),
+    ) { _, _ ->
+        onNodeWithText("Download").performClick()
+        onNodeWithText("Book names will appear in English", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the warning is only about that archive, not about every source`() = dialog(
+        catalogOutcome = BibleCatalogOutcome.Success(
+            listOf(module(sourceId = BibleSourceId.ZEFANIA, language = "LUS"))
+        ),
+    ) { _, _ ->
+        onNodeWithText("Download").performClick()
+        onNodeWithText("Book names will appear in English", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a third archive gets its own tab, listing its own translations`() {
+        fun vm(outcome: BibleCatalogOutcome) = BibleCatalogViewModel(
+            FakeSource(outcome, writesInstalledFile = true), dir.absolutePath, dispatcher = Dispatchers.Unconfined
+        ).also { created.add(it) }
+
+        val models = listOf(
+            vm(BibleCatalogOutcome.Success(listOf(module(displayName = "From eBible", fileStem = "ENG_A")))),
+            vm(BibleCatalogOutcome.Success(listOf(module(displayName = "From Zefania", fileStem = "ENG_B")))),
+            vm(BibleCatalogOutcome.Success(listOf(module(displayName = "From Holy Bible XML", fileStem = "ENG_C")))),
+        )
+        runComposeUiTest {
+            setContent {
+                MaterialTheme {
+                    BibleCatalogBrowserDialogContent(
+                        viewModels = models,
+                        tabLabels = listOf("eBible.org", "Zefania Archive", "Holy Bible XML"),
+                        onDismiss = {},
+                        onBibleInstalled = {},
+                    )
+                }
+            }
+            settle()
+            waitForIdle()
+
+            onNodeWithText("From eBible").assertExists()
+            onNodeWithText("From Holy Bible XML").assertDoesNotExist()
+
+            onNodeWithText("Holy Bible XML").performClick()
+            settle()
+            waitForIdle()
+
+            onNodeWithText("From Holy Bible XML").assertExists()
+            onNodeWithText("From eBible").assertDoesNotExist()
+        }
+    }
+
+    @Test
     fun `re-downloading an installed module warns before overwriting it`() {
         val installedFile = File(dir, "ENG_ACV.spb").apply { writeText("##spDataVersion:\t1\n") }
         dialog(catalogOutcome = BibleCatalogOutcome.Success(listOf(module()))) { _, _ ->

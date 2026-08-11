@@ -41,6 +41,15 @@ internal object BibleInstallSupport {
     const val EXTRACT_END = 0.60f
     const val CONVERT_END = 0.97f
 
+    /**
+     * Where reading the source file ends, for a source with nothing to unzip.
+     *
+     * The Holy Bible XML archive publishes bare XML up to 21 MB, so the parse owns the slice the
+     * other two sources spend extracting — without this the bar would sit at [DOWNLOAD_END] through
+     * the longest part of the install.
+     */
+    const val PARSE_END = 0.80f
+
     /** Attempts in a row that move the file forward not one byte, before the download is given up on. */
     private const val MAX_STALLED_ATTEMPTS = 3
 
@@ -298,6 +307,32 @@ internal object BibleInstallSupport {
     fun looksLikeModule(file: File): Boolean = runCatching {
         file.bufferedReader(Charsets.UTF_8).use { it.readLine() }?.startsWith("##") == true
     }.getOrDefault(false)
+
+    /**
+     * Records when a cached catalogue was fetched, and its ETag, in a `<cache>.meta` sidecar.
+     *
+     * Kept beside the cache rather than read from the file's own timestamp: a copied user profile, a
+     * restored backup or a sync tool all rewrite mtimes, and any of those would silently make a
+     * years-old listing look current.
+     */
+    internal object BibleIndexCache {
+
+        private fun metaFile(cacheFile: File) = File(cacheFile.parentFile, cacheFile.name + ".meta")
+
+        /** `fetchedAt` millis and ETag; zero and blank when there is no sidecar to read. */
+        fun readMeta(cacheFile: File): Pair<Long, String> {
+            val text = runCatching { metaFile(cacheFile).readText() }.getOrNull() ?: return 0L to ""
+            val fetchedAt = text.substringBefore('\n').trim().toLongOrNull() ?: 0L
+            return fetchedAt to text.substringAfter('\n', "").trim()
+        }
+
+        fun writeMeta(cacheFile: File, fetchedAt: Long, etag: String) {
+            runCatching {
+                cacheFile.parentFile?.mkdirs()
+                metaFile(cacheFile).writeText("$fetchedAt\n$etag")
+            }
+        }
+    }
 
     fun moveIntoPlace(source: File, destination: File) {
         try {

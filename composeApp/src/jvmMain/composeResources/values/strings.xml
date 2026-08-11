@@ -1531,11 +1531,14 @@
     <string name="bible_catalog_rights">Copyright: %1$s</string>
     <string name="bible_catalog_source_ebible">eBible.org</string>
     <string name="bible_catalog_source_zefania">Zefania Archive</string>
+    <string name="bible_catalog_source_beblia">Holy Bible XML</string>
     <string name="bible_catalog_license_title">Copyright and licensing</string>
     <string name="bible_catalog_license_body">Bible translations are protected by copyright. Some are public domain, others allow personal or congregational use only, and some require a licence before they may be shown publicly, streamed or broadcast.\n\nBy downloading you confirm that you are permitted to use this translation in your setting, and that you accept the publisher's terms.</string>
     <string name="bible_catalog_license_unknown">This archive states no copyright for this translation.</string>
     <string name="bible_catalog_license_source_ebible">eBible.org lists this translation as redistributable and publishes the copyright shown above.</string>
     <string name="bible_catalog_license_source_zefania">The Zefania archive publishes no licence details, so this translation’s copyright only becomes visible once it is installed. Its modules are community-contributed and have not been checked.</string>
+    <string name="bible_catalog_license_source_beblia">The Holy Bible XML archive republishes each translation\'s own copyright statement, shown above, but its files are community-contributed and none of the statements have been checked.</string>
+    <string name="bible_catalog_book_names_english">Book names will appear in English for this translation — the archive\'s files identify books by number only. Verse text is unaffected.</string>
     <string name="bible_catalog_license_accept">I understand — Download</string>
     <string name="bible_catalog_subtitle">Browse free translations and add them to your library</string>
     <string name="bible_catalog_installed_count">%1$d installed</string>

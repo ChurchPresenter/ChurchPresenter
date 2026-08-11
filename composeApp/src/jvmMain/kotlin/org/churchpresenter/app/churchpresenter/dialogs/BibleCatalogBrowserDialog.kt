@@ -125,10 +125,14 @@ import churchpresenter.composeapp.generated.resources.bible_catalog_testament_ne
 import churchpresenter.composeapp.generated.resources.bible_catalog_testament_old
 import churchpresenter.composeapp.generated.resources.bible_catalog_title
 import churchpresenter.composeapp.generated.resources.cancel
+import churchpresenter.composeapp.generated.resources.bible_catalog_book_names_english
+import churchpresenter.composeapp.generated.resources.bible_catalog_license_source_beblia
+import churchpresenter.composeapp.generated.resources.bible_catalog_source_beblia
 import churchpresenter.composeapp.generated.resources.ok
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.SearchableDropdownField
+import org.churchpresenter.app.churchpresenter.data.BebliaSource
 import org.churchpresenter.app.churchpresenter.data.BibleModule
 import org.churchpresenter.app.churchpresenter.data.BibleSource
 import org.churchpresenter.app.churchpresenter.data.BibleSourceId
@@ -164,6 +168,7 @@ fun BibleCatalogBrowserDialog(
         listOf(
             EBibleSource to Res.string.bible_catalog_source_ebible,
             ZefaniaSource to Res.string.bible_catalog_source_zefania,
+            BebliaSource to Res.string.bible_catalog_source_beblia,
         )
     }
     val viewModels = remember(storageDirectory) {
@@ -504,7 +509,12 @@ private fun SourceSegmentedControl(
  * Re-downloading folds into the same dialog rather than stacking a second one on top. The
  * redistributable/unverified badge is chosen from which archive the module came from, not from
  * whether its copyright string happens to be blank — eBible always states redistribution rights,
- * Zefania never publishes licence details up front, regardless of any one module's copyright text.
+ * Zefania never publishes licence details up front, and the Holy Bible XML archive republishes a
+ * copyright statement it has not checked, so only eBible's rows are badged as redistributable.
+ *
+ * That archive also gets a second notice, because its files identify books by number alone: for a
+ * language the app has no book-name table for, the installed Bible lists its books in English. That
+ * is worth learning before the download rather than after it.
  */
 @Composable
 private fun LicenceConfirmation(
@@ -514,6 +524,8 @@ private fun LicenceConfirmation(
     onDismiss: () -> Unit
 ) {
     val isRedistributable = module.sourceId == BibleSourceId.EBIBLE
+    val showsEnglishBookNames = module.sourceId == BibleSourceId.BEBLIA &&
+        !BebliaSource.hasLocalisedBookNames(module.language)
     val badgeContainer = if (isRedistributable) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.errorContainer
     val badgeContent = if (isRedistributable) MaterialTheme.colorScheme.inverseOnSurface else MaterialTheme.colorScheme.onErrorContainer
     val badgeLabel = stringResource(
@@ -610,6 +622,14 @@ private fun LicenceConfirmation(
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
+                }
+                if (showsEnglishBookNames) {
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(Res.string.bible_catalog_book_names_english),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
                 if (isReinstall) {
                     Spacer(Modifier.height(12.dp))
@@ -1021,11 +1041,13 @@ private fun phaseStringRes(phase: InstallPhase?): StringResource = when (phase) 
 private fun sourceLabelStringRes(sourceId: BibleSourceId): StringResource = when (sourceId) {
     BibleSourceId.EBIBLE -> Res.string.bible_catalog_source_ebible
     BibleSourceId.ZEFANIA -> Res.string.bible_catalog_source_zefania
+    BibleSourceId.BEBLIA -> Res.string.bible_catalog_source_beblia
 }
 
 private fun sourceLicenceStringRes(sourceId: BibleSourceId): StringResource = when (sourceId) {
     BibleSourceId.EBIBLE -> Res.string.bible_catalog_license_source_ebible
     BibleSourceId.ZEFANIA -> Res.string.bible_catalog_license_source_zefania
+    BibleSourceId.BEBLIA -> Res.string.bible_catalog_license_source_beblia
 }
 
 private fun catalogErrorStringRes(error: BibleCatalogError): StringResource = when (error) {

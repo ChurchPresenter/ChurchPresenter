@@ -89,6 +89,17 @@ class BibleModuleTestamentTest {
     }
 
     @Test
+    fun `a Holy Bible XML row is read from its counted books, not from its title`() {
+        // The generated manifest counts the `<book number>` elements actually present, so an edition
+        // whose title spells "New Testament" out is still read correctly — which is the case the
+        // token fallback documented above gets wrong for about a fifth of eBible's catalogue.
+        assertEquals(
+            Testament.NEW,
+            module(displayName = "New Testament in Achi", ntBookCount = 27).testament
+        )
+    }
+
+    @Test
     fun `the token has to stand alone to count`() {
         // Otherwise any word containing the letters would name a testament.
         assertEquals(Testament.FULL, module(displayName = "Contemporary").testament)

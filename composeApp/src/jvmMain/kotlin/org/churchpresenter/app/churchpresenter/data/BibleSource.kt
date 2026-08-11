@@ -4,7 +4,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File
 
 /** The archives the downloader can install from, in the order they are offered. */
-enum class BibleSourceId { EBIBLE, ZEFANIA }
+enum class BibleSourceId { EBIBLE, ZEFANIA, BEBLIA }
 
 /** Which portion of scripture a translation covers. */
 enum class Testament { OLD, NEW, FULL }
