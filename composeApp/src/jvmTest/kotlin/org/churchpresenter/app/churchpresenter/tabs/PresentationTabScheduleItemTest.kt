@@ -41,16 +41,30 @@ class PresentationTabScheduleItemTest {
         return out.toByteArray()
     }
 
-    private fun ComposeUiTest.awaitLoaded(vm: PresentationViewModel, timeoutMs: Long = 5_000) {
+    /**
+     * Waits for [slides] slides to be loaded — the count the caller is about to assert on, not
+     * merely "some".
+     *
+     * Both load paths append one slide at a time, so `slideFiles.isNotEmpty()` is true from the
+     * first one onwards. Returning on that let a caller assert the total against a load still in
+     * progress, which is what made this class fail on a loaded runner and pass everywhere else.
+     * `isLoading` does not close the gap either: it goes false in the loader's `finally`, which also
+     * runs when a slide was skipped, so the pair could settle on a short list and stay there.
+     *
+     * The timeout only fails the test — it is never the success path.
+     */
+    private fun ComposeUiTest.awaitLoaded(vm: PresentationViewModel, slides: Int, timeoutMs: Long = 5_000) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
-            if (!vm.isLoading && vm.slideFiles.isNotEmpty()) {
+            if (!vm.isLoading && vm.slideFiles.size == slides) {
                 waitForIdle()
                 return
             }
             Thread.sleep(20)
         }
-        throw AssertionError("timed out waiting for the schedule item to load")
+        throw AssertionError(
+            "timed out waiting for $slides slides: loaded ${vm.slideFiles.size}, isLoading=${vm.isLoading}"
+        )
     }
 
     @Test
@@ -61,7 +75,7 @@ class PresentationTabScheduleItemTest {
                 id = "item-1", filePath = file.absolutePath, fileName = file.nameWithoutExtension, slideCount = 2, fileType = "pdf",
             ),
         ) { vm, _ ->
-            awaitLoaded(vm)
+            awaitLoaded(vm, slides = 2)
 
             assertEquals(file.absolutePath, vm.selectedPresentation?.absolutePath)
             assertEquals(2, vm.slideFiles.size)
@@ -88,7 +102,7 @@ class PresentationTabScheduleItemTest {
             ),
             instanceLinkFetchPresentationSlideBytes = { _, _ -> jpegBytes() },
         ) { vm, _ ->
-            awaitLoaded(vm)
+            awaitLoaded(vm, slides = 2)
 
             assertEquals(2, vm.slideFiles.size)
             assertEquals("mirrored-deck.pdf", vm.selectedPresentation?.name)

@@ -205,8 +205,15 @@ class BibleEngineClientLinkTest {
     @Test
     fun `the client connects to a running engine`() {
         val c = client()
+
         c.connect()
-        assertEquals(1, engine.connectionCount.get())
+
+        // The live session, not the running total: this class sets a 25ms retry floor precisely so a
+        // connect that loses a race retries instead of failing, and a retried attempt leaves a
+        // second entry in that total for ever. What must hold is that the client ends up holding one
+        // link — a dead attempt's session is removed when its handler unwinds, so this settles at 1
+        // and would never settle if the client stacked links.
+        awaitUntil("the client to be holding exactly one link") { engine.sessions.size == 1 }
         assertFalse(c.startFailed.value, "connecting to a remote engine never starts one in-process")
     }
 
