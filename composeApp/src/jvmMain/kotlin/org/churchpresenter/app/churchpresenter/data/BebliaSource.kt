@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.data
 import converter.BookNames
 import converter.XmlToSpbConverter
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
@@ -114,6 +115,23 @@ object BebliaSource : BibleSource {
                     expectedBytes = module.sizeBytes,
                     retryFloorMs = retryFloorMs,
                 ) { onProgress(InstallProgress(InstallPhase.DOWNLOADING, it)) }
+            } catch (e: CancellationException) {
+                // Closing the dialog cancels the install. That is the user's doing, not a fault.
+                throw e
+            } catch (e: BibleInstallSupport.DownloadStalledException) {
+                CrashReporter.reportWarning(
+                    "Holy Bible XML download stalled (${module.fileStem})",
+                    throwable = e,
+                    tags = mapOf(
+                        "subsystem" to "bible_install",
+                        "module" to module.fileStem,
+                        "reason" to "stalled",
+                        "attempts" to e.attempts.toString(),
+                        "bytes_written" to e.bytesWritten.toString(),
+                        "expected_bytes" to module.sizeBytes.toString(),
+                    )
+                )
+                return@withContext BibleInstallOutcome.DownloadStalled
             } catch (e: Exception) {
                 CrashReporter.reportWarning(
                     "Holy Bible XML download failed (${module.fileStem})",

@@ -6,6 +6,7 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.data.BebliaSource.toBibleModule
 import java.io.File
@@ -67,6 +68,16 @@ class BebliaSourceTest {
         httpServingBytes(body.toByteArray(Charsets.UTF_8), status)
 
     private fun httpFailing() = HttpClient(MockEngine { throw java.io.IOException("no route to host") })
+
+    /** Answers with a promised length and then delivers none of it — the shape the Sentry report had. */
+    private fun httpNeverDelivering(body: ByteArray) = HttpClient(
+        MockEngine {
+            respond(
+                content = ByteReadChannel(ByteArray(0)),
+                headers = headersOf(HttpHeaders.ContentLength, body.size.toString()),
+            )
+        },
+    )
 
     /** The real git blob hash of [bytes], as the manifest publishes it. */
     private fun blobShaOf(bytes: ByteArray): String {
@@ -223,6 +234,17 @@ class BebliaSourceTest {
     @Test
     fun `an unreachable host is reported as a network error`() {
         assertIs<BibleInstallOutcome.NetworkError>(install(httpFailing()))
+    }
+
+    @Test
+    fun `a download that never gets going is reported as stalled, not as being offline`() {
+        // The distinction the Retry button hangs off: this tab must answer it like the other two.
+        val body = xmlBible().toByteArray(Charsets.UTF_8)
+
+        val outcome = install(httpNeverDelivering(body), module(sizeBytes = body.size.toLong()))
+
+        assertEquals(BibleInstallOutcome.DownloadStalled, outcome)
+        assertTrue(targetDir.listFiles()!!.isEmpty(), "nothing is left behind")
     }
 
     @Test
