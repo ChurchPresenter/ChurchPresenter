@@ -199,6 +199,9 @@ class SongsViewModel(
             _filteredSongItems.value = _filteredSongItems.value.replaced()
             _allSongItems.value = _allSongItems.value.replaced()
             _songsData.value = Songs().also { it.addSongs(_allSongItems.value) }
+            // The fetched lyrics are the first sections this song has had; an index carried over from
+            // whatever was selected before must not survive past their end.
+            clampSectionSelection()
             // Only nudge the presenter if this song is still the one selected — the operator may
             // have already moved on to a different song by the time this fetch resolves.
             val currentIdx = _selectedSongIndex.value
@@ -376,8 +379,30 @@ class SongsViewModel(
     fun selectSongById(songId: String): Boolean = selectSongByDetails(0, "", "", songId)
 
     fun selectSection(index: Int) {
-        _selectedSectionIndex.value = index
+        // Clamped, because the index does not always come from the rendered list: a phone pushes one
+        // through MainDesktop's songDisplaySectionIndex collector, and Back-to-Live replays one
+        // remembered from an earlier — possibly longer — version of the song.
+        _selectedSectionIndex.value = index.coerceAtMost(getLyricSections().lastIndex)
         _selectedLineIndex.value = 0
+    }
+
+    /**
+     * Keeps the section selection inside the song it now points at.
+     *
+     * There is no stored section list — [getLyricSections] recomputes from the selected song on every
+     * call — so the list changes under the index whenever the song does: a filter or sort change puts
+     * a different song at the same row, an edit or a folder-watcher reload can drop a verse, and an
+     * Instance Link catalog arrives with no lyrics at all. An index left past the end presented the
+     * wrong slide, and walking down from it crashed [navigatePreviousSection].
+     *
+     * `-1` is a real value — the whole-song/title slide — and is preserved.
+     */
+    private fun clampSectionSelection() {
+        val last = getLyricSections().lastIndex
+        if (_selectedSectionIndex.value > last) {
+            _selectedSectionIndex.value = last // -1 when the song has no sections at all
+            _selectedLineIndex.value = 0
+        }
     }
 
     fun setLineIndex(index: Int) {
@@ -578,7 +603,9 @@ class SongsViewModel(
     fun navigatePreviousSection(): Boolean {
         _selectedLineIndex.value = 0
         val sections = getLyricSections()
-        var prevIdx = _selectedSectionIndex.value - 1
+        // Start from the end of what actually exists: the selection can outlive the list it indexes
+        // (see [clampSectionSelection]), and this walk only guards its lower bound.
+        var prevIdx = (_selectedSectionIndex.value - 1).coerceAtMost(sections.lastIndex)
         while (prevIdx >= 0) {
             if (sections[prevIdx].lines.isNotEmpty()) {
                 _selectedSectionIndex.value = prevIdx
@@ -633,7 +660,9 @@ class SongsViewModel(
         }
         // Move to previous section with content lines (skip empty sections)
         val sections = getLyricSections()
-        var prevIdx = _selectedSectionIndex.value - 1
+        // Clamped for the same reason as [navigatePreviousSection] — a stale index would index past
+        // the end on the very first step.
+        var prevIdx = (_selectedSectionIndex.value - 1).coerceAtMost(sections.lastIndex)
         while (prevIdx >= 0) {
             if (sections[prevIdx].lines.isNotEmpty()) {
                 _selectedSectionIndex.value = prevIdx
@@ -701,6 +730,9 @@ class SongsViewModel(
             if (idx >= 0) {
                 _selectedSongIndex.value = idx
                 _pendingSelectSourceFile = null
+                // The re-select moved the song after [refreshFilteredSongItems] clamped, so the
+                // section index has to be checked against this song too.
+                clampSectionSelection()
             }
         }
     }
@@ -762,6 +794,9 @@ class SongsViewModel(
         }
 
         _filteredSongItems.value = items
+        // A re-sort leaves _selectedSongIndex where it was, so a different song — with a different
+        // number of sections — now sits under it.
+        clampSectionSelection()
     }
 
     private fun buildSongFileName(number: String, title: String): String {

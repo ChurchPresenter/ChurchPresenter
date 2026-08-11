@@ -6,6 +6,7 @@ import org.churchpresenter.app.churchpresenter.data.SongFileParser
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -40,6 +41,11 @@ class SongsViewModelNavigationEdgeTest {
                 "[Verse 2]", "V2 line one",
             ),
         )
+        // Five sections, so a selection late in this song is out of range in the one above.
+        writeSong(
+            songbook = "Hymnal", number = "0002", title = "Long Song",
+            lyrics = (1..5).flatMap { listOf("[Verse $it]", "V$it line one") },
+        )
     }
 
     @AfterTest
@@ -62,8 +68,15 @@ class SongsViewModelNavigationEdgeTest {
         created.add(vm)
         // Immediate dispatchers, so the load is done by the time the constructor returns.
         if (vm.filteredSongItems.value.isEmpty()) throw AssertionError("songs did not load synchronously")
-        vm.selectSong(0)
+        vm.selectByTitle("Empty Middle")
         return vm
+    }
+
+    /** Selects by title — the order the two songs load in is not guaranteed. */
+    private fun SongsViewModel.selectByTitle(title: String) {
+        val index = filteredSongItems.value.indexOfFirst { it.title == title }
+        assertTrue(index >= 0, "no song titled $title")
+        selectSong(index)
     }
 
     @Test
@@ -114,5 +127,88 @@ class SongsViewModelNavigationEdgeTest {
 
         assertEquals(0, vm.selectedSectionIndex.value, "the empty Bridge is skipped, landing on Verse 1")
         assertEquals(1, vm.selectedLineIndex.value, "and resumes at the last line of that section")
+    }
+
+    // ── A section selection that outlives the song it indexes ───────────────────
+    //
+    // The section list is recomputed from the selected song on every call, so anything that puts a
+    // different — shorter — song under the same row leaves the index pointing past the end. Walking
+    // *down* from such an index used to read past the end of the list on its very first step and
+    // kill the app (Sentry 042c9c37: "Index 3 out of bounds for length 3", released 26.4.203).
+
+    /** Leaves only the three-section song, with the selection on section 4 of the five-section one. */
+    private fun SongsViewModel.selectLateThenFilterToShortSong() {
+        selectByTitle("Long Song")
+        selectSection(4)
+        assertEquals(4, selectedSectionIndex.value, "the long song really does reach section 4")
+
+        updateSearchQuery("Empty")
+
+        assertEquals(1, filteredSongItems.value.size, "only the short song survives the search")
+        assertEquals(3, getLyricSections().size, "and it is the three-section song")
+    }
+
+    @Test
+    fun `stepping a section back after a shorter song takes the row does not read past the end`() {
+        val vm = viewModel()
+        vm.selectLateThenFilterToShortSong()
+
+        vm.navigatePreviousSection() // threw IndexOutOfBoundsException before the selection was clamped
+
+        assertTrue(
+            vm.selectedSectionIndex.value in vm.getLyricSections().indices,
+            "the selection lands inside the song that is actually selected",
+        )
+    }
+
+    @Test
+    fun `stepping a line back after a shorter song takes the row does not read past the end`() {
+        val vm = viewModel()
+        vm.selectLateThenFilterToShortSong()
+
+        vm.navigatePreviousLine()
+
+        assertTrue(vm.selectedSectionIndex.value in vm.getLyricSections().indices)
+    }
+
+    @Test
+    fun `a search that swaps in a shorter song pulls the section selection back into it`() {
+        val vm = viewModel()
+
+        vm.selectLateThenFilterToShortSong()
+
+        assertEquals(2, vm.selectedSectionIndex.value, "clamped to the last section of the short song")
+        assertEquals(0, vm.selectedLineIndex.value, "and to that section's first line")
+    }
+
+    @Test
+    fun `a re-sort that puts a shorter song under the selection re-clamps it`() {
+        val vm = viewModel()
+        vm.updateSort(Constants.SORT_TITLE) // ascending: Empty Middle, Long Song
+        vm.selectByTitle("Long Song")
+        vm.selectSection(4)
+
+        vm.updateSort(Constants.SORT_TITLE) // same column again -> descending, the songs swap rows
+
+        assertEquals("Empty Middle", vm.filteredSongItems.value[vm.selectedSongIndex.value].title)
+        assertEquals(2, vm.selectedSectionIndex.value)
+    }
+
+    @Test
+    fun `selecting a section past the end lands on the last real section`() {
+        val vm = viewModel() // the three-section song
+
+        vm.selectSection(9) // e.g. a stale index replayed by Back-to-Live or pushed from a phone
+
+        assertEquals(2, vm.selectedSectionIndex.value)
+    }
+
+    @Test
+    fun `selecting section -1 still selects the whole-song slide`() {
+        val vm = viewModel()
+
+        vm.selectSection(-1)
+
+        assertEquals(-1, vm.selectedSectionIndex.value, "-1 is the title slide, not an out-of-range index")
     }
 }
