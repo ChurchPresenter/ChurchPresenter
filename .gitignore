@@ -51,3 +51,4 @@ google-services.json
 .env
 **/analytics.properties
 CLAUDE*.md
+.impeccable/

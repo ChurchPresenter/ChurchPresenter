@@ -31,9 +31,8 @@ import kotlin.test.assertTrue
  * `PicturesTabTestSupport.kt`'s doc comment for why.
  *
  * The loop toggle used to be listed here too — "neither text nor a content description to address it
- * by" — which was true of the usual selectors and not of the tree: it is the *only* clickable node
- * carrying neither, and that is a selector. See `PicturesTabLoopTooltipTest`, which addresses it that
- * way and asserts the uniqueness rather than assuming it.
+ * by". It now has one, matching its tooltip, so it is addressable by name like any other button. See
+ * `PicturesTabLoopTooltipTest`.
  *
  * See `PicturesTabTestSupport.kt` for the harness.
  */

@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import converter.BibleCatalogNaming
+import converter.bible.BibleCatalogNaming
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO

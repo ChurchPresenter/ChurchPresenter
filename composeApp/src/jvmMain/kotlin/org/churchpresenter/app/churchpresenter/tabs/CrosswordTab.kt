@@ -60,6 +60,8 @@ import churchpresenter.composeapp.generated.resources.crossword_ask_more
 import churchpresenter.composeapp.generated.resources.crossword_check
 import churchpresenter.composeapp.generated.resources.crossword_correct
 import churchpresenter.composeapp.generated.resources.crossword_down
+import churchpresenter.composeapp.generated.resources.crossword_next_level
+import churchpresenter.composeapp.generated.resources.crossword_prev_level
 import churchpresenter.composeapp.generated.resources.crossword_wrong
 import churchpresenter.composeapp.generated.resources.crossword_level_label
 import churchpresenter.composeapp.generated.resources.crossword_loading
@@ -197,7 +199,7 @@ fun CrosswordTab(
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.crossword_prev_level),
                             tint = if (canGoBack)
                                 MaterialTheme.colorScheme.onSurface
                             else
@@ -218,7 +220,7 @@ fun CrosswordTab(
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.crossword_next_level),
                             tint = if (canGoForward)
                                 MaterialTheme.colorScheme.onSurface
                             else

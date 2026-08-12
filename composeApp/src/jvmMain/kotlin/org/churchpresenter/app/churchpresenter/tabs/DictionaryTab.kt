@@ -106,6 +106,7 @@ import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_search
+import churchpresenter.composeapp.generated.resources.search_clear
 import churchpresenter.composeapp.generated.resources.verse
 import java.awt.Cursor
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
@@ -1008,7 +1009,7 @@ private fun DictionarySearchField(
             IconButton(onClick = onClear, modifier = Modifier.size(30.dp)) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_close),
-                    contentDescription = null,
+                    contentDescription = stringResource(Res.string.search_clear),
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )

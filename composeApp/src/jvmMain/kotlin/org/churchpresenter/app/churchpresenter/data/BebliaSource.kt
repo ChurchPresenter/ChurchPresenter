@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import converter.BookNames
-import converter.XmlToSpbConverter
+import converter.bible.BookNames
+import converter.bible.XmlToSpbConverter
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers

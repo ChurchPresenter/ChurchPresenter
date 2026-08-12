@@ -6,6 +6,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -39,6 +40,16 @@ private const val THUMBNAIL_RETRY_MS = 120L
  * a genuinely corrupt file is reported almost immediately rather than sitting on "Loading…".
  */
 private const val THUMBNAIL_RETRY_ATTEMPTS = 3
+
+/**
+ * How many times a decoded thumbnail is written into the state maps before giving up on it, and how
+ * long between tries.
+ *
+ * The write races the thread advancing the global snapshot and can lose; the window is momentary, so
+ * a handful of tries a few milliseconds apart clears it without costing anything measurable.
+ */
+private const val PUBLISH_ATTEMPTS = 4
+private const val PUBLISH_RETRY_MS = 20L
 
 class PicturesViewModel(
     appSettings: AppSettings? = null
@@ -81,9 +92,12 @@ class PicturesViewModel(
         var lastError: Exception? = null
         repeat(attempts) { attempt ->
             try {
-                _thumbnails[file] = loadImageBitmap(file)
-                _thumbnailFailures.remove(file)
+                publishThumbnail(file, loadImageBitmap(file))
                 return
+            } catch (e: CancellationException) {
+                // Disposing the view model cancels the decode. That is not a broken file, and
+                // recording it would mark a working image failed and warn about it.
+                throw e
             } catch (e: Exception) {
                 lastError = e
                 if (attempt < attempts - 1) delay(THUMBNAIL_RETRY_MS)
@@ -95,6 +109,33 @@ class PicturesViewModel(
             "Pictures: thumbnail for ${file.name} could not be decoded — $reason",
             tags = mapOf("subsystem" to "pictures")
         )
+    }
+
+    /**
+     * Writes a decoded thumbnail into the state maps, from the background thread that decoded it.
+     *
+     * Both maps are snapshot state, and a write from a thread other than the one advancing the
+     * global snapshot can lose that race — the *write* throws `Reading a state that was created
+     * after the snapshot was taken or in a snapshot that has not yet been applied`. The image is
+     * fine; only the moment it was published in was wrong, so the write is simply made again.
+     *
+     * Writing inside `Snapshot.withMutableSnapshot` instead is not the fix — it moves the identical
+     * failure onto the readers, where the grid throws it out of composition.
+     *
+     * Whatever the last attempt throws is left to [decodeThumbnail] to record, so a write that never
+     * lands still resolves the file instead of leaving its tile on "Loading…" for ever.
+     */
+    private suspend fun publishThumbnail(file: File, bitmap: ImageBitmap) {
+        repeat(PUBLISH_ATTEMPTS) { attempt ->
+            try {
+                _thumbnails[file] = bitmap
+                _thumbnailFailures.remove(file)
+                return
+            } catch (e: IllegalStateException) {
+                if (attempt == PUBLISH_ATTEMPTS - 1) throw e
+                delay(PUBLISH_RETRY_MS)
+            }
+        }
     }
 
     private val _selectedImageIndex = mutableStateOf(0)

@@ -1,14 +1,18 @@
 package presentation.engine
 
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import presentation.engine.cache.SlideCacheSupersededException
 import presentation.engine.cache.SlideDiskCache
 import presentation.engine.model.DeckFormat
 import presentation.engine.model.Fidelity
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.File
+import java.io.IOException
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -84,6 +88,90 @@ class SlideDiskCacheTest {
         File(dir, "slide_0000.jpg").writeBytes(Fixtures.jpegBytes(64, 36, Color.RED))
         File(dir, "mtime.txt").writeText(source.lastModified().toString())
         assertNull(cache.lookup(source, 1920))
+    }
+
+    @Test
+    fun `a superseded writer cannot write or delete the newer entry`() {
+        val cache = newCache()
+        val source = sourceFile()
+        val first = cache.beginWrite(source, DeckFormat.PPTX, 1920)
+        first.putSlide(0, image(Color.RED), "", Fidelity.NATIVE, false)
+
+        val second = cache.beginWrite(source, DeckFormat.PPTX, 1920)
+        second.putSlide(0, image(Color.BLUE), "", Fidelity.NATIVE, false)
+
+        assertFailsWith<SlideCacheSupersededException> {
+            first.putSlide(1, image(Color.RED), "", Fidelity.NATIVE, false)
+        }
+        assertFailsWith<SlideCacheSupersededException> { first.commit() }
+        first.abort()
+
+        second.putSlide(1, image(Color.BLUE), "", Fidelity.NATIVE, false)
+        second.commit()
+
+        val cached = assertNotNull(cache.lookup(source, 1920))
+        assertEquals(2, cached.slideFiles.size)
+        assertTrue(cached.slideFiles.all { it.isFile })
+    }
+
+    @Test
+    fun `invalidate during a render disowns the writer instead of leaving it writing into nothing`() {
+        val cache = newCache()
+        val source = sourceFile()
+        val writer = cache.beginWrite(source, DeckFormat.PPTX, 1920)
+        writer.putSlide(0, image(Color.RED), "", Fidelity.NATIVE, false)
+
+        cache.invalidate(source)
+
+        assertFailsWith<SlideCacheSupersededException> {
+            writer.putSlide(1, image(Color.RED), "", Fidelity.NATIVE, false)
+        }
+        assertNull(cache.lookup(source, 1920))
+    }
+
+    @Test
+    fun `cleanupOrphaned leaves an in-flight render alone`() {
+        val cache = newCache()
+        val source = sourceFile()
+        val writer = cache.beginWrite(source, DeckFormat.PPTX, 1920)
+        writer.putSlide(0, image(Color.RED), "", Fidelity.NATIVE, false)
+
+        cache.cleanupOrphaned(emptyList())
+
+        writer.putSlide(1, image(Color.RED), "", Fidelity.NATIVE, false)
+        writer.commit()
+        assertEquals(2, assertNotNull(cache.lookup(source, 1920)).slideFiles.size)
+    }
+
+    @Test
+    fun `putSlide recreates an entry directory deleted underneath it`() {
+        val cache = newCache()
+        val source = sourceFile()
+        val writer = cache.beginWrite(source, DeckFormat.PPTX, 1920)
+        writer.putSlide(0, image(Color.RED), "", Fidelity.NATIVE, false)
+        cache.dirFor(source).deleteRecursively()
+
+        val slide = writer.putSlide(1, image(Color.BLUE), "", Fidelity.NATIVE, false)
+        assertTrue(slide.isFile)
+    }
+
+    @Test
+    fun `an entry directory that cannot be created fails naming it`() {
+        val base = File(tempDir, "readonly-cache").apply { mkdirs() }
+        val probe = File(base, "probe")
+        // Root, and some Windows setups, ignore the read-only bit — then there is nothing to test.
+        assumeTrue(base.setWritable(false) && !probe.mkdir(), "cache dir stayed writable here")
+        try {
+            val cache = SlideDiskCache(base)
+            val source = sourceFile()
+            val failure = assertFailsWith<IOException> { cache.beginWrite(source, DeckFormat.PPTX, 1920) }
+            assertTrue(
+                cache.dirFor(source).absolutePath in (failure.message ?: ""),
+                "message was: ${failure.message}"
+            )
+        } finally {
+            base.setWritable(true)
+        }
     }
 
     @Test

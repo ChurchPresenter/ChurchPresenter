@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
@@ -19,11 +21,16 @@ import kotlin.test.Test
 
 /**
  * The bundled format converter, reached from the Help menu. It ships its own colour scheme rather
- * than following the app theme, so each tab is one image instead of a light/dark pair.
+ * than following the app theme, so each state is one image instead of a light/dark pair.
+ *
+ * The Songs tab is shot several times over because its whole layout is driven by which format is
+ * selected in the rail — the destination step alone is a plain "same as input" line for SongBeamer
+ * and a required-folder warning for SoftProjector, and only the rail tells you which you are
+ * looking at.
  */
 class AppPreviewConverterScreenshotTest {
 
-    private fun converter(name: String, tab: String?) {
+    private fun converter(name: String, drive: ComposeUiTest.() -> Unit = {}) {
         TestSingletons.latchSkikoHostOs()
         TestSingletons.latchToTestHome()
         runSkikoComposeUiTest(size = Size(1100f, 800f), density = Density(1f)) {
@@ -33,23 +40,72 @@ class AppPreviewConverterScreenshotTest {
                 }
             }
             waitForIdle()
-            tab?.let {
-                onNodeWithText(it).performClick()
-                waitForIdle()
-            }
+            drive()
+            waitForIdle()
             captureTo(File("$SCREENSHOT_ROOT/previewApp/converter_$name.png"))
         }
     }
 
-    @Test
-    fun bibles() = converter("bibles", null)
+    private fun ComposeUiTest.tab(title: String) {
+        onNodeWithText(title).performClick()
+        waitForIdle()
+    }
+
+    private fun ComposeUiTest.format(name: String) {
+        onNodeWithText(name).performClick()
+        waitForIdle()
+    }
 
     @Test
-    fun songs() = converter("songs", "Songs")
+    fun bibles() = converter("bibles")
+
+    /** The rail's default selection: one .song per input, so the destination may be left alone. */
+    @Test
+    fun songs() = converter("songs") { tab("Songs") }
 
     @Test
-    fun duplicates() = converter("duplicates", "Duplicates")
+    fun `songs free worship`() = converter("songs_freeworship") {
+        tab("Songs")
+        format("Free Worship")
+    }
+
+    /** A song book fans out into a folder, so this state carries the output-folder warning. */
+    @Test
+    fun `songs soft projector`() = converter("songs_softprojector") {
+        tab("Songs")
+        format("SoftProjector")
+    }
 
     @Test
-    fun rename() = converter("rename", "Rename")
+    fun `songs documents`() = converter("songs_documents") {
+        tab("Songs")
+        format("Documents")
+    }
+
+    /** Searching narrows the rail; the note about requesting a format stays put beneath it. */
+    @Test
+    fun `songs search filtered`() = converter("songs_search") {
+        tab("Songs")
+        onNodeWithText("Search formats…").performTextInput("sp")
+    }
+
+    @Test
+    fun `songs search with no match`() = converter("songs_search_empty") {
+        tab("Songs")
+        onNodeWithText("Search formats…").performTextInput("propresenter")
+    }
+
+    @Test
+    fun duplicates() = converter("duplicates") { tab("Duplicates") }
+
+    @Test
+    fun rename() = converter("rename") { tab("Rename") }
+
+    /** The example line is computed from the options, so it has to be shot with them changed. */
+    @Test
+    fun `rename with options changed`() = converter("rename_options") {
+        tab("Rename")
+        onNodeWithText("Rename to the first line of verse 1").performClick()
+        onNodeWithText("Title Case").performClick()
+    }
 }

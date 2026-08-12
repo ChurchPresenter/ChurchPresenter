@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,6 +19,7 @@ import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import presentation.engine.DeckRasterizer
 import presentation.engine.LoadResult
 import presentation.engine.PresentationLoader
+import presentation.engine.cache.SlideCacheSupersededException
 import presentation.engine.cache.SlideDiskCache
 import presentation.engine.model.Deck
 import presentation.engine.model.DeckFormat
@@ -379,6 +381,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
             }
             val cacheWriter = diskCache.beginWrite(file, deck.format, renderWidth)
             writer = cacheWriter
+            var reportedSlideFailure = false
             DeckRasterizer(deck, renderWidth).use { rasterizer ->
                 for (slide in deck.slides) {
                     try {
@@ -394,9 +397,24 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                             _slideFiles.add(slideFile)
                             _slideNotes.add(slide.notes)
                         }
+                    } catch (e: CancellationException) {
+                        // This render was superseded by a newer selectPresentation. Let it die here
+                        // instead of rendering (and reporting) the rest of a deck nobody wants.
+                        throw e
+                    } catch (e: SlideCacheSupersededException) {
+                        // Another render of the same deck — the companion server, or a re-select
+                        // whose cancellation we haven't reached yet — owns the cache entry now.
+                        // Stop quietly and leave the files to it.
+                        return@use
                     } catch (e: Exception) {
-                        // One bad slide must not kill the deck; the slide is simply skipped.
-                        CrashReporter.reportException(e, "Rendering slide ${slide.index} of ${file.name}")
+                        // One bad slide must not kill the deck; the slide is simply skipped. Only
+                        // the first failure is reported: whatever breaks one slide (a full or
+                        // read-only cache dir) breaks every slide after it, and forty identical
+                        // events say nothing the first one didn't.
+                        if (!reportedSlideFailure) {
+                            reportedSlideFailure = true
+                            CrashReporter.reportException(e, "Rendering slide ${slide.index} of ${file.name}")
+                        }
                     }
                 }
             }
@@ -415,6 +433,11 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                     )
                 )
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: SlideCacheSupersededException) {
+            // Lost the entry to a newer render of the same deck between the last slide and the
+            // commit. That render owns the result; this one is not a failure and shows no error.
         } catch (e: Exception) {
             if (_loadError.value == null) {
                 withContext(Dispatchers.Main) { _loadError.value = PresentationLoadError.RENDER_FAILED }

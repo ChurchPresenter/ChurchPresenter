@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import converter.UsfxToSpbConverter
+import converter.bible.UsfxToSpbConverter
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import converter.BibleCatalogNaming
-import converter.UsfxToSpbConverter
-import converter.XmlToSpbConverter
+import converter.bible.BibleCatalogNaming
+import converter.bible.UsfxToSpbConverter
+import converter.bible.XmlToSpbConverter
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get

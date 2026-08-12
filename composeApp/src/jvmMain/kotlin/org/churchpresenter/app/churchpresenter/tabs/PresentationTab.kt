@@ -91,6 +91,8 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_stop
+import churchpresenter.composeapp.generated.resources.recent_pin
+import churchpresenter.composeapp.generated.resources.recent_unpin
 import churchpresenter.composeapp.generated.resources.tooltip_presentation_remote
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.animation_fade
@@ -651,7 +653,7 @@ fun PresentationTab(
                             IconButton(onClick = { RecentPresentationFiles.togglePin(path) }, modifier = Modifier.size(20.dp)) {
                                 Icon(
                                     painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
-                                    contentDescription = null,
+                                    contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
                                     modifier = Modifier.size(12.dp),
                                     tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
                                 )

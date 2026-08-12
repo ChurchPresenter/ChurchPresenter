@@ -6,6 +6,9 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.font.PDType1Font
 import java.io.File
 import java.nio.file.Files
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -201,6 +204,39 @@ class PresentationViewModelDeckSwitchingTest {
         vm.switchTo(first, slides = 2)
 
         assertTrue(vm.isPlaying)
+    }
+
+    @Test
+    fun `re-selecting a deck while it is still rendering still ends with every slide`() {
+        // Both renders of the same deck target one cache directory. The cancelled one used to
+        // delete it in its `finally` — while the restarted one was writing into it — so every
+        // remaining slide died with "Can't create an ImageOutputStream!" and the deck came up
+        // short. The overlap is forced rather than raced: the first render is held at slide 1
+        // until the second has started, and released only then.
+        val slides = 8
+        val file = pdf(pages = slides)
+        val vm = viewModel()
+        val reachedSlideOne = CountDownLatch(1)
+        val release = CountDownLatch(1)
+        val held = AtomicBoolean(false)
+        vm.renderSlideFrame = { rasterizer, index ->
+            if (index == 1 && held.compareAndSet(false, true)) {
+                reachedSlideOne.countDown()
+                assertTrue(release.await(5, TimeUnit.SECONDS), "the second render never started")
+            }
+            rasterizer.renderFinalFrame(index)
+        }
+
+        vm.addPresentation(file)
+        assertTrue(reachedSlideOne.await(10, TimeUnit.SECONDS), "the first render never reached slide 1")
+        vm.selectPresentation(file)
+        release.countDown()
+
+        awaitUntil("the restarted render to finish") { !vm.isLoading && vm.slideFiles.size >= slides }
+
+        assertEquals(slides, vm.slideFiles.size)
+        assertNull(vm.loadError)
+        assertTrue(vm.slideFiles.all { it.exists() }, "every rendered slide must still be on disk")
     }
 
     // ── Closing a deck and its rendered slides ──────────────────────────────────
