@@ -159,6 +159,7 @@ import churchpresenter.composeapp.generated.resources.song_play_count
 import churchpresenter.composeapp.generated.resources.song_columns
 import churchpresenter.composeapp.generated.resources.number
 import churchpresenter.composeapp.generated.resources.search
+import churchpresenter.composeapp.generated.resources.search_clear
 import churchpresenter.composeapp.generated.resources.search_songs
 import churchpresenter.composeapp.generated.resources.song_book
 import churchpresenter.composeapp.generated.resources.song_title_slide
@@ -696,7 +697,7 @@ fun SongsTab(
                     }
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { viewModel.updateSearchQuery("") }, modifier = Modifier.size(30.dp)) {
-                            Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
