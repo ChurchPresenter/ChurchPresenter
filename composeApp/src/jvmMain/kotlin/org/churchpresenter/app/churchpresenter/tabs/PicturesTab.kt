@@ -123,6 +123,8 @@ import churchpresenter.composeapp.generated.resources.no_folder_selected
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.previous_image
+import churchpresenter.composeapp.generated.resources.recent_pin
+import churchpresenter.composeapp.generated.resources.recent_unpin
 import churchpresenter.composeapp.generated.resources.select_folder
 import churchpresenter.composeapp.generated.resources.tab_focus_lost
 import churchpresenter.composeapp.generated.resources.select_folder_to_view
@@ -493,7 +495,7 @@ fun PicturesTab(
                             IconButton(onClick = { RecentPictureFolders.togglePin(path) }, modifier = Modifier.size(20.dp)) {
                                 Icon(
                                     painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
-                                    contentDescription = null,
+                                    contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
                                     modifier = Modifier.size(12.dp),
                                     tint = if (isPinned) MaterialTheme.colorScheme.primary
                                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
@@ -607,7 +609,9 @@ fun PicturesTab(
                         contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
                     )
                 ) {
-                    Icon(painterResource(Res.drawable.ic_refresh), contentDescription = null, modifier = Modifier.size(16.dp))
+                    // Same text the tooltip shows: TooltipArea is a hover popup and contributes no
+                    // semantics, so without this the button has no name at all.
+                    Icon(painterResource(Res.drawable.ic_refresh), contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), modifier = Modifier.size(16.dp))
                 }
             }
 

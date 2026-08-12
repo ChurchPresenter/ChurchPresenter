@@ -2255,4 +2255,18 @@
     <string name="planning_center_import_matched">✓ Matched</string>
     <string name="planning_center_import_button">Import Selected</string>
     <string name="planning_center_import_file_count">%1$d file(s)</string>
+
+    <!-- Names for buttons whose only content is an icon. These are read by assistive technology
+         and are never drawn, so a button that already shows a text label does not need one. -->
+    <string name="web_clear_url">Clear address</string>
+    <string name="web_clear_typed_text">Clear text</string>
+    <string name="recent_pin">Pin</string>
+    <string name="recent_unpin">Unpin</string>
+    <string name="canvas_rename_confirm">Confirm rename</string>
+    <string name="crossword_prev_level">Previous level</string>
+    <string name="crossword_next_level">Next level</string>
+    <string name="tab_strip_scroll_back">Scroll tabs back</string>
+    <string name="tab_strip_scroll_forward">Scroll tabs forward</string>
+    <string name="stock_photo_show_key">Show API key</string>
+    <string name="stock_photo_hide_key">Hide API key</string>
 </resources>

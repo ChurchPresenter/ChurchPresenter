@@ -2,11 +2,10 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performMouseInput
 import kotlin.test.Test
@@ -21,28 +20,27 @@ import kotlin.test.assertEquals
  * operator the opposite of the truth, and the failure is silent until a slideshow dead-ends at the
  * last picture mid-service.
  *
- * **`PicturesTabExtraTest` records this button as unreachable** — "whose icon carries neither text
- * nor a content description to address it by". That is true of the usual selectors and not of the
- * tree: it is the *only* clickable node with neither, which is a selector in itself. [loopButton]
- * asserts that uniqueness rather than assuming it, so if a second unlabelled button ever appears
- * this fails loudly instead of silently addressing the wrong one — the approach `CanvasTab`'s
- * rename tick already uses.
+ * The button now carries the same `Loop On`/`Loop Off` string as its content description, so it is
+ * addressable by name. It used to be addressed as the only clickable node carrying neither text nor
+ * a description — a selector that worked, but one that selected on the *absence* of a label and so
+ * broke the moment the button was given one.
+ *
+ * The tooltip is still what this tests: [countOf] matches `Text` semantics only, which the content
+ * description does not contribute to, so hovering must still raise the count by one.
  */
 class PicturesTabLoopTooltipTest {
 
-    /** The one clickable node carrying neither text nor a content description. */
+    /** The loop toggle, by the name it now carries in whichever state it is in. */
     private fun ComposeUiTest.loopButton(): SemanticsNodeInteraction {
-        val all = onAllNodes(hasClickAction())
-        val nodes = all.fetchSemanticsNodes(atLeastOneRootRequired = false)
-        val bare = nodes.indices.filter { i ->
-            nodes[i].config.getOrNull(SemanticsProperties.ContentDescription) == null &&
-                nodes[i].config.getOrNull(SemanticsProperties.Text) == null
-        }
-        assertEquals(
-            1, bare.size,
-            "the loop toggle is addressed as the only unlabelled button; found ${bare.size}",
+        val matches = onAllNodes(
+            hasClickAction() and
+                (hasContentDescription("Loop On") or hasContentDescription("Loop Off"))
         )
-        return all[bare.single()]
+        assertEquals(
+            1, matches.fetchSemanticsNodes(atLeastOneRootRequired = false).size,
+            "the loop toggle is addressed by its content description",
+        )
+        return matches[0]
     }
 
     private fun ComposeUiTest.countOf(text: String) =

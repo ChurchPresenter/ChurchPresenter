@@ -642,7 +642,7 @@ private fun RowScope.SongbookCard(
                     onClick = { onSongbookChange(originalSongbook); isAddingNew = false },
                     modifier = Modifier.size(20.dp),
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(14.dp))
+                    Icon(Icons.Default.Close, contentDescription = stringResource(Res.string.cancel), modifier = Modifier.size(14.dp))
                 }
             }
         }
