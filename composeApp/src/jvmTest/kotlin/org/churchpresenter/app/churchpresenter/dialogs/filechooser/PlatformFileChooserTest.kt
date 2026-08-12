@@ -26,6 +26,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
@@ -1163,5 +1164,43 @@ class PlatformFileChooserTest {
 
         assertFalse(fellBack, "cancelling must not silently reopen as a Swing dialog")
         assertFalse(FileKitFileChooser.nativeDialogsBroken, "cancelling is not a fault; the native path stays on")
+    }
+
+    // ── SwingFileChooser: a dialog that throws is a cancel ───────────────────────
+    //
+    // This chooser is where everything else falls back to, and it has nowhere to fall back to
+    // itself. JFileChooser throws out of its own focus handling (JDK-6561072: FilePane repaints
+    // the selection with a null rectangle), and that exception used to leave the dialog and the
+    // thread waiting on it.
+
+    @Test
+    fun `a dialog that returns normally is left alone`() {
+        assertEquals("picked", SwingFileChooser.dialogOrCancelled("test") { "picked" })
+    }
+
+    @Test
+    fun `a dialog that throws comes back as a cancel`() {
+        assertNull(
+            SwingFileChooser.dialogOrCancelled<String>("test") {
+                throw NullPointerException("Cannot read field \"x\" because \"<parameter1>\" is null")
+            },
+            "an operator who cannot open a file is a problem; one whose app dies for it is worse",
+        )
+    }
+
+    @Test
+    fun `the fault reported is the one Swing threw, not the reflection wrapper`() {
+        // Everything here runs through SwingUtilities.invokeAndWait, which reports whatever the
+        // dialog threw wrapped in an InvocationTargetException — useless as a crash-report title.
+        val real = NullPointerException("Cannot read field \"x\" because \"<parameter1>\" is null")
+
+        assertSame(real, SwingFileChooser.unwrapDialogFault(InvocationTargetException(real)))
+    }
+
+    @Test
+    fun `a fault that is not wrapped is reported as itself`() {
+        val direct = IllegalStateException("no display")
+
+        assertSame(direct, SwingFileChooser.unwrapDialogFault(direct))
     }
 }

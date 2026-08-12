@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.filechooser
 
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.io.File
+import java.lang.reflect.InvocationTargetException
 import java.nio.file.Path
 import javax.imageio.ImageIO
 import javax.swing.JFileChooser
@@ -227,6 +229,28 @@ object SwingFileChooser : FileChooser() {
         }
     }
 
+    /** The real cause of a failure inside [onEventDispatchThread], which reports it wrapped. */
+    internal fun unwrapDialogFault(failure: Exception): Throwable =
+        (failure as? InvocationTargetException)?.targetException ?: failure
+
+    /**
+     * Runs a dialog, treating one that throws as a cancel.
+     *
+     * This chooser is the last resort — every other implementation falls back to it, and it has
+     * nowhere to fall back to itself — so a fault here would otherwise leave the coroutine that
+     * asked for a file dying with it. The faults are not all ours to prevent: `JFileChooser`
+     * throws out of its own focus handling when Swing's `FilePane` repaints the selection with a
+     * null rectangle (JDK-6561072, open since 2007). An operator who cannot open a file is a
+     * problem; an operator whose app dies because they clicked Open is a worse one.
+     */
+    internal fun <T> dialogOrCancelled(context: String, show: () -> T?): T? =
+        try {
+            show()
+        } catch (e: Exception) {
+            CrashReporter.reportException(unwrapDialogFault(e), context = context)
+            null
+        }
+
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun chooseImpl(
         path: Path,
@@ -234,8 +258,10 @@ object SwingFileChooser : FileChooser() {
         title: String,
         selectDirectory: Boolean,
         multiple: Boolean
-    ): List<Path>? = runOpen(path, filters, title, selectDirectory, multiple, ownerFrame) { chooser, frame ->
-        chooser.showOpenDialog(frame)
+    ): List<Path>? = dialogOrCancelled("SwingFileChooser.chooseImpl") {
+        runOpen(path, filters, title, selectDirectory, multiple, ownerFrame) { chooser, frame ->
+            chooser.showOpenDialog(frame)
+        }
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
@@ -244,7 +270,9 @@ object SwingFileChooser : FileChooser() {
         suggestedName: String,
         filters: List<FileNameExtensionFilter>,
         title: String
-    ): Path? = runSave(location, suggestedName, filters, title, ownerFrame) { chooser, frame ->
-        chooser.showSaveDialog(frame)
+    ): Path? = dialogOrCancelled("SwingFileChooser.saveImpl") {
+        runSave(location, suggestedName, filters, title, ownerFrame) { chooser, frame ->
+            chooser.showSaveDialog(frame)
+        }
     }
 }
