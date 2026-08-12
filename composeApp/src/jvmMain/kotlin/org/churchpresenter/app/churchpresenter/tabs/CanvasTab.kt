@@ -125,6 +125,7 @@ import churchpresenter.composeapp.generated.resources.canvas_tool_ellipse
 import churchpresenter.composeapp.generated.resources.canvas_tool_line
 import churchpresenter.composeapp.generated.resources.canvas_tool_arrow
 import churchpresenter.composeapp.generated.resources.canvas_tool_freehand
+import churchpresenter.composeapp.generated.resources.canvas_rename_confirm
 import churchpresenter.composeapp.generated.resources.canvas_rename_scene
 import churchpresenter.composeapp.generated.resources.canvas_remove_scene
 import churchpresenter.composeapp.generated.resources.canvas_add_source
@@ -302,7 +303,7 @@ fun CanvasTab(
                                 },
                                 modifier = Modifier.size(20.dp)
                             ) {
-                                Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Filled.Check, contentDescription = stringResource(Res.string.canvas_rename_confirm), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
                             }
                         } else {
                             Text(

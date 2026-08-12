@@ -24,34 +24,34 @@ import kotlin.test.assertEquals
  * leaves the operator looking at the name they typed while the scene, the schedule and the saved
  * `scenes.json` all still hold the old one. That divergence is what these tests are for.
  *
- * **Locating the tick.** Its icon is declared with `contentDescription = null`, so it cannot be
- * addressed by label. While the editor is open it is the only button in the tab carrying neither text
- * nor a content description — every other one has a label ("Add source", "Go Live") or is a glyph
- * button whose symbol is its text. [confirmRenameButton] asserts that uniqueness rather than assuming
- * it, so if another unlabelled button ever appears the test says so instead of clicking the wrong
- * thing.
+ * **Locating the tick.** It carries its own content description, `canvas_rename_confirm` — a name
+ * distinct from the rename pencil's `canvas_rename_scene`, so the control that *opens* the editor and
+ * the one that *commits* it cannot be confused for one another.
+ *
+ * This test used to address the tick as the only button in the tab carrying neither text nor a content
+ * description. That worked, but it selected on the absence of a label, so labelling the button — an
+ * accessibility fix — broke it. Addressing it by its name is both the accessible behaviour and the
+ * stabler selector.
  */
 class CanvasTabSceneRenameTest {
 
     private companion object {
         /** The rename pencil's tooltip and content description — `canvas_rename_scene`. */
         const val RENAME = "Rename"
+
+        /** The tick that commits the rename — `canvas_rename_confirm`. */
+        const val CONFIRM_RENAME = "Confirm rename"
     }
 
-    /** The unlabelled tick that commits the rename. Fails loudly if it is no longer the only one. */
+    /** The tick that commits the rename. Fails loudly if it is not on screen exactly once. */
     private fun ComposeUiTest.confirmRenameButton(): SemanticsNodeInteraction {
-        val unlabelled = onAllNodes(
-            hasClickAction() and
-                SemanticsMatcher.keyNotDefined(SemanticsProperties.Text) and
-                SemanticsMatcher.keyNotDefined(SemanticsProperties.ContentDescription) and
-                SemanticsMatcher.keyNotDefined(SemanticsProperties.EditableText)
-        )
+        val ticks = onAllNodesWithContentDescription(CONFIRM_RENAME)
         assertEquals(
             1,
-            unlabelled.fetchSemanticsNodes().size,
-            "the confirm tick is identified by being the only unlabelled button while renaming",
+            ticks.fetchSemanticsNodes().size,
+            "the confirm tick is addressed by its content description while renaming",
         )
-        return unlabelled[0]
+        return ticks[0]
     }
 
     private fun ComposeUiTest.editorText(): String =

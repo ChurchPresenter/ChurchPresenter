@@ -70,6 +70,8 @@ import churchpresenter.composeapp.generated.resources.web_bookmark_add
 import churchpresenter.composeapp.generated.resources.web_bookmark_remove
 import churchpresenter.composeapp.generated.resources.web_add_to_schedule
 import churchpresenter.composeapp.generated.resources.web_back
+import churchpresenter.composeapp.generated.resources.web_clear_typed_text
+import churchpresenter.composeapp.generated.resources.web_clear_url
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_body
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_title
 import churchpresenter.composeapp.generated.resources.web_engine_unavailable_macos_body
@@ -327,7 +329,7 @@ fun WebTab(
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.ic_close),
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.web_clear_url),
                             modifier = Modifier.size(14.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -587,7 +589,7 @@ fun WebTab(
                         }
                         if (typeBuffer.isNotEmpty()) {
                             IconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
-                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.web_clear_typed_text), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }

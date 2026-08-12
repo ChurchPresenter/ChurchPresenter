@@ -6,12 +6,14 @@ import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.Struct
 import org.freedesktop.dbus.annotations.DBusInterfaceName
 import org.freedesktop.dbus.annotations.Position
+import org.freedesktop.dbus.connections.IDisconnectCallback
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusInterface
 import org.freedesktop.dbus.matchrules.DBusMatchRule
 import org.freedesktop.dbus.matchrules.DBusMatchRuleBuilder
 import org.freedesktop.dbus.types.UInt32
 import org.freedesktop.dbus.types.Variant
+import java.io.IOException
 import java.net.URI
 import java.nio.file.Path
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -21,6 +23,12 @@ import kotlin.io.use
 
 /**
  * A [FileChooser] implementation that uses DBus to communicate with the XDG Desktop Portal's File Chooser API on Linux.
+ *
+ * Everything here depends on someone else's process: a session bus, and a desktop portal that
+ * implements the FileChooser interface. Neither is guaranteed to be there — a session with no bus
+ * name yet answers `getUniqueName()` with an index error, a desktop with no portal has nothing to
+ * call — so every portal request goes through [withNativeDialog] and lands on the Swing dialog
+ * rather than taking the app down with it.
  */
 object XdgFileChooser : FileChooser() {
 
@@ -30,20 +38,28 @@ object XdgFileChooser : FileChooser() {
         title: String,
         selectDirectory: Boolean,
         multiple: Boolean
-    ): List<Path>? {
-        return openFileChooser(path, filters, title, null, selectDirectory, multiple, DBusFileChooser::OpenFile)
-    }
+    ): List<Path>? = withNativeDialog(
+        context = "XdgFileChooser.chooseImpl",
+        attempt = {
+            openFileChooser(path, filters, title, null, selectDirectory, multiple, DBusFileChooser::OpenFile)
+        },
+        fallback = { SwingFileChooser.fallbackChoose(path, filters, title, selectDirectory, multiple) }
+    )
 
     override suspend fun saveImpl(
         location: Path,
         suggestedName: String,
         filters: List<FileNameExtensionFilter>,
         title: String
-    ): Path? {
-        return saveSelection(
-            openFileChooser(location, filters, title, suggestedName, selectDirectory = false, multiple = false, DBusFileChooser::SaveFile)
-        )
-    }
+    ): Path? = withNativeDialog(
+        context = "XdgFileChooser.saveImpl",
+        attempt = {
+            saveSelection(
+                openFileChooser(location, filters, title, suggestedName, selectDirectory = false, multiple = false, DBusFileChooser::SaveFile)
+            )
+        },
+        fallback = { SwingFileChooser.fallbackSave(location, suggestedName, filters, title) }
+    )
 
     /**
      * The one path a save produced, or null.
@@ -92,6 +108,25 @@ object XdgFileChooser : FileChooser() {
     }
 
     /**
+     * The connection's unique bus name, or a failure that says what went wrong.
+     *
+     * dbus-java reads it off a list it has not necessarily filled — a connection whose `Hello`
+     * never completed answers with `IndexOutOfBoundsException: Index 0 out of bounds for length
+     * 0`, which reaches Sentry as an ArrayList error with nothing about D-Bus in it. There is no
+     * name to build a request path from either way, so both shapes of "no name" become one
+     * refusal, and the caller falls back to the Swing dialog.
+     */
+    internal fun uniqueNameOf(read: () -> String?): String {
+        val name = try {
+            read()
+        } catch (_: IndexOutOfBoundsException) {
+            null
+        }
+        return name?.takeIf { it.isNotBlank() }
+            ?: error("The D-Bus session connection has no unique name; the desktop portal is unreachable")
+    }
+
+    /**
      * The object path the portal will emit its Response signal on.
      *
      * Derived from the connection's unique bus name (`:1.42` → `1_42`) and the handle token, per
@@ -134,6 +169,34 @@ object XdgFileChooser : FileChooser() {
             .build()
 
     /**
+     * The request path to listen on in addition to the predicted one, or null when there is
+     * nothing to add.
+     *
+     * [requestPath] is a prediction of what the portal will name the Request object, and the
+     * portal is free to name it something else — it returns the real one from `OpenFile`/
+     * `SaveFile`, and the documentation says to use that. Listening only on the prediction means
+     * the Response signal arrives somewhere nobody is listening and the dialog waits for ever, so
+     * a handle that differs is listened on as well rather than instead: the prediction has to be
+     * registered before the call to avoid missing a fast answer, and both cannot be wrong.
+     */
+    internal fun extraResponsePath(predicted: String, handle: String?): String? =
+        handle?.takeIf { it.isNotBlank() && it != predicted }
+
+    /**
+     * A callback that ends the wait if the session bus goes away.
+     *
+     * The Response signal is the only thing that finishes a portal request, and a bus that has
+     * disconnected will never deliver one — the dialog is gone from the operator's screen too, so
+     * the honest answer is a cancel rather than a wait nothing can end.
+     */
+    internal fun cancelOnDisconnect(response: CompletableDeferred<List<String>?>): IDisconnectCallback =
+        object : IDisconnectCallback {
+            override fun clientDisconnect() { response.complete(null) }
+            override fun requestedDisconnect(code: Int?) { response.complete(null) }
+            override fun disconnectOnError(exception: IOException) { response.complete(null) }
+        }
+
+    /**
      * The whole portal request: build the options for [token], work out the path the answer will
      * arrive on, hand both to [ask], and turn the uris it returns into paths.
      *
@@ -165,24 +228,37 @@ object XdgFileChooser : FileChooser() {
         multiple: Boolean,
         // crossinline: invoked from inside the request lambda below, so it cannot return non-locally
         crossinline dbusMethod: DBusFileChooser.(String, String, Map<String, Variant<*>>) -> DBusPath
-    ): List<Path>? = DBusConnectionBuilder.forSessionBus().build().use { conn ->
-        val fileChooser = conn.getRemoteObject(
-            Constants.DBus.DESKTOP_OBJECT_NAME,
-            Constants.DBus.DESKTOP_OBJECT_PATH,
-            DBusFileChooser::class.java
-        )
+    ): List<Path>? {
+        // Created before the connection so a bus that drops can end the wait — see cancelOnDisconnect.
+        val response = CompletableDeferred<List<String>?>()
+        return DBusConnectionBuilder.forSessionBus()
+            .withDisconnectCallback(cancelOnDisconnect(response))
+            .build()
+            .use { conn ->
+                val fileChooser = conn.getRemoteObject(
+                    Constants.DBus.DESKTOP_OBJECT_NAME,
+                    Constants.DBus.DESKTOP_OBJECT_PATH,
+                    DBusFileChooser::class.java
+                )
 
-        requestPaths(
-            path, filters, suggestedName, selectDirectory, multiple,
-            conn.uniqueName, Random.nextULong().toString(16)
-        ) { options, requestPath ->
-            val result = CompletableDeferred<List<String>?>()
-            conn.addGenericSigHandler(responseMatchRule(requestPath)) { signal ->
-                result.complete(parseResponse(signal.parameters))
+                requestPaths(
+                    path, filters, suggestedName, selectDirectory, multiple,
+                    uniqueNameOf { conn.uniqueName }, Random.nextULong().toString(16)
+                ) { options, requestPath ->
+                    conn.addGenericSigHandler(responseMatchRule(requestPath)) { signal ->
+                        response.complete(parseResponse(signal.parameters))
+                    }
+                    // An unanswered method call fails on dbus-java's own reply timeout, so only the
+                    // wait below is open-ended — as it must be, since it is the operator deciding.
+                    val handle = fileChooser.dbusMethod("", title, options)
+                    extraResponsePath(requestPath, handle?.path)?.let { actualPath ->
+                        conn.addGenericSigHandler(responseMatchRule(actualPath)) { signal ->
+                            response.complete(parseResponse(signal.parameters))
+                        }
+                    }
+                    response.await()
+                }
             }
-            fileChooser.dbusMethod("", title, options)
-            result.await()
-        }
     }
 
     /**

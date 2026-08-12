@@ -107,6 +107,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import java.awt.Cursor
 import java.awt.Window as AwtWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
@@ -159,6 +160,7 @@ import churchpresenter.composeapp.generated.resources.song_play_count
 import churchpresenter.composeapp.generated.resources.song_columns
 import churchpresenter.composeapp.generated.resources.number
 import churchpresenter.composeapp.generated.resources.search
+import churchpresenter.composeapp.generated.resources.search_clear
 import churchpresenter.composeapp.generated.resources.search_songs
 import churchpresenter.composeapp.generated.resources.song_book
 import churchpresenter.composeapp.generated.resources.song_title_slide
@@ -203,6 +205,9 @@ import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+
+/** The toolbar button that adds the *selected* song, as opposed to any other "Add to Schedule". */
+internal const val SONGS_ADD_SELECTED_TAG = "songs_addSelectedToSchedule"
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -696,7 +701,7 @@ fun SongsTab(
                     }
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { viewModel.updateSearchQuery("") }, modifier = Modifier.size(30.dp)) {
-                            Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -846,6 +851,10 @@ fun SongsTab(
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                                // Deliberately unlabelled: this is a column header whose click
+                                // SORTS, so naming it "Add to Schedule" would name it after an
+                                // action it does not perform. Giving a sortable header its proper
+                                // name is a semantics question for the whole table, not this icon.
                                 Icon(
                                     painter = painterResource(
                                         if (colId == "favorites") Res.drawable.ic_star else Res.drawable.ic_playlist_add
@@ -1128,7 +1137,7 @@ fun SongsTab(
                                         ) {
                                             Icon(
                                                 painter = painterResource(Res.drawable.ic_playlist_add),
-                                                contentDescription = null,
+                                                contentDescription = stringResource(Res.string.add_to_schedule),
                                                 modifier = Modifier.size(16.dp),
                                                 tint = MaterialTheme.colorScheme.secondary
                                             )
@@ -1474,7 +1483,12 @@ fun SongsTab(
                             }
                             tabFocusRequester.requestFocus()
                         },
-                        tooltipText = addScheduleStr
+                        tooltipText = addScheduleStr,
+                        // Tagged because "Add to Schedule" is the right name for several controls
+                        // here — this one, the per-row buttons and the favourites panel's — and only
+                        // this one adds the *selected* song. The name is shared on purpose; the tag
+                        // is how a test says which of them it means.
+                        modifier = Modifier.testTag(SONGS_ADD_SELECTED_TAG)
                     )
                 }
 

@@ -14,10 +14,14 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_arrow_left
 import churchpresenter.composeapp.generated.resources.ic_arrow_right
+import churchpresenter.composeapp.generated.resources.tab_strip_scroll_back
+import churchpresenter.composeapp.generated.resources.tab_strip_scroll_forward
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 internal const val TAB_STRIP_ARROW_BACK_TAG = "tabStripArrowBack"
 internal const val TAB_STRIP_ARROW_FORWARD_TAG = "tabStripArrowForward"
@@ -49,7 +53,7 @@ fun TabStripBackArrow(scrollState: ScrollState) {
     // cancelled at that moment — killing the animation that was still finishing the move.
     val coroutineScope = rememberCoroutineScope()
     if (scrollState.maxValue > 0 && scrollState.value > 0) {
-        TabStripArrow(Res.drawable.ic_arrow_left, TAB_STRIP_ARROW_BACK_TAG, coroutineScope, scrollState) {
+        TabStripArrow(Res.drawable.ic_arrow_left, Res.string.tab_strip_scroll_back, TAB_STRIP_ARROW_BACK_TAG, coroutineScope, scrollState) {
             (scrollState.value - TAB_SCROLL_STEP).coerceAtLeast(0)
         }
     }
@@ -60,16 +64,20 @@ fun TabStripBackArrow(scrollState: ScrollState) {
 fun TabStripForwardArrow(scrollState: ScrollState) {
     val coroutineScope = rememberCoroutineScope()
     if (scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue) {
-        TabStripArrow(Res.drawable.ic_arrow_right, TAB_STRIP_ARROW_FORWARD_TAG, coroutineScope, scrollState) {
+        TabStripArrow(Res.drawable.ic_arrow_right, Res.string.tab_strip_scroll_forward, TAB_STRIP_ARROW_FORWARD_TAG, coroutineScope, scrollState) {
             (scrollState.value + TAB_SCROLL_STEP).coerceAtMost(scrollState.maxValue)
         }
     }
 }
 
-/** @param target where to scroll to, read at click time rather than at composition. */
+/**
+ * @param description the button's name for assistive technology; the arrow itself carries no text.
+ * @param target where to scroll to, read at click time rather than at composition.
+ */
 @Composable
 private fun TabStripArrow(
     icon: DrawableResource,
+    description: StringResource,
     tag: String,
     coroutineScope: CoroutineScope,
     scrollState: ScrollState,
@@ -84,7 +92,7 @@ private fun TabStripArrow(
     ) {
         Icon(
             painter = painterResource(icon),
-            contentDescription = null,
+            contentDescription = stringResource(description),
             modifier = Modifier.size(ARROW_ICON_SIZE),
         )
     }
