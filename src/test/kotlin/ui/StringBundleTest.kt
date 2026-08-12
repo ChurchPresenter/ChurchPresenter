@@ -1,6 +1,8 @@
 package ui
 
+import java.util.Locale
 import java.util.Properties
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -77,5 +79,27 @@ class StringBundleTest {
             assertTrue(english.containsKey("source_desc_${source.id}"), source.id)
             assertTrue(english.containsKey("source_accepts_${source.id}"), source.id)
         }
+    }
+
+    private val systemLocale: Locale = Locale.getDefault()
+
+    @AfterTest
+    fun restoreLocale() {
+        Locale.setDefault(systemLocale)
+        Strings.setLocale(systemLocale)
+    }
+
+    @Test
+    fun `the chosen language is used, not the machine's`() {
+        Locale.setDefault(Locale.forLanguageTag("ru"))
+        Strings.setLocale(Locale.forLanguageTag("de"))
+        assertEquals(load("converter_strings_de.properties").getProperty("tab_bibles"), Strings.tabBibles)
+    }
+
+    @Test
+    fun `a language with no bundle falls back to English, not to the machine's`() {
+        Locale.setDefault(Locale.forLanguageTag("ru"))
+        Strings.setLocale(Locale.forLanguageTag("fr"))
+        assertEquals(english().getProperty("tab_bibles"), Strings.tabBibles)
     }
 }

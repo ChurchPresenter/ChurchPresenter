@@ -1,14 +1,36 @@
 package ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import java.util.Locale
 import java.util.ResourceBundle
 
 object Strings {
-    private var bundle: ResourceBundle = ResourceBundle.getBundle("converter_strings", Locale.getDefault())
+    /**
+     * Snapshot state, so switching language while the converter is open redraws it in the new one
+     * instead of waiting for the window to be closed and opened again.
+     *
+     * Standalone, the OS locale is the only thing to go on. Hosted inside ChurchPresenter, the app
+     * sets it from the language chosen there — see `ConverterWindow`.
+     */
+    private var bundle: ResourceBundle by mutableStateOf(bundleFor(Locale.getDefault()))
 
     fun setLocale(locale: Locale) {
-        bundle = ResourceBundle.getBundle("converter_strings", locale)
+        bundle = bundleFor(locale)
     }
+
+    /**
+     * `ResourceBundle.getBundle` tries the *default locale's* bundle before the base one, so asking
+     * for a language the converter has no bundle for answers in whatever the machine is set to — a
+     * Dutch user on a Russian machine would get Russian. No-fallback lookup gives English instead.
+     */
+    private fun bundleFor(locale: Locale): ResourceBundle =
+        ResourceBundle.getBundle(
+            "converter_strings",
+            locale,
+            ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES),
+        )
 
     // Tab names
     val tabBibles: String get() = bundle.getString("tab_bibles")
