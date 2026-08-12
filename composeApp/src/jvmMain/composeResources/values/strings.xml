@@ -2263,6 +2263,7 @@
     <string name="recent_pin">Pin</string>
     <string name="recent_unpin">Unpin</string>
     <string name="canvas_rename_confirm">Confirm rename</string>
+    <string name="qa_clear_question_text">Clear question text</string>
     <string name="crossword_prev_level">Previous level</string>
     <string name="crossword_next_level">Next level</string>
     <string name="tab_strip_scroll_back">Scroll tabs back</string>
