@@ -17,6 +17,7 @@ import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import presentation.engine.DeckRasterizer
 import presentation.engine.LoadResult
 import presentation.engine.PresentationLoader
+import presentation.engine.cache.SlideCacheSupersededException
 import presentation.engine.cache.SlideDiskCache
 
 /**
@@ -136,6 +137,10 @@ internal class PresentationStore(
                 jpegSlides = cached.slideFiles.map { it.readBytes() }
                 notes = cached.notes
             } else {
+                // The Presentation tab is rendering this very deck into the shared entry. Starting
+                // a second render here would take the entry away from it mid-deck, so leave it be:
+                // the client's 404-retry path comes back once the tab's render has committed.
+                if (slideDiskCache.isWriting(file)) return
                 val deck = when (val result = PresentationLoader.load(file)) {
                     is LoadResult.Failure -> {
                         CrashReporter.reportWarning(
@@ -170,6 +175,9 @@ internal class PresentationStore(
                     }
                     writer.commit()
                     committed = true
+                } catch (superseded: SlideCacheSupersededException) {
+                    // A tab render took the entry over after this one started; it finishes the job.
+                    return
                 } finally {
                     if (!committed) writer.abort()
                 }
