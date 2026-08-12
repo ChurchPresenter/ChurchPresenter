@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.block_for_session
 import churchpresenter.composeapp.generated.resources.remote_activity_added_to_schedule
 import churchpresenter.composeapp.generated.resources.remote_activity_removed_from_schedule
 import churchpresenter.composeapp.generated.resources.remote_activity_by
@@ -270,7 +271,7 @@ private fun RemoteActivityToast(
                 OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onBlockForSession) {
                     Icon(
                         Icons.Filled.RemoveCircle,
-                        contentDescription = null,
+                        contentDescription = stringResource(Res.string.block_for_session),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }

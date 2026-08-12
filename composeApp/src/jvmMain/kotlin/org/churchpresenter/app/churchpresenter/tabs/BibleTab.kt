@@ -214,6 +214,7 @@ import churchpresenter.composeapp.generated.resources.no_results_found
 import churchpresenter.composeapp.generated.resources.primary_bible
 import churchpresenter.composeapp.generated.resources.scope
 import churchpresenter.composeapp.generated.resources.search
+import churchpresenter.composeapp.generated.resources.search_clear
 import churchpresenter.composeapp.generated.resources.secondary_bible
 import churchpresenter.composeapp.generated.resources.stt_connect
 import churchpresenter.composeapp.generated.resources.stt_disconnect
@@ -3003,10 +3004,11 @@ private fun BibleSearchField(
         if (value.isNotEmpty()) {
             IconButton(
                 onClick = onClear,
-                // Tagged for tests: the icon is decorative, so there is no label to address it by.
+                // Tagged as well as labelled: this tab has other content descriptions in play, and
+                // the tag keeps the existing test selector exact.
                 modifier = Modifier.size(30.dp).testTag("bible_searchClear")
             ) {
-                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         Box(modifier = Modifier.padding(end = 6.dp)) {

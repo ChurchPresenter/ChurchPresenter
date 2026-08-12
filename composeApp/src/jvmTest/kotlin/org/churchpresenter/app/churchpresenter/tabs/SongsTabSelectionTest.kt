@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
 import kotlin.test.Test
@@ -226,7 +227,10 @@ class SongsTabSelectionTest {
     @Test
     fun `the add-to-schedule action sends the selected song to the schedule`() = songsTab { _, reports ->
         clickRow("Amazing Love")
-        onAllNodes(hasContentDescription("Add to Schedule"))[0].performClick()
+        // By tag, not by label: several controls are correctly named "Add to Schedule" — the toolbar
+        // button, one per table row, one per favourites entry — and only the tagged one adds the
+        // song that is *selected*, which is what this asserts.
+        onNodeWithTag(SONGS_ADD_SELECTED_TAG).performClick()
         waitForIdle()
 
         assertEquals(

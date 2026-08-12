@@ -912,7 +912,9 @@ fun LowerThirdTab(
                     )
                     val unreachableTooltip = stringResource(Res.string.atem_unreachable, appSettings.atemSettings.host)
                     val goLiveKey = appSettings.atemSettings.goLiveKey
-                    Tooltip(stringResource(Res.string.atem_golive_key)) {
+                    // One string for the tooltip and the button's name, so they cannot drift apart.
+                    val goLiveKeyLabel = stringResource(Res.string.atem_golive_key)
+                    Tooltip(goLiveKeyLabel) {
                         FilledIconButton(
                             onClick = { onSettingsChangeState.value { s -> s.copy(atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey)) } },
                             modifier = Modifier.size(34.dp),
@@ -922,7 +924,7 @@ fun LowerThirdTab(
                                 contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                             )
                         ) {
-                            Icon(painterResource(Res.drawable.ic_key), contentDescription = null, modifier = Modifier.size(16.dp))
+                            Icon(painterResource(Res.drawable.ic_key), contentDescription = goLiveKeyLabel, modifier = Modifier.size(16.dp))
                         }
                     }
 
@@ -934,14 +936,16 @@ fun LowerThirdTab(
                         val quickClipCapacity = appSettings.atemSettings.detectedClipMaxFrames.getOrNull(clipSlot)
                         val quickClipTooLong = quickClipVariant != null && quickClipCapacity != null && quickClipVariant.frameCount > quickClipCapacity
 
-                        Tooltip(if (!atemReachable) unreachableTooltip else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)) {
+                        val quickStillLabel = if (!atemReachable) unreachableTooltip else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)
+                        Tooltip(quickStillLabel) {
                             FilledIconButton(onClick = { startAtemUpload(atemVariant(isClip = false, useDetectedFps = false), stillSlot, closeDialogOnSuccess = false) }, enabled = quickEnabled, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
-                                Icon(Icons.Filled.Image, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Filled.Image, contentDescription = quickStillLabel, modifier = Modifier.size(16.dp))
                             }
                         }
-                        Tooltip(when { !atemReachable -> unreachableTooltip; quickClipTooLong -> { val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps); stringResource(Res.string.atem_clip_too_long, quickClipVariant.frameCount, clipSlot + 1, quickClipCapacity, secs) }; else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1) }) {
+                        val quickClipLabel = when { !atemReachable -> unreachableTooltip; quickClipTooLong -> { val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps); stringResource(Res.string.atem_clip_too_long, quickClipVariant.frameCount, clipSlot + 1, quickClipCapacity, secs) }; else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1) }
+                        Tooltip(quickClipLabel) {
                             FilledIconButton(onClick = { quickClipVariant?.let { startAtemUpload(it, clipSlot, closeDialogOnSuccess = false) } }, enabled = quickEnabled && !quickClipTooLong, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
-                                Icon(Icons.Filled.Movie, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Filled.Movie, contentDescription = quickClipLabel, modifier = Modifier.size(16.dp))
                             }
                         }
                     } else {

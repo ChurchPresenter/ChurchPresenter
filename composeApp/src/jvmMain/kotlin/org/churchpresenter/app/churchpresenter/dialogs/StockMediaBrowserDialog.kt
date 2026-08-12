@@ -73,6 +73,7 @@ import churchpresenter.composeapp.generated.resources.stock_photo_error_network
 import churchpresenter.composeapp.generated.resources.stock_photo_error_rate_limited
 import churchpresenter.composeapp.generated.resources.stock_photo_get_key
 import churchpresenter.composeapp.generated.resources.stock_photo_get_key_hint
+import churchpresenter.composeapp.generated.resources.stock_photo_hide_key
 import churchpresenter.composeapp.generated.resources.stock_photo_key_required_hint
 import churchpresenter.composeapp.generated.resources.stock_photo_load_more
 import churchpresenter.composeapp.generated.resources.stock_photo_no_results
@@ -80,6 +81,7 @@ import churchpresenter.composeapp.generated.resources.stock_photo_pexels_key_lab
 import churchpresenter.composeapp.generated.resources.stock_photo_pixabay_key_label
 import churchpresenter.composeapp.generated.resources.stock_photo_search_placeholder_photo
 import churchpresenter.composeapp.generated.resources.stock_photo_search_placeholder_video
+import churchpresenter.composeapp.generated.resources.stock_photo_show_key
 import churchpresenter.composeapp.generated.resources.stock_photo_source_pexels
 import churchpresenter.composeapp.generated.resources.stock_photo_source_pixabay
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
@@ -466,7 +468,9 @@ private fun ApiKeyField(
                 IconButton(onClick = { showKey = !showKey }) {
                     Icon(
                         imageVector = if (showKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = null
+                        contentDescription = stringResource(
+                            if (showKey) Res.string.stock_photo_hide_key else Res.string.stock_photo_show_key
+                        )
                     )
                 }
             }

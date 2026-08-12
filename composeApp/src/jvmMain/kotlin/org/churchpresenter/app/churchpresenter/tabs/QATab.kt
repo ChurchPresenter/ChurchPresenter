@@ -75,6 +75,7 @@ import churchpresenter.composeapp.generated.resources.qa_add_question_hint
 import churchpresenter.composeapp.generated.resources.qa_approve
 import churchpresenter.composeapp.generated.resources.qa_back_to_incoming
 import churchpresenter.composeapp.generated.resources.qa_clear_all_questions
+import churchpresenter.composeapp.generated.resources.qa_clear_question_text
 import churchpresenter.composeapp.generated.resources.qa_confirm_go_live
 import churchpresenter.composeapp.generated.resources.qa_confirm_go_live_prompt
 import churchpresenter.composeapp.generated.resources.qa_delete_all_history
@@ -426,7 +427,7 @@ fun QATab(
                         }
                         if (addQuestionText.isNotEmpty()) {
                             FilledIconButton(onClick = { addQuestionText = "" }, modifier = Modifier.size(30.dp), shape = RoundedCornerShape(5.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = null, modifier = Modifier.size(14.dp))
+                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.qa_clear_question_text), modifier = Modifier.size(14.dp))
                             }
                         }
                     }
