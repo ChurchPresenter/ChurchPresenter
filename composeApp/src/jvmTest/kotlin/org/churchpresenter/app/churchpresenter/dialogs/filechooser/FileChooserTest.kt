@@ -297,31 +297,25 @@ class FileChooserTest {
     }
 
     /**
-     * Documents a CONTRACT on the platform implementations rather than desired behaviour for
-     * callers: `chooseSingle` unwraps with `single()`, so an implementation that hands back two
-     * paths for a single-selection dialog throws rather than silently taking the first. Worth
-     * knowing when writing a new platform chooser — the failure is an exception out of the dialog,
-     * not a wrong file.
+     * A single choice takes the first path rather than insisting on exactly one.
+     *
+     * The answer comes from a platform that is free to hand back something other than one path —
+     * the XDG portal replies with a uri list, and a success carrying two of them used to come out
+     * of the dialog as an exception. An Open is not worth crashing over.
      */
     @Test
-    fun `an implementation returning more than one file for a single choice throws`() {
-        val chooser = RecordingChooser(
-            chooseResult = listOf(File(home, "a.sps").toPath(), File(home, "b.sps").toPath()),
-        )
+    fun `an implementation returning more than one file for a single choice takes the first`() = runBlocking {
+        val first = File(home, "a.sps").toPath()
+        val chooser = RecordingChooser(chooseResult = listOf(first, File(home, "b.sps").toPath()))
 
-        assertFailsWith<IllegalArgumentException> {
-            runBlocking { chooser.chooseSingle(null, emptyList(), "", selectDirectory = false) }
-        }
+        assertEquals(first, chooser.chooseSingle(null, emptyList(), "", selectDirectory = false))
     }
 
     @Test
-    fun `an implementation returning no files for a single choice throws`() {
-        // An implementation must return null to mean "cancelled" — not an empty list.
-        val chooser = RecordingChooser(chooseResult = emptyList())
-
-        assertFailsWith<NoSuchElementException> {
-            runBlocking { chooser.chooseSingle(null, emptyList(), "", selectDirectory = false) }
-        }
+    fun `an implementation returning no files is a cancel, not a crash`() = runBlocking {
+        // The portal answers a dismissed dialog with an empty uri list as readily as with none.
+        assertNull(RecordingChooser(chooseResult = emptyList()).chooseSingle(null, emptyList(), "", false))
+        assertNull(RecordingChooser(chooseResult = emptyList()).chooseMultiple(null, emptyList(), "", false))
     }
 
     // ── Which implementation the platform gets ──────────────────────────────────
@@ -531,6 +525,32 @@ class XdgPortalRequestTest {
         assertEquals("Schedule", (structs.single() as XdgFileChooser.DBusFilter).name)
     }
 
+    // ── The connection's unique name ────────────────────────────────────────────
+    //
+    // Reading it is the first thing a portal request does, and on a session whose bus name is not
+    // established dbus-java answers with `IndexOutOfBoundsException: Index 0 out of bounds for
+    // length 0` from inside an ArrayList. Uncaught, that took the whole app down when an operator
+    // opened a folder.
+
+    @Test
+    fun `the unique name is read straight through`() {
+        assertEquals(":1.42", XdgFileChooser.uniqueNameOf { ":1.42" })
+    }
+
+    @Test
+    fun `a connection with no bus name yet is refused, not propagated as an index error`() {
+        val failure = assertFailsWith<IllegalStateException> {
+            XdgFileChooser.uniqueNameOf { throw IndexOutOfBoundsException("Index 0 out of bounds for length 0") }
+        }
+        assertEquals(true, failure.message?.contains("unique name"), "message was: ${failure.message}")
+    }
+
+    @Test
+    fun `a missing or blank unique name is refused too`() {
+        assertFailsWith<IllegalStateException> { XdgFileChooser.uniqueNameOf { null } }
+        assertFailsWith<IllegalStateException> { XdgFileChooser.uniqueNameOf { "  " } }
+    }
+
     // ── The path the portal will answer on ──────────────────────────────────────
 
     private fun requestPath(uniqueName: String, token: String) =
@@ -726,5 +746,47 @@ class XdgPortalRequestTest {
     fun `nothing selected stays nothing`() {
         assertNull(toPaths(null), "null means cancelled and must not become an empty selection")
         assertEquals(emptyList(), toPaths(emptyList()))
+    }
+
+    // ── When there is no portal at all ──────────────────────────────────────────
+    //
+    // The portal request itself needs a session bus, so it cannot run here; what can run is the
+    // guard around it, which is the part that decides whether a desktop without a portal gets a
+    // Swing dialog or takes the app down.
+
+    @Test
+    fun `a portal failure falls back to the Swing dialog and latches`() = runBlocking {
+        XdgFileChooser.nativeDialogsBroken = false
+        try {
+            var fellBack = false
+
+            val result = XdgFileChooser.withNativeDialog(
+                context = "test",
+                attempt = { throw IndexOutOfBoundsException("Index 0 out of bounds for length 0") },
+                fallback = { fellBack = true; "swing" },
+            )
+
+            assertEquals("swing", result, "no portal must still leave the operator a dialog")
+            assertEquals(true, fellBack)
+            assertEquals(true, XdgFileChooser.nativeDialogsBroken, "a desktop with no portal is not asked again")
+        } finally {
+            XdgFileChooser.nativeDialogsBroken = false
+        }
+    }
+
+    @Test
+    fun `a broken portal does not disable the native dialogs of another platform`() = runBlocking {
+        XdgFileChooser.nativeDialogsBroken = false
+        FileKitFileChooser.nativeDialogsBroken = false
+        try {
+            XdgFileChooser.withNativeDialog("test", attempt = { error("no portal") }, fallback = { "swing" })
+
+            assertFalse(
+                FileKitFileChooser.nativeDialogsBroken,
+                "the latch belongs to the chooser that failed, not to every chooser",
+            )
+        } finally {
+            XdgFileChooser.nativeDialogsBroken = false
+        }
     }
 }

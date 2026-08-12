@@ -8,8 +8,6 @@ import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.openDirectoryPicker
 import io.github.vinceglb.filekit.dialogs.openFilePicker
 import io.github.vinceglb.filekit.dialogs.openFileSaver
-import kotlinx.coroutines.CancellationException
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.awt.KeyboardFocusManager
 import java.io.File
 import java.nio.file.InvalidPathException
@@ -23,10 +21,6 @@ import javax.swing.filechooser.FileNameExtensionFilter
  * native dialog fails.
  */
 object FileKitFileChooser : FileChooser() {
-
-    /** Latched after the first native-dialog failure so a broken machine doesn't retry (and re-report) per dialog. */
-    @Volatile
-    internal var nativeDialogsBroken = false
 
     /** Which of the three native pickers a request calls for. */
     internal enum class PickerMode { DIRECTORY, MULTIPLE_FILES, SINGLE_FILE }
@@ -121,33 +115,6 @@ object FileKitFileChooser : FileChooser() {
         val (baseName, extension) = saveNameParts(suggestedName, extensions)
         val saved = saveNative(baseName, extension, allowedExtensions(extensions), PlatformFile(location.toFile()))
         return saved?.toPathOrNull()
-    }
-
-    /**
-     * Runs [attempt] (the native dialog) and falls back to [fallback] (the Swing dialog) when the
-     * native one is unavailable.
-     *
-     * Once a native dialog has failed on this machine [nativeDialogsBroken] latches, so every later
-     * dialog goes straight to the fallback rather than failing — and re-reporting the same fault —
-     * on each open. A [CancellationException] is the operator dismissing the dialog, not a fault,
-     * so it is re-thrown untouched and must not latch the native path off. [context] labels the
-     * crash report the fault path files.
-     */
-    internal suspend fun <T> withNativeDialog(
-        context: String,
-        attempt: suspend () -> T,
-        fallback: suspend () -> T
-    ): T {
-        if (nativeDialogsBroken) return fallback()
-        return try {
-            attempt()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (t: Throwable) {
-            CrashReporter.reportException(t, context = context)
-            nativeDialogsBroken = true
-            fallback()
-        }
     }
 
     override suspend fun chooseImpl(

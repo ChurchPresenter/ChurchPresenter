@@ -1,9 +1,11 @@
 package org.churchpresenter.app.churchpresenter.dialogs.filechooser
 
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.nio.file.Path
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.io.path.exists
@@ -25,7 +27,10 @@ abstract class FileChooser {
         title: String,
         selectDirectory: Boolean
     ): Path? {
-        return choose(path, filters, title, selectDirectory, multiple = false)?.single()
+        // firstOrNull, not single: a dialog is asked for one path but the answer comes from a
+        // platform (the XDG portal's uri list, a native picker) that is free to hand back none or
+        // several, and neither is worth crashing an Open over.
+        return choose(path, filters, title, selectDirectory, multiple = false)?.firstOrNull()
     }
 
     /**
@@ -78,7 +83,45 @@ abstract class FileChooser {
         multiple: Boolean
     ): List<Path>? {
         val initialPath = path?.takeIf { it.exists() } ?: Path(System.getProperty(Constants.SystemProperties.USER_HOME))
-        return withContext(Dispatchers.IO) { chooseImpl(initialPath, filters, title, selectDirectory, multiple) }
+        // An empty selection is a cancel, not a selection of nothing — callers read null that way.
+        return withContext(Dispatchers.IO) {
+            chooseImpl(initialPath, filters, title, selectDirectory, multiple)?.takeIf { it.isNotEmpty() }
+        }
+    }
+
+    /**
+     * Latched after the first failure of this chooser's platform dialog, so a machine whose
+     * dialogs are broken doesn't retry — and re-report — on every open.
+     */
+    @Volatile
+    internal var nativeDialogsBroken = false
+
+    /**
+     * Runs [attempt] (the platform dialog) and falls back to [fallback] (the Swing dialog) when the
+     * platform one is unavailable.
+     *
+     * Every platform dialog is somebody else's process or library — a native picker, the XDG
+     * desktop portal over D-Bus — and none of them failing is a reason for the app to die: without
+     * this, a session with no portal takes the whole app down the first time an operator opens a
+     * folder. A [CancellationException] is the operator dismissing the dialog, not a fault, so it
+     * is re-thrown untouched and must not latch the platform path off. [context] labels the crash
+     * report the fault path files.
+     */
+    internal suspend fun <T> withNativeDialog(
+        context: String,
+        attempt: suspend () -> T,
+        fallback: suspend () -> T
+    ): T {
+        if (nativeDialogsBroken) return fallback()
+        return try {
+            attempt()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (t: Throwable) {
+            CrashReporter.reportException(t, context = context)
+            nativeDialogsBroken = true
+            fallback()
+        }
     }
 
     protected abstract suspend fun chooseImpl(

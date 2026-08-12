@@ -21,6 +21,12 @@ import kotlin.io.use
 
 /**
  * A [FileChooser] implementation that uses DBus to communicate with the XDG Desktop Portal's File Chooser API on Linux.
+ *
+ * Everything here depends on someone else's process: a session bus, and a desktop portal that
+ * implements the FileChooser interface. Neither is guaranteed to be there — a session with no bus
+ * name yet answers `getUniqueName()` with an index error, a desktop with no portal has nothing to
+ * call — so every portal request goes through [withNativeDialog] and lands on the Swing dialog
+ * rather than taking the app down with it.
  */
 object XdgFileChooser : FileChooser() {
 
@@ -30,20 +36,28 @@ object XdgFileChooser : FileChooser() {
         title: String,
         selectDirectory: Boolean,
         multiple: Boolean
-    ): List<Path>? {
-        return openFileChooser(path, filters, title, null, selectDirectory, multiple, DBusFileChooser::OpenFile)
-    }
+    ): List<Path>? = withNativeDialog(
+        context = "XdgFileChooser.chooseImpl",
+        attempt = {
+            openFileChooser(path, filters, title, null, selectDirectory, multiple, DBusFileChooser::OpenFile)
+        },
+        fallback = { SwingFileChooser.fallbackChoose(path, filters, title, selectDirectory, multiple) }
+    )
 
     override suspend fun saveImpl(
         location: Path,
         suggestedName: String,
         filters: List<FileNameExtensionFilter>,
         title: String
-    ): Path? {
-        return saveSelection(
-            openFileChooser(location, filters, title, suggestedName, selectDirectory = false, multiple = false, DBusFileChooser::SaveFile)
-        )
-    }
+    ): Path? = withNativeDialog(
+        context = "XdgFileChooser.saveImpl",
+        attempt = {
+            saveSelection(
+                openFileChooser(location, filters, title, suggestedName, selectDirectory = false, multiple = false, DBusFileChooser::SaveFile)
+            )
+        },
+        fallback = { SwingFileChooser.fallbackSave(location, suggestedName, filters, title) }
+    )
 
     /**
      * The one path a save produced, or null.
@@ -99,6 +113,25 @@ object XdgFileChooser : FileChooser() {
      * Getting this wrong means the handler is registered for a path that never fires and the
      * dialog hangs forever rather than failing.
      */
+    /**
+     * The connection's unique bus name, or a failure that says what went wrong.
+     *
+     * dbus-java reads it off a list it has not necessarily filled — a connection whose `Hello`
+     * never completed answers with `IndexOutOfBoundsException: Index 0 out of bounds for length
+     * 0`, which reaches Sentry as an ArrayList error with nothing about D-Bus in it. There is no
+     * name to build a request path from either way, so both shapes of "no name" become one
+     * refusal, and the caller falls back to the Swing dialog.
+     */
+    internal fun uniqueNameOf(read: () -> String?): String {
+        val name = try {
+            read()
+        } catch (_: IndexOutOfBoundsException) {
+            null
+        }
+        return name?.takeIf { it.isNotBlank() }
+            ?: error("The D-Bus session connection has no unique name; the desktop portal is unreachable")
+    }
+
     internal fun requestPath(uniqueName: String, token: String): String {
         val sender = uniqueName.drop(1).replace('.', '_')
         return "/org/freedesktop/portal/desktop/request/$sender/$token"
@@ -174,7 +207,7 @@ object XdgFileChooser : FileChooser() {
 
         requestPaths(
             path, filters, suggestedName, selectDirectory, multiple,
-            conn.uniqueName, Random.nextULong().toString(16)
+            uniqueNameOf { conn.uniqueName }, Random.nextULong().toString(16)
         ) { options, requestPath ->
             val result = CompletableDeferred<List<String>?>()
             conn.addGenericSigHandler(responseMatchRule(requestPath)) { signal ->
