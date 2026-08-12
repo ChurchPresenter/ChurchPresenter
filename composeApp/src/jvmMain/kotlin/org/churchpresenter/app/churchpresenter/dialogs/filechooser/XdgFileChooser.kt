@@ -108,14 +108,6 @@ object XdgFileChooser : FileChooser() {
     }
 
     /**
-     * The object path the portal will emit its Response signal on.
-     *
-     * Derived from the connection's unique bus name (`:1.42` → `1_42`) and the handle token, per
-     * https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Request.html.
-     * Getting this wrong means the handler is registered for a path that never fires and the
-     * dialog hangs forever rather than failing.
-     */
-    /**
      * The connection's unique bus name, or a failure that says what went wrong.
      *
      * dbus-java reads it off a list it has not necessarily filled — a connection whose `Hello`
@@ -134,6 +126,14 @@ object XdgFileChooser : FileChooser() {
             ?: error("The D-Bus session connection has no unique name; the desktop portal is unreachable")
     }
 
+    /**
+     * The object path the portal will emit its Response signal on.
+     *
+     * Derived from the connection's unique bus name (`:1.42` → `1_42`) and the handle token, per
+     * https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Request.html.
+     * Getting this wrong means the handler is registered for a path that never fires and the
+     * dialog hangs forever rather than failing.
+     */
     internal fun requestPath(uniqueName: String, token: String): String {
         val sender = uniqueName.drop(1).replace('.', '_')
         return "/org/freedesktop/portal/desktop/request/$sender/$token"
