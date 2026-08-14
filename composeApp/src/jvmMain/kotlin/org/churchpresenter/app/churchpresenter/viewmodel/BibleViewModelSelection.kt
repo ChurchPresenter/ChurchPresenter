@@ -10,15 +10,19 @@ import org.churchpresenter.app.churchpresenter.models.SelectedVerse
  */
 
 internal fun BibleViewModel.getSelectedVerses(): List<SelectedVerse> {
-    val verseList = mutableListOf<SelectedVerse>()
-
-    if (_verses.value.isEmpty()) {
-        return verseList
-    }
+    if (_verses.value.isEmpty()) return emptyList()
 
     val bookId = _primaryBible.value?.getBookId(_selectedBookIndex.value) ?: (_selectedBookIndex.value + 1)
+    return if (_multiVerseEnabled.value && _selectedVerseIndices.isNotEmpty()) {
+        multiVerseSelection(bookId)
+    } else {
+        singleVerseSelection(bookId)
+    }
+}
 
-    if (_multiVerseEnabled.value && _selectedVerseIndices.isNotEmpty()) {
+/** Ctrl/Shift-selected verses, joined into one primary entry plus one per parallel translation. */
+private fun BibleViewModel.multiVerseSelection(bookId: Int): List<SelectedVerse> {
+    val verseList = mutableListOf<SelectedVerse>()
         val sortedIndices = _selectedVerseIndices.sorted()
         val primaryTexts = mutableListOf<String>()
         val parallelTexts = _loadedBibles.value.drop(1).map { mutableListOf<String>() }
@@ -86,8 +90,12 @@ internal fun BibleViewModel.getSelectedVerses(): List<SelectedVerse> {
                 )
             )
         }
-        return verseList
-    }
+    return verseList
+}
+
+/** The single selected verse, with the same verse from every other loaded translation. */
+private fun BibleViewModel.singleVerseSelection(bookId: Int): List<SelectedVerse> {
+    val verseList = mutableListOf<SelectedVerse>()
 
     val safeIndex = _selectedVerseIndex.value.coerceIn(0, _verses.value.size - 1)
 

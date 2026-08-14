@@ -64,9 +64,7 @@ fun STTPresenter(
     val translationColor = if (isKey) Color.White else parseHexColor(sttSettings.translationTextColor)
     val bgOpacity = (sttSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
     val cardBg = if (isKey) Color.White
-    else parseHexColor(if (
-        sttSettings.backgroundColor == "transparent"
-    ) "#1E1E2E" else sttSettings.backgroundColor).copy(alpha = bgOpacity)
+                 else parseHexColor(if (sttSettings.backgroundColor == "transparent") "#1E1E2E" else sttSettings.backgroundColor).copy(alpha = bgOpacity)
     val fontFamily = systemFontFamilyOrDefault(sttSettings.fontType)
 
     val shadowColorBase = parseHexColor(sttSettings.shadowColor)
@@ -104,16 +102,8 @@ fun STTPresenter(
     // Drip feed: reveal newest segment letter-by-letter
     val dripEnabled = sttSettings.dripFeedEnabled
     val dripSpeed = sttSettings.dripFeedSpeed.toLong().coerceAtLeast(1L)
-    val dripTranscription = useDripFeed(
-        segments,
-        enabled = dripEnabled && !sttSettings.showInProgress,
-        delayMs = dripSpeed
-    )
-    val dripTranslation = useDripFeed(
-        translationSegments,
-        enabled = dripEnabled && !sttSettings.showTranslationInProgress,
-        delayMs = dripSpeed
-    )
+    val dripTranscription = useDripFeed(segments, enabled = dripEnabled && !sttSettings.showInProgress, delayMs = dripSpeed)
+    val dripTranslation = useDripFeed(translationSegments, enabled = dripEnabled && !sttSettings.showTranslationInProgress, delayMs = dripSpeed)
 
     // Build text — pass ALL segments, no filtering by maxSegments
     val transcriptionText = buildDisplayText(
@@ -154,37 +144,17 @@ fun STTPresenter(
                             horizontalArrangement = Arrangement.spacedBy(24.dp),
                             verticalAlignment = Alignment.Bottom
                         ) {
-                            BottomAlignedText(
-                                text = first,
-                                style = firstStyle,
-                                maxLines = maxLines,
-                                modifier = Modifier.weight(1f)
-                            )
-                            BottomAlignedText(
-                                text = second,
-                                style = secondStyle,
-                                maxLines = maxLines,
-                                modifier = Modifier.weight(1f)
-                            )
+                            BottomAlignedText(text = first, style = firstStyle, maxLines = maxLines, modifier = Modifier.weight(1f))
+                            BottomAlignedText(text = second, style = secondStyle, maxLines = maxLines, modifier = Modifier.weight(1f))
                         }
                     } else {
                         Column(modifier = Modifier.fillMaxWidth().fillMaxSize()) {
                             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = boxAlignment) {
-                                BottomAlignedText(
-                                    text = first,
-                                    style = firstStyle,
-                                    maxLines = maxLines,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                                BottomAlignedText(text = first, style = firstStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth())
                             }
                             Spacer(modifier = Modifier.height(16.dp))
                             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = boxAlignment) {
-                                BottomAlignedText(
-                                    text = second,
-                                    style = secondStyle,
-                                    maxLines = maxLines,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                                BottomAlignedText(text = second, style = secondStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth())
                             }
                         }
                     }
@@ -300,40 +270,40 @@ private fun buildDisplayText(
     }
 
     // Apply word highlighting with Unicode word boundaries
-    if (showWordHighlighting && highlightedWords.isNotEmpty()) {
-        for (hw in highlightedWords) {
-            if (hw.word.isBlank()) continue
-            try {
-                val highlightColor = parseHexColor(hw.color)
-                val wb = "(?<![\\p{L}\\p{N}])"
-                val we = "(?![\\p{L}\\p{N}])"
-                val rawPattern = if (hw.isRegex) {
-                    "$wb(?:${hw.word})$we"
-                } else {
-                    val escaped = Regex.escape(hw.word)
-                    "$wb$escaped$we"
-                }
-                var flags = java.util.regex.Pattern.UNICODE_CHARACTER_CLASS
-                if (!hw.caseSensitive) flags =
-                    flags or java.util.regex.Pattern.CASE_INSENSITIVE or java.util.regex.Pattern.UNICODE_CASE
-                val regex = java.util.regex.Pattern.compile(rawPattern, flags).toRegex()
-                regex.findAll(fullText).forEach { match ->
-                    for (j in match.range) colors[j] = highlightColor
-                }
-            } catch (_: Exception) {}
-        }
+    if (showWordHighlighting) {
+        highlightedWords.forEach { applyHighlight(it, fullText, colors) }
     }
 
-    // Build AnnotatedString with contiguous color runs
-    return buildAnnotatedString {
-        var i = 0
-        while (i < fullText.length) {
-            val color = colors[i]
-            val start = i
-            while (i < fullText.length && colors[i] == color) i++
-            withStyle(SpanStyle(color = color)) {
-                append(fullText.substring(start, i))
-            }
+    return runsOf(fullText, colors)
+}
+
+/** Paints every match of one highlighted word into [colors]. A pattern that won't compile is skipped. */
+private fun applyHighlight(hw: HighlightedWord, fullText: String, colors: Array<Color>) {
+    if (hw.word.isBlank()) return
+    try {
+        val highlightColor = parseHexColor(hw.color)
+        val wb = "(?<![\\p{L}\\p{N}])"
+        val we = "(?![\\p{L}\\p{N}])"
+        val rawPattern = if (hw.isRegex) "$wb(?:${hw.word})$we" else "$wb${Regex.escape(hw.word)}$we"
+        var flags = java.util.regex.Pattern.UNICODE_CHARACTER_CLASS
+        if (!hw.caseSensitive) {
+            flags = flags or java.util.regex.Pattern.CASE_INSENSITIVE or java.util.regex.Pattern.UNICODE_CASE
+        }
+        java.util.regex.Pattern.compile(rawPattern, flags).toRegex().findAll(fullText).forEach { match ->
+            for (j in match.range) colors[j] = highlightColor
+        }
+    } catch (_: Exception) {}
+}
+
+/** The per-character colours collapsed into contiguous styled runs. */
+private fun runsOf(fullText: String, colors: Array<Color>): AnnotatedString = buildAnnotatedString {
+    var i = 0
+    while (i < fullText.length) {
+        val color = colors[i]
+        val start = i
+        while (i < fullText.length && colors[i] == color) i++
+        withStyle(SpanStyle(color = color)) {
+            append(fullText.substring(start, i))
         }
     }
 }

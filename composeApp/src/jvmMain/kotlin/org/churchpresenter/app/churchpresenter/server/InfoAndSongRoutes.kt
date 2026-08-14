@@ -32,6 +32,17 @@ internal fun Route.infoAndSongRoutes(
     json: Json,
     scope: CoroutineScope,
 ) {
+    infoRoutes(server, _bibleCatalog, _catalog, _fileUploadEnabled, _maxMediaUploadMb)
+    songRoutes(server, _catalog, json, scope)
+}
+
+private fun Route.infoRoutes(
+    server: CompanionServer,
+    _bibleCatalog: MutableStateFlow<BibleCatalogResponse?>,
+    _catalog: MutableStateFlow<SongCatalogResponse>,
+    _fileUploadEnabled: MutableStateFlow<Boolean>,
+    _maxMediaUploadMb: MutableStateFlow<Int>,
+) {
                 get(Constants.ENDPOINT_INFO) {
                     if (!server.checkApiKey(call)) return@get
                     call.respond(ServerInfoResponse(port = server.currentPort))
@@ -60,7 +71,14 @@ internal fun Route.infoAndSongRoutes(
                         )
                     )
                 }
+}
 
+private fun Route.songRoutes(
+    server: CompanionServer,
+    _catalog: MutableStateFlow<SongCatalogResponse>,
+    json: Json,
+    scope: CoroutineScope,
+) {
                 get(Constants.ENDPOINT_SONGS) {
                     if (!server.checkApiKey(call)) return@get
                     val filter = call.request.queryParameters[Constants.QUERY_PARAM_SONGBOOK]
@@ -125,6 +143,14 @@ internal fun Route.infoAndSongRoutes(
                  *
                  * Response: {"ok":true}
                  */
+    songSelectRoutes(server, json, scope)
+}
+
+private fun Route.songSelectRoutes(
+    server: CompanionServer,
+    json: Json,
+    scope: CoroutineScope,
+) {
                 post("${Constants.ENDPOINT_SONGS}/{number}/select") {
                     if (!server.checkApiKey(call)) return@post
                     val number = call.parameters["number"] ?: run {
@@ -150,5 +176,6 @@ internal fun Route.infoAndSongRoutes(
                     )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
-
 }
+
+

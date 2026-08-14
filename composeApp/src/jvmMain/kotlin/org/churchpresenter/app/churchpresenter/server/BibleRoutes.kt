@@ -33,6 +33,16 @@ internal fun Route.bibleAndDictionaryRoutes(
     json: Json,
     scope: CoroutineScope,
 ) {
+    bibleReadRoutes(server, _bible, _bibleCatalog)
+    dictionaryRoutes(server, _bible, json)
+    bibleSelectRoutes(server, json, scope)
+}
+
+private fun Route.bibleReadRoutes(
+    server: CompanionServer,
+    _bible: MutableStateFlow<Bible?>,
+    _bibleCatalog: MutableStateFlow<BibleCatalogResponse?>,
+) {
                 get(Constants.ENDPOINT_BIBLE) {
                     if (!server.checkApiKey(call)) return@get
                     val catalog = _bibleCatalog.value
@@ -99,6 +109,13 @@ internal fun Route.bibleAndDictionaryRoutes(
                  * results to the Strong's numbers occurring in that reference,
                  * narrowing progressively as chapter and verse are added.
                  */
+}
+
+private fun Route.dictionaryRoutes(
+    server: CompanionServer,
+    _bible: MutableStateFlow<Bible?>,
+    json: Json,
+) {
                 get(Constants.ENDPOINT_DICTIONARY) {
                     if (!server.checkApiKey(call)) return@get
                     val q       = call.request.queryParameters["q"] ?: ""
@@ -210,6 +227,13 @@ internal fun Route.bibleAndDictionaryRoutes(
                  * No approval dialog — fires immediately like select_picture / select_song_section.
                  * Response: {"ok":true}
                  */
+}
+
+private fun Route.bibleSelectRoutes(
+    server: CompanionServer,
+    json: Json,
+    scope: CoroutineScope,
+) {
                 post(Constants.ENDPOINT_BIBLE_SELECT) {
                     if (!server.checkApiKey(call)) return@post
                     val body = call.receiveText()
@@ -245,3 +269,4 @@ internal fun Route.bibleAndDictionaryRoutes(
                  * schedule items are still accessible without polluting this list.
                  */
 }
+

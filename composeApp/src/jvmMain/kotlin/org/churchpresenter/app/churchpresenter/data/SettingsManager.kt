@@ -243,6 +243,43 @@ class SettingsManager {
         return result
     }
 
+    /** One screen assignment with showBible/showSongs turned into modes, or null if untouched. */
+    private fun assignmentWithModes(obj: JsonObject): JsonObject? {
+        val showBibleFalse = (obj["showBible"] as? JsonPrimitive)?.content == "false"
+        val showSongsFalse = (obj["showSongs"] as? JsonPrimitive)?.content == "false"
+        if (!showBibleFalse && !showSongsFalse) return null
+        return buildJsonObject {
+            obj.forEach { (k, v) -> if (k != "showBible" && k != "showSongs") put(k, v) }
+            if (showBibleFalse && !obj.containsKey("bibleMode")) put("bibleMode", JsonPrimitive("off"))
+            if (showSongsFalse && !obj.containsKey("songMode")) put("songMode", JsonPrimitive("off"))
+        }
+    }
+
+    /** One satellite connection with row/column ranges turned back into counts, or null if untouched. */
+    private fun connectionWithCounts(obj: JsonObject, rangeKeys: Set<String>): JsonObject? {
+        val additions = buildJsonObject {
+            for (prefix in CompanionSurfacePlacementPrefixes) {
+                val startRow = (obj["${prefix}StartRow"] as? JsonPrimitive)?.content?.toIntOrNull()
+                val endRow = (obj["${prefix}EndRow"] as? JsonPrimitive)?.content?.toIntOrNull()
+                val startColumn = (obj["${prefix}StartColumn"] as? JsonPrimitive)?.content?.toIntOrNull()
+                val endColumn = (obj["${prefix}EndColumn"] as? JsonPrimitive)?.content?.toIntOrNull()
+                if (startRow != null && endRow != null && !obj.containsKey("${prefix}Rows")) {
+                    put("${prefix}Rows", JsonPrimitive((endRow - startRow + 1).coerceAtLeast(1)))
+                }
+                if (startColumn != null && endColumn != null && !obj.containsKey("${prefix}Columns")) {
+                    put("${prefix}Columns", JsonPrimitive((endColumn - startColumn + 1).coerceAtLeast(1)))
+                }
+            }
+        }
+        // Stray range keys with no rows/columns to derive (shouldn't normally happen) are still
+        // stripped, so they don't linger as dead unknown keys forever.
+        if (additions.isEmpty() && rangeKeys.none { it in obj }) return null
+        return buildJsonObject {
+            obj.forEach { (k, v) -> if (k !in rangeKeys) put(k, v) }
+            additions.forEach { (k, v) -> put(k, v) }
+        }
+    }
+
     private fun parseSettingsRoot(raw: String): JsonObject? =
         try { jsonFormat.parseToJsonElement(raw).jsonObject } catch (_: Exception) { null }
 
@@ -256,17 +293,9 @@ class SettingsManager {
         var changed = false
         val newAssignments = buildJsonArray {
             for (element in assignments) {
-                val obj = element.jsonObject
-                val showBibleFalse = (obj["showBible"] as? JsonPrimitive)?.content == "false"
-                val showSongsFalse = (obj["showSongs"] as? JsonPrimitive)?.content == "false"
-                if (showBibleFalse || showSongsFalse) {
-                    changed = true
-                    add(buildJsonObject {
-                        obj.forEach { (k, v) -> if (k != "showBible" && k != "showSongs") put(k, v) }
-                        if (showBibleFalse && !obj.containsKey("bibleMode")) put("bibleMode", JsonPrimitive("off"))
-                        if (showSongsFalse && !obj.containsKey("songMode")) put("songMode", JsonPrimitive("off"))
-                    })
-                } else { add(element) }
+                val migrated = assignmentWithModes(element.jsonObject)
+                if (migrated != null) changed = true
+                add(migrated ?: element)
             }
         }
         if (!changed) return raw
@@ -332,33 +361,9 @@ class SettingsManager {
         }.toSet()
         val newConnections = buildJsonArray {
             for (element in connections) {
-                val obj = element.jsonObject
-                val additions = buildJsonObject {
-                    for (prefix in CompanionSurfacePlacementPrefixes) {
-                        val startRow = (obj["${prefix}StartRow"] as? JsonPrimitive)?.content?.toIntOrNull()
-                        val endRow = (obj["${prefix}EndRow"] as? JsonPrimitive)?.content?.toIntOrNull()
-                        val startColumn = (obj["${prefix}StartColumn"] as? JsonPrimitive)?.content?.toIntOrNull()
-                        val endColumn = (obj["${prefix}EndColumn"] as? JsonPrimitive)?.content?.toIntOrNull()
-                        if (startRow != null && endRow != null && !obj.containsKey("${prefix}Rows")) {
-                            put("${prefix}Rows", JsonPrimitive((endRow - startRow + 1).coerceAtLeast(1)))
-                        }
-                        if (startColumn != null && endColumn != null && !obj.containsKey("${prefix}Columns")) {
-                            put("${prefix}Columns", JsonPrimitive((endColumn - startColumn + 1).coerceAtLeast(1)))
-                        }
-                    }
-                }
-                if (additions.isNotEmpty()) {
-                    changed = true
-                    add(buildJsonObject {
-                        obj.forEach { (k, v) -> if (k !in rangeKeys) put(k, v) }
-                        additions.forEach { (k, v) -> put(k, v) }
-                    })
-                } else if (rangeKeys.any { it in obj }) {
-                    // Stray range keys with no rows/columns to derive (shouldn't normally happen) —
-                    // still strip them so they don't linger as dead unknown keys forever.
-                    changed = true
-                    add(buildJsonObject { obj.forEach { (k, v) -> if (k !in rangeKeys) put(k, v) } })
-                } else { add(element) }
+                val migrated = connectionWithCounts(element.jsonObject, rangeKeys)
+                if (migrated != null) changed = true
+                add(migrated ?: element)
             }
         }
         if (!changed) return raw

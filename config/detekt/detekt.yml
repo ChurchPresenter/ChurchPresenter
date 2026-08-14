@@ -44,7 +44,11 @@ complexity:
   TooManyFunctions:
     active: false
   CyclomaticComplexMethod:
-    active: false
+    active: true
+    threshold: 20
+    ignoreAnnotated: ['Composable']
+    ignoreSingleWhenExpression: true
+    ignoreSimpleWhenEntries: true
   LargeClass:
     active: false
   NestedBlockDepth:

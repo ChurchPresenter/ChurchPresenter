@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import kotlinx.coroutines.flow.first
+import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 
 /**
@@ -118,29 +119,13 @@ internal fun BibleViewModel.onEngineScripture(
     val codeStart = canonicalCodeStart?.let { bible.parseVerseCode(it) }
     val codeBook = codeStart?.first ?: bookId
     val bookIndex = bible.getDisplayIndexForBookId(codeBook).takeIf { it in _books.value.indices } ?: return
-    val (dispChapter, dispVerseStart) =
-        if (codeStart != null)
-            bible.getVerseDetailsByCode(codeStart.first, codeStart.second, codeStart.third)
-                ?.let { it.displayChapter to it.displayVerse } ?: (chapter to verseStart)
-        else chapter to verseStart
+    val (dispChapter, dispVerseStart) = bible.displayPositionOf(codeStart, chapter, verseStart)
     val dispVerseEnd = canonicalCodeEnd?.let { bible.parseVerseCode(it) }
         ?.let { bible.getVerseDetailsByCode(it.first, it.second, it.third)?.displayVerse }
         ?: verseEnd
 
-    val source = when (matchType) {
-        "explicit" -> DetectionSource.EXPLICIT
-        "continuation" -> DetectionSource.CONTINUATION
-        "chapter-scan" -> DetectionSource.CHAPTER_SCAN
-        "chapter-history" -> DetectionSource.CHAPTER_HISTORY
-        else -> DetectionSource.REVERSE
-    }
-    val trackSet = tracks.mapNotNull {
-        when (it) {
-            "transcription" -> DetectionTrack.TRANSCRIPTION
-            "translation" -> DetectionTrack.TRANSLATION
-            else -> null
-        }
-    }.toSet()
+    val source = detectionSourceOf(matchType)
+    val trackSet = detectionTracksOf(tracks)
     val vEnd = dispVerseEnd?.takeIf { it > dispVerseStart }
     val label = buildDetectionLabel(bookIndex, dispChapter, dispVerseStart, vEnd)
     val key = "$bookIndex|$dispChapter|$dispVerseStart|$vEnd"
@@ -282,4 +267,33 @@ internal fun BibleViewModel.buildDetectionLabel(bookIndex: Int, chapter: Int, vs
         else -> ""
     }
     return "$bookName $chapter$versePart"
+}
+
+/** The engine's matchType as the enum the UI tiers confidence by. */
+private fun detectionSourceOf(matchType: String): DetectionSource = when (matchType) {
+    "explicit" -> DetectionSource.EXPLICIT
+    "continuation" -> DetectionSource.CONTINUATION
+    "chapter-scan" -> DetectionSource.CHAPTER_SCAN
+    "chapter-history" -> DetectionSource.CHAPTER_HISTORY
+    else -> DetectionSource.REVERSE
+}
+
+private fun detectionTracksOf(tracks: List<String>): Set<DetectionTrack> = tracks.mapNotNull {
+    when (it) {
+        "transcription" -> DetectionTrack.TRANSCRIPTION
+        "translation" -> DetectionTrack.TRANSLATION
+        else -> null
+    }
+}.toSet()
+
+/** The module's own chapter/verse for a canonical code, falling back to what the engine sent. */
+private fun Bible.displayPositionOf(
+    codeStart: Triple<Int, Int, Int>?,
+    chapter: Int,
+    verseStart: Int,
+): Pair<Int, Int> {
+    if (codeStart == null) return chapter to verseStart
+    return getVerseDetailsByCode(codeStart.first, codeStart.second, codeStart.third)
+        ?.let { it.displayChapter to it.displayVerse }
+        ?: (chapter to verseStart)
 }

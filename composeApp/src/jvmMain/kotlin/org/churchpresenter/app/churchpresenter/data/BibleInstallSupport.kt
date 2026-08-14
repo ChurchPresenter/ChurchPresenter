@@ -13,6 +13,7 @@ import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.HttpHeaders
 import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.delay
+import io.ktor.utils.io.ByteReadChannel
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -26,6 +27,9 @@ import kotlin.random.Random
 private const val JITTER_MIN = 0.8
 private const val JITTER_MAX = 1.2
 private const val HTTP_OK = 200
+private const val HTTP_PARTIAL_CONTENT = 206
+private const val HTTP_RANGE_NOT_SATISFIABLE = 416
+private val HTTP_SUCCESS_RANGE = 200..299
 private const val MAX_CAUSE_DEPTH = 4
 
 /**
@@ -147,9 +151,7 @@ internal object BibleInstallSupport {
         onProgress: (Float) -> Unit,
     ): DownloadResult {
         // Deliberately outside the loop: this is the state a resumed attempt picks back up from.
-        var written = 0L
-        var total = expectedBytes.takeIf { it > 0 } ?: -1L
-        var highest = 0f
+        val state = DownloadState(total = expectedBytes.takeIf { it > 0 } ?: -1L)
         var stalledAttempts = 0
         var attempts = 0
         var lastFailure: IOException? = null
@@ -161,7 +163,7 @@ internal object BibleInstallSupport {
 
         while (attempts < MAX_DOWNLOAD_ATTEMPTS) {
             attempts++
-            val resumeFrom = written
+            val resumeFrom = state.written
             try {
                 val status = http.prepareGet(url) {
                     if (resumeFrom > 0) header(HttpHeaders.Range, "bytes=$resumeFrom-")
@@ -169,64 +171,91 @@ internal object BibleInstallSupport {
                         requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
                         socketTimeoutMillis = DOWNLOAD_SOCKET_TIMEOUT_MS
                     }
-                }.execute { response ->
-                    val code = response.status.value
-                    // Asked for a tail that isn't there: everything wanted is already on disk.
-                    if (code == 416 && resumeFrom > 0) return@execute 200
-                    if (code !in 200..299) return@execute code
-
-                    // Only a 206 whose Content-Range starts exactly where we left off is a tail. A
-                    // server that ignores Range answers 200 with the whole body, and appending that
-                    // would splice the file into nonsense — so start the file over instead.
-                    val append = code == 206 && resumeFrom > 0 && rangeStartsAt(response, resumeFrom)
-                    if (!append) written = 0
-                    // What this answer promises, as opposed to what the catalogue said the whole
-                    // module weighs — only the former is a promise this response can break.
-                    val promised = response.headers[HttpHeaders.ContentLength]?.toLongOrNull()
-                        ?.let { it + if (append) resumeFrom else 0 }
-                    if (promised != null) total = promised
-
-                    val channel = response.bodyAsChannel()
-                    val buffer = ByteArray(COPY_BUFFER_BYTES)
-                    FileOutputStream(destination, append).use { out ->
-                        var endOfBody = false
-                        while (!endOfBody) {
-                            val read = channel.readAvailable(buffer, 0, buffer.size)
-                            if (read == -1) endOfBody = true
-                            if (read > 0) {
-                                out.write(buffer, 0, read)
-                                written += read
-                                if (total > 0) {
-                                    val fraction = (written.toFloat() / total).coerceIn(0f, 1f) * DOWNLOAD_END
-                                    // Only ever forward: a restart from zero must not rewind the bar.
-                                    if (fraction > highest) {
-                                        highest = fraction
-                                        onProgress(fraction)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    // A body that stops early does not always throw at the read: depending on how the
-                    // connection died the channel is simply closed, with the cause attached or with
-                    // nothing at all. Both are the same event — fewer bytes than the server promised
-                    // — and both must resume rather than hand a half file on to be converted.
-                    requireCompleteBody(channel.closedCause, promised, written)
-                    code
-                }
-                if (status !in 200..299) return DownloadResult(status, written)
+                }.execute { response -> receiveBody(response, destination, resumeFrom, state, onProgress) }
+                if (status !in HTTP_SUCCESS_RANGE) return DownloadResult(status, state.written)
                 // 206 is normalised away — callers only ever ask whether the bytes arrived.
-                return DownloadResult(HTTP_OK, written)
+                return DownloadResult(HTTP_OK, state.written)
             } catch (e: IOException) {
                 lastFailure = e
-                stalledAttempts = if (written > resumeFrom) 0 else stalledAttempts + 1
+                stalledAttempts = if (state.written > resumeFrom) 0 else stalledAttempts + 1
                 if (stalledAttempts >= MAX_STALLED_ATTEMPTS) break
                 delay(downloadRetryDelayMs(stalledAttempts - 1, retryFloorMs))
             }
         }
 
         val failure = lastFailure ?: IOException("Download failed without a cause")
-        throw if (failure.isStall()) DownloadStalledException(attempts, written, failure) else failure
+        throw if (failure.isStall()) DownloadStalledException(attempts, state.written, failure) else failure
+    }
+
+    /** What a resumed attempt picks back up from: bytes on disk, promised size, bar position. */
+    private class DownloadState(var written: Long = 0L, var total: Long = -1L, var highest: Float = 0f)
+
+    /**
+     * Writes one response body into [destination], resuming after [resumeFrom] when the server
+     * really did hand back that tail. Returns the status the attempt should be judged by.
+     */
+    private suspend fun receiveBody(
+        response: HttpResponse,
+        destination: File,
+        resumeFrom: Long,
+        state: DownloadState,
+        onProgress: (Float) -> Unit,
+    ): Int {
+        val code = response.status.value
+        // Asked for a tail that isn't there: everything wanted is already on disk.
+        if (code == HTTP_RANGE_NOT_SATISFIABLE && resumeFrom > 0) return HTTP_OK
+        if (code !in HTTP_SUCCESS_RANGE) return code
+
+        // Only a 206 whose Content-Range starts exactly where we left off is a tail. A server that
+        // ignores Range answers 200 with the whole body, and appending that would splice the file
+        // into nonsense — so start the file over instead.
+        val append = code == HTTP_PARTIAL_CONTENT && resumeFrom > 0 && rangeStartsAt(response, resumeFrom)
+        if (!append) state.written = 0
+        // What this answer promises, as opposed to what the catalogue said the whole module weighs
+        // — only the former is a promise this response can break.
+        val promised = response.headers[HttpHeaders.ContentLength]?.toLongOrNull()
+            ?.let { it + if (append) resumeFrom else 0 }
+        if (promised != null) state.total = promised
+
+        val channel = response.bodyAsChannel()
+        copyChannel(channel, destination, append, state, onProgress)
+        // A body that stops early does not always throw at the read: depending on how the connection
+        // died the channel is simply closed, with the cause attached or with nothing at all. Both are
+        // the same event — fewer bytes than the server promised — and both must resume rather than
+        // hand a half file on to be converted.
+        requireCompleteBody(channel.closedCause, promised, state.written)
+        return code
+    }
+
+    private suspend fun copyChannel(
+        channel: ByteReadChannel,
+        destination: File,
+        append: Boolean,
+        state: DownloadState,
+        onProgress: (Float) -> Unit,
+    ) {
+        val buffer = ByteArray(COPY_BUFFER_BYTES)
+        FileOutputStream(destination, append).use { out ->
+            var endOfBody = false
+            while (!endOfBody) {
+                val read = channel.readAvailable(buffer, 0, buffer.size)
+                if (read == -1) endOfBody = true
+                if (read > 0) {
+                    out.write(buffer, 0, read)
+                    state.written += read
+                    if (state.total > 0) reportProgress(state, onProgress)
+                }
+            }
+        }
+    }
+
+    /** Only ever forward: a restart from zero must not rewind the bar. */
+    private fun reportProgress(state: DownloadState, onProgress: (Float) -> Unit) {
+        val fraction = (state.written.toFloat() / state.total).coerceIn(0f, 1f) * DOWNLOAD_END
+        if (fraction > state.highest) {
+            state.highest = fraction
+            onProgress(fraction)
+        }
     }
 
     /** Rejects a body that ended early, whether the channel reported a cause or simply closed. */

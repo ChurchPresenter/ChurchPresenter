@@ -181,11 +181,20 @@ object LiveMapReporter {
         append("&version=$version")
         if (updateCheckInterval != null) append("&updateCheck=${updateCheckInterval.name.lowercase()}")
         if (isDevBuild) append("&src=dev")
+        appendBuildFacts(repoSlug, commit, buildType)
+        appendSetupFacts(setup)
+        appendEventCounts(events)
+    }
+
+    private fun StringBuilder.appendBuildFacts(repoSlug: String, commit: String, buildType: String) {
         if (repoSlug.isNotBlank() && repoSlug != "unknown") append("&repo=$repoSlug")
         if (commit.isNotBlank() && commit != "unknown") append("&commit=$commit")
         if (buildType.isNotBlank() && buildType != "unknown") append("&build=$buildType")
-        // Omitted rather than sent as 0/false when unknown or unused, so the server can tell a
-        // setup that has none from a build too old to report it.
+    }
+
+    // Omitted rather than sent as 0/false when unknown or unused, so the server can tell a setup
+    // that has none from a build too old to report it.
+    private fun StringBuilder.appendSetupFacts(setup: SetupFacts) {
         if (setup.language.isNotBlank()) append("&lang=${setup.language}")
         if (setup.screens > 0) append("&screens=${setup.screens}")
         if (setup.bibles > 0) append("&bibles=${setup.bibles}")
@@ -194,8 +203,11 @@ object LiveMapReporter {
         if (setup.songbooks > 0) append("&songbooks=${setup.songbooks}")
         if (setup.songs > 0) append("&songs=${setup.songs}")
         if (setup.sessionMinutes > 0) append("&sessionMinutes=${setup.sessionMinutes}")
-        // Everything above describes the session that is starting. These are things that already
-        // happened, counted since the last ping the server took, so they can simply be added up.
+    }
+
+    // Everything above describes the session that is starting. These are things that already
+    // happened, counted since the last ping the server took, so they can simply be added up.
+    private fun StringBuilder.appendEventCounts(events: Map<UsageEvent, Int>) {
         UsageEvent.entries.forEach { event ->
             val count = events[event] ?: 0
             if (count > 0) append("&${event.param}=$count")

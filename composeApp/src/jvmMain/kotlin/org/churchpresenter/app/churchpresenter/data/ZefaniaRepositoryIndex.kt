@@ -14,9 +14,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import io.ktor.client.statement.HttpResponse
 import java.io.File
 import java.net.URLEncoder
 
+private val HTTP_OK_RANGE = 200..299
 private const val REGEX_GROUP_IDENTIFIER = 3
 private const val REGEX_GROUP_DISPLAY_NAME = 4
 
@@ -169,26 +171,7 @@ object ZefaniaRepositoryIndex {
                 if (cached != null && cached.etag.isNotBlank()) header("If-None-Match", cached.etag)
             }
 
-            if (response.status == HttpStatusCode.NotModified && cached != null) {
-                writeMeta(cacheFile, nowMillis, cached.etag)
-                memoryCache = nowMillis to cached
-                return@withContext IndexOutcome.Success(cached)
-            }
-
-            if (response.status == HttpStatusCode.Forbidden && response.headers["x-ratelimit-remaining"] == "0") {
-                val reset = response.headers["x-ratelimit-reset"]?.toLongOrNull()
-                return@withContext cached
-                    ?.let { IndexOutcome.Success(it, stale = true) }
-                    ?: IndexOutcome.RateLimited(reset)
-            }
-
-            if (response.status.value !in 200..299) {
-                CrashReporter.reportWarning(
-                    "Zefania index fetch returned HTTP ${response.status.value}",
-                    tags = mapOf("subsystem" to "zefania_index")
-                )
-                return@withContext cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.Failure
-            }
+            unusableResponseOutcome(response, cached, cacheFile, nowMillis)?.let { return@withContext it }
 
             val body = response.body<String>()
             val etag = response.headers["ETag"].orEmpty()
@@ -214,6 +197,35 @@ object ZefaniaRepositoryIndex {
             // install, which is far more useful than an empty dialog.
             cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError
         }
+    }
+
+    /**
+     * The outcome for a response that carries no new index — not-modified, rate-limited or an error
+     * status — or null when the body should be parsed. A stale cached index beats an empty dialog.
+     */
+    private suspend fun unusableResponseOutcome(
+        response: HttpResponse,
+        cached: Index?,
+        cacheFile: File,
+        nowMillis: Long,
+    ): IndexOutcome? {
+        if (response.status == HttpStatusCode.NotModified && cached != null) {
+            writeMeta(cacheFile, nowMillis, cached.etag)
+            memoryCache = nowMillis to cached
+            return IndexOutcome.Success(cached)
+        }
+        if (response.status == HttpStatusCode.Forbidden && response.headers["x-ratelimit-remaining"] == "0") {
+            val reset = response.headers["x-ratelimit-reset"]?.toLongOrNull()
+            return cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.RateLimited(reset)
+        }
+        if (response.status.value !in HTTP_OK_RANGE) {
+            CrashReporter.reportWarning(
+                "Zefania index fetch returned HTTP ${response.status.value}",
+                tags = mapOf("subsystem" to "zefania_index")
+            )
+            return cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.Failure
+        }
+        return null
     }
 
     /** Parses a git-tree response body. Pure — this is where nearly all the behaviour lives. */

@@ -12,6 +12,8 @@ import java.io.File
 import java.nio.file.ClosedWatchServiceException
 import java.nio.file.FileSystems
 import java.nio.file.Path
+import java.nio.file.WatchEvent
+import java.nio.file.WatchKey
 import java.nio.file.StandardWatchEventKinds
 import java.nio.file.WatchService
 
@@ -56,33 +58,7 @@ class SongFolderWatcher(
 
                     for (event in key.pollEvents()) {
                         if (event.kind() == StandardWatchEventKinds.OVERFLOW) continue
-                        val fileName = event.context().toString()
-
-                        // Check if it's a .song file change
-                        if (fileName.substringAfterLast('.', "").lowercase() == Constants.EXTENSION_SONG) {
-                            relevant = true
-                        }
-
-                        // Check if it's a directory change (new songbook folder)
-                        val watchedPath = (key.watchable() as? Path)?.resolve(fileName)
-                        if (watchedPath != null) {
-                            val file = watchedPath.toFile()
-                            if (file.isDirectory) {
-                                // Register the new subdirectory for watching
-                                if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
-                                    try {
-                                        file.toPath().register(
-                                            watchService,
-                                            StandardWatchEventKinds.ENTRY_CREATE,
-                                            StandardWatchEventKinds.ENTRY_DELETE,
-                                            StandardWatchEventKinds.ENTRY_MODIFY
-                                        )
-                                    } catch (_: Exception) {
-                                    }
-                                }
-                                relevant = true
-                            }
-                        }
+                        if (isRelevantEvent(event, key, watchService)) relevant = true
                     }
 
                     if (relevant) {
@@ -103,6 +79,33 @@ class SongFolderWatcher(
                 watchService.close()
             }
         }
+    }
+
+
+    /**
+     * True when this event should trigger a reload: a .song file changed, or a songbook folder
+     * appeared — in which case the new folder is registered for watching too.
+     */
+    private fun isRelevantEvent(
+        event: WatchEvent<*>,
+        key: WatchKey,
+        watchService: WatchService,
+    ): Boolean {
+        val fileName = event.context().toString()
+        val isSongFile = fileName.substringAfterLast('.', "").lowercase() == Constants.EXTENSION_SONG
+        val file = (key.watchable() as? Path)?.resolve(fileName)?.toFile()
+        if (file?.isDirectory != true) return isSongFile
+        if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
+            runCatching {
+                file.toPath().register(
+                    watchService,
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_DELETE,
+                    StandardWatchEventKinds.ENTRY_MODIFY
+                )
+            }
+        }
+        return true
     }
 
     fun dispose() {

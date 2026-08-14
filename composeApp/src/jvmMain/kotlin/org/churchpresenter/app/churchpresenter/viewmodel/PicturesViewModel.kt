@@ -26,6 +26,7 @@ import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 import org.jetbrains.skia.Image
 import java.io.File
 import java.nio.file.FileSystems
+import java.nio.file.WatchEvent
 import java.nio.file.StandardWatchEventKinds
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
@@ -495,48 +496,7 @@ class PicturesViewModel(
                         val fileName = event.context().toString()
                         val ext = fileName.substringAfterLast('.', "").lowercase()
                         if (kind == StandardWatchEventKinds.OVERFLOW || ext !in imageExtensions) continue
-
-                        val file = File(folder, fileName)
-                        when (kind) {
-                            StandardWatchEventKinds.ENTRY_CREATE -> {
-                                // isActive gates the add: cancellation is cooperative, so a watcher
-                                // cancelled by clearImages() can still be mid-pollEvents() here — an
-                                // add now would land in _images after the reload and duplicate a path.
-                                val isNewImageFile = file.exists() && file.isFile && file !in _images
-                        if (isActive && isNewImageFile) {
-                                    // Insert in sorted order, keep selected image stable
-                                    val insertIndex = _images.indexOfFirst { it.name > file.name }
-                                    if (insertIndex >= 0) {
-                                        _images.add(insertIndex, file)
-                                        if (insertIndex <= _selectedImageIndex.value) {
-                                            _selectedImageIndex.value++
-                                        }
-                                    } else {
-                                        _images.add(file)
-                                    }
-                                    // Load thumbnail
-                                    // A file copied into a watched folder is seen the moment it
-                                    // is created, usually before it is fully written, so the first
-                                    // decode of it legitimately fails.
-                                    launch { decodeThumbnail(file, attempts = THUMBNAIL_RETRY_ATTEMPTS) }
-                                    changed = true
-                                }
-                            }
-                            StandardWatchEventKinds.ENTRY_DELETE -> {
-                                val idx = _images.indexOf(file)
-                                if (idx >= 0) {
-                                    _images.removeAt(idx)
-                                    _thumbnails.remove(file)
-                                    _thumbnailFailures.remove(file)
-                                    if (idx < _selectedImageIndex.value) {
-                                        _selectedImageIndex.value--
-                                    } else if (_selectedImageIndex.value >= _images.size && _images.isNotEmpty()) {
-                                        _selectedImageIndex.value = _images.size - 1
-                                    }
-                                    changed = true
-                                }
-                            }
-                        }
+                        if (applyWatchEvent(kind, File(folder, fileName))) changed = true
                     }
                     if (!key.reset()) break
                 }
@@ -549,6 +509,48 @@ class PicturesViewModel(
                 // Folder became unavailable mid-watch (deleted/unmounted). Watching is best-effort.
             }
         }
+    }
+
+
+    /** Applies one watch event to the image list; true when the list actually changed. */
+    private fun CoroutineScope.applyWatchEvent(kind: WatchEvent.Kind<*>, file: File): Boolean = when (kind) {
+        StandardWatchEventKinds.ENTRY_CREATE -> addWatchedImage(file)
+        StandardWatchEventKinds.ENTRY_DELETE -> removeWatchedImage(file)
+        else -> false
+    }
+
+    private fun CoroutineScope.addWatchedImage(file: File): Boolean {
+        // isActive gates the add: cancellation is cooperative, so a watcher cancelled by
+        // clearImages() can still be mid-pollEvents() here — an add now would land in _images
+        // after the reload and duplicate a path.
+        val isNewImageFile = file.exists() && file.isFile && file !in _images
+        if (!isActive || !isNewImageFile) return false
+        // Insert in sorted order, keep selected image stable
+        val insertIndex = _images.indexOfFirst { it.name > file.name }
+        if (insertIndex >= 0) {
+            _images.add(insertIndex, file)
+            if (insertIndex <= _selectedImageIndex.value) _selectedImageIndex.value++
+        } else {
+            _images.add(file)
+        }
+        // A file copied into a watched folder is seen the moment it is created, usually before it
+        // is fully written, so the first decode of it legitimately fails.
+        launch { decodeThumbnail(file, attempts = THUMBNAIL_RETRY_ATTEMPTS) }
+        return true
+    }
+
+    private fun removeWatchedImage(file: File): Boolean {
+        val idx = _images.indexOf(file)
+        if (idx < 0) return false
+        _images.removeAt(idx)
+        _thumbnails.remove(file)
+        _thumbnailFailures.remove(file)
+        if (idx < _selectedImageIndex.value) {
+            _selectedImageIndex.value--
+        } else if (_selectedImageIndex.value >= _images.size && _images.isNotEmpty()) {
+            _selectedImageIndex.value = _images.size - 1
+        }
+        return true
     }
 
     fun dispose() {

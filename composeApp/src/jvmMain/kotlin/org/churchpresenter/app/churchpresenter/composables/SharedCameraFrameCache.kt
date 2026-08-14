@@ -19,6 +19,7 @@ import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 
 private const val MAX_NULL_FRAMES_BEFORE_CLEAR = 30
 private const val DECKLINK_POLL_INTERVAL_MS = 16L
+private const val STDERR_TAIL_LINES = 50
 private const val MAX_CONSECUTIVE_FAILURES = 5
 private const val DEVICE_RELEASE_DELAY_MS = 500L
 private const val RETRY_DELAY_MS = 2000L
@@ -192,11 +193,121 @@ object SharedCameraFrameCache {
 
     // ── FFmpeg capture ──────────────────────────────────────────────
 
+
+    /**
+     * Reads raw BGRA frames off a running ffmpeg into [entry] until the stream ends. True when at
+     * least one frame arrived, which is what tells a dropped stream apart from a device that never
+     * opened.
+     */
+    private suspend fun streamFrames(process: Process, entry: CacheEntry): Boolean {
+        entry.ffmpegProcess = process
+
+        // Drain stderr and extract video dimensions from ffmpeg output
+        val stderrLines = mutableListOf<String>()
+        val videoDims = java.util.concurrent.atomic.AtomicReference<Pair<Int, Int>?>(null)
+        val stderrJob = CoroutineScope(currentCoroutineContext()).launch(Dispatchers.IO) {
+            try {
+                process.errorStream.bufferedReader().useLines { lines ->
+                    lines.forEach { line ->
+                        synchronized(stderrLines) {
+                            stderrLines.add(line)
+                            if (stderrLines.size > STDERR_TAIL_LINES) stderrLines.removeAt(0)
+                        }
+                        if (videoDims.get() == null) {
+                            parseFfmpegVideoDimensions(line)?.let { videoDims.set(it) }
+                        }
+                    }
+                }
+            } catch (_: Throwable) {}
+        }
+
+        val resolved = awaitVideoDimensions(videoDims)
+        if (resolved == null) {
+            System.err.println("[Camera] Could not determine video dimensions from ffmpeg")
+            stderrJob.cancel()
+            withContext(Dispatchers.IO) { killFfmpegProcess(process) }
+            entry.ffmpegProcess = null
+            return false
+        }
+
+        val (videoW, videoH) = resolved
+        val frameCount = readFramesInto(process, entry, videoW, videoH)
+
+        // Stream ended — clean up this process
+        stderrJob.cancel()
+        val exitCode = withContext(Dispatchers.IO) {
+            try {
+                killFfmpegProcess(process)
+                process.exitValue()
+            } catch (_: Throwable) { -1 }
+        }
+        entry.ffmpegProcess = null
+
+        if (frameCount > 0) {
+            System.err.println("[Camera] Stream interrupted after $frameCount frames (exit $exitCode), restarting...")
+        } else {
+            System.err.println("[Camera] ffmpeg exited with code $exitCode without producing any frames")
+            synchronized(stderrLines) {
+                stderrLines.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
+            }
+        }
+        return frameCount > 0
+    }
+
+    /** Waits up to five seconds for ffmpeg to announce the stream's size. */
+    private suspend fun awaitVideoDimensions(
+        videoDims: java.util.concurrent.atomic.AtomicReference<Pair<Int, Int>?>,
+    ): Pair<Int, Int>? {
+        repeat(DIMENSION_POLL_ATTEMPTS) {
+            videoDims.get()?.let { return it }
+            delay(DIMENSION_POLL_INTERVAL_MS)
+        }
+        return videoDims.get()
+    }
+
+    /** Frames read into [entry] until the stream stops; the count is the caller's success signal. */
+    private suspend fun readFramesInto(process: Process, entry: CacheEntry, videoW: Int, videoH: Int): Int {
+        val frameBytes = videoW * videoH * 4  // BGRA = 4 bytes per pixel
+        System.err.println("[Camera] Capturing ${videoW}x${videoH} rawvideo BGRA ($frameBytes bytes/frame)")
+
+        val inputStream = java.io.BufferedInputStream(process.inputStream, frameBytes * 2)
+        val frameBuf = ByteArray(frameBytes)
+        val pixelBuf = IntArray(videoW * videoH)
+        var frameCount = 0
+
+        while (currentCoroutineContext().isActive) {
+            val ok = withContext(Dispatchers.IO) { readFullFrame(inputStream, frameBuf, frameBytes) }
+            if (!ok) break
+
+            withContext(Dispatchers.IO) { bgraBytesToArgbPixels(frameBuf, pixelBuf) }
+
+            val img = java.awt.image.BufferedImage(videoW, videoH, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+            img.setRGB(0, 0, videoW, videoH, pixelBuf, 0, videoW)
+            entry.frame.value = img.toComposeImageBitmap()
+            frameCount++
+            if (frameCount == 1) {
+                System.err.println("[Camera] First frame received (${videoW}x${videoH})")
+            }
+        }
+        return frameCount
+    }
+
+    private fun readFullFrame(inputStream: java.io.InputStream, frameBuf: ByteArray, frameBytes: Int): Boolean =
+        try {
+            var read = 0
+            var endOfStream = false
+            while (read < frameBytes && !endOfStream) {
+                val r = inputStream.read(frameBuf, read, frameBytes - read)
+                if (r == -1) endOfStream = true else read += r
+            }
+            !endOfStream
+        } catch (_: Throwable) {
+            false
+        }
+
     private suspend fun runFfmpegCapture(source: SceneSource.CameraSource, entry: CacheEntry) {
         val path = source.devicePath
-        System.err.println(
-            "[Camera] Starting camera capture for device: $path, format: ${source.videoFormat.ifEmpty { "auto" }}"
-        )
+        System.err.println("[Camera] Starting camera capture for device: $path, format: ${source.videoFormat.ifEmpty { "auto" }}")
 
         val command = buildFfmpegCommand(source) ?: run {
             System.err.println("[Camera] Unknown device path scheme: $path")
@@ -213,8 +324,7 @@ object SharedCameraFrameCache {
                 delay(DEVICE_RELEASE_DELAY_MS)
             }
 
-            System.err
-                .println("[Camera] Opening device (attempt ${consecutiveFailures + 1}): ${command.joinToString(" ")}")
+            System.err.println("[Camera] Opening device (attempt ${consecutiveFailures + 1}): ${command.joinToString(" ")}")
             val process = withContext(Dispatchers.IO) {
                 try {
                     ProcessBuilder(command).redirectErrorStream(false).start()
@@ -231,107 +341,8 @@ object SharedCameraFrameCache {
                 System.err.println("[Camera] ffmpeg exited immediately with code ${process.exitValue()}")
                 withContext(Dispatchers.IO) { killFfmpegProcess(process) }
             }
-            var framesProduced = false
-            if (process != null && !exitedImmediately) {
-                entry.ffmpegProcess = process
-
-                // Drain stderr and extract video dimensions from ffmpeg output
-                val stderrLines = mutableListOf<String>()
-                val videoDims = java.util.concurrent.atomic.AtomicReference<Pair<Int, Int>?>(null)
-                val stderrJob = CoroutineScope(currentCoroutineContext()).launch(Dispatchers.IO) {
-                    try {
-                        process.errorStream.bufferedReader().useLines { lines ->
-                            lines.forEach { line ->
-                                synchronized(stderrLines) {
-                                    stderrLines.add(line)
-                                    if (stderrLines.size > 50) stderrLines.removeAt(0)
-                                }
-                                if (videoDims.get() == null) {
-                                    parseFfmpegVideoDimensions(line)?.let { videoDims.set(it) }
-                                }
-                            }
-                        }
-                    } catch (_: Throwable) {}
-                }
-
-                // Wait for dimensions (up to 5 seconds)
-                var dims: Pair<Int, Int>? = null
-                repeat(DIMENSION_POLL_ATTEMPTS) {
-                    dims = videoDims.get()
-                    if (dims != null) break
-                    delay(DIMENSION_POLL_INTERVAL_MS)
-                }
-                val resolved = dims
-                if (resolved == null) {
-                    System.err.println("[Camera] Could not determine video dimensions from ffmpeg")
-                    stderrJob.cancel()
-                    withContext(Dispatchers.IO) { killFfmpegProcess(process) }
-                    entry.ffmpegProcess = null
-                } else {
-                    val (videoW, videoH) = resolved
-                    val frameBytes = videoW * videoH * 4  // BGRA = 4 bytes per pixel
-                    System.err.println("[Camera] Capturing ${videoW}x${videoH} rawvideo BGRA ($frameBytes bytes/frame)")
-
-                    val inputStream = java.io.BufferedInputStream(process.inputStream, frameBytes * 2)
-                    val frameBuf = ByteArray(frameBytes)
-                    val pixelBuf = IntArray(videoW * videoH)
-                    var frameCount = 0
-
-                    while (currentCoroutineContext().isActive) {
-                        val ok = withContext(Dispatchers.IO) {
-                            try {
-                                var read = 0
-                                while (read < frameBytes) {
-                                    val r = inputStream.read(frameBuf, read, frameBytes - read)
-                                    if (r == -1) return@withContext false
-                                    read += r
-                                }
-                                true
-                            } catch (_: Throwable) { false }
-                        }
-                        if (!ok) break
-
-                        withContext(Dispatchers.IO) {
-                            bgraBytesToArgbPixels(frameBuf, pixelBuf)
-                        }
-
-                        val img = java.awt.image.BufferedImage(
-                            videoW,
-                            videoH,
-                            java.awt.image.BufferedImage.TYPE_INT_ARGB
-                        )
-                        img.setRGB(0, 0, videoW, videoH, pixelBuf, 0, videoW)
-                        entry.frame.value = img.toComposeImageBitmap()
-                        frameCount++
-                        if (frameCount == 1) {
-                            System.err.println("[Camera] First frame received (${videoW}x${videoH})")
-                        }
-                    }
-
-                    // Stream ended — clean up this process
-                    stderrJob.cancel()
-                    val exitCode = withContext(Dispatchers.IO) {
-                        try {
-                            killFfmpegProcess(process)
-                            process.exitValue()
-                        } catch (_: Throwable) { -1 }
-                    }
-                    entry.ffmpegProcess = null
-
-                    framesProduced = frameCount > 0
-                    if (framesProduced) {
-                        System.err.println(
-                            "[Camera] Stream interrupted after $frameCount frames (exit $exitCode), restarting..."
-                        )
-                    } else {
-                        System.err.println("[Camera] ffmpeg exited with code $exitCode without producing any frames")
-                        synchronized(stderrLines) {
-                            stderrLines.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
-                        }
-                    }
-                }
-            }
-
+            val framesProduced =
+                if (process != null && !exitedImmediately) streamFrames(process, entry) else false
             if (framesProduced) {
                 consecutiveFailures = 0
                 delay(RESTART_DELAY_MS)

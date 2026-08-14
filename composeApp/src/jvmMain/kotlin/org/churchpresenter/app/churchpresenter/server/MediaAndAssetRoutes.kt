@@ -43,6 +43,20 @@ internal fun Route.mediaAndAssetRoutes(
     json: Json,
     scope: CoroutineScope,
 ) {
+    pictureRoutes(server, _pictureCatalog, _pictureCatalogs, _pictureFiles)
+    mediaStreamAndBibleFileRoutes(server, _scheduleItemToMediaPath)
+    backgroundAndPictureUploadRoutes(
+        server, deviceUploadsFolderId, _backgroundSettings, _fileUploadEnabled,
+        _pictureCatalogs, _pictureFiles, json, scope
+    )
+}
+
+private fun Route.pictureRoutes(
+    server: CompanionServer,
+    _pictureCatalog: MutableStateFlow<PictureFolderResponse?>,
+    _pictureCatalogs: ConcurrentHashMap<String, PictureFolderResponse>,
+    _pictureFiles: ConcurrentHashMap<String, List<File>>,
+) {
                 get(Constants.ENDPOINT_PICTURES) {
                     if (!server.checkApiKey(call)) return@get
                     val catalog = _pictureCatalog.value
@@ -145,6 +159,12 @@ internal fun Route.mediaAndAssetRoutes(
                  * handled by the PartialContent plugin so seeking works, letting an InstanceLink
                  * follower play the file over HTTP without needing a local copy.
                  */
+}
+
+private fun Route.mediaStreamAndBibleFileRoutes(
+    server: CompanionServer,
+    _scheduleItemToMediaPath: ConcurrentHashMap<String, String>,
+) {
                 get("${Constants.ENDPOINT_MEDIA_STREAM}/{id}") {
                     if (!server.checkApiKey(call)) return@get
                     val id = call.parameters["id"] ?: run {
@@ -246,6 +266,18 @@ internal fun Route.mediaAndAssetRoutes(
                 /** GET /api/backgrounds — current BackgroundSettings as JSON. Image/video fields are
                  *  still local file paths on this machine; a follower resolves the actual bytes via
                  *  GET /api/backgrounds/asset/{slot} below, keyed by slot rather than raw path. */
+}
+
+private fun Route.backgroundAndPictureUploadRoutes(
+    server: CompanionServer,
+    deviceUploadsFolderId: String,
+    _backgroundSettings: MutableStateFlow<BackgroundSettings>,
+    _fileUploadEnabled: MutableStateFlow<Boolean>,
+    _pictureCatalogs: ConcurrentHashMap<String, PictureFolderResponse>,
+    _pictureFiles: ConcurrentHashMap<String, List<File>>,
+    json: Json,
+    scope: CoroutineScope,
+) {
                 get(Constants.ENDPOINT_BACKGROUNDS) {
                     if (!server.checkApiKey(call)) return@get
                     server.logRest("/api/backgrounds", HttpStatusCode.OK.value)
@@ -313,6 +345,18 @@ internal fun Route.mediaAndAssetRoutes(
                  * When "file-name" is provided the index is resolved by name so the correct
                  * image is displayed regardless of sort-order differences between clients.
                  */
+    pictureSelectAndUploadRoutes(server, deviceUploadsFolderId, _fileUploadEnabled, _pictureCatalogs, _pictureFiles, json, scope)
+}
+
+private fun Route.pictureSelectAndUploadRoutes(
+    server: CompanionServer,
+    deviceUploadsFolderId: String,
+    _fileUploadEnabled: MutableStateFlow<Boolean>,
+    _pictureCatalogs: ConcurrentHashMap<String, PictureFolderResponse>,
+    _pictureFiles: ConcurrentHashMap<String, List<File>>,
+    json: Json,
+    scope: CoroutineScope,
+) {
                 post("${Constants.ENDPOINT_PICTURES}/select") {
                     if (!server.checkApiKey(call)) return@post
                     try {
@@ -437,5 +481,6 @@ internal fun Route.mediaAndAssetRoutes(
                         )
                     }
                 }
-
 }
+
+

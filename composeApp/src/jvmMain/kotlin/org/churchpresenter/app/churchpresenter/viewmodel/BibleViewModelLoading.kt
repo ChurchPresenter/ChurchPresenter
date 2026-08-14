@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -9,6 +10,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
+import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
@@ -124,12 +126,7 @@ internal fun BibleViewModel.setInstanceLinkSource(
             if (bytes == null) {
                 InstanceLinkLogger.log(
                     InstanceLinkLogSide.FOLLOWER, "bible_sync_result",
-                    mapOf(
-                        "mode" to mode.name,
-                        "primaryDownloaded" to false,
-                        "secondaryDownloaded" to false,
-                        "reason" to "primary_fetch_failed"
-                    )
+                    mapOf("mode" to mode.name, "primaryDownloaded" to false, "secondaryDownloaded" to false, "reason" to "primary_fetch_failed")
                 )
                 return@launch
             }
@@ -157,11 +154,7 @@ internal fun BibleViewModel.setInstanceLinkSource(
 
         InstanceLinkLogger.log(
             InstanceLinkLogSide.FOLLOWER, "bible_sync_result",
-            mapOf(
-                "mode" to mode.name,
-                "primaryDownloaded" to primaryDownloaded,
-                "secondaryDownloaded" to secondaryDownloaded
-            )
+            mapOf("mode" to mode.name, "primaryDownloaded" to primaryDownloaded, "secondaryDownloaded" to secondaryDownloaded)
         )
         loadBibles()
     }
@@ -179,47 +172,11 @@ internal fun BibleViewModel.loadBibles() {
         try {
             val useReplica = remoteModeActive && syncMode == BibleSyncMode.FULL_REPLICA
             val configuredTranslations = appSettings.bibleSettings.translationList()
-            val primaryPath = if (useReplica) {
-                remoteBibleCacheFile?.takeIf { it.exists() }
-            } else if (configuredTranslations.firstOrNull()?.fileName?.isNotEmpty() == true &&
-                appSettings.bibleSettings.storageDirectory.isNotEmpty()
-            ) File(appSettings.bibleSettings.storageDirectory, configuredTranslations.first().fileName)
-                .takeIf { it.exists() }
-            else null
-
-            val secondaryPath = if (useReplica) {
-                remoteSecondaryBibleCacheFile?.takeIf { it.exists() }
-            } else if (configuredTranslations.getOrNull(1)?.fileName?.isNotEmpty() == true &&
-                appSettings.bibleSettings.storageDirectory.isNotEmpty()
-            ) File(appSettings.bibleSettings.storageDirectory, configuredTranslations[1].fileName)
-                .takeIf { it.exists() }
-            else null
-            val translationSources = if (useReplica && remoteTranslationCacheFiles.isNotEmpty()) {
-                remoteTranslationCacheFiles
-            } else if (useReplica) {
-                listOfNotNull(primaryPath, secondaryPath).mapIndexed { index, path ->
-                    (configuredTranslations.getOrNull(index)?.fileName ?: path.name) to path
-                }
-            } else {
-                configuredTranslations.mapNotNull { translation ->
-                    File(appSettings.bibleSettings.storageDirectory, translation.fileName)
-                        .takeIf { it.exists() }
-                        ?.let { translation.fileName to it }
-                }
-            }
-
-            val missingTranslations = if (useReplica) emptyList() else {
-                val present = translationSources.map { it.first }.toSet()
-                configuredTranslations
-                    .filter { it.fileName.isNotEmpty() && it.fileName !in present }
-                    .map {
-                        BibleLoadError(
-                            resourcePath = File(appSettings.bibleSettings.storageDirectory, it.fileName).absolutePath,
-                            reason = BibleViewModel.MODULE_FILE_MISSING,
-                            partial = false,
-                        )
-                    }
-            }
+            val sources = resolveTranslationSources(useReplica, configuredTranslations)
+            val primaryPath = sources.primaryPath
+            val secondaryPath = sources.secondaryPath
+            val translationSources = sources.files
+            val missingTranslations = sources.missing
 
             val bookNameMappingDeferred = async(ioDispatcher) {
                 try { BibleBookNames.getBookNameMapping() } catch (_: Exception) { emptyMap() }
@@ -244,37 +201,12 @@ internal fun BibleViewModel.loadBibles() {
                 refreshFilteredLists()
             }
 
-            val bibleDeferred = translationSources.map { (identity, path) ->
-                identity to async(ioDispatcher) {
-                    try { Bible().apply { loadFromSpb(path.absolutePath) } }
-                    catch (e: Exception) { e.printStackTrace(); null }
-                }
-            }
-            val loadedByFile = bibleDeferred.associate { (fileName, deferred) -> fileName to deferred.await() }
-            val orderedIdentities = bibleDeferred.map { it.first }
-            val loaded = orderedIdentities.mapNotNull { fileName ->
-                loadedByFile[fileName]?.let { BibleViewModel.LoadedTranslation(fileName, it) }
-            }
-            val useRemoteIdentities = useReplica && remoteTranslationCacheFiles.isNotEmpty()
-            val primaryIdentity = if (useRemoteIdentities) orderedIdentities.firstOrNull()
-                else configuredTranslations.firstOrNull()?.fileName ?: orderedIdentities.firstOrNull()
-            val secondaryIdentity = if (useRemoteIdentities) orderedIdentities.getOrNull(1)
-                else configuredTranslations.getOrNull(1)?.fileName ?: orderedIdentities.getOrNull(1)
-            val primary = primaryIdentity?.let { loadedByFile[it] }
-            val secondary = secondaryIdentity?.let { loadedByFile[it] }
+            val modules = loadModules(useReplica, configuredTranslations, translationSources)
+            val loaded = modules.loaded
+            val primary = modules.primary
+            val secondary = modules.secondary
 
-            _loadErrors.value = missingTranslations + orderedIdentities.mapNotNull { identity ->
-                val path = translationSources.first { it.first == identity }.second
-                val bible = loadedByFile[identity]
-                when {
-                    bible == null -> BibleLoadError(
-                        path.absolutePath,
-                        BibleViewModel.MODULE_LOAD_THREW,
-                        partial = false
-                    )
-                    else -> bible.loadError
-                }
-            }
+            _loadErrors.value = missingTranslations + modules.errors
 
             if (remoteModeActive) {
                 InstanceLinkLogger.log(
@@ -298,30 +230,7 @@ internal fun BibleViewModel.loadBibles() {
             }
 
             if (primary != null) {
-                _books.value = primary.getCanonicalBooks()
-
-                val bookCount = minOf(primary.getBookCount(), BibleViewModel.CANONICAL_BOOK_COUNT)
-                val clampedBookIndex = if (previousBookId != null) {
-                    (0 until bookCount).firstOrNull { primary.getBookId(it) == previousBookId }
-                        ?: _selectedBookIndex.value.coerceIn(0, (bookCount - 1).coerceAtLeast(0))
-                } else {
-                    _selectedBookIndex.value.coerceIn(0, (bookCount - 1).coerceAtLeast(0))
-                }
-                _selectedBookIndex.value = clampedBookIndex
-                val bookId = primary.getBookId(clampedBookIndex)
-                val chapterResult = withContext(ioDispatcher) {
-                    primary.getChapter(bookId, _selectedChapter.value)
-                }
-                _verses.value = chapterResult.verses
-                _selectedVerseIndex.value = _selectedVerseIndex.value.coerceIn(
-                    0,
-                    (chapterResult.verses.size - 1).coerceAtLeast(0)
-                )
-                refreshFilteredLists()
-
-                if (previousBookId != null && _verses.value.isNotEmpty()) {
-                    _verseSelectionToken.value++
-                }
+                applyLoadedPrimary(primary, previousBookId)
                 onBibleLoaded?.invoke(primary, configuredTranslations.firstOrNull()?.fileName.orEmpty())
             } else if (booksOnlyBible == null) {
                 _books.value = emptyList()
@@ -333,4 +242,126 @@ internal fun BibleViewModel.loadBibles() {
             _isFullyLoadedFlow.value = true
         }
     }
+}
+
+/** Where each configured translation's module actually is, and which ones are missing. */
+private class TranslationSources(
+    val primaryPath: File?,
+    val secondaryPath: File?,
+    val files: List<Pair<String, File>>,
+    val missing: List<BibleLoadError>,
+)
+
+private fun BibleViewModel.resolveTranslationSources(
+    useReplica: Boolean,
+    configuredTranslations: List<BibleTranslationSettings>,
+): TranslationSources {
+    val storageDirectory = appSettings.bibleSettings.storageDirectory
+    fun configuredFile(index: Int): File? = configuredTranslations.getOrNull(index)
+        ?.fileName?.takeIf { it.isNotEmpty() }
+        ?.let { name -> storageDirectory.takeIf { it.isNotEmpty() }?.let { File(it, name) } }
+        ?.takeIf { it.exists() }
+
+    val primaryPath = if (useReplica) remoteBibleCacheFile?.takeIf { it.exists() } else configuredFile(0)
+    val secondaryPath =
+        if (useReplica) remoteSecondaryBibleCacheFile?.takeIf { it.exists() } else configuredFile(1)
+
+    val files = when {
+        useReplica && remoteTranslationCacheFiles.isNotEmpty() -> remoteTranslationCacheFiles
+        useReplica -> listOfNotNull(primaryPath, secondaryPath).mapIndexed { index, path ->
+            (configuredTranslations.getOrNull(index)?.fileName ?: path.name) to path
+        }
+        else -> configuredTranslations.mapNotNull { translation ->
+            File(storageDirectory, translation.fileName)
+                .takeIf { it.exists() }
+                ?.let { translation.fileName to it }
+        }
+    }
+
+    val present = files.map { it.first }.toSet()
+    val missing = if (useReplica) emptyList() else {
+        configuredTranslations
+            .filter { it.fileName.isNotEmpty() && it.fileName !in present }
+            .map {
+                BibleLoadError(
+                    resourcePath = File(storageDirectory, it.fileName).absolutePath,
+                    reason = BibleViewModel.MODULE_FILE_MISSING,
+                    partial = false,
+                )
+            }
+    }
+    return TranslationSources(primaryPath, secondaryPath, files, missing)
+}
+
+/** Points the book list, selection and verses at a freshly loaded primary module. */
+private suspend fun BibleViewModel.applyLoadedPrimary(primary: Bible, previousBookId: Int?) {
+    _books.value = primary.getCanonicalBooks()
+
+    val bookCount = minOf(primary.getBookCount(), BibleViewModel.CANONICAL_BOOK_COUNT)
+    val fallbackIndex = _selectedBookIndex.value.coerceIn(0, (bookCount - 1).coerceAtLeast(0))
+    val clampedBookIndex = if (previousBookId != null) {
+        (0 until bookCount).firstOrNull { primary.getBookId(it) == previousBookId } ?: fallbackIndex
+    } else {
+        fallbackIndex
+    }
+    _selectedBookIndex.value = clampedBookIndex
+    val bookId = primary.getBookId(clampedBookIndex)
+    val chapterResult = withContext(ioDispatcher) { primary.getChapter(bookId, _selectedChapter.value) }
+    _verses.value = chapterResult.verses
+    _selectedVerseIndex.value =
+        _selectedVerseIndex.value.coerceIn(0, (chapterResult.verses.size - 1).coerceAtLeast(0))
+    refreshFilteredLists()
+
+    if (previousBookId != null && _verses.value.isNotEmpty()) {
+        _verseSelectionToken.value++
+    }
+}
+
+/** Every configured module read off disk, with the primary/secondary picked out of them. */
+private class LoadedModules(
+    val loaded: List<BibleViewModel.LoadedTranslation>,
+    val primary: Bible?,
+    val secondary: Bible?,
+    val errors: List<BibleLoadError>,
+)
+
+private suspend fun BibleViewModel.loadModules(
+    useReplica: Boolean,
+    configuredTranslations: List<BibleTranslationSettings>,
+    translationSources: List<Pair<String, File>>,
+): LoadedModules = coroutineScope {
+    val bibleDeferred = translationSources.map { (identity, path) ->
+        identity to async(ioDispatcher) {
+            try { Bible().apply { loadFromSpb(path.absolutePath) } }
+            catch (e: Exception) { e.printStackTrace(); null }
+        }
+    }
+    val loadedByFile = bibleDeferred.associate { (fileName, deferred) -> fileName to deferred.await() }
+    val orderedIdentities = bibleDeferred.map { it.first }
+    val loaded = orderedIdentities.mapNotNull { fileName ->
+        loadedByFile[fileName]?.let { BibleViewModel.LoadedTranslation(fileName, it) }
+    }
+    val useRemoteIdentities = useReplica && remoteTranslationCacheFiles.isNotEmpty()
+    val primaryIdentity = if (useRemoteIdentities) orderedIdentities.firstOrNull()
+        else configuredTranslations.firstOrNull()?.fileName ?: orderedIdentities.firstOrNull()
+    val secondaryIdentity = if (useRemoteIdentities) orderedIdentities.getOrNull(1)
+        else configuredTranslations.getOrNull(1)?.fileName ?: orderedIdentities.getOrNull(1)
+
+    // A module that threw is reported as such; one that read is reported by its own loadError,
+    // which is null — and so dropped — when it read cleanly.
+    val errors = orderedIdentities.mapNotNull { identity ->
+        val path = translationSources.first { it.first == identity }.second
+        val bible = loadedByFile[identity]
+        if (bible == null) {
+            BibleLoadError(path.absolutePath, BibleViewModel.MODULE_LOAD_THREW, partial = false)
+        } else {
+            bible.loadError
+        }
+    }
+    LoadedModules(
+        loaded = loaded,
+        primary = primaryIdentity?.let { loadedByFile[it] },
+        secondary = secondaryIdentity?.let { loadedByFile[it] },
+        errors = errors,
+    )
 }

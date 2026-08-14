@@ -63,27 +63,7 @@ fun RemoteItemDto.toScheduleItem(): ScheduleItem? {
                 definition      = definition ?: ""
             )
         // Announcement / timer — must have announcementText (may be "")
-        announcementText != null ->
-            ScheduleItem.AnnouncementItem(
-                id                = safeId,
-                text              = announcementText,
-                textColor         = textColor ?: "#FFFFFF",
-                backgroundColor   = backgroundColor ?: "#000000",
-                fontSize          = fontSize ?: 48,
-                animationType     = animationType ?: "SLIDE_FROM_BOTTOM",
-                animationDuration = animationDuration ?: 500,
-                isTimer           = isTimer ?: false,
-                timerHours        = timerHours ?: 0,
-                timerMinutes      = timerMinutes ?: 0,
-                timerSeconds      = timerSeconds ?: 0,
-                timerTextColor    = timerTextColor ?: (textColor ?: "#FFFFFF"),
-                timerExpiredText  = timerExpiredText ?: "",
-                timerMode         = timerMode ?: Constants.TIMER_MODE_DURATION,
-                targetHour        = targetHour ?: 0,
-                targetMinute      = targetMinute ?: 0,
-                targetSecond      = targetSecond ?: 0,
-                liveClockFormat   = liveClockFormat ?: "HH:mm:ss"
-            )
+        announcementText != null -> toAnnouncementItem(safeId, announcementText)
         // Website — must have url
         url != null ->
             ScheduleItem.WebsiteItem(
@@ -94,6 +74,29 @@ fun RemoteItemDto.toScheduleItem(): ScheduleItem? {
         else -> null
     }
 }
+
+/** The announcement/timer branch of [toScheduleItem], where most of the defaulting lives. */
+private fun RemoteItemDto.toAnnouncementItem(safeId: String, text: String): ScheduleItem.AnnouncementItem =
+    ScheduleItem.AnnouncementItem(
+        id                = safeId,
+        text              = text,
+        textColor         = textColor ?: "#FFFFFF",
+        backgroundColor   = backgroundColor ?: "#000000",
+        fontSize          = fontSize ?: 48,
+        animationType     = animationType ?: "SLIDE_FROM_BOTTOM",
+        animationDuration = animationDuration ?: 500,
+        isTimer           = isTimer ?: false,
+        timerHours        = timerHours ?: 0,
+        timerMinutes      = timerMinutes ?: 0,
+        timerSeconds      = timerSeconds ?: 0,
+        timerTextColor    = timerTextColor ?: (textColor ?: "#FFFFFF"),
+        timerExpiredText  = timerExpiredText ?: "",
+        timerMode         = timerMode ?: Constants.TIMER_MODE_DURATION,
+        targetHour        = targetHour ?: 0,
+        targetMinute      = targetMinute ?: 0,
+        targetSecond      = targetSecond ?: 0,
+        liveClockFormat   = liveClockFormat ?: "HH:mm:ss"
+    )
 
 /**
  * The companion API's wire form of a schedule item.
