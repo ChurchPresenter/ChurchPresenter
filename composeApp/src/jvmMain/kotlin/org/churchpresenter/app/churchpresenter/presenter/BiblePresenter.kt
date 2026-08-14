@@ -187,7 +187,7 @@ fun BiblePresenter(
         systemFontFamilyOrDefault(if (isLowerThird) t1.lowerThirdReferenceFontType else t1.referenceFontType)
     }
 
-    val primaryBible = effectiveVerses.firstOrNull() ?: return
+    effectiveVerses.firstOrNull() ?: return
     val secondaryBible = effectiveVerses.getOrNull(1)
 
     // Resolve colors — key mode forces white for a proper key signal

@@ -279,7 +279,7 @@ class PlanningCenterImportContentTest {
         assertTextEventually("Planning Center session expired — reconnect in Settings")
     }
 
-    private fun withPlan(vm: PlanningCenterImportViewModel, items: List<PlanningCenterClient.PlanItem>) {
+    private fun withPlan(items: List<PlanningCenterClient.PlanItem>) {
         coEvery { PlanningCenterClient.listUpcomingPlans(any(), any(), any()) } returns
             PlanningCenterClient.PlansOutcome.Success(listOf(PlanningCenterClient.Plan("plan-1", "Sunday Service", "Jul 27")))
         coEvery { PlanningCenterClient.getPlanItems(any(), any(), any(), any()) } returns
@@ -290,7 +290,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `a header row shows a bold title and a checkbox`() = dialog { vm, _, _, _ ->
-        withPlan(vm, listOf(planItem("h1", "Welcome", itemType = "header")))
+        withPlan(listOf(planItem("h1", "Welcome", itemType = "header")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
 
@@ -299,7 +299,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `an unmatched song row shows an Add Song button and no Matched tag`() = dialog { vm, _, _, _ ->
-        withPlan(vm, listOf(planItem("s1", "Amazing Grace", itemType = "song", songTitle = "Amazing Grace")))
+        withPlan(listOf(planItem("s1", "Amazing Grace", itemType = "song", songTitle = "Amazing Grace")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
 
@@ -309,7 +309,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `a media row is shown disabled with strikethrough styling`() = dialog { vm, _, _, _ ->
-        withPlan(vm, listOf(planItem("m1", "Intro Video", itemType = "media")))
+        withPlan(listOf(planItem("m1", "Intro Video", itemType = "media")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
 
@@ -318,7 +318,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `a generic item row shows a checkbox and can be selected for import`() = dialog { vm, _, _, _ ->
-        withPlan(vm, listOf(planItem("i1", "Sermon Notes", itemType = "item")))
+        withPlan(listOf(planItem("i1", "Sermon Notes", itemType = "item")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
 
@@ -329,7 +329,6 @@ class PlanningCenterImportContentTest {
     @Test
     fun `the select-all checkbox toggles every row and its label switches to Deselect All`() = dialog { vm, _, _, _ ->
         withPlan(
-            vm,
             listOf(
                 planItem("h1", "Welcome", itemType = "header"),
                 planItem("i1", "Notes", itemType = "item"),
@@ -352,7 +351,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `clicking a generic item row toggles its own checkbox off`() = dialog { vm, _, _, _ ->
-        withPlan(vm, listOf(planItem("i1", "Sermon Notes", itemType = "item")))
+        withPlan(listOf(planItem("i1", "Sermon Notes", itemType = "item")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
 
@@ -364,7 +363,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `importing a selected header calls onAddLabel and dismisses`() = dialog { vm, dismissed, _, recorder ->
-        withPlan(vm, listOf(planItem("h1", "Welcome", itemType = "header")))
+        withPlan(listOf(planItem("h1", "Welcome", itemType = "header")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
         assertTextEventually("Import Selected")
@@ -381,7 +380,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `importing a generic item with no scripture calls onAddAnnouncement with the item's description`() = dialog { vm, _, _, recorder ->
-        withPlan(vm, listOf(planItem("i1", "Sermon Notes", itemType = "item", description = "some notes")))
+        withPlan(listOf(planItem("i1", "Sermon Notes", itemType = "item", description = "some notes")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
         assertTextEventually("Import Selected")
@@ -395,7 +394,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `importing a generic item with a blank description falls back to its title`() = dialog { vm, _, _, recorder ->
-        withPlan(vm, listOf(planItem("i2", "Announcement Title", itemType = "item", description = "")))
+        withPlan(listOf(planItem("i2", "Announcement Title", itemType = "item", description = "")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
         assertTextEventually("Import Selected")
@@ -408,7 +407,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `Import is disabled when nothing importable is selected`() = dialog { vm, _, _, _ ->
-        withPlan(vm, listOf(planItem("s1", "Unmatched Song", itemType = "song")))
+        withPlan(listOf(planItem("s1", "Unmatched Song", itemType = "song")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
 
@@ -497,7 +496,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `an already-matched song shows the Matched tag instead of Add Song`() = dialog { vm, _, _, _ ->
-        withPlan(vm, listOf(planItem("s1", "Amazing Grace", itemType = "song", ccli = "22025")))
+        withPlan(listOf(planItem("s1", "Amazing Grace", itemType = "song", ccli = "22025")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
         // No local library configured in this test's temp home, so nothing actually matches —
@@ -508,7 +507,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `the OK-equivalent Import button shows a spinner while importing`() = dialog { vm, _, _, _ ->
-        withPlan(vm, listOf(planItem("h1", "Welcome", itemType = "header")))
+        withPlan(listOf(planItem("h1", "Welcome", itemType = "header")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
 
@@ -517,7 +516,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `clicking Add Song fetches an arrangement and requests the add-song dialog`() = dialog { vm, _, _, recorder ->
-        withPlan(vm, listOf(planItem("s1", "Amazing Grace", itemType = "song", songTitle = "Amazing Grace")))
+        withPlan(listOf(planItem("s1", "Amazing Grace", itemType = "song", songTitle = "Amazing Grace")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
         assertTextEventually("Add Song")
@@ -532,7 +531,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `a manually-matched song shows the Matched tag and is enabled for import`() = dialog { vm, _, _, _ ->
-        withPlan(vm, listOf(planItem("s1", "Amazing Grace", itemType = "song")))
+        withPlan(listOf(planItem("s1", "Amazing Grace", itemType = "song")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
 
@@ -544,7 +543,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `toggling a header row's own checkbox via click deselects it`() = dialog { vm, _, _, _ ->
-        withPlan(vm, listOf(planItem("h1", "Welcome", itemType = "header")))
+        withPlan(listOf(planItem("h1", "Welcome", itemType = "header")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
         assertTextEventually("Welcome")
@@ -558,7 +557,7 @@ class PlanningCenterImportContentTest {
 
     @Test
     fun `importing a matched song calls onAddSong with the parsed songbook and number`() = dialog { vm, _, _, recorder ->
-        withPlan(vm, listOf(planItem("s1", "Amazing Grace", itemType = "song", songTitle = "Amazing Grace")))
+        withPlan(listOf(planItem("s1", "Amazing Grace", itemType = "song", songTitle = "Amazing Grace")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
 
@@ -604,7 +603,6 @@ class PlanningCenterImportContentTest {
     fun `expanding an item row's attachments shows each file, greying out unsupported ones`() = dialog { vm, _, _, _ ->
         coEvery { PlanningCenterClient.fetchThumbnailBytes(any(), any()) } returns null
         withPlan(
-            vm,
             listOf(planItem("i1", "Sermon Notes", itemType = "item")),
         )
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
@@ -638,7 +636,7 @@ class PlanningCenterImportContentTest {
     fun `an item with a detected scripture reference shows its verse instead of a row checkbox`() {
         setUpBibleFixture()
         dialog { vm, _, _, _ ->
-            withPlan(vm, listOf(planItem("i1", "Scripture Reading", itemType = "item", description = "Psalms 23:1")))
+            withPlan(listOf(planItem("i1", "Scripture Reading", itemType = "item", description = "Psalms 23:1")))
             vm.selectServiceType("st-1")
             awaitVm { vm.detectedScripturesByItemId.containsKey("i1") }
 
@@ -652,7 +650,7 @@ class PlanningCenterImportContentTest {
     fun `clicking a detected scripture's own checkbox toggles it off`() {
         setUpBibleFixture()
         dialog { vm, _, _, _ ->
-            withPlan(vm, listOf(planItem("i1", "Scripture Reading", itemType = "item", description = "Psalms 23:1")))
+            withPlan(listOf(planItem("i1", "Scripture Reading", itemType = "item", description = "Psalms 23:1")))
             vm.selectServiceType("st-1")
             awaitVm { vm.detectedScripturesByItemId.containsKey("i1") }
             assertTextEventually("Psalms 23:1")
@@ -669,7 +667,7 @@ class PlanningCenterImportContentTest {
     fun `importing a selected scripture calls onAddBibleVerse with the resolved verse`() {
         setUpBibleFixture()
         dialog { vm, _, _, recorder ->
-            withPlan(vm, listOf(planItem("i1", "Scripture Reading", itemType = "item", description = "Psalms 23:1")))
+            withPlan(listOf(planItem("i1", "Scripture Reading", itemType = "item", description = "Psalms 23:1")))
             vm.selectServiceType("st-1")
             awaitVm { vm.detectedScripturesByItemId.containsKey("i1") }
             assertTextEventually("Import Selected")
@@ -685,7 +683,7 @@ class PlanningCenterImportContentTest {
     fun `deselecting the only detected scripture is not imported`() {
         setUpBibleFixture()
         dialog { vm, dismissed, _, recorder ->
-            withPlan(vm, listOf(planItem("i1", "Scripture Reading", itemType = "item", description = "Psalms 23:1")))
+            withPlan(listOf(planItem("i1", "Scripture Reading", itemType = "item", description = "Psalms 23:1")))
             vm.selectServiceType("st-1")
             awaitVm { vm.detectedScripturesByItemId.containsKey("i1") }
 
@@ -760,7 +758,7 @@ class PlanningCenterImportContentTest {
     @Test
     fun `an image attachment with a decodable thumbnail replaces the loading spinner with the image`() = dialog { vm, _, _, _ ->
         coEvery { PlanningCenterClient.fetchThumbnailBytes(any(), any()) } returns tinyPngBytes()
-        withPlan(vm, listOf(planItem("i1", "Sermon Notes", itemType = "item")))
+        withPlan(listOf(planItem("i1", "Sermon Notes", itemType = "item")))
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
             PlanningCenterClient.AttachmentsOutcome.Success(
                 listOf(PlanningCenterClient.PlanAttachment(id = "att-1", filename = "photo.jpg", thumbnailUrl = "https://example.test/thumb.jpg")),
@@ -779,7 +777,7 @@ class PlanningCenterImportContentTest {
     @Test
     fun `an image attachment with corrupt thumbnail bytes leaves the loading spinner showing`() = dialog { vm, _, _, _ ->
         coEvery { PlanningCenterClient.fetchThumbnailBytes(any(), any()) } returns "not a real image".toByteArray()
-        withPlan(vm, listOf(planItem("i1", "Sermon Notes", itemType = "item")))
+        withPlan(listOf(planItem("i1", "Sermon Notes", itemType = "item")))
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
             PlanningCenterClient.AttachmentsOutcome.Success(
                 listOf(PlanningCenterClient.PlanAttachment(id = "att-1", filename = "photo.jpg", thumbnailUrl = "https://example.test/thumb.jpg")),
@@ -802,7 +800,6 @@ class PlanningCenterImportContentTest {
         coEvery { PlanningCenterClient.getArrangementDetail(any(), any(), any(), any()) } returns
             PlanningCenterClient.ArrangementOutcome.Success(PlanningCenterClient.ArrangementDetail(chordChart = "G C D", lyrics = "la la la"))
         withPlan(
-            vm,
             listOf(planItem("s1", "Amazing Grace", itemType = "song", songTitle = "Amazing Grace", songId = "song-1", arrangementId = "arr-1")),
         )
         vm.selectServiceType("st-1")
@@ -820,7 +817,6 @@ class PlanningCenterImportContentTest {
     @Test
     fun `importing skips a media row and still imports the other selected rows`() = dialog { vm, dismissed, _, recorder ->
         withPlan(
-            vm,
             listOf(
                 planItem("m1", "Intro Video", itemType = "media"),
                 planItem("h1", "Welcome", itemType = "header"),

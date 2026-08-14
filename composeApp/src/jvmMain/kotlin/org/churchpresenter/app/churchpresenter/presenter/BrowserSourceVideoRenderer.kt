@@ -623,7 +623,6 @@ internal fun BrowserSourceContent(
                                     if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
                                         MediaPresenter(
                                             modifier = Modifier.fillMaxSize(),
-                                            audioEnabled = false,
                                             transitionAlpha = presenterManager.mediaTransitionAlpha.value
                                         )
                                     }

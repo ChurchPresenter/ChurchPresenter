@@ -403,7 +403,7 @@ class SourcePropertiesClockTest {
         sourcePanel(countdown(id, minutes = 3)) { _ ->
             onNodeWithText("Start").performScrollTo().performClick()
             waitForIdle()
-            TimerStateManager.tick(id, 180)
+            TimerStateManager.tick(id)
             waitForIdle()
 
             onNodeWithText("Reset").performScrollTo().performClick()
@@ -424,7 +424,7 @@ class SourcePropertiesClockTest {
             onNodeWithText("Start").performScrollTo().performClick()
             waitForIdle()
 
-            TimerStateManager.tick(id, 60)
+            TimerStateManager.tick(id)
             waitForIdle()
 
             onNodeWithText("00:00:59").assertExists("the panel observes the shared timer, not its own copy")

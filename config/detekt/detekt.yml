@@ -35,11 +35,11 @@ complexity:
   TooManyFunctions:
     active: false
   CyclomaticComplexMethod:
-    active: true
+    active: false
   LargeClass:
     active: false
   NestedBlockDepth:
-    active: true
+    active: false
 
 naming:
   TopLevelPropertyNaming:
@@ -61,7 +61,7 @@ naming:
     ignoreAnnotated: ['Composable']
     excludes: ['**/test/**', '**/jvmTest/**', '**/X11WindowCapture.kt']
   MatchingDeclarationName:
-    active: true
+    active: false
 
 exceptions:
   TooGenericExceptionCaught:

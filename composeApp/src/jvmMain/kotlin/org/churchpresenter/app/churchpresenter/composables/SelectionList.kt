@@ -112,8 +112,8 @@ fun SelectionListWithIndex(
                             awaitPointerEventScope {
                                 while (true) {
                                     val event = awaitPointerEvent(PointerEventPass.Initial)
-                                    if (event.type == PointerEventType.Release &&
-                                        index >= 0 && index < list.size &&
+                                    val inBounds = index >= 0 && index < list.size
+                                    if (event.type == PointerEventType.Release && inBounds &&
                                         event.changes.any { !it.isConsumed }
                                     ) {
                                         // Consume the event so a recomposition-triggered item
@@ -142,9 +142,9 @@ fun SelectionListWithIndex(
                             awaitPointerEventScope {
                                 while (true) {
                                     val event = awaitPointerEvent(PointerEventPass.Main)
+                                    val inRange = index >= 0 && index < list.size
                                     if (event.type == PointerEventType.Press &&
-                                        event.button?.isSecondary == true &&
-                                        index >= 0 && index < list.size
+                                        event.button?.isSecondary == true && inRange
                                     ) {
                                         onRightClicked?.invoke(index)
                                     }

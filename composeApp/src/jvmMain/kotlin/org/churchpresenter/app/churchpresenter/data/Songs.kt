@@ -10,103 +10,99 @@ import java.nio.file.Paths
 
 
 class Songs {
-    private val songs = mutableStateListOf<SongItem>()
+    private val items = mutableStateListOf<SongItem>()
 
     fun loadFromSps(resourcePath: String) {
-        songs.clear()
+        items.clear()
         loadFromSpsAppend(resourcePath)
     }
 
     fun loadFromSpsAppend(resourcePath: String) {
-        try {
-            // Detect SQLite format (Mac SongPresenter uses SQLite databases for .sps files)
-            val spsFile = java.io.File(resourcePath)
-            if (spsFile.exists() && spsFile.length() >= 16) {
-                val header = ByteArray(16)
-                spsFile.inputStream().use { it.read(header) }
-                if (String(header, Charsets.US_ASCII).startsWith("SQLite format 3")) {
-                    loadFromSpsSqlite(spsFile)
-                    return
-                }
+        // Detect SQLite format (Mac SongPresenter uses SQLite databases for .sps files)
+        val spsFile = java.io.File(resourcePath)
+        if (spsFile.exists() && spsFile.length() >= 16) {
+            val header = ByteArray(16)
+            spsFile.inputStream().use { it.read(header) }
+            if (String(header, Charsets.US_ASCII).startsWith("SQLite format 3")) {
+                loadFromSpsSqlite(spsFile)
+                return
             }
+        }
 
-            // Extract database name from the file path (without extension) as fallback
-            val fileBaseName = resourcePath.substringAfterLast('/').substringAfterLast('\\').substringBeforeLast('.')
+        // Extract database name from the file path (without extension) as fallback
+        val fileBaseName = resourcePath.substringAfterLast('/').substringAfterLast('\\').substringBeforeLast('.')
 
-            val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
-            val reader = if (inputStream != null) {
-                inputStream.bufferedReader(StandardCharsets.UTF_8)
-            } else {
-                val path = Paths.get(resourcePath)
-                require(Files.exists(path)) {
-                    "loadFromSpsAppend: resource not found on classpath or filesystem: $resourcePath"
-                }
-                Files.newBufferedReader(path, StandardCharsets.UTF_8)
+        val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
+        val reader = if (inputStream != null) {
+            inputStream.bufferedReader(StandardCharsets.UTF_8)
+        } else {
+            val path = Paths.get(resourcePath)
+            require(Files.exists(path)) {
+                "loadFromSpsAppend: resource not found on classpath or filesystem: $resourcePath"
             }
+            Files.newBufferedReader(path, StandardCharsets.UTF_8)
+        }
 
-            var databaseName = fileBaseName // Default to filename
-            val categoryToSongbookMap = mutableMapOf<String, String>()
-            var headerLineCount = 0 // Track which header line we're on
+        var databaseName = fileBaseName // Default to filename
+        val categoryToSongbookMap = mutableMapOf<String, String>()
+        var headerLineCount = 0 // Track which header line we're on
 
-            reader.use { r ->
-                r.forEachLine { rawLine ->
-                    val line = rawLine.trimEnd('\r', '\n')
+        reader.use { r ->
+            r.forEachLine { rawLine ->
+                val line = rawLine.trimEnd('\r', '\n')
 
-                    // Parse header lines for songbook mappings
-                    if (line.startsWith("##")) {
-                        headerLineCount++
-                        val headerContent = line.substring(2).trim()
+                // Parse header lines for songbook mappings
+                if (line.startsWith("##")) {
+                    headerLineCount++
+                    val headerContent = line.substring(2).trim()
 
-                        // The second header line contains the actual songbook name
-                        if (headerLineCount == 2) {
-                            databaseName = headerContent
-                        }
-                        return@forEachLine
+                    // The second header line contains the actual songbook name
+                    if (headerLineCount == 2) {
+                        databaseName = headerContent
                     }
+                    return@forEachLine
+                }
 
-                    // Skip empty lines
-                    if (line.isBlank()) {
-                        return@forEachLine
-                    }
+                // Skip empty lines
+                if (line.isBlank()) {
+                    return@forEachLine
+                }
 
-                    // Parse song entry
-                    val parts = line.split("#\$#")
-                    if (parts.size >= 6) {
-                        val number = parts[0]
-                        val title = parts[1]
-                        val categoryId = parts[2].trim() // This is the category/songbook ID
-                        val key = parts[3]
-                        val author = parts[4]
-                        val composer = parts[5]
-                        val lyricsText = if (parts.size > 6) parts[6] else ""
+                // Parse song entry
+                val parts = line.split("#\$#")
+                if (parts.size >= 6) {
+                    val number = parts[0]
+                    val title = parts[1]
+                    val categoryId = parts[2].trim() // This is the category/songbook ID
+                    val key = parts[3]
+                    val author = parts[4]
+                    val composer = parts[5]
+                    val lyricsText = if (parts.size > 6) parts[6] else ""
 
-                        // Map category ID to actual songbook name, or use database name as fallback
-                        val songbookName = categoryToSongbookMap[categoryId] ?: databaseName
+                    // Map category ID to actual songbook name, or use database name as fallback
+                    val songbookName = categoryToSongbookMap[categoryId] ?: databaseName
 
-                        // Parse lyrics
-                        val lyrics = parseLyrics(lyricsText)
+                    // Parse lyrics
+                    val lyrics = parseLyrics(lyricsText)
 
-                        songs.add(
-                            SongItem(
-                                number = number,
-                                title = title,
-                                songbook = songbookName,
-                                tune = key,
-                                author = author,
-                                composer = composer,
-                                lyrics = lyrics
-                            )
+                    items.add(
+                        SongItem(
+                            number = number,
+                            title = title,
+                            songbook = songbookName,
+                            tune = key,
+                            author = author,
+                            composer = composer,
+                            lyrics = lyrics
                         )
-                    }
+                    )
                 }
             }
-        } catch (e: Exception) {
-            throw e
         }
     }
 
     /**
-     * Load songs from a SQLite-format .sps file (Mac SongPresenter).
+     * Load items from a SQLite-format .sps file (Mac SongPresenter).
      */
     private fun loadFromSpsSqlite(file: java.io.File) {
         val conn = JdbcDatabase.openConnection(file.absolutePath)
@@ -117,13 +113,13 @@ class Songs {
                 sbResult.firstOrNull()?.getString(0)?.ifEmpty { null }
             } catch (_: Exception) { null } ?: file.nameWithoutExtension
 
-            // Load all songs
+            // Load all items
             val result = JdbcDatabase.executeQuery(c,
                 "SELECT number, title, category, tune, words, music, song_text FROM Songs ORDER BY number")
             for (row in result) {
                 val songText = row.getString(6)
                 val lyrics = parseSqliteLyrics(songText)
-                songs.add(
+                items.add(
                     SongItem(
                         number = row.getString(0).trim(),
                         title = row.getString(1).trim(),
@@ -251,21 +247,21 @@ class Songs {
     )
 
     fun addSongs(newSongs: List<SongItem>) {
-        songs.addAll(newSongs)
+        items.addAll(newSongs)
     }
 
     fun getSongs(): List<SongItem> {
-        return songs.toList()
+        return items.toList()
     }
 
     fun getSongCount(): Int {
-        return songs.size
+        return items.size
     }
 
     fun findSongs(query: String, filterType: String = "Contains"): List<SongItem> {
-        if (query.isBlank()) return songs.toList()
+        if (query.isBlank()) return items.toList()
 
-        return songs.filter { song ->
+        return items.filter { song ->
             when (filterType) {
                 Constants.CONTAINS -> song.title.contains(query, ignoreCase = true) ||
                             song.number.contains(query, ignoreCase = true)
@@ -279,22 +275,22 @@ class Songs {
     }
 
     fun getSongsByCategory(category: String): List<SongItem> {
-        if (category == "All song categories") return songs.toList()
+        if (category == "All song categories") return items.toList()
 
-        // For now, return all songs since categories aren't clearly defined in the SPS format
-        return songs.toList()
+        // For now, return all items since categories aren't clearly defined in the SPS format
+        return items.toList()
     }
 
     fun getSongsBySongbook(songbook: String): List<SongItem> {
-        if (songbook == "All songbooks") return songs.toList()
+        if (songbook == "All songbooks") return items.toList()
 
-        return songs.filter { it.songbook.contains(songbook, ignoreCase = true) }
+        return items.filter { it.songbook.contains(songbook, ignoreCase = true) }
     }
 
     fun updateSong(oldSong: SongItem, newSong: SongItem) {
-        val index = songs.indexOfFirst { it.number == oldSong.number && it.songbook == oldSong.songbook }
+        val index = items.indexOfFirst { it.number == oldSong.number && it.songbook == oldSong.songbook }
         if (index >= 0) {
-            songs[index] = newSong
+            items[index] = newSong
         }
     }
 

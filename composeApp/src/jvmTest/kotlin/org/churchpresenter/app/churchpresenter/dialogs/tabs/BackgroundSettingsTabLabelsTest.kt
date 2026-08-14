@@ -9,7 +9,6 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundConfig
-import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,9 +28,6 @@ import kotlin.test.assertEquals
  * rendered semantics tree, so they are exhaustive by construction rather than by memory.
  */
 class BackgroundSettingsTabLabelsTest {
-
-    private fun settingsWith(change: BackgroundSettings.() -> BackgroundSettings): AppSettings =
-        AppSettings().let { it.copy(backgroundSettings = it.backgroundSettings.change()) }
 
     /** Every string the tab renders out of the box, and how many times it must appear. */
     private val outOfTheBox = mapOf(

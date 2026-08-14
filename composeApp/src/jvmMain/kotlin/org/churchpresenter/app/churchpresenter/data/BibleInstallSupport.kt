@@ -205,10 +205,7 @@ internal object BibleInstallSupport {
                     // connection died the channel is simply closed, with the cause attached or with
                     // nothing at all. Both are the same event — fewer bytes than the server promised
                     // — and both must resume rather than hand a half file on to be converted.
-                    channel.closedCause?.let { throw it }
-                    if (promised != null && written < promised) {
-                        throw TruncatedBodyException(promised = promised, received = written)
-                    }
+                    requireCompleteBody(channel.closedCause, promised, written)
                     code
                 }
                 if (status !in 200..299) return DownloadResult(status, written)
@@ -224,6 +221,14 @@ internal object BibleInstallSupport {
 
         val failure = lastFailure ?: IOException("Download failed without a cause")
         throw if (failure.isStall()) DownloadStalledException(attempts, written, failure) else failure
+    }
+
+    /** Rejects a body that ended early, whether the channel reported a cause or simply closed. */
+    private fun requireCompleteBody(closedCause: Throwable?, promised: Long?, written: Long) {
+        if (closedCause != null) throw closedCause
+        if (promised != null && written < promised) {
+            throw TruncatedBodyException(promised = promised, received = written)
+        }
     }
 
     /** `Content-Range: bytes 1234-5678/9999` — the tail is only ours if it starts at [expectedStart]. */

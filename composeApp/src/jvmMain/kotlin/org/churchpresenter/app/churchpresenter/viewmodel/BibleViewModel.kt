@@ -268,17 +268,6 @@ class BibleViewModel(
         _verseSelectionToken.value++
     }
 
-    private fun toggleVerseInSelection(verseIndex: Int) {
-        if (verseIndex < 0 || verseIndex >= _verses.value.size) return
-        if (_selectedVerseIndices.contains(verseIndex)) {
-            _selectedVerseIndices.remove(verseIndex)
-        } else {
-            _selectedVerseIndices.add(verseIndex)
-        }
-        _multiVerseEnabled.value = _selectedVerseIndices.isNotEmpty()
-        _verseSelectionToken.value++
-    }
-
     fun formatVerseRange(numbers: List<Int>): String {
         if (numbers.isEmpty()) return ""
         if (numbers.size == 1) return numbers.first().toString()

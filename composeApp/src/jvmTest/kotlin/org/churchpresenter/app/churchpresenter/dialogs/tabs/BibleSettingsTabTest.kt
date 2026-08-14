@@ -25,7 +25,6 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
-import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -735,44 +734,7 @@ class BibleSettingsTabTest {
 
 
     /** Types a new size into target [index]'s font-size field. */
-    private fun ComposeUiTest.assertFontSizeField(index: Int) {
-        var settings = BibleSettings()
-        targets.forEachIndexed { i, t -> settings = t.withFontSize(settings, 20 + i) }
-        val harness = showBibleTab(settings)
-        val target = targets[index]
-
-        onNodeWithText((20 + index).toString()).performScrollTo().performTextReplacement("120")
-        waitForIdle()
-
-        assertEquals(120, target.fontSize(harness.current.bibleSettings), "font size for ${target.name}")
-        assertEquals(120, target.fontSize(persisted(harness.current)), "and it must survive settings.json")
-        onAllNodesWithText("120").onFirst().assertExists("the field must show what was typed")
-    }
-
     /** Picks a different font in target [index]'s dropdown. */
-    private fun ComposeUiTest.assertFontDropdown(index: Int) {
-        val start = "Serif"
-        val chosen = "SansSerif"   // a Java logical family, and it matches the seeded "Serif" query
-        val harness = showBibleTab(
-            BibleSettings(
-                primaryBibleFontType = start, primaryBibleLowerThirdFontType = start,
-                primaryReferenceFontType = start, primaryReferenceLowerThirdFontType = start,
-                secondaryBibleFontType = start, secondaryBibleLowerThirdFontType = start,
-                secondaryReferenceFontType = start, secondaryReferenceLowerThirdFontType = start,
-            )
-        )
-        val target = targets[index]
-
-        onAllNodesWithText(start)[index].performScrollTo().performClick()
-        waitForIdle()
-        onAllNodesWithText(chosen).onLast().performScrollTo().performClick()
-        waitForIdle()
-
-        assertEquals(chosen, target.fontType(harness.current.bibleSettings), "font for ${target.name}")
-        assertEquals(chosen, target.fontType(persisted(harness.current)), "and it must survive settings.json")
-        onAllNodesWithText(chosen).onFirst().assertExists("the closed dropdown must read the new font")
-    }
-
     /** Opens target [index]'s colour swatch, types a hex and accepts it. */
     private fun ComposeUiTest.assertColourPicker(index: Int) {
         val harness = showBibleTab(distinctColours())
@@ -867,17 +829,6 @@ class BibleSettingsTabTest {
     // ── Shadow detail rows: eight of them, three controls each ────────────────
 
     /** Every target's shadow switched on, with distinct values so each control is findable. */
-    private fun everyShadowShowing() = twoBibles().copy(
-        primaryBibleShadow = true, primaryBibleShadowColor = "#A10011", primaryBibleShadowSize = 201, primaryBibleShadowOpacity = 41,
-        primaryBibleLowerThirdShadow = true, primaryBibleLowerThirdShadowColor = "#A10012", primaryBibleLowerThirdShadowSize = 202, primaryBibleLowerThirdShadowOpacity = 42,
-        primaryReferenceShadow = true, primaryReferenceShadowColor = "#A10013", primaryReferenceShadowSize = 203, primaryReferenceShadowOpacity = 43,
-        primaryReferenceLowerThirdShadow = true, primaryReferenceLowerThirdShadowColor = "#A10014", primaryReferenceLowerThirdShadowSize = 204, primaryReferenceLowerThirdShadowOpacity = 44,
-        secondaryBibleShadow = true, secondaryBibleShadowColor = "#A10015", secondaryBibleShadowSize = 205, secondaryBibleShadowOpacity = 45,
-        secondaryBibleLowerThirdShadow = true, secondaryBibleLowerThirdShadowColor = "#A10016", secondaryBibleLowerThirdShadowSize = 206, secondaryBibleLowerThirdShadowOpacity = 46,
-        secondaryReferenceShadow = true, secondaryReferenceShadowColor = "#A10017", secondaryReferenceShadowSize = 207, secondaryReferenceShadowOpacity = 47,
-        secondaryReferenceLowerThirdShadow = true, secondaryReferenceLowerThirdShadowColor = "#A10018", secondaryReferenceLowerThirdShadowSize = 208, secondaryReferenceLowerThirdShadowOpacity = 48,
-    ).migrateTranslations()
-
     // ── Horizontal alignment: one test per group ──────────────────────────────
 
     /**

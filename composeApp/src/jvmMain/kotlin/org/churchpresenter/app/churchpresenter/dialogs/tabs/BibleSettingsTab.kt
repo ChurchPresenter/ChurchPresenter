@@ -207,7 +207,7 @@ private fun TranslationStyleSection(
         onExpandedChange = onExpandedChange,
     ) {
         TranslationTextSection(settings, translation, ::update, availableFonts, presenterManager)
-        TranslationReferenceSection(settings, translation, ::update, availableFonts, presenterManager)
+        TranslationReferenceSection(translation, ::update, availableFonts)
     }
 }
 
@@ -719,11 +719,9 @@ private fun TranslationTextSection(
 
 @Composable
 private fun TranslationReferenceSection(
-    settings: AppSettings,
     translation: BibleTranslationSettings,
     update: ((BibleTranslationSettings) -> BibleTranslationSettings) -> Unit,
     availableFonts: List<String>,
-    presenterManager: PresenterManager? = null
 ) {
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {

@@ -70,6 +70,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
+      # Pre-existing findings are in config/detekt/baseline.xml; this gates only new ones.
+      - name: Detekt
+        run: ./gradlew :composeApp:detekt
+
       - name: App unit tests
         id: unit_tests
         # Tighter than the job's own deadline so a hang here is attributed to this step and the

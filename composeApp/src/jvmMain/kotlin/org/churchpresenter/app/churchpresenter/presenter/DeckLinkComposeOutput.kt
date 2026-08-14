@@ -58,7 +58,6 @@ fun DeckLinkComposeOutput(
     content: @Composable BoxScope.() -> Unit
 ) {
     val currentAppSettings by rememberUpdatedState(appSettings)
-    val currentOutputRole by rememberUpdatedState(outputRole)
     val currentIsLowerThird by rememberUpdatedState(isLowerThird)
 
     // Render the same vector icon used by all Compose Windows to a BufferedImage for the JFrame

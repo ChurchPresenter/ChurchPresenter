@@ -16,8 +16,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 fun MediaPresenter(
     modifier: Modifier = Modifier,
     isVisible: Boolean = true,
-    audioEnabled: Boolean = true,
-    audioDeviceId: String = "",
     transitionAlpha: Float = 1f,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL
 ) {

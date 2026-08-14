@@ -124,7 +124,6 @@ internal fun scheduleTab(
                         onSelectedItemChanged = { reports.selectionChanges += it },
                         onActionsReady = { reports.actions = it },
                         onAddLabel = { reports.addLabelRequests++ },
-                        onAddWebsite = { reports.addWebsiteRequests++ },
                         onPresentSong = { reports.presented += it },
                         onPresentBible = { reports.presented += it },
                         onPresentWebsite = { reports.presented += it },

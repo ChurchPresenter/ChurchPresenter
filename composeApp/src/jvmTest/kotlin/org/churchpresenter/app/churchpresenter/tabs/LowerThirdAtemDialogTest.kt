@@ -30,7 +30,6 @@ import kotlin.test.assertTrue
 class LowerThirdAtemDialogTest {
 
     /** The upload button's tooltip, which is also its content description. */
-    private val ATEM_UPLOAD = ATEM_UPLOAD_LABEL
 
     private fun state(
         fps: Double = 25.0,

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -19,7 +20,7 @@ class PresenterTransitionEffectsTest {
     )
     private val section = LyricSection(type = "verse", lines = listOf("Amazing grace"))
 
-    private fun androidx.compose.ui.test.ComposeUiTest.effects(
+    private fun ComposeUiTest.effects(
         manager: PresenterManager,
         settings: AppSettings = AppSettings(),
     ) = setContent { PresenterTransitionEffects(manager, settings) }

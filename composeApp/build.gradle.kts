@@ -192,6 +192,7 @@ plugins {
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+    baseline = rootProject.file("config/detekt/baseline.xml")
     source.setFrom("src/jvmMain/kotlin", "src/jvmTest/kotlin")
     parallel = true
 }

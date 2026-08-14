@@ -33,7 +33,7 @@ import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
  */
 internal fun Route.mediaAndAssetRoutes(
     server: CompanionServer,
-    DEVICE_UPLOADS_FOLDER_ID: String,
+    deviceUploadsFolderId: String,
     _backgroundSettings: MutableStateFlow<BackgroundSettings>,
     _fileUploadEnabled: MutableStateFlow<Boolean>,
     _pictureCatalog: MutableStateFlow<PictureFolderResponse?>,
@@ -318,7 +318,7 @@ internal fun Route.mediaAndAssetRoutes(
                         // Each calendar day gets its own subfolder; the folderId includes the
                         // date so uploads from different days are catalogued separately.
                         val dateStr = java.time.LocalDate.now().toString()   // "yyyy-MM-dd"
-                        val dateFolderId = "${DEVICE_UPLOADS_FOLDER_ID}_$dateStr"
+                        val dateFolderId = "${deviceUploadsFolderId}_$dateStr"
                         val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads/$dateStr").also { it.mkdirs() }
                         // Ensure the file name is unique by appending a timestamp if needed
                         val uniqueName = if (File(uploadDir, safeName).exists()) {

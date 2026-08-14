@@ -91,19 +91,18 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 fun SceneSourceRenderer(
     source: SceneSource,
     modifier: Modifier = Modifier,
-    isPresenter: Boolean = false,
     fontScale: Float = 1f
 ) {
     when (source) {
         is SceneSource.ImageSource -> ImageSourceContent(source, modifier)
         is SceneSource.TextSource -> TextSourceContent(source, modifier, fontScale)
         is SceneSource.ColorSource -> ColorSourceContent(source, modifier)
-        is SceneSource.VideoSource -> VideoSourceContent(source, modifier, isPresenter)
-        is SceneSource.BrowserSource -> BrowserSourceContent(source, modifier, isPresenter)
+        is SceneSource.VideoSource -> VideoSourceContent(source, modifier)
+        is SceneSource.BrowserSource -> BrowserSourceContent(source, modifier)
         is SceneSource.ShapeSource -> ShapeSourceContent(source, modifier, fontScale)
         is SceneSource.ClockSource -> ClockSourceContent(source, modifier, fontScale)
         is SceneSource.QRCodeSource -> QRCodeSourceContent(source, modifier)
-        is SceneSource.CameraSource -> CameraSourceContent(source, modifier, isPresenter)
+        is SceneSource.CameraSource -> CameraSourceContent(source, modifier)
         is SceneSource.ScreenCaptureSource -> ScreenCaptureSourceContent(source, modifier)
         is SceneSource.BibleSource -> BibleSourceContent(source, modifier, fontScale)
     }
@@ -210,7 +209,6 @@ private fun ColorSourceContent(source: SceneSource.ColorSource, modifier: Modifi
 private fun VideoSourceContent(
     source: SceneSource.VideoSource,
     modifier: Modifier,
-    isPresenter: Boolean
 ) {
     val file = remember(source.filePath) { if (source.filePath.isNotBlank()) File(source.filePath) else null }
     if (file == null || !file.exists() || !isVlcAvailable) {
@@ -326,7 +324,6 @@ private fun VideoSourceContent(
 private fun BrowserSourceContent(
     source: SceneSource.BrowserSource,
     modifier: Modifier,
-    isPresenter: Boolean
 ) {
     if (source.url.isBlank()) {
         Box(
@@ -532,7 +529,7 @@ private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifi
         LaunchedEffect(timerState.isRunning) {
             while (timerState.isRunning) {
                 delay(1000)
-                TimerStateManager.tick(source.id, totalSeconds)
+                TimerStateManager.tick(source.id)
             }
         }
 
@@ -662,7 +659,6 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
 private fun CameraSourceContent(
     source: SceneSource.CameraSource,
     modifier: Modifier,
-    isPresenter: Boolean
 ) {
     if (source.devicePath.isBlank()) {
         Box(

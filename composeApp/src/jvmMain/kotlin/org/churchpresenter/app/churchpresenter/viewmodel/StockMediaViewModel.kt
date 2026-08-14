@@ -70,7 +70,8 @@ class StockMediaViewModel(
     }
 
     fun loadMore(apiKey: String) {
-        if (apiKey.isBlank() || query.isBlank() || isLoading || !hasMore) return
+        val missingInput = apiKey.isBlank() || query.isBlank()
+        if (missingInput || isLoading || !hasMore) return
         val nextPage = currentPage + 1
         searchJob?.cancel()
         searchJob = viewModelScope.launch {

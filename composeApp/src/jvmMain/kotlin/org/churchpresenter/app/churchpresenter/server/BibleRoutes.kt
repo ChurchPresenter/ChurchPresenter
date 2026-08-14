@@ -28,7 +28,6 @@ internal fun Route.bibleAndDictionaryRoutes(
     server: CompanionServer,
     _bible: MutableStateFlow<Bible?>,
     _bibleCatalog: MutableStateFlow<BibleCatalogResponse?>,
-    _presentationCatalog: MutableStateFlow<PresentationCatalogResponse>,
     json: Json,
     scope: CoroutineScope,
 ) {

@@ -165,8 +165,6 @@ class SystemSettingsTabScreenshotTest {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     Box(Modifier.fillMaxSize()) {
                         SystemSettingsTab(
-                            currentTheme = ThemeMode.SYSTEM,
-                            onThemeChange = {},
                             settings = settings,
                             onSettingsChange = {},
                         )

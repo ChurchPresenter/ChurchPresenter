@@ -40,7 +40,7 @@ class InstanceLinkClientMalformedMessageTest {
                 webSocket(Constants.ENDPOINT_WS) {
                     session = this
                     try {
-                        for (frame in incoming) Unit
+                        while (incoming.receiveCatching().isSuccess) Unit
                     } catch (_: Exception) {
                         // the client disconnected, which every test here does on cleanup
                     }

@@ -105,7 +105,6 @@ import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.churchpresenter.app.churchpresenter.dialogs.BibleCatalogBrowserDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
@@ -127,8 +126,6 @@ private val exportJsonFormat = Json {
 
 @Composable
 fun SystemSettingsTab(
-    currentTheme: ThemeMode,
-    onThemeChange: (ThemeMode) -> Unit,
     settings: AppSettings = AppSettings(),
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     companionServer: CompanionServer? = null
@@ -355,7 +352,7 @@ fun SystemSettingsTab(
 
                                 // Check if target folder already exists
                                 if (converter.targetFolderExists(spsPath, settings.songSettings.storageDirectory)) {
-                                    val folderName = converter.getTargetFolderName(spsPath, settings.songSettings.storageDirectory) ?: spsFile
+                                    val folderName = converter.getTargetFolderName(spsPath) ?: spsFile
                                     val confirm = JOptionPane.showConfirmDialog(
                                         null,
                                         String.format(folderOverwriteConfirmFmt, folderName),

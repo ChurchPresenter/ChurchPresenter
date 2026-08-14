@@ -93,7 +93,6 @@ fun OptionsDialog(
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
-    onThemeChange: (ThemeMode) -> Unit = {},
     scenes: List<Scene> = emptyList(),
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     obsManager: OBSWebSocketManager? = null,
@@ -132,7 +131,6 @@ fun OptionsDialog(
             onSave = onSave,
             onIdentifyScreen = onIdentifyScreen,
             onIdentifyBrowserSource = onIdentifyBrowserSource,
-            onThemeChange = onThemeChange,
             scenes = scenes,
             onOpenLottieGen = onOpenLottieGen,
             obsManager = obsManager,
@@ -154,7 +152,6 @@ internal fun OptionsDialogContent(
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
-    onThemeChange: (ThemeMode) -> Unit = {},
     scenes: List<Scene> = emptyList(),
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     obsManager: OBSWebSocketManager? = null,
@@ -268,8 +265,6 @@ internal fun OptionsDialogContent(
                     ) {
                         when (safeTabIndex) {
                             0 -> SystemSettingsTab(
-                                currentTheme = theme,
-                                onThemeChange = onThemeChange,
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)

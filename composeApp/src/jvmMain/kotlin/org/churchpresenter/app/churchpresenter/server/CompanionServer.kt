@@ -974,7 +974,7 @@ class CompanionServer {
                 )
                 scheduleRoutes(this@CompanionServer, _schedule, json, scope)
                 bibleAndDictionaryRoutes(
-                    this@CompanionServer, _bible, _bibleCatalog, presentations._presentationCatalog, json, scope
+                    this@CompanionServer, _bible, _bibleCatalog, json, scope
                 )
                 presentationRoutes(
                     this@CompanionServer, _fileUploadEnabled, _maxMediaUploadMb, presentations._presentationCatalog,
@@ -996,7 +996,7 @@ class CompanionServer {
                 lowerThirdAndAtemRoutes(this@CompanionServer, json, scope)
                 browserSourceRoutes(
                     this@CompanionServer, browserSource._browserSourceFrameFlows,
-                    browserSource._browserSourceSessions, scope
+                    browserSource._browserSourceSessions
                 )
                 qaRoutes(this@CompanionServer, json, scope)
             }
@@ -1056,8 +1056,9 @@ class CompanionServer {
             // updatePresentation and updateSchedule) then fall back to _schedule scan.
             // NOTE: mobile may omit the "type" field when it equals the default ("presentation"),
             // so also accept type==null as long as the id resolves in presentations._presentationFilePaths.
-            if (dto.filePath == null && dto.folderId == null && dto.id.isNotBlank() &&
-                (dto.type == "presentation" || dto.type == null)) {
+            val looksLikePresentation = dto.type == "presentation" || dto.type == null
+            val noExplicitTarget = dto.filePath == null && dto.folderId == null
+            if (noExplicitTarget && dto.id.isNotBlank() && looksLikePresentation) {
                 val filePath = presentations._presentationFilePaths[dto.id]
                     ?: _schedule.value.firstOrNull { s ->
                         s.type == "presentation" && (

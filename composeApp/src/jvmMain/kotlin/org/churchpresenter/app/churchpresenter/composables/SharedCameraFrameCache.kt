@@ -244,7 +244,7 @@ object SharedCameraFrameCache {
 
             // Wait for dimensions (up to 5 seconds)
             var dims: Pair<Int, Int>? = null
-            for (i in 1..50) {
+            repeat(50) {
                 dims = videoDims.get()
                 if (dims != null) break
                 delay(100)

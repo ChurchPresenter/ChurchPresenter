@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -68,7 +67,6 @@ internal fun ColumnScope.BibleBrowserPane(
     selectedChapter: Int,
     selectedVerseIndices: Set<Int>?,
     selectedVerseInFiltered: Int,
-    accentColor: Color,
     bookWidthPx: Float,
     chapterWidthPx: Float,
     crossRefWidthPx: Float,
@@ -81,7 +79,7 @@ internal fun ColumnScope.BibleBrowserPane(
     onSaveCrossRefWidth: () -> Unit,
     onSaveSplitWidth: () -> Unit,
     crossRefs: BibleCrossReferenceState,
-    crossRefsEnabled: Boolean,
+    crossRefsDocked: Boolean,
     crossRefCountLabel: (Int) -> String,
     crossRefPopoverTitle: (String, Int) -> String,
     onOpenCrossRef: (CrossRefRow) -> Unit,
@@ -150,7 +148,7 @@ internal fun ColumnScope.BibleBrowserPane(
                 BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
 
                 val crossRefReserve =
-                    if (crossRefsEnabled) crossRefWidthPx + with(density) { 5.dp.toPx() } else 0f
+                    if (crossRefsDocked) crossRefWidthPx + with(density) { 5.dp.toPx() } else 0f
                 val effectiveSplitWidth = if (isSplitActive)
                     splitWidthPx.coerceAtMost(
                         (constraints.maxWidth - crossRefReserve - with(density) { (100.dp + 6.dp).toPx() }).coerceAtLeast(0f)
@@ -180,7 +178,6 @@ internal fun ColumnScope.BibleBrowserPane(
                                 verses = filteredVerses,
                                 selectedIndex = selectedVerseInFiltered,
                                 selectedIndices = selectedVerseIndices,
-                                accentColor = accentColor,
                                 onItemSelected = onVerseSelected,
                                 refCountFor = { index ->
                                     filteredVerses.getOrNull(index)
@@ -188,7 +185,7 @@ internal fun ColumnScope.BibleBrowserPane(
                                         ?.let { crossRefs.counts[it] } ?: 0
                                 },
                                 refCountTooltip = crossRefCountLabel,
-                                openRefIndex = if (crossRefsEnabled) -1 else crossRefs.popoverIndex,
+                                openRefIndex = if (crossRefsDocked) -1 else crossRefs.popoverIndex,
                                 onRefsClicked = onRefsChipClicked,
                                 refPopover = {
                                     CrossReferencePopover(
@@ -234,7 +231,7 @@ internal fun ColumnScope.BibleBrowserPane(
                         }
                     }
 
-                    if (crossRefsEnabled) {
+                    if (crossRefsDocked) {
                         DragHandle(onDragEnd = onSaveCrossRefWidth) { amount ->
                             onCrossRefWidthChange(
                                 (crossRefWidthPx - amount).coerceIn(

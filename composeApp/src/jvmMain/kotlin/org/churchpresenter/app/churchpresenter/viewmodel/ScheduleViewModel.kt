@@ -382,7 +382,7 @@ class ScheduleViewModel(
                     notifyChanged()
                     CrashReporter.breadcrumb("Schedule opened (${file.fileName}, ${items.size} items)", category = "schedule")
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    CrashReporter.reportException(e, "Opening schedule file")
                 }
             }
         }
@@ -614,7 +614,9 @@ class ScheduleViewModel(
 
     fun moveItem(from: Int, to: Int) {
         if (_isFollowingRemote.value) return
-        if (from < 0 || to < 0 || from >= _scheduleItems.size || to >= _scheduleItems.size || from == to) return
+        val fromValid = from in _scheduleItems.indices
+        val toValid = to in _scheduleItems.indices
+        if (!fromValid || !toValid || from == to) return
         pushUndoSnapshot()
         val item = _scheduleItems.removeAt(from)
         _scheduleItems.add(to, item)

@@ -148,7 +148,6 @@ internal fun PresenterModeContent(
                 } else {
                     MediaPresenter(
                         modifier = Modifier.fillMaxSize(),
-                        audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
                         transitionAlpha = mediaTransitionAlpha
                     )
                 }

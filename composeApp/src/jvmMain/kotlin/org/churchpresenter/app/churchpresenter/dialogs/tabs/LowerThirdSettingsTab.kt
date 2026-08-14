@@ -34,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,7 +81,6 @@ fun LowerThirdSettingsTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> }
 ) {
-    val scope = rememberCoroutineScope()
     val viewModel = remember { LowerThirdSettingsViewModel() }
 
     // Keep viewModel folder in sync with settings

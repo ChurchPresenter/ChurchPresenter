@@ -42,7 +42,7 @@ object HeicDecoder {
                 null
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            CrashReporter.reportException(e, "Converting HEIC to JPEG")
             null
         } finally {
             tempFile.delete()
@@ -58,7 +58,7 @@ object HeicDecoder {
             ImageIO.write(bufferedImage, "jpg", out)
             out.toByteArray()
         } catch (e: Exception) {
-            e.printStackTrace()
+            CrashReporter.reportException(e, "Decoding HEIC image")
             null
         }
     }

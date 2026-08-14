@@ -39,7 +39,6 @@ import churchpresenter.composeapp.generated.resources.konami_dialog_message
 import churchpresenter.composeapp.generated.resources.konami_dialog_title
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.sin
 import kotlin.random.Random
@@ -66,7 +65,6 @@ private val confettiColors = listOf(
 fun KonamiEasterEggDialog(
     isVisible: Boolean,
     onDismiss: () -> Unit,
-    theme: ThemeMode = ThemeMode.SYSTEM
 ) {
     if (!isVisible) return
 

@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -135,7 +134,6 @@ class CompanionServerRemoteControlTest {
 
     private fun HttpResponse.text(): String = runBlocking { bodyAsText() }
     private fun HttpResponse.obj(): JsonObject = json.parseToJsonElement(text()).jsonObject
-    private fun HttpResponse.array(): JsonArray = json.parseToJsonElement(text()).jsonArray
     private fun JsonObject.str(key: String) = getValue(key).jsonPrimitive.content
 
     /**

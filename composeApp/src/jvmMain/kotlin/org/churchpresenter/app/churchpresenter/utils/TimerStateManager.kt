@@ -26,7 +26,7 @@ object TimerStateManager {
         _states[sourceId] = current.copy(isRunning = running)
     }
 
-    fun tick(sourceId: String, totalSeconds: Int) {
+    fun tick(sourceId: String) {
         val current = _states[sourceId] ?: return
         if (current.isRunning && current.remainingSeconds > 0) {
             val next = current.remainingSeconds - 1

@@ -1176,14 +1176,8 @@ fun main() {
                                             instanceLinkViewModel.sendSelectBibleVerse(bookName, chapter, verseNumber, verseText, verseRange)
                                         }
                                     } else null,
-                                    instanceLinkSendPicture = if (instanceLinkIsControllerConnected) {
-                                        { folderId, index, fileName -> instanceLinkViewModel.sendSelectPicture(folderId, index, fileName) }
-                                    } else null,
                                     instanceLinkSendSongSection = if (instanceLinkIsControllerConnected) {
                                         { number, section, lineIndex -> instanceLinkViewModel.sendSelectSongSection(number, section, lineIndex) }
-                                    } else null,
-                                    instanceLinkSendSlide = if (instanceLinkIsControllerConnected) {
-                                        { id, index -> instanceLinkViewModel.sendSelectSlide(id, index) }
                                     } else null,
                                     instanceLinkSendClear = if (instanceLinkIsControllerConnected) {
                                         { instanceLinkViewModel.sendClear() }
@@ -1377,11 +1371,6 @@ fun main() {
                                             updated.atemSettings,
                                             updated.streamingSettings.lowerThirdFolder
                                         )
-                                    },
-                                    onThemeChange = { newTheme ->
-                                        appSettings = appSettings.copy(theme = newTheme.toString())
-                                        theme = newTheme
-                                        settingsManager.saveSettings(appSettings)
                                     },
                                     onIdentifyScreen = {
                                         identifyingScreen = true

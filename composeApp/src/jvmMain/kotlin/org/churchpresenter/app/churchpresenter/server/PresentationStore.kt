@@ -208,7 +208,7 @@ internal class PresentationStore(
                 )
             )
         } catch (e: Exception) {
-            e.printStackTrace()
+            CrashReporter.reportException(e, "Storing presentation slide")
         }
     }
 }

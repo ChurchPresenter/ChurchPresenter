@@ -19,7 +19,6 @@ fun ScenePresenter(
         selectedSourceId = null,
         onSourceSelected = {},
         onTransformChanged = { _, _ -> },
-        isInteractive = false,
-        isPresenter = true
+        isInteractive = false
     )
 }

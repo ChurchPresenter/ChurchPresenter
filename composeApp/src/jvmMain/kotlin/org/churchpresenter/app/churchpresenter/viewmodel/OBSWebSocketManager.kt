@@ -72,7 +72,7 @@ class OBSWebSocketManager {
                     withContext(Dispatchers.Main) { _status.value = ConnectionStatus.CONNECTED }
                     CrashReporter.breadcrumb("OBS connected ($host:$port)", category = "integration")
 
-                    for (frame in incoming) { /* drain event notifications */ }
+                    while (incoming.receiveCatching().isSuccess) { /* drain event notifications */ }
                 }
             } catch (e: CancellationException) {
                 throw e

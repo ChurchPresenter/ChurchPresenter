@@ -31,7 +31,6 @@ fun PresenterScreen(
     showBackground: Boolean = true,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     // Browser Source scenes blank to transparent pixels (OBS keys the video underneath);
     // projector windows blank to black — that's what "nothing" looks like on a display.

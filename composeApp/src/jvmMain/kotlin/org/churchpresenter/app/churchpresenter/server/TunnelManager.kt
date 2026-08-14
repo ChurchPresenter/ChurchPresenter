@@ -135,26 +135,29 @@ class TunnelManager {
                 }
             }
 
-            if (isMac) {
-                binaryFile.delete()
-                val result = ProcessBuilder("tar", "-xzf", tmpFile.absolutePath, "-C", dataDir.absolutePath, "cloudflared")
-                    .redirectErrorStream(true)
-                    .start()
-                val exitCode = result.waitFor()
-                if (exitCode != 0 || !binaryFile.exists()) {
-                    throw RuntimeException("Failed to extract cloudflared from archive (exit $exitCode)")
-                }
-            } else {
-                if (!tmpFile.renameTo(binaryFile)) {
-                    binaryFile.delete()
-                    if (!tmpFile.renameTo(binaryFile)) {
-                        throw RuntimeException("Failed to move downloaded binary into place")
-                    }
-                }
-            }
+            installDownloadedBinary()
             binaryFile.setExecutable(true)
         } finally {
             tmpFile.delete()
+        }
+    }
+
+    private fun installDownloadedBinary() {
+        if (isMac) {
+            binaryFile.delete()
+            val result = ProcessBuilder("tar", "-xzf", tmpFile.absolutePath, "-C", dataDir.absolutePath, "cloudflared")
+                .redirectErrorStream(true)
+                .start()
+            val exitCode = result.waitFor()
+            if (exitCode != 0 || !binaryFile.exists()) {
+                throw RuntimeException("Failed to extract cloudflared from archive (exit $exitCode)")
+            }
+            return
+        }
+        if (tmpFile.renameTo(binaryFile)) return
+        binaryFile.delete()
+        if (!tmpFile.renameTo(binaryFile)) {
+            throw RuntimeException("Failed to move downloaded binary into place")
         }
     }
 

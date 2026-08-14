@@ -152,7 +152,6 @@ fun ScheduleTab(
     onSelectedItemChanged: (String?) -> Unit = {},
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
     onAddLabel: () -> Unit = {},
-    onAddWebsite: () -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM,
     itemZoomPercent: Int = ZOOM_DEFAULT,
     onItemZoomChange: (Int) -> Unit = {},

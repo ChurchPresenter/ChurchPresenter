@@ -56,7 +56,7 @@ object TrainingDataLogger {
 
     /** Keeps `[A-Za-z0-9._-]`, replacing anything else with `_`, so any session id is filename-safe. */
     private fun sanitize(raw: String): String =
-        raw.map { if (it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '.' || it == '_' || it == '-') it else '_' }
+        raw.map { if (it.isLetterOrDigit() || it in ".-_") it else '_' }
             .joinToString("")
 
     /**

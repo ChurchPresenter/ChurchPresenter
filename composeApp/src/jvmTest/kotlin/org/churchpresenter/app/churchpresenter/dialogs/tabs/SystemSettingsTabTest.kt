@@ -29,7 +29,6 @@ import io.mockk.unmockkAll
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import java.io.File
 import java.nio.file.Files
@@ -163,8 +162,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = initial,
                     onSettingsChange = { transform -> applied = transform(initial) },
                 )
@@ -184,8 +181,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = initial,
                     onSettingsChange = { transform -> applied = transform(initial) },
                 )
@@ -204,8 +199,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(analyticsReportingEnabled = false),
                 )
             }
@@ -219,8 +212,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(analyticsReportingEnabled = true),
                 )
             }
@@ -236,8 +227,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(analyticsReportingEnabled = true),
                 )
             }
@@ -258,8 +247,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(analyticsReportingEnabled = false),
                 )
             }
@@ -286,8 +273,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = current,
                     onSettingsChange = { transform -> current = transform(current) },
                 )
@@ -365,8 +350,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = current,
                     onSettingsChange = { transform -> changes++; current = transform(current) },
                 )
@@ -390,8 +373,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = initial,
                     onSettingsChange = { transform -> applied = transform(initial) },
                 )
@@ -422,8 +403,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = initial,
                     onSettingsChange = { transform -> applied = transform(initial) },
                 )
@@ -444,7 +423,7 @@ class SystemSettingsTabTest {
     fun `an unset picker shows the placeholder and cannot set all directories`() = runComposeUiTest {
         setContent {
             MaterialTheme {
-                SystemSettingsTab(currentTheme = ThemeMode.SYSTEM, onThemeChange = {})
+                SystemSettingsTab()
             }
         }
 
@@ -458,7 +437,7 @@ class SystemSettingsTabTest {
     fun `every storage section renders with a browse and a set-all button`() = runComposeUiTest {
         setContent {
             MaterialTheme {
-                SystemSettingsTab(currentTheme = ThemeMode.SYSTEM, onThemeChange = {})
+                SystemSettingsTab()
             }
         }
 
@@ -483,8 +462,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         bibleSettings = AppSettings().bibleSettings.copy(storageDirectory = dirs[0].path),
                         songSettings = AppSettings().songSettings.copy(storageDirectory = dirs[1].path),
@@ -512,8 +489,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         bibleSettings = AppSettings().bibleSettings.copy(storageDirectory = dir.path)
                     ),
@@ -532,8 +507,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         bibleSettings = AppSettings().bibleSettings.copy(storageDirectory = dir.path)
                     ),
@@ -552,8 +525,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         songSettings = AppSettings().songSettings.copy(storageDirectory = dir.path)
                     ),
@@ -577,8 +548,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         songSettings = AppSettings().songSettings.copy(storageDirectory = dir.path)
                     ),
@@ -598,8 +567,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         songSettings = AppSettings().songSettings.copy(storageDirectory = dir.path)
                     ),
@@ -625,8 +592,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         songSettings = AppSettings().songSettings.copy(storageDirectory = dir.path)
                     ),
@@ -645,8 +610,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(analyticsReportingEnabled = true),
                 )
             }
@@ -669,8 +632,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(analyticsReportingEnabled = true),
                 )
             }
@@ -687,8 +648,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(analyticsReportingEnabled = false),
                 )
             }
@@ -703,7 +662,7 @@ class SystemSettingsTabTest {
     fun `the settings-file and maintenance buttons all render`() = runComposeUiTest {
         setContent {
             MaterialTheme {
-                SystemSettingsTab(currentTheme = ThemeMode.SYSTEM, onThemeChange = {})
+                SystemSettingsTab()
             }
         }
 
@@ -720,8 +679,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         songSettings = AppSettings().songSettings.copy(storageDirectory = dir.path)
                     ),
@@ -751,8 +708,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         bibleSettings = AppSettings().bibleSettings.copy(storageDirectory = dir.path)
                     ),
@@ -770,8 +725,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(),
                 )
             }
@@ -791,8 +744,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         songSettings = AppSettings().songSettings.copy(storageDirectory = dir.path)
                     ),
@@ -831,8 +782,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         songSettings = AppSettings().songSettings.copy(storageDirectory = dir.path)
                     ),
@@ -931,7 +880,7 @@ class SystemSettingsTabTest {
         stubSwingDialogs()
         setContent {
             MaterialTheme {
-                SystemSettingsTab(currentTheme = ThemeMode.SYSTEM, onThemeChange = {})
+                SystemSettingsTab()
             }
         }
 
@@ -955,7 +904,7 @@ class SystemSettingsTabTest {
         stubSwingDialogs(confirmAnswer = JOptionPane.NO_OPTION)
         setContent {
             MaterialTheme {
-                SystemSettingsTab(currentTheme = ThemeMode.SYSTEM, onThemeChange = {})
+                SystemSettingsTab()
             }
         }
 
@@ -972,7 +921,7 @@ class SystemSettingsTabTest {
         stubSwingDialogs(confirmAnswer = JOptionPane.NO_OPTION)
         setContent {
             MaterialTheme {
-                SystemSettingsTab(currentTheme = ThemeMode.SYSTEM, onThemeChange = {})
+                SystemSettingsTab()
             }
         }
 
@@ -993,7 +942,7 @@ class SystemSettingsTabTest {
         stubSwingDialogs(confirmAnswer = JOptionPane.YES_OPTION)
         setContent {
             MaterialTheme {
-                SystemSettingsTab(currentTheme = ThemeMode.SYSTEM, onThemeChange = {})
+                SystemSettingsTab()
             }
         }
 
@@ -1012,7 +961,7 @@ class SystemSettingsTabTest {
         stubSwingDialogs(confirmAnswer = JOptionPane.NO_OPTION)
         setContent {
             MaterialTheme {
-                SystemSettingsTab(currentTheme = ThemeMode.SYSTEM, onThemeChange = {})
+                SystemSettingsTab()
             }
         }
 
@@ -1033,7 +982,7 @@ class SystemSettingsTabTest {
         stubSwingDialogs()
         setContent {
             MaterialTheme {
-                SystemSettingsTab(currentTheme = ThemeMode.SYSTEM, onThemeChange = {})
+                SystemSettingsTab()
             }
         }
 
@@ -1054,7 +1003,7 @@ class SystemSettingsTabTest {
         stubSwingDialogs(confirmAnswer = JOptionPane.YES_OPTION)
         setContent {
             MaterialTheme {
-                SystemSettingsTab(currentTheme = ThemeMode.SYSTEM, onThemeChange = {})
+                SystemSettingsTab()
             }
         }
 
@@ -1106,8 +1055,6 @@ class SystemSettingsTabTest {
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
-                    currentTheme = ThemeMode.SYSTEM,
-                    onThemeChange = {},
                     settings = AppSettings(
                         bibleSettings = AppSettings().bibleSettings.copy(storageDirectory = path)
                     ),

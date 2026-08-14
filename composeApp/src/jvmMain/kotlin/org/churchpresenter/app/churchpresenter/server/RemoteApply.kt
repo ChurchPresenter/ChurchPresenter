@@ -195,7 +195,8 @@ internal suspend fun applyRemoteLiveState(
             val codeBook = state.verseCodeBook
             val codeChapter = state.verseCodeChapter
             val codeVerse = state.verseCodeVerse
-            if (bibleSyncMode == BibleSyncMode.REFERENCE_ONLY && codeBook != null && codeChapter != null && codeVerse != null) {
+            val hasFullCode = codeBook != null && codeChapter != null && codeVerse != null
+            if (bibleSyncMode == BibleSyncMode.REFERENCE_ONLY && hasFullCode) {
                 // Reference-only: never touch a downloaded file — resolve the SAME canonical verse in
                 // this instance's own independently-configured (possibly different-language) Bible via
                 // Bible.getVerseDetailsByCode, so the follower shows its own translation's wording, not

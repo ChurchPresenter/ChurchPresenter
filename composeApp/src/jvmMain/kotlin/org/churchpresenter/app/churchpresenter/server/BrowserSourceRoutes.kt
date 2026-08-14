@@ -14,7 +14,6 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
@@ -34,7 +33,6 @@ internal fun Route.browserSourceRoutes(
     server: CompanionServer,
     _browserSourceFrameFlows: ConcurrentHashMap<Int, SharedFlow<BrowserSourceFrame>>,
     _browserSourceSessions: ConcurrentHashMap<Int, MutableSet<DefaultWebSocketServerSession>>,
-    scope: CoroutineScope,
 ) {
                 get("${Constants.ENDPOINT_BROWSER_SOURCE}/{index}") {
                     // Path segment is the 1-based number shown in Projection Settings

@@ -145,9 +145,8 @@ class PresentationPlayer(
         if (index !in deck.slides.indices) return
         val outgoing = lastPlacedLayers
         val spec = deck.slides[index].transition
-        transitionSpec = if (index != slideIndex && outgoing.isNotEmpty() && spec != null &&
-            spec.type != TransitionType.NONE && spec.durationMs > 0
-        ) spec else null
+        val specUsable = spec != null && spec.type != TransitionType.NONE && spec.durationMs > 0
+        transitionSpec = if (index != slideIndex && outgoing.isNotEmpty() && specUsable) spec else null
         transitionFromLayers = if (transitionSpec != null) outgoing else emptyList()
         transitionStartNanos = 0L
         slideIndex = index

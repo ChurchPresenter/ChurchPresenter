@@ -319,7 +319,6 @@ internal fun BibleBrowserColumn(
 internal fun BibleVerseColumn(
     verses: List<String>,
     selectedIndex: Int,
-    accentColor: Color,
     selectedIndices: Set<Int>? = null,
     onItemSelected: (Int) -> Unit,
     onItemDoubleClicked: (Int) -> Unit = {},

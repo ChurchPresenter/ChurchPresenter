@@ -39,8 +39,6 @@ internal fun RemoteCommandEffects(
     presentationViewModel: PresentationViewModel,
     bibleViewModel: BibleViewModel,
     presenterManager: PresenterManager,
-    selectedPictureItem: ScheduleItem.PictureItem?,
-    selectedPresentationItem: ScheduleItem.PresentationItem?,
     onSongItemVersionBump: () -> Unit,
     resolveImageFile: ((folderId: String, index: Int) -> File?)?,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
@@ -177,7 +175,6 @@ LaunchedEffect(selectBibleVerseFlow) {
 
         // Resolve bookId from book name using the primary Bible's book list
         val bookIndex = primaryBible?.getBooks()?.let { resolveBookIndex(it, req.bookName) } ?: -1
-        val bookId = resolveBookIdOrZero(bookIndex) { primaryBible?.getBookId(it) }
 
         val resolved = bibleViewModel.getVersesForDisplay(req.bookName, req.chapter, req.verseNumber)
         val verses = remoteSelectedVerses(

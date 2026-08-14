@@ -487,7 +487,8 @@ class PicturesViewModel(
                                 // isActive gates the add: cancellation is cooperative, so a watcher
                                 // cancelled by clearImages() can still be mid-pollEvents() here — an
                                 // add now would land in _images after the reload and duplicate a path.
-                                if (isActive && file.exists() && file.isFile && file !in _images) {
+                                val isNewImageFile = file.exists() && file.isFile && file !in _images
+                        if (isActive && isNewImageFile) {
                                     // Insert in sorted order, keep selected image stable
                                     val insertIndex = _images.indexOfFirst { it.name > file.name }
                                     if (insertIndex >= 0) {

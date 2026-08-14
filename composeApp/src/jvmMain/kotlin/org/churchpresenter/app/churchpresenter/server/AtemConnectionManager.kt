@@ -86,7 +86,8 @@ object AtemConnectionManager {
         val existing = client
         // Reconnect when there is no client, the target changed, or the keepalive loop
         // tore the socket down because the ATEM went silent.
-        if (existing == null || !existing.isAlive() || host != cachedHost || port != cachedPort) {
+        val endpointChanged = host != cachedHost || port != cachedPort
+        if (existing == null || !existing.isAlive() || endpointChanged) {
             existing?.disconnect()
             return openConnection(host, port, collectState = needsState)
         }

@@ -443,11 +443,6 @@ fun SongPresenter(
         }
         // Bilingual flags for layout decisions (outside remember, always fresh)
         val langDisplay = effectiveLangDisplay
-        val hasBilingualContent = allLyricSections.any { it.secondaryLines.isNotEmpty() }
-        val isBilingualSideBySide = langDisplay == Constants.SONG_LANG_BOTH &&
-                ss.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE && hasBilingualContent
-        val isBilingualTopBottom = langDisplay == Constants.SONG_LANG_BOTH &&
-                ss.bilingualLayout == Constants.BILINGUAL_TOP_BOTTOM && hasBilingualContent
         val autoFitEnabled = if (lookAheadEnabled) {
             if (isLowerThird) ss.lowerThirdLookAheadFontSizeAutoFit else ss.lookAheadFontSizeAutoFit
         } else {
@@ -594,7 +589,7 @@ fun SongPresenter(
                             // Look-ahead = 1 verse: all lines of next section
                             nextSection.lines
                         }
-                    } else if (lookAheadEnabled && isLineMode && effectiveLineIndex >= 0 && effectiveLineIndex + 1 < allDisplayLines.size) {
+                    } else if (lookAheadEnabled && isLineMode && effectiveLineIndex in 0 until allDisplayLines.size - 1) {
                         // No next section but there's a next line in the current section
                         if (laIsLineMode) listOf(allDisplayLines[effectiveLineIndex + 1]) else emptyList()
                     } else {
@@ -602,8 +597,6 @@ fun SongPresenter(
                     }
 
                     // Combine main + look-ahead
-                    val displayLines = mainLines + laLines
-                    val lookAheadStartIndex = if (laLines.isNotEmpty()) mainLines.size else -1
 
                     // Build main secondary lines (for bilingual)
                     val mainSecondaryLines: List<String> = if (section.secondaryLines.isNotEmpty()) {
@@ -629,13 +622,12 @@ fun SongPresenter(
                         } else {
                             nextSection.secondaryLines
                         }
-                    } else if (lookAheadEnabled && isLineMode && effectiveLineIndex >= 0 && effectiveLineIndex + 1 < (section.secondaryLines.size)) {
+                    } else if (lookAheadEnabled && isLineMode && effectiveLineIndex in 0 until section.secondaryLines.size - 1) {
                         if (laIsLineMode) listOf(section.secondaryLines[effectiveLineIndex + 1]) else emptyList()
                     } else {
                         emptyList()
                     }
 
-                    val secondaryLookAheadStartIndex = if (laSecondaryLines.isNotEmpty()) mainSecondaryLines.size else -1
 
                     // Apply language display to main lines
                     val effectiveDisplayLines: List<String>
@@ -844,8 +836,6 @@ fun SongPresenter(
                     }
 
                     // Determine which positions have content for balancing
-                    val hasTopContent = (titleConfigured && effectiveTitlePosition == Constants.ABOVE_VERSE) ||
-                            (numberConfigured && effectiveSongNumberPosition == Constants.ABOVE_VERSE)
                     val hasBottomContent = (titleConfigured && effectiveTitlePosition == Constants.BELOW_VERSE) ||
                             (numberConfigured && effectiveSongNumberPosition == Constants.BELOW_VERSE)
 

@@ -263,7 +263,7 @@ class SpsConverterTest {
     fun `the target folder can be worked out before converting`() {
         val sps = spsFile(songbook = "Sunday Hymnal", songs = arrayOf(song("1", "Amazing Grace")))
 
-        assertEquals("Sunday Hymnal", converter.getTargetFolderName(sps.absolutePath, output.absolutePath))
+        assertEquals("Sunday Hymnal", converter.getTargetFolderName(sps.absolutePath))
     }
 
     @Test
@@ -272,7 +272,7 @@ class SpsConverterTest {
 
         assertEquals(
             "Hymns Book 1 2",
-            converter.getTargetFolderName(sps.absolutePath, output.absolutePath),
+            converter.getTargetFolderName(sps.absolutePath),
             "the prompt must name the folder that will actually be written",
         )
     }
@@ -283,7 +283,7 @@ class SpsConverterTest {
 
         assertEquals(
             "Grace Hymns",
-            converter.getTargetFolderName(sps.absolutePath, output.absolutePath),
+            converter.getTargetFolderName(sps.absolutePath),
             "the overwrite prompt must name the same folder the conversion will actually use",
         )
     }
@@ -292,7 +292,7 @@ class SpsConverterTest {
     fun `a file with nothing in it has no target folder`() {
         val sps = spsFile(name = "empty.sps", songs = arrayOf())
 
-        assertNull(converter.getTargetFolderName(sps.absolutePath, output.absolutePath))
+        assertNull(converter.getTargetFolderName(sps.absolutePath))
         assertFalse(converter.targetFolderExists(sps.absolutePath, output.absolutePath))
     }
 

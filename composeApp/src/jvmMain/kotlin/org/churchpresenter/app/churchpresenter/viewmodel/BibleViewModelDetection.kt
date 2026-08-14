@@ -174,8 +174,10 @@ internal fun BibleViewModel.addDetection(ref: DetectedReference): Boolean {
         val verseText = list[idx].verseText ?: ref.verseText
 
         val version = ref.detectedVersion ?: list[idx].detectedVersion
-        if (merged != list[idx].sources || mergedTracks != list[idx].tracks ||
-            verseText != list[idx].verseText || version != list[idx].detectedVersion) {
+        val previous = list[idx]
+        val sourcesChanged = merged != previous.sources || mergedTracks != previous.tracks
+        val textChanged = verseText != previous.verseText || version != previous.detectedVersion
+        if (sourcesChanged || textChanged) {
             _detectedReferences.value = list.toMutableList().also {
                 it[idx] = list[idx].copy(
                     sources = merged, tracks = mergedTracks,

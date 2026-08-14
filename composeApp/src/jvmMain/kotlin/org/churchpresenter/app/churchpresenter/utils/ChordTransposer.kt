@@ -72,7 +72,7 @@ object ChordTransposer {
         val bracketed = (t.startsWith("[") && t.endsWith("]")) || (t.startsWith("{") && t.endsWith("}"))
         if (!bracketed) return false
         val inner = t.substring(1, t.length - 1)
-        if (inner.any { it == '[' || it == ']' || it == '{' || it == '}' }) return false
+        if (inner.any { it in "[]{}" }) return false
         return !isChord(inner)
     }
 

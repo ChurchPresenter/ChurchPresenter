@@ -9,9 +9,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.junit.AfterClass
@@ -47,7 +44,6 @@ class CompanionServerPreloadTest {
     companion object {
         private lateinit var server: CompanionServer
         private var port: Int = 0
-        private val json = Json { ignoreUnknownKeys = true }
         private lateinit var workDir: File
 
         @JvmStatic
@@ -90,7 +86,6 @@ class CompanionServerPreloadTest {
 
     private fun get(path: String): HttpResponse = runBlocking { client.get(url(path)) }
     private fun HttpResponse.text(): String = runBlocking { bodyAsText() }
-    private fun HttpResponse.obj(): JsonObject = json.parseToJsonElement(text()).jsonObject
     private fun HttpResponse.bytes(): ByteArray = runBlocking { body<ByteArray>() }
 
     /** One row of the `.sps` line format: number#$#title#$#category#$#key#$#author#$#composer#$#lyrics. */

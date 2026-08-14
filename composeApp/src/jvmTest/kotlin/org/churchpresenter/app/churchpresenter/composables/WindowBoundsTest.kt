@@ -27,7 +27,7 @@ class WindowBoundsTest {
     private val stackingList =
         "_NET_CLIENT_LIST_STACKING(WINDOW): window id # 0x1400003, 0x1600005, 0x1800007"
 
-    private fun named(id: String, title: String) = "_NET_WM_NAME(UTF8_STRING) = \"$title\""
+    private fun named(title: String) = "_NET_WM_NAME(UTF8_STRING) = \"$title\""
 
     private fun xwininfo(x: Int, y: Int, w: Int, h: Int) = """
         xwininfo: Window id: 0x1600005 "Some Window"
@@ -49,8 +49,8 @@ class WindowBoundsTest {
             when {
                 command.contains("-root") -> CommandResult(0, stackingList)
                 command.first() == "xwininfo" -> CommandResult(0, xwininfo(100, 200, 1280, 720))
-                command.contains("0x1600005") -> CommandResult(0, named("0x1600005", "Sermon Notes"))
-                else -> CommandResult(0, named("x", "Something Else"))
+                command.contains("0x1600005") -> CommandResult(0, named("Sermon Notes"))
+                else -> CommandResult(0, named("Something Else"))
             }
         }
 
@@ -63,8 +63,8 @@ class WindowBoundsTest {
             when {
                 command.contains("-root") -> CommandResult(0, stackingList)
                 command.first() == "xwininfo" -> CommandResult(0, xwininfo(0, 0, 800, 600))
-                command.contains("0x1400003") -> CommandResult(0, named("0x1400003", "Sermon Notes"))
-                else -> CommandResult(0, named("x", "Other"))
+                command.contains("0x1400003") -> CommandResult(0, named("Sermon Notes"))
+                else -> CommandResult(0, named("Other"))
             }
         }
 
@@ -84,7 +84,7 @@ class WindowBoundsTest {
             when {
                 command.contains("-root") -> CommandResult(0, stackingList)
                 command.first() == "xwininfo" -> CommandResult(0, xwininfo(0, 0, 800, 600))
-                else -> CommandResult(0, named("x", "Sermon Notes — Edited"))
+                else -> CommandResult(0, named("Sermon Notes — Edited"))
             }
         }
 
@@ -98,7 +98,7 @@ class WindowBoundsTest {
                 command.contains("-root") -> CommandResult(0, stackingList)
                 command.first() == "xwininfo" -> CommandResult(0, xwininfo(10, 20, 640, 480))
                 command.contains("0x1400003") -> CommandResult(0, "_NET_WM_NAME:  not found.")
-                else -> CommandResult(0, named("x", "Sermon Notes"))
+                else -> CommandResult(0, named("Sermon Notes"))
             }
         }
 
@@ -118,7 +118,7 @@ class WindowBoundsTest {
                     if (measured == 1) CommandResult(0, xwininfo(0, 0, 0, 0))
                     else CommandResult(0, xwininfo(5, 6, 320, 240))
                 }
-                else -> CommandResult(0, named("x", "Sermon Notes"))
+                else -> CommandResult(0, named("Sermon Notes"))
             }
         }
 
@@ -139,7 +139,7 @@ class WindowBoundsTest {
             when {
                 command.contains("-root") -> CommandResult(0, stackingList)
                 command.first() == "xwininfo" -> CommandResult(0, xwininfo(0, 0, 800, 600))
-                else -> CommandResult(0, named("x", "Other"))
+                else -> CommandResult(0, named("Other"))
             }
         }
 

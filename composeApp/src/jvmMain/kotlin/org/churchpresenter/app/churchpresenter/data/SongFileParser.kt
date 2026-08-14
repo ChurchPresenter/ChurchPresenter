@@ -161,7 +161,8 @@ class SongFileParser {
         val sb = StringBuilder()
 
         // Write header if any metadata exists
-        if (song.author.isNotEmpty() || song.composer.isNotEmpty() || song.tune.isNotEmpty() || song.ccliNumber.isNotEmpty()) {
+        val hasCredits = song.author.isNotEmpty() || song.composer.isNotEmpty()
+        if (hasCredits || song.tune.isNotEmpty() || song.ccliNumber.isNotEmpty()) {
             sb.appendLine("---")
             if (song.author.isNotEmpty()) sb.appendLine("author: ${song.author}")
             if (song.composer.isNotEmpty()) sb.appendLine("composer: ${song.composer}")

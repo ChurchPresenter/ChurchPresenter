@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -14,7 +15,7 @@ import kotlin.test.assertNotNull
 class LiveStateBroadcastWiringTest {
 
     private fun compose(
-        test: androidx.compose.ui.test.ComposeUiTest,
+        test: ComposeUiTest,
         presenterManager: PresenterManager,
         server: CompanionServer = CompanionServer(),
         settings: AppSettings = AppSettings(),

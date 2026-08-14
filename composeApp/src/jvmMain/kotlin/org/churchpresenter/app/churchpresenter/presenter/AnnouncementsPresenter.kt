@@ -53,7 +53,6 @@ fun AnnouncementsPresenter(
     onFinished: () -> Unit = {},
     showBackground: Boolean = true,
 ) {
-    val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val settings   = appSettings.announcementsSettings
     val textColor  = if (isKey) Color.White else parseHexColor(settings.textColor)

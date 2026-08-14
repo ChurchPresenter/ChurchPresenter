@@ -614,7 +614,6 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 itemsIndexed(filteredSongs) { index, song ->
                     var showContextMenu by remember { mutableStateOf(false) }
                     var contextMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
-                    val rowAccentColor = MaterialTheme.colorScheme.primary
                     val isRowSelected = index == selectedSongIndex
                     Box {
                     Row(

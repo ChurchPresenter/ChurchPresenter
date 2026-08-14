@@ -57,7 +57,7 @@ class SpsConverter {
         }
     }
 
-    fun getTargetFolderName(spsFilePath: String, outputDirectory: String): String? {
+    fun getTargetFolderName(spsFilePath: String): String? {
         try {
             val songs = Songs()
             songs.loadFromSps(spsFilePath)
@@ -73,7 +73,7 @@ class SpsConverter {
     }
 
     fun targetFolderExists(spsFilePath: String, outputDirectory: String): Boolean {
-        val folderName = getTargetFolderName(spsFilePath, outputDirectory) ?: return false
+        val folderName = getTargetFolderName(spsFilePath) ?: return false
         return File(outputDirectory, folderName).exists()
     }
 

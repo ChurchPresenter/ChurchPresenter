@@ -26,7 +26,7 @@ class TimerStateManagerTest {
         val id = id()
         TimerStateManager.getState(id, 60)
         TimerStateManager.setRunning(id, 60, true)
-        TimerStateManager.tick(id, 60)
+        TimerStateManager.tick(id)
         // A second read with the same duration must NOT reset progress back to 60.
         assertEquals(59, TimerStateManager.getState(id, 60).remainingSeconds)
     }
@@ -35,18 +35,18 @@ class TimerStateManagerTest {
     fun `tick only counts down while running`() {
         val id = id()
         TimerStateManager.getState(id, 10)
-        TimerStateManager.tick(id, 10)
+        TimerStateManager.tick(id)
         assertEquals(10, TimerStateManager.getState(id, 10).remainingSeconds, "stopped timer must not tick")
 
         TimerStateManager.setRunning(id, 10, true)
-        repeat(3) { TimerStateManager.tick(id, 10) }
+        repeat(3) { TimerStateManager.tick(id) }
         assertEquals(7, TimerStateManager.getState(id, 10).remainingSeconds)
     }
 
     @Test
     fun `tick on an unknown source is a no-op and does not create state`() {
         val id = id()
-        TimerStateManager.tick(id, 30) // never read/seeded first
+        TimerStateManager.tick(id) // never read/seeded first
         assertEquals(30, TimerStateManager.getState(id, 30).remainingSeconds)
     }
 
@@ -55,7 +55,7 @@ class TimerStateManagerTest {
         val id = id()
         TimerStateManager.getState(id, 3)
         TimerStateManager.setRunning(id, 3, true)
-        repeat(10) { TimerStateManager.tick(id, 3) } // far more ticks than seconds
+        repeat(10) { TimerStateManager.tick(id) } // far more ticks than seconds
         val s = TimerStateManager.getState(id, 3)
         assertEquals(0, s.remainingSeconds, "countdown must clamp at zero, never go negative")
         assertFalse(s.isRunning, "hitting zero must stop the timer")
@@ -66,13 +66,13 @@ class TimerStateManagerTest {
         val id = id()
         TimerStateManager.getState(id, 60)
         TimerStateManager.setRunning(id, 60, true)
-        repeat(5) { TimerStateManager.tick(id, 60) }
+        repeat(5) { TimerStateManager.tick(id) }
 
         TimerStateManager.reset(id, 60)
         assertEquals(TimerStateManager.TimerState(60, false), TimerStateManager.getState(id, 60))
 
         TimerStateManager.setRunning(id, 60, true)
-        TimerStateManager.tick(id, 60)
+        TimerStateManager.tick(id)
         TimerStateManager.onDurationChanged(id, 90) // duration edited in the properties panel
         assertEquals(TimerStateManager.TimerState(90, false), TimerStateManager.getState(id, 90))
     }
@@ -84,7 +84,7 @@ class TimerStateManagerTest {
         TimerStateManager.getState(a, 10)
         TimerStateManager.getState(b, 10)
         TimerStateManager.setRunning(a, 10, true)
-        TimerStateManager.tick(a, 10)
+        TimerStateManager.tick(a)
         assertEquals(9, TimerStateManager.getState(a, 10).remainingSeconds)
         assertEquals(10, TimerStateManager.getState(b, 10).remainingSeconds, "sources must not share state")
     }
@@ -102,11 +102,11 @@ class TimerStateManagerTest {
         val id = id()
         TimerStateManager.getState(id, 1)
         TimerStateManager.setRunning(id, 1, true)
-        TimerStateManager.tick(id, 1)
+        TimerStateManager.tick(id)
         assertEquals(0, TimerStateManager.getState(id, 1).remainingSeconds)
 
         TimerStateManager.setRunning(id, 1, true) // "start" pressed again at zero
-        TimerStateManager.tick(id, 1)
+        TimerStateManager.tick(id)
         assertTrue(TimerStateManager.getState(id, 1).isRunning, "current behaviour: flag stays set")
         assertEquals(0, TimerStateManager.getState(id, 1).remainingSeconds)
     }

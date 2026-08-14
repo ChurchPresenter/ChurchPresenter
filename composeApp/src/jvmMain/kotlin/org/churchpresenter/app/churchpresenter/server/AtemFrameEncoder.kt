@@ -130,7 +130,7 @@ object AtemFrameEncoder {
                 resultOffset += 8; dst.putLong(resultOffset, (identicalCount + 1).toLong())
                 resultOffset += 8; dst.putLong(resultOffset, lastBlock)
             } else if (identicalCount > 0) {
-                for (j in 0..identicalCount) {
+                repeat(identicalCount + 1) {
                     resultOffset += 8; dst.putLong(resultOffset, lastBlock)
                 }
             } else {
@@ -146,7 +146,7 @@ object AtemFrameEncoder {
             resultOffset += 8; dst.putLong(resultOffset, (identicalCount + 1).toLong())
             resultOffset += 8; dst.putLong(resultOffset, lastBlock)
         } else if (identicalCount > 0) {
-            for (j in 0..identicalCount) {
+            repeat(identicalCount + 1) {
                 resultOffset += 8; dst.putLong(resultOffset, lastBlock)
             }
         } else {

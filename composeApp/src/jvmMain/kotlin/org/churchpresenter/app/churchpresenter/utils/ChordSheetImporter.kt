@@ -110,7 +110,8 @@ object ChordSheetImporter {
 
             if (isChordLine(line)) {
                 val next = lines.getOrNull(index + 1)
-                if (next != null && next.isNotBlank() && !isChordLine(next) && sectionMarkerOf(next) { 0 } == null) {
+                val isLyricLine = next != null && next.isNotBlank() && !isChordLine(next)
+            if (isLyricLine && sectionMarkerOf(next) { 0 } == null) {
                     out.add(merge(line, next))
                     index += 2
                 } else {

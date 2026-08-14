@@ -75,7 +75,7 @@ internal fun BibleColumnHeaderRow(
     bookWidth: Dp,
     chapterWidth: Dp,
     crossRefsVisible: Boolean,
-    crossRefsEnabled: Boolean,
+    crossRefsDocked: Boolean,
     holdAvailable: Boolean,
     holdLive: Boolean,
     sttToggleVisible: Boolean,
@@ -154,13 +154,13 @@ internal fun BibleColumnHeaderRow(
                                 modifier = Modifier
                                     .height(27.dp)
                                     .background(
-                                        if (crossRefsEnabled) MaterialTheme.colorScheme.primaryContainer
+                                        if (crossRefsDocked) MaterialTheme.colorScheme.primaryContainer
                                         else MaterialTheme.colorScheme.surfaceVariant,
                                         RoundedCornerShape(6.dp),
                                     )
                                     .border(
                                         1.dp,
-                                        if (crossRefsEnabled) MaterialTheme.colorScheme.primary
+                                        if (crossRefsDocked) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.outlineVariant,
                                         RoundedCornerShape(6.dp),
                                     )
@@ -178,13 +178,13 @@ internal fun BibleColumnHeaderRow(
                                     painter = painterResource(Res.drawable.ic_link),
                                     contentDescription = stringResource(Res.string.bible_cross_references),
                                     modifier = Modifier.size(12.dp),
-                                    tint = if (crossRefsEnabled) MaterialTheme.colorScheme.primary
+                                    tint = if (crossRefsDocked) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                 )
                                 Text(
                                     crossRefsLabel,
                                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.5.sp),
-                                    color = if (crossRefsEnabled) MaterialTheme.colorScheme.primary
+                                    color = if (crossRefsDocked) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                 )
                             }

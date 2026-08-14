@@ -97,7 +97,7 @@ object SharedBrowserFrameCache {
         if (entry.refCount == 1) {
             entry.captureJob = scope.launch {
                 try {
-                    startBrowser(entry, sourceId, url, renderWidth, renderHeight, customCss, fps, forceTransparent)
+                    startBrowser(entry, url, renderWidth, renderHeight, customCss, fps, forceTransparent)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -278,7 +278,6 @@ object SharedBrowserFrameCache {
 
     private suspend fun startBrowser(
         entry: CacheEntry,
-        sourceId: String,
         url: String,
         renderWidth: Int,
         renderHeight: Int,

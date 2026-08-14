@@ -116,7 +116,7 @@ class CompanionSatelliteViewModel {
             .forEach { disableSlot(it.connectionId, it.placement) }
         desired.forEach { slot ->
             val newParams = paramsFor(slot, settings)
-            if (activeParams[slot] != newParams) startSlot(slot, settings, newParams)
+            if (activeParams[slot] != newParams) startSlot(slot, newParams)
         }
     }
 
@@ -163,7 +163,7 @@ class CompanionSatelliteViewModel {
         reconnectDelayMs = settings.reconnectDelayMs
     )
 
-    private fun startSlot(slot: CompanionSurfaceSlot, settings: CompanionSatelliteSettings, params: SlotRegistrationParams) {
+    private fun startSlot(slot: CompanionSurfaceSlot, params: SlotRegistrationParams) {
         activeParams[slot] = params
         // startRow/startColumn default to 0 (top-left) — ChurchPresenter no longer offers UI to
         // change them; Companion's own per-surface settings already cover this reliably. See
