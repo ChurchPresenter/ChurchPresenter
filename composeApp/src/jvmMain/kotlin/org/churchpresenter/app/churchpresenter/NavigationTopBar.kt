@@ -314,7 +314,9 @@ fun FrameWindowScope.NavigationTopBar(
 
         Menu(helpLabel, mnemonic = helpMnemonic) {
             Item(stringResource(Res.string.menu_getting_started), onClick = onGettingStarted)
-            Item(stringResource(Res.string.menu_keyboard_shortcuts), onClick = onKeyboardShortcuts, shortcut = accel(ShortcutAction.KEYBOARD_SHORTCUTS))
+            Item(stringResource(Res.string.menu_keyboard_shortcuts),
+                onClick = onKeyboardShortcuts,
+                shortcut = accel(ShortcutAction.KEYBOARD_SHORTCUTS))
             Item(stringResource(Res.string.menu_how_to_blog), onClick = onHowToBlog)
             Item(stringResource(Res.string.open_converter), onClick = onConverter)
             Item(stringResource(Res.string.menu_about), onClick = onAbout)

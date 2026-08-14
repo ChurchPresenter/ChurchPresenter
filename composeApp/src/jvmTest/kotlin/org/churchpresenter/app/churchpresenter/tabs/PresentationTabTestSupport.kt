@@ -114,7 +114,10 @@ internal fun presentationTab(
                         appSettings = appSettings,
                         viewModel = vm,
                         presenterManager = presenterManager,
-                        onAddToSchedule = { path, name, count, type -> reports.scheduled += "$path:$name:$count:$type" },
+                        onAddToSchedule = { path,
+                            name,
+                            count,
+                            type -> reports.scheduled += "$path:$name:$count:$type" },
                         onSettingsChange = { transform ->
                             reports.settingsChanges++
                             reports.settingsAfterChange = transform(reports.settingsAfterChange ?: appSettings)

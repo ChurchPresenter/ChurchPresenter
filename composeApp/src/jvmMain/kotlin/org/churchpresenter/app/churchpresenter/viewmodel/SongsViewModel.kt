@@ -165,7 +165,11 @@ class SongsViewModel(
         songFolderWatcher.dispose()
         val items = catalog?.songBook?.flatMap { entry ->
             entry.songs.map { dto ->
-                SongItem(number = dto.number, title = dto.title, songbook = entry.bookName, tune = dto.tune, author = dto.author)
+                SongItem(number = dto.number,
+                    title = dto.title,
+                    songbook = entry.bookName,
+                    tune = dto.tune,
+                    author = dto.author)
             }
         } ?: emptyList()
         applySongList(items)

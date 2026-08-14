@@ -6,12 +6,7 @@ import java.io.File
  * Builds a tiny `.spb` Bible module on disk so [Bible] can be loaded in a test.
  *
  * `.spb` is BibleQuote's plain-text format, not a database:
- * ```
- * ##Title: <name>
- * <bookId> <Book Name> <chapterCount>      // one header line per book
- * -----
- * B001C001V001 1 1 1 <verse text>          // code ref, then DISPLAY book/chapter/verse, then text
- * ```
+ * ``` * ##Title: <name> * <bookId> <Book Name> <chapterCount>      // one header line per book * ----- * B001C001V001 1 1 1 <verse text>          // code ref, then DISPLAY book/chapter/verse, then text * ```
  * The code reference (`BxxxCyyyVzzz`) is the canonical/Hebrew numbering and the three bare numbers
  * are the module's own display numbering — they differ in real modules (e.g. Russian Psalms follow
  * the LXX), which is why cross-Bible lookups go through the code and the UI goes through the

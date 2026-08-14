@@ -154,7 +154,9 @@ class PresentationTabPlaybackSettingsTest {
         onNodeWithText("OK").performClick()
         waitForIdle()
 
-        assertEquals(30f, vm.autoScrollInterval, "an operator mistyping a huge value must not leave the slideshow stalled")
+        assertEquals(30f,
+            vm.autoScrollInterval,
+            "an operator mistyping a huge value must not leave the slideshow stalled")
     }
 
     @Test

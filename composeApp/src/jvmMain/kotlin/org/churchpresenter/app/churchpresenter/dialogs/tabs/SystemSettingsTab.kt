@@ -372,14 +372,18 @@ fun SystemSettingsTab(
                                     if (result.errors.isEmpty()) {
                                         JOptionPane.showMessageDialog(
                                             null,
-                                            String.format(conversionCompleteMsgFmt, result.songsConverted, java.io.File(result.songbookFolder).name),
+                                            String.format(conversionCompleteMsgFmt,
+                                                result.songsConverted,
+                                                java.io.File(result.songbookFolder).name),
                                             conversionCompleteTitle,
                                             JOptionPane.INFORMATION_MESSAGE
                                         )
                                     } else {
                                         JOptionPane.showMessageDialog(
                                             null,
-                                            String.format(conversionCompleteErrorsFmt, result.songsConverted, result.errors.joinToString("\n")),
+                                            String.format(conversionCompleteErrorsFmt,
+                                                result.songsConverted,
+                                                result.errors.joinToString("\n")),
                                             conversionCompleteTitle,
                                             JOptionPane.WARNING_MESSAGE
                                         )
@@ -739,7 +743,8 @@ fun SystemSettingsTab(
                             JOptionPane.WARNING_MESSAGE
                         )
                         if (result == JOptionPane.YES_OPTION) {
-                            val uploadsDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/device_uploads")
+                            val uploadsDir = java.io.File(System.getProperty("user.home"),
+                                ".churchpresenter/device_uploads")
                             uploadsDir.deleteRecursively()
                             JOptionPane.showMessageDialog(
                                 Window.getWindows().firstOrNull { it.isActive },
@@ -840,7 +845,9 @@ private fun DirectoryPicker(
             }
             TooltipArea(
                 tooltip = {
-                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                    Surface(color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp) {
                         Text(
                             when (status) {
                                 DirStatus.CHECKING -> "…"
@@ -855,7 +862,8 @@ private fun DirectoryPicker(
                         )
                     }
                 },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter,
+                    offset = DpOffset(0.dp, 4.dp))
             ) {
                 Box(
                     modifier = Modifier

@@ -252,7 +252,8 @@ internal fun InstanceLinkDialogContent(
                             }
                             remoteLiveState?.let { state ->
                                 Text(
-                                    text = stringResource(Res.string.instance_link_last_received, liveStateSummary(state)),
+                                    text = stringResource(Res.string.instance_link_last_received,
+                                        liveStateSummary(state)),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

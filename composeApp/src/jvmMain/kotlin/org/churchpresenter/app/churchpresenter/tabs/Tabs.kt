@@ -1,5 +1,18 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 enum class Tabs {
-    BIBLE, SONGS, PICTURES, PRESENTATION, MEDIA, LOWER_THIRD, ANNOUNCEMENTS, WEB, CANVAS, QA, STT, CROSSWORD, DICTIONARY, COMPANION_SURFACE
+    BIBLE,
+    SONGS,
+    PICTURES,
+    PRESENTATION,
+    MEDIA,
+    LOWER_THIRD,
+    ANNOUNCEMENTS,
+    WEB,
+    CANVAS,
+    QA,
+    STT,
+    CROSSWORD,
+    DICTIONARY,
+    COMPANION_SURFACE
 }

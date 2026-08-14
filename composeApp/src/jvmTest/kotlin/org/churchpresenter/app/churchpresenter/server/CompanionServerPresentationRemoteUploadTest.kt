@@ -248,7 +248,8 @@ class CompanionServerPresentationRemoteUploadTest {
     fun `uploading with the wrong password is unauthorized, and with the right one is accepted`() {
         server.presentationRemotePassword = "sermon"
 
-        assertEquals(HttpStatusCode.Unauthorized, upload(body("a.pdf", dataUri("x".toByteArray())), password = "guess").status)
+        assertEquals(HttpStatusCode.Unauthorized,
+            upload(body("a.pdf", dataUri("x".toByteArray())), password = "guess").status)
         assertEquals(HttpStatusCode.OK, upload(body("a.pdf", dataUri("x".toByteArray())), password = "sermon").status)
     }
 

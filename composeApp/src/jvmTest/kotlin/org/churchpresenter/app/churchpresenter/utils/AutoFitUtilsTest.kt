@@ -272,7 +272,8 @@ class AutoFitUtilsTest {
         val withWords = listOf("[G]Amazing [C]grace how [D]sweet the [Em]sound")
         val pairs = zoneHeights.map { chartSize(lines = introOnly, height = it) to chartSize(lines = withWords, height = it) }
 
-        assertTrue(pairs.all { (intro, words) -> intro >= words }, "a chord-only line was tighter than a stacked one: $pairs")
+        assertTrue(pairs.all { (intro, words) -> intro >= words },
+            "a chord-only line was tighter than a stacked one: $pairs")
         assertTrue(pairs.any { (intro, words) -> intro > words }, "the two line shapes never differed: $pairs")
     }
 }

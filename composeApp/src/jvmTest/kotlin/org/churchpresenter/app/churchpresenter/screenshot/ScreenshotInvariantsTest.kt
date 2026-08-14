@@ -9,8 +9,7 @@ import kotlin.test.fail
 /**
  * The two rules that decide whether a screenshot is compared in CI at all.
  *
- * Both fail **silently**. `.github/workflows/screenshots.yml` records with `--tests
- * '*ScreenshotTest*'` and matches images between the two sides of the comparison by their path
+ * Both fail **silently**. `.github/workflows/screenshots.yml` records with `--tests * '*ScreenshotTest*'` and matches images between the two sides of the comparison by their path
  * relative to [SCREENSHOT_ROOT], so a class named something else is simply never rendered, and an
  * image written outside that root simply has no counterpart. Neither produces a failure, a warning,
  * or a missing-file error — the image just stops being looked at, and stays that way for as long as

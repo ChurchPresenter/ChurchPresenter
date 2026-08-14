@@ -509,7 +509,9 @@ class InstanceLinkContentTest {
     @Test
     fun `WEBSITE prefers the page title over the URL`() = dialog(
         connectionStatus = InstanceLinkStatus.CONNECTED,
-        remoteLiveState = LiveStateDto(contentType = "WEBSITE", websiteTitle = "Church Home", websiteUrl = "https://church.example"),
+        remoteLiveState = LiveStateDto(contentType = "WEBSITE",
+            websiteTitle = "Church Home",
+            websiteUrl = "https://church.example"),
     ) {
         onNodeWithText("Last received: Church Home").assertExists()
     }

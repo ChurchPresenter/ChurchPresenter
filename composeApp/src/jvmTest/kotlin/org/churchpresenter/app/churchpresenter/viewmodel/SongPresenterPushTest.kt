@@ -81,7 +81,11 @@ class SongPresenterPushTest {
     )
 
     @Test fun `an edit lands on the previously-live section and line, with bpm stamped`() {
-        val push = resolveEditedSongPush(sections, liveSectionIndex = 1, liveLineIndex = 2, song(), SongTuning(bpm = 80))
+        val push = resolveEditedSongPush(sections,
+            liveSectionIndex = 1,
+            liveLineIndex = 2,
+            song(),
+            SongTuning(bpm = 80))
         assertEquals(1, push.sectionIndex)
         assertEquals(2, push.lineIndex)
         assertEquals(80, push.section.bpm)
@@ -89,14 +93,28 @@ class SongPresenterPushTest {
     }
 
     @Test fun `a section index past the end is clamped to the last section`() =
-        assertEquals(1, resolveEditedSongPush(sections, liveSectionIndex = 9, liveLineIndex = 0, song(), SongTuning(bpm = 0)).sectionIndex)
+        assertEquals(1,
+            resolveEditedSongPush(sections,
+                liveSectionIndex = 9,
+                liveLineIndex = 0,
+                song(),
+                SongTuning(bpm = 0)).sectionIndex)
 
     @Test fun `a line index past the end is clamped to the section's last line`() =
-        assertEquals(1, resolveEditedSongPush(sections, liveSectionIndex = 0, liveLineIndex = 9, song(), SongTuning(bpm = 0)).lineIndex)
+        assertEquals(1,
+            resolveEditedSongPush(sections,
+                liveSectionIndex = 0,
+                liveLineIndex = 9,
+                song(),
+                SongTuning(bpm = 0)).lineIndex)
 
     @Test fun `with no sections the push falls back to a section built from the edited song`() {
         val edited = song(lyrics = listOf("line one", "line two"))
-        val push = resolveEditedSongPush(emptyList(), liveSectionIndex = 0, liveLineIndex = 5, edited, SongTuning(bpm = 70))
+        val push = resolveEditedSongPush(emptyList(),
+            liveSectionIndex = 0,
+            liveLineIndex = 5,
+            edited,
+            SongTuning(bpm = 70))
         assertEquals(-1, push.sectionIndex, "no section to select in an empty list")
         assertEquals(Constants.SECTION_TYPE_SONG, push.section.type)
         assertEquals(listOf("line one", "line two"), push.section.lines)

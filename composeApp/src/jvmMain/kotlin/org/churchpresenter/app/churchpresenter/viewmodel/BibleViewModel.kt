@@ -450,7 +450,12 @@ class BibleViewModel(
         return result
     }
 
-    fun selectVerseByDetails(bookName: String, chapter: Int, verseNumber: Int, verseRange: String = "", goLiveSource: String? = null, bookId: Int = 0): Boolean {
+    fun selectVerseByDetails(bookName: String,
+        chapter: Int,
+        verseNumber: Int,
+        verseRange: String = "",
+        goLiveSource: String? = null,
+        bookId: Int = 0): Boolean {
         val bookIndex = (if (bookId > 0) _primaryBible.value?.getDisplayIndexForBookId(bookId)?.takeIf { it in _books.value.indices } else null)
             ?: _books.value.indexOfFirst { it.equals(bookName, ignoreCase = true) }
         if (bookIndex < 0) return false
@@ -717,7 +722,12 @@ class BibleViewModel(
     }
 
     fun addCurrentVerseToSchedule(
-        onAdd: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit
+        onAdd: (bookName: String,
+            chapter: Int,
+            verseNumber: Int,
+            verseText: String,
+            verseRange: String,
+            bookId: Int) -> Unit
     ): Boolean {
         if (_verses.value.isEmpty()) return false
         val idx = _selectedVerseIndex.value
@@ -737,7 +747,12 @@ class BibleViewModel(
         bookId: Int,
         chapter: Int,
         verse: Int,
-        onAdd: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit,
+        onAdd: (bookName: String,
+            chapter: Int,
+            verseNumber: Int,
+            verseText: String,
+            verseRange: String,
+            bookId: Int) -> Unit,
     ): Boolean {
         val bible = _primaryBible.value ?: return false
         val details = bible.getVerseDetailsByCode(bookId, chapter, verse) ?: return false
@@ -835,7 +850,8 @@ class BibleViewModel(
     internal var remoteBibleCacheFile: File? = null
     internal var remoteSecondaryBibleCacheFile: File? = null
     internal var remoteTranslationCacheFiles: List<Pair<String, File>> = emptyList()
-    internal val remoteBibleCacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/bibles")
+    internal val remoteBibleCacheDir = File(System.getProperty("user.home"),
+        ".churchpresenter/instance-link/cache/bibles")
     internal val actedDetectionKeys = HashSet<String>()
 
     val nextVerses: State<List<SelectedVerse>> = derivedStateOf { getNextVerses() }

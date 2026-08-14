@@ -154,7 +154,10 @@ internal fun LeftColumn(
     SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.full_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = settings.songSettings.songNumberPosition,
                     onPositionChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberPosition = storedValue)) } },
@@ -163,7 +166,10 @@ internal fun LeftColumn(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.lower_third_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = settings.songSettings.songNumberLowerThirdPosition,
                     onPositionChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdPosition = storedValue)) } },
@@ -177,7 +183,10 @@ internal fun LeftColumn(
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.full_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.songNumberHorizontalAlignment,
                     onAlignmentChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberHorizontalAlignment = storedValue)) } },
@@ -187,7 +196,10 @@ internal fun LeftColumn(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.lower_third_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.songNumberLowerThirdHorizontalAlignment,
                     onAlignmentChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdHorizontalAlignment = storedValue)) } },
@@ -361,7 +373,10 @@ internal fun LeftColumn(
     SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.full_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = settings.songSettings.titlePosition,
                     onPositionChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titlePosition = storedValue)) } },
@@ -370,7 +385,10 @@ internal fun LeftColumn(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.lower_third_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = settings.songSettings.titleLowerThirdPosition,
                     onPositionChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdPosition = storedValue)) } },
@@ -384,7 +402,10 @@ internal fun LeftColumn(
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.full_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.titleHorizontalAlignment,
                     onAlignmentChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleHorizontalAlignment = storedValue)) } },
@@ -394,7 +415,10 @@ internal fun LeftColumn(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.lower_third_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.titleLowerThirdHorizontalAlignment,
                     onAlignmentChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdHorizontalAlignment = storedValue)) } },
@@ -484,7 +508,9 @@ internal fun LeftColumn(
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                 icon = {}
             ) {
-                Text(text = stringResource(Res.string.bilingual_left_right), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                Text(text = stringResource(Res.string.bilingual_left_right),
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1)
             }
             SegmentedButton(
                 selected = !isSideBySide,
@@ -497,7 +523,9 @@ internal fun LeftColumn(
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                 icon = {}
             ) {
-                Text(text = stringResource(Res.string.bilingual_top_bottom), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                Text(text = stringResource(Res.string.bilingual_top_bottom),
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1)
             }
         }
     }
@@ -551,7 +579,9 @@ internal fun LeftColumn(
                     .height(180.dp)
             ) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = stringResource(Res.string.screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = stringResource(Res.string.screen),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             NumberSettingsTextField(

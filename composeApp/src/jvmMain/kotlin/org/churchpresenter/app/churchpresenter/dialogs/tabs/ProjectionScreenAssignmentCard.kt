@@ -165,7 +165,8 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
     // right above the divider.
     Row(verticalAlignment = Alignment.CenterVertically) {
         Spacer(modifier = Modifier.width(screenLabelWidth))
-        Box(modifier = Modifier.width(displayDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+        Box(modifier = Modifier.width(displayDropdownWidth).height(contentLabelHeight),
+            contentAlignment = Alignment.BottomCenter) {
             Text(
                 text = stringResource(Res.string.projection_target_display),
                 style = MaterialTheme.typography.bodySmall,
@@ -174,7 +175,8 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        Box(modifier = Modifier.width(displayDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+        Box(modifier = Modifier.width(displayDropdownWidth).height(contentLabelHeight),
+            contentAlignment = Alignment.BottomCenter) {
             Text(
                 text = stringResource(Res.string.key_output),
                 style = MaterialTheme.typography.bodySmall,
@@ -183,7 +185,8 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        Box(modifier = Modifier.width(langDropdownWidth).height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+        Box(modifier = Modifier.width(langDropdownWidth).height(contentLabelHeight),
+            contentAlignment = Alignment.BottomCenter) {
             Text(
                 text = stringResource(Res.string.display_mode),
                 style = MaterialTheme.typography.bodySmall,
@@ -312,7 +315,10 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                                             if (primaryMatch) {
                                                 newProj = newProj.withAssignment(j, other.copy(
                                                     targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
-                                                    targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
+                                                    targetBoundsX = Int.MIN_VALUE,
+                                                    targetBoundsY = Int.MIN_VALUE,
+                                                    targetBoundsW = 0,
+                                                    targetBoundsH = 0
                                                 ))
                                             }
                                             // Clear from key outputs that target the same output
@@ -326,8 +332,12 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                                             }
                                             if (keyMatch) {
                                                 newProj = newProj.withAssignment(j, otherLatest.copy(
-                                                    keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen",
-                                                    keyTargetBoundsX = Int.MIN_VALUE, keyTargetBoundsY = Int.MIN_VALUE, keyTargetBoundsW = 0, keyTargetBoundsH = 0
+                                                    keyTargetDisplay = Constants.KEY_TARGET_NONE,
+                                                    keyTargetType = "screen",
+                                                    keyTargetBoundsX = Int.MIN_VALUE,
+                                                    keyTargetBoundsY = Int.MIN_VALUE,
+                                                    keyTargetBoundsW = 0,
+                                                    keyTargetBoundsH = 0
                                                 ))
                                             }
                                         }
@@ -364,7 +374,10 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                             label = "Display $keyDisplayNum (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX},${screen.boundsY})",
                             shortLabel = "D$keyDisplayNum (${screen.boundsW}x${screen.boundsH})",
                             targetDisplay = screen.index, targetType = "screen",
-                            boundsX = screen.boundsX, boundsY = screen.boundsY, boundsW = screen.boundsW, boundsH = screen.boundsH
+                            boundsX = screen.boundsX,
+                            boundsY = screen.boundsY,
+                            boundsW = screen.boundsW,
+                            boundsH = screen.boundsH
                         ))
                         keyDisplayNum++
                     }
@@ -467,7 +480,10 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                                             if (primaryMatch) {
                                                 newProj = newProj.withAssignment(j, other.copy(
                                                     targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
-                                                    targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
+                                                    targetBoundsX = Int.MIN_VALUE,
+                                                    targetBoundsY = Int.MIN_VALUE,
+                                                    targetBoundsW = 0,
+                                                    targetBoundsH = 0
                                                 ))
                                             }
                                             // Clear from other key outputs that target the same output
@@ -481,8 +497,12 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                                             }
                                             if (keyMatch) {
                                                 newProj = newProj.withAssignment(j, otherLatest.copy(
-                                                    keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen",
-                                                    keyTargetBoundsX = Int.MIN_VALUE, keyTargetBoundsY = Int.MIN_VALUE, keyTargetBoundsW = 0, keyTargetBoundsH = 0
+                                                    keyTargetDisplay = Constants.KEY_TARGET_NONE,
+                                                    keyTargetType = "screen",
+                                                    keyTargetBoundsX = Int.MIN_VALUE,
+                                                    keyTargetBoundsY = Int.MIN_VALUE,
+                                                    keyTargetBoundsW = 0,
+                                                    keyTargetBoundsH = 0
                                                 ))
                                             }
                                         }
@@ -498,7 +518,10 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                                         if (selfMatch) {
                                             newProj = newProj.withAssignment(i, self.copy(
                                                 targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
-                                                targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
+                                                targetBoundsX = Int.MIN_VALUE,
+                                                targetBoundsY = Int.MIN_VALUE,
+                                                targetBoundsW = 0,
+                                                targetBoundsH = 0
                                             ))
                                         }
                                     }

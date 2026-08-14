@@ -65,25 +65,29 @@ class PicturesTabExtraTest {
 
     @Test
     fun `a saved fade setting is shown as Fade`() =
-        picturesTab(settings = { it.copy(pictureSettings = it.pictureSettings.copy(animationType = Constants.ANIMATION_FADE)) }) { _, _ ->
+        picturesTab(settings = { it.copy(pictureSettings = it.pictureSettings.copy(animationType = Constants.ANIMATION_FADE)) }) { _,
+            _ ->
             assertTrue(showsContainingText("ANIMATION TYPE:Fade"), renderedText().toString())
         }
 
     @Test
     fun `a saved slide-right setting is shown as Slide Right`() =
-        picturesTab(settings = { it.copy(pictureSettings = it.pictureSettings.copy(animationType = Constants.ANIMATION_SLIDE_RIGHT)) }) { _, _ ->
+        picturesTab(settings = { it.copy(pictureSettings = it.pictureSettings.copy(animationType = Constants.ANIMATION_SLIDE_RIGHT)) }) { _,
+            _ ->
             assertTrue(showsContainingText("ANIMATION TYPE:Slide Right"), renderedText().toString())
         }
 
     @Test
     fun `a saved none setting is shown as None`() =
-        picturesTab(settings = { it.copy(pictureSettings = it.pictureSettings.copy(animationType = Constants.ANIMATION_NONE)) }) { _, _ ->
+        picturesTab(settings = { it.copy(pictureSettings = it.pictureSettings.copy(animationType = Constants.ANIMATION_NONE)) }) { _,
+            _ ->
             assertTrue(showsContainingText("ANIMATION TYPE:None"), renderedText().toString())
         }
 
     @Test
     fun `re-choosing Crossfade from the dropdown is a real choice, not a no-op`() =
-        picturesTab(settings = { it.copy(pictureSettings = it.pictureSettings.copy(animationType = Constants.ANIMATION_SLIDE_LEFT)) }) { vm, reports ->
+        picturesTab(settings = { it.copy(pictureSettings = it.pictureSettings.copy(animationType = Constants.ANIMATION_SLIDE_LEFT)) }) { vm,
+            reports ->
             openAnimationDropdown()
             onNodeWithText("Crossfade").performClick()
             waitForIdle()

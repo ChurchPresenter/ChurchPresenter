@@ -388,7 +388,9 @@ fun EmbeddedWebView(
                 disableDefaultHandling: BoolRef?
             ): CefResourceRequestHandler {
                 return object : CefResourceRequestHandlerAdapter() {
-                    override fun onBeforeResourceLoad(browser: CefBrowser?, frame: CefFrame?, request: CefRequest?): Boolean {
+                    override fun onBeforeResourceLoad(browser: CefBrowser?,
+                        frame: CefFrame?,
+                        request: CefRequest?): Boolean {
                         applyMobileUserAgent(navController?.mobileMode == true, request)
                         return false
                     }

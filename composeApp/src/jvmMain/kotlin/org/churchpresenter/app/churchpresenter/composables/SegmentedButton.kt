@@ -111,8 +111,14 @@ private fun <T> SegmentedButtonGrid(
                     val isSelected = selectedValue == item.value
                     val shape = when {
                         rowItems.size == 1 -> RoundedCornerShape(4.dp)
-                        index == 0 -> RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 0.dp, bottomEnd = 0.dp)
-                        index == rowItems.lastIndex -> RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = 4.dp, bottomEnd = 4.dp)
+                        index == 0 -> RoundedCornerShape(topStart = 4.dp,
+                            bottomStart = 4.dp,
+                            topEnd = 0.dp,
+                            bottomEnd = 0.dp)
+                        index == rowItems.lastIndex -> RoundedCornerShape(topStart = 0.dp,
+                            bottomStart = 0.dp,
+                            topEnd = 4.dp,
+                            bottomEnd = 4.dp)
                         else -> RoundedCornerShape(0.dp)
                     }
 

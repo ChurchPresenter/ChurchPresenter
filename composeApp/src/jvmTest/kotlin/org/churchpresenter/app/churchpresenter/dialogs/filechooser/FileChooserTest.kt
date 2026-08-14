@@ -530,8 +530,7 @@ class XdgPortalRequestTest {
     // ── The connection's unique name ────────────────────────────────────────────
     //
     // Reading it is the first thing a portal request does, and on a session whose bus name is not
-    // established dbus-java answers with `IndexOutOfBoundsException: Index 0 out of bounds for
-    // length 0` from inside an ArrayList. Uncaught, that took the whole app down when an operator
+    // established dbus-java answers with `IndexOutOfBoundsException: Index 0 out of bounds for // length 0` from inside an ArrayList. Uncaught, that took the whole app down when an operator
     // opened a folder.
 
     @Test
@@ -711,7 +710,8 @@ class XdgPortalRequestTest {
 
     @Test
     fun `a save takes the one path the portal named`() {
-        assertEquals(Path("/home/leader/sunday.cps"), XdgFileChooser.saveSelection(listOf(Path("/home/leader/sunday.cps"))))
+        assertEquals(Path("/home/leader/sunday.cps"),
+            XdgFileChooser.saveSelection(listOf(Path("/home/leader/sunday.cps"))))
     }
 
     @Test

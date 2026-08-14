@@ -26,7 +26,11 @@ class MainDesktopScheduleItemTabTest {
 
     @Test
     fun `a bible verse routes to the Bible tab`() {
-        val item = ScheduleItem.BibleVerseItem(id = "1", bookName = "John", chapter = 3, verseNumber = 16, verseText = "v")
+        val item = ScheduleItem.BibleVerseItem(id = "1",
+            bookName = "John",
+            chapter = 3,
+            verseNumber = 16,
+            verseText = "v")
         assertEquals(Tabs.BIBLE, tabForScheduleItem(item))
     }
 
@@ -44,7 +48,11 @@ class MainDesktopScheduleItemTabTest {
 
     @Test
     fun `a presentation routes to the Presentation tab`() {
-        val item = ScheduleItem.PresentationItem(id = "1", filePath = "/f.pptx", fileName = "f.pptx", slideCount = 10, fileType = "pptx")
+        val item = ScheduleItem.PresentationItem(id = "1",
+            filePath = "/f.pptx",
+            fileName = "f.pptx",
+            slideCount = 10,
+            fileType = "pptx")
         assertEquals(Tabs.PRESENTATION, tabForScheduleItem(item))
     }
 
@@ -56,7 +64,11 @@ class MainDesktopScheduleItemTabTest {
 
     @Test
     fun `a lower third routes to the Lower Third tab`() {
-        val item = ScheduleItem.LowerThirdItem(id = "1", presetId = "p1", presetLabel = "Welcome", pauseAtFrame = false, pauseDurationMs = 0)
+        val item = ScheduleItem.LowerThirdItem(id = "1",
+            presetId = "p1",
+            presetLabel = "Welcome",
+            pauseAtFrame = false,
+            pauseDurationMs = 0)
         assertEquals(Tabs.LOWER_THIRD, tabForScheduleItem(item))
     }
 
@@ -80,7 +92,11 @@ class MainDesktopScheduleItemTabTest {
 
     @Test
     fun `a dictionary entry routes to the Dictionary tab`() {
-        val item = ScheduleItem.DictionaryItem(id = "1", number = "H430", word = "Elohim", transliteration = "el-o-heem", definition = "God")
+        val item = ScheduleItem.DictionaryItem(id = "1",
+            number = "H430",
+            word = "Elohim",
+            transliteration = "el-o-heem",
+            definition = "God")
         assertEquals(Tabs.DICTIONARY, tabForScheduleItem(item))
     }
 
@@ -94,7 +110,11 @@ class MainDesktopScheduleItemTabTest {
             ScheduleItem.PictureItem(id = "3", folderPath = "/p", folderName = "P", imageCount = 1),
             ScheduleItem.PresentationItem(id = "4", filePath = "/f", fileName = "f", slideCount = 1, fileType = "pdf"),
             ScheduleItem.MediaItem(id = "5", mediaUrl = "u", mediaTitle = "t", mediaType = "local"),
-            ScheduleItem.LowerThirdItem(id = "6", presetId = "p", presetLabel = "l", pauseAtFrame = false, pauseDurationMs = 0),
+            ScheduleItem.LowerThirdItem(id = "6",
+                presetId = "p",
+                presetLabel = "l",
+                pauseAtFrame = false,
+                pauseDurationMs = 0),
             ScheduleItem.AnnouncementItem(id = "7", text = "t"),
             ScheduleItem.WebsiteItem(id = "8", url = "u"),
             ScheduleItem.SceneItem(id = "9", sceneId = "s", sceneName = "n"),

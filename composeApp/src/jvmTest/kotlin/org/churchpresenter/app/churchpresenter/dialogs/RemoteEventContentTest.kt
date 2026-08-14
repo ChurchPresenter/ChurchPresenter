@@ -194,7 +194,10 @@ class RemoteEventContentTest {
         runComposeUiTest {
             setContent {
                 MaterialTheme {
-                    result = resolveRemoteEventPresentation(event, queueSize, isClientKnownAllowed, isClientKnownBlocked)
+                    result = resolveRemoteEventPresentation(event,
+                        queueSize,
+                        isClientKnownAllowed,
+                        isClientKnownBlocked)
                 }
             }
         }

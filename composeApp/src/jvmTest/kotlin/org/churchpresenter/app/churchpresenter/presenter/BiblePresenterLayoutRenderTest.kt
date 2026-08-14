@@ -64,7 +64,8 @@ class BiblePresenterLayoutRenderTest {
                 )
             }
         }
-        onNodeWithText("For God so loved the world", substring = true).assertExists("the band must show the verse on air")
+        onNodeWithText("For God so loved the world",
+            substring = true).assertExists("the band must show the verse on air")
         onNodeWithText("John 3:16", substring = true).assertExists("the lower third still needs its reference")
     }
 
@@ -83,7 +84,8 @@ class BiblePresenterLayoutRenderTest {
                 )
             }
         }
-        onNodeWithText("For God so loved the world", substring = true).assertExists("the band must carry the primary translation")
+        onNodeWithText("For God so loved the world",
+            substring = true).assertExists("the band must carry the primary translation")
         onNodeWithText("Ибо так возлюбил Бог мир", substring = true)
             .assertExists("the lower-third secondary-translation style path must render the second language too")
     }
@@ -155,8 +157,16 @@ class BiblePresenterLayoutRenderTest {
                 BiblePresenter(
                     selectedVerses = listOf(
                         verse("For God so loved the world", 16, fileName = "kjv.spb"),
-                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb"),
-                        verse("Also sehr liebte Gott", 16, book = "Johannes", abbreviation = "LUT", fileName = "lut.spb"),
+                        verse("Ибо так возлюбил Бог мир",
+                            16,
+                            book = "Иоанна",
+                            abbreviation = "RST",
+                            fileName = "rst.spb"),
+                        verse("Also sehr liebte Gott",
+                            16,
+                            book = "Johannes",
+                            abbreviation = "LUT",
+                            fileName = "lut.spb"),
                     ),
                     appSettings = settings,
                     isLowerThird = true,

@@ -511,11 +511,17 @@ private fun DictionaryDetailPane(
             )
             TooltipArea(
                 tooltip = {
-                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                        Text(switchLangStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                    Surface(color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp) {
+                        Text(switchLangStr,
+                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.bodySmall)
                     }
                 },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter,
+                    offset = DpOffset(0.dp, 4.dp)),
             ) {
                 Box(
                     modifier = Modifier
@@ -761,7 +767,9 @@ private fun InterlinearVerseRow(
     onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -> Unit)? = null,
     getEntry: ((strongsNumber: String) -> StrongsEntry?)? = null,
 ) {
-    val verseText = getVerseText?.invoke(interlinearVerse.bookId, interlinearVerse.chapter, interlinearVerse.verseNumber)
+    val verseText = getVerseText?.invoke(interlinearVerse.bookId,
+        interlinearVerse.chapter,
+        interlinearVerse.verseNumber)
     val bookName = getBookName?.invoke(interlinearVerse.bookId) ?: "Book ${interlinearVerse.bookId}"
     val refLabel = "$bookName ${interlinearVerse.chapter}:${interlinearVerse.verseNumber}"
     val goToVerseStr = stringResource(Res.string.dictionary_go_to_verse)
@@ -779,11 +787,17 @@ private fun InterlinearVerseRow(
         if (onVerseClick != null) {
             TooltipArea(
                 tooltip = {
-                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                        Text(goToVerseStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                    Surface(color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp) {
+                        Text(goToVerseStr,
+                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.bodySmall)
                     }
                 },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomEnd, offset = DpOffset(0.dp, 4.dp)),
+                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomEnd,
+                    offset = DpOffset(0.dp, 4.dp)),
             ) {
                 Text(
                     text = refLabel,
@@ -900,7 +914,8 @@ private fun InterlinearWordChip(
                     }
                 }
             },
-            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter,
+                offset = DpOffset(0.dp, 4.dp)),
         ) { chip() }
     } else {
         chip()

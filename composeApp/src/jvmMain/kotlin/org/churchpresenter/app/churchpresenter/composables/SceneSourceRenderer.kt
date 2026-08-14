@@ -579,7 +579,12 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
     val bgColor = parseHexColor(source.backgroundColor)
     val fgColor = parseHexColor(source.foregroundColor)
 
-    val qrContent = remember(source.contentType, source.content, source.wifiSsid, source.wifiPassword, source.wifiEncryption, source.wifiHidden) {
+    val qrContent = remember(source.contentType,
+        source.content,
+        source.wifiSsid,
+        source.wifiPassword,
+        source.wifiEncryption,
+        source.wifiHidden) {
         if (source.contentType == "wifi") {
             val encType = when (source.wifiEncryption) {
                 "WPA", "WPA2", "WPA3" -> "WPA"
@@ -597,7 +602,11 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
         }
     }
 
-    val bitmap = remember(qrContent, source.foregroundColor, source.backgroundColor, source.transparentBackground, source.errorCorrection) {
+    val bitmap = remember(qrContent,
+        source.foregroundColor,
+        source.backgroundColor,
+        source.transparentBackground,
+        source.errorCorrection) {
         try {
             val ecLevel = when (source.errorCorrection) {
                 "L" -> ErrorCorrectionLevel.L
@@ -666,7 +675,8 @@ private fun CameraSourceContent(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
+                text = if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera,
+                    source.deviceName)
                        else stringResource(Res.string.canvas_placeholder_camera_default),
                 color = Color.White,
                 fontSize = 14.sp
@@ -702,7 +712,8 @@ private fun CameraSourceContent(
         ) {
             Text(
                 text = error
-                    ?: if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
+                    ?: if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera,
+                        source.deviceName)
                        else stringResource(Res.string.canvas_placeholder_camera_default),
                 color = if (error != null) Color(0xFFFF8888) else Color.White,
                 fontSize = 14.sp,
@@ -716,7 +727,14 @@ private fun CameraSourceContent(
 private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, modifier: Modifier) {
     var frame by remember { mutableStateOf<ImageBitmap?>(null) }
 
-    LaunchedEffect(source.captureMode, source.captureX, source.captureY, source.captureWidth, source.captureHeight, source.captureInterval, source.windowTitle, source.windowId) {
+    LaunchedEffect(source.captureMode,
+        source.captureX,
+        source.captureY,
+        source.captureWidth,
+        source.captureHeight,
+        source.captureInterval,
+        source.windowTitle,
+        source.windowId) {
         try {
             val robot = Robot()
             while (isActive) {

@@ -23,14 +23,18 @@ class MainDesktopTabsTest {
 
     @Test
     fun `every tab is visible with nothing hidden and no extras enabled`() {
-        val tabs = computeVisibleTabs(hiddenTabs = emptySet(), showCrosswordTab = false, hasCompanionTabConnections = false)
+        val tabs = computeVisibleTabs(hiddenTabs = emptySet(),
+            showCrosswordTab = false,
+            hasCompanionTabConnections = false)
 
         assertEquals(Tabs.entries.filter { it != Tabs.CROSSWORD && it != Tabs.COMPANION_SURFACE }, tabs)
     }
 
     @Test
     fun `a hidden tab from settings is excluded`() {
-        val tabs = computeVisibleTabs(hiddenTabs = setOf(Tabs.MEDIA.name), showCrosswordTab = false, hasCompanionTabConnections = false)
+        val tabs = computeVisibleTabs(hiddenTabs = setOf(Tabs.MEDIA.name),
+            showCrosswordTab = false,
+            hasCompanionTabConnections = false)
 
         assertFalse(tabs.contains(Tabs.MEDIA))
     }
@@ -50,30 +54,40 @@ class MainDesktopTabsTest {
     fun `crossword never appears through the hidden-tabs list, only through its own flag`() {
         // CROSSWORD is filtered out unconditionally in the base list, then appended separately —
         // trying to hide it via settings must be a no-op either way.
-        val hiddenAttempt = computeVisibleTabs(hiddenTabs = setOf(Tabs.CROSSWORD.name), showCrosswordTab = false, hasCompanionTabConnections = false)
+        val hiddenAttempt = computeVisibleTabs(hiddenTabs = setOf(Tabs.CROSSWORD.name),
+            showCrosswordTab = false,
+            hasCompanionTabConnections = false)
         assertFalse(hiddenAttempt.contains(Tabs.CROSSWORD))
 
-        val unlocked = computeVisibleTabs(hiddenTabs = setOf(Tabs.CROSSWORD.name), showCrosswordTab = true, hasCompanionTabConnections = false)
+        val unlocked = computeVisibleTabs(hiddenTabs = setOf(Tabs.CROSSWORD.name),
+            showCrosswordTab = true,
+            hasCompanionTabConnections = false)
         assertTrue(unlocked.contains(Tabs.CROSSWORD), "the Easter egg flag must win regardless of the hidden-tabs list")
     }
 
     @Test
     fun `crossword appears last once its Easter egg is unlocked`() {
-        val tabs = computeVisibleTabs(hiddenTabs = emptySet(), showCrosswordTab = true, hasCompanionTabConnections = false)
+        val tabs = computeVisibleTabs(hiddenTabs = emptySet(),
+            showCrosswordTab = true,
+            hasCompanionTabConnections = false)
 
         assertEquals(Tabs.CROSSWORD, tabs.last(), "the unlocked tab must not jump ahead of the regular tabs")
     }
 
     @Test
     fun `companion surface is hidden with no connections configured to show in the tab`() {
-        val tabs = computeVisibleTabs(hiddenTabs = emptySet(), showCrosswordTab = false, hasCompanionTabConnections = false)
+        val tabs = computeVisibleTabs(hiddenTabs = emptySet(),
+            showCrosswordTab = false,
+            hasCompanionTabConnections = false)
 
         assertFalse(tabs.contains(Tabs.COMPANION_SURFACE))
     }
 
     @Test
     fun `companion surface appears once a connection asks to show in the tab`() {
-        val tabs = computeVisibleTabs(hiddenTabs = emptySet(), showCrosswordTab = false, hasCompanionTabConnections = true)
+        val tabs = computeVisibleTabs(hiddenTabs = emptySet(),
+            showCrosswordTab = false,
+            hasCompanionTabConnections = true)
 
         assertTrue(tabs.contains(Tabs.COMPANION_SURFACE))
     }
@@ -92,7 +106,9 @@ class MainDesktopTabsTest {
     @Test
     fun `hiding every tab falls back to Bible rather than leaving nothing to click`() {
         val allTabNames = Tabs.entries.map { it.name }.toSet()
-        val tabs = computeVisibleTabs(hiddenTabs = allTabNames, showCrosswordTab = false, hasCompanionTabConnections = false)
+        val tabs = computeVisibleTabs(hiddenTabs = allTabNames,
+            showCrosswordTab = false,
+            hasCompanionTabConnections = false)
 
         assertEquals(listOf(Tabs.BIBLE), tabs)
     }
@@ -150,14 +166,18 @@ class MainDesktopTabsTest {
     fun `every keyboard-shortcut tab resolves to its own distinct index`() {
         // Mirrors the F6-F12 dispatch in MainDesktop: each key must land on its own tab, not
         // silently fall through to whatever was previously selected.
-        val tabs = computeVisibleTabs(hiddenTabs = emptySet(), showCrosswordTab = false, hasCompanionTabConnections = false)
+        val tabs = computeVisibleTabs(hiddenTabs = emptySet(),
+            showCrosswordTab = false,
+            hasCompanionTabConnections = false)
         val shortcutTabs = listOf(
             Tabs.BIBLE, Tabs.SONGS, Tabs.PICTURES, Tabs.PRESENTATION,
             Tabs.MEDIA, Tabs.LOWER_THIRD, Tabs.ANNOUNCEMENTS,
         )
 
         shortcutTabs.forEach { tab ->
-            assertEquals(tabs.indexOf(tab), resolveTabSelection(tab, tabs, currentIndex = 0), "$tab must resolve to its own position")
+            assertEquals(tabs.indexOf(tab),
+                resolveTabSelection(tab, tabs, currentIndex = 0),
+                "$tab must resolve to its own position")
         }
     }
 }

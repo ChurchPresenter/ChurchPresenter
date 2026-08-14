@@ -88,7 +88,8 @@ class SceneModelsSerializationTest {
     fun `a path point round trips`() {
         val point = PathPoint(x = 0.3f, y = 0.7f)
 
-        assertEquals(point, json.decodeFromString(PathPoint.serializer(), json.encodeToString(PathPoint.serializer(), point)))
+        assertEquals(point,
+            json.decodeFromString(PathPoint.serializer(), json.encodeToString(PathPoint.serializer(), point)))
     }
 
     // ── Each kind of source ─────────────────────────────────────────────────────
@@ -302,16 +303,20 @@ class SceneModelsSerializationTest {
         // moves them, and every scene saved by an older build stops loading.
         val prefix = "org.churchpresenter.app.churchpresenter.models.SceneSource."
 
-        assertEquals(prefix + "ImageSource", discriminatorOf(SceneSource.ImageSource(id = "1", name = "n", filePath = "/f")))
+        assertEquals(prefix + "ImageSource",
+            discriminatorOf(SceneSource.ImageSource(id = "1", name = "n", filePath = "/f")))
         assertEquals(prefix + "TextSource", discriminatorOf(SceneSource.TextSource(id = "1", name = "n")))
         assertEquals(prefix + "ColorSource", discriminatorOf(SceneSource.ColorSource(id = "1", name = "n")))
-        assertEquals(prefix + "VideoSource", discriminatorOf(SceneSource.VideoSource(id = "1", name = "n", filePath = "/f")))
-        assertEquals(prefix + "BrowserSource", discriminatorOf(SceneSource.BrowserSource(id = "1", name = "n", url = "u")))
+        assertEquals(prefix + "VideoSource",
+            discriminatorOf(SceneSource.VideoSource(id = "1", name = "n", filePath = "/f")))
+        assertEquals(prefix + "BrowserSource",
+            discriminatorOf(SceneSource.BrowserSource(id = "1", name = "n", url = "u")))
         assertEquals(prefix + "ShapeSource", discriminatorOf(SceneSource.ShapeSource(id = "1", name = "n")))
         assertEquals(prefix + "ClockSource", discriminatorOf(SceneSource.ClockSource(id = "1", name = "n")))
         assertEquals(prefix + "QRCodeSource", discriminatorOf(SceneSource.QRCodeSource(id = "1", name = "n")))
         assertEquals(prefix + "CameraSource", discriminatorOf(SceneSource.CameraSource(id = "1", name = "n")))
-        assertEquals(prefix + "ScreenCaptureSource", discriminatorOf(SceneSource.ScreenCaptureSource(id = "1", name = "n")))
+        assertEquals(prefix + "ScreenCaptureSource",
+            discriminatorOf(SceneSource.ScreenCaptureSource(id = "1", name = "n")))
         assertEquals(prefix + "BibleSource", discriminatorOf(SceneSource.BibleSource(id = "1", name = "n")))
     }
 
@@ -383,7 +388,9 @@ class SceneModelsSerializationTest {
         sources.forEach {
             val encoded = terse.encodeToString(SceneSource.serializer(), it)
 
-            assertEquals(it, terse.decodeFromString(SceneSource.serializer(), encoded), "${it::class.simpleName} lost a field")
+            assertEquals(it,
+                terse.decodeFromString(SceneSource.serializer(), encoded),
+                "${it::class.simpleName} lost a field")
         }
     }
 

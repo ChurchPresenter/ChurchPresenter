@@ -52,7 +52,9 @@ internal fun Route.webSocketRoute(
                     if (_apiKeyEnabled.value && _apiKey.value.isNotEmpty()) {
                         val provided = queryKey ?: headerKey ?: ""
                         if (provided != _apiKey.value) {
-                            InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_unauthorized", mapOf("reason" to "bad_api_key"))
+                            InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY,
+                                "follower_unauthorized",
+                                mapOf("reason" to "bad_api_key"))
                             send(Frame.Text("{\"error\":\"Unauthorized\"}"))
                             return@webSocket
                         }
@@ -78,7 +80,9 @@ internal fun Route.webSocketRoute(
                     if (!isInstanceLinkFollower) UsageEvents.recordOncePerRun(UsageEvent.MOBILE_APP_CONNECTED)
                     if (isInstanceLinkFollower && wsClientId.isNotEmpty()) {
                         _connectedInstanceLinkFollowers.value = _connectedInstanceLinkFollowers.value + wsClientId
-                        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_connected", mapOf("deviceId" to wsClientId))
+                        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY,
+                            "follower_connected",
+                            mapOf("deviceId" to wsClientId))
                     }
 
                     // Subscribed to the server.broadcast flow BEFORE the connect snapshot is written, and
@@ -124,7 +128,8 @@ internal fun Route.webSocketRoute(
                     }
                     send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
                         WebSocketMessage(Constants.WS_EVENT_SCHEDULE_UPDATED,
-                            json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(schedule, schedule.size))))))
+                            json.encodeToString(ScheduleResponse.serializer(),
+                                ScheduleResponse(schedule, schedule.size))))))
                     val presentationCatalog = _presentationCatalog.value
                     if (presentationCatalog.presentations.isNotEmpty()) {
                         send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
@@ -222,7 +227,8 @@ internal fun Route.webSocketRoute(
                                         sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_SELECT_SONG_SECTION -> {
-                                        val req = json.decodeFromString(SelectSongSectionRequest.serializer(), msg.payload)
+                                        val req = json.decodeFromString(SelectSongSectionRequest.serializer(),
+                                            msg.payload)
                                         scope.launch { server.onSelectSongSection.emit(req) }
                                         scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction("present", "Song ${req.number}", "Section ${req.section}", wsClientId)) }
                                         sendCommandAck(msg.commandId, ok = true)
@@ -235,7 +241,8 @@ internal fun Route.webSocketRoute(
                                         sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_SELECT_BIBLE_VERSE -> {
-                                        val req = json.decodeFromString(SelectBibleVerseRequest.serializer(), msg.payload)
+                                        val req = json.decodeFromString(SelectBibleVerseRequest.serializer(),
+                                            msg.payload)
                                         scope.launch { server.onSelectBibleVerse.emit(req) }
                                         val ref = if (req.verseRange.isNotEmpty()) "${req.bookName} ${req.chapter}:${req.verseRange}"
                                                   else "${req.bookName} ${req.chapter}:${req.verseNumber}"
@@ -307,7 +314,8 @@ internal fun Route.webSocketRoute(
                                     }
                                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {
                                         val item = server.parseRemoteItem(msg.payload)
-                                            ?: json.decodeFromString(AddToScheduleRequest.serializer(), msg.payload).item
+                                            ?: json.decodeFromString(AddToScheduleRequest.serializer(),
+                                                msg.payload).item
                                         val pending = PendingRemoteRequest(item, wsClientId)
                                         scope.launch {
                                             server.onAddToSchedule.emit(pending)
@@ -351,7 +359,8 @@ internal fun Route.webSocketRoute(
                                         sendCommandAck(msg.commandId, ok = true, reason = "pending_approval")
                                     }
                                     Constants.WS_CMD_REMOVE_FROM_SCHEDULE -> {
-                                        val req = json.decodeFromString(RemoveFromScheduleRequest.serializer(), msg.payload)
+                                        val req = json.decodeFromString(RemoveFromScheduleRequest.serializer(),
+                                            msg.payload)
                                         val label = _schedule.value.firstOrNull { it.id == req.id }?.displayText ?: req.id
                                         val pending = PendingRemoveRequest(req.id, label, wsClientId)
                                         scope.launch {
@@ -376,7 +385,9 @@ internal fun Route.webSocketRoute(
                         broadcastJob.cancel()
                         if (isInstanceLinkFollower && wsClientId.isNotEmpty()) {
                             _connectedInstanceLinkFollowers.value = _connectedInstanceLinkFollowers.value - wsClientId
-                            InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_disconnected", mapOf("deviceId" to wsClientId))
+                            InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY,
+                                "follower_disconnected",
+                                mapOf("deviceId" to wsClientId))
                         }
                     }
                 }

@@ -56,7 +56,8 @@ private object JfxInit {
                     // the JVM's default handler.
                     Platform.runLater {
                         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
-                        Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { thread, throwable ->
+                        Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { thread,
+                            throwable ->
                             val isScreenReconfigRace = throwable is NullPointerException &&
                                 throwable.stackTrace.any {
                                     it.className.startsWith("com.sun.glass.ui.Screen") ||
@@ -549,16 +550,21 @@ fun SoftwareVideoPlayer(
     // Set up callback video surface for software rendering
     DisposableEffect(Unit) {
         val bufferFormatCallback = object : uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback {
-            override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat {
+            override fun getBufferFormat(sourceWidth: Int,
+                sourceHeight: Int): uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat {
                 val w = sourceWidth.coerceAtLeast(1)
                 val h = sourceHeight.coerceAtLeast(1)
-                bufferedImageHolder.value = java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_RGB)
+                bufferedImageHolder.value = java.awt.image.BufferedImage(w,
+                    h,
+                    java.awt.image.BufferedImage.TYPE_INT_RGB)
                 return uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat(w, h)
             }
             override fun allocatedBuffers(buffers: Array<out java.nio.ByteBuffer>) = Unit
         }
 
-        val renderCallback = uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback { _, nativeBuffers, _ ->
+        val renderCallback = uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback { _,
+            nativeBuffers,
+            _ ->
             val img = bufferedImageHolder.value ?: return@RenderCallback
             if (nativeBuffers == null || nativeBuffers.isEmpty()) return@RenderCallback
             val pixelData = (img.raster.dataBuffer as? java.awt.image.DataBufferInt)?.data ?: return@RenderCallback

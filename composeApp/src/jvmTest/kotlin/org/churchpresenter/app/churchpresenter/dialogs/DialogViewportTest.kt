@@ -83,14 +83,17 @@ class DialogViewportTest {
 
     @Test
     fun `AddWebsite content fits its 500x440 window`() =
-        fits(ADD_WEBSITE_DIALOG_WIDTH, ADD_WEBSITE_DIALOG_HEIGHT) { AddWebsiteDialogContent(onDismiss = {}, onConfirm = { _, _ -> }) }
+        fits(ADD_WEBSITE_DIALOG_WIDTH,
+            ADD_WEBSITE_DIALOG_HEIGHT) { AddWebsiteDialogContent(onDismiss = {}, onConfirm = { _, _ -> }) }
 
     @Test
     fun `AddLabel content fits its 500x640 window`() =
-        fits(ADD_LABEL_DIALOG_WIDTH, ADD_LABEL_DIALOG_HEIGHT) { AddLabelDialogContent(onDismiss = {}, onConfirm = { _, _, _ -> }) }
+        fits(ADD_LABEL_DIALOG_WIDTH,
+            ADD_LABEL_DIALOG_HEIGHT) { AddLabelDialogContent(onDismiss = {}, onConfirm = { _, _, _ -> }) }
 
     @Test
-    fun `AddLabel content fits its window with a long label typed in`() = fits(ADD_LABEL_DIALOG_WIDTH, ADD_LABEL_DIALOG_HEIGHT) {
+    fun `AddLabel content fits its window with a long label typed in`() = fits(ADD_LABEL_DIALOG_WIDTH,
+        ADD_LABEL_DIALOG_HEIGHT) {
         AddLabelDialogContent(
             onDismiss = {},
             onConfirm = { _, _, _ -> },
@@ -135,15 +138,18 @@ class DialogViewportTest {
      */
     @Test
     fun `RemoteEvent content fits its 500x290 window`() =
-        fits(REMOTE_EVENT_DIALOG_WIDTH, REMOTE_EVENT_DIALOG_HEIGHT) { remoteEventContent(remaining = 0, title = "Amazing Grace") }
+        fits(REMOTE_EVENT_DIALOG_WIDTH,
+            REMOTE_EVENT_DIALOG_HEIGHT) { remoteEventContent(remaining = 0, title = "Amazing Grace") }
 
     @Test
     fun `RemoteEvent content fits its 500x330 window when requests are queued`() =
-        fits(REMOTE_EVENT_DIALOG_WIDTH, REMOTE_EVENT_DIALOG_HEIGHT_QUEUED) { remoteEventContent(remaining = 4, title = "Amazing Grace") }
+        fits(REMOTE_EVENT_DIALOG_WIDTH,
+            REMOTE_EVENT_DIALOG_HEIGHT_QUEUED) { remoteEventContent(remaining = 4, title = "Amazing Grace") }
 
     @Test
     fun `RemoteEvent content fits its window with a long item title`() =
-        fits(REMOTE_EVENT_DIALOG_WIDTH, REMOTE_EVENT_DIALOG_HEIGHT) { remoteEventContent(remaining = 0, title = longText) }
+        fits(REMOTE_EVENT_DIALOG_WIDTH,
+            REMOTE_EVENT_DIALOG_HEIGHT) { remoteEventContent(remaining = 0, title = longText) }
 
     // Every dialog again with its text 30% taller, which is the only handle on growth the three
     // resource-only bodies have. Kept as separate tests so a failure names both the dialog and the

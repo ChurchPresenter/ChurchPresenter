@@ -74,19 +74,33 @@ internal fun BibleHistoryPanel(
                     .padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(painter = painterResource(if (expanded) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up), contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(text = stringResource(Res.string.bible_history), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+                Icon(painter = painterResource(if (expanded) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = stringResource(Res.string.bible_history),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 4.dp))
                 Spacer(modifier = Modifier.weight(1f))
                 TooltipArea(
                     tooltip = {
-                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
-                            Text(stringResource(Res.string.bible_history_clear), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                        Surface(color = MaterialTheme.colorScheme.inverseSurface,
+                            shape = MaterialTheme.shapes.extraSmall) {
+                            Text(stringResource(Res.string.bible_history_clear),
+                                color = MaterialTheme.colorScheme.inverseOnSurface,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.bodySmall)
                         }
                     },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(onClick = onClear) {
-                        Icon(painter = painterResource(Res.drawable.ic_delete), contentDescription = stringResource(Res.string.bible_history_clear), modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(painter = painterResource(Res.drawable.ic_delete),
+                            contentDescription = stringResource(Res.string.bible_history_clear),
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -112,7 +126,8 @@ internal fun BibleHistoryPanel(
                                         else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                     )
                                     .drawBehind {
-                                        if (idx == selectedIndex) drawRect(color = markerColor, size = Size(4f, size.height))
+                                        if (idx == selectedIndex) drawRect(color = markerColor,
+                                            size = Size(4f, size.height))
                                     }
                                     .initialPassCombinedClickable(
                                         onClick = { onEntryClick(idx) },
@@ -123,7 +138,8 @@ internal fun BibleHistoryPanel(
                             )
                         }
                     }
-                    VerticalScrollbar(modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(), adapter = rememberScrollbarAdapter(scrollState = historyListState))
+                    VerticalScrollbar(modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                        adapter = rememberScrollbarAdapter(scrollState = historyListState))
                 }
             }
         }

@@ -340,7 +340,9 @@ fun AnnouncementsTab(
                     modifier = Modifier.fillMaxWidth(),
                     decorationBox = { inner ->
                         if (viewModel.text.isEmpty()) {
-                            Text(stringResource(Res.string.announcement_text_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                            Text(stringResource(Res.string.announcement_text_hint),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                         }
                         inner()
                     }
@@ -400,10 +402,17 @@ fun AnnouncementsTab(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            ColorPickerField(label = stringResource(Res.string.text_color), color = viewModel.textColor, onColorChange = { viewModel.setTextColor(it); viewModel.saveToSettings(onSettingsChange) }, modifier = Modifier.width(120.dp))
-            HorizontalDivider(modifier = Modifier.height(22.dp).width(1.dp), color = MaterialTheme.colorScheme.outlineVariant)
+            ColorPickerField(label = stringResource(Res.string.text_color),
+                color = viewModel.textColor,
+                onColorChange = { viewModel.setTextColor(it); viewModel.saveToSettings(onSettingsChange) },
+                modifier = Modifier.width(120.dp))
+            HorizontalDivider(modifier = Modifier.height(22.dp).width(1.dp),
+                color = MaterialTheme.colorScheme.outlineVariant)
             TextStyleButtons(
-                bold = viewModel.bold, italic = viewModel.italic, underline = viewModel.underline, shadow = viewModel.shadow,
+                bold = viewModel.bold,
+                italic = viewModel.italic,
+                underline = viewModel.underline,
+                shadow = viewModel.shadow,
                 onBoldChange = { viewModel.setBold(it); viewModel.saveToSettings(onSettingsChange) },
                 onItalicChange = { viewModel.setItalic(it); viewModel.saveToSettings(onSettingsChange) },
                 onUnderlineChange = { viewModel.setUnderline(it); viewModel.saveToSettings(onSettingsChange) },
@@ -414,9 +423,16 @@ fun AnnouncementsTab(
                 onAlignmentChange = { viewModel.setHorizontalAlignment(it); viewModel.saveToSettings(onSettingsChange) },
                 leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
             )
-            HorizontalDivider(modifier = Modifier.height(22.dp).width(1.dp), color = MaterialTheme.colorScheme.outlineVariant)
-            FontSettingsDropdown(label = stringResource(Res.string.font_type), value = viewModel.fontType, fonts = availableFonts, onValueChange = { viewModel.setFontType(it); viewModel.saveToSettings(onSettingsChange) })
-            NumberSettingsTextField(label = stringResource(Res.string.font_size), initialText = viewModel.fontSize, range = 8..200, onValueChange = { viewModel.setFontSize(it); viewModel.saveToSettings(onSettingsChange) })
+            HorizontalDivider(modifier = Modifier.height(22.dp).width(1.dp),
+                color = MaterialTheme.colorScheme.outlineVariant)
+            FontSettingsDropdown(label = stringResource(Res.string.font_type),
+                value = viewModel.fontType,
+                fonts = availableFonts,
+                onValueChange = { viewModel.setFontType(it); viewModel.saveToSettings(onSettingsChange) })
+            NumberSettingsTextField(label = stringResource(Res.string.font_size),
+                initialText = viewModel.fontSize,
+                range = 8..200,
+                onValueChange = { viewModel.setFontSize(it); viewModel.saveToSettings(onSettingsChange) })
             Spacer(Modifier.weight(1f))
         }
         AnimatedVisibility(visible = viewModel.shadow) {
@@ -457,7 +473,9 @@ fun AnnouncementsTab(
                                 modifier = Modifier
                                     .height(32.dp)
                                     .clickable { viewModel.setBackgroundColor("#000000"); viewModel.saveToSettings(onSettingsChange) }
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                    .border(1.dp,
+                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                        RoundedCornerShape(8.dp))
                                     .padding(horizontal = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -474,10 +492,16 @@ fun AnnouncementsTab(
                                 )
                             }
                         } else {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                ColorPickerField(label = stringResource(Res.string.announcement_background_color_label), color = viewModel.backgroundColor, onColorChange = { viewModel.setBackgroundColor(it); viewModel.saveToSettings(onSettingsChange) }, modifier = Modifier.weight(1f))
-                                OutlinedButton(onClick = { viewModel.setBackgroundColor("transparent"); viewModel.saveToSettings(onSettingsChange) }, shape = RoundedCornerShape(8.dp)) {
-                                    Text(stringResource(Res.string.transparent_default), style = MaterialTheme.typography.labelMedium)
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically) {
+                                ColorPickerField(label = stringResource(Res.string.announcement_background_color_label),
+                                    color = viewModel.backgroundColor,
+                                    onColorChange = { viewModel.setBackgroundColor(it); viewModel.saveToSettings(onSettingsChange) },
+                                    modifier = Modifier.weight(1f))
+                                OutlinedButton(onClick = { viewModel.setBackgroundColor("transparent"); viewModel.saveToSettings(onSettingsChange) },
+                                    shape = RoundedCornerShape(8.dp)) {
+                                    Text(stringResource(Res.string.transparent_default),
+                                        style = MaterialTheme.typography.labelMedium)
                                 }
                             }
                         }
@@ -601,7 +625,10 @@ fun AnnouncementsTab(
                         val amPmSuffix = if (use24Hour) "" else " " + stringResource(if (targetIsPm) Res.string.timer_pm else Res.string.timer_am)
                         Text(
                             text = "$timerTargetTimeLabel %02d:%02d:%02d%s".format(
-                                displayHour(viewModel.targetHour), viewModel.targetMinute, viewModel.targetSecond, amPmSuffix
+                                displayHour(viewModel.targetHour),
+                                viewModel.targetMinute,
+                                viewModel.targetSecond,
+                                amPmSuffix
                             ),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary,
@@ -777,7 +804,9 @@ fun AnnouncementsTab(
                                             // Sending Specific Time to Stage Monitor also (re)starts its
                                             // ticker if it wasn't already running via the play/pause button.
                                             if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
-                                                presenterManager.startAnnouncementSpecificTime(viewModel.targetHour, viewModel.targetMinute, viewModel.targetSecond)
+                                                presenterManager.startAnnouncementSpecificTime(viewModel.targetHour,
+                                                    viewModel.targetMinute,
+                                                    viewModel.targetSecond)
                                             }
                                             presenterManager.setAnnouncementTickerLive(true)
                                         }
@@ -805,7 +834,9 @@ fun AnnouncementsTab(
                                         // is one of only two places (with Send to Stage Monitor) allowed
                                         // to mark the ticker live — the play/pause button stays preview-only.
                                         when (viewModel.timerMode) {
-                                            Constants.TIMER_MODE_CLOCK -> presenterManager.startAnnouncementSpecificTime(viewModel.targetHour, viewModel.targetMinute, viewModel.targetSecond)
+                                            Constants.TIMER_MODE_CLOCK -> presenterManager.startAnnouncementSpecificTime(viewModel.targetHour,
+                                                viewModel.targetMinute,
+                                                viewModel.targetSecond)
                                             Constants.TIMER_MODE_CLOCK_DISPLAY -> presenterManager.startAnnouncementClockDisplay(viewModel.liveClockFormat)
                                             else -> {}
                                         }
@@ -840,7 +871,9 @@ fun AnnouncementsTab(
                                     modifier = Modifier.fillMaxWidth(),
                                     decorationBox = { inner ->
                                         if (viewModel.timerExpiredText.isEmpty()) {
-                                            Text(stringResource(Res.string.timer_expired_text_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                                            Text(stringResource(Res.string.timer_expired_text_hint),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                                         }
                                         inner()
                                     }
@@ -1093,7 +1126,9 @@ fun AnnouncementsTab(
                         )
                         TooltipArea(
                             tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                Surface(color = MaterialTheme.colorScheme.inverseSurface,
+                                    shape = MaterialTheme.shapes.extraSmall,
+                                    tonalElevation = 4.dp) {
                                     Text(
                                         stringResource(Res.string.announcement_loop_tooltip),
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -1101,7 +1136,8 @@ fun AnnouncementsTab(
                                     )
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter,
+                                offset = DpOffset(0.dp, 4.dp))
                         ) {
                             NumberSettingsTextField(
                                 label = stringResource(Res.string.announcement_loop_count),
@@ -1199,7 +1235,9 @@ private fun TimerColumn(
         ) {
             Icon(Icons.Default.Remove, contentDescription = null)
         }
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+        Text(label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
     }
 }
 

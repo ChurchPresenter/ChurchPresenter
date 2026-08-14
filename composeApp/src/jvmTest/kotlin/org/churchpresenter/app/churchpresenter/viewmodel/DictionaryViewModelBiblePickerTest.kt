@@ -187,7 +187,9 @@ class DictionaryViewModelBiblePickerTest {
 
         awaitUntil("the bible to load") { d.dictBible != null && !d.isDictBibleLoading }
         assertEquals(file.absolutePath, d.dictBibleFile)
-        assertEquals("King James Version", d.dictBible?.getBibleTitle(), "the module must actually be parsed, not just referenced")
+        assertEquals("King James Version",
+            d.dictBible?.getBibleTitle(),
+            "the module must actually be parsed, not just referenced")
         assertEquals(3, d.dictBible?.getBookCount())
     }
 

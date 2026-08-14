@@ -51,7 +51,10 @@ import org.churchpresenter.app.churchpresenter.models.SourceTransform
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-internal fun PropertyTextField(label: String, value: String, modifier: Modifier = Modifier, onValueChange: (String) -> Unit) {
+internal fun PropertyTextField(label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    onValueChange: (String) -> Unit) {
     var text by remember(value) { mutableStateOf(value) }
     StyledTextField(
         value = text,
@@ -65,7 +68,10 @@ internal fun PropertyTextField(label: String, value: String, modifier: Modifier 
 }
 
 @Composable
-internal fun PropertyFloatField(label: String, value: Float, modifier: Modifier = Modifier, onValueChange: (Float) -> Unit) {
+internal fun PropertyFloatField(label: String,
+    value: Float,
+    modifier: Modifier = Modifier,
+    onValueChange: (Float) -> Unit) {
     var text by remember(value) { mutableStateOf("%.3f".format(value)) }
     var hasFocus by remember { mutableStateOf(false) }
     StyledTextField(
@@ -106,7 +112,12 @@ internal fun PropertySlider(label: String, value: Float, min: Float, max: Float,
 }
 
 @Composable
-internal fun PropertySliderWithInput(label: String, value: Float, min: Float, max: Float, suffix: String = "", onValueChange: (Float) -> Unit) {
+internal fun PropertySliderWithInput(label: String,
+    value: Float,
+    min: Float,
+    max: Float,
+    suffix: String = "",
+    onValueChange: (Float) -> Unit) {
     var textValue by remember(value) { mutableStateOf(value.toInt().toString()) }
     Column {
         Text(
@@ -140,7 +151,10 @@ internal fun PropertySliderWithInput(label: String, value: Float, min: Float, ma
                     hasFocus = state.isFocused
                 },
                 trailingIcon = if (suffix.isNotEmpty()) { {
-                    Text(suffix, style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), modifier = Modifier.padding(end = 6.dp))
+                    Text(suffix,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(end = 6.dp))
                 } } else null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { commitValue() })
@@ -195,7 +209,8 @@ internal fun FontDropdown(
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded.value = true }
+                .clickable(interactionSource = remember { MutableInteractionSource() },
+                    indication = null) { expanded.value = true }
                 .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
             verticalArrangement = Arrangement.Center
         ) {

@@ -588,7 +588,10 @@ fun WebTab(
                         }
                         if (typeBuffer.isNotEmpty()) {
                             IconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
-                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.web_clear_typed_text), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(painter = painterResource(Res.drawable.ic_close),
+                                    contentDescription = stringResource(Res.string.web_clear_typed_text),
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
@@ -720,7 +723,9 @@ fun WebTab(
                             .pointerInput(liveBrowser) {
                                 // Forward scroll via CefBrowser_N.sendMouseWheelEvent (reflection)
                                 if (liveBrowser == null) return@pointerInput
-                                val sendWheel = findMethod(liveBrowser, "sendMouseWheelEvent", MouseWheelEvent::class.java)
+                                val sendWheel = findMethod(liveBrowser,
+                                    "sendMouseWheelEvent",
+                                    MouseWheelEvent::class.java)
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()

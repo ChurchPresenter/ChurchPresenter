@@ -101,7 +101,8 @@ class LottieFontsTest {
     fun `bold is wanted for heavy weights or an explicit -Bold name`() {
         assertTrue(LottieFonts.wantsBold(FontWeight.SemiBold, "Poppins"))
         assertTrue(LottieFonts.wantsBold(FontWeight.Bold, "Poppins"))
-        assertTrue(LottieFonts.wantsBold(FontWeight.Normal, "Poppins-Bold"), "the -Bold suffix forces bold at any weight")
+        assertTrue(LottieFonts.wantsBold(FontWeight.Normal, "Poppins-Bold"),
+            "the -Bold suffix forces bold at any weight")
     }
 
     @Test
@@ -330,14 +331,18 @@ class AutoStartManagerTest {
     @Test
     fun `registration content is the payload for the platform`() {
         val exe = "/opt/CP/cp"
-        assertEquals(AutoStartManager.windowsRunValue(exe), AutoStartManager.registrationContent(exe, AutoStartManager.Platform.WINDOWS))
-        assertEquals(AutoStartManager.macPlistContent(exe), AutoStartManager.registrationContent(exe, AutoStartManager.Platform.MAC))
-        assertEquals(AutoStartManager.linuxDesktopContent(exe), AutoStartManager.registrationContent(exe, AutoStartManager.Platform.LINUX))
+        assertEquals(AutoStartManager.windowsRunValue(exe),
+            AutoStartManager.registrationContent(exe, AutoStartManager.Platform.WINDOWS))
+        assertEquals(AutoStartManager.macPlistContent(exe),
+            AutoStartManager.registrationContent(exe, AutoStartManager.Platform.MAC))
+        assertEquals(AutoStartManager.linuxDesktopContent(exe),
+            AutoStartManager.registrationContent(exe, AutoStartManager.Platform.LINUX))
     }
 
     @Test
     fun `the windows run value quotes the launcher path`() {
-        assertEquals("\"C:\\Program Files\\CP\\CP.exe\"", AutoStartManager.windowsRunValue("C:\\Program Files\\CP\\CP.exe"))
+        assertEquals("\"C:\\Program Files\\CP\\CP.exe\"",
+            AutoStartManager.windowsRunValue("C:\\Program Files\\CP\\CP.exe"))
     }
 
     @Test

@@ -402,7 +402,8 @@ internal fun EditSongContent(
                                 // A recessed track, so the filled tab on it is the brightest thing
                                 // in the row rather than one of two similar surfaces.
                                 modifier = Modifier
-                                    .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(9.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainerLowest,
+                                        RoundedCornerShape(9.dp))
                                     .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(9.dp))
                                     .padding(2.dp),
                                 horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -642,7 +643,9 @@ private fun RowScope.SongbookCard(
                     onClick = { onSongbookChange(originalSongbook); isAddingNew = false },
                     modifier = Modifier.size(20.dp),
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = stringResource(Res.string.cancel), modifier = Modifier.size(14.dp))
+                    Icon(Icons.Default.Close,
+                        contentDescription = stringResource(Res.string.cancel),
+                        modifier = Modifier.size(14.dp))
                 }
             }
         }

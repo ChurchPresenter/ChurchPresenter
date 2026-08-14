@@ -210,7 +210,9 @@ class PlanningCenterScriptureDetectorTest {
 
         assertEquals("For God so loved the world", resolved.verseText)
         assertEquals("John", resolved.bookName)
-        assertEquals(43, resolved.bookId, "the id travels alongside the name so a later lookup does not need to re-resolve it")
+        assertEquals(43,
+            resolved.bookId,
+            "the id travels alongside the name so a later lookup does not need to re-resolve it")
         assertEquals(16, resolved.verseNumber)
         assertEquals("", resolved.verseRange, "a single verse has no range")
         assertEquals("John 3:16", resolved.displayReference)

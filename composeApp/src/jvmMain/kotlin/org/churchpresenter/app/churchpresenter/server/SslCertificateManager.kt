@@ -260,7 +260,8 @@ object SslCertificateManager {
 
     private fun newKeyStore()              = KeyStore.getInstance("JKS").also { it.load(null, PASSWORD) }
     private fun loadKeyStore(f: File)      = KeyStore.getInstance("JKS").also { ks -> f.inputStream().use { ks.load(it, PASSWORD) } }
-    private fun ipSan(ip: String)          = GeneralName(GeneralName.iPAddress, DEROctetString(InetAddress.getByName(ip).address))
+    private fun ipSan(ip: String)          = GeneralName(GeneralName.iPAddress,
+        DEROctetString(InetAddress.getByName(ip).address))
     private fun isIpAddress(host: String)  = host.matches(Regex("""^\d{1,3}(\.\d{1,3}){3}$""")) || host.contains(":")
 
     private fun extractSanNames(cert: X509Certificate): Set<String> = try {

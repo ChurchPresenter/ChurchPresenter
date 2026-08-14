@@ -227,7 +227,9 @@ class ColorPickerDialogTest {
         onNodeWithText("OK").performClick()
         // Red (hue 0, s=1, v=1) dragged to the bar's center (hue ~180) with saturation/value untouched.
         val expectedHue180 = cpColorToHex(cpHsvToColor(180f, 1f, 1f))
-        assertEquals(expectedHue180, result, "confirming after a hue drag must report the new hue at full saturation/value")
+        assertEquals(expectedHue180,
+            result,
+            "confirming after a hue drag must report the new hue at full saturation/value")
     }
 
     @Test

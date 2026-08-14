@@ -441,7 +441,10 @@ fun main() {
         var mirroredBackgroundSettings by remember { mutableStateOf<BackgroundSettings?>(null) }
         val instanceLinkConnectionStatusForBackgrounds by instanceLinkViewModel.connectionStatus.collectAsState()
         val instanceLinkBackgroundsSignal by instanceLinkViewModel.backgroundsUpdatedSignal.collectAsState()
-        LaunchedEffect(instanceLinkConnectionStatusForBackgrounds, appSettings.instanceLink.mirrorBackgrounds, appSettings.instanceLink.role, instanceLinkBackgroundsSignal) {
+        LaunchedEffect(instanceLinkConnectionStatusForBackgrounds,
+            appSettings.instanceLink.mirrorBackgrounds,
+            appSettings.instanceLink.role,
+            instanceLinkBackgroundsSignal) {
             if (!shouldMirrorRemoteBackgrounds(
                     status = instanceLinkConnectionStatusForBackgrounds,
                     role = appSettings.instanceLink.role,
@@ -496,7 +499,9 @@ fun main() {
             prevTunnelWasConnected.value = isConnected
         }
         var presentationFrozen by remember { mutableStateOf(false) }
-        LaunchedEffect(appSettings.presentationRemoteSettings.remoteControlEnabled, appSettings.serverSettings.apiKeyEnabled, appSettings.serverSettings.apiKey) {
+        LaunchedEffect(appSettings.presentationRemoteSettings.remoteControlEnabled,
+            appSettings.serverSettings.apiKeyEnabled,
+            appSettings.serverSettings.apiKey) {
             val activeApiKey = activeApiKey(appSettings.serverSettings)
             companionServer.updatePresentationRemoteSettings(appSettings.presentationRemoteSettings, activeApiKey)
         }
@@ -532,7 +537,10 @@ fun main() {
                 }
                 val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
                 val bsOutput = browserSourceOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
-                val renderer = remember(i, bsOutput.browserSourceWidth, bsOutput.browserSourceHeight, bsOutput.browserSourceFps) {
+                val renderer = remember(i,
+                    bsOutput.browserSourceWidth,
+                    bsOutput.browserSourceHeight,
+                    bsOutput.browserSourceFps) {
                     BrowserSourceVideoRenderer(
                         presenterManager, appSettingsState, screenAssignmentState, effectiveModeState,
                         outputIndex = i,
@@ -1154,7 +1162,8 @@ fun main() {
                                     },
                                     instanceLinkRemoteSchedule = instanceLinkViewModel.remoteSchedule.collectAsState().value,
                                     instanceLinkRemoteSongCatalog = instanceLinkViewModel.remoteSongCatalog.collectAsState().value,
-                                    instanceLinkFetchSongDetail = { number, songbook -> instanceLinkViewModel.fetchSongDetail(number, songbook) },
+                                    instanceLinkFetchSongDetail = { number,
+                                        songbook -> instanceLinkViewModel.fetchSongDetail(number, songbook) },
                                     instanceLinkFetchBibleFile = { instanceLinkViewModel.fetchBibleFile() },
                                     instanceLinkBibleSyncMode = appSettings.instanceLink.bibleSyncMode,
                                     instanceLinkFetchSecondaryBibleFile = { instanceLinkViewModel.fetchSecondaryBibleFile() },
@@ -1173,11 +1182,19 @@ fun main() {
                                     } else null,
                                     instanceLinkSendVerse = if (instanceLinkIsControllerConnected) {
                                         { bookName, chapter, verseNumber, verseText, verseRange ->
-                                            instanceLinkViewModel.sendSelectBibleVerse(bookName, chapter, verseNumber, verseText, verseRange)
+                                            instanceLinkViewModel.sendSelectBibleVerse(bookName,
+                                                chapter,
+                                                verseNumber,
+                                                verseText,
+                                                verseRange)
                                         }
                                     } else null,
                                     instanceLinkSendSongSection = if (instanceLinkIsControllerConnected) {
-                                        { number, section, lineIndex -> instanceLinkViewModel.sendSelectSongSection(number, section, lineIndex) }
+                                        { number,
+                                            section,
+                                            lineIndex -> instanceLinkViewModel.sendSelectSongSection(number,
+                                                section,
+                                                lineIndex) }
                                     } else null,
                                     instanceLinkSendClear = if (instanceLinkIsControllerConnected) {
                                         { instanceLinkViewModel.sendClear() }
@@ -1198,7 +1215,8 @@ fun main() {
                                         { instanceLinkViewModel.sendPreviousSlide() }
                                     } else null,
                                     instanceLinkFetchPictureImageBytes = if (instanceLinkUsesRemoteContent) {
-                                        { folderId, index -> instanceLinkViewModel.fetchPictureImageBytes(folderId, index) }
+                                        { folderId,
+                                            index -> instanceLinkViewModel.fetchPictureImageBytes(folderId, index) }
                                     } else null,
                                     instanceLinkFetchPresentationSlideBytes = if (instanceLinkUsesRemoteContent) {
                                         { id, index -> instanceLinkViewModel.fetchPresentationSlideBytes(id, index) }
@@ -1250,12 +1268,18 @@ fun main() {
                                         companionServer.updateBible(
                                             bible,
                                             translation,
-                                            filePath = bibleFilePath(appSettings.bibleSettings.storageDirectory, translation)
+                                            filePath = bibleFilePath(appSettings.bibleSettings.storageDirectory,
+                                                translation)
                                         )
                                     },
                                     onScheduleChanged = { items -> companionServer.updateSchedule(items) },
                                     onPresentationSlidesLoaded = { id, filePath, fileName, fileType, slides, notes ->
-                                        companionServer.updatePresentation(id, filePath, fileName, fileType, slides, notes)
+                                        companionServer.updatePresentation(id,
+                                            filePath,
+                                            fileName,
+                                            fileType,
+                                            slides,
+                                            notes)
                                     },
                                     onPicturesLoaded = { folderId, folderName, folderPath, imageFiles ->
                                         companionServer.updatePictures(folderId, folderName, folderPath, imageFiles)

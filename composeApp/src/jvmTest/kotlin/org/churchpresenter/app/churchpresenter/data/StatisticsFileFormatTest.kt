@@ -119,7 +119,9 @@ class StatisticsFileFormatTest {
 
         val keys = json.decodeFromString(DisplayStatistics.serializer(), statsFile.readText()).songDisplayCounts.keys
 
-        assertEquals(setOf("Hymnal::1", "Songs of Praise::1"), keys, "the key is the identity — merging them loses a song")
+        assertEquals(setOf("Hymnal::1", "Songs of Praise::1"),
+            keys,
+            "the key is the identity — merging them loses a song")
     }
 
     // ── The event log on disk ───────────────────────────────────────────────────

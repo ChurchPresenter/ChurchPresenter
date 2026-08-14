@@ -110,13 +110,18 @@ class CompanionSatelliteViewModelTest {
         return field.get(client) as T
     }
 
-    private fun reportStatus(vm: CompanionSatelliteViewModel, slot: CompanionSurfaceSlot, status: CompanionConnectionStatus, error: String? = null) =
+    private fun reportStatus(vm: CompanionSatelliteViewModel,
+        slot: CompanionSurfaceSlot,
+        status: CompanionConnectionStatus,
+        error: String? = null) =
         callback<(CompanionConnectionStatus, String?) -> Unit>(clientFor(vm, slot), "onStatusChanged")(status, error)
 
     private fun resetButtons(vm: CompanionSatelliteViewModel, slot: CompanionSurfaceSlot, count: Int) =
         callback<(Int) -> Unit>(clientFor(vm, slot), "onButtonsReset")(count)
 
-    private fun updateButton(vm: CompanionSatelliteViewModel, slot: CompanionSurfaceSlot, update: CompanionButtonUpdate) =
+    private fun updateButton(vm: CompanionSatelliteViewModel,
+        slot: CompanionSurfaceSlot,
+        update: CompanionButtonUpdate) =
         callback<(CompanionButtonUpdate) -> Unit>(clientFor(vm, slot), "onButtonUpdated")(update)
 
     private fun reportBrightness(vm: CompanionSatelliteViewModel, slot: CompanionSurfaceSlot, percent: Int) =
@@ -358,7 +363,11 @@ class CompanionSatelliteViewModelTest {
 
         updateButton(
             vm, slot(CompanionSurfacePlacement.TAB),
-            CompanionButtonUpdate(index = 2, text = "Go Live", color = "#FF0000", textColor = "#FFFFFF", pressed = true),
+            CompanionButtonUpdate(index = 2,
+                text = "Go Live",
+                color = "#FF0000",
+                textColor = "#FFFFFF",
+                pressed = true),
         )
 
         val button = vm.buttonsFor(slot(CompanionSurfacePlacement.TAB))[2]
@@ -415,7 +424,9 @@ class CompanionSatelliteViewModelTest {
         updateButton(vm, slot(CompanionSurfacePlacement.TAB), CompanionButtonUpdate(index = 0, text = "Tab button"))
 
         assertEquals("Tab button", vm.buttonsFor(slot(CompanionSurfacePlacement.TAB))[0].text)
-        assertEquals("", vm.buttonsFor(slot(CompanionSurfacePlacement.LEFT_SIDEBAR))[0].text, "each surface is its own page")
+        assertEquals("",
+            vm.buttonsFor(slot(CompanionSurfacePlacement.LEFT_SIDEBAR))[0].text,
+            "each surface is its own page")
     }
 
     // ── Connection status ───────────────────────────────────────────────────────
@@ -472,10 +483,15 @@ class CompanionSatelliteViewModelTest {
         vm.connectAll(settings(tab = true, left = true))
 
         reportStatus(vm, slot(CompanionSurfacePlacement.TAB), CompanionConnectionStatus.CONNECTED)
-        reportStatus(vm, slot(CompanionSurfacePlacement.LEFT_SIDEBAR), CompanionConnectionStatus.ERROR, "no route to host")
+        reportStatus(vm,
+            slot(CompanionSurfacePlacement.LEFT_SIDEBAR),
+            CompanionConnectionStatus.ERROR,
+            "no route to host")
 
-        assertEquals(CompanionConnectionStatus.CONNECTED, vm.connectionStates.getValue(slot(CompanionSurfacePlacement.TAB)).status)
-        assertEquals(CompanionConnectionStatus.ERROR, vm.connectionStates.getValue(slot(CompanionSurfacePlacement.LEFT_SIDEBAR)).status)
+        assertEquals(CompanionConnectionStatus.CONNECTED,
+            vm.connectionStates.getValue(slot(CompanionSurfacePlacement.TAB)).status)
+        assertEquals(CompanionConnectionStatus.ERROR,
+            vm.connectionStates.getValue(slot(CompanionSurfacePlacement.LEFT_SIDEBAR)).status)
     }
 
     @Test

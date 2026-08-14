@@ -187,7 +187,8 @@ object PlanningCenterClient {
     @Serializable
     internal data class PersonResponse(val data: PersonData = PersonData())
 
-    suspend fun getCurrentPerson(accessToken: String, http: HttpClient = defaultHttp): PersonOutcome = withContext(Dispatchers.IO) {
+    suspend fun getCurrentPerson(accessToken: String,
+        http: HttpClient = defaultHttp): PersonOutcome = withContext(Dispatchers.IO) {
         try {
             val response = http.get(ME_URL) {
                 header("Authorization", "Bearer $accessToken")
@@ -274,7 +275,8 @@ object PlanningCenterClient {
         data object Failure : ArrangementOutcome
     }
 
-    suspend fun listServiceTypes(accessToken: String, http: HttpClient = defaultHttp): ServiceTypesOutcome = withContext(Dispatchers.IO) {
+    suspend fun listServiceTypes(accessToken: String,
+        http: HttpClient = defaultHttp): ServiceTypesOutcome = withContext(Dispatchers.IO) {
         try {
             val response = http.get("$SERVICES_BASE_URL/service_types") {
                 header("Authorization", "Bearer $accessToken")
@@ -622,7 +624,8 @@ object PlanningCenterClient {
     }
 
     /** Fetches raw bytes for an attachment thumbnail preview (public S3 URL, no auth); null on any failure. */
-    suspend fun fetchThumbnailBytes(url: String, http: HttpClient = defaultHttp): ByteArray? = withContext(Dispatchers.IO) {
+    suspend fun fetchThumbnailBytes(url: String,
+        http: HttpClient = defaultHttp): ByteArray? = withContext(Dispatchers.IO) {
         try {
             val response = http.get(url)
             if (response.status.value in 200..299) response.body() else null

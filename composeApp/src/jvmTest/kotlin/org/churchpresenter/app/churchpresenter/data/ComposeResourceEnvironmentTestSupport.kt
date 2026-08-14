@@ -9,8 +9,7 @@ import kotlin.reflect.typeOf
 
 /**
  * Forces Compose Multiplatform's string-resource loading to resolve against a fixed English/light
- * environment instead of asking AWT for the real display's DPI. That query — `Toolkit
- * .getScreenResolution()`, reached from `getSystemResourceEnvironment()` — throws
+ * environment instead of asking AWT for the real display's DPI. That query — `Toolkit * .getScreenResolution()`, reached from `getSystemResourceEnvironment()` — throws
  * `HeadlessException` under this suite's `-Djava.awt.headless=true`, which is why
  * [BibleBookNames.getEnglishBookNames]/[BibleBookNames.getBookNameMapping] and
  * [BibleBookAbbreviations]'s loaders were previously untestable (see AGENT.md's note on Compose

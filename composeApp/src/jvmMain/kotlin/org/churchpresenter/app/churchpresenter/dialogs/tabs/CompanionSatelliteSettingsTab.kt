@@ -157,22 +157,36 @@ private fun CompanionConnectionCard(
     var hostText by remember(connection.id, connection.host) { mutableStateOf(connection.host) }
     var portText by remember(connection.id, connection.port) { mutableStateOf(connection.port.toString()) }
     var deviceIdText by remember(connection.id, connection.deviceId) { mutableStateOf(connection.deviceId) }
-    var leftSidebarDeviceIdText by remember(connection.id, connection.leftSidebarDeviceId) { mutableStateOf(connection.leftSidebarDeviceId) }
-    var rightSidebarDeviceIdText by remember(connection.id, connection.rightSidebarDeviceId) { mutableStateOf(connection.rightSidebarDeviceId) }
+    var leftSidebarDeviceIdText by remember(connection.id,
+        connection.leftSidebarDeviceId) { mutableStateOf(connection.leftSidebarDeviceId) }
+    var rightSidebarDeviceIdText by remember(connection.id,
+        connection.rightSidebarDeviceId) { mutableStateOf(connection.rightSidebarDeviceId) }
     var productNameText by remember(connection.id, connection.productName) { mutableStateOf(connection.productName) }
-    var reconnectDelayText by remember(connection.id, connection.reconnectDelayMs) { mutableStateOf(connection.reconnectDelayMs.toString()) }
+    var reconnectDelayText by remember(connection.id,
+        connection.reconnectDelayMs) { mutableStateOf(connection.reconnectDelayMs.toString()) }
     var tabRowsText by remember(connection.id, connection.tabRows) { mutableStateOf(connection.tabRows.toString()) }
-    var tabColumnsText by remember(connection.id, connection.tabColumns) { mutableStateOf(connection.tabColumns.toString()) }
-    var tabBitmapSizeText by remember(connection.id, connection.tabBitmapSize) { mutableStateOf(connection.tabBitmapSize.toString()) }
-    var leftRowsText by remember(connection.id, connection.leftSidebarRows) { mutableStateOf(connection.leftSidebarRows.toString()) }
-    var leftColumnsText by remember(connection.id, connection.leftSidebarColumns) { mutableStateOf(connection.leftSidebarColumns.toString()) }
-    var leftBitmapSizeText by remember(connection.id, connection.leftSidebarBitmapSize) { mutableStateOf(connection.leftSidebarBitmapSize.toString()) }
-    var rightRowsText by remember(connection.id, connection.rightSidebarRows) { mutableStateOf(connection.rightSidebarRows.toString()) }
-    var rightColumnsText by remember(connection.id, connection.rightSidebarColumns) { mutableStateOf(connection.rightSidebarColumns.toString()) }
-    var rightBitmapSizeText by remember(connection.id, connection.rightSidebarBitmapSize) { mutableStateOf(connection.rightSidebarBitmapSize.toString()) }
-    var tabMaxButtonSizeText by remember(connection.id, connection.tabMaxButtonSizeDp) { mutableStateOf(connection.tabMaxButtonSizeDp.toString()) }
-    var leftMaxButtonSizeText by remember(connection.id, connection.leftSidebarMaxButtonSizeDp) { mutableStateOf(connection.leftSidebarMaxButtonSizeDp.toString()) }
-    var rightMaxButtonSizeText by remember(connection.id, connection.rightSidebarMaxButtonSizeDp) { mutableStateOf(connection.rightSidebarMaxButtonSizeDp.toString()) }
+    var tabColumnsText by remember(connection.id,
+        connection.tabColumns) { mutableStateOf(connection.tabColumns.toString()) }
+    var tabBitmapSizeText by remember(connection.id,
+        connection.tabBitmapSize) { mutableStateOf(connection.tabBitmapSize.toString()) }
+    var leftRowsText by remember(connection.id,
+        connection.leftSidebarRows) { mutableStateOf(connection.leftSidebarRows.toString()) }
+    var leftColumnsText by remember(connection.id,
+        connection.leftSidebarColumns) { mutableStateOf(connection.leftSidebarColumns.toString()) }
+    var leftBitmapSizeText by remember(connection.id,
+        connection.leftSidebarBitmapSize) { mutableStateOf(connection.leftSidebarBitmapSize.toString()) }
+    var rightRowsText by remember(connection.id,
+        connection.rightSidebarRows) { mutableStateOf(connection.rightSidebarRows.toString()) }
+    var rightColumnsText by remember(connection.id,
+        connection.rightSidebarColumns) { mutableStateOf(connection.rightSidebarColumns.toString()) }
+    var rightBitmapSizeText by remember(connection.id,
+        connection.rightSidebarBitmapSize) { mutableStateOf(connection.rightSidebarBitmapSize.toString()) }
+    var tabMaxButtonSizeText by remember(connection.id,
+        connection.tabMaxButtonSizeDp) { mutableStateOf(connection.tabMaxButtonSizeDp.toString()) }
+    var leftMaxButtonSizeText by remember(connection.id,
+        connection.leftSidebarMaxButtonSizeDp) { mutableStateOf(connection.leftSidebarMaxButtonSizeDp.toString()) }
+    var rightMaxButtonSizeText by remember(connection.id,
+        connection.rightSidebarMaxButtonSizeDp) { mutableStateOf(connection.rightSidebarMaxButtonSizeDp.toString()) }
 
     SettingsSection(
         title = connection.name.ifBlank { stringResource(Res.string.companion_satellite_settings) },
@@ -230,7 +244,8 @@ private fun CompanionConnectionCard(
                                 CompanionConnectionStatus.CONNECTING ->
                                     stringResource(Res.string.companion_satellite_status_connecting) to MaterialTheme.semantic.warning
                                 CompanionConnectionStatus.ERROR ->
-                                    stringResource(Res.string.companion_satellite_status_error, state.errorMessage) to MaterialTheme.colorScheme.error
+                                    stringResource(Res.string.companion_satellite_status_error,
+                                        state.errorMessage) to MaterialTheme.colorScheme.error
                                 else ->
                                     stringResource(Res.string.companion_satellite_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             }
@@ -422,7 +437,8 @@ private fun CompanionConnectionCard(
         if (canRemove) {
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = onRemove) {
-                Text(stringResource(Res.string.companion_satellite_remove_connection), color = MaterialTheme.colorScheme.error)
+                Text(stringResource(Res.string.companion_satellite_remove_connection),
+                    color = MaterialTheme.colorScheme.error)
             }
         }
     }

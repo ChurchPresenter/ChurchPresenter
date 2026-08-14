@@ -102,7 +102,10 @@ internal fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSo
             onColorChange = { onUpdate(source.copy(strokeColor = it)) },
             label = stringResource(Res.string.canvas_shape_stroke_color)
         )
-        PropertySlider("${stringResource(Res.string.canvas_shape_stroke_color)} ${stringResource(Res.string.canvas_opacity)}", source.strokeOpacity, 0f, 1f) { v ->
+        PropertySlider("${stringResource(Res.string.canvas_shape_stroke_color)} ${stringResource(Res.string.canvas_opacity)}",
+            source.strokeOpacity,
+            0f,
+            1f) { v ->
             onUpdate(source.copy(strokeOpacity = v))
         }
     }
@@ -113,7 +116,10 @@ internal fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSo
             onColorChange = { onUpdate(source.copy(fillColor = it)) },
             label = stringResource(Res.string.canvas_shape_fill_color)
         )
-        PropertySlider("${stringResource(Res.string.canvas_shape_fill_color)} ${stringResource(Res.string.canvas_opacity)}", source.fillOpacity, 0f, 1f) { v ->
+        PropertySlider("${stringResource(Res.string.canvas_shape_fill_color)} ${stringResource(Res.string.canvas_opacity)}",
+            source.fillOpacity,
+            0f,
+            1f) { v ->
             onUpdate(source.copy(fillOpacity = v))
         }
     }
@@ -144,13 +150,24 @@ internal fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSo
                 onColorChange = { onUpdate(source.copy(gradientColor2 = it)) },
                 label = stringResource(Res.string.canvas_color_2)
             )
-            PropertySlider("${stringResource(Res.string.canvas_color_2)} ${stringResource(Res.string.canvas_opacity)}", source.gradientColor2Opacity, 0f, 1f) { v ->
+            PropertySlider("${stringResource(Res.string.canvas_color_2)} ${stringResource(Res.string.canvas_opacity)}",
+                source.gradientColor2Opacity,
+                0f,
+                1f) { v ->
                 onUpdate(source.copy(gradientColor2Opacity = v))
             }
-            PropertySliderWithInput(stringResource(Res.string.canvas_angle), source.gradientAngle, 0f, 360f, "\u00B0") { v ->
+            PropertySliderWithInput(stringResource(Res.string.canvas_angle),
+                source.gradientAngle,
+                0f,
+                360f,
+                "\u00B0") { v ->
                 onUpdate(source.copy(gradientAngle = v))
             }
-            PropertySliderWithInput(stringResource(Res.string.position), source.gradientPosition * 100f, 0f, 100f, "%") { v ->
+            PropertySliderWithInput(stringResource(Res.string.position),
+                source.gradientPosition * 100f,
+                0f,
+                100f,
+                "%") { v ->
                 onUpdate(source.copy(gradientPosition = (v / 100f).coerceIn(0f, 1f)))
             }
         }
@@ -259,7 +276,8 @@ internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSo
                 shape = RoundedCornerShape(8.dp),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
             ) {
-                Text(if (isRunning) stringResource(Res.string.pause) else stringResource(Res.string.timer_start), style = MaterialTheme.typography.labelSmall)
+                Text(if (isRunning) stringResource(Res.string.pause) else stringResource(Res.string.timer_start),
+                    style = MaterialTheme.typography.labelSmall)
             }
             Button(
                 onClick = { TimerStateManager.reset(source.id, totalSeconds) },

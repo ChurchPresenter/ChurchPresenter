@@ -489,18 +489,25 @@ class CompanionServer {
      *  primary currently has live, since a Controller has no way to learn the primary's internally-
      *  assigned folderId/presentationId. See Constants.WS_CMD_NEXT_PICTURE and siblings. */
     val onNextPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onPreviousPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onPreviousPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val onNextSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onPreviousSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onPreviousSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     // Media transport controls from a companion remote
-    val onMediaPlayPause = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaPlayPause = MutableSharedFlow<Unit>(extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val onMediaStop = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaSeekForward = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaSeekBackward = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaSeekForward = MutableSharedFlow<Unit>(extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaSeekBackward = MutableSharedFlow<Unit>(extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val onMediaSeekTo = MutableSharedFlow<Long>(extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaSetVolume = MutableSharedFlow<Float>(extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaMuteToggle = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaSetVolume = MutableSharedFlow<Float>(extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaMuteToggle = MutableSharedFlow<Unit>(extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     /**
      * Emitted for every instant (no-approval) action so the UI can show an activity toast.
@@ -590,7 +597,9 @@ class CompanionServer {
     /** Allow or disallow file uploads from mobile devices without restarting the server. */
     fun updateFileUploadEnabled(enabled: Boolean) {
         _fileUploadEnabled.value = enabled
-        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "file_upload_enabled", "enabled" to enabled))
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY,
+            "state_updated",
+            mapOf("type" to "file_upload_enabled", "enabled" to enabled))
     }
 
     /** Update the max media-upload size (MB) without restarting the server. */
@@ -689,7 +698,9 @@ class CompanionServer {
     fun updateSecondaryBibleFilePath(filePath: String) {
         if (_secondaryBibleFilePath == filePath) return
         _secondaryBibleFilePath = filePath
-        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "secondary_bible_file_path", "filePath" to filePath))
+        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY,
+            "state_updated",
+            mapOf("type" to "secondary_bible_file_path", "filePath" to filePath))
         // Invalidation signal for followers mirroring the secondary bible — they re-download
         // the .spb on this event instead of trusting their local cache forever.
         broadcast(WebSocketMessage(type = Constants.WS_EVENT_SECONDARY_BIBLE_UPDATED, payload = ""))
@@ -978,7 +989,9 @@ class CompanionServer {
                 )
                 presentationRoutes(
                     this@CompanionServer, _fileUploadEnabled, _maxMediaUploadMb, presentations._presentationCatalog,
-                    presentations._presentationCatalogs, presentations._presentationFilePaths, presentations._scheduleItemToPresentationId,
+                    presentations._presentationCatalogs,
+                    presentations._presentationFilePaths,
+                    presentations._scheduleItemToPresentationId,
                     presentations._slideBytes, json, scope
                 )
                 presentationRemoteRoutes(this@CompanionServer, presentations._presentationNotes, scope)
@@ -1165,7 +1178,8 @@ class CompanionServer {
                 return
             }
             val fileBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
-            val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_presentations").also { it.mkdirs() }
+            val uploadDir = File(System.getProperty("user.home"),
+                ".churchpresenter/device_presentations").also { it.mkdirs() }
             val uniqueName = if (File(uploadDir, safeName).exists()) {
                 val ts   = System.currentTimeMillis()
                 val base = safeName.substringBeforeLast('.', safeName)

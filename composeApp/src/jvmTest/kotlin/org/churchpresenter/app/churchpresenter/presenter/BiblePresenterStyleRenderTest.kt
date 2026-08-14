@@ -82,8 +82,14 @@ class BiblePresenterStyleRenderTest {
         fileName = fileName,
         textBold = true, textItalic = true, textUnderline = true, textShadow = true,
         referenceBold = true, referenceItalic = true, referenceUnderline = true, referenceShadow = true,
-        lowerThirdTextBold = true, lowerThirdTextItalic = true, lowerThirdTextUnderline = true, lowerThirdTextShadow = true,
-        lowerThirdReferenceBold = true, lowerThirdReferenceItalic = true, lowerThirdReferenceUnderline = true, lowerThirdReferenceShadow = true,
+        lowerThirdTextBold = true,
+        lowerThirdTextItalic = true,
+        lowerThirdTextUnderline = true,
+        lowerThirdTextShadow = true,
+        lowerThirdReferenceBold = true,
+        lowerThirdReferenceItalic = true,
+        lowerThirdReferenceUnderline = true,
+        lowerThirdReferenceShadow = true,
         textHorizontalAlignment = alignment,
         referencePosition = Constants.POSITION_ABOVE,
         lowerThirdReferencePosition = Constants.POSITION_ABOVE,
@@ -155,7 +161,8 @@ class BiblePresenterStyleRenderTest {
             setContent {
                 Box(screen) {
                     BiblePresenter(
-                        selectedVerses = listOf(verse("FIRST TEXT", fileName = "a.spb"), verse("SECOND TEXT", fileName = "b.spb")),
+                        selectedVerses = listOf(verse("FIRST TEXT", fileName = "a.spb"),
+                            verse("SECOND TEXT", fileName = "b.spb")),
                         appSettings = settings,
                         outputRole = Constants.OUTPUT_ROLE_KEY,
                     )
@@ -230,8 +237,10 @@ class BiblePresenterStyleRenderTest {
         val settings = AppSettings(
             bibleSettings = BibleSettings().withTranslations(
                 listOf(
-                    BibleTranslationSettings(fileName = "a.spb", lowerThirdReferencePosition = Constants.POSITION_ABOVE),
-                    BibleTranslationSettings(fileName = "b.spb", lowerThirdReferencePosition = Constants.POSITION_ABOVE),
+                    BibleTranslationSettings(fileName = "a.spb",
+                        lowerThirdReferencePosition = Constants.POSITION_ABOVE),
+                    BibleTranslationSettings(fileName = "b.spb",
+                        lowerThirdReferencePosition = Constants.POSITION_ABOVE),
                 ),
             ),
         )
@@ -291,7 +300,8 @@ class BiblePresenterStyleRenderTest {
     fun `a decodable image background renders full-screen`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = png().absolutePath),
+                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE,
+                    backgroundImage = png().absolutePath),
             ),
         )
         renderShowsText(settings)
@@ -301,7 +311,8 @@ class BiblePresenterStyleRenderTest {
     fun `a decodable image background renders in the lower third band`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                bibleLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = png().absolutePath),
+                bibleLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE,
+                    backgroundImage = png().absolutePath),
             ),
         )
         renderShowsText(settings, isLowerThird = true)
@@ -311,7 +322,8 @@ class BiblePresenterStyleRenderTest {
     fun `a missing image path falls back to black rather than crashing`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = "/no/such/file/does-not-exist.png"),
+                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE,
+                    backgroundImage = "/no/such/file/does-not-exist.png"),
             ),
         )
         renderShowsText(settings)
@@ -321,7 +333,8 @@ class BiblePresenterStyleRenderTest {
     fun `an undecodable image file falls back to black rather than crashing`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = garbageFile().absolutePath),
+                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE,
+                    backgroundImage = garbageFile().absolutePath),
             ),
         )
         renderShowsText(settings)
@@ -331,7 +344,8 @@ class BiblePresenterStyleRenderTest {
     fun `a video background type renders full-screen without a decoder present`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO, backgroundVideo = "/no/such/file.mp4"),
+                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO,
+                    backgroundVideo = "/no/such/file.mp4"),
             ),
         )
         renderShowsText(settings)
@@ -341,7 +355,8 @@ class BiblePresenterStyleRenderTest {
     fun `a video background type renders in the lower third without a decoder present`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                bibleLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO, backgroundVideo = "/no/such/file.mp4"),
+                bibleLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO,
+                    backgroundVideo = "/no/such/file.mp4"),
             ),
         )
         renderShowsText(settings, isLowerThird = true)
@@ -372,7 +387,8 @@ class BiblePresenterStyleRenderTest {
                     appSettings = AppSettings(
                         bibleSettings = BibleSettings(fadeIn = true, transitionDuration = 100f),
                         backgroundSettings = BackgroundSettings(
-                            bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_COLOR, backgroundColor = "#FFFFFF"),
+                            bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_COLOR,
+                                backgroundColor = "#FFFFFF"),
                         ),
                     ),
                 )
@@ -410,8 +426,10 @@ class BiblePresenterStyleRenderTest {
         verses = listOf(verse("SECOND VERSE", number = 17))
         mainClock.advanceTimeByFrame()
         mainClock.advanceTimeByFrame()
-        onNodeWithText("FIRST VERSE", substring = true).assertExists("mid-crossfade the outgoing verse must still be visible")
-        onNodeWithText("SECOND VERSE", substring = true).assertExists("mid-crossfade the incoming verse must already be visible")
+        onNodeWithText("FIRST VERSE",
+            substring = true).assertExists("mid-crossfade the outgoing verse must still be visible")
+        onNodeWithText("SECOND VERSE",
+            substring = true).assertExists("mid-crossfade the incoming verse must already be visible")
 
         mainClock.advanceTimeBy(500)
         onNodeWithText("SECOND VERSE", substring = true).assertExists()

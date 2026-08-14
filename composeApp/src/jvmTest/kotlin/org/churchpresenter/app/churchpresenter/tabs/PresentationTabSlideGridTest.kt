@@ -47,7 +47,8 @@ class PresentationTabSlideGridTest {
         return dir to files
     }
 
-    private fun withSlides(count: Int, block: ComposeUiTest.(vm: PresentationViewModel, reports: PresentationReports) -> Unit) {
+    private fun withSlides(count: Int,
+        block: ComposeUiTest.(vm: PresentationViewModel, reports: PresentationReports) -> Unit) {
         val (dir, files) = slideFiles(count)
         try {
             presentationTab { vm, reports ->

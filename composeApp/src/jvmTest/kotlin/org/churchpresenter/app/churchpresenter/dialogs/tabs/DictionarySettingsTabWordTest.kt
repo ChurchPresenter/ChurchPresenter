@@ -203,8 +203,7 @@ class DictionarySettingsTabWordTest {
     /**
      * Clicking the arrow a second time does **not** close the menu — it stays open.
      *
-     * The arrow's handler is a toggle (`if (expanded) expanded = false else { requestFocus(); expanded
-     * = true }`), but it never sees `expanded == true`: the click pulls focus off the editor first,
+     * The arrow's handler is a toggle (`if (expanded) expanded = false else { requestFocus(); expanded * = true }`), but it never sees `expanded == true`: the click pulls focus off the editor first,
      * and the editor's `onFocusChanged` has already set `expanded = false` by the time the handler
      * runs, so it takes the opening branch again. The close branch is therefore unreachable from the
      * arrow.

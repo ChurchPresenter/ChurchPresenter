@@ -348,7 +348,8 @@ internal fun ScheduleItemRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
-                    .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f),
+                        RoundedCornerShape(6.dp))
                     .padding(start = 8.dp, end = 2.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.Top
             ) {
@@ -478,22 +479,34 @@ internal fun ScheduleItemContent(item: ScheduleItem, density: ScheduleDensity, i
         }
         is ScheduleItem.BibleVerseItem -> Text(
             text = scheduleItemDetailText(item).orEmpty(),
-            style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
+            style = MaterialTheme.typography.bodySmall,
+            color = detailColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         is ScheduleItem.PictureItem -> Text(
             text = scheduleItemDetailText(item).orEmpty(),
-            style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
+            style = MaterialTheme.typography.bodySmall,
+            color = detailColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         is ScheduleItem.PresentationItem -> if (!scheduleShowKindDetails(density.percent)) {
             Text(
                 text = scheduleItemDetailText(item).orEmpty(),
-                style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
+                style = MaterialTheme.typography.bodySmall,
+                color = detailColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
         is ScheduleItem.MediaItem -> if (!scheduleShowKindDetails(density.percent)) {
             Text(
                 text = scheduleItemDetailText(item).orEmpty(),
-                style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
+                style = MaterialTheme.typography.bodySmall,
+                color = detailColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
         is ScheduleItem.LowerThirdItem -> if (item.pauseAtFrame) {
@@ -513,11 +526,17 @@ internal fun ScheduleItemContent(item: ScheduleItem, density: ScheduleDensity, i
         }
         is ScheduleItem.WebsiteItem -> Text(
             text = item.url,
-            style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
+            style = MaterialTheme.typography.bodySmall,
+            color = detailColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         is ScheduleItem.DictionaryItem -> Text(
             text = item.transliteration,
-            style = MaterialTheme.typography.bodySmall, color = detailColor, maxLines = 1, overflow = TextOverflow.Ellipsis
+            style = MaterialTheme.typography.bodySmall,
+            color = detailColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         is ScheduleItem.LabelItem, is ScheduleItem.SceneItem -> {  }
     }
@@ -535,7 +554,9 @@ internal fun ScheduleItemContent(item: ScheduleItem, density: ScheduleDensity, i
         ) {
             val (chipBg, chipFg) = scheduleChipColors(scheduleItemPaletteIndex(item))
             Box(
-                modifier = Modifier.background(chipBg, RoundedCornerShape(4.dp)).padding(horizontal = 6.dp, vertical = 1.dp)
+                modifier = Modifier.background(chipBg,
+                    RoundedCornerShape(4.dp)).padding(horizontal = 6.dp,
+                    vertical = 1.dp)
             ) {
                 Text(
                     text = stringResource(scheduleItemKindLabel(item)).uppercase(),

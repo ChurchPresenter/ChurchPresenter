@@ -47,8 +47,7 @@ internal val THEMES = listOf("light" to ThemeMode.LIGHT, "dark" to ThemeMode.DAR
  *   their path relative to it**, so one written elsewhere is not reported as *differing* — it has no
  *   counterpart and silently stops being compared. Go through [stackedThemes]/[captureComponent] and
  *   this is handled.
- * - **A class must be named `…ScreenshotTest`.** The workflow records with `--tests
- *   '*ScreenshotTest*'`; a class outside that pattern is never rendered in CI and its images are
+ * - **A class must be named `…ScreenshotTest`.** The workflow records with `--tests *   '*ScreenshotTest*'`; a class outside that pattern is never rendered in CI and its images are
  *   never compared.
  */
 internal const val SCREENSHOT_ROOT = "screenshots"
@@ -76,8 +75,7 @@ internal const val SCREENSHOT_ROOT = "screenshots"
  * **It must stay comfortably under a minute.** `runTest` — which `runComposeUiTest` builds on —
  * gives the whole test body 60s, and that is the outer bound no wait in here can exceed. Set to
  * 60s this constant could never spend its budget: a slow render hit the harness timeout first and
- * failed with `UncompletedCoroutinesError: After waiting for 1m, the test body did not run to
- * completion`, which names neither the wait nor the condition. 30s leaves room for the rest of the
+ * failed with `UncompletedCoroutinesError: After waiting for 1m, the test body did not run to * completion`, which names neither the wait nor the condition. 30s leaves room for the rest of the
  * test and still fails with the message that says what was being waited for.
  */
 internal const val RENDER_TIMEOUT_MS = 30_000L
@@ -295,7 +293,10 @@ private fun BufferedImage.trimmed(margin: Int = 8): BufferedImage {
 
     val x = (left - margin).coerceAtLeast(0)
     val y = (top - margin).coerceAtLeast(0)
-    return getSubimage(x, y, (right + margin - x).coerceAtMost(width - x), (bottom + margin - y).coerceAtMost(height - y))
+    return getSubimage(x,
+        y,
+        (right + margin - x).coerceAtMost(width - x),
+        (bottom + margin - y).coerceAtMost(height - y))
 }
 
 /**
@@ -312,11 +313,7 @@ private fun BufferedImage.trimmed(margin: Int = 8): BufferedImage {
  * because a class that left the singleton empty would change what every later class in the JVM sees
  * — the same reason `RecentFilesSwap` exists.
  *
- * ```
- * private val recents = PinnedRecentColors()
- * @BeforeTest fun pinRecents() = recents.clear()
- * @AfterTest fun unpinRecents() = recents.restore()
- * ```
+ * ``` * private val recents = PinnedRecentColors() * @BeforeTest fun pinRecents() = recents.clear() * @AfterTest fun unpinRecents() = recents.restore() * ```
  */
 internal class PinnedRecentColors {
     private val stashed = mutableListOf<String>()

@@ -72,7 +72,9 @@ class PresentationTabRealDeckTest {
         block: ComposeUiTest.(vm: PresentationViewModel, reports: PresentationReports, file: File) -> Unit,
     ) {
         val file = pdf(pages)
-        presentationTab(presenterManager = presenterManager, onInstanceLinkSendProject = onInstanceLinkSendProject) { vm, reports ->
+        presentationTab(presenterManager = presenterManager,
+            onInstanceLinkSendProject = onInstanceLinkSendProject) { vm,
+            reports ->
             vm.addPresentation(file)
             awaitLoaded(vm)
             block(vm, reports, file)
@@ -87,7 +89,9 @@ class PresentationTabRealDeckTest {
     }
 
     @Test
-    fun `adding a loaded deck to the schedule reports its real file details`() = withRealDeck(pages = 4) { vm, reports, file ->
+    fun `adding a loaded deck to the schedule reports its real file details`() = withRealDeck(pages = 4) { vm,
+        reports,
+        file ->
         presentationButton(PresentationLabel.ADD_TO_SCHEDULE).performClick()
         waitForIdle()
 
@@ -130,7 +134,8 @@ class PresentationTabRealDeckTest {
                 Thread.sleep(20)
             }
 
-            assertTrue(presenter.selectedSlide.value != null, "the live slide bitmap must arrive, even though it decodes asynchronously")
+            assertTrue(presenter.selectedSlide.value != null,
+                "the live slide bitmap must arrive, even though it decodes asynchronously")
         }
     }
 
@@ -138,7 +143,11 @@ class PresentationTabRealDeckTest {
     fun `Go Live also projects the deck to Instance Link when wired`() {
         val presenter = PresenterManager()
         val sent = mutableListOf<ScheduleItem>()
-        withRealDeck(pages = 3, presenterManager = presenter, onInstanceLinkSendProject = { sent += it }) { vm, _, file ->
+        withRealDeck(pages = 3,
+            presenterManager = presenter,
+            onInstanceLinkSendProject = { sent += it }) { vm,
+            _,
+            file ->
             presentationButton(PresentationLabel.GO_LIVE).performClick()
             waitForIdle()
 
@@ -154,7 +163,11 @@ class PresentationTabRealDeckTest {
     fun `double-clicking a thumbnail also projects to Instance Link when wired`() {
         val presenter = PresenterManager()
         val sent = mutableListOf<ScheduleItem>()
-        withRealDeck(pages = 3, presenterManager = presenter, onInstanceLinkSendProject = { sent += it }) { _, _, file ->
+        withRealDeck(pages = 3,
+            presenterManager = presenter,
+            onInstanceLinkSendProject = { sent += it }) { _,
+            _,
+            file ->
             waitUntilAtLeastOneExists(hasContentDescription("Slide 2"), timeoutMillis = 5_000)
             onNodeWithContentDescription("Slide 2").performTouchInput {
                 down(center)

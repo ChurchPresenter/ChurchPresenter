@@ -343,7 +343,8 @@ private fun SingleDisplayPreview(
                             if (appSettings.bibleSettings.crossfade) appSettings.bibleSettings.transitionDuration.toInt() else 0,
                             if (appSettings.songSettings.crossfade) appSettings.songSettings.transitionDuration.toInt() else 0
                         ).coerceAtLeast(100)
-                        Crossfade(targetState = effectiveMode, animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
+                        Crossfade(targetState = effectiveMode,
+                            animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
                         when (mode) {
                             Presenting.BIBLE ->
                                 BiblePresenter(
@@ -391,7 +392,8 @@ private fun SingleDisplayPreview(
                                 )
                             Presenting.MEDIA ->
                                 if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
-                                    MediaPresenter(modifier = Modifier.fillMaxSize(), transitionAlpha = mediaTransitionAlpha)
+                                    MediaPresenter(modifier = Modifier.fillMaxSize(),
+                                        transitionAlpha = mediaTransitionAlpha)
                                 }
                             Presenting.LOWER_THIRD ->
                                 LowerThirdPresenter(
@@ -412,7 +414,8 @@ private fun SingleDisplayPreview(
                             Presenting.QA -> {
                                 val showQRCode by presenterManager.showQRCodeOnDisplay
                                 if (showQRCode) {
-                                    QAQRCodePresenter(url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa", qaSettings = appSettings.qaSettings)
+                                    QAQRCodePresenter(url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
+                                        qaSettings = appSettings.qaSettings)
                                 } else {
                                     QAPresenter(question = displayedQuestion, qaSettings = appSettings.qaSettings)
                                 }

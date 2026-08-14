@@ -331,7 +331,8 @@ class PresenterFullScreenScreenshotTest {
 
     @Test
     fun `on a colour`() = shoot("song_background_colour") {
-        SongPresenter(lyricSection = song(), appSettings = songBackground(BackgroundConfig(backgroundColor = "#1B2A5B")))
+        SongPresenter(lyricSection = song(),
+            appSettings = songBackground(BackgroundConfig(backgroundColor = "#1B2A5B")))
     }
 
     @Test

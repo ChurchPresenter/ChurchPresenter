@@ -420,7 +420,11 @@ class CompanionServerRemoteControlTest {
         server.updateSchedule(
             listOf(
                 ScheduleItem.SongItem(id = "1", songNumber = 42, title = "Amazing Grace", songbook = "Hymnal"),
-                ScheduleItem.BibleVerseItem(id = "2", bookName = "John", chapter = 3, verseNumber = 16, verseText = "…"),
+                ScheduleItem.BibleVerseItem(id = "2",
+                    bookName = "John",
+                    chapter = 3,
+                    verseNumber = 16,
+                    verseText = "…"),
             ),
         )
 
@@ -964,8 +968,10 @@ class CompanionServerRemoteControlTest {
         val dir = loadBible()
         try {
             // The phone sends back whatever the user typed into its search box.
-            assertEquals("1", get("${Constants.ENDPOINT_BIBLE}?${Constants.QUERY_PARAM_BOOK}=john").obj().str("book-total"))
-            assertEquals("1", get("${Constants.ENDPOINT_BIBLE}?${Constants.QUERY_PARAM_BOOK}=JOHN").obj().str("book-total"))
+            assertEquals("1",
+                get("${Constants.ENDPOINT_BIBLE}?${Constants.QUERY_PARAM_BOOK}=john").obj().str("book-total"))
+            assertEquals("1",
+                get("${Constants.ENDPOINT_BIBLE}?${Constants.QUERY_PARAM_BOOK}=JOHN").obj().str("book-total"))
         } finally {
             dir.deleteRecursively()
         }
@@ -1447,7 +1453,10 @@ class CompanionServerRemoteControlTest {
         server.updateSchedule(
             listOf(
                 ScheduleItem.MediaItem(
-                    id = "media-1", mediaUrl = "https://youtube.com/watch?v=x", mediaTitle = "Clip", mediaType = "youtube",
+                    id = "media-1",
+                    mediaUrl = "https://youtube.com/watch?v=x",
+                    mediaTitle = "Clip",
+                    mediaType = "youtube",
                 ),
             ),
         )

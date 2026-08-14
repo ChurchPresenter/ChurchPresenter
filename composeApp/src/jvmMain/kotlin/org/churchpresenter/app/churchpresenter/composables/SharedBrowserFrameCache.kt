@@ -122,13 +122,15 @@ object SharedBrowserFrameCache {
                         })
                     })
                     cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                        put("expression", "document.documentElement.style.background='transparent';document.body.style.background='transparent';")
+                        put("expression",
+                            "document.documentElement.style.background='transparent';document.body.style.background='transparent';")
                     })
                 } else {
                     // Reset to default (opaque white) background
                     cdp.sendAsync("Emulation.setDefaultBackgroundColorOverride", buildJsonObject {})
                     cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                        put("expression", "document.documentElement.style.background='';document.body.style.background='';")
+                        put("expression",
+                            "document.documentElement.style.background='';document.body.style.background='';")
                     })
                 }
             } catch (_: Exception) {}
@@ -159,12 +161,14 @@ object SharedBrowserFrameCache {
                 delay(2000) // wait for page load
                 if (forceTransparent) {
                     cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                        put("expression", "document.documentElement.style.background='transparent';document.body.style.background='transparent';")
+                        put("expression",
+                            "document.documentElement.style.background='transparent';document.body.style.background='transparent';")
                     })
                 }
                 if (customCss.isNotBlank()) {
                     cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                        put("expression", "var s=document.createElement('style');s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);")
+                        put("expression",
+                            "var s=document.createElement('style');s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);")
                     })
                 }
             } catch (_: Exception) {}
@@ -222,7 +226,11 @@ object SharedBrowserFrameCache {
 
         // Fallback: check PATH
         val names = if (isWindows) listOf("msedge.exe", "chrome.exe")
-                    else listOf("google-chrome-stable", "google-chrome", "chromium-browser", "chromium", "microsoft-edge-stable")
+                    else listOf("google-chrome-stable",
+                        "google-chrome",
+                        "chromium-browser",
+                        "chromium",
+                        "microsoft-edge-stable")
         val whichCmd = if (isWindows) "where" else "which"
         for (name in names) {
             try {
@@ -409,12 +417,14 @@ object SharedBrowserFrameCache {
             // Inject transparency CSS
             if (forceTransparent) {
                 cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                    put("expression", "document.documentElement.style.background='transparent';document.body.style.background='transparent';")
+                    put("expression",
+                        "document.documentElement.style.background='transparent';document.body.style.background='transparent';")
                 })
             }
             if (customCss.isNotBlank()) {
                 cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                    put("expression", "var s=document.createElement('style');s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);")
+                    put("expression",
+                        "var s=document.createElement('style');s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);")
                 })
             }
         }

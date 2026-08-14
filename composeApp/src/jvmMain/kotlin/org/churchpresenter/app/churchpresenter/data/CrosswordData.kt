@@ -47,7 +47,12 @@ object CrosswordDecoder {
      * (direction, row, col), or null if the file is malformed or empty.
      * Layout is null when the file predates the LAYOUT section.
      */
-    fun decodeFile(base64Content: String): Triple<String, List<CrosswordClue>, Map<Pair<Int, CrosswordDirection>, Pair<Int, Int>>?>? = try {
+    fun decodeFile(base64Content: String): Triple<String,
+    List<CrosswordClue>,
+    Map<Pair<Int,
+    CrosswordDirection>,
+    Pair<Int,
+    Int>>?>? = try {
         val bytes = Base64.getDecoder().decode(base64Content.trim())
         val keyBytes = CROSSWORD_XOR_KEY.encodeToByteArray()
         val decoded = ByteArray(bytes.size) { i ->
@@ -67,7 +72,12 @@ object CrosswordDecoder {
      *   DOWN:
      *   2. Clue text | ANSWER
      */
-    private fun parseText(text: String): Triple<String, List<CrosswordClue>, Map<Pair<Int, CrosswordDirection>, Pair<Int, Int>>?>? {
+    private fun parseText(text: String): Triple<String,
+    List<CrosswordClue>,
+    Map<Pair<Int,
+    CrosswordDirection>,
+    Pair<Int,
+    Int>>?>? {
         var title = "Crossword"
         val clues = mutableListOf<CrosswordClue>()
         // Key is (clueNumber, direction) so two words sharing the same sequential number

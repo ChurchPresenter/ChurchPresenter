@@ -179,7 +179,8 @@ class EBibleSourceTest {
             if (value == null) System.clearProperty(stagingProperty) else System.setProperty(stagingProperty, value)
             block()
         } finally {
-            if (original == null) System.clearProperty(stagingProperty) else System.setProperty(stagingProperty, original)
+            if (original == null) System.clearProperty(stagingProperty) else System.setProperty(stagingProperty,
+                original)
         }
     }
 
@@ -408,7 +409,9 @@ class EBibleSourceTest {
 
         val offline = fetch(httpFailing(), now = 1_000L)
 
-        assertEquals(BibleCatalogOutcome.NetworkError, offline, "an empty cache must not be reported as a stale success")
+        assertEquals(BibleCatalogOutcome.NetworkError,
+            offline,
+            "an empty cache must not be reported as a stale success")
     }
 
     @Test
@@ -425,7 +428,9 @@ class EBibleSourceTest {
             fetch(httpServing(csv("eng,engnet,NET,,public domain,True,True,2024-01-01")), now = muchLater),
         )
 
-        assertEquals("engnet", outcome.modules.single().identifier, "a stale age must not serve the old cache unrefreshed")
+        assertEquals("engnet",
+            outcome.modules.single().identifier,
+            "a stale age must not serve the old cache unrefreshed")
     }
 
     @Test

@@ -251,7 +251,8 @@ class DictionaryViewModelSearchTest {
     @Test
     fun `the passage filter tightens as chapter and verse are picked`() {
         val d = loaded()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf("G26", "G5485")
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf("G26",
+            "G5485")
         every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, 3, null) } returns setOf("G26")
         every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, 3, 16) } returns setOf("G26")
 
@@ -305,7 +306,8 @@ class DictionaryViewModelSearchTest {
     @Test
     fun `filtering to a passage that still contains the current word keeps it selected`() {
         val d = loaded()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf("G26", "G5485")
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf("G26",
+            "G5485")
         d.onEntrySelected(DictionaryFixture.agape)
 
         d.filterEntryListByBook(43)

@@ -169,7 +169,10 @@ internal fun BibleViewModel.getNextVerses(): List<SelectedVerse> {
     return buildNextVerseList(nextBookId, nextChapter, verseNumber, verseTextOf(firstVerse))
 }
 
-internal fun BibleViewModel.buildNextVerseList(bookId: Int, chapter: Int, verseNumber: Int, verseText: String): List<SelectedVerse> {
+internal fun BibleViewModel.buildNextVerseList(bookId: Int,
+    chapter: Int,
+    verseNumber: Int,
+    verseText: String): List<SelectedVerse> {
     val verseList = mutableListOf<SelectedVerse>()
     if (verseText.isNotEmpty()) {
         verseList.add(

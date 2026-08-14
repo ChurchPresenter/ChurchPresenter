@@ -312,7 +312,8 @@ fun ProjectionSettingsTab(
     val songLaTooltip = stringResource(Res.string.projection_content_song_la_tooltip)
     val contentCols = listOf(
         ContentCol(songLaLabel, { it.songLookAhead }, { a, v ->
-            if (v) a.copy(songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode, songLookAhead = true)
+            if (v) a.copy(songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode,
+                songLookAhead = true)
             else a.copy(songLookAhead = false)
         }, enabled = { it.songMode != Constants.SONG_LANG_OFF }, tooltip = songLaTooltip),
         ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
@@ -325,9 +326,17 @@ fun ProjectionSettingsTab(
         ContentCol(sttLabel, { it.showSTT }, { a, v -> a.copy(showSTT = v) }, tooltip = sttTooltip),
         ContentCol(dictionaryLabel, { it.showDictionary }, { a, v -> a.copy(showDictionary = v) }),
         ContentCol(backgroundLabel, { it.showFullscreenBackground }, { a, v -> a.copy(showFullscreenBackground = v) }),
-        ContentCol(ltBackgroundLabel, { it.showLowerThirdBackground }, { a, v -> a.copy(showLowerThirdBackground = v) }),
-        ContentCol(bibleBackgroundLabel, { it.showBibleBackground }, { a, v -> a.copy(showBibleBackground = v) }, tooltip = backgroundLayeredTooltip),
-        ContentCol(songsBackgroundLabel, { it.showSongsBackground }, { a, v -> a.copy(showSongsBackground = v) }, tooltip = backgroundLayeredTooltip),
+        ContentCol(ltBackgroundLabel,
+            { it.showLowerThirdBackground },
+            { a, v -> a.copy(showLowerThirdBackground = v) }),
+        ContentCol(bibleBackgroundLabel,
+            { it.showBibleBackground },
+            { a, v -> a.copy(showBibleBackground = v) },
+            tooltip = backgroundLayeredTooltip),
+        ContentCol(songsBackgroundLabel,
+            { it.showSongsBackground },
+            { a, v -> a.copy(showSongsBackground = v) },
+            tooltip = backgroundLayeredTooltip),
     )
     // Split for the Content Outputs dialog: the last four toggles are the layered backgrounds,
     // everything before them is regular content. Bible/Songs language modes are handled
@@ -383,7 +392,8 @@ fun ProjectionSettingsTab(
         value = withContext(Dispatchers.IO) {
             settings.bibleSettings.translationList().map { t ->
                 val code = t.fileName.substringBeforeLast('.')
-                val path = if (storageDirectory.isNotEmpty()) File(storageDirectory, t.fileName).absolutePath else t.fileName
+                val path = if (storageDirectory.isNotEmpty()) File(storageDirectory,
+                    t.fileName).absolutePath else t.fileName
                 val summary = Bible.readTranslationSummary(path)
                 val portion = when {
                     summary?.hasOldTestament == true && summary.hasNewTestament -> otNtPortionLabel
@@ -400,7 +410,10 @@ fun ProjectionSettingsTab(
         }
     }
     val translationDisplays = readTranslationDisplays ?: unreadTranslationDisplays
-    val songLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to lang1Label, Constants.SONG_LANG_SECONDARY to lang2Label, Constants.SONG_LANG_BOTH to bothLabel)
+    val songLangModes = listOf(Constants.SONG_LANG_OFF to offLabel,
+        Constants.SONG_LANG_PRIMARY to lang1Label,
+        Constants.SONG_LANG_SECONDARY to lang2Label,
+        Constants.SONG_LANG_BOTH to bothLabel)
 
     // Shared column widths — used by both the Screen Assignment table (Card 1) and the
     // Browser Source Outputs table (Card 1.5) so their columns line up the same way.

@@ -83,7 +83,8 @@ internal fun BibleSearchRow(
                     modeChip = { SearchModeChip(searchMode, onCycleSearchMode) },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     DropdownSelector(
                         label = stringResource(Res.string.scope),
                         items = scopeOptions,
@@ -108,12 +109,17 @@ internal fun BibleSearchRow(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                        Icon(painter = painterResource(Res.drawable.ic_search),
+                            contentDescription = stringResource(Res.string.search),
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
             }
         } else {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.fillMaxWidth()) {
                 BibleSearchField(
                     value = searchQuery,
                     placeholder = searchPlaceholder,
@@ -148,7 +154,10 @@ internal fun BibleSearchRow(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                    Icon(painter = painterResource(Res.drawable.ic_search),
+                        contentDescription = stringResource(Res.string.search),
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }
@@ -177,7 +186,9 @@ private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, mod
     }
     TooltipArea(
         tooltip = {
-            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+            Surface(color = MaterialTheme.colorScheme.inverseSurface,
+                shape = MaterialTheme.shapes.extraSmall,
+                tonalElevation = 4.dp) {
                 Text(
                     text = stringResource(Res.string.bible_search_mode_tooltip),
                     color = MaterialTheme.colorScheme.inverseOnSurface,
@@ -186,7 +197,8 @@ private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, mod
                 )
             }
         },
-        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp))
     ) {
         Surface(
             onClick = onCycle,

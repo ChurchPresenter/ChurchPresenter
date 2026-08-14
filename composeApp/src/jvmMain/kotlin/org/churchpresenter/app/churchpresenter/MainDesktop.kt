@@ -182,12 +182,34 @@ data class ScheduleActions(
     val clearSchedule: () -> Unit = {},
     // Remote-API add helpers (populated from ScheduleTabActions)
     val addSong: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit = { _, _, _, _ -> },
-    val addBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit = { _, _, _, _, _, _ -> },
+    val addBibleVerse: (bookName: String,
+        chapter: Int,
+        verseNumber: Int,
+        verseText: String,
+        verseRange: String,
+        bookId: Int) -> Unit = { _,
+        _,
+        _,
+        _,
+        _,
+        _ -> },
     val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
-    val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
+    val addPresentation: (filePath: String,
+        fileName: String,
+        slideCount: Int,
+        fileType: String) -> Unit = { _,
+        _,
+        _,
+        _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
-    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> },
+    val addDictionary: (number: String,
+        word: String,
+        transliteration: String,
+        definition: String) -> Unit = { _,
+        _,
+        _,
+        _ -> },
     val addAnnouncement: (item: ScheduleItem.AnnouncementItem) -> Unit = { },
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> }
 )
@@ -435,10 +457,15 @@ fun MainDesktop(
     val presentationViewModel = remember { PresentationViewModel(appSettings) }
     DisposableEffect(Unit) { onDispose { presentationViewModel.dispose() } }
 
-    LaunchedEffect(presentationViewModel.selectedSlideIndex, presentationViewModel.slideFiles.size, presentationViewModel.isPlaying) {
+    LaunchedEffect(presentationViewModel.selectedSlideIndex,
+        presentationViewModel.slideFiles.size,
+        presentationViewModel.isPlaying) {
         val f = presentationViewModel.selectedPresentation ?: return@LaunchedEffect
         val id = stableFileId(f)
-        onSlideChanged?.invoke(id, presentationViewModel.selectedSlideIndex, presentationViewModel.slideFiles.size, presentationViewModel.isPlaying)
+        onSlideChanged?.invoke(id,
+            presentationViewModel.selectedSlideIndex,
+            presentationViewModel.slideFiles.size,
+            presentationViewModel.isPlaying)
     }
     LaunchedEffect(appSettings.presentationRemoteSettings.remoteControlEnabled) {
         val f = presentationViewModel.selectedPresentation
@@ -858,7 +885,8 @@ fun MainDesktop(
                         // presentation responds no matter which tab or control has focus —
                         // the presenter clicks from the platform while the operator works
                         // elsewhere. Only claimed while a presentation is actually live.
-                        shortcuts.matches(ShortcutAction.CLICKER_NEXT, keyEvent) && presentingMode == Presenting.PRESENTATION -> {
+                        shortcuts.matches(ShortcutAction.CLICKER_NEXT,
+                            keyEvent) && presentingMode == Presenting.PRESENTATION -> {
                             clickerScope.launch {
                                 val deck = presentationViewModel.deck
                                 val stepped = deck != null && presenterManager
@@ -870,7 +898,8 @@ fun MainDesktop(
                             }
                             true
                         }
-                        shortcuts.matches(ShortcutAction.CLICKER_PREVIOUS, keyEvent) && presentingMode == Presenting.PRESENTATION -> {
+                        shortcuts.matches(ShortcutAction.CLICKER_PREVIOUS,
+                            keyEvent) && presentingMode == Presenting.PRESENTATION -> {
                             clickerScope.launch {
                                 val deck = presentationViewModel.deck
                                 val stepped = deck != null && presenterManager
@@ -896,7 +925,9 @@ fun MainDesktop(
                                 if (konamiStep.completed) showKonamiEasterEgg = true
 
                                 // Crossword: ←→←→
-                                val crosswordStep = advanceKeySequence(keyEvent.key, crosswordSequence, crosswordProgress)
+                                val crosswordStep = advanceKeySequence(keyEvent.key,
+                                    crosswordSequence,
+                                    crosswordProgress)
                                 crosswordProgress = crosswordStep.progress
                                 if (crosswordStep.completed) {
                                     showCrosswordTab = true
@@ -905,7 +936,9 @@ fun MainDesktop(
 
                                 // Secret unlock: press D seven times in a row to reveal the
                                 // Developer menu (upper- or lower-case; Key.D is Shift-agnostic).
-                                val developerStep = advanceKeySequence(keyEvent.key, developerUnlockSequence, developerUnlockProgress)
+                                val developerStep = advanceKeySequence(keyEvent.key,
+                                    developerUnlockSequence,
+                                    developerUnlockProgress)
                                 developerUnlockProgress = developerStep.progress
                                 if (developerStep.completed) onRequestDeveloperMenuUnlock()
 
@@ -1016,7 +1049,9 @@ fun MainDesktop(
                     Column(
                         modifier = Modifier
                             .layout { measurable, constraints ->
-                                val widthPx = panelRenderWidthPx(schedulePanelPx, maxScheduleState.value, scheduleVisibleFraction.value)
+                                val widthPx = panelRenderWidthPx(schedulePanelPx,
+                                    maxScheduleState.value,
+                                    scheduleVisibleFraction.value)
                                 val placeable = measurable.measure(constraints.copy(minWidth = widthPx, maxWidth = widthPx))
                                 layout(widthPx, placeable.height) {
                                     placeable.placeRelative(0, 0)
@@ -1057,11 +1092,13 @@ fun MainDesktop(
                             // stop an ERROR-state retry loop without reopening the dialog.
                             if (canDisconnectInstanceLink(instanceLinkConnectionStatus)) {
                                 TextButton(onClick = onInstanceLinkDisconnect) {
-                                    Text(stringResource(Res.string.menu_disconnect), style = MaterialTheme.typography.labelSmall)
+                                    Text(stringResource(Res.string.menu_disconnect),
+                                        style = MaterialTheme.typography.labelSmall)
                                 }
                             } else {
                                 TextButton(onClick = onInstanceLinkConnect) {
-                                    Text(stringResource(Res.string.connect), style = MaterialTheme.typography.labelSmall)
+                                    Text(stringResource(Res.string.connect),
+                                        style = MaterialTheme.typography.labelSmall)
                                 }
                             }
                         }
@@ -1069,7 +1106,8 @@ fun MainDesktop(
                     if (connectedInstanceLinkFollowerCount > 0) {
                         ConnectionStatusRow(
                             status = InstanceLinkStatus.CONNECTED,
-                            connectedLabel = stringResource(Res.string.instance_link_primary_badge, connectedInstanceLinkFollowerCount),
+                            connectedLabel = stringResource(Res.string.instance_link_primary_badge,
+                                connectedInstanceLinkFollowerCount),
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
@@ -1142,10 +1180,16 @@ fun MainDesktop(
                         },
                         onPresentLowerThird = { item ->
                             val lottieFolder = File(appSettings.streamingSettings.lowerThirdFolder)
-                            val lottieFile = findLottiePresetFile(lottieFolder.listFiles()?.toList(), item.presetLabel, item.presetId)
+                            val lottieFile = findLottiePresetFile(lottieFolder.listFiles()?.toList(),
+                                item.presetLabel,
+                                item.presetId)
                             if (lottieFile != null && lottieFile.exists()) {
                                 val json = lottieFile.readText()
-                                presenterManager.setLottieContent(json, item.pauseAtFrame, -1f, item.pauseDurationMs, lottieFile.nameWithoutExtension)
+                                presenterManager.setLottieContent(json,
+                                    item.pauseAtFrame,
+                                    -1f,
+                                    item.pauseDurationMs,
+                                    lottieFile.nameWithoutExtension)
                                 presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                 presenterManager.setShowPresenterWindow(true)
                             }
@@ -1421,7 +1465,12 @@ fun MainDesktop(
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
-                                    currentScheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId)
+                                    currentScheduleActions.addBibleVerse(bookName,
+                                        chapter,
+                                        verseNumber,
+                                        verseText,
+                                        verseRange,
+                                        bookId)
                                 },
                                 selectedVerseItem = selectedBibleVerseItem,
                                 onVerseSelected = onVerseSelected,
@@ -1527,7 +1576,11 @@ fun MainDesktop(
                                     scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
                                 },
                                 onGoLive = { json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName ->
-                                    presenterManager.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName)
+                                    presenterManager.setLottieContent(json,
+                                        pauseAtFrame,
+                                        pauseFrame,
+                                        pauseDurationMs,
+                                        presetName)
                                     presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                     presenterManager.setShowPresenterWindow(true)
                                 },
@@ -1735,7 +1788,10 @@ fun MainDesktop(
         },
         onConfirm = { text, textColor, backgroundColor ->
             if (editingLabelItem != null) {
-                currentScheduleActions.updateLabel(editingLabelItem?.id ?: return@AddLabelDialog, text, textColor, backgroundColor)
+                currentScheduleActions.updateLabel(editingLabelItem?.id ?: return@AddLabelDialog,
+                    text,
+                    textColor,
+                    backgroundColor)
             } else {
                 currentScheduleActions.addLabel(text, textColor, backgroundColor)
             }
@@ -1861,7 +1917,8 @@ private fun PreviewSidebar(
                     mutableStateOf(resolveSelectedConnectionId(null, rightSidebarConnections))
                 }
                 LaunchedEffect(rightSidebarConnections.map { it.id }) {
-                    selectedRightSidebarId = resolveSelectedConnectionId(selectedRightSidebarId, rightSidebarConnections)
+                    selectedRightSidebarId = resolveSelectedConnectionId(selectedRightSidebarId,
+                        rightSidebarConnections)
                 }
                 val selectedRightSidebarConnection = rightSidebarConnections.find { it.id == selectedRightSidebarId }
                 // No weight here — sizeToContent sizes this panel to exactly what its

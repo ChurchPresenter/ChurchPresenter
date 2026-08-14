@@ -39,8 +39,7 @@ import kotlin.test.assertEquals
  * whether scripture is on. Gate them on it — `expanded = dropdownOpen && showing` is all it takes —
  * and both halves of the second bug come back at once: Clear shuts the menu under the hand that just
  * pressed it, and because nothing cleared the flag that opened it, switching scripture back on later
- * pops the menu open again unprompted. That mutation is what `the menu does not reopen by itself after
- * Clear` was checked against; it fails on the first assertion, the one saying Clear left the menu
+ * pops the menu open again unprompted. That mutation is what `the menu does not reopen by itself after * Clear` was checked against; it fails on the first assertion, the one saying Clear left the menu
  * standing.
  *
  * This picker was rewritten (`567242f8`) after those fixes landed, which deleted the suite that

@@ -255,7 +255,11 @@ class SongFileParserTest {
             author = "John Newton",
             composer = "Traditional",
             ccliNumber = "22025",
-            lyrics = listOf("[Verse 1]", "Amazing grace how sweet the sound", "", "[Verse 2]", "Twas grace that taught"),
+            lyrics = listOf("[Verse 1]",
+                "Amazing grace how sweet the sound",
+                "",
+                "[Verse 2]",
+                "Twas grace that taught"),
             secondaryTitle = "Удивительная благодать",
             secondaryLyrics = listOf("[Куплет 1]", "Удивительная благодать"),
         )

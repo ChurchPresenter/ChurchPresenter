@@ -194,7 +194,10 @@ internal fun RowScope.SongLyricsPanel(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
-                Text(backToLiveStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onError, maxLines = 1)
+                Text(backToLiveStr,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onError,
+                    maxLines = 1)
             }
         }
 
@@ -427,16 +430,32 @@ internal fun RowScope.SongLyricsPanel(
                             if (showPrimary && showSecondary) {
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     Column(modifier = Modifier.weight(1f)) {
-                                        LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
+                                        LyricLines(section.lines,
+                                            textColor,
+                                            activeLineIndex,
+                                            lineClickHandler,
+                                            lineDoubleClickHandler)
                                     }
                                     Column(modifier = Modifier.weight(1f)) {
-                                        LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
+                                        LyricLines(section.secondaryLines,
+                                            textColor,
+                                            activeLineIndex,
+                                            lineClickHandler,
+                                            lineDoubleClickHandler)
                                     }
                                 }
                             } else if (showSecondary) {
-                                LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
+                                LyricLines(section.secondaryLines,
+                                    textColor,
+                                    activeLineIndex,
+                                    lineClickHandler,
+                                    lineDoubleClickHandler)
                             } else {
-                                LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
+                                LyricLines(section.lines,
+                                    textColor,
+                                    activeLineIndex,
+                                    lineClickHandler,
+                                    lineDoubleClickHandler)
                             }
                         }
                         // No separator between sections: each one opens with its own labelled

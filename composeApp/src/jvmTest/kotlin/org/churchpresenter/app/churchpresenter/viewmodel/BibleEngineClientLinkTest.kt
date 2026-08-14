@@ -307,7 +307,9 @@ class BibleEngineClientLinkTest {
         repeat(3) { i ->
             engine.push("""{"type":"scripture.detected","reference":{"bookId":43,"chapter":3,"verseStart":${16 + i}}}""")
         }
-        assertEquals(listOf(16, 17, 18), List(3) { nextDetection().verseStart }, "the read loop must not stop after one frame")
+        assertEquals(listOf(16, 17, 18),
+            List(3) { nextDetection().verseStart },
+            "the read loop must not stop after one frame")
     }
 
     @Test
@@ -317,7 +319,9 @@ class BibleEngineClientLinkTest {
         engine.push("not json")
         engine.push("""{"type":"scripture.detected","reference":{"bookId":43,"chapter":3,"verseStart":16}}""")
 
-        assertEquals(16, nextDetection().verseStart, "one bad frame from the engine must not end the service's auto-follow")
+        assertEquals(16,
+            nextDetection().verseStart,
+            "one bad frame from the engine must not end the service's auto-follow")
         assertTrue(c.connected.value)
     }
 

@@ -209,7 +209,8 @@ class PlanningCenterImportViewModel(
                     val scriptureMap = mutableMapOf<String, List<PlanningCenterScriptureDetector.ResolvedVerses>>()
                     for (pco in outcome.items) {
                         if (pco.itemType != "item") continue
-                        val combinedText = listOf(pco.title, pco.description).filter { it.isNotBlank() }.joinToString("\n")
+                        val combinedText = listOf(pco.title,
+                            pco.description).filter { it.isNotBlank() }.joinToString("\n")
                         val detected = detectScriptureReferences(combinedText)
                         if (detected.isNotEmpty()) scriptureMap[pco.id] = detected
                     }
@@ -235,7 +236,8 @@ class PlanningCenterImportViewModel(
         }
     }
 
-    var detectedScripturesByItemId by mutableStateOf<Map<String, List<PlanningCenterScriptureDetector.ResolvedVerses>>>(emptyMap())
+    var detectedScripturesByItemId by mutableStateOf<Map<String,
+    List<PlanningCenterScriptureDetector.ResolvedVerses>>>(emptyMap())
         private set
     var selectedScriptureIndices by mutableStateOf<Map<String, Set<Int>>>(emptyMap())
         private set
@@ -397,7 +399,10 @@ class PlanningCenterImportViewModel(
     suspend fun fetchThumbnailBytes(url: String): ByteArray? = PlanningCenterClient.fetchThumbnailBytes(url)
 
     sealed interface ImportedMedia {
-        data class Presentation(val filePath: String, val fileName: String, val slideCount: Int, val fileType: String) : ImportedMedia
+        data class Presentation(val filePath: String,
+            val fileName: String,
+            val slideCount: Int,
+            val fileType: String) : ImportedMedia
         data class Picture(val folderPath: String, val folderName: String, val imageCount: Int) : ImportedMedia
         data class Media(val mediaUrl: String, val mediaTitle: String) : ImportedMedia
     }

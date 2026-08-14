@@ -349,7 +349,8 @@ internal fun ContentOutputsDialog(
                             onApply(a)
                         },
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) { Text(stringResource(Res.string.content_outputs_select_all), style = MaterialTheme.typography.labelSmall) }
+                    ) { Text(stringResource(Res.string.content_outputs_select_all),
+                        style = MaterialTheme.typography.labelSmall) }
                     Spacer(modifier = Modifier.width(8.dp))
                     OutlinedButton(
                         shape = RoundedCornerShape(6.dp),
@@ -364,7 +365,8 @@ internal fun ContentOutputsDialog(
                             onApply(a)
                         },
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) { Text(stringResource(Res.string.content_outputs_clear_all), style = MaterialTheme.typography.labelSmall) }
+                    ) { Text(stringResource(Res.string.content_outputs_clear_all),
+                        style = MaterialTheme.typography.labelSmall) }
                 }
 
                 // Content
@@ -410,7 +412,13 @@ internal fun ContentOutputsDialog(
                 contentGroup.chunked(2).forEach { pair ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         pair.forEach { col ->
-                            ContentOutputsToggle(Modifier.weight(1f), col, assignment, isBrowserSource, webDeckLinkTooltip, webSnapshotTooltip, onApply)
+                            ContentOutputsToggle(Modifier.weight(1f),
+                                col,
+                                assignment,
+                                isBrowserSource,
+                                webDeckLinkTooltip,
+                                webSnapshotTooltip,
+                                onApply)
                         }
                         if (pair.size == 1) Spacer(modifier = Modifier.weight(1f))
                     }
@@ -421,7 +429,13 @@ internal fun ContentOutputsDialog(
                 backgroundGroup.chunked(2).forEach { pair ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         pair.forEach { col ->
-                            ContentOutputsToggle(Modifier.weight(1f), col, assignment, isBrowserSource, webDeckLinkTooltip, webSnapshotTooltip, onApply)
+                            ContentOutputsToggle(Modifier.weight(1f),
+                                col,
+                                assignment,
+                                isBrowserSource,
+                                webDeckLinkTooltip,
+                                webSnapshotTooltip,
+                                onApply)
                         }
                         if (pair.size == 1) Spacer(modifier = Modifier.weight(1f))
                     }

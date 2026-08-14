@@ -264,7 +264,9 @@ class StockMediaClientTest {
         search(pexels, photo, key = "my-pexels-key", query = "autumn leaves", page = 3)
 
         val request = requests.single()
-        assertEquals("my-pexels-key", request.headers[HttpHeaders.Authorization], "Pexels rejects the request without it")
+        assertEquals("my-pexels-key",
+            request.headers[HttpHeaders.Authorization],
+            "Pexels rejects the request without it")
         assertEquals("autumn leaves", request.url.parameters["query"])
         assertEquals("3", request.url.parameters["page"])
         assertEquals("landscape", request.url.parameters["orientation"], "a portrait background does not fill a screen")
@@ -427,14 +429,16 @@ class StockMediaClientTest {
     fun `a refused download is reported as a failure`() {
         http = HttpClient(MockEngine { respondError(HttpStatusCode.NotFound) })
 
-        assertEquals(StockMediaClient.DownloadOutcome.Failure, runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) })
+        assertEquals(StockMediaClient.DownloadOutcome.Failure,
+            runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) })
     }
 
     @Test
     fun `a download that never connects is told apart from one that was refused`() {
         failToConnect()
 
-        assertEquals(StockMediaClient.DownloadOutcome.NetworkError, runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) })
+        assertEquals(StockMediaClient.DownloadOutcome.NetworkError,
+            runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) })
     }
 
     @Test

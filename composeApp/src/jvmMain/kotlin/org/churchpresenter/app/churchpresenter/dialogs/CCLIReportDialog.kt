@@ -224,9 +224,13 @@ internal fun CCLIReportContent(
     var toMonth by remember { mutableStateOf(today.monthValue) }
     var toDay by remember { mutableStateOf(today.lengthOfMonth()) }
 
-    fun fromMs(): Long = LocalDate.of(fromYear, fromMonth, fromDay.coerceAtMost(LocalDate.of(fromYear, fromMonth, 1).lengthOfMonth()))
+    fun fromMs(): Long = LocalDate.of(fromYear,
+        fromMonth,
+        fromDay.coerceAtMost(LocalDate.of(fromYear, fromMonth, 1).lengthOfMonth()))
         .atStartOfDay(zone).toInstant().toEpochMilli()
-    fun toMs(): Long = LocalDate.of(toYear, toMonth, toDay.coerceAtMost(LocalDate.of(toYear, toMonth, 1).lengthOfMonth()))
+    fun toMs(): Long = LocalDate.of(toYear,
+        toMonth,
+        toDay.coerceAtMost(LocalDate.of(toYear, toMonth, 1).lengthOfMonth()))
         .atTime(23, 59, 59).atZone(zone).toInstant().toEpochMilli()
 
     var songs by remember { mutableStateOf(emptyList<SongSummary>()) }
@@ -308,14 +312,18 @@ internal fun CCLIReportContent(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(stringResource(Res.string.ccli_from), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(Res.string.ccli_from),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
                         DatePicker(
                             year = fromYear, month = fromMonth, day = fromDay,
                             yearRange = yearRange,
                             onChanged = { y, m, d -> activePreset = null; fromYear = y; fromMonth = m; fromDay = d }
                         )
                         Spacer(Modifier.width(16.dp))
-                        Text(stringResource(Res.string.ccli_to), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(Res.string.ccli_to),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
                         DatePicker(
                             year = toYear, month = toMonth, day = toDay,
                             yearRange = yearRange,
@@ -413,7 +421,8 @@ internal fun CCLIReportContent(
 
                     Spacer(Modifier.weight(1f))
 
-                    Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.close)) }
+                    Button(shape = RoundedCornerShape(6.dp),
+                        onClick = onDismiss) { Text(stringResource(Res.string.close)) }
                 }
             }
         }
@@ -560,11 +569,15 @@ internal fun ActivityContent(activity: List<ActivityPoint>) {
         ) {
             LegendDot(primary)
             Spacer(Modifier.width(4.dp))
-            Text(stringResource(Res.string.ccli_legend_songs), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(Res.string.ccli_legend_songs),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.width(16.dp))
             LegendDot(verseColor)
             Spacer(Modifier.width(4.dp))
-            Text(stringResource(Res.string.ccli_legend_bible), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(Res.string.ccli_legend_bible),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -610,7 +623,9 @@ private fun SongTable(songs: List<SongSummary>, modifier: Modifier = Modifier) {
                         TableCell(song.title, weight = 2f)
                         TableCell(song.author.ifBlank { "—" }, weight = 1.5f, muted = song.author.isBlank())
                         TableCell(song.songbook.ifBlank { "—" }, weight = 1f, muted = song.songbook.isBlank())
-                        TableCell(song.ccliNumber.ifBlank { "—" }, fixedWidth = 66.dp.value, muted = song.ccliNumber.isBlank())
+                        TableCell(song.ccliNumber.ifBlank { "—" },
+                            fixedWidth = 66.dp.value,
+                            muted = song.ccliNumber.isBlank())
                         UsageBadgeCell(song.count, maxCount, accent, fixedWidth = 52.dp.value)
                         TableCell(dateFmt.format(Date(song.firstUsed)), fixedWidth = 90.dp.value)
                         TableCell(dateFmt.format(Date(song.lastUsed)), fixedWidth = 90.dp.value)
@@ -1134,5 +1149,11 @@ private fun RowScope.TableCell(
     val style = if (bold) MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
     else MaterialTheme.typography.bodySmall
     val mod = if (fixedWidth != null) Modifier.width(fixedWidth.dp) else Modifier.weight(weight)
-    Text(text, style = style, color = textColor, modifier = mod, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = align)
+    Text(text,
+        style = style,
+        color = textColor,
+        modifier = mod,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        textAlign = align)
 }

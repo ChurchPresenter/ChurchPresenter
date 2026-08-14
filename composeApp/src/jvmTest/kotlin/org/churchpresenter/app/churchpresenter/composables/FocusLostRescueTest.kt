@@ -29,7 +29,9 @@ import kotlin.test.assertTrue
 class FocusLostRescueTest {
 
     private fun state(active: Boolean = true) =
-        FocusLostRescueState(null, FocusRequester(), CoroutineScope(Dispatchers.Unconfined)).apply { this.active = active }
+        FocusLostRescueState(null,
+            FocusRequester(),
+            CoroutineScope(Dispatchers.Unconfined)).apply { this.active = active }
 
     // ── bannerVisible ──────────────────────────────────────────────────────────────────────────
 

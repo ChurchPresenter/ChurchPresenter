@@ -64,7 +64,8 @@ class InstanceLinkClientMalformedMessageTest {
 
     private fun startFake(): FakePrimary = FakePrimary().also { it.start(); fakePrimary = it }
 
-    private fun connectedClient(fake: FakePrimary, onScheduleUpdated: (List<ScheduleItemDto>) -> Unit): InstanceLinkClient {
+    private fun connectedClient(fake: FakePrimary,
+        onScheduleUpdated: (List<ScheduleItemDto>) -> Unit): InstanceLinkClient {
         val client = InstanceLinkClient(
             onStatusChanged = {},
             onScheduleUpdated = onScheduleUpdated,
@@ -75,7 +76,11 @@ class InstanceLinkClientMalformedMessageTest {
             onSongsUpdated = {},
         )
         clients += client
-        client.connect(host = "127.0.0.1", port = fake.port, apiKey = "", deviceId = "test-device", reconnectDelayMs = 60_000)
+        client.connect(host = "127.0.0.1",
+            port = fake.port,
+            apiKey = "",
+            deviceId = "test-device",
+            reconnectDelayMs = 60_000)
         return client
     }
 

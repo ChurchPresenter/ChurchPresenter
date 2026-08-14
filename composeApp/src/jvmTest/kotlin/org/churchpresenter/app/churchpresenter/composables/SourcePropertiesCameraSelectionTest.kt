@@ -35,8 +35,16 @@ class SourcePropertiesCameraSelectionTest {
 
     private val webcam = CameraDevice("FaceTime HD Camera", "avfoundation://0", "FaceTime HD Camera")
     private val virtual = CameraDevice("OBS Virtual Camera", "avfoundation://1", "OBS Virtual Camera")
-    private val card = CameraDevice("DeckLink Mini", "decklink://0", "DeckLink: DeckLink Mini", isDeckLink = true, deckLinkIndex = 0)
-    private val card2 = CameraDevice("DeckLink Duo", "decklink://1", "DeckLink: DeckLink Duo", isDeckLink = true, deckLinkIndex = 1)
+    private val card = CameraDevice("DeckLink Mini",
+        "decklink://0",
+        "DeckLink: DeckLink Mini",
+        isDeckLink = true,
+        deckLinkIndex = 0)
+    private val card2 = CameraDevice("DeckLink Duo",
+        "decklink://1",
+        "DeckLink: DeckLink Duo",
+        isDeckLink = true,
+        deckLinkIndex = 1)
     private val all = listOf(card, card2, webcam, virtual)
 
     // ── Which device the dropdown names ───────────────────────────────────────

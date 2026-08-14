@@ -140,23 +140,35 @@ internal suspend fun downloadMirroredBackgroundSettings(
     return remote.copy(
         defaultBackgroundImage = cache(Constants.BACKGROUND_SLOT_DEFAULT, remote.defaultBackgroundImage, false),
         defaultBackgroundVideo = cache(Constants.BACKGROUND_SLOT_DEFAULT, remote.defaultBackgroundVideo, true),
-        defaultLowerThirdBackgroundImage = cache(Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD, remote.defaultLowerThirdBackgroundImage, false),
-        defaultLowerThirdBackgroundVideo = cache(Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD, remote.defaultLowerThirdBackgroundVideo, true),
+        defaultLowerThirdBackgroundImage = cache(Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD,
+            remote.defaultLowerThirdBackgroundImage,
+            false),
+        defaultLowerThirdBackgroundVideo = cache(Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD,
+            remote.defaultLowerThirdBackgroundVideo,
+            true),
         bibleBackground = remote.bibleBackground.copy(
             backgroundImage = cache(Constants.BACKGROUND_SLOT_BIBLE, remote.bibleBackground.backgroundImage, false),
             backgroundVideo = cache(Constants.BACKGROUND_SLOT_BIBLE, remote.bibleBackground.backgroundVideo, true)
         ),
         bibleLowerThirdBackground = remote.bibleLowerThirdBackground.copy(
-            backgroundImage = cache(Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD, remote.bibleLowerThirdBackground.backgroundImage, false),
-            backgroundVideo = cache(Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD, remote.bibleLowerThirdBackground.backgroundVideo, true)
+            backgroundImage = cache(Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD,
+                remote.bibleLowerThirdBackground.backgroundImage,
+                false),
+            backgroundVideo = cache(Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD,
+                remote.bibleLowerThirdBackground.backgroundVideo,
+                true)
         ),
         songBackground = remote.songBackground.copy(
             backgroundImage = cache(Constants.BACKGROUND_SLOT_SONG, remote.songBackground.backgroundImage, false),
             backgroundVideo = cache(Constants.BACKGROUND_SLOT_SONG, remote.songBackground.backgroundVideo, true)
         ),
         songLowerThirdBackground = remote.songLowerThirdBackground.copy(
-            backgroundImage = cache(Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD, remote.songLowerThirdBackground.backgroundImage, false),
-            backgroundVideo = cache(Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD, remote.songLowerThirdBackground.backgroundVideo, true)
+            backgroundImage = cache(Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD,
+                remote.songLowerThirdBackground.backgroundImage,
+                false),
+            backgroundVideo = cache(Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD,
+                remote.songLowerThirdBackground.backgroundVideo,
+                true)
         )
     )
 }
@@ -269,7 +281,9 @@ internal suspend fun applyRemoteLiveState(
             )
             presenterManager.setSongDisplaySectionIndex(state.songSectionIndex ?: -1)
             presenterManager.setSongDisplayLineIndex(state.songLineIndex ?: -1)
-            InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "LYRICS", "resolved" to true))
+            InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER,
+                "apply_live_state",
+                mapOf("contentType" to "LYRICS", "resolved" to true))
         } else {
             InstanceLinkLogger.log(
                 InstanceLinkLogSide.FOLLOWER, "apply_live_state",
@@ -280,7 +294,9 @@ internal suspend fun applyRemoteLiveState(
             val text = state.announcementText
             if (text != null) {
                 presenterManager.setAnnouncementText(text)
-                InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "ANNOUNCEMENTS", "resolved" to true))
+                InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER,
+                    "apply_live_state",
+                    mapOf("contentType" to "ANNOUNCEMENTS", "resolved" to true))
             } else {
                 InstanceLinkLogger.log(
                     InstanceLinkLogSide.FOLLOWER, "apply_live_state",
@@ -313,7 +329,9 @@ internal suspend fun applyRemoteLiveState(
                         if (!cacheFile.exists()) {
                             InstanceLinkLogger.log(
                                 InstanceLinkLogSide.FOLLOWER, "apply_live_state",
-                                mapOf("contentType" to "PICTURES", "resolved" to false, "reason" to "cache_write_failed")
+                                mapOf("contentType" to "PICTURES",
+                                    "resolved" to false,
+                                    "reason" to "cache_write_failed")
                             )
                             return
                         }
@@ -326,7 +344,9 @@ internal suspend fun applyRemoteLiveState(
                     }
                 }
                 presenterManager.setSelectedImagePath(cacheFile.absolutePath)
-                InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "PICTURES", "resolved" to true))
+                InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER,
+                    "apply_live_state",
+                    mapOf("contentType" to "PICTURES", "resolved" to true))
             } else {
                 InstanceLinkLogger.log(
                     InstanceLinkLogSide.FOLLOWER, "apply_live_state",
@@ -343,7 +363,9 @@ internal suspend fun applyRemoteLiveState(
                         String(bytes, Charsets.UTF_8), pauseAtFrame = false, pauseFrame = -1f,
                         pauseDurationMs = 2000L, presetName = name
                     )
-                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "LOWER_THIRD", "resolved" to true))
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER,
+                        "apply_live_state",
+                        mapOf("contentType" to "LOWER_THIRD", "resolved" to true))
                 } else {
                     InstanceLinkLogger.log(
                         InstanceLinkLogSide.FOLLOWER, "apply_live_state",
@@ -377,7 +399,10 @@ internal suspend fun applyRemoteLiveState(
                     presenterManager.setCurrentMedia(streamUrl, type)
                     InstanceLinkLogger.log(
                         InstanceLinkLogSide.FOLLOWER, "apply_live_state",
-                        mapOf("contentType" to "MEDIA", "resolved" to true, "source" to "stream", "positionSync" to false)
+                        mapOf("contentType" to "MEDIA",
+                            "resolved" to true,
+                            "source" to "stream",
+                            "positionSync" to false)
                     )
                 }
                 else -> InstanceLinkLogger.log(
@@ -420,7 +445,9 @@ internal suspend fun applyRemoteLiveState(
                         status = QuestionStatus.APPROVED
                     )
                 )
-                InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "QA", "resolved" to true))
+                InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER,
+                    "apply_live_state",
+                    mapOf("contentType" to "QA", "resolved" to true))
             } else {
                 InstanceLinkLogger.log(
                     InstanceLinkLogSide.FOLLOWER, "apply_live_state",
@@ -434,12 +461,18 @@ internal suspend fun applyRemoteLiveState(
             when {
                 entry != null -> {
                     presenterManager.setDisplayedDictionaryEntry(entry)
-                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "apply_live_state", mapOf("contentType" to "DICTIONARY", "resolved" to true))
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER,
+                        "apply_live_state",
+                        mapOf("contentType" to "DICTIONARY", "resolved" to true))
                 }
                 word != null -> {
                     // Old primary that doesn't carry the full entry — show what we have.
                     presenterManager.setDisplayedDictionaryEntry(
-                        StrongsEntry(number = "", word = word, transliteration = "", pronunciation = "", definition = "")
+                        StrongsEntry(number = "",
+                            word = word,
+                            transliteration = "",
+                            pronunciation = "",
+                            definition = "")
                     )
                     InstanceLinkLogger.log(
                         InstanceLinkLogSide.FOLLOWER, "apply_live_state",
@@ -613,7 +646,10 @@ internal fun executeProjectItem(
                     type = Constants.SECTION_TYPE_SONG
                 )
             )
-            statisticsManager?.recordSongDisplay(songId = item.songId, songNumber = item.songNumber, title = item.title, songbook = item.songbook)
+            statisticsManager?.recordSongDisplay(songId = item.songId,
+                songNumber = item.songNumber,
+                title = item.title,
+                songbook = item.songbook)
             presenterManager.setPresentingMode(Presenting.LYRICS)
             presenterManager.setShowPresenterWindow(true)
         }
@@ -684,7 +720,9 @@ internal fun executeProjectItem(
                 val total = item.timerHours * 3600 + item.timerMinutes * 60 + item.timerSeconds
                 when (item.timerMode) {
                     Constants.TIMER_MODE_COUNT_UP -> presenterManager.startAnnouncementCountUp(0)
-                    Constants.TIMER_MODE_CLOCK -> presenterManager.startAnnouncementSpecificTime(item.targetHour, item.targetMinute, item.targetSecond)
+                    Constants.TIMER_MODE_CLOCK -> presenterManager.startAnnouncementSpecificTime(item.targetHour,
+                        item.targetMinute,
+                        item.targetSecond)
                     Constants.TIMER_MODE_CLOCK_DISPLAY -> presenterManager.startAnnouncementClockDisplay(item.liveClockFormat)
                     else -> presenterManager.startAnnouncementCountdown(total, item.timerExpiredText)
                 }

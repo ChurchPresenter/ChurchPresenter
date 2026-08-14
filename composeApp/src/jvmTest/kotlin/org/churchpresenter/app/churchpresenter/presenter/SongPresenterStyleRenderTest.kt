@@ -102,8 +102,14 @@ class SongPresenterStyleRenderTest {
     fun `bold italic underline and shadow render on a lower third`() {
         val settings = AppSettings(
             songSettings = SongSettings(
-                titleLowerThirdBold = true, titleLowerThirdItalic = true, titleLowerThirdUnderline = true, titleLowerThirdShadow = true,
-                lyricsLowerThirdBold = true, lyricsLowerThirdItalic = true, lyricsLowerThirdUnderline = true, lyricsLowerThirdShadow = true,
+                titleLowerThirdBold = true,
+                titleLowerThirdItalic = true,
+                titleLowerThirdUnderline = true,
+                titleLowerThirdShadow = true,
+                lyricsLowerThirdBold = true,
+                lyricsLowerThirdItalic = true,
+                lyricsLowerThirdUnderline = true,
+                lyricsLowerThirdShadow = true,
                 titleLowerThirdPosition = Constants.ABOVE_VERSE, titleLowerThirdDisplay = Constants.EVERY_PAGE,
             ),
         )
@@ -117,7 +123,10 @@ class SongPresenterStyleRenderTest {
         val settings = AppSettings(
             songSettings = SongSettings(
                 lookAheadBold = true, lookAheadItalic = true, lookAheadUnderline = true, lookAheadShadow = true,
-                lookAheadNextBold = true, lookAheadNextItalic = false, lookAheadNextUnderline = true, lookAheadNextShadow = true,
+                lookAheadNextBold = true,
+                lookAheadNextItalic = false,
+                lookAheadNextUnderline = true,
+                lookAheadNextShadow = true,
             ),
         )
         runComposeUiTest {
@@ -179,7 +188,8 @@ class SongPresenterStyleRenderTest {
                 )
             }
         }
-        val bounds = onNodeWithText("Amazing grace how sweet the sound", substring = true).fetchSemanticsNode().boundsInRoot
+        val bounds = onNodeWithText("Amazing grace how sweet the sound",
+            substring = true).fetchSemanticsNode().boundsInRoot
         assertTrue(bounds.top < 540f, "top alignment must place the lyric above the midline, was $bounds")
     }
 
@@ -245,7 +255,8 @@ class SongPresenterStyleRenderTest {
     fun `a decodable image background renders full-screen`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = png().absolutePath),
+                songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE,
+                    backgroundImage = png().absolutePath),
             ),
         )
         renderShowsText(settings)
@@ -255,7 +266,8 @@ class SongPresenterStyleRenderTest {
     fun `a decodable image background renders in the lower third band`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                songLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = png().absolutePath),
+                songLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE,
+                    backgroundImage = png().absolutePath),
             ),
         )
         renderShowsText(settings, isLowerThird = true)
@@ -265,7 +277,8 @@ class SongPresenterStyleRenderTest {
     fun `a missing image path falls back to black rather than crashing`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = "/no/such/file/does-not-exist.png"),
+                songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE,
+                    backgroundImage = "/no/such/file/does-not-exist.png"),
             ),
         )
         renderShowsText(settings)
@@ -275,7 +288,8 @@ class SongPresenterStyleRenderTest {
     fun `an undecodable image file falls back to black rather than crashing`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = garbageFile().absolutePath),
+                songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE,
+                    backgroundImage = garbageFile().absolutePath),
             ),
         )
         renderShowsText(settings)
@@ -285,7 +299,8 @@ class SongPresenterStyleRenderTest {
     fun `a video background type renders full-screen without a decoder present`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO, backgroundVideo = "/no/such/file.mp4"),
+                songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO,
+                    backgroundVideo = "/no/such/file.mp4"),
             ),
         )
         renderShowsText(settings)
@@ -295,7 +310,8 @@ class SongPresenterStyleRenderTest {
     fun `a video background type renders in the lower third without a decoder present`() {
         val settings = AppSettings(
             backgroundSettings = BackgroundSettings(
-                songLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO, backgroundVideo = "/no/such/file.mp4"),
+                songLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO,
+                    backgroundVideo = "/no/such/file.mp4"),
             ),
         )
         renderShowsText(settings, isLowerThird = true)
@@ -338,7 +354,8 @@ class SongPresenterStyleRenderTest {
                     appSettings = AppSettings(
                         songSettings = SongSettings(fadeIn = true, transitionDuration = 100f),
                         backgroundSettings = BackgroundSettings(
-                            songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_COLOR, backgroundColor = "#FFFFFF"),
+                            songBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_COLOR,
+                                backgroundColor = "#FFFFFF"),
                         ),
                     ),
                 )
@@ -376,8 +393,10 @@ class SongPresenterStyleRenderTest {
         current = section(lines = listOf("SECOND LINE"), header = "[Verse 2]")
         mainClock.advanceTimeByFrame()
         mainClock.advanceTimeByFrame()
-        onNodeWithText("FIRST LINE", substring = true).assertExists("mid-crossfade the outgoing section must still be visible")
-        onNodeWithText("SECOND LINE", substring = true).assertExists("mid-crossfade the incoming section must already be visible")
+        onNodeWithText("FIRST LINE",
+            substring = true).assertExists("mid-crossfade the outgoing section must still be visible")
+        onNodeWithText("SECOND LINE",
+            substring = true).assertExists("mid-crossfade the incoming section must already be visible")
 
         mainClock.advanceTimeBy(500)
         onNodeWithText("SECOND LINE", substring = true).assertExists()

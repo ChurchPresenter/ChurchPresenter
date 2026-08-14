@@ -167,7 +167,9 @@ internal fun StatisticsContent(
                             .fillMaxSize()
                             .verticalScroll(scrollState)
                             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                            .border(1.dp,
+                                MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                RoundedCornerShape(8.dp))
                             .padding(start = 16.dp, end = 20.dp, top = 14.dp, bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(18.dp)
                     ) {
@@ -233,7 +235,8 @@ internal fun StatisticsContent(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.close)) }
+                    Button(shape = RoundedCornerShape(6.dp),
+                        onClick = onDismiss) { Text(stringResource(Res.string.close)) }
                 }
             }
         }
@@ -359,8 +362,13 @@ internal fun TopVersesSection(data: Map<String, List<VerseDisplayEntry>>) {
 @Composable
 private fun EmptyStatSection(title: String) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-        Text(stringResource(Res.string.em_dash), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface)
+        Text(stringResource(Res.string.em_dash),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

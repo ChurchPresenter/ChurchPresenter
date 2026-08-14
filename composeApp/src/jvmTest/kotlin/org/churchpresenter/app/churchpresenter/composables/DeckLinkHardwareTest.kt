@@ -13,9 +13,7 @@ import kotlin.test.assertTrue
  * An **opt-in manual harness** that exercises DeckLinkManager against a real Blackmagic DeckLink
  * card. It is not part of the ordinary unit suite and does nothing unless explicitly asked for:
  *
- * ```
- * ./gradlew :composeApp:jvmTest -PdecklinkHardware=true --tests '*DeckLinkHardwareTest*'
- * ```
+ * ``` * ./gradlew :composeApp:jvmTest -PdecklinkHardware=true --tests '*DeckLinkHardwareTest*' * ```
  *
  * **Why it is gated rather than merely self-skipping.** Reaching the native calls has real side
  * effects that must never happen during a routine `:composeApp:check`:

@@ -99,9 +99,11 @@ internal fun Route.infoAndSongRoutes(
                         // Fall back to number + songbook match; treat "_" as empty number
                         val lookupNumber = if (identifier == "_") "" else identifier
                         server._songs.firstOrNull { s ->
-                            val matchesSongbook = songbookFilter.isNullOrBlank() || s.songbook.equals(songbookFilter, ignoreCase = true)
+                            val matchesSongbook = songbookFilter.isNullOrBlank() || s.songbook.equals(songbookFilter,
+                                ignoreCase = true)
                             val matchesNumber = s.number == lookupNumber
-                            val matchesTitle = !titleFilter.isNullOrBlank() && s.title.equals(titleFilter, ignoreCase = true)
+                            val matchesTitle = !titleFilter.isNullOrBlank() && s.title.equals(titleFilter,
+                                ignoreCase = true)
                             matchesSongbook && (matchesNumber || matchesTitle)
                         }
                     }

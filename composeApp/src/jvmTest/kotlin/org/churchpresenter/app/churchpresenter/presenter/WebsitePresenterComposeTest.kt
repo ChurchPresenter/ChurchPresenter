@@ -111,7 +111,9 @@ class WebsitePresenterComposeTest {
     fun `WebsitePresenter in key mode is a plain white output`() = runComposeUiTest {
         setContent {
             Box(Modifier.size(200.dp, 200.dp)) {
-                WebsitePresenter(url = "https://example.com", outputRole = Constants.OUTPUT_ROLE_KEY, modifier = Modifier.testTag("ws"))
+                WebsitePresenter(url = "https://example.com",
+                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                    modifier = Modifier.testTag("ws"))
             }
         }
         val pixels = onNodeWithTag("ws").captureToImage().toPixelMap()

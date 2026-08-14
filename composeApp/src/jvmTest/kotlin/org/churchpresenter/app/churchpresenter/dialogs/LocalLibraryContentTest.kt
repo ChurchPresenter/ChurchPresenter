@@ -150,7 +150,8 @@ class LocalLibraryContentTest {
 
         dialog(mediaType = StockMediaClient.StockMediaType.PHOTO, downloadedFiles = listOf(file)) {
             awaitUntil {
-                onAllNodesWithTag(LIBRARY_THUMBNAIL_IMAGE_TAG, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+                onAllNodesWithTag(LIBRARY_THUMBNAIL_IMAGE_TAG,
+                    useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
             }
             onNodeWithTag(LIBRARY_THUMBNAIL_IMAGE_TAG, useUnmergedTree = true).assertExists()
         }

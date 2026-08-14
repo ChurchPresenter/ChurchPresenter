@@ -116,7 +116,10 @@ class SceneSourceRendererTest {
                 setContent {
                     MaterialTheme {
                         SceneSourceRenderer(
-                            SceneSource.ImageSource(id = "i4", name = "P", filePath = file.absolutePath, contentScale = scale)
+                            SceneSource.ImageSource(id = "i4",
+                                name = "P",
+                                filePath = file.absolutePath,
+                                contentScale = scale)
                         )
                     }
                 }
@@ -293,7 +296,8 @@ class SceneSourceRendererTest {
                 SceneSourceRenderer(
                     SceneSource.ShapeSource(
                         id = "s3", name = "S", shapeType = "freehand",
-                        strokeColor = "#FFFFFF", points = listOf(org.churchpresenter.app.churchpresenter.models.PathPoint(0.5f, 0.5f)),
+                        strokeColor = "#FFFFFF",
+                        points = listOf(org.churchpresenter.app.churchpresenter.models.PathPoint(0.5f, 0.5f)),
                     ),
                     modifier = Modifier.testTag("renderer").size(40.dp),
                 )
@@ -313,7 +317,11 @@ class SceneSourceRendererTest {
             setContent {
                 MaterialTheme {
                     SceneSourceRenderer(
-                        SceneSource.ShapeSource(id = "s4", name = "S", shapeType = type, points = points, strokeColor = "#FFFFFF"),
+                        SceneSource.ShapeSource(id = "s4",
+                            name = "S",
+                            shapeType = type,
+                            points = points,
+                            strokeColor = "#FFFFFF"),
                         modifier = Modifier.testTag("renderer"),
                     )
                 }
@@ -327,7 +335,11 @@ class SceneSourceRendererTest {
         setContent {
             MaterialTheme {
                 SceneSourceRenderer(
-                    SceneSource.ShapeSource(id = "s5", name = "S", shapeType = "line", points = emptyList(), strokeColor = "#FFFFFF"),
+                    SceneSource.ShapeSource(id = "s5",
+                        name = "S",
+                        shapeType = "line",
+                        points = emptyList(),
+                        strokeColor = "#FFFFFF"),
                     modifier = Modifier.testTag("renderer"),
                 )
             }
@@ -392,7 +404,11 @@ class SceneSourceRendererTest {
         setContent {
             MaterialTheme {
                 SceneSourceRenderer(
-                    SceneSource.ShapeSource(id = "s9", name = "S", shapeType = "arrow", points = emptyList(), strokeColor = "#FFFFFF"),
+                    SceneSource.ShapeSource(id = "s9",
+                        name = "S",
+                        shapeType = "arrow",
+                        points = emptyList(),
+                        strokeColor = "#FFFFFF"),
                     modifier = Modifier.testTag("renderer"),
                 )
             }
@@ -692,7 +708,10 @@ class SceneSourceRendererTest {
         setContent {
             MaterialTheme {
                 SceneSourceRenderer(
-                    SceneSource.BibleSource(id = "b2", name = "B", verseText = "In the beginning...", referenceText = "Genesis 1:1")
+                    SceneSource.BibleSource(id = "b2",
+                        name = "B",
+                        verseText = "In the beginning...",
+                        referenceText = "Genesis 1:1")
                 )
             }
         }
@@ -821,7 +840,10 @@ class SceneSourceRendererTest {
             setContent {
                 MaterialTheme {
                     SceneSourceRenderer(
-                        SceneSource.CameraSource(id = "cam2", name = "Cam", devicePath = "", deviceName = "Logitech C920")
+                        SceneSource.CameraSource(id = "cam2",
+                            name = "Cam",
+                            devicePath = "",
+                            deviceName = "Logitech C920")
                     )
                 }
             }

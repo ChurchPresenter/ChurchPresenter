@@ -37,8 +37,7 @@ import kotlin.test.assertTrue
  * protocol subtly wrong in a way that only shows up against a real OBS, so a throwaway Ktor server
  * plays OBS here and the frames are inspected as they arrive.
  *
- * The digest is the part worth pinning down: it is `base64(sha256(base64(sha256(password + salt)) +
- * challenge))`, and swapping the two rounds or concatenating in the other order still produces a
+ * The digest is the part worth pinning down: it is `base64(sha256(base64(sha256(password + salt)) + * challenge))`, and swapping the two rounds or concatenating in the other order still produces a
  * plausible-looking base64 string that OBS simply rejects.
  */
 class OBSWebSocketManagerTest {

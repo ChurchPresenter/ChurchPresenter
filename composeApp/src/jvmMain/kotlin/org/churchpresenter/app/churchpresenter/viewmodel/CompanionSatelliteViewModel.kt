@@ -192,10 +192,12 @@ class CompanionSatelliteViewModel {
                         when (status) {
                             CompanionConnectionStatus.CONNECTED -> {
                                 UsageEvents.recordOncePerRun(UsageEvent.COMPANION_SATELLITE)
-                                CrashReporter.breadcrumb("Companion Satellite connected (${slot.connectionId}/${slot.placement})", category = "integration")
+                                CrashReporter.breadcrumb("Companion Satellite connected (${slot.connectionId}/${slot.placement})",
+                                    category = "integration")
                             }
                             CompanionConnectionStatus.DISCONNECTED ->
-                                CrashReporter.breadcrumb("Companion Satellite disconnected (${slot.connectionId}/${slot.placement})", category = "integration")
+                                CrashReporter.breadcrumb("Companion Satellite disconnected (${slot.connectionId}/${slot.placement})",
+                                    category = "integration")
                             CompanionConnectionStatus.ERROR ->
                                 // A connection error here is normal churn for an auto-reconnecting
                                 // satellite (server unreachable/slow/restarting): environmental, not an

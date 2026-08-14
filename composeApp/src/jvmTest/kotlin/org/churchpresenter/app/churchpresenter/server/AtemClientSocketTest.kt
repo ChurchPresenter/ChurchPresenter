@@ -233,7 +233,8 @@ class AtemClientSocketTest {
             assertEquals(3, fake.commandsNamed("FTSD").size, "one transfer per frame")
             assertEquals(1, fake.commandsNamed("SMPC").size, "the clip is committed once")
             val commit = fake.commandsNamed("SMPC").single()
-            assertEquals(3, ((commit[commit.size - 2].toInt() and 0xFF) shl 8) or (commit[commit.size - 1].toInt() and 0xFF),
+            assertEquals(3,
+                ((commit[commit.size - 2].toInt() and 0xFF) shl 8) or (commit[commit.size - 1].toInt() and 0xFF),
                 "the commit carries the frame count")
         }
     }

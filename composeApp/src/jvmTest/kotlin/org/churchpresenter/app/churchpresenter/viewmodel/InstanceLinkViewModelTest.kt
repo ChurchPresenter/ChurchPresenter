@@ -111,8 +111,22 @@ class InstanceLinkViewModelTest {
     private fun broadcastSongSection(vm: InstanceLinkViewModel, index: Int) =
         callback<(Int) -> Unit>(vm, "onSongSectionSelected")(index)
 
-    private fun broadcastSlide(vm: InstanceLinkViewModel, id: String, index: Int, total: Int, isPlaying: Boolean, isLive: Boolean) =
-        callback<(String, Int, Int, Boolean, Boolean) -> Unit>(vm, "onPresentationSlideChanged")(id, index, total, isPlaying, isLive)
+    private fun broadcastSlide(vm: InstanceLinkViewModel,
+        id: String,
+        index: Int,
+        total: Int,
+        isPlaying: Boolean,
+        isLive: Boolean) =
+        callback<(String,
+            Int,
+            Int,
+            Boolean,
+            Boolean) -> Unit>(vm,
+            "onPresentationSlideChanged")(id,
+            index,
+            total,
+            isPlaying,
+            isLive)
 
     private fun signal(vm: InstanceLinkViewModel, name: String) = callback<() -> Unit>(vm, name)()
 
@@ -182,7 +196,9 @@ class InstanceLinkViewModelTest {
     @Test
     fun `any other status clears the pending retry deadline`() {
         val vm = vm()
-        listOf(InstanceLinkStatus.CONNECTING, InstanceLinkStatus.CONNECTED, InstanceLinkStatus.DISCONNECTED).forEach { status ->
+        listOf(InstanceLinkStatus.CONNECTING,
+            InstanceLinkStatus.CONNECTED,
+            InstanceLinkStatus.DISCONNECTED).forEach { status ->
             reportReconnectIn(vm, 5_000L)
             reportStatus(vm, status)
             assertNull(vm.nextRetryAtMs.value, "a stale countdown next to a $status link reads as still failing")
@@ -350,7 +366,8 @@ class InstanceLinkViewModelTest {
     // ── Command failures ────────────────────────────────────────────────────────
 
     /** Collects everything emitted while [block] runs. Unconfined so the collector subscribes before it does. */
-    private fun collectFailures(vm: InstanceLinkViewModel, block: () -> Unit): List<InstanceLinkCommandFailure> = runBlocking {
+    private fun collectFailures(vm: InstanceLinkViewModel,
+        block: () -> Unit): List<InstanceLinkCommandFailure> = runBlocking {
         val seen = mutableListOf<InstanceLinkCommandFailure>()
         val job = CoroutineScope(Dispatchers.Unconfined).launch { vm.commandFailures.collect { seen.add(it) } }
         block()
@@ -409,7 +426,11 @@ class InstanceLinkViewModelTest {
     fun `connecting and disconnecting reach the client`() {
         val vm = vm()
 
-        vm.connect(host = "10.0.0.9", port = 8765, apiKey = "secret", deviceId = "follower-1", reconnectDelayMs = 3_000L)
+        vm.connect(host = "10.0.0.9",
+            port = 8765,
+            apiKey = "secret",
+            deviceId = "follower-1",
+            reconnectDelayMs = 3_000L)
         vm.disconnect()
 
         verify(exactly = 1) { anyConstructed<InstanceLinkClient>().connect("10.0.0.9", 8765, "secret", "follower-1", 3_000L) }

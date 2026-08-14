@@ -94,7 +94,8 @@ class MemoryMonitorContentTest {
 
     @Test
     fun `a snapshot of the real JVM reports sane, non-negative figures`() {
-        val snapshot = readMemorySnapshot(ManagementFactory.getMemoryMXBean(), ManagementFactory.getGarbageCollectorMXBeans())
+        val snapshot = readMemorySnapshot(ManagementFactory.getMemoryMXBean(),
+            ManagementFactory.getGarbageCollectorMXBeans())
 
         assertTrue(snapshot.heapUsed > 0, "the JVM this test runs in has allocated some heap")
         assertTrue(snapshot.heapCommitted >= snapshot.heapUsed)

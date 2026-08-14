@@ -189,7 +189,8 @@ internal fun ColumnScope.BibleBrowserPane(
                                 onRefsClicked = onRefsChipClicked,
                                 refPopover = {
                                     CrossReferencePopover(
-                                        title = crossRefPopoverTitle(crossRefs.popoverLabel, crossRefs.popoverRows.size),
+                                        title = crossRefPopoverTitle(crossRefs.popoverLabel,
+                                            crossRefs.popoverRows.size),
                                         rows = crossRefs.popoverRows,
                                         onDismiss = onDismissPopover,
                                         onDock = onDockCrossRefs,

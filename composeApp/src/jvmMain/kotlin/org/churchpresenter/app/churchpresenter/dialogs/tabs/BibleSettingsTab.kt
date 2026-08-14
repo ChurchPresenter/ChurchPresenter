@@ -249,7 +249,8 @@ private fun LeftColumn(
                             translations.none { it.fileName == candidate }
                     }
                     .map { fileName -> bibleFileDisplayNames[fileName] ?: fileName }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     DropdownSettingsField(
                         width = pickerWidth,
                         label = stringResource(Res.string.bible_translation, index + 1),
@@ -476,9 +477,19 @@ private fun LeftColumn(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            NumberSettingsTextField(modifier = Modifier.width(100.dp), label = stringResource(Res.string.top), initialText = settings.bibleSettings.marginTop, onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginTop = value)) } }, range = 0..500)
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                NumberSettingsTextField(modifier = Modifier.width(100.dp), label = stringResource(Res.string.left), initialText = settings.bibleSettings.marginLeft, onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginLeft = value)) } }, range = 0..500)
+            NumberSettingsTextField(modifier = Modifier.width(100.dp),
+                label = stringResource(Res.string.top),
+                initialText = settings.bibleSettings.marginTop,
+                onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginTop = value)) } },
+                range = 0..500)
+            Row(modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                NumberSettingsTextField(modifier = Modifier.width(100.dp),
+                    label = stringResource(Res.string.left),
+                    initialText = settings.bibleSettings.marginLeft,
+                    onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginLeft = value)) } },
+                    range = 0..500)
                 TvScreenBox(
                     modifier = Modifier
                         .weight(1f)
@@ -486,12 +497,22 @@ private fun LeftColumn(
                         .height(180.dp)
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = stringResource(Res.string.screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = stringResource(Res.string.screen),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-                NumberSettingsTextField(modifier = Modifier.width(100.dp), label = stringResource(Res.string.right), initialText = settings.bibleSettings.marginRight, onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginRight = value)) } }, range = 0..500)
+                NumberSettingsTextField(modifier = Modifier.width(100.dp),
+                    label = stringResource(Res.string.right),
+                    initialText = settings.bibleSettings.marginRight,
+                    onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginRight = value)) } },
+                    range = 0..500)
             }
-            NumberSettingsTextField(modifier = Modifier.width(100.dp), label = stringResource(Res.string.bottom), initialText = settings.bibleSettings.marginBottom, onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginBottom = value)) } }, range = 0..500)
+            NumberSettingsTextField(modifier = Modifier.width(100.dp),
+                label = stringResource(Res.string.bottom),
+                initialText = settings.bibleSettings.marginBottom,
+                onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginBottom = value)) } },
+                range = 0..500)
         }
     }
 }
@@ -601,7 +622,8 @@ private fun TranslationTextSection(
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     NumberSettingsTextField(
                         label = stringResource(Res.string.full_screen),
                         initialText = translation.textFontSize,
@@ -635,8 +657,14 @@ private fun TranslationTextSection(
                                 val hasSecondary = verses.size > 1
                                 val effectiveH = if (hasSecondary) availH / 2 else availH
                                 val refText = "${verse.bookName} ${verse.chapter}:${verse.verseNumber}"
-                                val refH = textMeasurer.measure(refText, refStyle.copy(fontSize = bs.primaryReferenceFontSize.sp), density = Density(1f)).size.height
-                                val fullSize = calculateAutoFitFontSize(textMeasurer, text, baseStyle, availW, effectiveH - refH)
+                                val refH = textMeasurer.measure(refText,
+                                    refStyle.copy(fontSize = bs.primaryReferenceFontSize.sp),
+                                    density = Density(1f)).size.height
+                                val fullSize = calculateAutoFitFontSize(textMeasurer,
+                                    text,
+                                    baseStyle,
+                                    availW,
+                                    effectiveH - refH)
                                 update { t -> t.copy(textFontSize = fullSize) }
                             },
                             modifier = Modifier.height(32.dp),
@@ -648,7 +676,8 @@ private fun TranslationTextSection(
                 }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     NumberSettingsTextField(
                         label = stringResource(Res.string.lower_third_size),
                         initialText = translation.lowerThirdTextFontSize,
@@ -681,8 +710,14 @@ private fun TranslationTextSection(
                                 val availH = 1080 - proj.windowTop - proj.windowBottom - bs.marginTop - bs.marginBottom
                                 val ltH = (availH * proj.lowerThirdHeightPercent / 100f).toInt()
                                 val refText = "${verse.bookName} ${verse.chapter}:${verse.verseNumber}"
-                                val ltRefH = textMeasurer.measure(refText, refStyle.copy(fontSize = bs.primaryReferenceLowerThirdFontSize.sp), density = Density(1f)).size.height
-                                val ltSize = calculateAutoFitFontSize(textMeasurer, text, baseStyle, availW, ltH - ltRefH)
+                                val ltRefH = textMeasurer.measure(refText,
+                                    refStyle.copy(fontSize = bs.primaryReferenceLowerThirdFontSize.sp),
+                                    density = Density(1f)).size.height
+                                val ltSize = calculateAutoFitFontSize(textMeasurer,
+                                    text,
+                                    baseStyle,
+                                    availW,
+                                    ltH - ltRefH)
                                 update { t -> t.copy(lowerThirdTextFontSize = ltSize) }
                             },
                             modifier = Modifier.height(32.dp),
@@ -698,7 +733,10 @@ private fun TranslationTextSection(
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.full_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = translation.textHorizontalAlignment,
                     onAlignmentChange = { value -> update { t -> t.copy(textHorizontalAlignment = value) } },
@@ -706,7 +744,10 @@ private fun TranslationTextSection(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.lower_third_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = translation.lowerThirdTextHorizontalAlignment,
                     onAlignmentChange = { value -> update { t -> t.copy(lowerThirdTextHorizontalAlignment = value) } },
@@ -826,7 +867,10 @@ private fun TranslationReferenceSection(
     SettingRow(stringResource(Res.string.position)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.full_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = translation.referencePosition,
                     onPositionChange = { value ->
@@ -837,7 +881,10 @@ private fun TranslationReferenceSection(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.lower_third_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 PositionButtons(
                     selectedPosition = translation.lowerThirdReferencePosition,
                     onPositionChange = { value ->
@@ -852,7 +899,10 @@ private fun TranslationReferenceSection(
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.full_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = translation.referenceHorizontalAlignment,
                     onAlignmentChange = { value -> update { t -> t.copy(referenceHorizontalAlignment = value) } },
@@ -860,7 +910,10 @@ private fun TranslationReferenceSection(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(stringResource(Res.string.lower_third_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp))
                 HorizontalAlignmentButtons(
                     selectedAlignment = translation.lowerThirdReferenceHorizontalAlignment,
                     onAlignmentChange = { value -> update { t -> t.copy(lowerThirdReferenceHorizontalAlignment = value) } },

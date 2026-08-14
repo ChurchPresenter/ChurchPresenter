@@ -400,7 +400,9 @@ class AnnouncementsViewModel {
                 if (presenterManager.announcementTickerActive.value) {
                     presenterManager.pauseAnnouncementTimer()
                 } else {
-                    presenterManager.startAnnouncementSpecificTime(_targetHour.value, _targetMinute.value, _targetSecond.value)
+                    presenterManager.startAnnouncementSpecificTime(_targetHour.value,
+                        _targetMinute.value,
+                        _targetSecond.value)
                 }
             }
             Constants.TIMER_MODE_COUNT_UP -> {

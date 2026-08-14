@@ -377,7 +377,9 @@ class SettingsManagerTest {
 
         assertEquals(listOf(0), outputs[0].bibleTranslations)
         assertEquals(listOf(1), outputs[1].bibleTranslations)
-        assertEquals(emptyList(), outputs[2].bibleTranslations, "\"both\" is every translation, which is the empty list")
+        assertEquals(emptyList(),
+            outputs[2].bibleTranslations,
+            "\"both\" is every translation, which is the empty list")
         assertEquals(emptyList(), outputs[3].bibleTranslations)
         assertTrue(outputs[0].showBible, "naming a bible does not switch the output off")
         assertTrue(!outputs[3].showBible, "and an output that was off stays off")

@@ -106,11 +106,16 @@ fun SlimSlider(
                 val cy = size.height / 2f
                 val top = cy - trackH / 2f
                 val radius = CornerRadius(trackH / 2f, trackH / 2f)
-                drawRoundRect(color = trackColor, topLeft = Offset(0f, top), size = Size(size.width, trackH), cornerRadius = radius)
+                drawRoundRect(color = trackColor,
+                    topLeft = Offset(0f, top),
+                    size = Size(size.width, trackH),
+                    cornerRadius = radius)
                 if (fraction > 0f) {
                     val playedW = size.width * fraction
                     drawRoundRect(
-                        brush = Brush.horizontalGradient(listOf(playedStart, primary), startX = 0f, endX = playedW.coerceAtLeast(trackH)),
+                        brush = Brush.horizontalGradient(listOf(playedStart, primary),
+                            startX = 0f,
+                            endX = playedW.coerceAtLeast(trackH)),
                         topLeft = Offset(0f, top),
                         size = Size(playedW, trackH),
                         cornerRadius = radius
@@ -118,7 +123,9 @@ fun SlimSlider(
                 }
                 if (handleAlpha > 0.01f) {
                     val hx = (size.width * fraction).coerceIn(0f, size.width)
-                    drawCircle(color = handleColor.copy(alpha = handleAlpha), radius = 6.dp.toPx() * handleScale, center = Offset(hx, cy))
+                    drawCircle(color = handleColor.copy(alpha = handleAlpha),
+                        radius = 6.dp.toPx() * handleScale,
+                        center = Offset(hx, cy))
                 }
             }
         }

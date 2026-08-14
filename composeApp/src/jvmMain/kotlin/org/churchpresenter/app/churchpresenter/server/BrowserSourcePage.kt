@@ -34,7 +34,8 @@ internal fun browserSourceOverlayPage(
     bgOverride: String? = null,
 ): String {
     val needsKey = output.browserSourceApiKeyRequired || (apiKeyEnabled && apiKey.isNotEmpty())
-    val keyParam = if (needsKey) "?${Constants.QUERY_PARAM_API_KEY}=" + java.net.URLEncoder.encode(apiKey, "UTF-8") else ""
+    val keyParam = if (needsKey) "?${Constants.QUERY_PARAM_API_KEY}=" + java.net.URLEncoder.encode(apiKey,
+        "UTF-8") else ""
     // ?bg= is a per-request debug override (e.g. for viewing outside OBS, where a page
     // background left transparent just renders as opaque white in a plain browser tab) —
     // it's purely a page-preview convenience, unrelated to whether the rendered frame itself

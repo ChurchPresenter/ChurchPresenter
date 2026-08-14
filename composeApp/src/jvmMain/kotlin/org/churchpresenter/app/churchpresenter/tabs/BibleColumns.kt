@@ -259,7 +259,10 @@ internal fun BibleSearchField(
 
                 modifier = Modifier.size(30.dp).testTag("bible_searchClear")
             ) {
-                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(painter = painterResource(Res.drawable.ic_close),
+                    contentDescription = stringResource(Res.string.search_clear),
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         Box(modifier = Modifier.padding(end = 6.dp)) {

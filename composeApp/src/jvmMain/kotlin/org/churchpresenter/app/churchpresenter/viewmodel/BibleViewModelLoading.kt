@@ -124,7 +124,10 @@ internal fun BibleViewModel.setInstanceLinkSource(
             if (bytes == null) {
                 InstanceLinkLogger.log(
                     InstanceLinkLogSide.FOLLOWER, "bible_sync_result",
-                    mapOf("mode" to mode.name, "primaryDownloaded" to false, "secondaryDownloaded" to false, "reason" to "primary_fetch_failed")
+                    mapOf("mode" to mode.name,
+                        "primaryDownloaded" to false,
+                        "secondaryDownloaded" to false,
+                        "reason" to "primary_fetch_failed")
                 )
                 return@launch
             }
@@ -152,7 +155,9 @@ internal fun BibleViewModel.setInstanceLinkSource(
 
         InstanceLinkLogger.log(
             InstanceLinkLogSide.FOLLOWER, "bible_sync_result",
-            mapOf("mode" to mode.name, "primaryDownloaded" to primaryDownloaded, "secondaryDownloaded" to secondaryDownloaded)
+            mapOf("mode" to mode.name,
+                "primaryDownloaded" to primaryDownloaded,
+                "secondaryDownloaded" to secondaryDownloaded)
         )
         loadBibles()
     }
@@ -258,7 +263,9 @@ internal fun BibleViewModel.loadBibles() {
                 val path = translationSources.first { it.first == identity }.second
                 val bible = loadedByFile[identity]
                 when {
-                    bible == null -> BibleLoadError(path.absolutePath, BibleViewModel.MODULE_LOAD_THREW, partial = false)
+                    bible == null -> BibleLoadError(path.absolutePath,
+                        BibleViewModel.MODULE_LOAD_THREW,
+                        partial = false)
                     else -> bible.loadError
                 }
             }
@@ -300,7 +307,8 @@ internal fun BibleViewModel.loadBibles() {
                     primary.getChapter(bookId, _selectedChapter.value)
                 }
                 _verses.value = chapterResult.verses
-                _selectedVerseIndex.value = _selectedVerseIndex.value.coerceIn(0, (chapterResult.verses.size - 1).coerceAtLeast(0))
+                _selectedVerseIndex.value = _selectedVerseIndex.value.coerceIn(0,
+                    (chapterResult.verses.size - 1).coerceAtLeast(0))
                 refreshFilteredLists()
 
                 if (previousBookId != null && _verses.value.isNotEmpty()) {

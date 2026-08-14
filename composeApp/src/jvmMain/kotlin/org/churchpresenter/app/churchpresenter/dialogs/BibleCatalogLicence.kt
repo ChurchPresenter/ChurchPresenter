@@ -76,7 +76,8 @@ internal fun LicenceConfirmation(
         icon = { IconBadge(icon = Icons.Filled.Copyright) },
         title = {
             Column {
-                Text(stringResource(Res.string.bible_catalog_license_title), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(Res.string.bible_catalog_license_title),
+                    style = MaterialTheme.typography.titleLarge)
                 Text(
                     text = stringResource(Res.string.bible_catalog_license_subtitle),
                     style = MaterialTheme.typography.bodySmall,
@@ -104,10 +105,13 @@ internal fun LicenceConfirmation(
                             overflow = TextOverflow.Ellipsis
                         )
                         Spacer(Modifier.width(8.dp))
-                        Surface(shape = MaterialTheme.shapes.extraSmall, color = badgeContainer, contentColor = badgeContent) {
+                        Surface(shape = MaterialTheme.shapes.extraSmall,
+                            color = badgeContainer,
+                            contentColor = badgeContent) {
                             Text(
                                 text = badgeLabel.uppercase(),
-                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold),
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold),
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }

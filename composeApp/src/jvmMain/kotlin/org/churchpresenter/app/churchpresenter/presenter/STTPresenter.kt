@@ -102,8 +102,12 @@ fun STTPresenter(
     // Drip feed: reveal newest segment letter-by-letter
     val dripEnabled = sttSettings.dripFeedEnabled
     val dripSpeed = sttSettings.dripFeedSpeed.toLong().coerceAtLeast(1L)
-    val dripTranscription = useDripFeed(segments, enabled = dripEnabled && !sttSettings.showInProgress, delayMs = dripSpeed)
-    val dripTranslation = useDripFeed(translationSegments, enabled = dripEnabled && !sttSettings.showTranslationInProgress, delayMs = dripSpeed)
+    val dripTranscription = useDripFeed(segments,
+        enabled = dripEnabled && !sttSettings.showInProgress,
+        delayMs = dripSpeed)
+    val dripTranslation = useDripFeed(translationSegments,
+        enabled = dripEnabled && !sttSettings.showTranslationInProgress,
+        delayMs = dripSpeed)
 
     // Build text — pass ALL segments, no filtering by maxSegments
     val transcriptionText = buildDisplayText(
@@ -144,17 +148,29 @@ fun STTPresenter(
                             horizontalArrangement = Arrangement.spacedBy(24.dp),
                             verticalAlignment = Alignment.Bottom
                         ) {
-                            BottomAlignedText(text = first, style = firstStyle, maxLines = maxLines, modifier = Modifier.weight(1f))
-                            BottomAlignedText(text = second, style = secondStyle, maxLines = maxLines, modifier = Modifier.weight(1f))
+                            BottomAlignedText(text = first,
+                                style = firstStyle,
+                                maxLines = maxLines,
+                                modifier = Modifier.weight(1f))
+                            BottomAlignedText(text = second,
+                                style = secondStyle,
+                                maxLines = maxLines,
+                                modifier = Modifier.weight(1f))
                         }
                     } else {
                         Column(modifier = Modifier.fillMaxWidth().fillMaxSize()) {
                             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = boxAlignment) {
-                                BottomAlignedText(text = first, style = firstStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth())
+                                BottomAlignedText(text = first,
+                                    style = firstStyle,
+                                    maxLines = maxLines,
+                                    modifier = Modifier.fillMaxWidth())
                             }
                             Spacer(modifier = Modifier.height(16.dp))
                             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = boxAlignment) {
-                                BottomAlignedText(text = second, style = secondStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth())
+                                BottomAlignedText(text = second,
+                                    style = secondStyle,
+                                    maxLines = maxLines,
+                                    modifier = Modifier.fillMaxWidth())
                             }
                         }
                     }

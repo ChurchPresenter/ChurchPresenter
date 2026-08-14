@@ -504,7 +504,9 @@ class PicturesViewModelTest {
         vm.selectImage(1)
         vm.syncWithPresenter(pm)
 
-        assertEquals(vm.images[1].absolutePath, pm.selectedImagePath.value, "the locked screen is still showing pictures")
+        assertEquals(vm.images[1].absolutePath,
+            pm.selectedImagePath.value,
+            "the locked screen is still showing pictures")
     }
 
     @Test
@@ -562,7 +564,9 @@ class PicturesViewModelTest {
         val vm = vm(settings(directory = folder.absolutePath))
 
         assertEquals(folder, vm.selectedFolder)
-        assertEquals(listOf("a.jpg", "b.jpg"), vm.names, "the operator's folder should be there when the app comes back")
+        assertEquals(listOf("a.jpg", "b.jpg"),
+            vm.names,
+            "the operator's folder should be there when the app comes back")
     }
 
     @Test

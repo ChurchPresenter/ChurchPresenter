@@ -169,7 +169,8 @@ class BibleEngineClient(
                     _startFailed.value = true
                     return@launch
                 }
-                val logDir = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
+                val logDir = File(System.getProperty("user.home"),
+                    ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
                 DetectionLogger.path = File(logDir, "detection-log.jsonl").absolutePath
             }
             // A locally-started engine always lives on loopback, on the port it ACTUALLY bound (which

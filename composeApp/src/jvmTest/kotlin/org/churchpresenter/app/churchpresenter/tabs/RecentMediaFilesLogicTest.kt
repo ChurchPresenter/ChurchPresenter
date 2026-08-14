@@ -174,6 +174,8 @@ class RecentMediaFilesLogicTest {
 
         RecentMediaFiles.load()
 
-        assertEquals(listOf(path("untouched")), RecentMediaFiles.paths, "a bad file must not wipe what was already there")
+        assertEquals(listOf(path("untouched")),
+            RecentMediaFiles.paths,
+            "a bad file must not wipe what was already there")
     }
 }

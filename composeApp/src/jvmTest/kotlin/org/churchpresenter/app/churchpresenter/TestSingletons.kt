@@ -50,8 +50,7 @@ object TestSingletons {
      * every [org.churchpresenter.app.churchpresenter.composables.withOsName] caller does, naming an
      * OS no enumerator matches precisely so the panel spawns no processes — makes that the *first*
      * touch, and skiko throws. `Surface` is then permanently uninitialisable and every later Compose
-     * test in the JVM dies with `NoClassDefFoundError: Could not initialize class
-     * org.jetbrains.skia.Surface`, pointing at whichever innocent class ran next.
+     * test in the JVM dies with `NoClassDefFoundError: Could not initialize class * org.jetbrains.skia.Surface`, pointing at whichever innocent class ran next.
      *
      * Whether it bites is pure execution order: if any Compose test runs before the first faking
      * one, the lazy is already resolved and the fake is harmless. That is why CI stayed green while
@@ -76,8 +75,7 @@ object TestSingletons {
      * `org.jetbrains.skiko.Library.unpackIfNeeded` extracts the native binary into a cache directory
      * under `user.home` and `Files.move`s it into place, once per JVM. A test that swaps `user.home`
      * to a temp dir and is the first to touch skia unpacks into that dir; the dir is deleted in
-     * teardown, and every later skia class in the JVM fails with `NoClassDefFoundError: Could not
-     * initialize class org.jetbrains.skia.Image` — in whichever innocent class ran next. It surfaces
+     * teardown, and every later skia class in the JVM fails with `NoClassDefFoundError: Could not * initialize class org.jetbrains.skia.Image` — in whichever innocent class ran next. It surfaces
      * as an `Error`, so the `catch (e: Exception)` around a thumbnail decode does not contain it and
      * the whole coroutine dies.
      *

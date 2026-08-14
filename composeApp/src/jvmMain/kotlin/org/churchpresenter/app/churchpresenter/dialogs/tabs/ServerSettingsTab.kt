@@ -282,7 +282,8 @@ fun ServerSettingsTab(
                                     containerColor = MaterialTheme.colorScheme.secondary
                                 )
                             ) {
-                                Text(stringResource(Res.string.server_restart), style = MaterialTheme.typography.labelSmall)
+                                Text(stringResource(Res.string.server_restart),
+                                    style = MaterialTheme.typography.labelSmall)
                             }
                         } else {
                             Text(
@@ -346,7 +347,8 @@ fun ServerSettingsTab(
                                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                                 )
                             ) {
-                                Text(stringResource(Res.string.show_qr_code), style = MaterialTheme.typography.labelSmall)
+                                Text(stringResource(Res.string.show_qr_code),
+                                    style = MaterialTheme.typography.labelSmall)
                             }
                         }
                     }
@@ -417,7 +419,8 @@ fun ServerSettingsTab(
                                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             ) {
-                                Text(stringResource(Res.string.generate_api_key), style = MaterialTheme.typography.labelSmall)
+                                Text(stringResource(Res.string.generate_api_key),
+                                    style = MaterialTheme.typography.labelSmall)
                             }
                             Button(
                                 shape = RoundedCornerShape(6.dp),
@@ -428,7 +431,8 @@ fun ServerSettingsTab(
                                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                 )
                             ) {
-                                Text(stringResource(Res.string.copy_api_key), style = MaterialTheme.typography.labelSmall)
+                                Text(stringResource(Res.string.copy_api_key),
+                                    style = MaterialTheme.typography.labelSmall)
                             }
                         }
                     }
@@ -475,7 +479,8 @@ fun ServerSettingsTab(
                         )
                     }
                     Text(
-                        text = stringResource(Res.string.max_media_upload_description, Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB),
+                        text = stringResource(Res.string.max_media_upload_description,
+                            Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -672,7 +677,8 @@ fun ServerSettingsTab(
                                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                         )
-                                    ) { Text(stringResource(Res.string.companion_lt_copy_key), style = MaterialTheme.typography.labelSmall) }
+                                    ) { Text(stringResource(Res.string.companion_lt_copy_key),
+                                        style = MaterialTheme.typography.labelSmall) }
                                     Button(
                                         shape = RoundedCornerShape(6.dp),
                                         onClick = { copyText(triggerUrl(name, withKey = false)) },
@@ -681,7 +687,8 @@ fun ServerSettingsTab(
                                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                         )
-                                    ) { Text(stringResource(Res.string.companion_lt_copy_nokey), style = MaterialTheme.typography.labelSmall) }
+                                    ) { Text(stringResource(Res.string.companion_lt_copy_nokey),
+                                        style = MaterialTheme.typography.labelSmall) }
                                     if (atemConfigured) {
                                         Button(
                                             shape = RoundedCornerShape(6.dp),
@@ -691,7 +698,8 @@ fun ServerSettingsTab(
                                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                             )
-                                        ) { Text(stringResource(Res.string.companion_atem_still_key), style = MaterialTheme.typography.labelSmall) }
+                                        ) { Text(stringResource(Res.string.companion_atem_still_key),
+                                            style = MaterialTheme.typography.labelSmall) }
                                         Button(
                                             shape = RoundedCornerShape(6.dp),
                                             onClick = { copyText(stillUrl(name, withKey = false)) },
@@ -700,7 +708,8 @@ fun ServerSettingsTab(
                                                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                             )
-                                        ) { Text(stringResource(Res.string.companion_atem_still_only), style = MaterialTheme.typography.labelSmall) }
+                                        ) { Text(stringResource(Res.string.companion_atem_still_only),
+                                            style = MaterialTheme.typography.labelSmall) }
                                         Button(
                                             shape = RoundedCornerShape(6.dp),
                                             onClick = { copyText(clipUrl(name, withKey = true)) },
@@ -709,7 +718,8 @@ fun ServerSettingsTab(
                                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                             )
-                                        ) { Text(stringResource(Res.string.companion_atem_clip_key), style = MaterialTheme.typography.labelSmall) }
+                                        ) { Text(stringResource(Res.string.companion_atem_clip_key),
+                                            style = MaterialTheme.typography.labelSmall) }
                                         Button(
                                             shape = RoundedCornerShape(6.dp),
                                             onClick = { copyText(clipUrl(name, withKey = false)) },
@@ -718,7 +728,8 @@ fun ServerSettingsTab(
                                                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                             )
-                                        ) { Text(stringResource(Res.string.companion_atem_clip_only), style = MaterialTheme.typography.labelSmall) }
+                                        ) { Text(stringResource(Res.string.companion_atem_clip_only),
+                                            style = MaterialTheme.typography.labelSmall) }
                                     }
                                 }
                             }
@@ -752,7 +763,8 @@ fun ServerSettingsTab(
                                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                     )
-                                ) { Text(stringResource(Res.string.companion_atem_key_on), style = MaterialTheme.typography.labelSmall) }
+                                ) { Text(stringResource(Res.string.companion_atem_key_on),
+                                    style = MaterialTheme.typography.labelSmall) }
                                 Button(
                                     shape = RoundedCornerShape(6.dp),
                                     onClick = { copyText(keyOffUrl()) },
@@ -761,7 +773,8 @@ fun ServerSettingsTab(
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                     )
-                                ) { Text(stringResource(Res.string.companion_atem_key_off), style = MaterialTheme.typography.labelSmall) }
+                                ) { Text(stringResource(Res.string.companion_atem_key_off),
+                                    style = MaterialTheme.typography.labelSmall) }
                             }
                             Spacer(Modifier.height(4.dp))
                         }
@@ -783,7 +796,8 @@ fun ServerSettingsTab(
                                     containerColor = MaterialTheme.colorScheme.errorContainer,
                                     contentColor = MaterialTheme.colorScheme.onErrorContainer
                                 )
-                            ) { Text(stringResource(Res.string.companion_lt_copy_hide), style = MaterialTheme.typography.labelSmall) }
+                            ) { Text(stringResource(Res.string.companion_lt_copy_hide),
+                                style = MaterialTheme.typography.labelSmall) }
                             Button(
                                 shape = RoundedCornerShape(6.dp),
                                 onClick = { copyText(clearDisplayUrl(serverUrl, apiKeyOrBlank)) },
@@ -792,7 +806,8 @@ fun ServerSettingsTab(
                                     containerColor = MaterialTheme.colorScheme.error,
                                     contentColor = MaterialTheme.colorScheme.onError
                                 )
-                            ) { Text(stringResource(Res.string.tooltip_clear_display), style = MaterialTheme.typography.labelSmall) }
+                            ) { Text(stringResource(Res.string.tooltip_clear_display),
+                                style = MaterialTheme.typography.labelSmall) }
                         }
                     }
                 }

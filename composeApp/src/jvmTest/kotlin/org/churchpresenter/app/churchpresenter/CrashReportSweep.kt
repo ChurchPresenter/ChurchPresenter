@@ -15,11 +15,7 @@ import java.io.File
  * real crash reports are the reason the directory exists, and a test suite must not be the thing
  * that throws away the report they were about to send in.
  *
- * ```
- * private val sweep = CrashReportSweep()
- * @BeforeTest fun mark() = sweep.mark()
- * @AfterTest fun clean() = sweep.sweep()
- * ```
+ * ``` * private val sweep = CrashReportSweep() * @BeforeTest fun mark() = sweep.mark() * @AfterTest fun clean() = sweep.sweep() * ```
  */
 class CrashReportSweep {
 

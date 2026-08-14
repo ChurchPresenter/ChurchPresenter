@@ -451,7 +451,10 @@ class AtemClient(val host: String, val port: Int = 9910) {
             // Drop any buffered clip-store state from before this upload so a later readiness wait
             // (awaitClipReady) only reacts to MPCS updates produced by this upload.
             pendingCommands.removeAll { it.first == "MPCS" }
-            sendCommandAndWait("LOCK", buildLockPayload(storeId, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
+            sendCommandAndWait("LOCK",
+                buildLockPayload(storeId, locked = true),
+                "LKOB",
+                timeout = CMD_TIMEOUT_MS.toLong())
             try {
                 // Clear the clip slot before uploading new frames
                 sendCommandAndWait("CMPC", ByteArray(4).also { it[0] = slot.toByte() }, expectedResponse = null)
@@ -875,7 +878,15 @@ class AtemClient(val host: String, val port: Int = 9910) {
             }
             (0 until mixEffectCount).map { byMe[it] ?: 0 }
         } else emptyList()
-        return AtemState(fps, mode, parseStillSlots(m), parseClipSlots(m), clipMaxFrames, unassigned, mixEffectCount, keyersPerMe, downstreamKeyers)
+        return AtemState(fps,
+            mode,
+            parseStillSlots(m),
+            parseClipSlots(m),
+            clipMaxFrames,
+            unassigned,
+            mixEffectCount,
+            keyersPerMe,
+            downstreamKeyers)
     }
 
     /**

@@ -110,7 +110,10 @@ internal val CROSS_REF_MIN_WIDTH = 200.dp
 
 internal val CROSS_REF_MAX_WIDTH = 500.dp
 
-internal fun withBibleColumnWidths(settings: AppSettings, isMaximized: Boolean, bookWidthDp: Int, chapterWidthDp: Int): AppSettings =
+internal fun withBibleColumnWidths(settings: AppSettings,
+    isMaximized: Boolean,
+    bookWidthDp: Int,
+    chapterWidthDp: Int): AppSettings =
     if (isMaximized) settings.copy(maximizedLayout = settings.maximizedLayout.copy(bibleColWidthBook = bookWidthDp, bibleColWidthChapter = chapterWidthDp))
     else settings.copy(windowedLayout = settings.windowedLayout.copy(bibleColWidthBook = bookWidthDp, bibleColWidthChapter = chapterWidthDp))
 
@@ -174,7 +177,11 @@ fun BibleTab(
             if (!viewModel.isFullyLoadedFlow.value) {
                 viewModel.isFullyLoadedFlow.first { it }
             }
-            val found = viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber, item.verseRange, bookId = item.bookId)
+            val found = viewModel.selectVerseByDetails(item.bookName,
+                item.chapter,
+                item.verseNumber,
+                item.verseRange,
+                bookId = item.bookId)
             if (found) {
                 focusRequester.requestFocus()
             }
@@ -323,7 +330,11 @@ fun BibleTab(
                 primary.bibleName, primary.bookName, primary.chapter, primary.verseNumber
             )
             onVerseSelected(verses)
-            onInstanceLinkSendVerse?.invoke(primary.bookName, primary.chapter, primary.verseNumber, primary.verseText, primary.verseRange)
+            onInstanceLinkSendVerse?.invoke(primary.bookName,
+                primary.chapter,
+                primary.verseNumber,
+                primary.verseText,
+                primary.verseRange)
             presenterManager?.let { if (it.bibleHold.value) { it.setBibleHold(false); onInstanceLinkSendBibleHold?.invoke(false) } }
             onPresenting(Presenting.BIBLE)
             viewModel.logLiveReference(
@@ -364,10 +375,16 @@ fun BibleTab(
         if (primaryVerse != null && statisticsManager != null) {
             if (viewModel.multiVerseEnabled.value) {
                 for (vNum in viewModel.getSelectedVerseNumbers()) {
-                    statisticsManager.recordVerseDisplay(primaryVerse.bibleName, primaryVerse.bookName, primaryVerse.chapter, vNum)
+                    statisticsManager.recordVerseDisplay(primaryVerse.bibleName,
+                        primaryVerse.bookName,
+                        primaryVerse.chapter,
+                        vNum)
                 }
             } else {
-                statisticsManager.recordVerseDisplay(primaryVerse.bibleName, primaryVerse.bookName, primaryVerse.chapter, primaryVerse.verseNumber)
+                statisticsManager.recordVerseDisplay(primaryVerse.bibleName,
+                    primaryVerse.bookName,
+                    primaryVerse.chapter,
+                    primaryVerse.verseNumber)
             }
         }
 
@@ -414,7 +431,8 @@ fun BibleTab(
     val autoFollowTokenGate = rememberTokenGate(autoFollowLiveToken)
     LaunchedEffect(autoFollowLiveToken) {
         if (!autoFollowTokenGate.consume()) return@LaunchedEffect
-        goLiveWithHistory(source = viewModel.autoFollowLiveSource.value, matchType = viewModel.autoFollowLiveMatchType.value)
+        goLiveWithHistory(source = viewModel.autoFollowLiveSource.value,
+            matchType = viewModel.autoFollowLiveMatchType.value)
     }
 
     LaunchedEffect(verseSelectionToken) {
@@ -775,7 +793,12 @@ fun BibleTab(
                     focusRequester.requestFocus()
                 },
                 onAddToSchedule = {
-                    viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
+                    viewModel.addCurrentVerseToSchedule { bookName,
+                        chapter,
+                        verseNumber,
+                        verseText,
+                        verseRange,
+                        bookId ->
                         onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange, bookId)
                     }
                     focusRequester.requestFocus()
@@ -890,7 +913,12 @@ fun BibleTab(
                     )
                 },
                 onAddToSchedule = {
-                    viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
+                    viewModel.addCurrentVerseToSchedule { bookName,
+                        chapter,
+                        verseNumber,
+                        verseText,
+                        verseRange,
+                        bookId ->
                         onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange, bookId)
                     }
                     focusRequester.requestFocus()
@@ -903,9 +931,16 @@ fun BibleTab(
                         val shown = viewModel.getVersesForDisplay(liveBookName, liveChapterNum, verseNum)
                         if (shown.isNotEmpty()) {
                             val primary = shown.first()
-                            statisticsManager?.recordVerseDisplay(primary.bibleName, primary.bookName, primary.chapter, primary.verseNumber)
+                            statisticsManager?.recordVerseDisplay(primary.bibleName,
+                                primary.bookName,
+                                primary.chapter,
+                                primary.verseNumber)
                             onVerseSelected(shown)
-                            onInstanceLinkSendVerse?.invoke(primary.bookName, primary.chapter, primary.verseNumber, primary.verseText, primary.verseRange)
+                            onInstanceLinkSendVerse?.invoke(primary.bookName,
+                                primary.chapter,
+                                primary.verseNumber,
+                                primary.verseText,
+                                primary.verseRange)
                             presenterManager?.let { if (it.bibleHold.value) { it.setBibleHold(false); onInstanceLinkSendBibleHold?.invoke(false) } }
                             onPresenting(Presenting.BIBLE)
                             viewModel.logLiveReference(

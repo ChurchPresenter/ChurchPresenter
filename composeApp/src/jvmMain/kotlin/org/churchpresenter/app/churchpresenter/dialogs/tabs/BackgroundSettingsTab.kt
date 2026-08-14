@@ -743,7 +743,8 @@ private fun BackgroundTypeDropdown(
             .heightIn(min = 36.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+            .clickable(interactionSource = remember { MutableInteractionSource() },
+                indication = null) { expanded = true }
             .padding(horizontal = 11.dp, vertical = 8.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -885,7 +886,9 @@ private fun TooltipIconButton(
 ) {
     TooltipArea(
         tooltip = {
-            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+            Surface(color = MaterialTheme.colorScheme.inverseSurface,
+                shape = MaterialTheme.shapes.extraSmall,
+                tonalElevation = 4.dp) {
                 Text(
                     text = tooltip,
                     color = MaterialTheme.colorScheme.inverseOnSurface,
@@ -894,7 +897,8 @@ private fun TooltipIconButton(
                 )
             }
         },
-        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp))
     ) {
         IconButton(onClick = onClick) {
             Icon(icon, contentDescription = tooltip)

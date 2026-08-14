@@ -250,7 +250,8 @@ private fun CrossRefActionButton(
                 )
             }
         },
-        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp)),
     ) {
         Box(
             modifier = Modifier.size(22.dp)
@@ -505,7 +506,8 @@ internal fun CrossRefChip(
                 )
             }
         },
-        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp)),
     ) {
         Row(
             modifier = Modifier

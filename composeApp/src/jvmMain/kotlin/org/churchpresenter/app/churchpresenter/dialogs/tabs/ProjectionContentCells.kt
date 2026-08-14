@@ -385,9 +385,15 @@ internal fun ContentTranslationCell(
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(text = label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis)
                 Text(
-                    text = stringResource(Res.string.content_bible_translations_enabled, enabledCount, translations.size),
+                    text = stringResource(Res.string.content_bible_translations_enabled,
+                        enabledCount,
+                        translations.size),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -398,11 +404,16 @@ internal fun ContentTranslationCell(
                     .size(18.dp)
                     .clip(masterCheckShape)
                     .background(if (enabledCount > 0) MaterialTheme.colorScheme.primary else Color.Transparent)
-                    .border(1.dp, if (enabledCount > 0) Color.Transparent else MaterialTheme.colorScheme.outline, masterCheckShape),
+                    .border(1.dp,
+                        if (enabledCount > 0) Color.Transparent else MaterialTheme.colorScheme.outline,
+                        masterCheckShape),
                 contentAlignment = Alignment.Center,
             ) {
                 if (allSelected && showing) {
-                    Icon(Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(11.dp))
+                    Icon(Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(11.dp))
                 } else if (enabledCount > 0) {
                     Box(modifier = Modifier.size(width = 8.dp, height = 2.dp).background(MaterialTheme.colorScheme.onPrimary, RoundedCornerShape(1.dp)))
                 }
@@ -474,7 +485,9 @@ internal fun ContentTranslationCell(
                                 .height(26.dp)
                                 .clip(chipShape)
                                 .background(if (ticked) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f) else MaterialTheme.colorScheme.surfaceVariant)
-                                .border(1.dp, if (ticked) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant, chipShape)
+                                .border(1.dp,
+                                    if (ticked) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant,
+                                    chipShape)
                                 .padding(horizontal = 4.dp),
                             contentAlignment = Alignment.Center,
                         ) {
@@ -507,7 +520,8 @@ internal fun ContentTranslationCell(
                             // PRIMARY sits on its own line with the portion rather than competing
                             // with the title for width -- a long title (e.g. "King James Version")
                             // was getting cut to "King James V..." to make room for the tag.
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 if (info.portion.isNotEmpty()) {
                                     Text(
                                         text = info.portion,
@@ -539,11 +553,16 @@ internal fun ContentTranslationCell(
                                 .size(18.dp)
                                 .clip(rowCheckShape)
                                 .background(if (ticked) MaterialTheme.colorScheme.primary else Color.Transparent)
-                                .border(1.dp, if (ticked) Color.Transparent else MaterialTheme.colorScheme.outline, rowCheckShape),
+                                .border(1.dp,
+                                    if (ticked) Color.Transparent else MaterialTheme.colorScheme.outline,
+                                    rowCheckShape),
                             contentAlignment = Alignment.Center,
                         ) {
                             if (ticked) {
-                                Icon(Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(11.dp))
+                                Icon(Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.size(11.dp))
                             }
                         }
                     }
@@ -681,7 +700,9 @@ internal fun ContentLangCell(
                             modifier = Modifier
                                 .size(18.dp)
                                 .clip(CircleShape)
-                                .border(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, CircleShape),
+                                .border(1.dp,
+                                    if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                    CircleShape),
                             contentAlignment = Alignment.Center,
                         ) {
                             if (isSelected) {

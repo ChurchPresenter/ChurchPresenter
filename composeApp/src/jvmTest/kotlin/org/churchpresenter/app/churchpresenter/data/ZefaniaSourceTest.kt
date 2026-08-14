@@ -207,7 +207,8 @@ class ZefaniaSourceTest {
     fun `a matching git blob hash is accepted`() {
         val bytes = zipOf("module.xml" to xmlBible())
 
-        val outcome = install(httpServingBytes(bytes), module(checksum = blobShaOf(bytes), sizeBytes = bytes.size.toLong()))
+        val outcome = install(httpServingBytes(bytes),
+            module(checksum = blobShaOf(bytes), sizeBytes = bytes.size.toLong()))
 
         assertIs<BibleInstallOutcome.Success>(outcome)
     }
@@ -216,7 +217,8 @@ class ZefaniaSourceTest {
     fun `a git blob hash that does not match the archive is rejected`() {
         val bytes = zipOf("module.xml" to xmlBible())
 
-        val outcome = install(httpServingBytes(bytes), module(checksum = "0".repeat(40), sizeBytes = bytes.size.toLong()))
+        val outcome = install(httpServingBytes(bytes),
+            module(checksum = "0".repeat(40), sizeBytes = bytes.size.toLong()))
 
         assertEquals(BibleInstallOutcome.ChecksumMismatch, outcome)
         assertTrue(targetDir.listFiles()!!.isEmpty())
@@ -410,7 +412,9 @@ class ZefaniaSourceTest {
             """ENG/A Conservative Version/SF_2009-01-20_ENG_ACV_(A CONSERVATIVE VERSION).zip",""" +
             """"type":"blob","sha":"abc123","size":4242}]}"""
         val http = HttpClient(MockEngine {
-            respond(content = tree, status = HttpStatusCode.OK, headers = headersOf(HttpHeaders.ContentType, "application/json"))
+            respond(content = tree,
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json"))
         })
 
         // ZefaniaSource.catalog() always asks ZefaniaRepositoryIndex for the real archive at its

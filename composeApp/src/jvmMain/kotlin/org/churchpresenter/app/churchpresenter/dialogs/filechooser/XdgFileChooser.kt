@@ -55,7 +55,13 @@ object XdgFileChooser : FileChooser() {
         context = "XdgFileChooser.saveImpl",
         attempt = {
             saveSelection(
-                openFileChooser(location, filters, title, suggestedName, selectDirectory = false, multiple = false, DBusFileChooser::SaveFile)
+                openFileChooser(location,
+                    filters,
+                    title,
+                    suggestedName,
+                    selectDirectory = false,
+                    multiple = false,
+                    DBusFileChooser::SaveFile)
             )
         },
         fallback = { SwingFileChooser.fallbackSave(location, suggestedName, filters, title) }
@@ -111,8 +117,7 @@ object XdgFileChooser : FileChooser() {
      * The connection's unique bus name, or a failure that says what went wrong.
      *
      * dbus-java reads it off a list it has not necessarily filled — a connection whose `Hello`
-     * never completed answers with `IndexOutOfBoundsException: Index 0 out of bounds for length
-     * 0`, which reaches Sentry as an ArrayList error with nothing about D-Bus in it. There is no
+     * never completed answers with `IndexOutOfBoundsException: Index 0 out of bounds for length * 0`, which reaches Sentry as an ArrayList error with nothing about D-Bus in it. There is no
      * name to build a request path from either way, so both shapes of "no name" become one
      * refusal, and the caller falls back to the Swing dialog.
      */

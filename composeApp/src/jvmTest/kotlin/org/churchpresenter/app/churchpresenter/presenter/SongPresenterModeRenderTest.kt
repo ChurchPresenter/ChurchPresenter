@@ -54,7 +54,8 @@ class SongPresenterModeRenderTest {
                 )
             }
         }
-        onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists("the section being sung must be on screen")
+        onNodeWithText("Amazing grace how sweet the sound",
+            substring = true).assertExists("the section being sung must be on screen")
         onNodeWithText("That saved a wretch like me", substring = true)
             .assertExists("the band's look-ahead preview of the next section must render")
     }

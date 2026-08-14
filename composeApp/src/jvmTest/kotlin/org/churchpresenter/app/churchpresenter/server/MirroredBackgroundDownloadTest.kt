@@ -63,7 +63,11 @@ class MirroredBackgroundDownloadTest {
             } ?: error("server did not start")
 
             link = InstanceLinkViewModel()
-            link.connect(host = "127.0.0.1", port = port, apiKey = "", deviceId = "test-follower", reconnectDelayMs = 60_000)
+            link.connect(host = "127.0.0.1",
+                port = port,
+                apiKey = "",
+                deviceId = "test-follower",
+                reconnectDelayMs = 60_000)
             awaitUntil("the link to connect") { link.connectionStatus.value == InstanceLinkStatus.CONNECTED }
         }
 

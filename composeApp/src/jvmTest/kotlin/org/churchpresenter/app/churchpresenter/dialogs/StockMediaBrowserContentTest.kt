@@ -250,7 +250,8 @@ class StockMediaBrowserContentTest {
     // ── Loading indicator ────────────────────────────────────────────────────────
 
     @Test
-    fun `a spinner shows while a search is in flight and clears once it resolves`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+    fun `a spinner shows while a search is in flight and clears once it resolves`() = dialog(pexelsApiKey = "a-key") { _,
+        _ ->
         coEvery { StockMediaClient.fetchThumbnailBytes(any(), any()) } returns tinyPngBytes()
         val gate = CompletableDeferred<StockMediaClient.SearchOutcome>()
         coEvery { StockMediaClient.search(any(), any(), any(), any(), any(), any()) } coAnswers { gate.await() }
@@ -367,7 +368,8 @@ class StockMediaBrowserContentTest {
     }
 
     @Test
-    fun `a downloading tile shows a spinner on its own download button while it runs`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+    fun `a downloading tile shows a spinner on its own download button while it runs`() = dialog(pexelsApiKey = "a-key") { _,
+        _ ->
         coEvery { StockMediaClient.fetchThumbnailBytes(any(), any()) } returns tinyPngBytes()
         val gate = CompletableDeferred<StockMediaClient.DownloadOutcome>()
         coEvery { StockMediaClient.download(any(), any(), any()) } coAnswers { gate.await() }

@@ -94,7 +94,8 @@ internal fun TranslationOrderSelector(
                     if (expanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
                     RoundedCornerShape(10.dp),
                 )
-                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+                .clickable(interactionSource = remember { MutableInteractionSource() },
+                    indication = null) { expanded = true }
                 .padding(horizontal = 10.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -111,7 +112,9 @@ internal fun TranslationOrderSelector(
                 Spacer(Modifier.height(1.dp))
                 Text(
                     text = primaryName,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 13.sp, fontWeight = FontWeight.SemiBold),
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp,
+                        lineHeight = 13.sp,
+                        fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -255,7 +258,8 @@ private fun TranslationOrderPanel(
                     }
 
                     Column(modifier = Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             Text(
                                 text = name,
                                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -326,7 +330,8 @@ private fun ReorderArrowButton(
     Box(
         modifier = Modifier
             .size(width = 22.dp, height = 16.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 1f else 0.4f), RoundedCornerShape(5.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 1f else 0.4f),
+                RoundedCornerShape(5.dp))
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.outlineVariant.copy(alpha = if (enabled) 1f else 0.5f),

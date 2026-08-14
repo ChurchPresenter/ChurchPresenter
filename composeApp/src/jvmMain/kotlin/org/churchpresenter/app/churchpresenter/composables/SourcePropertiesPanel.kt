@@ -58,7 +58,9 @@ fun SourcePropertiesPanel(
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
-        Text(stringResource(Res.string.canvas_transform), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(Res.string.canvas_transform),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
 
         val t = source.transform
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {

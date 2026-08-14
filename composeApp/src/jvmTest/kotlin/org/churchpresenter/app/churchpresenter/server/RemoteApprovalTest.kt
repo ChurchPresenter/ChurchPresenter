@@ -75,7 +75,11 @@ class RemoteApprovalTest {
         val event = assertIs<RemoteApproval.Ask>(approval(RemoteAccess.PROMPT)).event
 
         assertEquals(
-            listOf(notification.type, notification.title, notification.detail, notification.clientId, notification.clientLabel),
+            listOf(notification.type,
+                notification.title,
+                notification.detail,
+                notification.clientId,
+                notification.clientLabel),
             listOf(event.type, event.title, event.detail, event.clientId, event.clientLabel),
             "the operator must see the same request whether it was auto-approved or asked about",
         )

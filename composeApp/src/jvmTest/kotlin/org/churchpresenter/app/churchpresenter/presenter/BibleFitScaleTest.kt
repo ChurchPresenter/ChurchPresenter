@@ -18,8 +18,7 @@ import kotlin.test.assertTrue
  *
  * That used to be only half true. The search took a floor, and when nothing at or above the floor
  * fitted it returned the floor anyway, unprobed — so the caller could not tell a fit from a failure
- * and drew the overflow (issue #97). This suite asserted that behaviour as `text that fits nowhere
- * still returns the floor`, which contradicted its own opening paragraph. The floor is now a
+ * and drew the overflow (issue #97). This suite asserted that behaviour as `text that fits nowhere * still returns the floor`, which contradicted its own opening paragraph. The floor is now a
  * *starting point*: when it does not fit, the search halves below it until something does. The first
  * fix attempt went the other way and raised the floor to a readable 8sp, which turned
  * unreadably-small into cut-off. Both are wrong; fitting wins.

@@ -68,11 +68,17 @@ class ZefaniaRepositoryIndexTest {
 
     /** The real shapes found in the archive. */
     private val realisticTree = tree(
-        blob("$prefix" + "ENG/A Conservative Version/SF_2009-01-20_ENG_ACV_(A CONSERVATIVE VERSION).zip", 1255567, "sha1"),
-        blob("$prefix" + "AFR/1933/1953 Afrikaans Bybel/SF_2009-01-20_AFR_AFR3353_(1933_1953 AFRIKAANS BYBEL).zip", 1293091, "sha2"),
+        blob("$prefix" + "ENG/A Conservative Version/SF_2009-01-20_ENG_ACV_(A CONSERVATIVE VERSION).zip",
+            1255567,
+            "sha1"),
+        blob("$prefix" + "AFR/1933/1953 Afrikaans Bybel/SF_2009-01-20_AFR_AFR3353_(1933_1953 AFRIKAANS BYBEL).zip",
+            1293091,
+            "sha2"),
         blob("$prefix" + "SWA/Neno/SF_2009-01-20_SWA_SWA_(SWAHILI NT).zip", 500, "sha3"),
         blob("$prefix" + "CZE/Cesky studijni preklad/SF_2015-01-01_CZE_ČSP_(Český studijní překlad).zip", 600, "sha4"),
-        blob("zefania-sharp-sourceforge-backup/Dictionaries/GER/X/SF_2005-12-09_GER_LUTH_(KONKORDANZ).zip", 700, "sha5"),
+        blob("zefania-sharp-sourceforge-backup/Dictionaries/GER/X/SF_2005-12-09_GER_LUTH_(KONKORDANZ).zip",
+            700,
+            "sha5"),
         blob("iso639_codes.xml", 800, "sha6"),
         treeEntry(prefix + "ENG"),
     )
@@ -377,7 +383,9 @@ class ZefaniaRepositoryIndexTest {
             fetch(httpServing(fresh), now = muchLater),
         )
 
-        assertEquals("KJV", outcome.index.modules.single().identifier, "a stale age must not serve the old cache unrefreshed")
+        assertEquals("KJV",
+            outcome.index.modules.single().identifier,
+            "a stale age must not serve the old cache unrefreshed")
     }
 
     @Test
@@ -420,7 +428,9 @@ class ZefaniaRepositoryIndexTest {
 
         val outcome = assertIs<ZefaniaRepositoryIndex.IndexOutcome.Success>(
             fetch(
-                httpServing("rate limited", status = HttpStatusCode.Forbidden, headers = mapOf("x-ratelimit-remaining" to "0")),
+                httpServing("rate limited",
+                    status = HttpStatusCode.Forbidden,
+                    headers = mapOf("x-ratelimit-remaining" to "0")),
                 now = muchLater,
             ),
         )

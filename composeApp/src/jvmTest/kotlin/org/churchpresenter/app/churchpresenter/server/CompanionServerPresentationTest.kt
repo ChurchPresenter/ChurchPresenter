@@ -83,7 +83,8 @@ class CompanionServerPresentationTest {
 
     private fun url(path: String) = "http://127.0.0.1:$port$path"
     private fun get(path: String): HttpResponse = runBlocking { client.get(url(path)) }
-    private fun post(path: String, body: String): HttpResponse = runBlocking { client.post(url(path)) { setBody(body) } }
+    private fun post(path: String,
+        body: String): HttpResponse = runBlocking { client.post(url(path)) { setBody(body) } }
     private fun HttpResponse.text(): String = runBlocking { bodyAsText() }
 
     private fun <T> collecting(flow: MutableSharedFlow<T>, onEach: (T) -> Unit) {
@@ -111,7 +112,11 @@ class CompanionServerPresentationTest {
         val slideBytes = (0 until slideCount).map { byteArrayOf(0x10, it.toByte()) }
         val dir = Files.createTempDirectory("cp-presentation-slides").toFile()
         val slideFiles = slideBytes.mapIndexed { i, bytes -> File(dir, "slide$i.jpg").apply { writeBytes(bytes) } }
-        server.updatePresentation(id = id, filePath = "", fileName = "Test.pptx", fileType = "pptx", slideFiles = slideFiles)
+        server.updatePresentation(id = id,
+            filePath = "",
+            fileName = "Test.pptx",
+            fileType = "pptx",
+            slideFiles = slideFiles)
         awaitUntil("presentation $id to be published") { get("/api/presentations/$id").status == HttpStatusCode.OK }
         return slideBytes
     }
@@ -218,7 +223,8 @@ class CompanionServerPresentationTest {
 
         awaitUntil("onPresentationUploaded") { uploaded.isNotEmpty() }
         val saved = uploaded.single()
-        assertTrue(saved.absolutePath.startsWith(tempHome.absolutePath), "must be saved under the isolated user.home, not the real one")
+        assertTrue(saved.absolutePath.startsWith(tempHome.absolutePath),
+            "must be saved under the isolated user.home, not the real one")
         assertEquals(pdfBytes.toList(), saved.readBytes().toList())
     }
 

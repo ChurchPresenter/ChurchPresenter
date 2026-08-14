@@ -22,8 +22,7 @@ import kotlin.test.assertTrue
  * Each of those functions is eleven near-identical branches of
  * `is SceneSource.X -> source.copy(field = …)`. The compiler guarantees the list is *complete*
  * (the `when` is exhaustive over a sealed class, so a twelfth source type will not compile until
- * it is added), but it cannot catch a branch that copies the wrong field — `copy(visible =
- * !source.locked)` type-checks perfectly and would make one source type's eye icon toggle its
+ * it is added), but it cannot catch a branch that copies the wrong field — `copy(visible = * !source.locked)` type-checks perfectly and would make one source type's eye icon toggle its
  * padlock instead. That is what these tests pin down, type by type.
  *
  * Each case also asserts the *other* flag is untouched, since that is the shape the mistake takes.

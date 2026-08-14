@@ -801,7 +801,8 @@ class SystemSettingsTabTest {
         clickConvert(dir)
         waitUntil(timeoutMillis = 5_000) { told.isNotEmpty() }
 
-        val songFiles = File(dir, "Hymnal").listFiles { f -> f.extension == "song" }?.map { it.name }?.sorted().orEmpty()
+        val songFiles = File(dir,
+            "Hymnal").listFiles { f -> f.extension == "song" }?.map { it.name }?.sorted().orEmpty()
         assertEquals(2, songFiles.size, "both songs are written as .song files: $songFiles")
         val message = told.single()
         assertTrue("2" in message && "Hymnal" in message, "the report names the song count and folder: $message")
@@ -931,7 +932,9 @@ class SystemSettingsTabTest {
         flushEventQueue()
 
         assertTrue("reset all settings" in asked.single(), "resetting is never silent: ${asked.single()}")
-        assertEquals(before, settingsFile().takeIf { it.exists() }?.readText(), "declining leaves settings as they were")
+        assertEquals(before,
+            settingsFile().takeIf { it.exists() }?.readText(),
+            "declining leaves settings as they were")
     }
 
     @Test

@@ -246,7 +246,10 @@ class StageMonitorScreenshotTest {
         "qa",
         presenting = Presenting.QA,
         section = LyricSection(),
-        question = Question(id = "q1", text = "How do I join a small group?", timestamp = 0L, status = QuestionStatus.APPROVED),
+        question = Question(id = "q1",
+            text = "How do I join a small group?",
+            timestamp = 0L,
+            status = QuestionStatus.APPROVED),
     )
 
     @Test
@@ -342,7 +345,10 @@ class StageMonitorScreenshotTest {
         settings = stageSettings(zones = mapOf(StageMonitorContentType.QA to StageMonitorZone.BOTTOM_LEFT)),
         presenting = Presenting.QA,
         section = LyricSection(),
-        question = Question(id = "q1", text = "How do I join a small group?", timestamp = 0L, status = QuestionStatus.APPROVED),
+        question = Question(id = "q1",
+            text = "How do I join a small group?",
+            timestamp = 0L,
+            status = QuestionStatus.APPROVED),
     )
 
     @Test
@@ -509,9 +515,15 @@ class StageMonitorScreenshotTest {
                 StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.BOTTOM_LEFT,
             ),
             styles = mapOf(
-                StageMonitorStyleZone.TOP_LEFT to StageMonitorZoneStyle(fontSize = 40, color = "#FFFFFF", bgColor = "#10131A"),
-                StageMonitorStyleZone.TOP_RIGHT to StageMonitorZoneStyle(fontSize = 36, color = "#10131A", bgColor = "#8FB3F5"),
-                StageMonitorStyleZone.BOTTOM_LEFT to StageMonitorZoneStyle(fontSize = 32, color = "#FFD54F", bgColor = "#3B1F5B"),
+                StageMonitorStyleZone.TOP_LEFT to StageMonitorZoneStyle(fontSize = 40,
+                    color = "#FFFFFF",
+                    bgColor = "#10131A"),
+                StageMonitorStyleZone.TOP_RIGHT to StageMonitorZoneStyle(fontSize = 36,
+                    color = "#10131A",
+                    bgColor = "#8FB3F5"),
+                StageMonitorStyleZone.BOTTOM_LEFT to StageMonitorZoneStyle(fontSize = 32,
+                    color = "#FFD54F",
+                    bgColor = "#3B1F5B"),
             ),
         ),
         announcementActive = true,
@@ -540,7 +552,9 @@ class StageMonitorScreenshotTest {
         "large_type",
         settings = stageSettings(
             styles = mapOf(
-                StageMonitorStyleZone.TOP_LEFT to StageMonitorZoneStyle(fontSize = 96, color = "#FFFFFF", bgColor = "#000000"),
+                StageMonitorStyleZone.TOP_LEFT to StageMonitorZoneStyle(fontSize = 96,
+                    color = "#FFFFFF",
+                    bgColor = "#000000"),
             )
         ),
         sections = SONG_SECTIONS,

@@ -87,7 +87,8 @@ class WebTabBrowserBridgeTest {
     // ── The "type to page" field with a live browser attached ───────────────────
 
     @Test
-    fun `typing into the type-to-page field with a live browser injects JavaScript per character`() = webTab { presenter, _ ->
+    fun `typing into the type-to-page field with a live browser injects JavaScript per character`() = webTab { presenter,
+        _ ->
         val browser = mockk<CefBrowser>(relaxed = true)
         presenter.setPresentingMode(Presenting.WEBSITE)
         presenter.setLiveBrowser(browser)

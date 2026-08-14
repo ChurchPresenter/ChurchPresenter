@@ -11,7 +11,9 @@ import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 internal fun BibleViewModel.canonicalBookIdForDisplayIndex(displayIndex: Int): Int =
     _primaryBible.value?.getBookId(displayIndex) ?: (displayIndex + 1)
 
-internal fun BibleViewModel.canonicalRefForDisplay(displayBookIndex: Int, chapter: Int, verse: Int?): Triple<Int, Int, Int?>? {
+internal fun BibleViewModel.canonicalRefForDisplay(displayBookIndex: Int,
+    chapter: Int,
+    verse: Int?): Triple<Int, Int, Int?>? {
     val bible = _primaryBible.value ?: return null
     val bookId = bible.getBookId(displayBookIndex)
     val code = bible.getCodeReference(bookId, chapter, verse ?: 1) ?: return null
@@ -21,7 +23,9 @@ internal fun BibleViewModel.canonicalRefForDisplay(displayBookIndex: Int, chapte
 internal fun BibleViewModel.displayIndexForBookName(bookName: String): Int =
     _books.value.indexOfFirst { it.equals(bookName, ignoreCase = true) }
 
-internal fun BibleViewModel.canonicalRefForBookName(bookName: String, chapter: Int, verse: Int): Triple<Int, Int, Int>? {
+internal fun BibleViewModel.canonicalRefForBookName(bookName: String,
+    chapter: Int,
+    verse: Int): Triple<Int, Int, Int>? {
     val displayIndex = displayIndexForBookName(bookName).takeIf { it >= 0 } ?: return null
     val (book, mappedChapter, mappedVerse) =
         canonicalRefForDisplay(displayIndex, chapter, verse) ?: return null

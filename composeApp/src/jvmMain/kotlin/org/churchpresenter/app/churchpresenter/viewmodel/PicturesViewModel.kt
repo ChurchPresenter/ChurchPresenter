@@ -115,8 +115,7 @@ class PicturesViewModel(
      * Writes a decoded thumbnail into the state maps, from the background thread that decoded it.
      *
      * Both maps are snapshot state, and a write from a thread other than the one advancing the
-     * global snapshot can lose that race — the *write* throws `Reading a state that was created
-     * after the snapshot was taken or in a snapshot that has not yet been applied`. The image is
+     * global snapshot can lose that race — the *write* throws `Reading a state that was created * after the snapshot was taken or in a snapshot that has not yet been applied`. The image is
      * fine; only the moment it was published in was wrong, so the write is simply made again.
      *
      * Writing inside `Snapshot.withMutableSnapshot` instead is not the fix — it moves the identical
@@ -243,7 +242,8 @@ class PicturesViewModel(
     ) {
         clearImages()
         _selectedFolder.value = File(folderPath)
-        val cacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/picture-folders/$folderId")
+        val cacheDir = File(System.getProperty("user.home"),
+            ".churchpresenter/instance-link/cache/picture-folders/$folderId")
         cacheDir.mkdirs()
         scope.launch {
             for (index in 0 until imageCount) {

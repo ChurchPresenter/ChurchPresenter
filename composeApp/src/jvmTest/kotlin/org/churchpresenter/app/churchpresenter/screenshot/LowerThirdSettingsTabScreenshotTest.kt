@@ -78,7 +78,8 @@ class LowerThirdSettingsTabScreenshotTest {
     @Test
     fun `the window insets set`() = shoot(
         "window_insets",
-        settings = withPresets(PRESETS.size, StreamingSettings(windowTop = 40, windowLeft = 120, windowRight = 60, windowBottom = 24)),
+        settings = withPresets(PRESETS.size,
+            StreamingSettings(windowTop = 40, windowLeft = 120, windowRight = 60, windowBottom = 24)),
     )
 
     /**

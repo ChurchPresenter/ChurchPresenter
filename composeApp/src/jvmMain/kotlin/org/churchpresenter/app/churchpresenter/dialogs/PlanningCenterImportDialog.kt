@@ -126,7 +126,12 @@ fun PlanningCenterImportDialog(
     onAddPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit,
     onAddMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit,
     onAddAnnouncement: (text: String) -> Unit,
-    onAddBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit,
+    onAddBibleVerse: (bookName: String,
+        chapter: Int,
+        verseNumber: Int,
+        verseText: String,
+        verseRange: String,
+        bookId: Int) -> Unit,
     onConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit,
     onDisconnect: () -> Unit
 ) {
@@ -346,7 +351,12 @@ internal fun PlanningCenterImportDialogContent(
     onAddPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit,
     onAddMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit,
     onAddAnnouncement: (text: String) -> Unit,
-    onAddBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit,
+    onAddBibleVerse: (bookName: String,
+        chapter: Int,
+        verseNumber: Int,
+        verseText: String,
+        verseRange: String,
+        bookId: Int) -> Unit,
     onAddSongRequested: (pco: PlanningCenterClient.PlanItem, prefill: SongItem) -> Unit
 ) {
     var isFetchingArrangement by remember { mutableStateOf<String?>(null) }
@@ -387,7 +397,8 @@ internal fun PlanningCenterImportDialogContent(
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    stringResource(Res.string.planning_center_status_connected, settings.connectedPersonName.ifBlank { "?" }),
+                    stringResource(Res.string.planning_center_status_connected,
+                        settings.connectedPersonName.ifBlank { "?" }),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.semantic.success
                 )
@@ -398,7 +409,8 @@ internal fun PlanningCenterImportDialogContent(
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                     modifier = Modifier.height(32.dp)
                 ) {
-                    Text(stringResource(Res.string.planning_center_disconnect), style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(Res.string.planning_center_disconnect),
+                        style = MaterialTheme.typography.bodySmall)
                 }
             }
 
@@ -485,7 +497,8 @@ internal fun PlanningCenterImportDialogContent(
                                             if (entry.matchedSongId != null) {
                                                 MatchedTag()
                                             } else if (isFetchingArrangement == pco.id) {
-                                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                                CircularProgressIndicator(modifier = Modifier.size(16.dp),
+                                                    strokeWidth = 2.dp)
                                             } else {
                                                 Button(
                                                     shape = RoundedCornerShape(8.dp),
@@ -520,7 +533,8 @@ internal fun PlanningCenterImportDialogContent(
                                                 checked = entry.selected,
                                                 onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
                                             )
-                                            PlanItemTypeIcon(Icons.AutoMirrored.Filled.Label, tint = MaterialTheme.semantic.warning)
+                                            PlanItemTypeIcon(Icons.AutoMirrored.Filled.Label,
+                                                tint = MaterialTheme.semantic.warning)
                                             Text(
                                                 pco.title,
                                                 style = MaterialTheme.typography.titleSmall,
@@ -540,7 +554,8 @@ internal fun PlanningCenterImportDialogContent(
                                             // minimumInteractiveComponentSize footprint as the
                                             // interactive rows so the checkbox stays aligned.
                                             Checkbox(checked = false, enabled = false, onCheckedChange = {})
-                                            PlanItemTypeIcon(Icons.Filled.PlayCircle, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+                                            PlanItemTypeIcon(Icons.Filled.PlayCircle,
+                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
                                             Text(
                                                 pco.title,
                                                 modifier = Modifier.weight(1f),
@@ -574,7 +589,8 @@ internal fun PlanningCenterImportDialogContent(
                                             val attachmentsLoaded = viewModel.attachmentsByItemId.containsKey(pco.id)
                                             val fileCount = viewModel.attachmentsByItemId[pco.id]?.size ?: 0
                                             if (!attachmentsLoaded) {
-                                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                                CircularProgressIndicator(modifier = Modifier.size(16.dp),
+                                                    strokeWidth = 2.dp)
                                             } else if (fileCount > 0) {
                                                 // Plain badge — the whole row is the click target
                                                 // for expand/collapse (see isExpandable above).
@@ -582,11 +598,14 @@ internal fun PlanningCenterImportDialogContent(
                                                     modifier = Modifier
                                                         .clip(RoundedCornerShape(50))
                                                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
-                                                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(50))
+                                                        .border(1.dp,
+                                                            MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                                                            RoundedCornerShape(50))
                                                         .padding(horizontal = 12.dp, vertical = 5.dp)
                                                 ) {
                                                     Text(
-                                                        stringResource(Res.string.planning_center_import_file_count, fileCount),
+                                                        stringResource(Res.string.planning_center_import_file_count,
+                                                            fileCount),
                                                         style = MaterialTheme.typography.labelMedium,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
@@ -771,7 +790,9 @@ internal fun PlanningCenterImportDialogContent(
                                                 pictureCount++
                                             }
                                             is PlanningCenterImportViewModel.ImportedMedia.Media ->
-                                                onAddMedia(imported.mediaUrl, pco.title.ifBlank { imported.mediaTitle }, "local")
+                                                onAddMedia(imported.mediaUrl,
+                                                    pco.title.ifBlank { imported.mediaTitle },
+                                                    "local")
                                             null -> {}
                                         }
                                     }

@@ -312,7 +312,8 @@ class DictionaryViewModelInterlinearTest {
     @Test
     fun `a number lookup inside the current passage filter keeps the filter`() {
         val d = loaded()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf("G26", "G5485")
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf("G26",
+            "G5485")
         d.filterEntryListByBook(43)
 
         d.selectByNumber("G26")

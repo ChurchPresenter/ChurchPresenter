@@ -17,13 +17,13 @@ style:
     active: true
     forbiddenPatterns: 'androidx\.compose\.material\.(?!icons)'
   MaxLineLength:
-    active: false
+    active: true
   MagicNumber:
-    active: false
+    active: true
   ReturnCount:
-    active: false
+    active: true
   LoopWithTooManyJumpStatements:
-    active: false
+    active: true
   UnusedPrivateMember:
     active: true
 
@@ -35,15 +35,15 @@ complexity:
   TooManyFunctions:
     active: false
   CyclomaticComplexMethod:
-    active: false
+    active: true
   LargeClass:
     active: false
   NestedBlockDepth:
-    active: false
+    active: true
 
 naming:
   TopLevelPropertyNaming:
-    active: false
+    active: true
   VariableNaming:
     active: true
     variablePattern: '(_)?[a-z][A-Za-z0-9]*|[A-Z][A-Z0-9_]*'
@@ -61,7 +61,7 @@ naming:
     ignoreAnnotated: ['Composable']
     excludes: ['**/test/**', '**/jvmTest/**', '**/X11WindowCapture.kt']
   MatchingDeclarationName:
-    active: false
+    active: true
 
 exceptions:
   TooGenericExceptionCaught:

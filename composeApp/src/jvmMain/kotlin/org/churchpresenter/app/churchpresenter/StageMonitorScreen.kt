@@ -256,20 +256,45 @@ fun StageMonitorScreen(
             Column(modifier = Modifier.fillMaxSize()) {
                 // ── TOP ROW (fixed 2:1 against bottom = 67%; left/right split evenly 50/50) ──
                 Row(modifier = Modifier.fillMaxWidth().weight(2f)) {
-                    StageZoneBox(sm, StageMonitorZone.TOP_LEFT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
+                    StageZoneBox(sm,
+                        StageMonitorZone.TOP_LEFT,
+                        renderData,
+                        mediaViewModel,
+                        ::contentFor,
+                        Modifier.weight(1f))
                     VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-                    StageZoneBox(sm, StageMonitorZone.TOP_RIGHT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
+                    StageZoneBox(sm,
+                        StageMonitorZone.TOP_RIGHT,
+                        renderData,
+                        mediaViewModel,
+                        ::contentFor,
+                        Modifier.weight(1f))
                 }
 
                 HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
 
                 // ── BOTTOM ROW (fixed at 33% of total height, regardless of content) ──
                 Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                    StageZoneBox(sm, StageMonitorZone.BOTTOM_LEFT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
+                    StageZoneBox(sm,
+                        StageMonitorZone.BOTTOM_LEFT,
+                        renderData,
+                        mediaViewModel,
+                        ::contentFor,
+                        Modifier.weight(1f))
                     VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-                    StageZoneBox(sm, StageMonitorZone.BOTTOM_MIDDLE, renderData, mediaViewModel, ::contentFor, Modifier.weight(0.8f))
+                    StageZoneBox(sm,
+                        StageMonitorZone.BOTTOM_MIDDLE,
+                        renderData,
+                        mediaViewModel,
+                        ::contentFor,
+                        Modifier.weight(0.8f))
                     VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-                    StageZoneBox(sm, StageMonitorZone.BOTTOM_RIGHT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
+                    StageZoneBox(sm,
+                        StageMonitorZone.BOTTOM_RIGHT,
+                        renderData,
+                        mediaViewModel,
+                        ::contentFor,
+                        Modifier.weight(1f))
                 }
             }
         }
@@ -471,7 +496,8 @@ private fun ZoneContent(
         StageMonitorContentType.ANNOUNCEMENT_TEXT -> CenteredText(data.timerText, style)
         StageMonitorContentType.CANVAS -> ScenePresenter(modifier = Modifier.fillMaxSize(), scene = data.activeScene)
         StageMonitorContentType.QA -> QAPresenter(question = data.displayedQuestion, qaSettings = data.qaSettings)
-        StageMonitorContentType.DICTIONARY -> DictionaryPresenter(entry = data.displayedDictionaryEntry, dictionarySettings = data.dictionarySettings)
+        StageMonitorContentType.DICTIONARY -> DictionaryPresenter(entry = data.displayedDictionaryEntry,
+            dictionarySettings = data.dictionarySettings)
         StageMonitorContentType.NEXT ->
             if (data.nextChordLines.isEmpty()) TextContent(style, data.nextText)
             else ZoneChordChart(style, data.nextChordLines)

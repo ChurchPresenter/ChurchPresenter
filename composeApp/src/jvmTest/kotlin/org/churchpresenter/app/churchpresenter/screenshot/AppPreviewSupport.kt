@@ -100,9 +100,7 @@ private val KJV_SOURCE = File("src/jvmMain/composeResources/files/bible_samples/
  *
  * So it is a knob rather than a new default. Recording high-DPI captures:
  *
- * ```
- * ./gradlew :composeApp:recordRoborazziJvm --tests '*AppPreview*' -PpreviewDensity=2
- * ```
+ * ``` * ./gradlew :composeApp:recordRoborazziJvm --tests '*AppPreview*' -PpreviewDensity=2 * ```
  *
  * **The canvas has to grow with it.** `runSkikoComposeUiTest`'s `size` is in *pixels*, not dp, so
  * raising density alone does not render the same layout more finely — it scales the UI up inside an
@@ -137,7 +135,8 @@ internal fun appPreview(
     RecentMediaFiles.paths.clear()
     RecentMediaFiles.pinned.clear()
     RecentMediaFiles.paths.addAll(
-        listOf(File(LIBRARY, "Media/Welcome Loop.mp4").absolutePath, File(LIBRARY, "Media/Baptism Testimony.mp4").absolutePath),
+        listOf(File(LIBRARY, "Media/Welcome Loop.mp4").absolutePath,
+            File(LIBRARY, "Media/Baptism Testimony.mp4").absolutePath),
     )
     writeScenes()
     writeQuestions()
@@ -336,16 +335,64 @@ private fun serviceSchedule(actions: ScheduleActions) {
  */
 private fun writeQuestions() {
     val asked = listOf(
-        QuestionDto("q1", "How do we know the resurrection actually happened?", "Sarah", "", 1_770_000_000_000, "APPROVED", 12, 12, 0),
-        QuestionDto("q2", "What does it mean to be baptised in the Spirit?", "Michael", "", 1_770_000_060_000, "APPROVED", 9, 9, 0),
-        QuestionDto("q3", "How can I share my faith with family who aren't interested?", "Grace", "", 1_770_000_120_000, "PENDING", 7, 7, 0),
+        QuestionDto("q1",
+            "How do we know the resurrection actually happened?",
+            "Sarah",
+            "",
+            1_770_000_000_000,
+            "APPROVED",
+            12,
+            12,
+            0),
+        QuestionDto("q2",
+            "What does it mean to be baptised in the Spirit?",
+            "Michael",
+            "",
+            1_770_000_060_000,
+            "APPROVED",
+            9,
+            9,
+            0),
+        QuestionDto("q3",
+            "How can I share my faith with family who aren't interested?",
+            "Grace",
+            "",
+            1_770_000_120_000,
+            "PENDING",
+            7,
+            7,
+            0),
         QuestionDto("q4", "Why does God allow suffering?", "Daniel", "", 1_770_000_180_000, "PENDING", 6, 6, 0),
         QuestionDto("q5", "Is it wrong to doubt sometimes?", "Ruth", "", 1_770_000_240_000, "PENDING", 4, 4, 0),
-        QuestionDto("q6", "How should we pray when we don't know what to ask for?", "Peter", "", 1_770_000_300_000, "PENDING", 3, 3, 0),
-        QuestionDto("q7", "What's the difference between grace and mercy?", "Hannah", "", 1_770_000_360_000, "DENIED", 0, 0, 0),
+        QuestionDto("q6",
+            "How should we pray when we don't know what to ask for?",
+            "Peter",
+            "",
+            1_770_000_300_000,
+            "PENDING",
+            3,
+            3,
+            0),
+        QuestionDto("q7",
+            "What's the difference between grace and mercy?",
+            "Hannah",
+            "",
+            1_770_000_360_000,
+            "DENIED",
+            0,
+            0,
+            0),
     )
     val answered = listOf(
-        QuestionDto("q0", "Where in the Bible does it talk about the good shepherd?", "Anna", "", 1_769_999_400_000, "DONE", 15, 15, 0),
+        QuestionDto("q0",
+            "Where in the Bible does it talk about the good shepherd?",
+            "Anna",
+            "",
+            1_769_999_400_000,
+            "DONE",
+            15,
+            15,
+            0),
     )
     val list = ListSerializer(QuestionDto.serializer())
     val json = Json { encodeDefaults = true }
@@ -619,7 +666,9 @@ private val HYMNS = listOf(
     )),
     Hymn("78", "Holy, Holy, Holy", "Reginald Heber", lyrics = listOf(
         "[Verse 1]", "Holy, holy, holy! Lord God Almighty!", "Early in the morning our song shall rise to Thee.",
-        "[Verse 2]", "Holy, holy, holy! all the saints adore Thee,", "Casting down their golden crowns around the glassy sea.",
+        "[Verse 2]",
+        "Holy, holy, holy! all the saints adore Thee,",
+        "Casting down their golden crowns around the glassy sea.",
     )),
     Hymn("103", "How Great Thou Art", "Carl Boberg", lyrics = listOf(
         "[Verse 1]", "O Lord my God, when I in awesome wonder", "Consider all the worlds Thy hands have made.",
@@ -641,7 +690,9 @@ private val HYMNS = listOf(
         "[Verse 1]", "O for a thousand tongues to sing", "My great Redeemer's praise.",
     )),
     Hymn("221", "Praise To The Lord, The Almighty", "Joachim Neander", lyrics = listOf(
-        "[Verse 1]", "Praise to the Lord, the Almighty, the King of creation!", "O my soul, praise Him, for He is thy health and salvation!",
+        "[Verse 1]",
+        "Praise to the Lord, the Almighty, the King of creation!",
+        "O my soul, praise Him, for He is thy health and salvation!",
     )),
     Hymn("244", "Rock Of Ages", "Augustus Toplady", lyrics = listOf(
         "[Verse 1]", "Rock of Ages, cleft for me,", "Let me hide myself in Thee.",
@@ -669,7 +720,9 @@ private val HYMNS = listOf(
         "[Verse 1]", "Blessed assurance, Jesus is mine!", "O what a foretaste of glory divine!",
     )),
     Hymn("419", "To God Be The Glory", "Fanny Crosby", lyrics = listOf(
-        "[Verse 1]", "To God be the glory, great things He hath done,", "So loved He the world that He gave us His Son.",
+        "[Verse 1]",
+        "To God be the glory, great things He hath done,",
+        "So loved He the world that He gave us His Son.",
     )),
     Hymn("437", "Come, Thou Long-Expected Jesus", "Charles Wesley", lyrics = listOf(
         "[Verse 1]", "Come, Thou long-expected Jesus,", "Born to set Thy people free.",

@@ -226,7 +226,10 @@ class SongSettingsTabLyricsTest {
     fun `the lyrics fullscreen shadow detail fields store their values`() =
         songTab(
             initial = settingsWith {
-                copy(lyricsShadow = true, lyricsShadowColor = "#040506", lyricsShadowSize = 125, lyricsShadowOpacity = 79)
+                copy(lyricsShadow = true,
+                    lyricsShadowColor = "#040506",
+                    lyricsShadowSize = 125,
+                    lyricsShadowOpacity = 79)
             },
         ) { get ->
             retypeNumberField(showing = 125, to = 180)

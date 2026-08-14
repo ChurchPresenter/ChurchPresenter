@@ -32,9 +32,24 @@ class SongsViewModelSortingTest {
     fun createLibrary() {
         dir = Files.createTempDirectory("cp-songs-sort-test").toFile()
         // Deliberately mixed case and out-of-order numbers.
-        song(songbook = "Zulu", number = "10", title = "zion Awaits", author = "Watts", composer = "Mason", tune = "OLD")
-        song(songbook = "Alpha", number = "2", title = "Abide With Me", author = "lyte", composer = "monk", tune = "eventide")
-        song(songbook = "Mike", number = "1", title = "Marvellous Grace", author = "Johnston", composer = "Towner", tune = "MOODY")
+        song(songbook = "Zulu",
+            number = "10",
+            title = "zion Awaits",
+            author = "Watts",
+            composer = "Mason",
+            tune = "OLD")
+        song(songbook = "Alpha",
+            number = "2",
+            title = "Abide With Me",
+            author = "lyte",
+            composer = "monk",
+            tune = "eventide")
+        song(songbook = "Mike",
+            number = "1",
+            title = "Marvellous Grace",
+            author = "Johnston",
+            composer = "Towner",
+            tune = "MOODY")
     }
 
     @AfterTest
@@ -60,7 +75,10 @@ class SongsViewModelSortingTest {
     }
 
     private fun viewModel(): SongsViewModel {
-        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined, enableFolderWatcher = false)
+        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false)
         created.add(vm)
         awaitUntil("songs") { vm.filteredSongItems.value.size == 3 }
         return vm
@@ -219,7 +237,10 @@ class SongsViewModelSortingTest {
                 SongItem(number = "0042", title = "Padded", songbook = "Hymnal", lyrics = listOf("l")),
                 File(File(padded, "Hymnal"), "0042 - Padded.song").absolutePath,
             )
-            val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = padded.absolutePath)), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined, enableFolderWatcher = false)
+            val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = padded.absolutePath)),
+                dispatcher = Dispatchers.Unconfined,
+                ioDispatcher = Dispatchers.Unconfined,
+                enableFolderWatcher = false)
                 .also { created.add(it) }
             awaitUntil("padded song") { vm.filteredSongItems.value.isNotEmpty() }
 

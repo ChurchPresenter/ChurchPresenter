@@ -106,7 +106,8 @@ class InterlinearVerseTest {
             words = listOf(InterlinearWord(text = "ἀγάπη", strongsNumber = "G26")),
         )
 
-        val restored = Json.decodeFromString(InterlinearVerse.serializer(), Json.encodeToString(InterlinearVerse.serializer(), original))
+        val restored = Json.decodeFromString(InterlinearVerse.serializer(),
+            Json.encodeToString(InterlinearVerse.serializer(), original))
 
         assertEquals(original, restored)
     }

@@ -319,7 +319,8 @@ internal fun Route.mediaAndAssetRoutes(
                         // date so uploads from different days are catalogued separately.
                         val dateStr = java.time.LocalDate.now().toString()   // "yyyy-MM-dd"
                         val dateFolderId = "${deviceUploadsFolderId}_$dateStr"
-                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads/$dateStr").also { it.mkdirs() }
+                        val uploadDir = File(System.getProperty("user.home"),
+                            ".churchpresenter/device_uploads/$dateStr").also { it.mkdirs() }
                         // Ensure the file name is unique by appending a timestamp if needed
                         val uniqueName = if (File(uploadDir, safeName).exists()) {
                             val ts = System.currentTimeMillis()

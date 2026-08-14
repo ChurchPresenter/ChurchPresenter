@@ -177,7 +177,8 @@ internal fun Route.presentationRoutes(
                             return@post
                         }
                         val fileBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
-                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_presentations").also { it.mkdirs() }
+                        val uploadDir = File(System.getProperty("user.home"),
+                            ".churchpresenter/device_presentations").also { it.mkdirs() }
                         val uniqueName = if (File(uploadDir, safeName).exists()) {
                             val ts   = System.currentTimeMillis()
                             val base = safeName.substringBeforeLast('.', safeName)
@@ -247,7 +248,8 @@ internal fun Route.presentationRoutes(
                             call.respond(HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
                             return@post
                         }
-                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_media").also { it.mkdirs() }
+                        val uploadDir = File(System.getProperty("user.home"),
+                            ".churchpresenter/device_media").also { it.mkdirs() }
                         val uniqueName = if (File(uploadDir, safeName).exists()) {
                             val ts   = System.currentTimeMillis()
                             val base = safeName.substringBeforeLast('.', safeName)

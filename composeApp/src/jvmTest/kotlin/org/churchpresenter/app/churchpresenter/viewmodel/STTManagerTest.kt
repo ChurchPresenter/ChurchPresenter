@@ -187,7 +187,9 @@ class STTManagerTest {
         val s = stt()
         s.transcription("""{"segments":[{"id":1,"text":"first"},{"id":2,"text":"second"}]}""")
         s.transcription("""{"segments":[{"id":1,"text":"first (corrected)"}]}""")
-        assertEquals(listOf("first (corrected)"), s.segments.map { it.text }, "the server sends the whole transcript each time")
+        assertEquals(listOf("first (corrected)"),
+            s.segments.map { it.text },
+            "the server sends the whole transcript each time")
     }
 
     @Test
@@ -203,7 +205,9 @@ class STTManagerTest {
         val s = stt()
         s.transcription("""{"segments":[{"id":1,"text":"first"}]}""")
         s.transcription("""{"in_progress":"still talking"}""")
-        assertEquals(listOf("first"), s.segments.map { it.text }, "an in-progress-only update must not wipe the transcript")
+        assertEquals(listOf("first"),
+            s.segments.map { it.text },
+            "an in-progress-only update must not wipe the transcript")
         assertEquals("still talking", s.inProgressText.value)
     }
 
@@ -299,7 +303,9 @@ class STTManagerTest {
     fun `the in-progress translation arrives as an object`() {
         val s = stt()
         s.translation("""{"in_progress":{"text":"For God","translated_text":"Ибо"}}""")
-        assertEquals("Ибо", s.inProgressTranslation.value, "the object form carries both languages; only the translation is shown")
+        assertEquals("Ибо",
+            s.inProgressTranslation.value,
+            "the object form carries both languages; only the translation is shown")
     }
 
     @Test

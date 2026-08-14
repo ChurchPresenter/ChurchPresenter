@@ -162,7 +162,9 @@ class SongPresenterTitleRuleTest {
 
     @Test
     fun `the three alignments map to their text directions`() {
-        assertEquals(TextAlign.Start.toString(), textAlign(Constants.LEFT), "Start rather than Left, so RTL text still reads")
+        assertEquals(TextAlign.Start.toString(),
+            textAlign(Constants.LEFT),
+            "Start rather than Left, so RTL text still reads")
         assertEquals(TextAlign.End.toString(), textAlign(Constants.RIGHT))
         assertEquals(TextAlign.Center.toString(), textAlign(Constants.CENTER))
     }

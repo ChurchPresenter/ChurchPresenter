@@ -88,7 +88,9 @@ class BibleEngineClientMessageTest {
         c.receive(detection(type = "scripture.detected"))
         c.receive(detection(type = "scripture.continuation"))
         c.receive(detection(type = "scripture.some.future.variant"))
-        assertEquals(3, detections.size, "the engine may add event kinds; the app should not have to be taught each one")
+        assertEquals(3,
+            detections.size,
+            "the engine may add event kinds; the app should not have to be taught each one")
     }
 
     // ── Frames that must be ignored ─────────────────────────────────────────────

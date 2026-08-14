@@ -65,7 +65,11 @@ class InstanceLinkClient(
     private val onLiveStateUpdated: (LiveStateDto) -> Unit,
     private val onDisplayCleared: () -> Unit,
     private val onSongSectionSelected: (Int) -> Unit,
-    private val onPresentationSlideChanged: (id: String, index: Int, total: Int, isPlaying: Boolean, isLive: Boolean) -> Unit,
+    private val onPresentationSlideChanged: (id: String,
+        index: Int,
+        total: Int,
+        isPlaying: Boolean,
+        isLive: Boolean) -> Unit,
     private val onSongsUpdated: (SongCatalogResponse) -> Unit,
     /** Every decoded WS message — application-level liveness ("last update Xs ago" in the UI). */
     private val onMessageReceived: () -> Unit = {},
@@ -257,7 +261,9 @@ class InstanceLinkClient(
             Constants.WS_EVENT_SCHEDULE_UPDATED -> {
                 val response = runCatching { json.decodeFromString(ScheduleResponse.serializer(), msg.payload) }.getOrNull()
                 if (response == null) {
-                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_message_decode_failed", mapOf("context" to "schedule"))
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER,
+                        "ws_message_decode_failed",
+                        mapOf("context" to "schedule"))
                     return
                 }
                 onScheduleUpdated(response.items)
@@ -265,7 +271,9 @@ class InstanceLinkClient(
             Constants.WS_EVENT_LIVE_STATE_CHANGED -> {
                 val state = runCatching { json.decodeFromString(LiveStateDto.serializer(), msg.payload) }.getOrNull()
                 if (state == null) {
-                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_message_decode_failed", mapOf("context" to "live_state"))
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER,
+                        "ws_message_decode_failed",
+                        mapOf("context" to "live_state"))
                     return
                 }
                 onLiveStateUpdated(state)
@@ -273,7 +281,9 @@ class InstanceLinkClient(
             Constants.WS_EVENT_SONGS_UPDATED -> {
                 val catalog = runCatching { json.decodeFromString(SongCatalogResponse.serializer(), msg.payload) }.getOrNull()
                 if (catalog == null) {
-                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_message_decode_failed", mapOf("context" to "song_catalog"))
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER,
+                        "ws_message_decode_failed",
+                        mapOf("context" to "song_catalog"))
                     return
                 }
                 onSongsUpdated(catalog)
@@ -286,7 +296,9 @@ class InstanceLinkClient(
             Constants.WS_EVENT_COMMAND_ACK -> {
                 val ack = runCatching { json.decodeFromString(CommandAckPayload.serializer(), msg.payload) }.getOrNull()
                 if (ack == null) {
-                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, "ws_message_decode_failed", mapOf("context" to "command_ack"))
+                    InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER,
+                        "ws_message_decode_failed",
+                        mapOf("context" to "command_ack"))
                     return
                 }
                 pendingAcks.remove(ack.commandId)?.complete(ack)
@@ -327,7 +339,8 @@ class InstanceLinkClient(
      * the next schedule_updated broadcast.
      */
     fun sendRemoveFromSchedule(id: String) {
-        sendCommand(Constants.WS_CMD_REMOVE_FROM_SCHEDULE, json.encodeToString(RemoveFromScheduleRequest.serializer(), RemoveFromScheduleRequest(id)))
+        sendCommand(Constants.WS_CMD_REMOVE_FROM_SCHEDULE,
+            json.encodeToString(RemoveFromScheduleRequest.serializer(), RemoveFromScheduleRequest(id)))
     }
 
     /**
@@ -421,7 +434,8 @@ class InstanceLinkClient(
     fun sendSelectBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) {
         sendCommand(
             Constants.WS_CMD_SELECT_BIBLE_VERSE,
-            json.encodeToString(SelectBibleVerseRequest.serializer(), SelectBibleVerseRequest(bookName, chapter, verseNumber, verseText, verseRange))
+            json.encodeToString(SelectBibleVerseRequest.serializer(),
+                SelectBibleVerseRequest(bookName, chapter, verseNumber, verseText, verseRange))
         )
     }
 
@@ -439,7 +453,8 @@ class InstanceLinkClient(
     fun sendSelectSongSection(number: String, section: Int, lineIndex: Int = -1) {
         sendCommand(
             Constants.WS_CMD_SELECT_SONG_SECTION,
-            json.encodeToString(SelectSongSectionRequest.serializer(), SelectSongSectionRequest(number, section, lineIndex))
+            json.encodeToString(SelectSongSectionRequest.serializer(),
+                SelectSongSectionRequest(number, section, lineIndex))
         )
     }
 
@@ -591,7 +606,10 @@ class InstanceLinkClient(
                 if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
             }
             if (!response.status.isSuccess()) {
-                logFetch("secondary_bible_file", success = false, status = response.status.value, reason = "http_status")
+                logFetch("secondary_bible_file",
+                    success = false,
+                    status = response.status.value,
+                    reason = "http_status")
                 return null
             }
             logFetch("secondary_bible_file", success = true, status = response.status.value)

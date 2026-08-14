@@ -4,7 +4,8 @@ package org.churchpresenter.app.churchpresenter.utils
  * The schedule card density ladder: five fixed rungs rather than a continuous zoom -- Compact,
  * Normal and Detailed, plus one step smaller and one step larger than those. The two outer rungs
  * reuse their neighbour's name in the UI: they change how much room a card takes, not what it
- * shows, so a fourth and fifth label would name a distinction that is not there. The persisted setting stays a plain `Int` (`AppSettings.scheduleItemZoomPercent`,
+ * shows,
+ so a fourth and fifth label would name a distinction that is not there. The persisted setting stays a plain `Int` (`AppSettings.scheduleItemZoomPercent`,
  * pre-dating this ladder) so a value saved under the old 11-rung 70-150 scheme still resolves to the
  * nearest rung here. Extracted from ScheduleTab so the rung math is tested without the Compose
  * controls.

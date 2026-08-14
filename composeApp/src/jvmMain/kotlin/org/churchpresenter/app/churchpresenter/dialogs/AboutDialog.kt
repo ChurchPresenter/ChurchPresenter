@@ -183,7 +183,9 @@ internal fun AboutDialogContent(
                             Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"))
                         }
                     ) {
-                        Text(stringResource(Res.string.submit_feature_request), maxLines = 2, textAlign = TextAlign.Center)
+                        Text(stringResource(Res.string.submit_feature_request),
+                            maxLines = 2,
+                            textAlign = TextAlign.Center)
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -274,7 +276,12 @@ fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
 }
 
 @Composable
-fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onFileSaved: (() -> Unit)? = null, canvasWidth: Int? = null, canvasHeight: Int? = null) {
+fun LottieGenWindow(theme: ThemeMode,
+    outputDir: File?,
+    onClose: () -> Unit,
+    onFileSaved: (() -> Unit)? = null,
+    canvasWidth: Int? = null,
+    canvasHeight: Int? = null) {
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.lottie_gen_window_title),

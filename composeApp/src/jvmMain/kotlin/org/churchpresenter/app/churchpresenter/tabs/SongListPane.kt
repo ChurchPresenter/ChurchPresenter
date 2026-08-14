@@ -286,7 +286,10 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 }
                 if (searchQuery.isNotEmpty()) {
                     IconButton(onClick = { onSearchQueryChange("") }, modifier = Modifier.size(30.dp)) {
-                        Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(painter = painterResource(Res.drawable.ic_close),
+                            contentDescription = stringResource(Res.string.search_clear),
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -330,9 +333,14 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary)
                 } else {
-                    Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                    Icon(painter = painterResource(Res.drawable.ic_search),
+                        contentDescription = stringResource(Res.string.search),
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary)
                 }
             }
 
@@ -435,7 +443,8 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             .then(reorderDragMod),
                         contentAlignment = Alignment.Center
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center) {
                             // Deliberately unlabelled: this is a column header whose click
                             // SORTS, so naming it "Add to Schedule" would name it after an
                             // action it does not perform. Giving a sortable header its proper
@@ -769,7 +778,10 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                     )
                                 },
                                 onClick = {
-                                    onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId)
+                                    onAddToSchedule(song.number.toIntOrNull() ?: 0,
+                                        song.title,
+                                        song.songbook,
+                                        song.songId)
                                     showContextMenu = false
                                 }
                             )
@@ -891,11 +903,17 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 Spacer(modifier = Modifier.weight(1f))
                 TooltipArea(
                     tooltip = {
-                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                            Text(stringResource(Res.string.song_favorites_clear), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                        Surface(color = MaterialTheme.colorScheme.inverseSurface,
+                            shape = MaterialTheme.shapes.extraSmall,
+                            tonalElevation = 4.dp) {
+                            Text(stringResource(Res.string.song_favorites_clear),
+                                color = MaterialTheme.colorScheme.inverseOnSurface,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.bodySmall)
                         }
                     },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(onClick = {
                         onClearFavorites()
@@ -967,7 +985,10 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                     if (onAddToSchedule != null) {
                                         IconButton(
                                             onClick = {
-                                                onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId)
+                                                onAddToSchedule(song.number.toIntOrNull() ?: 0,
+                                                    song.title,
+                                                    song.songbook,
+                                                    song.songId)
                                             },
                                             modifier = Modifier.size(20.dp)
                                         ) {

@@ -211,7 +211,8 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                 _totalSlides.value = slideCount
                 _isLoading.value = true
             }
-            val cacheDir = File(File(System.getProperty("user.home"), ".churchpresenter/slides"), "remote_$scheduleItemId")
+            val cacheDir = File(File(System.getProperty("user.home"), ".churchpresenter/slides"),
+                "remote_$scheduleItemId")
                 .also { it.mkdirs() }
             var success = false
             try {

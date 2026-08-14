@@ -31,7 +31,8 @@ internal fun Route.lowerThirdAndAtemRoutes(
                     if (!server.checkApiKey(call)) return@get
                     val items = server.atem.lowerThirdFiles().map { f ->
                         val dur = try { LottieRenderCache.lottieDurationMs(f.readText()) ?: 0L } catch (_: Exception) { 0L }
-                        val nameJson = json.encodeToString(kotlinx.serialization.serializer<String>(), f.nameWithoutExtension)
+                        val nameJson = json.encodeToString(kotlinx.serialization.serializer<String>(),
+                            f.nameWithoutExtension)
                         """{"name":$nameJson,"durationMs":$dur}"""
                     }
                     call.respondText("[${items.joinToString(",")}]", ContentType.Application.Json)
