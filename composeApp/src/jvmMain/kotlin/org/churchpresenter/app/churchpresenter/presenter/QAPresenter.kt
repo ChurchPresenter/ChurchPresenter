@@ -60,91 +60,9 @@ fun QAPresenter(
     val textColor = if (isKey) Color.White else parseHexColor(qaSettings.textColor)
     val bgOpacity = (qaSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
     val cardBg = if (isKey) Color.White
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                                                                                                                                                                                                                                                                                 else parseHexColor(if (qaSettings.backgroundColor == "transparent") "#1E1E2E" else qaSettings.backgroundColor).copy(alpha = bgOpacity)
+    else parseHexColor(if (
+        qaSettings.backgroundColor == "transparent"
+    ) "#1E1E2E" else qaSettings.backgroundColor).copy(alpha = bgOpacity)
     val fontFamily = systemFontFamilyOrDefault(qaSettings.fontType)
 
     val shadowColorBase = parseHexColor(qaSettings.shadowColor)
@@ -221,91 +139,9 @@ fun QAQRCodePresenter(
     val textColor = if (isKey) Color.White else parseHexColor(qaSettings.textColor)
     val qrBgOpacity = (qaSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
     val bgColor = if (isKey) Color.Transparent
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                                                                                                                                                                                                                                                                                  else parseHexColor(if (qaSettings.backgroundColor == "transparent") "#1E1E2E" else qaSettings.backgroundColor).copy(alpha = qrBgOpacity)
+    else parseHexColor(if (
+        qaSettings.backgroundColor == "transparent"
+    ) "#1E1E2E" else qaSettings.backgroundColor).copy(alpha = qrBgOpacity)
 
     val qrFgArgb = remember(qaSettings.qrForegroundColor) { parseHexColor(qaSettings.qrForegroundColor).toArgb() }
     val qrBgArgb = remember(qaSettings.qrBackgroundColor, qaSettings.qrBackgroundOpacity) {

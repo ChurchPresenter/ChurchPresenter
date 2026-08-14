@@ -110,7 +110,8 @@ class ScreenshotInvariantsTest {
     @Test
     fun `no screenshot renders a live clock`() {
         val liveClock =
-            Regex("""\b(LocalDate|LocalDateTime|LocalTime|Instant|ZonedDateTime|OffsetDateTime|Year|YearMonth)\.now\(""")
+            Regex("""\b(LocalDate|LocalDateTime|LocalTime|Instant|ZonedDateTime|OffsetDateTime|Year|YearMonth)\.now""" +
+                """\(""")
         val offenders = sources()
             .filterNot { (file, _) -> file.name == "${this::class.simpleName}.kt" }
             .flatMap { (file, text) ->

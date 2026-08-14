@@ -133,93 +133,9 @@ internal fun ContentOutputsMonitorPreview(
         if (assignment.showBible) {
             // An empty selection means every translation, so the whole stack is shown.
             val shownNames = if (assignment.bibleTranslations.isEmpty()) translationNames
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                                                                                                                                                                                                                                                                                              else assignment.bibleTranslations.filter {
-                                                                                                                                                  it in translationNames.indices
-                                                                                                                                              }.map { translationNames[it] }
+            else assignment.bibleTranslations.filter {
+            it in translationNames.indices
+            }.map { translationNames[it] }
             add(
                 if (translationNames.size > 1 && shownNames.isNotEmpty())
                     bibleListFormat.format(bibleLabel, shownNames.joinToString(", "))

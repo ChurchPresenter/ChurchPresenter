@@ -392,7 +392,8 @@ class PlanningCenterImportContentTest {
     }
 
     @Test
-    fun `importing a generic item with no scripture calls onAddAnnouncement with the item's description`() = dialog { vm, _, _, recorder ->
+    fun `importing a generic item with no scripture calls onAddAnnouncement with the item's description`()
+        = dialog { vm, _, _, recorder ->
         withPlan(listOf(planItem("i1", "Sermon Notes", itemType = "item", description = "some notes")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }

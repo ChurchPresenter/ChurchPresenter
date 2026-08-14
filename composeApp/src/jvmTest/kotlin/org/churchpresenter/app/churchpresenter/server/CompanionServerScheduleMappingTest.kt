@@ -376,7 +376,8 @@ class CompanionServerScheduleMappingTest {
     @Test
     fun `a verse posted in the companion format arrives as a verse`() {
         val (status, item) = addAndApprove(
-            """{"item":{"type":"bible","bookName":"John","chapter":3,"verseNumber":16,"verseText":"For God so loved the world."}}"""
+            """{"item":{"type":"bible","bookName":"John","chapter":3,"verseNumber":16,"verseText":"For God so loved""" +
+                """ the world."}}"""
         )
 
         assertEquals(HttpStatusCode.OK, status)
@@ -498,7 +499,8 @@ class CompanionServerScheduleMappingTest {
     fun `a body in the legacy sealed-class format is still accepted`() {
         // Older clients send the discriminated form; they must keep working.
         val (status, item) = addAndApprove(
-            """{"item":{"type":"org.churchpresenter.app.churchpresenter.models.ScheduleItem.LabelItem","id":"legacy-1","text":"Offering","textColor":"#FFFFFF","backgroundColor":"#000000"}}"""
+            """{"item":{"type":"org.churchpresenter.app.churchpresenter.models.ScheduleItem.LabelItem","id":"legacy""" +
+                """-1","text":"Offering","textColor":"#FFFFFF","backgroundColor":"#000000"}}"""
         )
 
         assertEquals(HttpStatusCode.OK, status)

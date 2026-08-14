@@ -962,7 +962,8 @@ fun PresentationTab(
                     maxLines = 1
                 )
                 Text(
-                    "${appSettings.presentationSettings.autoScrollInterval.toInt()} ${stringResource(Res.string.unit_s)}",
+                    "${appSettings.presentationSettings.autoScrollInterval.toInt()} " +
+                        "${stringResource(Res.string.unit_s)}",
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1
@@ -1015,7 +1016,8 @@ fun PresentationTab(
                     maxLines = 1
                 )
                 Text(
-                    "${appSettings.presentationSettings.transitionDuration.toInt()} ${stringResource(Res.string.unit_ms)}",
+                    "${appSettings.presentationSettings.transitionDuration.toInt()} " +
+                        "${stringResource(Res.string.unit_ms)}",
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1

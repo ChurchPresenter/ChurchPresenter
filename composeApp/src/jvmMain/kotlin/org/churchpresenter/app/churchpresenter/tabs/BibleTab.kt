@@ -120,93 +120,9 @@ internal fun withBibleColumnWidths(
         bibleColWidthBook = bookWidthDp,
         bibleColWidthChapter = chapterWidthDp
     ))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                                                                                                                                                                                                                                                                    else settings.copy(windowedLayout = settings.windowedLayout.copy(
-                                                                                                                        bibleColWidthBook = bookWidthDp,
-                                                                                                                        bibleColWidthChapter = chapterWidthDp
+    else settings.copy(windowedLayout = settings.windowedLayout.copy(
+    bibleColWidthBook = bookWidthDp,
+    bibleColWidthChapter = chapterWidthDp
                                                                                                                     ))
 
 internal fun withBibleSplitPanelWidth(settings: AppSettings, isMaximized: Boolean, widthDp: Int): AppSettings =
@@ -920,7 +836,8 @@ fun BibleTab(
                     focusRequester.requestFocus()
                 },
                 onAddToSchedule = {
-                    viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
+                    viewModel.addCurrentVerseToSchedule {
+                            bookName, chapter, verseNumber, verseText, verseRange, bookId ->
                         onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange, bookId)
                     }
                     focusRequester.requestFocus()
@@ -1035,7 +952,8 @@ fun BibleTab(
                     )
                 },
                 onAddToSchedule = {
-                    viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
+                    viewModel.addCurrentVerseToSchedule {
+                            bookName, chapter, verseNumber, verseText, verseRange, bookId ->
                         onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange, bookId)
                     }
                     focusRequester.requestFocus()

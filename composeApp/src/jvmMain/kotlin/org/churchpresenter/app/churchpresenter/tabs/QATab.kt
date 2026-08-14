@@ -711,7 +711,8 @@ fun QATab(
                                         withContext(Dispatchers.IO) {
                                             path.toFile().writeText(
                                                 toExport.joinToString("\n") { q ->
-                                                    "[${SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(q.timestamp))}] [${q.status}] ${q.text}"
+                                                    "[${SimpleDateFormat("HH:mm", Locale.getDefault())
+                                                        .format(Date(q.timestamp))}] [${q.status}] ${q.text}"
                                                 }
                                             )
                                         }

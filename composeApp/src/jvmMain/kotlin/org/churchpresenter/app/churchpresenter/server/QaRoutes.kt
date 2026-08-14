@@ -50,7 +50,9 @@ internal fun Route.qaRoutes(
                 get("/api/qa/status") {
                     val qa = server.qaManager
                     call.respondText(
-                        """{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":${server.qaCooldownSeconds},"displayedQuestionId":"${qa?.displayedQuestion?.id ?: ""}","votingEnabled":${server.qaVotingEnabled}}""",
+                        """{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":""" +
+                            """${server.qaCooldownSeconds},"displayedQuestionId":"""" +
+                                """${qa?.displayedQuestion?.id ?: ""}","votingEnabled":${server.qaVotingEnabled}}""",
                         ContentType.Application.Json
                     )
                 }

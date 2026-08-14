@@ -167,7 +167,9 @@ internal fun Route.webSocketRoute(
                         WebSocketMessage(
                             type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
                             payload =
-                                """{"id":"${server._currentPresentationId}","index":${server._currentSlideIndex},"total":${server._currentSlideTotalCount},"isPlaying":${server._presentationIsPlaying},"isLive":${server._presentationIsLive}}"""
+                                """{"id":"${server._currentPresentationId}","index":${server._currentSlideIndex},"t""" +
+                                    """otal":${server._currentSlideTotalCount},"isPlaying":""" +
+                                        """${server._presentationIsPlaying},"isLive":${server._presentationIsLive}}"""
                         ))))
                     _liveState.value?.let { state ->
                         send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
@@ -262,7 +264,8 @@ internal fun Route.webSocketRoute(
                                         val req = json.decodeFromString(SelectSlideRequest.serializer(), msg.payload)
                                         scope.launch { server.onSelectSlide.emit(req) }
                                         val presName =
-                                            _presentationCatalogs[_scheduleItemToPresentationId[req.id] ?: req.id]?.fileName ?: req.id
+                                            _presentationCatalogs[_scheduleItemToPresentationId[req.id] ?: req.id]
+                                                ?.fileName ?: req.id
                                         scope.launch {
                                             server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                                                 "present",

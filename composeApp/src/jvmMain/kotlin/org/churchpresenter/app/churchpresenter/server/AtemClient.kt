@@ -490,7 +490,8 @@ class AtemClient(val host: String, val port: Int = 9910) {
         if (!knownStills.isNullOrEmpty() && knownStills.none { it.index == slot }) {
             // 1-based in messages to match ATEM Software Control's numbering
             throw Exception(
-                "Still slot ${slot + 1} does not exist on this ATEM (available: 1–${knownStills.maxOf { it.index } + 1})"
+                "Still slot ${slot + 1} does not exist on this ATEM (available: 1–" +
+                    "${knownStills.maxOf { it.index } + 1})"
             )
         }
 

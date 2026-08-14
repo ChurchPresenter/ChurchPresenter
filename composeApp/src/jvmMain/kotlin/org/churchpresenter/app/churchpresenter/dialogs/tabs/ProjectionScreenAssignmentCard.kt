@@ -393,7 +393,8 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                         if (screen.isPrimary) continue
                         opts.add(KeyOutputOption(
                             label =
-                                "Display $keyDisplayNum (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX},${screen.boundsY})",
+                                "Display $keyDisplayNum (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX}," +
+                                    "${screen.boundsY})",
                             shortLabel = "D$keyDisplayNum (${screen.boundsW}x${screen.boundsH})",
                             targetDisplay = screen.index, targetType = "screen",
                             boundsX =

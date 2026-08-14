@@ -196,7 +196,8 @@ class SharedBrowserFrameCacheTest {
         cdp.connect("ws://127.0.0.1:${fake.port}/devtools/page/FAKE")
 
         fake.sendEvent(
-            """{"method":"Page.frameNavigated","params":{"frame":{"url":"https://ads.example/iframe","parentId":"main-frame-id"}}}"""
+            """{"method":"Page.frameNavigated","params":{"frame":{"url":"https://ads.example/iframe","parentId":"ma""" +
+                """in-frame-id"}}}"""
         )
         // Prove the event was actually processed (not just "not yet arrived") by sending a real
         // command afterward and waiting for its round trip before asserting the negative.

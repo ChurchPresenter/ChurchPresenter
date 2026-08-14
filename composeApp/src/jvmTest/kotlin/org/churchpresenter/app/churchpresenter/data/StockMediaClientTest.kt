@@ -193,7 +193,8 @@ class StockMediaClientTest {
     @Test
     fun `a pixabay photo is listed with a preview and a large download`() {
         respondWith(
-            """{"hits":[{"id":999,"previewURL":"https://img/prev.jpg","largeImageURL":"https://img/large.jpg"}],"totalHits":1}""",
+            """{"hits":[{"id":999,"previewURL":"https://img/prev.jpg","largeImageURL":"https://img/large.jpg"}],"to""" +
+                """talHits":1}""",
         )
 
         val item = items(search(pixabay, photo)).single()

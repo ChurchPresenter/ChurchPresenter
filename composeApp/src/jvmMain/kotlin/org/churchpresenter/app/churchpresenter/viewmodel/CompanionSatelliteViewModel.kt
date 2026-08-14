@@ -213,7 +213,8 @@ class CompanionSatelliteViewModel {
                                 // warning breadcrumb — kept for context if a real crash follows — rather
                                 // than a Sentry issue, which isn't actionable and floods the quota.
                                 CrashReporter.breadcrumb(
-                                    "Companion Satellite connection error (${slot.connectionId}/${slot.placement}): ${error ?: "unknown"}",
+                                    "Companion Satellite connection error (${slot.connectionId}/${slot.placement}): " +
+                                        "${error ?: "unknown"}",
                                     category = "integration",
                                     level = SentryLevel.WARNING
                                 )

@@ -233,7 +233,8 @@ class BibleSearchAndNumberingTest {
         assertEquals(
             22,
             found.displayChapter,
-            "and it must be shown as this Bible's own Psalm 22 — showing 23 would name a psalm the reader is not looking at",
+            "and it must be shown as this Bible's own Psalm 22 — showing 23 would name a psalm the reader is not look" +
+                "ing at",
         )
         assertEquals(1, found.displayVerse)
     }

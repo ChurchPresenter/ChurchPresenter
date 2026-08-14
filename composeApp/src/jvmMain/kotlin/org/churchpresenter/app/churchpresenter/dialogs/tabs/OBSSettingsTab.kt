@@ -213,7 +213,8 @@ fun OBSSettingsTab(
                             OBSWebSocketManager.ConnectionStatus.CONNECTING ->
                                 stringResource(Res.string.obs_status_connecting) to MaterialTheme.semantic.warning
                             OBSWebSocketManager.ConnectionStatus.ERROR ->
-                                "${stringResource(Res.string.obs_status_error)}: $errorMessage" to MaterialTheme.colorScheme.error
+                                "${stringResource(Res.string.obs_status_error)}: " +
+                                    "$errorMessage" to MaterialTheme.colorScheme.error
                             OBSWebSocketManager.ConnectionStatus.DISCONNECTED ->
                                 stringResource(Res.string.obs_status_disconnected) to MaterialTheme.colorScheme
                                     .onSurface

@@ -100,10 +100,10 @@ class CompanionSatelliteSettingsTabFieldsTest {
                 c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.deviceId
             },
             SatLabel.LEFT_DEVICE_ID to {
-                c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.leftSidebarDeviceId
+                c: CompanionSatelliteSettings -> c.leftSidebarDeviceId
             },
             SatLabel.RIGHT_DEVICE_ID to {
-                c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.rightSidebarDeviceId
+                c: CompanionSatelliteSettings -> c.rightSidebarDeviceId
             },
         )
         for ((caption, read) in cases) {

@@ -700,7 +700,8 @@ fun PicturesTab(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text =
-                                "${appSettings.pictureSettings.autoScrollInterval.toInt()} ${stringResource(Res.string.unit_s)}",
+                                "${appSettings.pictureSettings.autoScrollInterval.toInt()} " +
+                                    "${stringResource(Res.string.unit_s)}",
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
@@ -771,7 +772,8 @@ fun PicturesTab(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text =
-                                "${appSettings.pictureSettings.transitionDuration.toInt()} ${stringResource(Res.string.unit_ms)}",
+                                "${appSettings.pictureSettings.transitionDuration.toInt()} " +
+                                    "${stringResource(Res.string.unit_ms)}",
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium

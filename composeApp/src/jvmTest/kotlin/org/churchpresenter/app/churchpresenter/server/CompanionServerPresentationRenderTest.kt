@@ -101,7 +101,8 @@ class CompanionServerPresentationRenderTest {
                     val status = runCatching {
                         runBlocking {
                             warmClient.get(
-                                "http://127.0.0.1:$PORT${org.churchpresenter.app.churchpresenter.utils.Constants.ENDPOINT_PRESENTATIONS}/warm-up"
+                                "http://127.0.0.1:$PORT" +
+                                    "${Constants.ENDPOINT_PRESENTATIONS}/warm-up"
                             ).status
                         }
                     }.getOrNull()
@@ -181,7 +182,8 @@ class CompanionServerPresentationRenderTest {
      */
     private fun deck(scheduleItemId: String): Pair<HttpStatusCode, String> = runBlocking {
         val response = http().get(
-            "http://127.0.0.1:$PORT${org.churchpresenter.app.churchpresenter.utils.Constants.ENDPOINT_PRESENTATIONS}/$scheduleItemId"
+            "http://127.0.0.1:$PORT${org.churchpresenter.app.churchpresenter.utils.Constants.ENDPOINT_PRESENTATIONS}/" +
+                "$scheduleItemId"
         )
         response.status to response.bodyAsText()
     }
@@ -220,7 +222,8 @@ class CompanionServerPresentationRenderTest {
         val id = file.absolutePath.hashCode().toUInt().toString(16)
         val response = runBlocking {
             http().get(
-                "http://127.0.0.1:$PORT${org.churchpresenter.app.churchpresenter.utils.Constants.ENDPOINT_PRESENTATIONS}/$id/slides/0"
+                "http://127.0.0.1:$PORT" +
+                    "${org.churchpresenter.app.churchpresenter.utils.Constants.ENDPOINT_PRESENTATIONS}/$id/slides/0"
             )
         }
 

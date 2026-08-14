@@ -1138,7 +1138,9 @@ fun main() {
                                         ) {
                                             Text(
                                                 text =
-                                                    "Video backgrounds disabled after ${CrashReporter.consecutiveCrashes} consecutive crashes.  [Re-enable]  [Dismiss]",
+                                                    "Video backgrounds disabled after " +
+                                                        "${CrashReporter.consecutiveCrashes} consecutive crashes.  [R" +
+                                                            "e-enable]  [Dismiss]",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onErrorContainer,
                                                 modifier = Modifier.onPreviewKeyEvent {

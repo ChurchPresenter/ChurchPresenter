@@ -64,91 +64,9 @@ fun STTPresenter(
     val translationColor = if (isKey) Color.White else parseHexColor(sttSettings.translationTextColor)
     val bgOpacity = (sttSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
     val cardBg = if (isKey) Color.White
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                                                                                                                                                                                                                                                                                 else parseHexColor(if (sttSettings.backgroundColor == "transparent") "#1E1E2E" else sttSettings.backgroundColor).copy(alpha = bgOpacity)
+    else parseHexColor(if (
+        sttSettings.backgroundColor == "transparent"
+    ) "#1E1E2E" else sttSettings.backgroundColor).copy(alpha = bgOpacity)
     val fontFamily = systemFontFamilyOrDefault(sttSettings.fontType)
 
     val shadowColorBase = parseHexColor(sttSettings.shadowColor)

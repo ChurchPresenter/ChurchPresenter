@@ -177,14 +177,17 @@ class RemoteItemDtoTest {
                              "announcementText":"x","url":"https://example.org""""
 
         assertIs<ScheduleItem.SongItem>(parse("""{"songNumber":1,$laterFields}"""))
-        assertIs<ScheduleItem.BibleVerseItem>(parse("""{"bookName":"John","chapter":3,"verseNumber":16,$laterFields}"""))
+        assertIs<ScheduleItem.BibleVerseItem>(parse("""{"bookName":"John","chapter":3,"verseNumber":16,$laterFields""" +
+            """}"""))
         assertIs<ScheduleItem.PictureItem>(
-            parse("""{"folderPath":"/p","filePath":"/d","mediaUrl":"/m","strongsNumber":"G1","announcementText":"x","url":"u"}"""),
+            parse("""{"folderPath":"/p","filePath":"/d","mediaUrl":"/m","strongsNumber":"G1","announcementText":"x"""" +
+                ""","url":"u"}"""),
         )
         assertIs<ScheduleItem.PresentationItem>(
             parse("""{"filePath":"/d","mediaUrl":"/m","strongsNumber":"G1","announcementText":"x","url":"u"}"""),
         )
-        assertIs<ScheduleItem.MediaItem>(parse("""{"mediaUrl":"/m","strongsNumber":"G1","announcementText":"x","url":"u"}"""))
+        assertIs<ScheduleItem.MediaItem>(parse("""{"mediaUrl":"/m","strongsNumber":"G1","announcementText":"x","url""" +
+            """":"u"}"""))
         assertIs<ScheduleItem.DictionaryItem>(parse("""{"strongsNumber":"G1","announcementText":"x","url":"u"}"""))
         assertIs<ScheduleItem.AnnouncementItem>(parse("""{"announcementText":"x","url":"u"}"""))
         assertIs<ScheduleItem.WebsiteItem>(parse("""{"url":"https://example.org"}"""))

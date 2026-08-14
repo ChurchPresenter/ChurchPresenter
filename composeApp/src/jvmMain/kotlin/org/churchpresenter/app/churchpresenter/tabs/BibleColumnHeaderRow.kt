@@ -312,7 +312,8 @@ internal fun BibleColumnHeaderRow(
                                     )
                                     pair.forEachIndexed { position, item ->
                                         Text(
-                                            "${position + 1}. ${item.fileName.substringBeforeLast('.').ifEmpty { "-" }}",
+                                            "${position + 1}. " +
+                                                "${item.fileName.substringBeforeLast('.').ifEmpty { "-" }}",
                                             color = MaterialTheme.colorScheme.inverseOnSurface,
                                             style = MaterialTheme.typography.bodySmall,
                                         )

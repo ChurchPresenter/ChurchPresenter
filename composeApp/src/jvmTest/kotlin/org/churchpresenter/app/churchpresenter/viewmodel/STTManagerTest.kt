@@ -278,7 +278,8 @@ class STTManagerTest {
     @Test
     fun `translation segments carry their own timing and ids`() {
         val s = stt()
-        s.translation("""{"segments":[{"id":9,"timestamp":"10:31:02","translated_text":"привет","start":1.5,"end":2.5,"completed":false}]}""")
+        s.translation("""{"segments":[{"id":9,"timestamp":"10:31:02","translated_text":"привет","start":1.5,"end":2""" +
+            """.5,"completed":false}]}""")
         val seg = s.translationSegments.single()
         assertEquals(9, seg.id)
         assertEquals("10:31:02", seg.timestamp)

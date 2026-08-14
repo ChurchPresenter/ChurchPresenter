@@ -144,10 +144,12 @@ internal object WebLabel {
     const val TYPE_TO_PAGE_PLACEHOLDER = "Click an input on the live page first"
     const val ENGINE_UNAVAILABLE_TITLE = "Web browser unavailable"
     const val ENGINE_UNAVAILABLE_BODY =
-        "The browser engine could not start. Install the Microsoft Visual C++ Redistributable (x64) and restart the app."
+        "The browser engine could not start. Install the Microsoft Visual C++ Redistributable (x64) and restart the a" +
+            "pp."
     const val ENGINE_UNAVAILABLE_MACOS_TITLE = "Web browser requires a newer macOS"
     const val ENGINE_UNAVAILABLE_MACOS_BODY =
-        "ChurchPresenter's browser engine no longer supports this version of macOS. Update to macOS 12 (Monterey) or later to use the Web tab and browser sources."
+        "ChurchPresenter's browser engine no longer supports this version of macOS. Update to macOS 12 (Monterey) or " +
+            "later to use the Web tab and browser sources."
     const val SNAPSHOT_WAITING = "Waiting for snapshot..."
     const val SNAPSHOT_SCREEN_RECORDING_HINT =
         "If this persists, grant Screen Recording permission\n" +

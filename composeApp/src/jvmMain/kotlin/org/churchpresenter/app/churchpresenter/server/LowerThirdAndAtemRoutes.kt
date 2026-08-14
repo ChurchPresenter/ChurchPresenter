@@ -170,7 +170,8 @@ internal fun Route.lowerThirdAndAtemRoutes(
                         else -> ""","me":${mixEffect + 1},"key":${keyer + 1}"""
                     }
                     call.respondText(
-                        """{"status":"uploading","type":"still","name":${server.atem.jsonStr(name)},"slot":${slot + 1}$keyInfo}""",
+                        """{"status":"uploading","type":"still","name":${server.atem.jsonStr(name)},"slot":""" +
+                            """${slot + 1}$keyInfo}""",
                         ContentType.Application.Json
                     )
                 }
@@ -220,9 +221,11 @@ internal fun Route.lowerThirdAndAtemRoutes(
                     val clipCapacity = atem.detectedClipMaxFrames.getOrNull(slot)
                     if (clipCapacity != null && frameCount > clipCapacity) {
                         val secs = String.format(java.util.Locale.US, "%.1f", clipCapacity / fps)
+                        val tooLong = "Clip is $frameCount frames but slot ${slot + 1} holds at most " +
+                            "$clipCapacity frames (≈$secs s); use a shorter clip or lower fps"
                         call.respond(
                             HttpStatusCode.UnprocessableEntity,
-                            """{"error":${server.atem.jsonStr("Clip is $frameCount frames but slot ${slot + 1} holds at most $clipCapacity frames (≈$secs s); use a shorter clip or lower fps")}}"""
+                            """{"error":${server.atem.jsonStr(tooLong)}}"""
                         )
                         return@post
                     }
@@ -272,7 +275,8 @@ internal fun Route.lowerThirdAndAtemRoutes(
                         else -> ""","me":${mixEffect + 1},"key":${keyer + 1}"""
                     }
                     call.respondText(
-                        """{"status":"uploading","type":"clip","name":${server.atem.jsonStr(name)},"slot":${slot + 1}$keyInfoClip}""",
+                        """{"status":"uploading","type":"clip","name":${server.atem.jsonStr(name)},"slot":""" +
+                            """${slot + 1}$keyInfoClip}""",
                         ContentType.Application.Json
                     )
                 }

@@ -305,7 +305,8 @@ class BibleEngineClientLinkTest {
         val c = client()
         c.connect()
         repeat(3) { i ->
-            engine.push("""{"type":"scripture.detected","reference":{"bookId":43,"chapter":3,"verseStart":${16 + i}}}""")
+            engine.push("""{"type":"scripture.detected","reference":{"bookId":43,"chapter":3,"verseStart":${16 + i}""" +
+                """}}""")
         }
         assertEquals(
             listOf(16, 17, 18),

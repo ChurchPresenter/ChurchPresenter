@@ -327,7 +327,8 @@ class SettingsManagerTest {
         assertEquals(
             original,
             backup.readText(),
-            "the oldest snapshot for a version is the one taken before any lossy rewrite, so it is the one worth keeping",
+            "the oldest snapshot for a version is the one taken before any lossy rewrite, so it is the one worth keep" +
+                "ing",
         )
     }
 
@@ -350,7 +351,8 @@ class SettingsManagerTest {
     @Test
     fun `an older file's bible pair becomes the translation stack`() {
         val migrated = SettingsManager().migrateAndDecode(
-            """{"settingsVersion":5,"bibleSettings":{"primaryBible":"kjv.spb","secondaryBible":"rst.spb","primaryBibleColor":"#ABCDEF"}}""",
+            """{"settingsVersion":5,"bibleSettings":{"primaryBible":"kjv.spb","secondaryBible":"rst.spb","primaryBi""" +
+                """bleColor":"#ABCDEF"}}""",
         )
 
         assertEquals(
@@ -400,7 +402,8 @@ class SettingsManagerTest {
     fun `a current-version file whose stack never got filled is repaired on load`() {
         val current = AppSettings.CURRENT_SETTINGS_VERSION
         val loaded = SettingsManager().migrateAndDecode(
-            """{"settingsVersion":$current,"bibleSettings":{"primaryBible":"kjv.spb","secondaryBible":"rst.spb","translations":[]}}""",
+            """{"settingsVersion":$current,"bibleSettings":{"primaryBible":"kjv.spb","secondaryBible":"rst.spb","tr""" +
+                """anslations":[]}}""",
         )
 
         assertEquals(
@@ -417,7 +420,8 @@ class SettingsManagerTest {
         // beside an empty pair is a deliberate state, not drift, and must survive a reload.
         val current = AppSettings.CURRENT_SETTINGS_VERSION
         val loaded = SettingsManager().migrateAndDecode(
-            """{"settingsVersion":$current,"bibleSettings":{"primaryBible":"","secondaryBible":"","translations":[]}}""",
+            """{"settingsVersion":$current,"bibleSettings":{"primaryBible":"","secondaryBible":"","translations":[]""" +
+                """}}""",
         )
 
         assertTrue(

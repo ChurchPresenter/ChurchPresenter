@@ -148,7 +148,8 @@ class PlanningCenterClientNetworkTest {
 
     @Test
     fun `the connected person's name comes from the name attribute when present`() {
-        respondWith("""{"data":{"id":"1","attributes":{"name":"Pat Ringer","first_name":"Pat","last_name":"Ringer"}}}""")
+        respondWith("""{"data":{"id":"1","attributes":{"name":"Pat Ringer","first_name":"Pat","last_name":"Ringer"}""" +
+            """}}""")
 
         val outcome = runBlocking { PlanningCenterClient.getCurrentPerson("tok", http = http) }
 
@@ -282,7 +283,8 @@ class PlanningCenterClientNetworkTest {
 
     @Test
     fun `a plan's title comes from the title attribute when present`() {
-        respondWith("""{"data":[{"id":"9","attributes":{"title":"Easter Sunday","dates":"April 12, 2026","series_title":"Easter"}}]}""")
+        respondWith("""{"data":[{"id":"9","attributes":{"title":"Easter Sunday","dates":"April 12, 2026","series_ti""" +
+            """tle":"Easter"}}]}""")
 
         val plans = assertIs<PlanningCenterClient.PlansOutcome.Success>(
             runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
@@ -460,7 +462,8 @@ class PlanningCenterClientNetworkTest {
     @Test
     fun `pco's own lyrics attribute is preferred over locally stripping the chord chart`() {
         respondWith(
-            """{"data":{"attributes":{"chord_chart":"[G]Amazing [C]grace","lyrics":"Amazing grace (server stripped)"}}}""",
+            """{"data":{"attributes":{"chord_chart":"[G]Amazing [C]grace","lyrics":"Amazing grace (server stripped)""" +
+                """"}}}""",
         )
 
         val detail = assertIs<PlanningCenterClient.ArrangementOutcome.Success>(
@@ -525,7 +528,8 @@ class PlanningCenterClientNetworkTest {
     @Test
     fun `an attachment is read with its thumbnail when one is present`() {
         respondWith(
-            """{"data":[{"id":"att-1","attributes":{"filename":"slides.pdf","thumbnail_url":"https://s3/thumb.jpg"}}]}""",
+            """{"data":[{"id":"att-1","attributes":{"filename":"slides.pdf","thumbnail_url":"https://s3/thumb.jpg"}""" +
+                """}]}""",
         )
 
         val attachment = assertIs<PlanningCenterClient.AttachmentsOutcome.Success>(

@@ -426,7 +426,8 @@ internal fun Route.mediaAndAssetRoutes(
                             clientId = picUploadClientId
                         )) }
                         call.respondText(
-                            """{"ok":true,"folder-id":"$dateFolderId","image-index":$newIndex,"file-name":"${file.name}"}""",
+                            """{"ok":true,"folder-id":"$dateFolderId","image-index":$newIndex,"file-name":"""" +
+                                """${file.name}"}""",
                             ContentType.Application.Json
                         )
                     } catch (e: Exception) {

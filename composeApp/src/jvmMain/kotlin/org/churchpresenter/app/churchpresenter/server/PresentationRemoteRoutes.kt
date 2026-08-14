@@ -32,7 +32,14 @@ internal fun Route.presentationRemoteRoutes(
                     val note =
                         _presentationNotes[server._currentPresentationId]?.getOrNull(server._currentSlideIndex) ?: ""
                     call.respondText(
-                        """{"enabled":${server.presentationRemoteEnabled},"id":"${server._currentPresentationId}","index":${server._currentSlideIndex},"total":${server._currentSlideTotalCount},"frozen":${server._presentationFrozen},"isPlaying":${server._presentationIsPlaying},"isLive":${server._presentationIsLive},"autoScrollInterval":${server._autoScrollInterval},"looping":${server._presentationIsLooping},"passwordRequired":${server.presentationRemotePassword.isNotEmpty()},"notes":"${jsonEscape(note)}"}""",
+                        """{"enabled":${server.presentationRemoteEnabled},"id":"${server._currentPresentationId}","""" +
+                            """index":${server._currentSlideIndex},"total":${server._currentSlideTotalCount},"froze""" +
+                                """n":${server._presentationFrozen},"isPlaying":${server._presentationIsPlaying},"i""" +
+                                    """sLive":${server._presentationIsLive},"autoScrollInterval":""" +
+                                        """${server._autoScrollInterval},"looping":${server._presentationIsLooping}""" +
+                                            ""","passwordRequired":""" +
+                                                """${server.presentationRemotePassword.isNotEmpty()},"notes":"""" +
+                                                    """${jsonEscape(note)}"}""",
                         ContentType.Application.Json
                     )
                 }

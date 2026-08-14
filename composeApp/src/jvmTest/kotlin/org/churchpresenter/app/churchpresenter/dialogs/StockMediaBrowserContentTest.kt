@@ -359,7 +359,8 @@ class StockMediaBrowserContentTest {
     // ── Downloading ───────────────────────────────────────────────────────────────
 
     @Test
-    fun `downloading a result invokes the onMediaDownloaded callback with the saved file's path`() = dialog(pexelsApiKey = "a-key") { _, downloaded ->
+    fun `downloading a result invokes the onMediaDownloaded callback with the saved file's path`() = dialog(pexelsApiKey
+        = "a-key") { _, downloaded ->
         val saved = File.createTempFile("stock", ".jpg").also { it.deleteOnExit() }
         coEvery { StockMediaClient.download(any(), any(), any()) } returns StockMediaClient.DownloadOutcome
             .Success(saved)

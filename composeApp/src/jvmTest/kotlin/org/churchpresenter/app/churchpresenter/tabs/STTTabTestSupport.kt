@@ -139,7 +139,8 @@ internal val SILENT_STT_URL: String
 /** One completed transcription segment, as `transcription_update` delivers it. */
 internal fun STTManager.transcribe(vararg texts: String) {
     val segments = texts.mapIndexed { index, text ->
-        """{"id":$index,"timestamp":"00:0$index","text":"$text","start":$index.0,"end":${index + 1}.0,"completed":true}"""
+        """{"id":$index,"timestamp":"00:0$index","text":"$text","start":$index.0,"end":${index + 1}.0,"completed":t""" +
+            """rue}"""
     }
     handleTranscriptionUpdate(JSONObject("""{"segments":[${segments.joinToString(",")}]}"""))
 }
@@ -159,7 +160,8 @@ internal fun STTManager.transcribeInProgress(text: String) {
 
 internal fun STTManager.translate(vararg texts: String) {
     val segments = texts.mapIndexed { index, text ->
-        """{"id":$index,"timestamp":"00:0$index","translated_text":"$text","start":$index.0,"end":${index + 1}.0,"completed":true}"""
+        """{"id":$index,"timestamp":"00:0$index","translated_text":"$text","start":$index.0,"end":${index + 1}.0,"c""" +
+            """ompleted":true}"""
     }
     handleTranslationUpdate(JSONObject("""{"segments":[${segments.joinToString(",")}]}"""))
 }

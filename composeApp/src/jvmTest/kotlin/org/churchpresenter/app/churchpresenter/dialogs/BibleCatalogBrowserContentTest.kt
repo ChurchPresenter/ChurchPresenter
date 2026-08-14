@@ -812,9 +812,11 @@ class BibleCatalogBrowserContentTest {
                 "The download kept stopping — your connection may be slow or restricted.",
             BibleInstallOutcome.HttpError(500) to "Download failed. Please try again.",
             BibleInstallOutcome.ChecksumMismatch to "The download was incomplete and was discarded. Please try again.",
-            BibleInstallOutcome.CorruptArchive to "The downloaded file was damaged and was discarded. Please try again.",
+            BibleInstallOutcome.CorruptArchive to "The downloaded file was damaged and was discarded. Please try agai" +
+                "n.",
             BibleInstallOutcome.ConversionFailed to "This Bible couldn't be converted and was not installed.",
-            BibleInstallOutcome.WriteFailed to "Couldn't write to your Bible folder — check it still exists and has space.",
+            BibleInstallOutcome.WriteFailed to "Couldn't write to your Bible folder — check it still exists and has s" +
+                "pace.",
             BibleInstallOutcome.NoDirectory to "Choose a Bible storage folder in Appearance settings first.",
         )
         cases.forEach { (outcome, message) ->

@@ -93,7 +93,7 @@ class STTSettingsDialogContentTest {
     }
 
     @Test
-    fun `the host and port fields appear only when the engine is enabled and not local, and the port field ignores non-numeric text`() =
+    fun `host and port appear only when the engine is enabled and not local; the port ignores non-numeric text`() =
         sttDialog(bibleEngineSettings = BibleEngineSettings(enabled = true, runLocal = false)) { get, _ ->
             onNode(hasSetTextAction() and hasText("localhost")).performTextReplacement("192.168.1.5")
             waitForIdle()

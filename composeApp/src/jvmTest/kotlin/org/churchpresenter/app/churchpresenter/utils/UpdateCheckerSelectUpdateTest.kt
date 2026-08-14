@@ -33,7 +33,8 @@ class UpdateCheckerSelectUpdateTest {
     ): String {
         val html = htmlUrl?.let { "\"$it\"" } ?: "null"
         val body = notes?.let { "\"$it\"" } ?: "null"
-        return """{"tag_name":"$tag","draft":$draft,"prerelease":$prerelease,"html_url":$html,"body":$body,"assets":$assets}"""
+        return """{"tag_name":"$tag","draft":$draft,"prerelease":$prerelease,"html_url":$html,"body":$body,"assets"""" +
+            """:$assets}"""
     }
 
     private fun releases(vararg entries: String) = "[" + entries.joinToString(",") + "]"

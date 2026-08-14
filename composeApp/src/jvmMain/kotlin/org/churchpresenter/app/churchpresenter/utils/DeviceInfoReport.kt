@@ -109,8 +109,14 @@ object DeviceInfoReport {
         appendLine()
 
         appendLine("-- System --")
-        appendLine("OS: ${System.getProperty("os.name", "unknown")} ${System.getProperty("os.version", "")} (${System.getProperty("os.arch", "unknown")})")
-        appendLine("Java: ${System.getProperty("java.version", "unknown")} (${System.getProperty("java.vendor", "unknown")})")
+        appendLine(
+            "OS: ${System.getProperty("os.name", "unknown")} ${System.getProperty("os.version", "")} " +
+                "(${System.getProperty("os.arch", "unknown")})"
+        )
+        appendLine(
+            "Java: ${System.getProperty("java.version", "unknown")} " +
+                "(${System.getProperty("java.vendor", "unknown")})"
+        )
         val runtime = Runtime.getRuntime()
         appendLine("CPU cores: ${runtime.availableProcessors()}")
         val usedMb = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024)
@@ -131,8 +137,13 @@ object DeviceInfoReport {
         appendLine()
 
         appendLine("-- Video / Web --")
-        appendLine("VLC: ${if (facts.vlcAvailable) "available" else "unavailable (${facts.vlcReason.ifBlank { "unknown reason" }})"}")
-        appendLine("Web browser (JCEF): ${if (facts.jcefInitialized) "initialized" else "not initialized"}${if (facts.jcefMacUnsupported) " (macOS version too old)" else ""}")
+        val vlcState =
+            if (facts.vlcAvailable) "available"
+            else "unavailable (${facts.vlcReason.ifBlank { "unknown reason" }})"
+        appendLine("VLC: $vlcState")
+        appendLine("Web browser (JCEF): " +
+            "${if (facts.jcefInitialized) "initialized" else "not initialized"}" +
+                "${if (facts.jcefMacUnsupported) " (macOS version too old)" else ""}")
         appendLine()
 
         appendLine("-- Libraries --")

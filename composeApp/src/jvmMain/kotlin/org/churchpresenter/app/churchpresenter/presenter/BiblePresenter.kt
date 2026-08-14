@@ -1087,7 +1087,8 @@ fun BiblePresenter(
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = fittedSecondaryRefSize,
                                         text =
-                                            "$bookNameOrAbbr ${secondary.bookName} ${secondary.chapter}:$secondaryVerseRef",
+                                            "$bookNameOrAbbr ${secondary.bookName} ${secondary.chapter}:" +
+                                                "$secondaryVerseRef",
                                         color = secondaryBibleReferenceTextColor,
                                         style = secondaryReferenceTextStyleScaled
                                     )
@@ -1112,7 +1113,8 @@ fun BiblePresenter(
                                         fontFamily = secondaryBibleReferenceFontStyle,
                                         fontSize = fittedSecondaryRefSize,
                                         text =
-                                            "$bookNameOrAbbr ${secondary.bookName} ${secondary.chapter}:$secondaryVerseRef",
+                                            "$bookNameOrAbbr ${secondary.bookName} ${secondary.chapter}:" +
+                                                "$secondaryVerseRef",
                                         color = secondaryBibleReferenceTextColor,
                                         style = secondaryReferenceTextStyleScaled
                                     )

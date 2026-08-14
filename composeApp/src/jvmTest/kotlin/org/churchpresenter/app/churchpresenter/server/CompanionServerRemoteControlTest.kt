@@ -564,7 +564,8 @@ class CompanionServerRemoteControlTest {
         assertEquals(
             null,
             response,
-            "timing out is correct; answering OK while the dialog is still open would add it behind the operator's back",
+            "timing out is correct; answering OK while the dialog is still open would add it behind the operator's ba" +
+                "ck",
         )
     }
 

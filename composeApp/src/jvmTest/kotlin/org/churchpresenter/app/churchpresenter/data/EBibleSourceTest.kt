@@ -90,7 +90,8 @@ class EBibleSourceTest {
 
     /** The real catalogue publishes both an English name and the language's own name for itself. */
     private val namedHeader =
-        "languageCode,translationId,languageName,languageNameInEnglish,shortTitle,title,Copyright,Redistributable,downloadable,UpdateDate"
+        "languageCode,translationId,languageName,languageNameInEnglish,shortTitle,title,Copyright,Redistributable,dow" +
+            "nloadable,UpdateDate"
 
     private fun namedCsv(vararg rows: String) = (listOf(namedHeader) + rows).joinToString("\n")
 

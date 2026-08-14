@@ -80,7 +80,8 @@ class STTPresenterLayoutRenderTest {
         val translationBounds = onNodeWithText("Gnade und Frieden", substring = true).fetchSemanticsNode().boundsInRoot
         assertTrue(
             translationBounds.top < transcriptionBounds.top,
-            "the inverse layout must place the translation above the transcription, was $translationBounds vs $transcriptionBounds"
+            "the inverse layout must place the translation above the transcription, was $translationBounds vs " +
+                "$transcriptionBounds"
         )
     }
 

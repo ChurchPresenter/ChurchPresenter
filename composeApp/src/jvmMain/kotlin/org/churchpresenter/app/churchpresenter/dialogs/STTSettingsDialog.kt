@@ -505,7 +505,8 @@ internal fun STTSettingsDialogContent(
                                             modifier = Modifier.weight(1f).height(28.dp).clip(RoundedCornerShape(3.dp))
                                                 .background(if (
                                                     isSelected
-                                                ) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                                                ) MaterialTheme.colorScheme.primary
+                                                else MaterialTheme.colorScheme.surfaceVariant)
                                                 .clickable {
                                                     onSettingsChange { s ->
                                                         s.copy(sttSettings = s.sttSettings.copy(position = posConst))

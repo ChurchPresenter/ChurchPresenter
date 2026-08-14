@@ -188,7 +188,8 @@ class CompanionServer {
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
             payload =
-                """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":$_presentationIsLive,"notes":"${jsonEscape(note)}"}"""
+                """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":$_presentationIsLive,"""" +
+                    """notes":"${jsonEscape(note)}"}"""
         ))
     }
 
@@ -1020,7 +1021,8 @@ class CompanionServer {
                 )
                 presentationRoutes(
                     this@CompanionServer, _fileUploadEnabled, _maxMediaUploadMb, presentations._presentationCatalog,
-                    presentations._presentationCatalogs, presentations._presentationFilePaths, presentations._scheduleItemToPresentationId,
+                    presentations._presentationCatalogs, presentations._presentationFilePaths,
+                    presentations._scheduleItemToPresentationId,
                     presentations._slideBytes, json, scope
                 )
                 presentationRemoteRoutes(this@CompanionServer, presentations._presentationNotes, scope)

@@ -265,7 +265,8 @@ fun ProjectionSettingsTab(
             options.add(
                 DisplayOption(
                     label =
-                        "Display $displayNum (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX},${screen.boundsY})",
+                        "Display $displayNum (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX}," +
+                            "${screen.boundsY})",
                     shortLabel = "D$displayNum (${screen.boundsW}x${screen.boundsH})",
                     targetDisplay = screen.index,
                     targetType = "screen",

@@ -151,7 +151,8 @@ fun MediaSettingsTab(
                 valueRange = 100f..2000f,
                 modifier = Modifier.weight(1f),
                 trailingLabel =
-                    "${settings.pictureSettings.transitionDuration.toInt()}${stringResource(Res.string.milliseconds_suffix)}"
+                    "${settings.pictureSettings.transitionDuration.toInt()}" +
+                        "${stringResource(Res.string.milliseconds_suffix)}"
             )
         }
 

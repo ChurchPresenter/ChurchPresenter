@@ -331,7 +331,12 @@ fun ScheduleTab(
                     pauseDurationMs
                 ) },
                 addAnnouncement  =
-                    { text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, shadowColor, shadowSize, shadowOpacity, horizontalAlignment, position, animationType, animationDuration, loopCount, isTimer, timerHours, timerMinutes, timerSeconds, timerTextColor, timerExpiredText, timerMode, targetHour, targetMinute, targetSecond, liveClockFormat ->
+                    {
+                        text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow,
+                        shadowColor, shadowSize, shadowOpacity, horizontalAlignment, position, animationType,
+                        animationDuration, loopCount, isTimer, timerHours, timerMinutes, timerSeconds,
+                        timerTextColor, timerExpiredText, timerMode, targetHour, targetMinute, targetSecond,
+                        liveClockFormat ->
                     viewModel.addAnnouncement(
                         text,
                         textColor,

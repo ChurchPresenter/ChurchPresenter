@@ -185,7 +185,8 @@ internal fun AboutDialogContent(
                         modifier = Modifier.weight(1f),
                         onClick = {
                             Desktop.getDesktop().browse(java.net.URI(
-                                "https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"
+                                "https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_reque" +
+                                    "st.md"
                             ))
                         }
                     ) {

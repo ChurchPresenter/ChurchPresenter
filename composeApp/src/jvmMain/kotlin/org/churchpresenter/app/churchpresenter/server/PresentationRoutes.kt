@@ -311,7 +311,8 @@ internal fun Route.presentationRoutes(
                         )) }
                         val escapedPath = file.absolutePath.replace("\\", "\\\\").replace("\"", "\\\"")
                         call.respondText(
-                            """{"ok":true,"path":"$escapedPath","name":"${file.nameWithoutExtension.replace("\"", "\\\"")}","mediaType":"$mediaType"}""",
+                            """{"ok":true,"path":"$escapedPath","name":"""" +
+                                """${file.nameWithoutExtension.replace("\"", "\\\"")}","mediaType":"$mediaType"}""",
                             ContentType.Application.Json
                         )
                     } catch (e: Exception) {

@@ -442,7 +442,9 @@ class StatisticsManager {
         for (song in songs) {
             fun esc(s: String) = csvQuote(s)
             sb.appendLine(
-                "${esc(song.title)},${esc(song.author)},${esc(song.songbook)},${song.songNumber},${esc(song.ccliNumber)},${song.count},${dateFmt.format(Date(song.firstUsed))},${dateFmt.format(Date(song.lastUsed))}"
+                "${esc(song.title)},${esc(song.author)},${esc(song.songbook)},${song.songNumber}," +
+                    "${esc(song.ccliNumber)},${song.count},${dateFmt.format(Date(song.firstUsed))}," +
+                        "${dateFmt.format(Date(song.lastUsed))}"
             )
         }
         file.writeText(sb.toString())
