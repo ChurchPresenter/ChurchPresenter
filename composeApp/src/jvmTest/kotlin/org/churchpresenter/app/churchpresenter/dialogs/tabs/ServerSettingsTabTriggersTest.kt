@@ -82,7 +82,7 @@ class ServerSettingsTabTriggersTest {
 
     @Test
     fun `a folder whose json is not a Lottie animation counts as empty`() {
-        withLottieFolder("notes.json" to notLottieJson()) { folder ->
+        withLottieFolder("notes.json" to notLottieJson) { folder ->
             serverTab(initial = settingsFor(folder), server = server) { _, _ ->
                 onNodeWithText(ServerLabel.NO_LOWER_THIRDS)
                     .assertExists("a json that is not an animation must not become a trigger")

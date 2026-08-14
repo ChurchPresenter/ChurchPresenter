@@ -51,7 +51,6 @@ import androidx.compose.ui.text.style.TextAlign
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.desktop_view

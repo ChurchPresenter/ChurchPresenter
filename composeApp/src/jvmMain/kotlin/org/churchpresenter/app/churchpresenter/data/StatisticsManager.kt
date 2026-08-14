@@ -394,7 +394,7 @@ class StatisticsManager {
                     row.createCell(4).setCellValue(entry.count.toDouble())
                 }
             }
-        (0..4).forEach { songsSheet.autoSizeColumn(it) }
+        for (column in 0..4) songsSheet.autoSizeColumn(column)
 
         val versesSheet = workbook.createSheet("Top Verses")
         rowIndex = 0
@@ -415,7 +415,7 @@ class StatisticsManager {
                     row.createCell(5).setCellValue(entry.count.toDouble())
                 }
             }
-        (0..5).forEach { versesSheet.autoSizeColumn(it) }
+        for (column in 0..5) versesSheet.autoSizeColumn(column)
 
         file.outputStream().use { workbook.write(it) }
         workbook.close()
@@ -463,7 +463,7 @@ class StatisticsManager {
             row.createCell(7).setCellValue(dateFmt.format(Date(song.firstUsed)))
             row.createCell(8).setCellValue(dateFmt.format(Date(song.lastUsed)))
         }
-        (0..8).forEach { songsSheet.autoSizeColumn(it) }
+        for (column in 0..8) songsSheet.autoSizeColumn(column)
 
         val versesSheet = workbook.createSheet("Bible Verses")
         rowIndex = 0
@@ -483,7 +483,7 @@ class StatisticsManager {
             row.createCell(6).setCellValue(dateFmt.format(Date(verse.firstUsed)))
             row.createCell(7).setCellValue(dateFmt.format(Date(verse.lastUsed)))
         }
-        (0..7).forEach { versesSheet.autoSizeColumn(it) }
+        for (column in 0..7) versesSheet.autoSizeColumn(column)
 
         val actSheet = workbook.createSheet("Activity")
         rowIndex = 0
@@ -499,7 +499,7 @@ class StatisticsManager {
             row.createCell(2).setCellValue(pt.verseCount.toDouble())
             row.createCell(3).setCellValue((pt.songCount + pt.verseCount).toDouble())
         }
-        (0..3).forEach { actSheet.autoSizeColumn(it) }
+        for (column in 0..3) actSheet.autoSizeColumn(column)
 
         file.outputStream().use { workbook.write(it) }
         workbook.close()

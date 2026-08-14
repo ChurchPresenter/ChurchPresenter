@@ -56,7 +56,7 @@ internal fun lottieJson(name: String = "clip"): String =
     """{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":1920,"h":1080,"nm":"$name","layers":[]}"""
 
 /** Valid JSON that is not a Lottie animation — no `"layers"` key. */
-internal fun notLottieJson(): String = """{"v":"5.7.4","nm":"not an animation"}"""
+internal val notLottieJson: String = """{"v":"5.7.4","nm":"not an animation"}"""
 
 /**
  * Runs [block] against a fresh temporary folder, deleting it afterwards whatever happens.

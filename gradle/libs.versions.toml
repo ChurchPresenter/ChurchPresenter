@@ -5,6 +5,7 @@ sentryPlugin = "6.14.0"
 logback = "1.5.12"
 composeHotReload = "1.0.0"
 roborazzi = "1.70.0"
+detekt = "1.23.8"
 composeMultiplatform = "1.10.2"
 junit = "4.13.2"
 mockk = "1.14.2"
@@ -71,3 +72,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 sentry = { id = "io.sentry.jvm.gradle", version.ref = "sentryPlugin" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

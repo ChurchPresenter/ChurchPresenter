@@ -21,14 +21,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -62,12 +60,8 @@ import churchpresenter.composeapp.generated.resources.content_bible_translations
 import churchpresenter.composeapp.generated.resources.content_bible_translations_footer
 import churchpresenter.composeapp.generated.resources.content_bible_translations_header
 import churchpresenter.composeapp.generated.resources.content_bible_translations_more
-import churchpresenter.composeapp.generated.resources.left
-import churchpresenter.composeapp.generated.resources.right
-import churchpresenter.composeapp.generated.resources.screen
 import churchpresenter.composeapp.generated.resources.song_language_primary
 import churchpresenter.composeapp.generated.resources.top
-import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 

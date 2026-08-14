@@ -5,7 +5,6 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTextExactly
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.app.churchpresenter.data.settings.MetronomePosition

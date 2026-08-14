@@ -61,14 +61,10 @@ import churchpresenter.composeapp.generated.resources.bible_load_failed_partial_
 import churchpresenter.composeapp.generated.resources.bible_load_failed_partial_title
 import churchpresenter.composeapp.generated.resources.bible_load_failed_report_hint
 import churchpresenter.composeapp.generated.resources.bible_load_failed_title
-import churchpresenter.composeapp.generated.resources.book
-import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.ic_warning
-import churchpresenter.composeapp.generated.resources.search
 import churchpresenter.composeapp.generated.resources.search_clear
-import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.data.BibleLoadError
 import org.churchpresenter.app.churchpresenter.viewmodel.indexOfFirstLiveVerse
 import org.churchpresenter.app.churchpresenter.viewmodel.verseNumberOf

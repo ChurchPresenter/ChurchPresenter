@@ -1,17 +1,10 @@
 package org.churchpresenter.app.churchpresenter
 
-import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
-import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
-import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 /**
  * Tells connected companions what is live and keeps the Browser Source outputs and background

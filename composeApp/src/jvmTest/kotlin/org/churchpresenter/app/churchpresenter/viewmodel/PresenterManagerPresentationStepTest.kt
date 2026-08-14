@@ -19,7 +19,6 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertSame
-import kotlin.test.assertTrue
 
 /**
  * Animated-presentation step navigation on [PresenterManager].

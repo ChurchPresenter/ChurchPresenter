@@ -3,19 +3,14 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.hasImeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.text.input.ImeAction
 import org.junit.Assume
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings

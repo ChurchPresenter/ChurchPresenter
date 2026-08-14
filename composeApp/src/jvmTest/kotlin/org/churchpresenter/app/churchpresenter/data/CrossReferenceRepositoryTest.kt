@@ -156,7 +156,7 @@ class CrossReferenceRepositoryTest {
         var attempts = 0
         val repository = CrossReferenceRepository {
             attempts++
-            if (attempts == 1) throw IllegalStateException("resource missing") else fixture.toByteArray()
+            if (attempts == 1) error("resource missing") else fixture.toByteArray()
         }
 
         runCatching { repository.ensureLoaded() }

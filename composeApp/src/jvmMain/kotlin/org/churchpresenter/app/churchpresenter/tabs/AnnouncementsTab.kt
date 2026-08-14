@@ -10,7 +10,6 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.input.pointer.pointerInput
 import java.awt.Cursor
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.platform.LocalDensity
@@ -95,7 +94,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_add_to_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_go_live
 import churchpresenter.composeapp.generated.resources.tooltip_send_to_stage_monitor
@@ -123,7 +121,6 @@ import churchpresenter.composeapp.generated.resources.center_left
 import churchpresenter.composeapp.generated.resources.center_right
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
-import churchpresenter.composeapp.generated.resources.go_live
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cast

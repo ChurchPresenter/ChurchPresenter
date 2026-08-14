@@ -615,7 +615,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
      * genuinely dead socket there still cannot mask the original failure.
      */
     private fun sendRaw(bytes: ByteArray) {
-        val sock = socket ?: throw IllegalStateException(
+        val sock = socket ?: error(
             "ATEM connection to $host:$port is closed — connect() first (or the keepalive dropped it)"
         )
         sock.send(DatagramPacket(bytes, bytes.size, address, port))

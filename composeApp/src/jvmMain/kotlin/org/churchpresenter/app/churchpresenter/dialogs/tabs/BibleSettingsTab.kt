@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,15 +26,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.bible_catalog_button
 import churchpresenter.composeapp.generated.resources.bible_selection
-import churchpresenter.composeapp.generated.resources.bible_reference
 import churchpresenter.composeapp.generated.resources.bible_multi_layout
 import churchpresenter.composeapp.generated.resources.bible_translation_divider
 import churchpresenter.composeapp.generated.resources.bible_translation_spacing
@@ -53,16 +49,7 @@ import churchpresenter.composeapp.generated.resources.milliseconds_suffix
 import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.position
 import churchpresenter.composeapp.generated.resources.pixels_short
-import churchpresenter.composeapp.generated.resources.primary_bible
-import churchpresenter.composeapp.generated.resources.primary_bible_reference
-import churchpresenter.composeapp.generated.resources.primary_bible_text
-import churchpresenter.composeapp.generated.resources.secondary_bible
-import churchpresenter.composeapp.generated.resources.secondary_bible_reference
-import churchpresenter.composeapp.generated.resources.secondary_bible_text
 import churchpresenter.composeapp.generated.resources.show_abbreviation
-import churchpresenter.composeapp.generated.resources.show_in_lower_third
-import churchpresenter.composeapp.generated.resources.swap_bibles
-import churchpresenter.composeapp.generated.resources.ic_swap
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
@@ -100,7 +87,6 @@ import org.churchpresenter.app.churchpresenter.composables.rememberBibleFolderLi
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingRowFirstControlOffset
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
@@ -120,7 +106,6 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.moveBibleTranslation
 import org.churchpresenter.app.churchpresenter.data.settings.removeBibleTranslation
 import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
-import org.churchpresenter.app.churchpresenter.dialogs.BibleCatalogBrowserDialog
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

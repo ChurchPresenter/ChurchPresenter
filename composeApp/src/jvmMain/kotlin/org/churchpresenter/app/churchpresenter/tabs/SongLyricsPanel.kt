@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -61,7 +60,6 @@ import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.no_lyrics_available
 import churchpresenter.composeapp.generated.resources.tab_focus_lost
 import churchpresenter.composeapp.generated.resources.number
-import churchpresenter.composeapp.generated.resources.search
 import churchpresenter.composeapp.generated.resources.song_title_slide
 import churchpresenter.composeapp.generated.resources.title
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable

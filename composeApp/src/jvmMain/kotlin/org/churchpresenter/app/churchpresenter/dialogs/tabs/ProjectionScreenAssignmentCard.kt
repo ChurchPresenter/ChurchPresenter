@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,9 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.browser_source_website_snapshot_tooltip
-import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.content_bible
 import churchpresenter.composeapp.generated.resources.content_outputs
 import churchpresenter.composeapp.generated.resources.content_outputs_enabled_short
@@ -58,18 +55,15 @@ import churchpresenter.composeapp.generated.resources.display_mode
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.key_output
 import churchpresenter.composeapp.generated.resources.key_output_none
-import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.lower_third_height
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
 import churchpresenter.composeapp.generated.resources.projection_decklink_io_conflict_tooltip
 import churchpresenter.composeapp.generated.resources.projection_simulate_outputs
 import churchpresenter.composeapp.generated.resources.projection_target_display
 import churchpresenter.composeapp.generated.resources.projection_web_decklink_tooltip
-import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.screen
 import churchpresenter.composeapp.generated.resources.screen_assignment
 import churchpresenter.composeapp.generated.resources.screen_col_label
-import churchpresenter.composeapp.generated.resources.top
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection

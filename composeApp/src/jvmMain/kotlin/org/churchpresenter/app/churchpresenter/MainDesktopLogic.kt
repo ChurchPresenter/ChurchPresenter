@@ -1,14 +1,9 @@
 package org.churchpresenter.app.churchpresenter
 
 import kotlin.math.roundToInt
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.ui.window.WindowPlacement
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.ImageBitmap
@@ -18,14 +13,12 @@ import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
-import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File

@@ -12,7 +12,6 @@ import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 

@@ -48,7 +48,6 @@ import churchpresenter.composeapp.generated.resources.bible_history_clear
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_delete
-import kotlinx.coroutines.flow.first
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.ui.theme.semantic

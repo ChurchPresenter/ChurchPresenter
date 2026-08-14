@@ -3,7 +3,6 @@ package org.churchpresenter.app.churchpresenter.utils
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontFamily
-import java.awt.GraphicsEnvironment
 import java.time.chrono.Chronology
 import java.time.format.DateTimeFormatterBuilder
 import java.time.format.FormatStyle

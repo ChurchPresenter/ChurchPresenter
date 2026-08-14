@@ -1,7 +1,5 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.app.churchpresenter.data.Bible
-import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 
 enum class BibleSearchMode { AUTO, REFERENCE, TEXT }
 

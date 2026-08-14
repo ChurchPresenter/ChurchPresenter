@@ -15,7 +15,6 @@ import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.dialogs.EditSongContent
 import org.churchpresenter.app.churchpresenter.models.SongTuning
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import kotlin.test.Test
 
 /**

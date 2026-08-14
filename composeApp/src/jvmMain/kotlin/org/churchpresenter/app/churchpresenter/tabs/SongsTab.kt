@@ -37,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -53,9 +52,7 @@ import java.awt.Window as AwtWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.all_song_books
 import churchpresenter.composeapp.generated.resources.contains
 import churchpresenter.composeapp.generated.resources.exact_match
@@ -65,14 +62,10 @@ import churchpresenter.composeapp.generated.resources.new_song
 import churchpresenter.composeapp.generated.resources.delete_saved_string
 import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.filter
 import churchpresenter.composeapp.generated.resources.number
-import churchpresenter.composeapp.generated.resources.search
 import churchpresenter.composeapp.generated.resources.starts_with
 import churchpresenter.composeapp.generated.resources.title
-import churchpresenter.composeapp.generated.resources.tune
 import churchpresenter.composeapp.generated.resources.author
-import churchpresenter.composeapp.generated.resources.composer
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SongItem

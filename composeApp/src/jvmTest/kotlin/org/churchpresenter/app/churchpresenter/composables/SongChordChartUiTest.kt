@@ -5,9 +5,6 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.SemanticsNodeInteractionCollection
-import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick

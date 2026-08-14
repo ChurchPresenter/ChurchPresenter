@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,7 +53,6 @@ import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
 import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
 import churchpresenter.composeapp.generated.resources.file_filter_schedule
 import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.autosave_restore_confirm
 import churchpresenter.composeapp.generated.resources.autosave_restore_discard
 import churchpresenter.composeapp.generated.resources.autosave_restore_message

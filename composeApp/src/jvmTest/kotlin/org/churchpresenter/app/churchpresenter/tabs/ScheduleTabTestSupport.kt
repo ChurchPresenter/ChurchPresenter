@@ -23,7 +23,6 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.TestSingletons

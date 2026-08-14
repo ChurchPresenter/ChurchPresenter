@@ -119,7 +119,7 @@ class LowerThirdSettingsTabTest {
     fun `files that are not Lottie animations are left out`() {
         withLottieFolder(
             "real.json" to lottieJson("real"),
-            "plain.json" to notLottieJson(),
+            "plain.json" to notLottieJson,
             "notes.txt" to lottieJson("wrong extension"),
         ) { folder ->
             lowerThirdTab(initial = settingsForFolder(folder)) { _ ->

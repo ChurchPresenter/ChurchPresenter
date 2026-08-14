@@ -723,9 +723,9 @@ class PlanningCenterImportContentTest {
         onNodeWithText("Import Selected", useUnmergedTree = true).performClick()
         awaitVm { recorder.addPresentationCalls == 1 }
 
-        val (_, fileName, _, fileType) = recorder.lastAddPresentation!!
-        assertEquals("Sermon Slides", fileName)
-        assertEquals("pptx", fileType)
+        val recorded = recorder.lastAddPresentation!!
+        assertEquals("Sermon Slides", recorded[1])
+        assertEquals("pptx", recorded[3])
     }
 
     @Test

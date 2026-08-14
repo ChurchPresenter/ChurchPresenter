@@ -95,7 +95,7 @@ class CompanionServerAtemUploadTest {
         private var clipFrames: Int = 0
         private var clipFrameBytes: Int = 0
 
-        private val port = 39_880
+        private const val port = 39_880
 
         @JvmStatic
         @BeforeClass

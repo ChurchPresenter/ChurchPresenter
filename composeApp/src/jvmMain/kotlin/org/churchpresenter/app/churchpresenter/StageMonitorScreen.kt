@@ -71,7 +71,6 @@ import churchpresenter.composeapp.generated.resources.song_play
 import churchpresenter.composeapp.generated.resources.unit_bpm
 import churchpresenter.composeapp.generated.resources.Res
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.utils.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.composables.ChordChart

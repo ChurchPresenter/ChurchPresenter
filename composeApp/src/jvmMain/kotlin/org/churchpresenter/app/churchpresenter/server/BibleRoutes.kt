@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.data.Bible
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.utils.Constants
 
 /**

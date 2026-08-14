@@ -36,7 +36,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
@@ -61,7 +60,6 @@ import churchpresenter.composeapp.generated.resources.move_translation_down
 import churchpresenter.composeapp.generated.resources.move_translation_up
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.first
-import org.churchpresenter.app.churchpresenter.data.bibleDisplayNames
 import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

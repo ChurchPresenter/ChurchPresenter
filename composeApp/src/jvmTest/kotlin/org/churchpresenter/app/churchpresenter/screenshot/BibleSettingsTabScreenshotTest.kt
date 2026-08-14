@@ -20,7 +20,6 @@ import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File
 import kotlin.test.AfterTest

@@ -93,7 +93,7 @@ internal class EmbeddedVideoDecoder(
                 decodedFrame = frame
                 return RV32BufferFormat(frame.width, frame.height)
             }
-            override fun allocatedBuffers(buffers: Array<out ByteBuffer>) {}
+            override fun allocatedBuffers(buffers: Array<out ByteBuffer>) = Unit
         }
         val renderCallback = RenderCallback { _, nativeBuffers, _ ->
             val img = decodedFrame ?: return@RenderCallback

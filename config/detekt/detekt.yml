@@ -1,0 +1,76 @@
+build:
+  maxIssues: 0
+
+console-reports:
+  active: true
+
+comments:
+  active: false
+
+style:
+  WildcardImport:
+    active: true
+    excludeImports: []
+  UnusedImports:
+    active: true
+  ForbiddenImport:
+    active: true
+    forbiddenPatterns: 'androidx\.compose\.material\.(?!icons)'
+  MaxLineLength:
+    active: false
+  MagicNumber:
+    active: false
+  ReturnCount:
+    active: false
+  LoopWithTooManyJumpStatements:
+    active: false
+  UnusedPrivateMember:
+    active: true
+
+complexity:
+  LongMethod:
+    active: false
+  LongParameterList:
+    active: false
+  TooManyFunctions:
+    active: false
+  CyclomaticComplexMethod:
+    active: true
+  LargeClass:
+    active: false
+  NestedBlockDepth:
+    active: true
+
+naming:
+  TopLevelPropertyNaming:
+    active: false
+  VariableNaming:
+    active: true
+    variablePattern: '(_)?[a-z][A-Za-z0-9]*|[A-Z][A-Z0-9_]*'
+    privateVariablePattern: '(_)?[a-z][A-Za-z0-9]*|[A-Z][A-Z0-9_]*'
+  FunctionParameterNaming:
+    active: true
+    parameterPattern: '(_)?[a-z][A-Za-z0-9]*'
+  ConstructorParameterNaming:
+    active: true
+    parameterPattern: '(_)?[a-z][A-Za-z0-9]*'
+    privateParameterPattern: '(_)?[a-z][A-Za-z0-9]*'
+    excludes: ['**/test/**', '**/jvmTest/**', '**/PlanningCenterClient.kt', '**/StockMediaClient.kt']
+  FunctionNaming:
+    active: true
+    ignoreAnnotated: ['Composable']
+    excludes: ['**/test/**', '**/jvmTest/**', '**/X11WindowCapture.kt']
+  MatchingDeclarationName:
+    active: true
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: false
+  SwallowedException:
+    active: false
+  TooGenericExceptionThrown:
+    active: false
+
+performance:
+  SpreadOperator:
+    active: false

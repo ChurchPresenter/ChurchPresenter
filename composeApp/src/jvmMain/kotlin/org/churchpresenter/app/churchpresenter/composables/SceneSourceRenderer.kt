@@ -266,7 +266,7 @@ private fun VideoSourceContent(
                 bufferedImageHolder.value = BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB)
                 return RV32BufferFormat(sourceWidth, sourceHeight)
             }
-            override fun allocatedBuffers(buffers: Array<out ByteBuffer>) { }
+            override fun allocatedBuffers(buffers: Array<out ByteBuffer>) = Unit
         }
 
         val renderCallback = RenderCallback { _, nativeBuffers, _ ->

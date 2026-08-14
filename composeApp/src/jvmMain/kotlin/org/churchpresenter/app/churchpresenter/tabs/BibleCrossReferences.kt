@@ -8,7 +8,6 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -69,15 +68,12 @@ import churchpresenter.composeapp.generated.resources.bible_cross_references_oft
 import churchpresenter.composeapp.generated.resources.bible_cross_references_passage
 import churchpresenter.composeapp.generated.resources.bible_cross_references_source_count
 import churchpresenter.composeapp.generated.resources.bible_cross_references_title
-import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_link
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
-import churchpresenter.composeapp.generated.resources.mode
 import churchpresenter.composeapp.generated.resources.verse
-import kotlinx.coroutines.flow.first
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.data.formatCrossRefLabel

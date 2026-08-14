@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -62,7 +60,6 @@ import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_check
 import churchpresenter.composeapp.generated.resources.ic_note
 import churchpresenter.composeapp.generated.resources.pause_duration_ms
-import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.schedule_note_placeholder
 import churchpresenter.composeapp.generated.resources.tooltip_note
 import churchpresenter.composeapp.generated.resources.tooltip_note_clear

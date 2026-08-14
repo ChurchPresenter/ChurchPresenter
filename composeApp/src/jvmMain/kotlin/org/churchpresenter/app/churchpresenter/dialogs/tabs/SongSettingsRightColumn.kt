@@ -63,7 +63,6 @@ import androidx.compose.material3.Surface
 import churchpresenter.composeapp.generated.resources.auto_fit
 import churchpresenter.composeapp.generated.resources.auto_fit_checkbox_tooltip
 import churchpresenter.composeapp.generated.resources.auto_fit_button_tooltip
-import churchpresenter.composeapp.generated.resources.right
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons

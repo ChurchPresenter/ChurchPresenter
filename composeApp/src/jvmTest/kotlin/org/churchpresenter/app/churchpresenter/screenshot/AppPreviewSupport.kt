@@ -37,7 +37,6 @@ import org.churchpresenter.app.churchpresenter.tabs.RecentMediaFiles
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel

@@ -185,7 +185,26 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.sentry)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.detekt)
     jacoco
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+    source.setFrom("src/jvmMain/kotlin", "src/jvmTest/kotlin")
+    parallel = true
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    jvmTarget = "21"
+    reports {
+        html.required.set(true)
+        xml.required.set(false)
+        sarif.required.set(false)
+        txt.required.set(false)
+        md.required.set(false)
+    }
 }
 
 // Sentry source context: uploads a source bundle at build time so stack traces show

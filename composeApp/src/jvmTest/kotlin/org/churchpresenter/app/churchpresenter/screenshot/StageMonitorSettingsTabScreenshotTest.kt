@@ -22,7 +22,6 @@ import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContent
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSettings
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZone
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZone
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZoneStyle
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
 import org.churchpresenter.app.churchpresenter.utils.Constants

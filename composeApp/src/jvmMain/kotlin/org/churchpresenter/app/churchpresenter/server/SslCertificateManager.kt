@@ -66,7 +66,7 @@ object SslCertificateManager {
     /** DER-encoded CA certificate — served at GET /ca.crt for mobile installation. */
     val caCertFile: File = File(baseDir, "ca.crt")
 
-    private val CA_ALIAS     = "church-presenter-ca"
+    private const val CA_ALIAS = "church-presenter-ca"
     private val SERVER_ALIAS = Constants.SSL_KEY_ALIAS
     private val PASSWORD     = Constants.SSL_KEYSTORE_PASSWORD.toCharArray()
 

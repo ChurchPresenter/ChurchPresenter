@@ -263,7 +263,7 @@ class BibleViewModel(
         val from = minOf(anchor, targetIndex)
         val to   = maxOf(anchor, targetIndex)
         _selectedVerseIndices.clear()
-        (from..to).forEach { _selectedVerseIndices.add(it) }
+        for (index in from..to) _selectedVerseIndices.add(index)
         _multiVerseEnabled.value = _selectedVerseIndices.size > 1
         _verseSelectionToken.value++
     }
@@ -453,7 +453,7 @@ class BibleViewModel(
                 val bounds = trimmed.split("-")
                 val from = bounds.getOrNull(0)?.trim()?.toIntOrNull() ?: return@forEach
                 val to   = bounds.getOrNull(1)?.trim()?.toIntOrNull() ?: return@forEach
-                (from..to).forEach { result.add(it) }
+                for (index in from..to) result.add(index)
             } else {
                 trimmed.toIntOrNull()?.let { result.add(it) }
             }

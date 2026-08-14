@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.TEXT_GROWTH_SCALE
 import org.churchpresenter.app.churchpresenter.Viewport
 import org.churchpresenter.app.churchpresenter.ViewportProbe

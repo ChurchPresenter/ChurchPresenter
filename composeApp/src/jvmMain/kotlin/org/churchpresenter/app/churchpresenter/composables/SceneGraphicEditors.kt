@@ -71,7 +71,6 @@ import churchpresenter.composeapp.generated.resources.timer_reset
 import churchpresenter.composeapp.generated.resources.pause
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import androidx.compose.foundation.layout.PaddingValues
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 
 /**
  * The scene sources the app draws itself: shapes, a clock, and a QR code.

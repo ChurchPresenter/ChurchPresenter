@@ -82,7 +82,6 @@ import org.jetbrains.compose.resources.painterResource
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
-import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 
 /**
  * The scene sources that come from a file, a URL or plain typing: image, text, colour, video

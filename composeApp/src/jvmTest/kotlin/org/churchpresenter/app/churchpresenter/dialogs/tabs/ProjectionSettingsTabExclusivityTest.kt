@@ -45,8 +45,8 @@ class ProjectionSettingsTabExclusivityTest {
         targetDisplay = 1, targetBoundsX = 1920, targetBoundsY = 0, targetBoundsW = 1280, targetBoundsH = 720,
     )
 
-    private fun pickDisplay2(row: Int) = "Display 2 (3840x2160 @ 3200,0)"
-    private fun pickDisplay1() = "Display 1 (1280x720 @ 1920,0)"
+    private val pickDisplay2 = "Display 2 (3840x2160 @ 3200,0)"
+    private val pickDisplay1 = "Display 1 (1280x720 @ 1920,0)"
 
     // ── One display, one window ─────────────────────────────────────────────────────────────────
 
@@ -58,7 +58,7 @@ class ProjectionSettingsTabExclusivityTest {
         // Point row 0 at the display row 1 already has.
         gridButton(Grid.targetDisplay(row = 0)).performScrollTo().performClick()
         waitForIdle()
-        onNodeWithText(pickDisplay2(0)).performClick()
+        onNodeWithText(pickDisplay2).performClick()
         waitForIdle()
 
         assertEquals(2, get().projectionSettings.screenAssignments[0].targetDisplay, "row 0 takes the display")
@@ -97,7 +97,7 @@ class ProjectionSettingsTabExclusivityTest {
             // Row 0 already targets D1, so move it away and back to trigger the sweep.
             gridButton(Grid.targetDisplay(row = 0)).performScrollTo().performClick()
             waitForIdle()
-            onNodeWithText(pickDisplay1()).performClick()
+            onNodeWithText(pickDisplay1).performClick()
             waitForIdle()
 
             assertEquals(
@@ -120,7 +120,7 @@ class ProjectionSettingsTabExclusivityTest {
 
         gridButton(Grid.keyOutput(row = 0)).performScrollTo().performClick()
         waitForIdle()
-        onNodeWithText(pickDisplay2(0)).performClick()
+        onNodeWithText(pickDisplay2).performClick()
         waitForIdle()
 
         assertEquals(2, get().projectionSettings.screenAssignments[0].keyTargetDisplay, "row 0 keys off D2")
@@ -149,7 +149,7 @@ class ProjectionSettingsTabExclusivityTest {
         projectionTab(initial = bothKeyed) { get ->
             gridButton(Grid.keyOutput(row = 0)).performScrollTo().performClick()
             waitForIdle()
-            onNodeWithText(pickDisplay1()).performClick()
+            onNodeWithText(pickDisplay1).performClick()
             waitForIdle()
 
             assertEquals(1, get().projectionSettings.screenAssignments[0].keyTargetDisplay, "row 0 takes it")
@@ -201,7 +201,7 @@ class ProjectionSettingsTabExclusivityTest {
         projectionTab(initial = staleSize) { get ->
             gridButton(Grid.targetDisplay(row = 0)).performScrollTo().performClick()
             waitForIdle()
-            onNodeWithText(pickDisplay2(0)).performClick()
+            onNodeWithText(pickDisplay2).performClick()
             waitForIdle()
 
             assertEquals(2, get().projectionSettings.screenAssignments[0].targetDisplay, "row 0 takes D2")
@@ -230,7 +230,7 @@ class ProjectionSettingsTabExclusivityTest {
         projectionTab(initial = staleKey) { get ->
             gridButton(Grid.targetDisplay(row = 0)).performScrollTo().performClick()
             waitForIdle()
-            onNodeWithText(pickDisplay2(0)).performClick()
+            onNodeWithText(pickDisplay2).performClick()
             waitForIdle()
 
             assertEquals(

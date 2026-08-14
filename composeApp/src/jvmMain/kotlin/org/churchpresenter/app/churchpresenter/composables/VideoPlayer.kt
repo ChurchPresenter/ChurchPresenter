@@ -555,7 +555,7 @@ fun SoftwareVideoPlayer(
                 bufferedImageHolder.value = java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_RGB)
                 return uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat(w, h)
             }
-            override fun allocatedBuffers(buffers: Array<out java.nio.ByteBuffer>) { }
+            override fun allocatedBuffers(buffers: Array<out java.nio.ByteBuffer>) = Unit
         }
 
         val renderCallback = uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback { _, nativeBuffers, _ ->

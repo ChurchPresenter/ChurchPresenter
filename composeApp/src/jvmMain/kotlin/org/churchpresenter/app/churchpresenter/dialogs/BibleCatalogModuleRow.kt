@@ -52,7 +52,6 @@ import churchpresenter.composeapp.generated.resources.bible_catalog_testament_ol
 import org.churchpresenter.app.churchpresenter.data.BibleModule
 import org.churchpresenter.app.churchpresenter.data.InstallPhase
 import org.churchpresenter.app.churchpresenter.data.Testament
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogViewModel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

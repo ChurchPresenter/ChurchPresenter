@@ -1,13 +1,9 @@
 package org.churchpresenter.app.churchpresenter
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.window.Window
 import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment

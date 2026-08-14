@@ -77,7 +77,7 @@ fun LoopingVideoBackground(
                 bufferedImageHolder.value = BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB)
                 return RV32BufferFormat(sourceWidth, sourceHeight)
             }
-            override fun allocatedBuffers(buffers: Array<out ByteBuffer>) { }
+            override fun allocatedBuffers(buffers: Array<out ByteBuffer>) = Unit
         }
 
         // Use RenderCallback directly (not RenderCallbackAdapter) to avoid

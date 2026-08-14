@@ -5,8 +5,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.input.key.type
-import java.awt.GraphicsEnvironment
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.AnimationType

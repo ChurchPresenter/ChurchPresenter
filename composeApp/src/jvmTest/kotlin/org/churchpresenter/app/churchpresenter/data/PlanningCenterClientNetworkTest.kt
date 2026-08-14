@@ -12,7 +12,6 @@ import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
 import java.net.URLEncoder
 import java.util.Base64
-import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

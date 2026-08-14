@@ -38,11 +38,10 @@ class Songs {
                 inputStream.bufferedReader(StandardCharsets.UTF_8)
             } else {
                 val path = Paths.get(resourcePath)
-                if (Files.exists(path)) {
-                    Files.newBufferedReader(path, StandardCharsets.UTF_8)
-                } else {
-                    throw IllegalArgumentException("loadFromSpsAppend: resource not found on classpath or filesystem: $resourcePath")
+                require(Files.exists(path)) {
+                    "loadFromSpsAppend: resource not found on classpath or filesystem: $resourcePath"
                 }
+                Files.newBufferedReader(path, StandardCharsets.UTF_8)
             }
 
             var databaseName = fileBaseName // Default to filename

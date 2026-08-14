@@ -1,11 +1,8 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import androidx.compose.foundation.background
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.input.key.type
 import java.io.File
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collectLatest
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
@@ -21,14 +18,11 @@ import org.churchpresenter.app.churchpresenter.models.QuestionStatus
 import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
-import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 /**

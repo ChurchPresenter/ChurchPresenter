@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter.server
 
 import churchpresenter.composeapp.generated.resources.Res
 import io.mockk.coEvery
-import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString

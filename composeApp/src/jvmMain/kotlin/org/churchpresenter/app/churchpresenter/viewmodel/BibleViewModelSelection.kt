@@ -1,10 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import kotlinx.coroutines.flow.first
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
-import org.churchpresenter.app.churchpresenter.viewmodel.getNextVerses
 
 /**
  * What is currently selected, resolved into the verses that go on screen — including the

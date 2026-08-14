@@ -94,7 +94,6 @@ import org.churchpresenter.app.churchpresenter.utils.classifyDroppedFile
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.awt.dnd.DropTarget
 import java.io.File
 
 @OptIn(ExperimentalLayoutApi::class)

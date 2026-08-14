@@ -102,7 +102,7 @@ class PlanningCenterDownloadTest {
                 Thread.sleep(10)
             }
         }
-        throw IllegalStateException("fake attachment host never came up on port $port")
+        error("fake attachment host never came up on port $port")
     }
 
     @AfterTest

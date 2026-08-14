@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar

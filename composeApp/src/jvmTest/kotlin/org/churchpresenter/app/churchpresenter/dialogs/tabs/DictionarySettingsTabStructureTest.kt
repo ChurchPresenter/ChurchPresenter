@@ -5,11 +5,9 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
-import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 /**
  * Pins the shape of the tab and validates the ordinals the behaviour tests use.

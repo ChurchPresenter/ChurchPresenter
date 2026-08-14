@@ -12,6 +12,7 @@ import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
 import java.awt.HeadlessException
 import java.awt.Rectangle
+import java.util.Locale
 
 /** Empty on a headless JVM (CI, or a genuinely displayless deployment) instead of throwing. */
 private fun safeScreenDevices(): Array<GraphicsDevice> = try {
@@ -117,7 +118,7 @@ fun formatAspectRatio(width: Int, height: Int): String {
     val h = height / gcd
     // Accept simplified ratios where both sides are reasonable (≤64)
     return if (w <= 64 && h <= 64) "$w:$h"
-    else String.format("%.2f:1", width.toFloat() / height.toFloat())
+    else String.format(Locale.US, "%.2f:1", width.toFloat() / height.toFloat())
 }
 
 private fun gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b)

@@ -9,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,7 +45,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -62,12 +60,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -130,7 +125,6 @@ import churchpresenter.composeapp.generated.resources.recent
 import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.select_presentation_file
 import churchpresenter.composeapp.generated.resources.select_presentation_file_button
-import churchpresenter.composeapp.generated.resources.slide_count
 import churchpresenter.composeapp.generated.resources.loading_slides_progress
 import churchpresenter.composeapp.generated.resources.presentation_builds_counter
 import churchpresenter.composeapp.generated.resources.presentation_focus_lost
@@ -183,8 +177,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Component
-import java.awt.Container
 import java.awt.Window as AwtWindow
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter

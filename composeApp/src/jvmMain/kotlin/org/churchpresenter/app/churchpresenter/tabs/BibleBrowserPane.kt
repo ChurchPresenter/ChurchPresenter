@@ -28,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -39,12 +38,10 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.copy_verse
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_copy
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
-import churchpresenter.composeapp.generated.resources.verse
 import kotlinx.coroutines.flow.first
 import org.churchpresenter.app.churchpresenter.viewmodel.verseNumberOf
 import org.jetbrains.compose.resources.painterResource
