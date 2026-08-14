@@ -48,9 +48,12 @@ class PresentationTabLoadErrorTest {
         }
 
     @Test
-    fun `a password-protected deck shows the password error and no slides`() = withLoadError(DeckLoadError.PASSWORD_PROTECTED) { vm ->
+    fun `a password-protected deck shows the password error and no slides`() =
+        withLoadError(DeckLoadError.PASSWORD_PROTECTED) { vm ->
         assertTrue(
-            showsContainingText("This PDF is password-protected and can't be opened. Remove the password and try again."),
+            showsContainingText(
+                "This PDF is password-protected and can't be opened. Remove the password and try again."
+            ),
             renderedText().toString(),
         )
         assertTrue(vm.slideFiles.isEmpty())
@@ -62,7 +65,8 @@ class PresentationTabLoadErrorTest {
     }
 
     @Test
-    fun `an unsupported format shows the generic render-failed error`() = withLoadError(DeckLoadError.UNSUPPORTED_FORMAT) { _ ->
+    fun `an unsupported format shows the generic render-failed error`() =
+        withLoadError(DeckLoadError.UNSUPPORTED_FORMAT) { _ ->
         assertTrue(
             showsContainingText("Couldn't read this file — it may be corrupted or in an unsupported format."),
             renderedText().toString(),

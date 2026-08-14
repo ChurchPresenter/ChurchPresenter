@@ -243,8 +243,14 @@ class CompanionServerRemoteControlTest {
         server.updateApiKey(enabled = true, key = "s3cret")
 
         assertEquals(HttpStatusCode.Unauthorized, get(Constants.ENDPOINT_SCHEDULE).status)
-        assertEquals(HttpStatusCode.Unauthorized, post(Constants.ENDPOINT_SCHEDULE_ADD, """{"item":{"songNumber":1}}""").status)
-        assertEquals(HttpStatusCode.Unauthorized, post(Constants.ENDPOINT_PROJECT, """{"item":{"songNumber":1}}""").status)
+        assertEquals(
+            HttpStatusCode.Unauthorized,
+            post(Constants.ENDPOINT_SCHEDULE_ADD, """{"item":{"songNumber":1}}""").status
+        )
+        assertEquals(
+            HttpStatusCode.Unauthorized,
+            post(Constants.ENDPOINT_PROJECT, """{"item":{"songNumber":1}}""").status
+        )
         assertEquals(HttpStatusCode.Unauthorized, post(Constants.ENDPOINT_CLEAR).status)
     }
 
@@ -420,7 +426,13 @@ class CompanionServerRemoteControlTest {
         server.updateSchedule(
             listOf(
                 ScheduleItem.SongItem(id = "1", songNumber = 42, title = "Amazing Grace", songbook = "Hymnal"),
-                ScheduleItem.BibleVerseItem(id = "2", bookName = "John", chapter = 3, verseNumber = 16, verseText = "…"),
+                ScheduleItem.BibleVerseItem(
+                    id = "2",
+                    bookName = "John",
+                    chapter = 3,
+                    verseNumber = 16,
+                    verseText = "…"
+                ),
             ),
         )
 
@@ -463,7 +475,10 @@ class CompanionServerRemoteControlTest {
     fun `nothing recognisable in the body is refused before anyone is asked`() {
         val asked = playOperator(allow = true)
 
-        assertEquals(HttpStatusCode.BadRequest, post(Constants.ENDPOINT_SCHEDULE_ADD, """{"item":{"displayText":"nothing"}}""").status)
+        assertEquals(
+            HttpStatusCode.BadRequest,
+            post(Constants.ENDPOINT_SCHEDULE_ADD, """{"item":{"displayText":"nothing"}}""").status
+        )
         assertEquals(HttpStatusCode.BadRequest, post(Constants.ENDPOINT_SCHEDULE_ADD, "not json").status)
         assertTrue(asked.isEmpty(), "a junk request must not raise a dialog in front of the operator mid-service")
     }
@@ -541,7 +556,9 @@ class CompanionServerRemoteControlTest {
     fun `an unanswered request is left waiting rather than allowed`() {
         // Nothing plays the operator here: the desktop prompt is still on screen, unanswered.
         val response = runBlocking {
-            withTimeoutOrNull(1_500) { client.post(url(Constants.ENDPOINT_SCHEDULE_ADD)) { setBody("""{"item":{"songNumber":42}}""") } }
+            withTimeoutOrNull(1_500) {
+                client.post(url(Constants.ENDPOINT_SCHEDULE_ADD)) { setBody("""{"item":{"songNumber":42}}""") }
+            }
         }
 
         assertEquals(
@@ -625,7 +642,10 @@ class CompanionServerRemoteControlTest {
     private fun List<String>.ackFor(commandId: String): CommandAckPayload? =
         mapNotNull { runCatching { json.decodeFromString(WebSocketMessage.serializer(), it) }.getOrNull() }
             .filter { it.type == Constants.WS_EVENT_COMMAND_ACK }
-            .mapNotNull { runCatching { json.decodeFromString(CommandAckPayload.serializer(), it.payload) }.getOrNull() }
+            .mapNotNull { runCatching { json.decodeFromString(
+                CommandAckPayload.serializer(),
+                it.payload
+            ) }.getOrNull() }
             .firstOrNull { it.commandId == commandId }
 
     @Test
@@ -720,7 +740,11 @@ class CompanionServerRemoteControlTest {
     @Test
     fun `a batch with nothing recognisable in it is refused rather than queued`() {
         val ack = sendOverWebSocket(
-            command(Constants.WS_CMD_ADD_BATCH_TO_SCHEDULE, """{"items":[{"displayText":"nothing"}]}""", commandId = "cmd-4"),
+            command(
+                Constants.WS_CMD_ADD_BATCH_TO_SCHEDULE,
+                """{"items":[{"displayText":"nothing"}]}""",
+                commandId = "cmd-4"
+            ),
         ).ackFor("cmd-4")
 
         assertEquals(false, assertNotNull(ack).ok)
@@ -964,8 +988,14 @@ class CompanionServerRemoteControlTest {
         val dir = loadBible()
         try {
             // The phone sends back whatever the user typed into its search box.
-            assertEquals("1", get("${Constants.ENDPOINT_BIBLE}?${Constants.QUERY_PARAM_BOOK}=john").obj().str("book-total"))
-            assertEquals("1", get("${Constants.ENDPOINT_BIBLE}?${Constants.QUERY_PARAM_BOOK}=JOHN").obj().str("book-total"))
+            assertEquals(
+                "1",
+                get("${Constants.ENDPOINT_BIBLE}?${Constants.QUERY_PARAM_BOOK}=john").obj().str("book-total")
+            )
+            assertEquals(
+                "1",
+                get("${Constants.ENDPOINT_BIBLE}?${Constants.QUERY_PARAM_BOOK}=JOHN").obj().str("book-total")
+            )
         } finally {
             dir.deleteRecursively()
         }
@@ -1032,7 +1062,9 @@ class CompanionServerRemoteControlTest {
         try {
             assertEquals(
                 HttpStatusCode.NotFound,
-                get("${Constants.ENDPOINT_BIBLE}?${Constants.QUERY_PARAM_BOOK}=43&${Constants.QUERY_PARAM_CHAPTER}=99").status,
+                get(
+                    "${Constants.ENDPOINT_BIBLE}?${Constants.QUERY_PARAM_BOOK}=43&${Constants.QUERY_PARAM_CHAPTER}=99"
+                ).status,
             )
         } finally {
             dir.deleteRecursively()
@@ -1447,7 +1479,9 @@ class CompanionServerRemoteControlTest {
         server.updateSchedule(
             listOf(
                 ScheduleItem.MediaItem(
-                    id = "media-1", mediaUrl = "https://youtube.com/watch?v=x", mediaTitle = "Clip", mediaType = "youtube",
+                    id =
+                        "media-1", mediaUrl =
+                            "https://youtube.com/watch?v=x", mediaTitle = "Clip", mediaType = "youtube",
                 ),
             ),
         )

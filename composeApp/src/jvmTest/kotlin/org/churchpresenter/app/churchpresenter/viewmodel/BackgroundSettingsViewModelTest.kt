@@ -16,7 +16,10 @@ class BackgroundSettingsViewModelTest {
     private val vm = BackgroundSettingsViewModel()
 
     /** Applies one update to [start] and returns the result. */
-    private fun apply(start: AppSettings = AppSettings(), update: (((AppSettings) -> AppSettings) -> Unit) -> Unit): AppSettings {
+    private fun apply(
+        start: AppSettings = AppSettings(),
+        update: (((AppSettings) -> AppSettings) -> Unit) -> Unit
+    ): AppSettings {
         var current = start
         update { transform -> current = transform(current) }
         return current

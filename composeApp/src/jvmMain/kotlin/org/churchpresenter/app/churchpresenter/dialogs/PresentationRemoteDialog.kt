@@ -178,7 +178,11 @@ internal fun PresentationRemoteDialogContent(
                         checked = settings.presentationRemoteSettings.remoteControlEnabled,
                         onCheckedChange = { enabled ->
                             onSettingsChange { s ->
-                                s.copy(presentationRemoteSettings = s.presentationRemoteSettings.copy(remoteControlEnabled = enabled))
+                                s.copy(
+                                    presentationRemoteSettings = s.presentationRemoteSettings.copy(
+                                        remoteControlEnabled = enabled
+                                    )
+                                )
                             }
                         }
                     )
@@ -191,7 +195,8 @@ internal fun PresentationRemoteDialogContent(
                     Spacer(Modifier.height(12.dp))
 
                     val qrDisplayUrl = "$qrBaseUrl/presentation-remote"
-                    val qrUrl = if (apiKeyEnabled && apiKey.isNotBlank()) "$qrDisplayUrl?password=$apiKey" else qrDisplayUrl
+                    val qrUrl = if (apiKeyEnabled && apiKey.isNotBlank()) "$qrDisplayUrl?password=$apiKey"
+                        else qrDisplayUrl
                     val qrBitmap = remember(qrUrl) { generateQRCodeBitmap(qrUrl, 180) }
                     Text(
                         stringResource(Res.string.presentation_remote_uses_api_key),
@@ -228,7 +233,10 @@ internal fun PresentationRemoteDialogContent(
                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     ) {
-                        Text(stringResource(Res.string.presentation_remote_copy_url), style = MaterialTheme.typography.labelSmall)
+                        Text(
+                            stringResource(Res.string.presentation_remote_copy_url),
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
 
                     Spacer(Modifier.height(16.dp))
@@ -257,21 +265,39 @@ internal fun PresentationRemoteDialogContent(
                             Button(
                                 shape = RoundedCornerShape(6.dp),
                                 onClick = onStartTunnel,
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
                             ) {
-                                Text(stringResource(Res.string.qa_enable_public_access), style = MaterialTheme.typography.labelSmall)
+                                Text(
+                                    stringResource(Res.string.qa_enable_public_access),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
                             }
                         }
                         is TunnelStatus.Downloading -> {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                Text(stringResource(Res.string.qa_downloading_tunnel), style = MaterialTheme.typography.bodySmall)
+                                Text(
+                                    stringResource(Res.string.qa_downloading_tunnel),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
                         }
                         is TunnelStatus.Starting -> {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                Text(stringResource(Res.string.qa_starting_tunnel), style = MaterialTheme.typography.bodySmall)
+                                Text(
+                                    stringResource(Res.string.qa_starting_tunnel),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
                         }
                         is TunnelStatus.Connected -> {
@@ -279,25 +305,50 @@ internal fun PresentationRemoteDialogContent(
                                 Button(
                                     shape = RoundedCornerShape(6.dp),
                                     onClick = { onPresentationDisplayUrlChanged(serverUrl) },
-                                    colors = if (presentationDisplayUrl.isEmpty() || presentationDisplayUrl == serverUrl)
-                                        ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), contentColor = MaterialTheme.colorScheme.primary)
-                                    else ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
-                                ) { Text(stringResource(Res.string.qa_local), style = MaterialTheme.typography.labelSmall) }
+                                    colors =
+                                        if (presentationDisplayUrl.isEmpty() || presentationDisplayUrl == serverUrl)
+                                        ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                            contentColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    else ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                ) { Text(
+                                    stringResource(Res.string.qa_local),
+                                    style = MaterialTheme.typography.labelSmall
+                                ) }
                                 Button(
                                     shape = RoundedCornerShape(6.dp),
                                     onClick = { onPresentationDisplayUrlChanged(tunnelUrl) },
                                     colors = if (presentationDisplayUrl == tunnelUrl)
-                                        ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), contentColor = MaterialTheme.colorScheme.primary)
-                                    else ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
-                                ) { Text(stringResource(Res.string.qa_public), style = MaterialTheme.typography.labelSmall) }
+                                        ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                            contentColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    else ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                ) { Text(
+                                    stringResource(Res.string.qa_public),
+                                    style = MaterialTheme.typography.labelSmall
+                                ) }
                             }
                             Spacer(Modifier.height(8.dp))
                             Button(
                                 shape = RoundedCornerShape(6.dp),
                                 onClick = onStopTunnel,
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
                             ) {
-                                Text(stringResource(Res.string.qa_disable_public_access), style = MaterialTheme.typography.labelSmall)
+                                Text(
+                                    stringResource(Res.string.qa_disable_public_access),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
                             }
                         }
                         is TunnelStatus.Error -> {
@@ -309,7 +360,10 @@ internal fun PresentationRemoteDialogContent(
                             Button(
                                 shape = RoundedCornerShape(6.dp),
                                 onClick = onStartTunnel,
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
                             ) {
                                 Text(stringResource(Res.string.qa_retry), style = MaterialTheme.typography.labelSmall)
                             }

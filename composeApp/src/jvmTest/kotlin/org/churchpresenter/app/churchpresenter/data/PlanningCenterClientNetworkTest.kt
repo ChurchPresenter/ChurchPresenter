@@ -57,7 +57,8 @@ class PlanningCenterClientNetworkTest {
     fun `an authorization code is exchanged for a token set`() {
         respondWith("""{"access_token":"tok-abc","refresh_token":"ref-abc","expires_in":7200}""")
 
-        val outcome = runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "the-code", http = http) }
+        val outcome =
+            runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "the-code", http = http) }
 
         val tokens = assertIs<PlanningCenterClient.TokenOutcome.Success>(outcome, "got $outcome").tokens
         assertEquals("tok-abc", tokens.accessToken)
@@ -347,7 +348,9 @@ class PlanningCenterClientNetworkTest {
             """{
                 "data":[{
                     "id":"item-1",
-                    "attributes":{"title":"Amazing Grace","description":"desc","html_details":"<p>hi</p>","item_type":"song","sequence":2},
+                    "attributes":{
+                        "title":"Amazing Grace","description":"desc","html_details":"<p>hi</p>","item_type":"song","sequence":2
+                    },
                     "relationships":{
                         "song":{"data":{"type":"Song","id":"song-1"}},
                         "arrangement":{"data":{"type":"Arrangement","id":"arr-1"}}

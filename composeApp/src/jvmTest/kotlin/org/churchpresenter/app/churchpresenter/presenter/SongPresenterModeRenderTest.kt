@@ -54,14 +54,18 @@ class SongPresenterModeRenderTest {
                 )
             }
         }
-        onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists("the section being sung must be on screen")
+        onNodeWithText(
+            "Amazing grace how sweet the sound",
+            substring = true
+        ).assertExists("the section being sung must be on screen")
         onNodeWithText("That saved a wretch like me", substring = true)
             .assertExists("the band's look-ahead preview of the next section must render")
     }
 
     @Test
     fun `line mode shows only the selected line and hides the rest`() = runComposeUiTest {
-        val lineMode = AppSettings(songSettings = SongSettings(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_LINE))
+        val lineMode =
+            AppSettings(songSettings = SongSettings(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_LINE))
         setContent {
             Box(screen) {
                 SongPresenter(

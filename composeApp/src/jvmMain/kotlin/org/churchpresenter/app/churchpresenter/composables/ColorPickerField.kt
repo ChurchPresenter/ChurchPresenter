@@ -63,7 +63,10 @@ fun ColorPickerField(
             .heightIn(min = 42.dp)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(6.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { showDialog = true }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { showDialog = true }
             .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 0.dp),
         verticalArrangement = Arrangement.Center
     ) {

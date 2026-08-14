@@ -109,7 +109,12 @@ object FileKitFileChooser : FileChooser() {
         location: Path,
         suggestedName: String,
         filters: List<FileNameExtensionFilter>,
-        saveNative: suspend (baseName: String, defaultExtension: String?, allowed: Set<String>?, directory: PlatformFile) -> File?
+        saveNative: suspend (
+            baseName: String,
+            defaultExtension: String?,
+            allowed: Set<String>?,
+            directory: PlatformFile
+        ) -> File?
     ): Path? {
         val extensions = filters.allExtensions()
         val (baseName, extension) = saveNameParts(suggestedName, extensions)

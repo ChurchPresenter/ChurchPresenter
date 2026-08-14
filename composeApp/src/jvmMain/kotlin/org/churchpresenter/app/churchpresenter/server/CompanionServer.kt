@@ -187,7 +187,8 @@ class CompanionServer {
         val note = presentations._presentationNotes[id]?.getOrNull(index) ?: ""
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
-            payload = """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":$_presentationIsLive,"notes":"${jsonEscape(note)}"}"""
+            payload =
+                """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":$_presentationIsLive,"notes":"${jsonEscape(note)}"}"""
         ))
     }
 
@@ -499,18 +500,39 @@ class CompanionServer {
      *  primary currently has live, since a Controller has no way to learn the primary's internally-
      *  assigned folderId/presentationId. See Constants.WS_CMD_NEXT_PICTURE and siblings. */
     val onNextPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onPreviousPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onPreviousPicture = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     val onNextSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onPreviousSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onPreviousSlide = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
 
     // Media transport controls from a companion remote
-    val onMediaPlayPause = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaPlayPause = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     val onMediaStop = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaSeekForward = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaSeekBackward = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaSeekForward = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val onMediaSeekBackward = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     val onMediaSeekTo = MutableSharedFlow<Long>(extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaSetVolume = MutableSharedFlow<Float>(extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val onMediaMuteToggle = MutableSharedFlow<Unit>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val onMediaSetVolume = MutableSharedFlow<Float>(
+        extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val onMediaMuteToggle = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
 
     /**
      * Emitted for every instant (no-approval) action so the UI can show an activity toast.
@@ -600,7 +622,11 @@ class CompanionServer {
     /** Allow or disallow file uploads from mobile devices without restarting the server. */
     fun updateFileUploadEnabled(enabled: Boolean) {
         _fileUploadEnabled.value = enabled
-        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "file_upload_enabled", "enabled" to enabled))
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.PRIMARY,
+            "state_updated",
+            mapOf("type" to "file_upload_enabled", "enabled" to enabled)
+        )
     }
 
     /** Update the max media-upload size (MB) without restarting the server. */
@@ -628,7 +654,9 @@ class CompanionServer {
                             ?.sortedBy { it.name }
                             ?.forEach { file ->
                                 try { songs.loadFromSpsAppend(file.absolutePath) } catch (e: Exception) {
-                                    System.err.println("[CompanionServer] Failed to load song ${file.name}: ${e.message}")
+                                    System.err.println(
+                                        "[CompanionServer] Failed to load song ${file.name}: ${e.message}"
+                                    )
                                     CrashReporter.reportWarning(
                                         "Server: Failed to load song ${file.name}",
                                         throwable = e,
@@ -699,7 +727,11 @@ class CompanionServer {
     fun updateSecondaryBibleFilePath(filePath: String) {
         if (_secondaryBibleFilePath == filePath) return
         _secondaryBibleFilePath = filePath
-        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "secondary_bible_file_path", "filePath" to filePath))
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.PRIMARY,
+            "state_updated",
+            mapOf("type" to "secondary_bible_file_path", "filePath" to filePath)
+        )
         // Invalidation signal for followers mirroring the secondary bible — they re-download
         // the .spb on this event instead of trusting their local cache forever.
         broadcast(WebSocketMessage(type = Constants.WS_EVENT_SECONDARY_BIBLE_UPDATED, payload = ""))
@@ -1157,7 +1189,11 @@ class CompanionServer {
         return decodeUploadedFile(call, name, data)
     }
 
-    private suspend fun decodeUploadedFile(call: ApplicationCall, name: String, data: String): Pair<String, ByteArray>? {
+    private suspend fun decodeUploadedFile(
+        call: ApplicationCall,
+        name: String,
+        data: String
+    ): Pair<String, ByteArray>? {
         val safeName = File(name).name.ifBlank { "upload.pdf" }
         val ext = safeName.substringAfterLast('.', "").lowercase()
         if (ext !in UPLOADABLE_EXTENSIONS) {
@@ -1176,7 +1212,10 @@ class CompanionServer {
         try {
             val (safeName, fileBytes) = receiveUploadedFile(call) ?: return
             val ext = safeName.substringAfterLast('.', "").lowercase()
-            val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_presentations").also { it.mkdirs() }
+            val uploadDir = File(
+                System.getProperty("user.home"),
+                ".churchpresenter/device_presentations"
+            ).also { it.mkdirs() }
             val uniqueName = if (File(uploadDir, safeName).exists()) {
                 val ts   = System.currentTimeMillis()
                 val base = safeName.substringBeforeLast('.', safeName)
@@ -1204,7 +1243,10 @@ class CompanionServer {
                 ContentType.Application.Json
             )
         } catch (e: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}"""
+            )
         }
     }
 

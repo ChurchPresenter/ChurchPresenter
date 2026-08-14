@@ -220,7 +220,11 @@ fun ColorPickerDialog(
                                 modifier = Modifier
                                     .size(24.dp)
                                     .background(recentColor, RoundedCornerShape(4.dp))
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                                    .border(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                                        RoundedCornerShape(4.dp)
+                                    )
                                     .testTag("recentColor_$recentHex")
                                     .clickable {
                                         val (h, s, v) = cpColorToHsv(recentColor)
@@ -239,7 +243,10 @@ fun ColorPickerDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+                    TextButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = onDismiss
+                    ) { Text(stringResource(Res.string.cancel)) }
                     Spacer(Modifier.width(8.dp))
                     Button(
                         shape = RoundedCornerShape(6.dp),
@@ -301,7 +308,12 @@ internal fun SvPanel(
             val cx = saturation * size.width
             val cy = (1f - brightness) * size.height
             drawCircle(Color.White, radius = 8.dp.toPx(), center = Offset(cx, cy), style = Stroke(2.dp.toPx()))
-            drawCircle(Color.Black.copy(alpha = 0.4f), radius = 9.dp.toPx(), center = Offset(cx, cy), style = Stroke(1.dp.toPx()))
+            drawCircle(
+                Color.Black.copy(alpha = 0.4f),
+                radius = 9.dp.toPx(),
+                center = Offset(cx, cy),
+                style = Stroke(1.dp.toPx())
+            )
         }
     }
 }
@@ -344,7 +356,12 @@ internal fun HueBar(
             // Thumb line
             val x = hue / 360f * size.width
             drawLine(Color.White, Offset(x, 0f), Offset(x, size.height), strokeWidth = 3.dp.toPx())
-            drawLine(Color.Black.copy(alpha = 0.35f), Offset(x - 1.dp.toPx(), 0f), Offset(x - 1.dp.toPx(), size.height), strokeWidth = 1.dp.toPx())
+            drawLine(
+                Color.Black.copy(alpha = 0.35f),
+                Offset(x - 1.dp.toPx(), 0f),
+                Offset(x - 1.dp.toPx(), size.height),
+                strokeWidth = 1.dp.toPx()
+            )
         }
     }
 }

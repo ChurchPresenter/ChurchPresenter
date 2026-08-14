@@ -81,7 +81,10 @@ class AnnouncementsTabStageMonitorTest {
 
             assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
             assertEquals("Notices", presenter.announcementText.value)
-            assertTrue(presenter.screenLocks.value.isEmpty(), "there is nothing else to protect, so no per-screen lock is needed")
+            assertTrue(
+                presenter.screenLocks.value.isEmpty(),
+                "there is nothing else to protect, so no per-screen lock is needed"
+            )
         }
 
     @Test

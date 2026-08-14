@@ -174,7 +174,12 @@ class PlanningCenterImportContentTest {
             coEvery { PlanningCenterClient.listUpcomingPlans(any(), any(), any()) } returns
                 PlanningCenterClient.PlansOutcome.Success(emptyList())
         },
-        block: ComposeUiTest.(vm: PlanningCenterImportViewModel, dismissed: () -> Int, disconnected: () -> Int, recorder: Recorder) -> Unit,
+        block: ComposeUiTest.(
+            vm: PlanningCenterImportViewModel,
+            dismissed: () -> Int,
+            disconnected: () -> Int,
+            recorder: Recorder
+        ) -> Unit,
     ) {
         setup()
         val recorder = Recorder()
@@ -224,7 +229,14 @@ class PlanningCenterImportContentTest {
                         },
                         onAddBibleVerse = { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
                             recorder.addBibleVerseCalls++
-                            recorder.lastAddBibleVerse = listOf(bookName, chapter, verseNumber, verseText, verseRange, bookId)
+                            recorder.lastAddBibleVerse = listOf(
+                                bookName,
+                                chapter,
+                                verseNumber,
+                                verseText,
+                                verseRange,
+                                bookId
+                            )
                         },
                         onAddSongRequested = { pco, prefill -> recorder.addSongRequested = pco to prefill },
                     )
@@ -281,7 +293,8 @@ class PlanningCenterImportContentTest {
 
     private fun withPlan(items: List<PlanningCenterClient.PlanItem>) {
         coEvery { PlanningCenterClient.listUpcomingPlans(any(), any(), any()) } returns
-            PlanningCenterClient.PlansOutcome.Success(listOf(PlanningCenterClient.Plan("plan-1", "Sunday Service", "Jul 27")))
+            PlanningCenterClient.PlansOutcome
+                .Success(listOf(PlanningCenterClient.Plan("plan-1", "Sunday Service", "Jul 27")))
         coEvery { PlanningCenterClient.getPlanItems(any(), any(), any(), any()) } returns
             PlanningCenterClient.PlanItemsOutcome.Success(items)
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
@@ -482,7 +495,8 @@ class PlanningCenterImportContentTest {
             coEvery { PlanningCenterClient.listUpcomingPlans(any(), "st-1", any()) } returns
                 PlanningCenterClient.PlansOutcome.Success(emptyList())
             coEvery { PlanningCenterClient.listUpcomingPlans(any(), "st-2", any()) } returns
-                PlanningCenterClient.PlansOutcome.Success(listOf(PlanningCenterClient.Plan("plan-9", "Wednesday Service", "Jul 30")))
+                PlanningCenterClient.PlansOutcome
+                    .Success(listOf(PlanningCenterClient.Plan("plan-9", "Wednesday Service", "Jul 30")))
         },
     ) { vm, _, _, _ ->
         assertTextEventually("Sunday Morning")
@@ -556,7 +570,8 @@ class PlanningCenterImportContentTest {
     }
 
     @Test
-    fun `importing a matched song calls onAddSong with the parsed songbook and number`() = dialog { vm, _, _, recorder ->
+    fun `importing a matched song calls onAddSong with the parsed songbook and number`() =
+        dialog { vm, _, _, recorder ->
         withPlan(listOf(planItem("s1", "Amazing Grace", itemType = "song", songTitle = "Amazing Grace")))
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
@@ -575,7 +590,8 @@ class PlanningCenterImportContentTest {
     fun `importing a selected item with a supported attachment calls onAddPicture`() = dialog { vm, _, _, recorder ->
         val attachment = PlanningCenterClient.PlanAttachment(id = "att-1", filename = "slide.jpg")
         coEvery { PlanningCenterClient.listUpcomingPlans(any(), any(), any()) } returns
-            PlanningCenterClient.PlansOutcome.Success(listOf(PlanningCenterClient.Plan("plan-1", "Sunday Service", "Jul 27")))
+            PlanningCenterClient.PlansOutcome
+                .Success(listOf(PlanningCenterClient.Plan("plan-1", "Sunday Service", "Jul 27")))
         coEvery { PlanningCenterClient.getPlanItems(any(), any(), any(), any()) } returns
             PlanningCenterClient.PlanItemsOutcome.Success(listOf(planItem("i1", "Sermon Notes", itemType = "item")))
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
@@ -608,7 +624,11 @@ class PlanningCenterImportContentTest {
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
             PlanningCenterClient.AttachmentsOutcome.Success(
                 listOf(
-                    PlanningCenterClient.PlanAttachment(id = "att-1", filename = "photo.jpg", thumbnailUrl = "https://example.test/thumb.jpg"),
+                    PlanningCenterClient.PlanAttachment(
+                        id = "att-1",
+                        filename = "photo.jpg",
+                        thumbnailUrl = "https://example.test/thumb.jpg"
+                    ),
                     PlanningCenterClient.PlanAttachment(id = "att-2", filename = "slides.pptx"),
                     PlanningCenterClient.PlanAttachment(id = "att-3", filename = "notes.xyz"),
                 ),
@@ -700,10 +720,12 @@ class PlanningCenterImportContentTest {
     // ── Attachment classification on import ─────────────────────────────────────
 
     @Test
-    fun `importing a selected item with a supported presentation attachment calls onAddPresentation`() = dialog { vm, _, _, recorder ->
+    fun `importing a selected item with a supported presentation attachment calls onAddPresentation`() =
+        dialog { vm, _, _, recorder ->
         val attachment = PlanningCenterClient.PlanAttachment(id = "att-1", filename = "slides.pptx")
         coEvery { PlanningCenterClient.listUpcomingPlans(any(), any(), any()) } returns
-            PlanningCenterClient.PlansOutcome.Success(listOf(PlanningCenterClient.Plan("plan-1", "Sunday Service", "Jul 27")))
+            PlanningCenterClient.PlansOutcome
+                .Success(listOf(PlanningCenterClient.Plan("plan-1", "Sunday Service", "Jul 27")))
         coEvery { PlanningCenterClient.getPlanItems(any(), any(), any(), any()) } returns
             PlanningCenterClient.PlanItemsOutcome.Success(listOf(planItem("i1", "Sermon Slides", itemType = "item")))
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
@@ -727,10 +749,12 @@ class PlanningCenterImportContentTest {
     }
 
     @Test
-    fun `importing a selected item with a supported media attachment calls onAddMedia`() = dialog { vm, _, _, recorder ->
+    fun `importing a selected item with a supported media attachment calls onAddMedia`() =
+        dialog { vm, _, _, recorder ->
         val attachment = PlanningCenterClient.PlanAttachment(id = "att-1", filename = "clip.mp4")
         coEvery { PlanningCenterClient.listUpcomingPlans(any(), any(), any()) } returns
-            PlanningCenterClient.PlansOutcome.Success(listOf(PlanningCenterClient.Plan("plan-1", "Sunday Service", "Jul 27")))
+            PlanningCenterClient.PlansOutcome
+                .Success(listOf(PlanningCenterClient.Plan("plan-1", "Sunday Service", "Jul 27")))
         coEvery { PlanningCenterClient.getPlanItems(any(), any(), any(), any()) } returns
             PlanningCenterClient.PlanItemsOutcome.Success(listOf(planItem("i1", "Intro Clip", itemType = "item")))
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
@@ -756,12 +780,17 @@ class PlanningCenterImportContentTest {
     // ── Attachment thumbnails ─────────────────────────────────────────────────────
 
     @Test
-    fun `an image attachment with a decodable thumbnail replaces the loading spinner with the image`() = dialog { vm, _, _, _ ->
+    fun `an image attachment with a decodable thumbnail replaces the loading spinner with the image`() =
+        dialog { vm, _, _, _ ->
         coEvery { PlanningCenterClient.fetchThumbnailBytes(any(), any()) } returns tinyPngBytes()
         withPlan(listOf(planItem("i1", "Sermon Notes", itemType = "item")))
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
             PlanningCenterClient.AttachmentsOutcome.Success(
-                listOf(PlanningCenterClient.PlanAttachment(id = "att-1", filename = "photo.jpg", thumbnailUrl = "https://example.test/thumb.jpg")),
+                listOf(PlanningCenterClient.PlanAttachment(
+                    id = "att-1",
+                    filename = "photo.jpg",
+                    thumbnailUrl = "https://example.test/thumb.jpg"
+                )),
             )
 
         vm.selectServiceType("st-1")
@@ -775,12 +804,17 @@ class PlanningCenterImportContentTest {
     }
 
     @Test
-    fun `an image attachment with corrupt thumbnail bytes leaves the loading spinner showing`() = dialog { vm, _, _, _ ->
+    fun `an image attachment with corrupt thumbnail bytes leaves the loading spinner showing`() =
+        dialog { vm, _, _, _ ->
         coEvery { PlanningCenterClient.fetchThumbnailBytes(any(), any()) } returns "not a real image".toByteArray()
         withPlan(listOf(planItem("i1", "Sermon Notes", itemType = "item")))
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
             PlanningCenterClient.AttachmentsOutcome.Success(
-                listOf(PlanningCenterClient.PlanAttachment(id = "att-1", filename = "photo.jpg", thumbnailUrl = "https://example.test/thumb.jpg")),
+                listOf(PlanningCenterClient.PlanAttachment(
+                    id = "att-1",
+                    filename = "photo.jpg",
+                    thumbnailUrl = "https://example.test/thumb.jpg"
+                )),
             )
 
         vm.selectServiceType("st-1")
@@ -796,11 +830,20 @@ class PlanningCenterImportContentTest {
     }
 
     @Test
-    fun `clicking Add Song with a linked arrangement fetches it before requesting the add-song dialog`() = dialog { vm, _, _, recorder ->
+    fun `clicking Add Song with a linked arrangement fetches it before requesting the add-song dialog`() =
+        dialog { vm, _, _, recorder ->
         coEvery { PlanningCenterClient.getArrangementDetail(any(), any(), any(), any()) } returns
-            PlanningCenterClient.ArrangementOutcome.Success(PlanningCenterClient.ArrangementDetail(chordChart = "G C D", lyrics = "la la la"))
+            PlanningCenterClient.ArrangementOutcome
+                .Success(PlanningCenterClient.ArrangementDetail(chordChart = "G C D", lyrics = "la la la"))
         withPlan(
-            listOf(planItem("s1", "Amazing Grace", itemType = "song", songTitle = "Amazing Grace", songId = "song-1", arrangementId = "arr-1")),
+            listOf(planItem(
+                "s1",
+                "Amazing Grace",
+                itemType = "song",
+                songTitle = "Amazing Grace",
+                songId = "song-1",
+                arrangementId = "arr-1"
+            )),
         )
         vm.selectServiceType("st-1")
         awaitVm { vm.planItems.isNotEmpty() }
@@ -815,7 +858,8 @@ class PlanningCenterImportContentTest {
     }
 
     @Test
-    fun `importing skips a media row and still imports the other selected rows`() = dialog { vm, dismissed, _, recorder ->
+    fun `importing skips a media row and still imports the other selected rows`() =
+        dialog { vm, dismissed, _, recorder ->
         withPlan(
             listOf(
                 planItem("m1", "Intro Video", itemType = "media"),
@@ -834,10 +878,12 @@ class PlanningCenterImportContentTest {
     }
 
     @Test
-    fun `a failed attachment download imports nothing for that file but still dismisses`() = dialog { vm, dismissed, _, recorder ->
+    fun `a failed attachment download imports nothing for that file but still dismisses`() =
+        dialog { vm, dismissed, _, recorder ->
         val attachment = PlanningCenterClient.PlanAttachment(id = "att-1", filename = "slide.jpg")
         coEvery { PlanningCenterClient.listUpcomingPlans(any(), any(), any()) } returns
-            PlanningCenterClient.PlansOutcome.Success(listOf(PlanningCenterClient.Plan("plan-1", "Sunday Service", "Jul 27")))
+            PlanningCenterClient.PlansOutcome
+                .Success(listOf(PlanningCenterClient.Plan("plan-1", "Sunday Service", "Jul 27")))
         coEvery { PlanningCenterClient.getPlanItems(any(), any(), any(), any()) } returns
             PlanningCenterClient.PlanItemsOutcome.Success(listOf(planItem("i1", "Sermon Notes", itemType = "item")))
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns

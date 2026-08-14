@@ -249,7 +249,10 @@ object ZefaniaRepositoryIndex {
         val taken = mutableSetOf<String>()
         return entries
             .asSequence()
-            .filter { it.type == "blob" && it.path.startsWith(BIBLES_PREFIX) && it.path.endsWith(".zip", ignoreCase = true) }
+            .filter { it.type == "blob" && it.path.startsWith(BIBLES_PREFIX) && it.path.endsWith(
+                ".zip",
+                ignoreCase = true
+            ) }
             .sortedBy { it.path }
             .mapNotNull { entry ->
                 val module = parseEntry(entry) ?: return@mapNotNull null

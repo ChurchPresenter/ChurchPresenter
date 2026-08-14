@@ -268,7 +268,10 @@ data class BibleSettings(
         )
     }
 
-    fun updateTranslation(index: Int, transform: (BibleTranslationSettings) -> BibleTranslationSettings): BibleSettings {
+    fun updateTranslation(
+        index: Int,
+        transform: (BibleTranslationSettings) -> BibleTranslationSettings
+    ): BibleSettings {
         val current = translationList()
         if (index !in current.indices) return this
         return withTranslations(current.toMutableList().also { it[index] = transform(it[index]) })
@@ -350,7 +353,8 @@ data class BibleSettings(
         lowerThirdTextColor = secondaryBibleLowerThirdColor,
         lowerThirdTextFontType = secondaryBibleLowerThirdFontType,
         lowerThirdTextBold = secondaryBibleLowerThirdBold, lowerThirdTextItalic = secondaryBibleLowerThirdItalic,
-        lowerThirdTextUnderline = secondaryBibleLowerThirdUnderline, lowerThirdTextShadow = secondaryBibleLowerThirdShadow,
+        lowerThirdTextUnderline =
+            secondaryBibleLowerThirdUnderline, lowerThirdTextShadow = secondaryBibleLowerThirdShadow,
         referenceColor = secondaryReferenceColor, referenceFontType = secondaryReferenceFontType,
         referenceFontSize = secondaryReferenceFontSize,
         lowerThirdReferenceFontSize = secondaryReferenceLowerThirdFontSize,

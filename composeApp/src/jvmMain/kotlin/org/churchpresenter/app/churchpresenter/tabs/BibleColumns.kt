@@ -259,7 +259,12 @@ internal fun BibleSearchField(
 
                 modifier = Modifier.size(30.dp).testTag("bible_searchClear")
             ) {
-                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(
+                    painter = painterResource(Res.drawable.ic_close),
+                    contentDescription = stringResource(Res.string.search_clear),
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
         Box(modifier = Modifier.padding(end = 6.dp)) {
@@ -299,7 +304,8 @@ internal fun BibleBrowserColumn(
                     Text(
                         text = item,
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurface
+                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
                         maxLines = if (singleLine) 1 else Int.MAX_VALUE,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = if (centerText) TextAlign.Center else TextAlign.Start
@@ -385,7 +391,8 @@ internal fun BibleVerseColumn(
                             lineHeight = 13.5.sp * 1.6f,
                             fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
                         ),
-                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurface
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .weight(1f)
                             .pointerInput(index) {

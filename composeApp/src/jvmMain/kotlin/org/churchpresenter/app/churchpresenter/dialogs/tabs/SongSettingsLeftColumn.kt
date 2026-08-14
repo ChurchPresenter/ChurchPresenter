@@ -94,13 +94,19 @@ internal fun LeftColumn(
             NumberSettingsTextField(
                 label = stringResource(Res.string.full_screen),
                 initialText = settings.songSettings.songNumberFontSize,
-                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberFontSize = it)) } },
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberFontSize = it)) }
+                },
                 range = 8..150
             )
             NumberSettingsTextField(
                 label = stringResource(Res.string.lower_third_size),
                 initialText = settings.songSettings.songNumberLowerThirdFontSize,
-                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdFontSize = it)) } },
+                onValueChange = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdFontSize = it))
+                    }
+                },
                 range = 8..150
             )
         }
@@ -143,7 +149,9 @@ internal fun LeftColumn(
                         everyPageStr -> Constants.EVERY_PAGE
                         else -> Constants.FIRST_PAGE
                     }
-                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(showNumberLowerThird = storedValue)) }
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(showNumberLowerThird = storedValue))
+                    }
                 }
             )
         }
@@ -154,19 +162,37 @@ internal fun LeftColumn(
     SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(
+                    stringResource(Res.string.full_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp)
+                )
                 PositionButtons(
                     selectedPosition = settings.songSettings.songNumberPosition,
-                    onPositionChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberPosition = storedValue)) } },
+                    onPositionChange = { storedValue ->
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(songNumberPosition = storedValue))
+                        }
+                    },
                     aboveValue = Constants.ABOVE_VERSE,
                     belowValue = Constants.BELOW_VERSE
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(
+                    stringResource(Res.string.lower_third_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp)
+                )
                 PositionButtons(
                     selectedPosition = settings.songSettings.songNumberLowerThirdPosition,
-                    onPositionChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdPosition = storedValue)) } },
+                    onPositionChange = { storedValue ->
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdPosition = storedValue))
+                        }
+                    },
                     aboveValue = Constants.ABOVE_VERSE,
                     belowValue = Constants.BELOW_VERSE
                 )
@@ -177,20 +203,40 @@ internal fun LeftColumn(
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(
+                    stringResource(Res.string.full_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp)
+                )
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.songNumberHorizontalAlignment,
-                    onAlignmentChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberHorizontalAlignment = storedValue)) } },
+                    onAlignmentChange = { storedValue ->
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(songNumberHorizontalAlignment = storedValue))
+                        }
+                    },
                     leftValue = Constants.LEFT,
                     centerValue = Constants.CENTER,
                     rightValue = Constants.RIGHT
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(
+                    stringResource(Res.string.lower_third_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp)
+                )
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.songNumberLowerThirdHorizontalAlignment,
-                    onAlignmentChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdHorizontalAlignment = storedValue)) } },
+                    onAlignmentChange = { storedValue ->
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(
+                                songNumberLowerThirdHorizontalAlignment = storedValue
+                            ))
+                        }
+                    },
                     leftValue = Constants.LEFT,
                     centerValue = Constants.CENTER,
                     rightValue = Constants.RIGHT
@@ -201,12 +247,18 @@ internal fun LeftColumn(
 
     val sameFullscreen = settings.songSettings.songNumberPosition == settings.songSettings.titlePosition &&
             settings.songSettings.songNumberHorizontalAlignment == settings.songSettings.titleHorizontalAlignment
-    val sameLowerThird = settings.songSettings.songNumberLowerThirdPosition == settings.songSettings.titleLowerThirdPosition &&
-            settings.songSettings.songNumberLowerThirdHorizontalAlignment == settings.songSettings.titleLowerThirdHorizontalAlignment
+    val sameLowerThird =
+        settings.songSettings.songNumberLowerThirdPosition == settings.songSettings.titleLowerThirdPosition &&
+            settings.songSettings
+                .songNumberLowerThirdHorizontalAlignment == settings
+                .songSettings
+                .titleLowerThirdHorizontalAlignment
     AnimatedVisibility(visible = sameFullscreen || sameLowerThird) {
         LabeledCheckbox(
             checked = settings.songSettings.songNumberBeforeTitle,
-            onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberBeforeTitle = it)) } },
+            onCheckedChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberBeforeTitle = it)) }
+            },
             label = stringResource(Res.string.number_before_title),
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("song_songNumberBeforeTitle"),
             style = MaterialTheme.typography.bodyMedium,
@@ -252,7 +304,9 @@ internal fun LeftColumn(
                         everyPageStr -> Constants.EVERY_PAGE
                         else -> Constants.FIRST_PAGE
                     }
-                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdDisplay = storedValue)) }
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(titleLowerThirdDisplay = storedValue))
+                    }
                 }
             )
         }
@@ -263,13 +317,17 @@ internal fun LeftColumn(
             NumberSettingsTextField(
                 label = stringResource(Res.string.full_screen),
                 initialText = settings.songSettings.titleFontSize,
-                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleFontSize = it)) } },
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleFontSize = it)) }
+                },
                 range = 8..150
             )
             NumberSettingsTextField(
                 label = stringResource(Res.string.lower_third_size),
                 initialText = settings.songSettings.titleLowerThirdFontSize,
-                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdFontSize = it)) } },
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdFontSize = it)) }
+                },
                 range = 8..150
             )
         }
@@ -281,13 +339,17 @@ internal fun LeftColumn(
                 label = stringResource(Res.string.full_screen),
                 value = settings.songSettings.titleFontType,
                 fonts = availableFonts,
-                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleFontType = it)) } }
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleFontType = it)) }
+                }
             )
             FontSettingsDropdown(
                 label = stringResource(Res.string.lower_third_size),
                 value = settings.songSettings.titleLowerThirdFontType,
                 fonts = availableFonts,
-                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdFontType = it)) } }
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdFontType = it)) }
+                }
             )
         }
     }
@@ -305,7 +367,9 @@ internal fun LeftColumn(
                 label = stringResource(Res.string.full_screen),
                 modifier = Modifier.width(120.dp),
                 color = settings.songSettings.titleColor,
-                onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleColor = it)) } }
+                onColorChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleColor = it)) }
+                }
             )
             TextStyleButtons(
                 bold = settings.songSettings.titleBold,
@@ -313,9 +377,15 @@ internal fun LeftColumn(
                 underline = settings.songSettings.titleUnderline,
                 shadow = settings.songSettings.titleShadow,
                 onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleBold = it)) } },
-                onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleItalic = it)) } },
-                onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleUnderline = it)) } },
-                onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadow = it)) } }
+                onItalicChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleItalic = it)) }
+                },
+                onUnderlineChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleUnderline = it)) }
+                },
+                onShadowChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadow = it)) }
+                }
             )
         }
         AnimatedVisibility(visible = settings.songSettings.titleShadow) {
@@ -323,9 +393,15 @@ internal fun LeftColumn(
                 shadowColor = settings.songSettings.titleShadowColor,
                 shadowSize = settings.songSettings.titleShadowSize,
                 shadowOpacity = settings.songSettings.titleShadowOpacity,
-                onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowColor = it)) } },
-                onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowSize = it)) } },
-                onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowOpacity = it)) } }
+                onColorChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowColor = it)) }
+                },
+                onSizeChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowSize = it)) }
+                },
+                onOpacityChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowOpacity = it)) }
+                }
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -333,17 +409,27 @@ internal fun LeftColumn(
                 label = stringResource(Res.string.lower_third_size),
                 modifier = Modifier.width(120.dp),
                 color = settings.songSettings.titleLowerThirdColor,
-                onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdColor = it)) } }
+                onColorChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdColor = it)) }
+                }
             )
             TextStyleButtons(
                 bold = settings.songSettings.titleLowerThirdBold,
                 italic = settings.songSettings.titleLowerThirdItalic,
                 underline = settings.songSettings.titleLowerThirdUnderline,
                 shadow = settings.songSettings.titleLowerThirdShadow,
-                onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdBold = it)) } },
-                onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdItalic = it)) } },
-                onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdUnderline = it)) } },
-                onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadow = it)) } }
+                onBoldChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdBold = it)) }
+                },
+                onItalicChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdItalic = it)) }
+                },
+                onUnderlineChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdUnderline = it)) }
+                },
+                onShadowChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadow = it)) }
+                }
             )
         }
         AnimatedVisibility(visible = settings.songSettings.titleLowerThirdShadow) {
@@ -351,9 +437,19 @@ internal fun LeftColumn(
                 shadowColor = settings.songSettings.titleLowerThirdShadowColor,
                 shadowSize = settings.songSettings.titleLowerThirdShadowSize,
                 shadowOpacity = settings.songSettings.titleLowerThirdShadowOpacity,
-                onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowColor = it)) } },
-                onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowSize = it)) } },
-                onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowOpacity = it)) } }
+                onColorChange = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowColor = it))
+                    }
+                },
+                onSizeChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowSize = it)) }
+                },
+                onOpacityChange = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowOpacity = it))
+                    }
+                }
             )
         }
     }
@@ -361,19 +457,37 @@ internal fun LeftColumn(
     SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(
+                    stringResource(Res.string.full_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp)
+                )
                 PositionButtons(
                     selectedPosition = settings.songSettings.titlePosition,
-                    onPositionChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titlePosition = storedValue)) } },
+                    onPositionChange = { storedValue ->
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(titlePosition = storedValue))
+                        }
+                    },
                     aboveValue = Constants.ABOVE_VERSE,
                     belowValue = Constants.BELOW_VERSE
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(
+                    stringResource(Res.string.lower_third_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp)
+                )
                 PositionButtons(
                     selectedPosition = settings.songSettings.titleLowerThirdPosition,
-                    onPositionChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdPosition = storedValue)) } },
+                    onPositionChange = { storedValue ->
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(titleLowerThirdPosition = storedValue))
+                        }
+                    },
                     aboveValue = Constants.ABOVE_VERSE,
                     belowValue = Constants.BELOW_VERSE
                 )
@@ -384,20 +498,38 @@ internal fun LeftColumn(
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(
+                    stringResource(Res.string.full_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp)
+                )
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.titleHorizontalAlignment,
-                    onAlignmentChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleHorizontalAlignment = storedValue)) } },
+                    onAlignmentChange = { storedValue ->
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(titleHorizontalAlignment = storedValue))
+                        }
+                    },
                     leftValue = Constants.LEFT,
                     centerValue = Constants.CENTER,
                     rightValue = Constants.RIGHT
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                Text(
+                    stringResource(Res.string.lower_third_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(80.dp)
+                )
                 HorizontalAlignmentButtons(
                     selectedAlignment = settings.songSettings.titleLowerThirdHorizontalAlignment,
-                    onAlignmentChange = { storedValue -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdHorizontalAlignment = storedValue)) } },
+                    onAlignmentChange = { storedValue ->
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(titleLowerThirdHorizontalAlignment = storedValue))
+                        }
+                    },
                     leftValue = Constants.LEFT,
                     centerValue = Constants.CENTER,
                     rightValue = Constants.RIGHT
@@ -475,7 +607,11 @@ internal fun LeftColumn(
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
             SegmentedButton(
                 selected = isSideBySide,
-                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(bilingualLayout = Constants.BILINGUAL_SIDE_BY_SIDE)) } },
+                onClick = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(bilingualLayout = Constants.BILINGUAL_SIDE_BY_SIDE))
+                    }
+                },
                 shape = segmentedItemShape(index = 0, count = 2),
                 colors = SegmentedButtonDefaults.colors(
                     activeContainerColor = MaterialTheme.colorScheme.primary,
@@ -484,11 +620,19 @@ internal fun LeftColumn(
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                 icon = {}
             ) {
-                Text(text = stringResource(Res.string.bilingual_left_right), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                Text(
+                    text = stringResource(Res.string.bilingual_left_right),
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1
+                )
             }
             SegmentedButton(
                 selected = !isSideBySide,
-                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(bilingualLayout = Constants.BILINGUAL_TOP_BOTTOM)) } },
+                onClick = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(bilingualLayout = Constants.BILINGUAL_TOP_BOTTOM))
+                    }
+                },
                 shape = segmentedItemShape(index = 1, count = 2),
                 colors = SegmentedButtonDefaults.colors(
                     activeContainerColor = MaterialTheme.colorScheme.primary,
@@ -497,7 +641,11 @@ internal fun LeftColumn(
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                 icon = {}
             ) {
-                Text(text = stringResource(Res.string.bilingual_top_bottom), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                Text(
+                    text = stringResource(Res.string.bilingual_top_bottom),
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1
+                )
             }
         }
     }
@@ -528,7 +676,9 @@ internal fun LeftColumn(
             modifier = Modifier.width(100.dp),
             label = stringResource(Res.string.top),
             initialText = settings.songSettings.marginTop,
-            onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginTop = value)) } },
+            onValueChange = { value ->
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginTop = value)) }
+            },
             range = 0..500
         )
 
@@ -541,7 +691,9 @@ internal fun LeftColumn(
                 modifier = Modifier.width(100.dp),
                 label = stringResource(Res.string.left),
                 initialText = settings.songSettings.marginLeft,
-                onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginLeft = value)) } },
+                onValueChange = { value ->
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginLeft = value)) }
+                },
                 range = 0..500
             )
             TvScreenBox(
@@ -551,14 +703,20 @@ internal fun LeftColumn(
                     .height(180.dp)
             ) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = stringResource(Res.string.screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        text = stringResource(Res.string.screen),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
             NumberSettingsTextField(
                 modifier = Modifier.width(100.dp),
                 label = stringResource(Res.string.right),
                 initialText = settings.songSettings.marginRight,
-                onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginRight = value)) } },
+                onValueChange = { value ->
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginRight = value)) }
+                },
                 range = 0..500
             )
         }
@@ -567,7 +725,9 @@ internal fun LeftColumn(
             modifier = Modifier.width(100.dp),
             label = stringResource(Res.string.bottom),
             initialText = settings.songSettings.marginBottom,
-            onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginBottom = value)) } },
+            onValueChange = { value ->
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginBottom = value)) }
+            },
             range = 0..500
         )
     }

@@ -72,7 +72,8 @@ fun SettingsSection(
             )
             if (collapsible) {
                 Icon(
-                    painter = painterResource(if (expanded) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_right),
+                    painter =
+                        painterResource(if (expanded) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_right),
                     contentDescription = null,
                     modifier = Modifier.padding(start = 6.dp).size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,

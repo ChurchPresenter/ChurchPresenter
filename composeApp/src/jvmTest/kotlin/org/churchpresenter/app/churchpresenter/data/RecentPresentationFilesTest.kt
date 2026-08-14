@@ -242,7 +242,10 @@ class RecentPresentationFilesTest {
     @Test
     fun `a list saved by a build with a bigger cap is trimmed on the way in`() {
         recentsFile.parentFile?.mkdirs()
-        recentsFile.writeText(Json.encodeToString(ListSerializer(String.serializer()), (1..25).map { "/decks/deck$it.pptx" }))
+        recentsFile.writeText(Json.encodeToString(
+            ListSerializer(String.serializer()),
+            (1..25).map { "/decks/deck$it.pptx" }
+        ))
 
         reload()
 

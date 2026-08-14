@@ -127,7 +127,8 @@ internal fun RowScope.SongLyricsPanel(
         val goLiveStr      = stringResource(Res.string.go_live)
         val addScheduleStr = stringResource(Res.string.add_to_schedule)
 
-        val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && selectedSectionIndex >= 0
+        val hasSongSelected =
+            selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && selectedSectionIndex >= 0
         @OptIn(ExperimentalLayoutApi::class)
         FlowRow(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
@@ -194,7 +195,12 @@ internal fun RowScope.SongLyricsPanel(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
-                Text(backToLiveStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onError, maxLines = 1)
+                Text(
+                    backToLiveStr,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onError,
+                    maxLines = 1
+                )
             }
         }
 
@@ -405,7 +411,8 @@ internal fun RowScope.SongLyricsPanel(
                             // Lyrics panel always shows both — language filtering only applies to presenter
                             val langDisplay = Constants.SONG_LANG_BOTH
                             val showPrimary = langDisplay != Constants.SONG_LANG_SECONDARY
-                            val showSecondary = langDisplay != Constants.SONG_LANG_PRIMARY && section.secondaryLines.isNotEmpty()
+                            val showSecondary =
+                                langDisplay != Constants.SONG_LANG_PRIMARY && section.secondaryLines.isNotEmpty()
 
                             val lineClickHandler: ((Int) -> Unit)? = if (isPerLineMode) { lineIdx ->
                                 onSectionSelected(sectionIndex)
@@ -427,16 +434,40 @@ internal fun RowScope.SongLyricsPanel(
                             if (showPrimary && showSecondary) {
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     Column(modifier = Modifier.weight(1f)) {
-                                        LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
+                                        LyricLines(
+                                            section.lines,
+                                            textColor,
+                                            activeLineIndex,
+                                            lineClickHandler,
+                                            lineDoubleClickHandler
+                                        )
                                     }
                                     Column(modifier = Modifier.weight(1f)) {
-                                        LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
+                                        LyricLines(
+                                            section.secondaryLines,
+                                            textColor,
+                                            activeLineIndex,
+                                            lineClickHandler,
+                                            lineDoubleClickHandler
+                                        )
                                     }
                                 }
                             } else if (showSecondary) {
-                                LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
+                                LyricLines(
+                                    section.secondaryLines,
+                                    textColor,
+                                    activeLineIndex,
+                                    lineClickHandler,
+                                    lineDoubleClickHandler
+                                )
                             } else {
-                                LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler)
+                                LyricLines(
+                                    section.lines,
+                                    textColor,
+                                    activeLineIndex,
+                                    lineClickHandler,
+                                    lineDoubleClickHandler
+                                )
                             }
                         }
                         // No separator between sections: each one opens with its own labelled

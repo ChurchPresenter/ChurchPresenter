@@ -178,7 +178,10 @@ class DeviceInfoReportTest {
 
     @Test
     fun `unavailable VLC includes the reason`() {
-        assertTrue("VLC: unavailable (libvlc not found)" in render(facts(vlcAvailable = false, vlcReason = "libvlc not found")))
+        assertTrue("VLC: unavailable (libvlc not found)" in render(facts(
+            vlcAvailable = false,
+            vlcReason = "libvlc not found"
+        )))
     }
 
     @Test

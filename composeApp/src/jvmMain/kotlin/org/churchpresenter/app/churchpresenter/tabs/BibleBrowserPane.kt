@@ -151,7 +151,9 @@ internal fun ColumnScope.BibleBrowserPane(
                     if (crossRefsDocked) crossRefWidthPx + with(density) { 5.dp.toPx() } else 0f
                 val effectiveSplitWidth = if (isSplitActive)
                     splitWidthPx.coerceAtMost(
-                        (constraints.maxWidth - crossRefReserve - with(density) { (100.dp + 6.dp).toPx() }).coerceAtLeast(0f)
+                        (constraints.maxWidth - crossRefReserve - with(
+                            density
+                        ) { (100.dp + 6.dp).toPx() }).coerceAtLeast(0f)
                     )
                 else 0f
                 Row(modifier = Modifier.fillMaxSize()) {
@@ -167,7 +169,8 @@ internal fun ColumnScope.BibleBrowserPane(
                                         val event = awaitPointerEvent(PointerEventPass.Main)
                                         if (event.type == PointerEventType.Press && event.button?.isSecondary == true) {
                                             val pos = event.changes.first().position
-                                            verseContextMenuOffset = with(density) { DpOffset(pos.x.toDp(), pos.y.toDp()) }
+                                            verseContextMenuOffset =
+                                                with(density) { DpOffset(pos.x.toDp(), pos.y.toDp()) }
                                         }
                                     }
                                 }
@@ -189,7 +192,10 @@ internal fun ColumnScope.BibleBrowserPane(
                                 onRefsClicked = onRefsChipClicked,
                                 refPopover = {
                                     CrossReferencePopover(
-                                        title = crossRefPopoverTitle(crossRefs.popoverLabel, crossRefs.popoverRows.size),
+                                        title = crossRefPopoverTitle(
+                                            crossRefs.popoverLabel,
+                                            crossRefs.popoverRows.size
+                                        ),
                                         rows = crossRefs.popoverRows,
                                         onDismiss = onDismissPopover,
                                         onDock = onDockCrossRefs,
@@ -214,17 +220,32 @@ internal fun ColumnScope.BibleBrowserPane(
                             ) {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(Res.string.copy_verse)) },
-                                    leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_copy), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface) },
+                                    leadingIcon = { Icon(
+                                        painter = painterResource(Res.drawable.ic_copy),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                        tint = MaterialTheme.colorScheme.onSurface
+                                    ) },
                                     onClick = { onCopyVerse(); showVerseContextMenu = false }
                                 )
                                 DropdownMenuItem(
                                     text = { Text(stringResource(Res.string.add_to_schedule)) },
-                                    leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.secondary) },
+                                    leadingIcon = { Icon(
+                                        painter = painterResource(Res.drawable.ic_playlist_add),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                        tint = MaterialTheme.colorScheme.secondary
+                                    ) },
                                     onClick = { onAddToSchedule(); showVerseContextMenu = false }
                                 )
                                 DropdownMenuItem(
                                     text = { Text(stringResource(Res.string.go_live)) },
-                                    leadingIcon = { Icon(imageVector = Icons.Default.Tv, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary) },
+                                    leadingIcon = { Icon(
+                                        imageVector = Icons.Default.Tv,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    ) },
                                     onClick = { onVerseDoubleClicked(); showVerseContextMenu = false }
                                 )
                             }
@@ -266,7 +287,9 @@ internal fun ColumnScope.BibleBrowserPane(
                                 )
                             )
                         }
-                        Column(modifier = Modifier.width(with(density) { effectiveSplitWidth.toDp() }).fillMaxHeight()) {
+                        Column(modifier = Modifier.width(
+                            with(density) { effectiveSplitWidth.toDp() }
+                        ).fillMaxHeight()) {
                             LiveChapterPanel(
                                 verses = liveChapterVerses,
                                 liveVerseNumbers = liveVerseNumbers,

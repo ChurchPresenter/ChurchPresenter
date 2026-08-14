@@ -90,7 +90,8 @@ fun MediaSettingsTab(
                 },
                 valueRange = 1f..30f,
                 modifier = Modifier.weight(1f),
-                trailingLabel = "${settings.pictureSettings.autoScrollInterval.toInt()}${stringResource(Res.string.seconds_suffix)}"
+                trailingLabel =
+                    "${settings.pictureSettings.autoScrollInterval.toInt()}${stringResource(Res.string.seconds_suffix)}"
             )
         }
 
@@ -149,7 +150,8 @@ fun MediaSettingsTab(
                 },
                 valueRange = 100f..2000f,
                 modifier = Modifier.weight(1f),
-                trailingLabel = "${settings.pictureSettings.transitionDuration.toInt()}${stringResource(Res.string.milliseconds_suffix)}"
+                trailingLabel =
+                    "${settings.pictureSettings.transitionDuration.toInt()}${stringResource(Res.string.milliseconds_suffix)}"
             )
         }
 

@@ -219,7 +219,9 @@ class CompanionServerPresentationRenderTest {
 
         val id = file.absolutePath.hashCode().toUInt().toString(16)
         val response = runBlocking {
-            http().get("http://127.0.0.1:$PORT${org.churchpresenter.app.churchpresenter.utils.Constants.ENDPOINT_PRESENTATIONS}/$id/slides/0")
+            http().get(
+                "http://127.0.0.1:$PORT${org.churchpresenter.app.churchpresenter.utils.Constants.ENDPOINT_PRESENTATIONS}/$id/slides/0"
+            )
         }
 
         assertEquals(HttpStatusCode.OK, response.status)

@@ -207,8 +207,16 @@ fun MainDesktop(
      *  follower path resolves a mirrored CANVAS live state by scene id against this list. */
     onScenesChanged: ((List<Scene>) -> Unit)? = null,
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
-    onPresentationSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>, slideNotes: List<String>) -> Unit)? = null,
-    onPicturesLoaded: ((folderId: String, folderName: String, folderPath: String, imageFiles: List<File>) -> Unit)? = null,
+    onPresentationSlidesLoaded: ((
+        id: String,
+        filePath: String,
+        fileName: String,
+        fileType: String,
+        slideFiles: List<File>,
+        slideNotes: List<String>
+    ) -> Unit)? = null,
+    onPicturesLoaded: ((folderId: String, folderName: String, folderPath: String, imageFiles: List<File>) -> Unit)? =
+        null,
     selectPictureImageFlow: Flow<Pair<String, Int>>? = null,
     /**
      * Resolves an image [File] by folder-id and index from the companion server's file map.
@@ -282,7 +290,13 @@ fun MainDesktop(
      *  instant afterwards. Non-null only when connected AND in Controller mode. */
     instanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
     /** Controller mode instant Bible verse display — non-null only when connected AND controlling. */
-    instanceLinkSendVerse: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit)? = null,
+    instanceLinkSendVerse: ((
+        bookName: String,
+        chapter: Int,
+        verseNumber: Int,
+        verseText: String,
+        verseRange: String
+    ) -> Unit)? = null,
     /** Controller mode instant picture display — non-null only when connected AND controlling. */
     /** Controller mode instant song-section navigation (within an already-live song) — non-null only
      *  when connected AND controlling. */
@@ -353,7 +367,8 @@ fun MainDesktop(
 
     var showCrosswordTab by remember { mutableStateOf(false) }
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
-    val hasCompanionTabConnections = appSettings.companionSatelliteConnections.any { it.showInTab && it.host.isNotBlank() }
+    val hasCompanionTabConnections =
+        appSettings.companionSatelliteConnections.any { it.showInTab && it.host.isNotBlank() }
     val visibleTabs = remember(appSettings.hiddenTabs, showCrosswordTab, hasCompanionTabConnections) {
         computeVisibleTabs(appSettings.hiddenTabs, showCrosswordTab, hasCompanionTabConnections)
     }
@@ -416,10 +431,19 @@ fun MainDesktop(
     val presentationViewModel = remember { PresentationViewModel(appSettings) }
     DisposableEffect(Unit) { onDispose { presentationViewModel.dispose() } }
 
-    LaunchedEffect(presentationViewModel.selectedSlideIndex, presentationViewModel.slideFiles.size, presentationViewModel.isPlaying) {
+    LaunchedEffect(
+        presentationViewModel.selectedSlideIndex,
+        presentationViewModel.slideFiles.size,
+        presentationViewModel.isPlaying
+    ) {
         val f = presentationViewModel.selectedPresentation ?: return@LaunchedEffect
         val id = stableFileId(f)
-        onSlideChanged?.invoke(id, presentationViewModel.selectedSlideIndex, presentationViewModel.slideFiles.size, presentationViewModel.isPlaying)
+        onSlideChanged?.invoke(
+            id,
+            presentationViewModel.selectedSlideIndex,
+            presentationViewModel.slideFiles.size,
+            presentationViewModel.isPlaying
+        )
     }
     LaunchedEffect(appSettings.presentationRemoteSettings.remoteControlEnabled) {
         val f = presentationViewModel.selectedPresentation
@@ -455,7 +479,8 @@ fun MainDesktop(
     }
 
     val currentOnSongsLoaded by rememberUpdatedState(onSongsLoaded)
-    val songsViewModel = remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> currentOnSongsLoaded?.invoke(songs) }) }
+    val songsViewModel =
+        remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> currentOnSongsLoaded?.invoke(songs) }) }
     DisposableEffect(Unit) { onDispose { songsViewModel.dispose() } }
 
     // Mirrors the primary's song catalog while connected via Instance Link — see
@@ -589,7 +614,8 @@ fun MainDesktop(
     // ScheduleViewModel is hoisted here (outside AnimatedVisibility) so that collapsing/
     // expanding the schedule panel does NOT destroy the schedule items.
     val onScheduleChangedState = rememberUpdatedState(onScheduleChanged)
-    val scheduleViewModel = remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
+    val scheduleViewModel =
+        remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
     DisposableEffect(Unit) { onDispose { scheduleViewModel.dispose() } }
 
     // Mirrors the primary's schedule while connected via Instance Link, handing local editing
@@ -709,7 +735,11 @@ fun MainDesktop(
     // same gate PresentationTab's own slide-push effect uses.
     suspend fun pushCurrentSlideIfLive() {
         val index = presentationViewModel.selectedSlideIndex
-        if (!shouldPushSlide(presenterManager.presentingMode.value, index, presentationViewModel.slideFiles.size)) return
+        if (!shouldPushSlide(
+            presenterManager.presentingMode.value,
+            index,
+            presentationViewModel.slideFiles.size
+        )) return
         val (bitmap, nextBitmap) = decodeSlideBitmaps(presentationViewModel.slideFiles, index)
         presenterManager.setSelectedSlide(bitmap)
         presenterManager.setNextSlide(nextBitmap)
@@ -839,7 +869,10 @@ fun MainDesktop(
                         // presentation responds no matter which tab or control has focus —
                         // the presenter clicks from the platform while the operator works
                         // elsewhere. Only claimed while a presentation is actually live.
-                        shortcuts.matches(ShortcutAction.CLICKER_NEXT, keyEvent) && presentingMode == Presenting.PRESENTATION -> {
+                        shortcuts.matches(
+                            ShortcutAction.CLICKER_NEXT,
+                            keyEvent
+                        ) && presentingMode == Presenting.PRESENTATION -> {
                             clickerScope.launch {
                                 val deck = presentationViewModel.deck
                                 val stepped = deck != null && presenterManager
@@ -851,7 +884,10 @@ fun MainDesktop(
                             }
                             true
                         }
-                        shortcuts.matches(ShortcutAction.CLICKER_PREVIOUS, keyEvent) && presentingMode == Presenting.PRESENTATION -> {
+                        shortcuts.matches(
+                            ShortcutAction.CLICKER_PREVIOUS,
+                            keyEvent
+                        ) && presentingMode == Presenting.PRESENTATION -> {
                             clickerScope.launch {
                                 val deck = presentationViewModel.deck
                                 val stepped = deck != null && presenterManager
@@ -877,7 +913,11 @@ fun MainDesktop(
                                 if (konamiStep.completed) showKonamiEasterEgg = true
 
                                 // Crossword: ←→←→
-                                val crosswordStep = advanceKeySequence(keyEvent.key, crosswordSequence, crosswordProgress)
+                                val crosswordStep = advanceKeySequence(
+                                    keyEvent.key,
+                                    crosswordSequence,
+                                    crosswordProgress
+                                )
                                 crosswordProgress = crosswordStep.progress
                                 if (crosswordStep.completed) {
                                     showCrosswordTab = true
@@ -886,7 +926,11 @@ fun MainDesktop(
 
                                 // Secret unlock: press D seven times in a row to reveal the
                                 // Developer menu (upper- or lower-case; Key.D is Shift-agnostic).
-                                val developerStep = advanceKeySequence(keyEvent.key, developerUnlockSequence, developerUnlockProgress)
+                                val developerStep = advanceKeySequence(
+                                    keyEvent.key,
+                                    developerUnlockSequence,
+                                    developerUnlockProgress
+                                )
                                 developerUnlockProgress = developerStep.progress
                                 if (developerStep.completed) onRequestDeveloperMenuUnlock()
 
@@ -929,11 +973,17 @@ fun MainDesktop(
             // rendered width below tracks schedulePanelPx/previewPanelPx with no extra lag.
             val scheduleVisibleFraction = remember { Animatable(if (scheduleCollapsed) 0f else 1f) }
             LaunchedEffect(scheduleCollapsed) {
-                scheduleVisibleFraction.animateTo(if (scheduleCollapsed) 0f else 1f, animationSpec = tween(PANEL_COLLAPSE_ANIM_MS))
+                scheduleVisibleFraction.animateTo(
+                    if (scheduleCollapsed) 0f else 1f,
+                    animationSpec = tween(PANEL_COLLAPSE_ANIM_MS)
+                )
             }
             val previewVisibleFraction = remember { Animatable(if (previewCollapsed) 0f else 1f) }
             LaunchedEffect(previewCollapsed) {
-                previewVisibleFraction.animateTo(if (previewCollapsed) 0f else 1f, animationSpec = tween(PANEL_COLLAPSE_ANIM_MS))
+                previewVisibleFraction.animateTo(
+                    if (previewCollapsed) 0f else 1f,
+                    animationSpec = tween(PANEL_COLLAPSE_ANIM_MS)
+                )
             }
 
             fun saveScheduleWidth() {
@@ -997,8 +1047,13 @@ fun MainDesktop(
                     Column(
                         modifier = Modifier
                             .layout { measurable, constraints ->
-                                val widthPx = panelRenderWidthPx(schedulePanelPx, maxScheduleState.value, scheduleVisibleFraction.value)
-                                val placeable = measurable.measure(constraints.copy(minWidth = widthPx, maxWidth = widthPx))
+                                val widthPx = panelRenderWidthPx(
+                                    schedulePanelPx,
+                                    maxScheduleState.value,
+                                    scheduleVisibleFraction.value
+                                )
+                                val placeable =
+                                    measurable.measure(constraints.copy(minWidth = widthPx, maxWidth = widthPx))
                                 layout(widthPx, placeable.height) {
                                     placeable.placeRelative(0, 0)
                                 }
@@ -1038,11 +1093,17 @@ fun MainDesktop(
                             // stop an ERROR-state retry loop without reopening the dialog.
                             if (canDisconnectInstanceLink(instanceLinkConnectionStatus)) {
                                 TextButton(onClick = onInstanceLinkDisconnect) {
-                                    Text(stringResource(Res.string.menu_disconnect), style = MaterialTheme.typography.labelSmall)
+                                    Text(
+                                        stringResource(Res.string.menu_disconnect),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
                                 }
                             } else {
                                 TextButton(onClick = onInstanceLinkConnect) {
-                                    Text(stringResource(Res.string.connect), style = MaterialTheme.typography.labelSmall)
+                                    Text(
+                                        stringResource(Res.string.connect),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
                                 }
                             }
                         }
@@ -1050,7 +1111,10 @@ fun MainDesktop(
                     if (connectedInstanceLinkFollowerCount > 0) {
                         ConnectionStatusRow(
                             status = InstanceLinkStatus.CONNECTED,
-                            connectedLabel = stringResource(Res.string.instance_link_primary_badge, connectedInstanceLinkFollowerCount),
+                            connectedLabel = stringResource(
+                                Res.string.instance_link_primary_badge,
+                                connectedInstanceLinkFollowerCount
+                            ),
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
@@ -1123,10 +1187,20 @@ fun MainDesktop(
                         },
                         onPresentLowerThird = { item ->
                             val lottieFolder = File(appSettings.streamingSettings.lowerThirdFolder)
-                            val lottieFile = findLottiePresetFile(lottieFolder.listFiles()?.toList(), item.presetLabel, item.presetId)
+                            val lottieFile = findLottiePresetFile(
+                                lottieFolder.listFiles()?.toList(),
+                                item.presetLabel,
+                                item.presetId
+                            )
                             if (lottieFile != null && lottieFile.exists()) {
                                 val json = lottieFile.readText()
-                                presenterManager.setLottieContent(json, item.pauseAtFrame, -1f, item.pauseDurationMs, lottieFile.nameWithoutExtension)
+                                presenterManager.setLottieContent(
+                                    json,
+                                    item.pauseAtFrame,
+                                    -1f,
+                                    item.pauseDurationMs,
+                                    lottieFile.nameWithoutExtension
+                                )
                                 presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                 presenterManager.setShowPresenterWindow(true)
                             }
@@ -1138,7 +1212,9 @@ fun MainDesktop(
                             presenting(Presenting.WEBSITE)
                         },
                         onPresentDictionary = { item ->
-                            presenterManager.setAnnouncementText("${item.word} (${item.transliteration})\n\n${item.definition}")
+                            presenterManager.setAnnouncementText(
+                                "${item.word} (${item.transliteration})\n\n${item.definition}"
+                            )
                             presenterManager.setShowPresenterWindow(true)
                             presenting(Presenting.ANNOUNCEMENTS)
                         },
@@ -1309,8 +1385,94 @@ fun MainDesktop(
                     onToggleCollapsed = {
                         scheduleCollapsed = !scheduleCollapsed
                         onSettingsChangeState.value { s ->
-                            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(schedulePanelCollapsed = scheduleCollapsed))
-                            else s.copy(windowedLayout = s.windowedLayout.copy(schedulePanelCollapsed = scheduleCollapsed))
+                            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(
+                                schedulePanelCollapsed = scheduleCollapsed
+                            ))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                            else s.copy(windowedLayout = s.windowedLayout.copy(schedulePanelCollapsed = scheduleCollapsed))
                         }
                     },
                     icon = painterResource(
@@ -1356,7 +1518,10 @@ fun MainDesktop(
                                         text = { Text(getStringName(tab)) },
                                         onClick = {
                                             if (!isOnlyVisible) {
-                                                onSettingsChange { s -> s.copy(hiddenTabs = toggleHiddenTabs(s.hiddenTabs, tab)) }
+                                                onSettingsChange { s -> s.copy(hiddenTabs = toggleHiddenTabs(
+                                                    s.hiddenTabs,
+                                                    tab
+                                                )) }
                                             }
                                         },
                                         leadingIcon = {
@@ -1390,7 +1555,9 @@ fun MainDesktop(
 
                     AnimatedContent(
                         targetState = currentTab,
-                        transitionSpec = { fadeIn(tween(CONTENT_CROSSFADE_MS)) togetherWith fadeOut(tween(CONTENT_CROSSFADE_MS)) },
+                        transitionSpec = {
+                            fadeIn(tween(CONTENT_CROSSFADE_MS)) togetherWith fadeOut(tween(CONTENT_CROSSFADE_MS))
+                        },
                         modifier = Modifier.fillMaxWidth().weight(1f),
                         label = "tab_content"
                     ) { tab ->
@@ -1402,7 +1569,14 @@ fun MainDesktop(
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
-                                    currentScheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId)
+                                    currentScheduleActions.addBibleVerse(
+                                        bookName,
+                                        chapter,
+                                        verseNumber,
+                                        verseText,
+                                        verseRange,
+                                        bookId
+                                    )
                                 },
                                 selectedVerseItem = selectedBibleVerseItem,
                                 onVerseSelected = onVerseSelected,
@@ -1508,7 +1682,13 @@ fun MainDesktop(
                                     scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
                                 },
                                 onGoLive = { json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName ->
-                                    presenterManager.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName)
+                                    presenterManager.setLottieContent(
+                                        json,
+                                        pauseAtFrame,
+                                        pauseFrame,
+                                        pauseDurationMs,
+                                        presetName
+                                    )
                                     presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                     presenterManager.setShowPresenterWindow(true)
                                 },
@@ -1522,7 +1702,9 @@ fun MainDesktop(
                                 presenterManager = presenterManager,
                                 onAddToSchedule = { settings ->
                                     val isTimer = settings.timerMode != Constants.TIMER_MODE_DURATION ||
-                                        settings.timerHours > 0 || settings.timerMinutes > 0 || settings.timerSeconds > 0
+                                        settings.timerHours > 0
+                                            || settings.timerMinutes > 0
+                                            || settings.timerSeconds > 0
                                     currentScheduleActions.addAnnouncement(
                                         settings.text,
                                         settings.textColor,
@@ -1674,8 +1856,94 @@ fun MainDesktop(
                     onToggleCollapsed = {
                         previewCollapsed = !previewCollapsed
                         onSettingsChangeState.value { s ->
-                            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(previewPanelCollapsed = previewCollapsed))
-                            else s.copy(windowedLayout = s.windowedLayout.copy(previewPanelCollapsed = previewCollapsed))
+                            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(
+                                previewPanelCollapsed = previewCollapsed
+                            ))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                            else s.copy(windowedLayout = s.windowedLayout.copy(previewPanelCollapsed = previewCollapsed))
                         }
                     },
                     icon = painterResource(
@@ -1716,7 +1984,12 @@ fun MainDesktop(
         },
         onConfirm = { text, textColor, backgroundColor ->
             if (editingLabelItem != null) {
-                currentScheduleActions.updateLabel(editingLabelItem?.id ?: return@AddLabelDialog, text, textColor, backgroundColor)
+                currentScheduleActions.updateLabel(
+                    editingLabelItem?.id ?: return@AddLabelDialog,
+                    text,
+                    textColor,
+                    backgroundColor
+                )
             } else {
                 currentScheduleActions.addLabel(text, textColor, backgroundColor)
             }
@@ -1830,7 +2103,8 @@ private fun PreviewSidebar(
                 qaDisplayUrl = qaDisplayUrl,
                 sttManager = sttManager,
             )
-            val rightSidebarConnections = appSettings.companionSatelliteConnections.filter { it.showInRightSidebar && it.host.isNotBlank() }
+            val rightSidebarConnections =
+                appSettings.companionSatelliteConnections.filter { it.showInRightSidebar && it.host.isNotBlank() }
             if (rightSidebarConnections.isNotEmpty()) {
                 // Pushes everything below (divider + panel) down to the bottom of this
                 // fillMaxHeight column instead of sitting right under the live preview
@@ -1842,7 +2116,10 @@ private fun PreviewSidebar(
                     mutableStateOf(resolveSelectedConnectionId(null, rightSidebarConnections))
                 }
                 LaunchedEffect(rightSidebarConnections.map { it.id }) {
-                    selectedRightSidebarId = resolveSelectedConnectionId(selectedRightSidebarId, rightSidebarConnections)
+                    selectedRightSidebarId = resolveSelectedConnectionId(
+                        selectedRightSidebarId,
+                        rightSidebarConnections
+                    )
                 }
                 val selectedRightSidebarConnection = rightSidebarConnections.find { it.id == selectedRightSidebarId }
                 // No weight here — sizeToContent sizes this panel to exactly what its

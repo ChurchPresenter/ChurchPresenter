@@ -128,7 +128,10 @@ class PresenterManagerAnnouncementTimerTest {
         assertTrue(pm.announcementTickerLive.value, "going live must mark the ticker live")
         assertEquals(90, pm.timerRemainingSeconds.value, "1m30s is 90 seconds on the clock")
         assertTrue(pm.timerRunning.value)
-        assertTrue(pm.announcementText.value.isNotEmpty(), "an immediate value is pushed, not left blank until the first tick")
+        assertTrue(
+            pm.announcementText.value.isNotEmpty(),
+            "an immediate value is pushed, not left blank until the first tick"
+        )
     }
 
     @Test
@@ -218,7 +221,11 @@ class PresenterManagerAnnouncementTimerTest {
 
         pm.pushAnnouncementTextIfLive("TICK")
 
-        assertEquals("SENTINEL", pm.announcementText.value, "a lock on other content does not open the announcement gate")
+        assertEquals(
+            "SENTINEL",
+            pm.announcementText.value,
+            "a lock on other content does not open the announcement gate"
+        )
     }
 
     @Test

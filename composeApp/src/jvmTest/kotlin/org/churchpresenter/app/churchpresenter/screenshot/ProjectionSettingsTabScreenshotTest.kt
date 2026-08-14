@@ -405,7 +405,14 @@ class ProjectionSettingsTabScreenshotTest {
 
         val DISPLAY_1 = twoExternalScreens()[1]
         val DISPLAY_2 = twoExternalScreens()[2]
-        val DISPLAY_3 = DetectedScreen(index = 3, isPrimary = false, boundsX = 7040, boundsY = 0, boundsW = 1920, boundsH = 1080)
+        val DISPLAY_3 = DetectedScreen(
+            index = 3,
+            isPrimary = false,
+            boundsX = 7040,
+            boundsY = 0,
+            boundsW = 1920,
+            boundsH = 1080
+        )
 
         /** A primary display and three projectors — three assignment rows. */
         val BOOTH = twoExternalScreens() + DISPLAY_3

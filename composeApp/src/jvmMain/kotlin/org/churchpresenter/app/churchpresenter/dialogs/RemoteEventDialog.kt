@@ -410,11 +410,13 @@ internal fun RemoteEventDialogContent(
                             if (isClientKnownAllowed) {
                                 Spacer(Modifier.width(4.dp))
                                 Text(stringResource(Res.string.remote_client_allowed_badge),
-                                    style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                                    style =
+                                        MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                             } else if (isClientKnownBlocked) {
                                 Spacer(Modifier.width(4.dp))
                                 Text(stringResource(Res.string.remote_client_blocked_badge),
-                                    style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                                    style =
+                                        MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
                             }
                             if (isInstanceLinkFollower) {
                                 Spacer(Modifier.width(4.dp))

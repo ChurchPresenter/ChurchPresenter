@@ -116,7 +116,10 @@ internal fun ModuleRow(
                             Spacer(Modifier.width(3.dp))
                             Text(
                                 text = stringResource(Res.string.bible_catalog_installed),
-                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             )
                         }
                     }

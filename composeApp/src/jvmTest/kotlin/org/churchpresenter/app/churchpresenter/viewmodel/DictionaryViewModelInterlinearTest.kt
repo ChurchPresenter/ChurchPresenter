@@ -47,7 +47,11 @@ class DictionaryViewModelInterlinearTest {
         every { anyConstructed<InterlinearRepository>().getBooksWithHebrewData() } returns emptyList()
         every { anyConstructed<InterlinearRepository>().getChaptersForBook(any()) } returns emptyList()
         every { anyConstructed<InterlinearRepository>().getVersesInChapter(any(), any()) } returns emptyList()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(any(), any(), any()) } returns emptySet()
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(
+            any(),
+            any(),
+            any()
+        ) } returns emptySet()
     }
 
     @AfterTest
@@ -300,7 +304,11 @@ class DictionaryViewModelInterlinearTest {
     @Test
     fun `a number lookup outside the current passage filter drops the filter`() {
         val d = loaded()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf("G5485")
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(
+            43,
+            null,
+            null
+        ) } returns setOf("G5485")
         d.filterEntryListByBook(43)
 
         d.selectByNumber("G26") // not used in the filtered passage
@@ -312,7 +320,10 @@ class DictionaryViewModelInterlinearTest {
     @Test
     fun `a number lookup inside the current passage filter keeps the filter`() {
         val d = loaded()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf("G26", "G5485")
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf(
+            "G26",
+            "G5485"
+        )
         d.filterEntryListByBook(43)
 
         d.selectByNumber("G26")

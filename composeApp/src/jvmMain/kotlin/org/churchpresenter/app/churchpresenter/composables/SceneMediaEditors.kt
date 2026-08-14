@@ -97,7 +97,11 @@ private const val MAX_FPS = 60
  */
 
 @Composable
-internal fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSource) -> Unit, fileChooser: FileChooser) {
+internal fun ImageProperties(
+    source: SceneSource.ImageSource,
+    onUpdate: (SceneSource) -> Unit,
+    fileChooser: FileChooser
+) {
     val scope = rememberCoroutineScope()
     val strFilePath = stringResource(Res.string.canvas_file_path)
     val strSelectImage = stringResource(Res.string.canvas_select_image_title)
@@ -108,7 +112,11 @@ internal fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSo
     val stretchLabel = stringResource(Res.string.canvas_scale_stretch)
     val noneLabel = stringResource(Res.string.canvas_scale_none)
 
-    Text(stringResource(Res.string.canvas_source_image), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(
+        stringResource(Res.string.canvas_source_image),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -165,7 +173,11 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
 
     val availableFonts = rememberSystemFonts()
 
-    Text(stringResource(Res.string.canvas_source_text), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(
+        stringResource(Res.string.canvas_source_text),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 
     var textValue by remember(source.text) { mutableStateOf(source.text) }
     var showTextDialog by remember { mutableStateOf(false) }
@@ -222,7 +234,11 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
         }
     }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(Res.string.canvas_line_spacing), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            stringResource(Res.string.canvas_line_spacing),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         SlimSlider(
             value = source.lineSpacing / 100f,
             onValueChange = { onUpdate(source.copy(lineSpacing = (it * 100).toInt())) },
@@ -246,7 +262,11 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Column {
-            Text(stringResource(Res.string.canvas_align_horizontal), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                stringResource(Res.string.canvas_align_horizontal),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             HorizontalAlignmentButtons(
                 selectedAlignment = source.horizontalAlignment,
                 onAlignmentChange = { onUpdate(source.copy(horizontalAlignment = it)) },
@@ -256,7 +276,11 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
             )
         }
         Column {
-            Text(stringResource(Res.string.canvas_align_vertical), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                stringResource(Res.string.canvas_align_vertical),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             VerticalAlignmentButtons(
                 selectedAlignment = source.verticalAlignment,
                 onAlignmentChange = { onUpdate(source.copy(verticalAlignment = it)) },
@@ -294,7 +318,11 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
 
 @Composable
 internal fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSource) -> Unit) {
-    Text(stringResource(Res.string.canvas_source_color), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(
+        stringResource(Res.string.canvas_source_color),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
     ColorPickerField(
         color = source.color,
         onColorChange = { onUpdate(source.copy(color = it)) },
@@ -308,7 +336,12 @@ internal fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSo
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         spacing = 4.dp,
     )
-    PropertySlider("${stringResource(Res.string.canvas_color_1)} ${stringResource(Res.string.canvas_opacity)}", source.sourceOpacity, 0f, 1f) { v ->
+    PropertySlider(
+        "${stringResource(Res.string.canvas_color_1)} ${stringResource(Res.string.canvas_opacity)}",
+        source.sourceOpacity,
+        0f,
+        1f
+    ) { v ->
         onUpdate(source.copy(sourceOpacity = v))
     }
     if (source.isGradient) {
@@ -317,27 +350,52 @@ internal fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSo
             onColorChange = { onUpdate(source.copy(gradientColor2 = it)) },
             label = stringResource(Res.string.canvas_color_2)
         )
-        PropertySlider("${stringResource(Res.string.canvas_color_2)} ${stringResource(Res.string.canvas_opacity)}", source.gradientColor2Opacity, 0f, 1f) { v ->
+        PropertySlider(
+            "${stringResource(Res.string.canvas_color_2)} ${stringResource(Res.string.canvas_opacity)}",
+            source.gradientColor2Opacity,
+            0f,
+            1f
+        ) { v ->
             onUpdate(source.copy(gradientColor2Opacity = v))
         }
-        PropertySliderWithInput(stringResource(Res.string.canvas_angle), source.gradientAngle, 0f, MAX_ANGLE_DEGREES, "°") { v ->
+        PropertySliderWithInput(
+            stringResource(Res.string.canvas_angle),
+            source.gradientAngle,
+            0f,
+            MAX_ANGLE_DEGREES,
+            "°"
+        ) { v ->
             onUpdate(source.copy(gradientAngle = v))
         }
-        PropertySliderWithInput(stringResource(Res.string.position), source.gradientPosition * PERCENT_SCALE, 0f, PERCENT_SCALE, "%") { v ->
+        PropertySliderWithInput(
+            stringResource(Res.string.position),
+            source.gradientPosition * PERCENT_SCALE,
+            0f,
+            PERCENT_SCALE,
+            "%"
+        ) { v ->
             onUpdate(source.copy(gradientPosition = (v / 100f).coerceIn(0f, 1f)))
         }
     }
 }
 
 @Composable
-internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSource) -> Unit, fileChooser: FileChooser) {
+internal fun VideoProperties(
+    source: SceneSource.VideoSource,
+    onUpdate: (SceneSource) -> Unit,
+    fileChooser: FileChooser
+) {
     val scope = rememberCoroutineScope()
     val strFilePath = stringResource(Res.string.canvas_file_path)
     val strSelectVideo = stringResource(Res.string.canvas_select_video_title)
     val strVideoFiles = stringResource(Res.string.canvas_video_files)
     val strBrowse = stringResource(Res.string.canvas_browse)
 
-    Text(stringResource(Res.string.canvas_source_video), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(
+        stringResource(Res.string.canvas_source_video),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -393,7 +451,11 @@ internal fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSo
 
 @Composable
 internal fun BrowserProperties(source: SceneSource.BrowserSource, onUpdate: (SceneSource) -> Unit) {
-    Text(stringResource(Res.string.canvas_source_browser), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(
+        stringResource(Res.string.canvas_source_browser),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
     PropertyTextField(stringResource(Res.string.canvas_browser_url), source.url) { v ->
         onUpdate(source.copy(url = v))
     }
@@ -412,11 +474,25 @@ internal fun BrowserProperties(source: SceneSource.BrowserSource, onUpdate: (Sce
         }
     }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        PropertyTextField(stringResource(Res.string.canvas_render_width), source.renderWidth.toString(), Modifier.weight(1f)) { v ->
-            v.toIntOrNull()?.let { onUpdate(source.copy(renderWidth = it.coerceIn(MIN_RENDER_WIDTH, MAX_RENDER_WIDTH))) }
+        PropertyTextField(
+            stringResource(Res.string.canvas_render_width),
+            source.renderWidth.toString(),
+            Modifier.weight(1f)
+        ) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(renderWidth = it.coerceIn(
+                MIN_RENDER_WIDTH,
+                MAX_RENDER_WIDTH
+            ))) }
         }
-        PropertyTextField(stringResource(Res.string.canvas_render_height), source.renderHeight.toString(), Modifier.weight(1f)) { v ->
-            v.toIntOrNull()?.let { onUpdate(source.copy(renderHeight = it.coerceIn(MIN_RENDER_HEIGHT, MAX_RENDER_HEIGHT))) }
+        PropertyTextField(
+            stringResource(Res.string.canvas_render_height),
+            source.renderHeight.toString(),
+            Modifier.weight(1f)
+        ) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(renderHeight = it.coerceIn(
+                MIN_RENDER_HEIGHT,
+                MAX_RENDER_HEIGHT
+            ))) }
         }
     }
     PropertyTextField(stringResource(Res.string.canvas_fps), source.fps.toString()) { v ->

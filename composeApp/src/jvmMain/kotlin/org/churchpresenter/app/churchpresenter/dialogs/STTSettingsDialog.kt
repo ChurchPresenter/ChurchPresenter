@@ -173,7 +173,11 @@ internal fun STTSettingsDialogContent(
                 ) {
                     LabeledCheckbox(
                         checked = engine.enabled,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(enabled = it)) } },
+                        onCheckedChange = {
+                            onSettingsChange { s ->
+                                s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(enabled = it))
+                            }
+                        },
                         label = stringResource(Res.string.bible_engine_detect),
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -186,7 +190,11 @@ internal fun STTSettingsDialogContent(
                         LabeledCheckbox(
                             checked = engine.runLocal,
                             enabled = engine.enabled,
-                            onCheckedChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(runLocal = it)) } },
+                            onCheckedChange = {
+                                onSettingsChange { s ->
+                                    s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(runLocal = it))
+                                }
+                            },
                             label = stringResource(Res.string.bible_engine_run_local),
                             color = MaterialTheme.colorScheme.onSurface,
                         )
@@ -195,7 +203,11 @@ internal fun STTSettingsDialogContent(
                 AnimatedVisibility(visible = engine.enabled) {
                     LabeledCheckbox(
                         checked = engine.helpDevMode,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(helpDevMode = it)) } },
+                        onCheckedChange = {
+                            onSettingsChange { s ->
+                                s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(helpDevMode = it))
+                            }
+                        },
                         label = stringResource(Res.string.stt_help_dev_mode),
                         modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.onSurface,
@@ -210,14 +222,24 @@ internal fun STTSettingsDialogContent(
                     ) {
                         StyledTextField(
                             value = engine.host,
-                            onValueChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(host = it)) } },
+                            onValueChange = {
+                                onSettingsChange { s ->
+                                    s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(host = it))
+                                }
+                            },
                             label = stringResource(Res.string.bible_engine_host),
                             singleLine = true,
                             modifier = Modifier.weight(1f)
                         )
                         StyledTextField(
                             value = engine.port.toString(),
-                            onValueChange = { v -> v.toIntOrNull()?.let { p -> onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(port = p)) } } },
+                            onValueChange = { v ->
+                                v.toIntOrNull()?.let { p ->
+                                    onSettingsChange { s ->
+                                        s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(port = p))
+                                    }
+                                }
+                            },
                             label = stringResource(Res.string.bible_engine_port),
                             singleLine = true,
                             modifier = Modifier.width(120.dp)
@@ -241,7 +263,9 @@ internal fun STTSettingsDialogContent(
                             "translate" to stringResource(Res.string.stt_mode_translate),
                             "both" to stringResource(Res.string.stt_mode_both)
                         ),
-                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(displayMode = it)) } },
+                        onValueChange = {
+                            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(displayMode = it)) }
+                        },
                         modifier = Modifier.widthIn(min = 120.dp)
                     )
                     AnimatedVisibility(visible = sttSettings.displayMode == "both") {
@@ -254,7 +278,9 @@ internal fun STTSettingsDialogContent(
                                 "side_by_side" to stringResource(Res.string.stt_layout_side_by_side),
                                 "side_by_side_inverse" to stringResource(Res.string.stt_layout_side_by_side_inverse)
                             ),
-                            onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(layout = it)) } },
+                            onValueChange = {
+                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(layout = it)) }
+                            },
                             modifier = Modifier.widthIn(min = 120.dp)
                         )
                     }
@@ -262,19 +288,25 @@ internal fun STTSettingsDialogContent(
                         label = stringResource(Res.string.stt_max_segments),
                         initialText = sttSettings.maxSegments,
                         range = 0..100,
-                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(maxSegments = it)) } }
+                        onValueChange = {
+                            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(maxSegments = it)) }
+                        }
                     )
                     NumberSettingsTextField(
                         label = stringResource(Res.string.stt_max_lines),
                         initialText = sttSettings.maxLines,
                         range = 0..50,
-                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(maxLines = it)) } }
+                        onValueChange = {
+                            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(maxLines = it)) }
+                        }
                     )
                     NumberSettingsTextField(
                         label = stringResource(Res.string.stt_line_spacing),
                         initialText = sttSettings.lineSpacing,
                         range = 80..300,
-                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(lineSpacing = it)) } }
+                        onValueChange = {
+                            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(lineSpacing = it)) }
+                        }
                     )
                 }
 
@@ -288,21 +320,31 @@ internal fun STTSettingsDialogContent(
                 ) {
                     LabeledCheckbox(
                         checked = sttSettings.showWordHighlighting,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showWordHighlighting = it)) } },
+                        onCheckedChange = {
+                            onSettingsChange { s ->
+                                s.copy(sttSettings = s.sttSettings.copy(showWordHighlighting = it))
+                            }
+                        },
                         label = stringResource(Res.string.stt_word_highlighting),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     LabeledCheckbox(
                         checked = sttSettings.showInProgress,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showInProgress = it)) } },
+                        onCheckedChange = {
+                            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showInProgress = it)) }
+                        },
                         label = stringResource(Res.string.stt_in_progress_text),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     LabeledCheckbox(
                         checked = sttSettings.showTranslationInProgress,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showTranslationInProgress = it)) } },
+                        onCheckedChange = {
+                            onSettingsChange { s ->
+                                s.copy(sttSettings = s.sttSettings.copy(showTranslationInProgress = it))
+                            }
+                        },
                         label = stringResource(Res.string.stt_translation_in_progress),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -317,7 +359,9 @@ internal fun STTSettingsDialogContent(
                 ) {
                     LabeledCheckbox(
                         checked = sttSettings.dripFeedEnabled,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(dripFeedEnabled = it)) } },
+                        onCheckedChange = {
+                            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(dripFeedEnabled = it)) }
+                        },
                         label = stringResource(Res.string.stt_drip_feed),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -326,7 +370,9 @@ internal fun STTSettingsDialogContent(
                         label = stringResource(Res.string.stt_drip_feed_speed),
                         initialText = sttSettings.dripFeedSpeed,
                         range = 1..1000,
-                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(dripFeedSpeed = it)) } },
+                        onValueChange = {
+                            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(dripFeedSpeed = it)) }
+                        },
                         modifier = Modifier.width(130.dp)
                     )
                 }
@@ -336,40 +382,106 @@ internal fun STTSettingsDialogContent(
                 // ── Display Styling ───────────────────────────────────────
                 // Two columns side-by-side (text/font/background styling | position + opacity)
                 // instead of one long stacked column — keeps the dialog compact.
-                Text(stringResource(Res.string.stt_display_styling), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
+                Text(
+                    stringResource(Res.string.stt_display_styling),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // ── Left: Text, font & background styling ────────────
                     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        ColorPickerField(label = stringResource(Res.string.stt_text_color), color = sttSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(textColor = it)) } }, modifier = Modifier.fillMaxWidth())
+                        ColorPickerField(
+                            label = stringResource(Res.string.stt_text_color),
+                            color = sttSettings.textColor,
+                            onColorChange = {
+                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(textColor = it)) }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                         TextStyleButtons(
-                            bold = sttSettings.bold, italic = sttSettings.italic, underline = sttSettings.underline, shadow = sttSettings.shadow,
-                            onBoldChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(bold = it)) } },
-                            onItalicChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(italic = it)) } },
-                            onUnderlineChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(underline = it)) } },
-                            onShadowChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(shadow = it)) } }
+                            bold =
+                                sttSettings.bold, italic =
+                                    sttSettings.italic, underline = sttSettings.underline, shadow = sttSettings.shadow,
+                            onBoldChange = {
+                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(bold = it)) }
+                            },
+                            onItalicChange = {
+                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(italic = it)) }
+                            },
+                            onUnderlineChange = {
+                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(underline = it)) }
+                            },
+                            onShadowChange = {
+                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(shadow = it)) }
+                            }
                         )
                         AnimatedVisibility(visible = sttSettings.shadow) {
                             ShadowDetailRow(
-                                shadowColor = sttSettings.shadowColor, shadowSize = sttSettings.shadowSize, shadowOpacity = sttSettings.shadowOpacity,
-                                onColorChange = { c -> onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(shadowColor = c)) } },
-                                onSizeChange = { v -> onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(shadowSize = v)) } },
-                                onOpacityChange = { v -> onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(shadowOpacity = v)) } },
+                                shadowColor =
+                                    sttSettings.shadowColor, shadowSize =
+                                        sttSettings.shadowSize, shadowOpacity = sttSettings.shadowOpacity,
+                                onColorChange = { c ->
+                                    onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(shadowColor = c)) }
+                                },
+                                onSizeChange = { v ->
+                                    onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(shadowSize = v)) }
+                                },
+                                onOpacityChange = { v ->
+                                    onSettingsChange { s ->
+                                        s.copy(sttSettings = s.sttSettings.copy(shadowOpacity = v))
+                                    }
+                                },
                             )
                         }
-                        ColorPickerField(label = stringResource(Res.string.stt_translation_color), color = sttSettings.translationTextColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(translationTextColor = it)) } }, modifier = Modifier.fillMaxWidth())
-                        ColorPickerField(label = stringResource(Res.string.stt_background_color), color = sttSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundColor = it)) } }, modifier = Modifier.fillMaxWidth())
+                        ColorPickerField(
+                            label = stringResource(Res.string.stt_translation_color),
+                            color = sttSettings.translationTextColor,
+                            onColorChange = {
+                                onSettingsChange { s ->
+                                    s.copy(sttSettings = s.sttSettings.copy(translationTextColor = it))
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        ColorPickerField(
+                            label = stringResource(Res.string.stt_background_color),
+                            color = sttSettings.backgroundColor,
+                            onColorChange = {
+                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundColor = it)) }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
 
                     // ── Right: Font/Size + Position + Opacity ─────────────
                     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                            FontSettingsDropdown(label = stringResource(Res.string.stt_font), value = sttSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(fontType = it)) } }, modifier = Modifier.weight(1f))
-                            NumberSettingsTextField(label = stringResource(Res.string.stt_size), initialText = sttSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(fontSize = it)) } })
+                            FontSettingsDropdown(
+                                label = stringResource(Res.string.stt_font),
+                                value = sttSettings.fontType,
+                                fonts = availableFonts,
+                                onValueChange = {
+                                    onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(fontType = it)) }
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                            NumberSettingsTextField(
+                                label = stringResource(Res.string.stt_size),
+                                initialText = sttSettings.fontSize,
+                                range = 8..200,
+                                onValueChange = {
+                                    onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(fontSize = it)) }
+                                }
+                            )
                         }
-                        Text(stringResource(Res.string.stt_position), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                        Text(
+                            stringResource(Res.string.stt_position),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                         val positions = listOf(
                             Constants.TOP_LEFT to stringResource(Res.string.qa_pos_tl),
                             Constants.TOP_CENTER to stringResource(Res.string.qa_pos_tc),
@@ -383,27 +495,49 @@ internal fun STTSettingsDialogContent(
                         )
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.fillMaxWidth()) {
                             positions.chunked(POSITION_GRID_COLUMNS).forEach { rowItems ->
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
                                     rowItems.forEach { (posConst, posLabel) ->
                                         val isSelected = sttSettings.position == posConst
                                         Box(
                                             modifier = Modifier.weight(1f).height(28.dp).clip(RoundedCornerShape(3.dp))
-                                                .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
-                                                .clickable { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(position = posConst)) } },
+                                                .background(if (
+                                                    isSelected
+                                                ) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                                                .clickable {
+                                                    onSettingsChange { s ->
+                                                        s.copy(sttSettings = s.sttSettings.copy(position = posConst))
+                                                    }
+                                                },
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text(posLabel, style = MaterialTheme.typography.labelSmall, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text(
+                                                posLabel,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
                                         }
                                     }
                                 }
                             }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                            Text(stringResource(Res.string.stt_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                            Text(
+                                stringResource(Res.string.stt_opacity),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                             Spacer(Modifier.width(4.dp))
                             SlimSlider(
                                 value = sttSettings.backgroundOpacity / 100f,
-                                onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundOpacity = (it * 100).toInt())) } },
+                                onValueChange = {
+                                    onSettingsChange { s ->
+                                        s.copy(sttSettings = s.sttSettings.copy(backgroundOpacity = (it * 100).toInt()))
+                                    }
+                                },
                                 valueRange = 0f..1f,
                                 modifier = Modifier.weight(1f),
                                 trailingLabel = "${sttSettings.backgroundOpacity}%"

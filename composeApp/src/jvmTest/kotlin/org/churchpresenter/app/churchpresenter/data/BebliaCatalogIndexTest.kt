@@ -305,7 +305,12 @@ class BebliaCatalogIndexTest {
         BebliaCatalogIndex.clearMemoryCache()
         val week = 7L * 24 * 60 * 60 * 1000
 
-        val outcome = BebliaCatalogIndex.fetch("https://x.invalid/c.json", httpServing("{not json"), cacheFile, week + 1)
+        val outcome = BebliaCatalogIndex.fetch(
+            "https://x.invalid/c.json",
+            httpServing("{not json"),
+            cacheFile,
+            week + 1
+        )
 
         val success = assertIs<BebliaCatalogIndex.IndexOutcome.Success>(outcome)
         assertTrue(success.stale)

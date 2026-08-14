@@ -73,7 +73,11 @@ class MainDesktopKeySequenceTest {
         assertEquals(2, afterTwoUps)
 
         val step = advanceKeySequence(Key.DirectionUp, konami, afterTwoUps)
-        assertEquals(1, step.progress, "Up is konami's own first key, so this must restart the count rather than zero it")
+        assertEquals(
+            1,
+            step.progress,
+            "Up is konami's own first key, so this must restart the count rather than zero it"
+        )
         assertFalse(step.completed)
     }
 

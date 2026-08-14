@@ -211,7 +211,10 @@ class PlanningCenterImportViewModel(
                     val scriptureMap = mutableMapOf<String, List<PlanningCenterScriptureDetector.ResolvedVerses>>()
                     for (pco in outcome.items) {
                         if (pco.itemType != "item") continue
-                        val combinedText = listOf(pco.title, pco.description).filter { it.isNotBlank() }.joinToString("\n")
+                        val combinedText = listOf(
+                            pco.title,
+                            pco.description
+                        ).filter { it.isNotBlank() }.joinToString("\n")
                         val detected = detectScriptureReferences(combinedText)
                         if (detected.isNotEmpty()) scriptureMap[pco.id] = detected
                     }
@@ -237,7 +240,9 @@ class PlanningCenterImportViewModel(
         }
     }
 
-    var detectedScripturesByItemId by mutableStateOf<Map<String, List<PlanningCenterScriptureDetector.ResolvedVerses>>>(emptyMap())
+    var detectedScripturesByItemId by mutableStateOf<Map<String, List<PlanningCenterScriptureDetector.ResolvedVerses>>>(
+        emptyMap()
+    )
         private set
     var selectedScriptureIndices by mutableStateOf<Map<String, Set<Int>>>(emptyMap())
         private set
@@ -308,7 +313,9 @@ class PlanningCenterImportViewModel(
      * to whichever field the user's cursor happened to be in (plain "Description" vs. the rich
      * "Details" box), so both need checking. Null only when none of the three has anything usable.
      */
-    suspend fun fetchArrangementForAddSong(pco: PlanningCenterClient.PlanItem): PlanningCenterClient.ArrangementDetail? {
+    suspend fun fetchArrangementForAddSong(
+        pco: PlanningCenterClient.PlanItem
+    ): PlanningCenterClient.ArrangementDetail? {
         val songId = pco.songId
         val arrangementId = pco.arrangementId
         if (songId != null && arrangementId != null && ensureValidToken()) {
@@ -321,7 +328,10 @@ class PlanningCenterImportViewModel(
             return PlanningCenterClient.ArrangementDetail(chordChart = "", lyrics = it)
         }
         return pco.htmlDetails.takeIf { it.isNotBlank() }
-            ?.let { PlanningCenterClient.ArrangementDetail(chordChart = "", lyrics = PlanningCenterLyricsFormatter.htmlDetailsToPlainText(it)) }
+            ?.let { PlanningCenterClient.ArrangementDetail(
+                chordChart = "",
+                lyrics = PlanningCenterLyricsFormatter.htmlDetailsToPlainText(it)
+            ) }
             ?.takeIf { it.lyrics.isNotBlank() }
     }
 
@@ -399,7 +409,12 @@ class PlanningCenterImportViewModel(
     suspend fun fetchThumbnailBytes(url: String): ByteArray? = PlanningCenterClient.fetchThumbnailBytes(url)
 
     sealed interface ImportedMedia {
-        data class Presentation(val filePath: String, val fileName: String, val slideCount: Int, val fileType: String) : ImportedMedia
+        data class Presentation(
+            val filePath: String,
+            val fileName: String,
+            val slideCount: Int,
+            val fileType: String
+        ) : ImportedMedia
         data class Picture(val folderPath: String, val folderName: String, val imageCount: Int) : ImportedMedia
         data class Media(val mediaUrl: String, val mediaTitle: String) : ImportedMedia
     }
@@ -418,7 +433,8 @@ class PlanningCenterImportViewModel(
     ): ImportedMedia? = withContext(Dispatchers.IO) {
         if (!ensureValidToken()) return@withContext null
         val urlOutcome = PlanningCenterClient.resolveAttachmentDownloadUrl(accessToken, attachment.id)
-        val resolvedUrl = (urlOutcome as? PlanningCenterClient.AttachmentUrlOutcome.Success)?.url ?: return@withContext null
+        val resolvedUrl =
+            (urlOutcome as? PlanningCenterClient.AttachmentUrlOutcome.Success)?.url ?: return@withContext null
 
         val cacheDir = File(
             System.getProperty("user.home"),

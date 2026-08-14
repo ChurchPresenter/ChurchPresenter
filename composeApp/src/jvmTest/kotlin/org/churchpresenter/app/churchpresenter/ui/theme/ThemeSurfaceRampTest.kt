@@ -152,7 +152,9 @@ class ThemeSurfaceRampTest {
             val card = contrast(s.onSurface, s.surfaceContainer)
             when {
                 accent < 4.5 ->
-                    "accent swatch ${hex(s.onPrimaryContainer)} on ${hex(s.primaryContainer)} is only %.2f:1".format(accent)
+                    "accent swatch ${hex(s.onPrimaryContainer)} on ${hex(s.primaryContainer)} is only %.2f:1".format(
+                        accent
+                    )
                 // The head of the list, and the default a new label opens on.
                 card < 4.5 ->
                     "card swatch ${hex(s.onSurface)} on ${hex(s.surfaceContainer)} is only %.2f:1".format(card)

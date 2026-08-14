@@ -144,7 +144,11 @@ internal fun PresenterWindows(
         }
     }
 
-    val presenterOutputContent: @Composable (screenAssignment: ScreenAssignment, effectiveMode: Presenting, screenNumber: Int?) -> Unit = { screenAssignment, effectiveMode, screenNumber ->
+    val presenterOutputContent: @Composable (
+        screenAssignment: ScreenAssignment,
+        effectiveMode: Presenting,
+        screenNumber: Int?
+    ) -> Unit = { screenAssignment, effectiveMode, screenNumber ->
         PresenterOutputContent(
             screenAssignment, effectiveMode, screenNumber, presenterManager, appSettings,
             mediaViewModel, sttManager, serverUrl, qaDisplayUrl, identifyingScreen,
@@ -245,7 +249,10 @@ internal fun PresenterWindows(
                             appSettings.bibleSettings, appSettings.songSettings, effectiveMode, prevEffectiveMode,
                         )
                         if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                        Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                        Crossfade(
+                            targetState = effectiveMode,
+                            animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
+                        ) { mode ->
                         PresenterModeContent(
                             mode = mode,
                             screenAssignment = screenAssignment,
@@ -310,7 +317,11 @@ internal fun PresenterWindows(
                                             effectiveMode, prevEffectiveMode,
                                         )
                                         if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                                        Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                                        Crossfade(
+                                            targetState = effectiveMode,
+                                            animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration)
+                                                else snap()
+                                        ) { mode ->
                         PresenterModeContent(
                             mode = mode,
                             screenAssignment = screenAssignment,
@@ -443,7 +454,11 @@ internal fun PresenterWindows(
                                         effectiveMode, prevEffectiveMode,
                                     )
                                     if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                                    Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                                    Crossfade(
+                                        targetState = effectiveMode,
+                                        animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration)
+                                            else snap()
+                                    ) { mode ->
                         PresenterModeContent(
                             mode = mode,
                             screenAssignment = screenAssignment,
@@ -481,7 +496,10 @@ internal fun PresenterWindows(
                             appSettings.bibleSettings, appSettings.songSettings, effectiveMode, prevEffectiveMode,
                         )
                         if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                        Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                        Crossfade(
+                            targetState = effectiveMode,
+                            animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
+                        ) { mode ->
                         PresenterModeContent(
                             mode = mode,
                             screenAssignment = screenAssignment,

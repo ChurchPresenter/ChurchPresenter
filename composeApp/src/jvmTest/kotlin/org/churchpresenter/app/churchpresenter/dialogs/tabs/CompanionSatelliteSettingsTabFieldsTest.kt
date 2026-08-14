@@ -96,9 +96,15 @@ class CompanionSatelliteSettingsTabFieldsTest {
     @Test
     fun `each device ID box stores into its own field`() {
         val cases = listOf(
-            SatLabel.TAB_DEVICE_ID to { c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.deviceId },
-            SatLabel.LEFT_DEVICE_ID to { c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.leftSidebarDeviceId },
-            SatLabel.RIGHT_DEVICE_ID to { c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.rightSidebarDeviceId },
+            SatLabel.TAB_DEVICE_ID to {
+                c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.deviceId
+            },
+            SatLabel.LEFT_DEVICE_ID to {
+                c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.leftSidebarDeviceId
+            },
+            SatLabel.RIGHT_DEVICE_ID to {
+                c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.rightSidebarDeviceId
+            },
         )
         for ((caption, read) in cases) {
             satelliteTab(initial = satelliteSettings(distinct())) { get ->

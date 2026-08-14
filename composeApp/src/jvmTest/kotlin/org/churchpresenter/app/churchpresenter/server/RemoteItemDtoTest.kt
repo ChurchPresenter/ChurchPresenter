@@ -152,7 +152,8 @@ class RemoteItemDtoTest {
 
     @Test
     fun `a website is recognised by its url`() {
-        val item = assertIs<ScheduleItem.WebsiteItem>(parse("""{"url":"https://example.org","websiteTitle":"Giving"}"""))
+        val item =
+            assertIs<ScheduleItem.WebsiteItem>(parse("""{"url":"https://example.org","websiteTitle":"Giving"}"""))
 
         assertEquals("https://example.org", item.url)
         assertEquals("Giving", item.title)
@@ -209,7 +210,10 @@ class RemoteItemDtoTest {
         // `type` is what the companion app *says* it is; the fields are what it actually sent.
         val item = parse("""{"type":"website","songNumber":42,"title":"Amazing Grace"}""")
 
-        assertIs<ScheduleItem.SongItem>(item, "routing on an unverified label would let one bad client corrupt a service")
+        assertIs<ScheduleItem.SongItem>(
+            item,
+            "routing on an unverified label would let one bad client corrupt a service"
+        )
     }
 
     // ── What is filled in when a field is left out ──────────────────────────────

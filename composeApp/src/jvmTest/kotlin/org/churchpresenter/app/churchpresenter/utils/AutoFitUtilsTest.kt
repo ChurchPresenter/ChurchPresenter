@@ -258,7 +258,11 @@ class AutoFitUtilsTest {
 
     @Test
     fun `the info line costs height, so it cannot make the chart bigger`() {
-        val pairs = zoneHeights.map { chartSize(height = it, hasInfoLine = true) to chartSize(height = it, hasInfoLine = false) }
+        val pairs =
+            zoneHeights.map { chartSize(
+                height = it,
+                hasInfoLine = true
+            ) to chartSize(height = it, hasInfoLine = false) }
 
         assertTrue(pairs.all { (with, without) -> with <= without }, "the info row gained space somewhere: $pairs")
         assertTrue(pairs.any { (with, without) -> with < without }, "the info row never cost anything: $pairs")
@@ -270,9 +274,13 @@ class AutoFitUtilsTest {
         // than a stacked pair at 2.6x, so it must fit at a larger size in the same zone.
         val introOnly = listOf("[G] [C] [D] [Em] [G] [C] [D]")
         val withWords = listOf("[G]Amazing [C]grace how [D]sweet the [Em]sound")
-        val pairs = zoneHeights.map { chartSize(lines = introOnly, height = it) to chartSize(lines = withWords, height = it) }
+        val pairs =
+            zoneHeights.map { chartSize(lines = introOnly, height = it) to chartSize(lines = withWords, height = it) }
 
-        assertTrue(pairs.all { (intro, words) -> intro >= words }, "a chord-only line was tighter than a stacked one: $pairs")
+        assertTrue(
+            pairs.all { (intro, words) -> intro >= words },
+            "a chord-only line was tighter than a stacked one: $pairs"
+        )
         assertTrue(pairs.any { (intro, words) -> intro > words }, "the two line shapes never differed: $pairs")
     }
 }

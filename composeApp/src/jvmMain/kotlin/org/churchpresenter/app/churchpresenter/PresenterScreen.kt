@@ -47,10 +47,14 @@ fun PresenterScreen(
         isLowerThird -> lowerThirdType
         else -> bgSettings.defaultBackgroundType
     }
-    val bgColorHex = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundColor else bgSettings.defaultBackgroundColor
-    val bgImagePath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundImage else bgSettings.defaultBackgroundImage
-    val bgVideoPath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundVideo else bgSettings.defaultBackgroundVideo
-    val bgOpacity = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundOpacity else bgSettings.defaultBackgroundOpacity
+    val bgColorHex = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundColor
+        else bgSettings.defaultBackgroundColor
+    val bgImagePath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundImage
+        else bgSettings.defaultBackgroundImage
+    val bgVideoPath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundVideo
+        else bgSettings.defaultBackgroundVideo
+    val bgOpacity = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundOpacity
+        else bgSettings.defaultBackgroundOpacity
     val backgroundColor = if (!showBackground) Color.Black else parseHexColor(bgColorHex)
 
     val backgroundImageBitmap = remember(bgType, bgImagePath, showBackground) {

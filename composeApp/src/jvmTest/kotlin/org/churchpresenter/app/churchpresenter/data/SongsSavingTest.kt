@@ -113,7 +113,11 @@ class SongsSavingTest {
         val songs = load(file)
         val original = songs.getSongs().single()
 
-        assertTrue(songs.saveSongToFile(original, original.copy(number = "101", title = "Amazing Grace (new)"), dir.absolutePath))
+        assertTrue(songs.saveSongToFile(
+            original,
+            original.copy(number = "101", title = "Amazing Grace (new)"),
+            dir.absolutePath
+        ))
 
         val stored = storedRow(file, "Amazing Grace (new)")
         assertEquals("101", stored[0])
@@ -281,7 +285,11 @@ class SongsSavingTest {
         val songs = load(file)
         val original = songs.getSongs().single()
 
-        assertTrue(songs.saveSongToFile(original, original.copy(lyrics = listOf("{Припев}", "строка")), dir.absolutePath))
+        assertTrue(songs.saveSongToFile(
+            original,
+            original.copy(lyrics = listOf("{Припев}", "строка")),
+            dir.absolutePath
+        ))
 
         val stored = storedRow(file, "Amazing Grace")[6]
         assertEquals("Припев@%строка", stored, "the braces are this app's own display marker, not part of the format")

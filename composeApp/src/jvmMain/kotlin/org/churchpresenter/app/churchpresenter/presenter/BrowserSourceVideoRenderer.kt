@@ -185,7 +185,8 @@ class BrowserSourceVideoRenderer(
             val periodicReseedDue = elapsedMs - lastFullFrameAtMs >= FULL_FRAME_RESEED_MS
             if (!contentChanged && !newSubscriberJoined && !periodicReseedDue) return null
             val forceFullFrame = previous == null || newSubscriberJoined || periodicReseedDue
-            val rect = if (forceFullFrame) DirtyRect(0, 0, width, height) else computeDirtyRect(intBuf, previous, width, height)
+            val rect = if (forceFullFrame) DirtyRect(0, 0, width, height)
+                else computeDirtyRect(intBuf, previous, width, height)
             return TickDecision(rect, forceFullFrame, contentChanged)
         }
 
@@ -412,12 +413,28 @@ class BrowserSourceVideoRenderer(
 
                     val elapsedMs = timeNanos / 1_000_000
                     val lastBuf = if (hasPrevious) previousBuf else null
-                    val decision = decideTick(intBuf, lastBuf, width, height, newSubscriberJoined, elapsedMs, lastFullFrameAtMs)
+                    val decision = decideTick(
+                        intBuf,
+                        lastBuf,
+                        width,
+                        height,
+                        newSubscriberJoined,
+                        elapsedMs,
+                        lastFullFrameAtMs
+                    )
 
                     if (decision != null) {
                         val rect = decision.rect
                         val frame = if (decision.forceFullFrame) {
-                            BrowserSourceFrame(rect.x, rect.y, rect.w, rect.h, width, height, encodeFrame(intBuf, width, height))
+                            BrowserSourceFrame(
+                                rect.x,
+                                rect.y,
+                                rect.w,
+                                rect.h,
+                                width,
+                                height,
+                                encodeFrame(intBuf, width, height)
+                            )
                         } else {
                             val cropped = cropPixels(intBuf, width, rect.x, rect.y, rect.w, rect.h)
                             BrowserSourceFrame(
@@ -492,7 +509,8 @@ internal fun BrowserSourceContent(
             // General per-output background toggle — same field/logic as native output
             // (main.kt). showBibleBackground/showSongsBackground below are an additional
             // layer on top of this, not a replacement for it.
-            val showBg = if (isLowerThird) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
+            val showBg = if (isLowerThird) screenAssignment.showLowerThirdBackground
+                else screenAssignment.showFullscreenBackground
 
             if (isIdentifying) {
                 Box(
@@ -651,10 +669,23 @@ internal fun BrowserSourceContent(
                                     val showQRCode = presenterManager.showQRCodeOnDisplay.value
                                     val qaTransitionAlpha = presenterManager.qaTransitionAlpha.value
                                     if (showQRCode) {
-                                        val base = qaDisplayUrlState?.value?.ifEmpty { serverUrlState?.value ?: "" } ?: (serverUrlState?.value ?: "")
-                                        QAQRCodePresenter(url = "$base/qa", qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
+                                        val base =
+                                            qaDisplayUrlState?.value?.ifEmpty {
+                                                serverUrlState?.value ?: ""
+                                            } ?: (serverUrlState?.value ?: "")
+                                        QAQRCodePresenter(
+                                            url = "$base/qa",
+                                            qaSettings = appSettings.qaSettings,
+                                            outputRole = outputRole,
+                                            transitionAlpha = qaTransitionAlpha
+                                        )
                                     } else {
-                                        QAPresenter(question = presenterManager.displayedQuestion.value, qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
+                                        QAPresenter(
+                                            question = presenterManager.displayedQuestion.value,
+                                            qaSettings = appSettings.qaSettings,
+                                            outputRole = outputRole,
+                                            transitionAlpha = qaTransitionAlpha
+                                        )
                                     }
                                 }
                                 Presenting.STT -> {

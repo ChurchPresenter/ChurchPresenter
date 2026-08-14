@@ -127,7 +127,8 @@ internal fun SourceSegmentedControl(
         tabLabels.forEachIndexed { index, label ->
             val selected = index == selectedTab
             val container = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent
-            val content = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+            val content = if (selected) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant
             Surface(
                 onClick = { onSelect(index) },
                 shape = MaterialTheme.shapes.small,

@@ -270,7 +270,8 @@ class InstanceLinkContentTest {
     }
 
     @Test
-    fun `Disconnect is offered while connected and calls onDisconnect`() = dialog(connectionStatus = InstanceLinkStatus.CONNECTED) { result ->
+    fun `Disconnect is offered while connected and calls onDisconnect`() =
+        dialog(connectionStatus = InstanceLinkStatus.CONNECTED) { result ->
         onNodeWithText("Disconnect").performClick()
         assertEquals(1, result.disconnectCalls)
     }
@@ -296,7 +297,8 @@ class InstanceLinkContentTest {
     }
 
     @Test
-    fun `autoConnect reflects an already-enabled setting`() = dialog(settings = InstanceLinkSettings(autoConnect = true)) {
+    fun `autoConnect reflects an already-enabled setting`() =
+        dialog(settings = InstanceLinkSettings(autoConnect = true)) {
         onAllNodes(isToggleable())[0].assertIsOn()
     }
 
@@ -509,7 +511,11 @@ class InstanceLinkContentTest {
     @Test
     fun `WEBSITE prefers the page title over the URL`() = dialog(
         connectionStatus = InstanceLinkStatus.CONNECTED,
-        remoteLiveState = LiveStateDto(contentType = "WEBSITE", websiteTitle = "Church Home", websiteUrl = "https://church.example"),
+        remoteLiveState = LiveStateDto(
+            contentType = "WEBSITE",
+            websiteTitle = "Church Home",
+            websiteUrl = "https://church.example"
+        ),
     ) {
         onNodeWithText("Last received: Church Home").assertExists()
     }

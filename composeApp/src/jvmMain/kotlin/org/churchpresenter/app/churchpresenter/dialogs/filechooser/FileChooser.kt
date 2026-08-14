@@ -61,9 +61,15 @@ abstract class FileChooser {
      * When filters are provided, the returned path is guaranteed to carry one of the
      * filter extensions (the first one is appended if the user omitted it).
      */
-    suspend fun save(location: Path?, suggestedName: String, filters: List<FileNameExtensionFilter>, title: String): Path? {
+    suspend fun save(
+        location: Path?,
+        suggestedName: String,
+        filters: List<FileNameExtensionFilter>,
+        title: String
+    ): Path? {
         val initialLocation = location ?: Path(System.getProperty(Constants.SystemProperties.USER_HOME))
-        val result = withContext(Dispatchers.IO) { saveImpl(initialLocation, suggestedName, filters, title) } ?: return null
+        val result =
+            withContext(Dispatchers.IO) { saveImpl(initialLocation, suggestedName, filters, title) } ?: return null
         val extensions = filters.flatMap { it.extensions.toList() }
         val name = result.fileName.toString()
         return if (extensions.isEmpty() || extensions.any { name.endsWith(".$it", ignoreCase = true) }) {
@@ -73,7 +79,12 @@ abstract class FileChooser {
         }
     }
 
-    protected abstract suspend fun saveImpl(location: Path, suggestedName: String, filters: List<FileNameExtensionFilter>, title: String): Path?
+    protected abstract suspend fun saveImpl(
+        location: Path,
+        suggestedName: String,
+        filters: List<FileNameExtensionFilter>,
+        title: String
+    ): Path?
 
     private suspend fun choose(
         path: Path?,

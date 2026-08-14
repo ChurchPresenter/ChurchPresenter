@@ -54,7 +54,12 @@ class BibleCatalogBrowserContentTest {
 
     private class FakeSource(
         var catalogOutcome: BibleCatalogOutcome = BibleCatalogOutcome.Success(emptyList()),
-        var installOutcome: BibleInstallOutcome = BibleInstallOutcome.Success(File("x.spb"), "Installed Title", 66, "public domain"),
+        var installOutcome: BibleInstallOutcome = BibleInstallOutcome.Success(
+            File("x.spb"),
+            "Installed Title",
+            66,
+            "public domain"
+        ),
         var parkedCatalog: CompletableDeferred<BibleCatalogOutcome>? = null,
         var parkedInstall: CompletableDeferred<BibleInstallOutcome>? = null,
         var emitProgress: InstallProgress? = null,
@@ -73,7 +78,11 @@ class BibleCatalogBrowserContentTest {
             private set
 
         override suspend fun catalog(nowMillis: Long) = parkedCatalog?.await() ?: catalogOutcome
-        override suspend fun install(module: BibleModule, targetDir: File, onProgress: (InstallProgress) -> Unit): BibleInstallOutcome {
+        override suspend fun install(
+            module: BibleModule,
+            targetDir: File,
+            onProgress: (InstallProgress) -> Unit
+        ): BibleInstallOutcome {
             installCalls++
             emitProgress?.let(onProgress)
             val outcome = parkedInstall?.await() ?: installOutcome
@@ -112,11 +121,20 @@ class BibleCatalogBrowserContentTest {
 
     private fun dialog(
         catalogOutcome: BibleCatalogOutcome = BibleCatalogOutcome.Success(emptyList()),
-        installOutcome: BibleInstallOutcome = BibleInstallOutcome.Success(File("x.spb"), "Installed Title", 66, "public domain"),
+        installOutcome: BibleInstallOutcome = BibleInstallOutcome.Success(
+            File("x.spb"),
+            "Installed Title",
+            66,
+            "public domain"
+        ),
         source: FakeSource = FakeSource(catalogOutcome, installOutcome),
         block: ComposeUiTest.(dismissed: () -> Int, installed: () -> String?) -> Unit,
     ) {
-        val vm = BibleCatalogViewModel(source, dir.absolutePath, dispatcher = Dispatchers.Unconfined).also { created.add(it) }
+        val vm = BibleCatalogViewModel(
+            source,
+            dir.absolutePath,
+            dispatcher = Dispatchers.Unconfined
+        ).also { created.add(it) }
         var dismissed = 0
         var installedFileName: String? = null
         runComposeUiTest {
@@ -224,7 +242,8 @@ class BibleCatalogBrowserContentTest {
     }
 
     @Test
-    fun `a network error shows its own message and a retry button`() = dialog(catalogOutcome = BibleCatalogOutcome.NetworkError) { _, _ ->
+    fun `a network error shows its own message and a retry button`() =
+        dialog(catalogOutcome = BibleCatalogOutcome.NetworkError) { _, _ ->
         onNodeWithText("Couldn't reach the Bible archive — check your connection").assertExists()
         onNodeWithText("Retry").assertExists()
     }
@@ -239,7 +258,11 @@ class BibleCatalogBrowserContentTest {
 
     @Test
     fun `searching filters the module list by name`() = dialog(
-        catalogOutcome = BibleCatalogOutcome.Success(listOf(module(), module(identifier = "KJV", displayName = "King James Version", fileStem = "ENG_KJV"))),
+        catalogOutcome =
+            BibleCatalogOutcome.Success(listOf(
+                module(),
+                module(identifier = "KJV", displayName = "King James Version", fileStem = "ENG_KJV")
+            )),
     ) { _, _ ->
         onNodeWithText("Filter by name or language…").performTextInput("King James")
         waitForIdle()
@@ -313,14 +336,30 @@ class BibleCatalogBrowserContentTest {
 
     @Test
     fun `switching tabs shows the other archive's catalogue`() {
-        val ebible = FakeSource(catalogOutcome = BibleCatalogOutcome.Success(listOf(module(displayName = "A Conservative Version"))))
+        val ebible =
+            FakeSource(catalogOutcome = BibleCatalogOutcome.Success(
+                listOf(module(displayName = "A Conservative Version"))
+            ))
         val zefania = FakeSource(
             catalogOutcome = BibleCatalogOutcome.Success(
-                listOf(module(identifier = "ZEF", displayName = "Zefania Sample", fileStem = "ENG_ZEF", sourceId = BibleSourceId.ZEFANIA))
+                listOf(module(
+                    identifier = "ZEF",
+                    displayName = "Zefania Sample",
+                    fileStem = "ENG_ZEF",
+                    sourceId = BibleSourceId.ZEFANIA
+                ))
             )
         )
-        val vm1 = BibleCatalogViewModel(ebible, dir.absolutePath, dispatcher = Dispatchers.Unconfined).also { created.add(it) }
-        val vm2 = BibleCatalogViewModel(zefania, dir.absolutePath, dispatcher = Dispatchers.Unconfined).also { created.add(it) }
+        val vm1 = BibleCatalogViewModel(
+            ebible,
+            dir.absolutePath,
+            dispatcher = Dispatchers.Unconfined
+        ).also { created.add(it) }
+        val vm2 = BibleCatalogViewModel(
+            zefania,
+            dir.absolutePath,
+            dispatcher = Dispatchers.Unconfined
+        ).also { created.add(it) }
         runComposeUiTest {
             setContent {
                 MaterialTheme {
@@ -370,7 +409,8 @@ class BibleCatalogBrowserContentTest {
     }
 
     @Test
-    fun `a rate-limited catalogue shows its own message`() = dialog(catalogOutcome = BibleCatalogOutcome.RateLimited(null)) { _, _ ->
+    fun `a rate-limited catalogue shows its own message`() =
+        dialog(catalogOutcome = BibleCatalogOutcome.RateLimited(null)) { _, _ ->
         onNodeWithText("GitHub is limiting requests right now. Please try again in a few minutes.").assertExists()
     }
 
@@ -383,7 +423,8 @@ class BibleCatalogBrowserContentTest {
 
     @Test
     fun `a module with copyright and file size shows both in the list`() = dialog(
-        catalogOutcome = BibleCatalogOutcome.Success(listOf(module(copyright = "Public Domain", sizeBytes = 2L * 1024 * 1024))),
+        catalogOutcome =
+            BibleCatalogOutcome.Success(listOf(module(copyright = "Public Domain", sizeBytes = 2L * 1024 * 1024))),
     ) { _, _ ->
         onNodeWithText("Public Domain").assertExists()
         onNodeWithText("2.0 MB", substring = true).assertExists()
@@ -449,7 +490,8 @@ class BibleCatalogBrowserContentTest {
     }
 
     @Test
-    fun `the language dropdown lists every language until something is typed`() = dialog(catalogOutcome = twoLanguages) { _, _ ->
+    fun `the language dropdown lists every language until something is typed`() =
+        dialog(catalogOutcome = twoLanguages) { _, _ ->
         openLanguageMenu()
 
         // Focus clears the field, so the menu opens on the whole list rather than on the one row
@@ -468,7 +510,8 @@ class BibleCatalogBrowserContentTest {
     }
 
     @Test
-    fun `typing the language code narrows the dropdown just as the name does`() = dialog(catalogOutcome = twoLanguages) { _, _ ->
+    fun `typing the language code narrows the dropdown just as the name does`() =
+        dialog(catalogOutcome = twoLanguages) { _, _ ->
         openLanguageMenu().performTextInput("spa")
         waitForIdle()
 
@@ -550,7 +593,13 @@ class BibleCatalogBrowserContentTest {
     @Test
     fun `a language with no published name falls back to its bare code`() = dialog(
         catalogOutcome = BibleCatalogOutcome.Success(
-            listOf(module(identifier = "CSP", displayName = "Cesky", language = "CZE", languageName = "", fileStem = "CZE_CSP"))
+            listOf(module(
+                identifier = "CSP",
+                displayName = "Cesky",
+                language = "CZE",
+                languageName = "",
+                fileStem = "CZE_CSP"
+            ))
         ),
     ) { _, _ ->
         onNodeWithText("All languages").performClick()

@@ -78,7 +78,12 @@ class CompanionServerBibleSelectTest {
         val received = mutableListOf<SelectBibleVerseRequest>()
         collecting(server.onSelectBibleVerse) { received.add(it) }
 
-        val req = SelectBibleVerseRequest(bookName = "John", chapter = 3, verseNumber = 16, verseText = "For God so loved the world.")
+        val req = SelectBibleVerseRequest(
+            bookName = "John",
+            chapter = 3,
+            verseNumber = 16,
+            verseText = "For God so loved the world."
+        )
         val response = client.post(url(Constants.ENDPOINT_BIBLE_SELECT)) {
             setBody(json.encodeToString(SelectBibleVerseRequest.serializer(), req))
         }

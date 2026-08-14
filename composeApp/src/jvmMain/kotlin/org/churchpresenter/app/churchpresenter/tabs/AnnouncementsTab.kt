@@ -262,9 +262,12 @@ fun AnnouncementsTab(
     // "what's the current value" must be read from there rather than from the tab's own ViewModel,
     // which may have been recreated since the countdown was actually started. announcementTickerActive
     // (not timerRunning, which is only ever true for Duration/Count-Up) reflects all four.
-    val isDurationOrCountUp = viewModel.timerMode == Constants.TIMER_MODE_DURATION || viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP
+    val isDurationOrCountUp =
+        viewModel.timerMode == Constants.TIMER_MODE_DURATION || viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP
     val isTimerRunning = presenterManager?.announcementTickerActive?.value == true
-    val isTimerExpired = viewModel.timerMode == Constants.TIMER_MODE_DURATION && presenterManager?.announcementTimerExpired?.value == true
+    val isTimerExpired =
+        viewModel.timerMode == Constants.TIMER_MODE_DURATION
+            && presenterManager?.announcementTimerExpired?.value == true
     val timerDisplayValue = when {
         isTimerRunning -> presenterManager.timerRemainingSeconds.value
         viewModel.timerMode == Constants.TIMER_MODE_COUNT_UP -> viewModel.countUpElapsed
@@ -349,7 +352,11 @@ fun AnnouncementsTab(
                     modifier = Modifier.fillMaxWidth(),
                     decorationBox = { inner ->
                         if (viewModel.text.isEmpty()) {
-                            Text(stringResource(Res.string.announcement_text_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                            Text(
+                                stringResource(Res.string.announcement_text_hint),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            )
                         }
                         inner()
                     }
@@ -359,32 +366,54 @@ fun AnnouncementsTab(
                 // Mutually exclusive with the timer's own play/pause button below — only one of
                 // text/timer can occupy the shared announcementText slot at a time, so whichever
                 // one is started (isTimerRunning going true) automatically shows this as not-live.
-                val announcementTextIsLive = presenterManager.presentingMode.value == Presenting.ANNOUNCEMENTS && !isTimerRunning
+                val announcementTextIsLive =
+                    presenterManager.presentingMode.value == Presenting.ANNOUNCEMENTS && !isTimerRunning
                 ActionIconButton(
                     onClick = {
                         if (announcementTextIsLive) presenterManager.requestClearDisplay()
-                        else { viewModel.pauseTimer(presenterManager); presenterManager.setAnnouncementText(viewModel.text); presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS) }
+                        else {
+                            viewModel.pauseTimer(presenterManager)
+                            presenterManager.setAnnouncementText(viewModel.text)
+                            presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+                        }
                     },
                     enabled = viewModel.text.isNotBlank() || announcementTextIsLive,
-                    tooltipText = stringResource(if (announcementTextIsLive) Res.string.tooltip_announcement_hide else Res.string.tooltip_announcement_show),
-                    painter = painterResource(if (announcementTextIsLive) Res.drawable.ic_pause else Res.drawable.ic_play),
-                    containerColor = if (announcementTextIsLive) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primary,
-                    contentColor = if (announcementTextIsLive) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimary
+                    tooltipText =
+                        stringResource(if (
+                            announcementTextIsLive
+                        ) Res.string.tooltip_announcement_hide else Res.string.tooltip_announcement_show),
+                    painter =
+                        painterResource(if (announcementTextIsLive) Res.drawable.ic_pause else Res.drawable.ic_play),
+                    containerColor = if (announcementTextIsLive) MaterialTheme.colorScheme.secondaryContainer
+                        else MaterialTheme.colorScheme.primary,
+                    contentColor = if (announcementTextIsLive) MaterialTheme.colorScheme.onSecondaryContainer
+                        else MaterialTheme.colorScheme.onPrimary
                 )
                 if (canSendToStageMonitor) {
                     ActionIconButton(
                         onClick = { toggleStageMonitor(viewModel.text, stopTicker = true) },
                         enabled = viewModel.text.isNotBlank() || isSentToStageMonitor,
-                        tooltipText = if (isSentToStageMonitor) stringResource(Res.string.tooltip_hide_from_stage_monitor) else stringResource(Res.string.tooltip_send_to_stage_monitor),
+                        tooltipText =
+                            if (isSentToStageMonitor) stringResource(Res.string.tooltip_hide_from_stage_monitor)
+                                else stringResource(Res.string.tooltip_send_to_stage_monitor),
                         icon = if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast,
-                        containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                        containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer
+                            else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
             if (onAddToSchedule != null) {
                 AddToScheduleButton(
-                    onClick = { onAddToSchedule.invoke(viewModel.buildSettings().copy(timerHours = 0, timerMinutes = 0, timerSeconds = 0, timerTextColor = "#FFFFFF", timerExpiredText = "", timerMode = Constants.TIMER_MODE_DURATION)) },
+                    onClick = { onAddToSchedule.invoke(viewModel.buildSettings().copy(
+                        timerHours = 0,
+                        timerMinutes = 0,
+                        timerSeconds = 0,
+                        timerTextColor = "#FFFFFF",
+                        timerExpiredText = "",
+                        timerMode = Constants.TIMER_MODE_DURATION
+                    )) },
                     enabled = viewModel.text.isNotBlank(),
                     tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
                 )
@@ -409,10 +438,20 @@ fun AnnouncementsTab(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            ColorPickerField(label = stringResource(Res.string.text_color), color = viewModel.textColor, onColorChange = { viewModel.setTextColor(it); viewModel.saveToSettings(onSettingsChange) }, modifier = Modifier.width(120.dp))
-            HorizontalDivider(modifier = Modifier.height(22.dp).width(1.dp), color = MaterialTheme.colorScheme.outlineVariant)
+            ColorPickerField(
+                label = stringResource(Res.string.text_color),
+                color = viewModel.textColor,
+                onColorChange = { viewModel.setTextColor(it); viewModel.saveToSettings(onSettingsChange) },
+                modifier = Modifier.width(120.dp)
+            )
+            HorizontalDivider(
+                modifier = Modifier.height(22.dp).width(1.dp),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
             TextStyleButtons(
-                bold = viewModel.bold, italic = viewModel.italic, underline = viewModel.underline, shadow = viewModel.shadow,
+                bold =
+                    viewModel.bold, italic =
+                        viewModel.italic, underline = viewModel.underline, shadow = viewModel.shadow,
                 onBoldChange = { viewModel.setBold(it); viewModel.saveToSettings(onSettingsChange) },
                 onItalicChange = { viewModel.setItalic(it); viewModel.saveToSettings(onSettingsChange) },
                 onUnderlineChange = { viewModel.setUnderline(it); viewModel.saveToSettings(onSettingsChange) },
@@ -420,25 +459,56 @@ fun AnnouncementsTab(
             )
             HorizontalAlignmentButtons(
                 selectedAlignment = viewModel.horizontalAlignment,
-                onAlignmentChange = { viewModel.setHorizontalAlignment(it); viewModel.saveToSettings(onSettingsChange) },
+                onAlignmentChange = {
+                    viewModel.setHorizontalAlignment(it)
+                    viewModel.saveToSettings(onSettingsChange)
+                },
                 leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
             )
-            HorizontalDivider(modifier = Modifier.height(22.dp).width(1.dp), color = MaterialTheme.colorScheme.outlineVariant)
-            FontSettingsDropdown(label = stringResource(Res.string.font_type), value = viewModel.fontType, fonts = availableFonts, onValueChange = { viewModel.setFontType(it); viewModel.saveToSettings(onSettingsChange) })
-            NumberSettingsTextField(label = stringResource(Res.string.font_size), initialText = viewModel.fontSize, range = 8..200, onValueChange = { viewModel.setFontSize(it); viewModel.saveToSettings(onSettingsChange) })
+            HorizontalDivider(
+                modifier = Modifier.height(22.dp).width(1.dp),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+            FontSettingsDropdown(
+                label = stringResource(Res.string.font_type),
+                value = viewModel.fontType,
+                fonts = availableFonts,
+                onValueChange = { viewModel.setFontType(it); viewModel.saveToSettings(onSettingsChange) }
+            )
+            NumberSettingsTextField(
+                label = stringResource(Res.string.font_size),
+                initialText = viewModel.fontSize,
+                range = 8..200,
+                onValueChange = { viewModel.setFontSize(it); viewModel.saveToSettings(onSettingsChange) }
+            )
             Spacer(Modifier.weight(1f))
         }
         AnimatedVisibility(visible = viewModel.shadow) {
             Column {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(horizontal = 12.dp, vertical = 6.dp)) {
+                Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(
+                    horizontal = 12.dp,
+                    vertical = 6.dp
+                )) {
                     ShadowDetailRow(
                         shadowColor = appSettings.announcementsSettings.shadowColor,
                         shadowSize = appSettings.announcementsSettings.shadowSize,
                         shadowOpacity = appSettings.announcementsSettings.shadowOpacity,
-                        onColorChange = { c -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowColor = c)) } },
-                        onSizeChange = { v -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowSize = v)) } },
-                        onOpacityChange = { v -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowOpacity = v)) } }
+                        onColorChange = { c ->
+                            onSettingsChange { s ->
+                                s.copy(announcementsSettings = s.announcementsSettings.copy(shadowColor = c))
+                            }
+                        },
+                        onSizeChange = { v ->
+                            onSettingsChange { s ->
+                                s.copy(announcementsSettings = s.announcementsSettings.copy(shadowSize = v))
+                            }
+                        },
+                        onOpacityChange = { v ->
+                            onSettingsChange { s ->
+                                s.copy(announcementsSettings = s.announcementsSettings.copy(shadowOpacity = v))
+                            }
+                        }
                     )
                 }
             }
@@ -448,7 +518,9 @@ fun AnnouncementsTab(
         // ── Resizable split panel ─────────────────────────────────────
         var twoColHeightPx by remember { mutableStateOf(0) }
         var twoColWidthPx by remember { mutableStateOf(0) }
-        Box(modifier = Modifier.weight(1f).fillMaxWidth().onSizeChanged { twoColHeightPx = it.height; twoColWidthPx = it.width }) {
+        Box(modifier = Modifier.weight(
+            1f
+        ).fillMaxWidth().onSizeChanged { twoColHeightPx = it.height; twoColWidthPx = it.width }) {
             Row(modifier = Modifier.fillMaxSize()) {
                 // ── LEFT: background color + position + timer ──────────────
                 Column(
@@ -465,8 +537,15 @@ fun AnnouncementsTab(
                             Row(
                                 modifier = Modifier
                                     .height(32.dp)
-                                    .clickable { viewModel.setBackgroundColor("#000000"); viewModel.saveToSettings(onSettingsChange) }
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        viewModel.setBackgroundColor("#000000")
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    }
+                                    .border(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                        RoundedCornerShape(8.dp)
+                                    )
                                     .padding(horizontal = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -483,10 +562,30 @@ fun AnnouncementsTab(
                                 )
                             }
                         } else {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                ColorPickerField(label = stringResource(Res.string.announcement_background_color_label), color = viewModel.backgroundColor, onColorChange = { viewModel.setBackgroundColor(it); viewModel.saveToSettings(onSettingsChange) }, modifier = Modifier.weight(1f))
-                                OutlinedButton(onClick = { viewModel.setBackgroundColor("transparent"); viewModel.saveToSettings(onSettingsChange) }, shape = RoundedCornerShape(8.dp)) {
-                                    Text(stringResource(Res.string.transparent_default), style = MaterialTheme.typography.labelMedium)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                ColorPickerField(
+                                    label = stringResource(Res.string.announcement_background_color_label),
+                                    color = viewModel.backgroundColor,
+                                    onColorChange = {
+                                        viewModel.setBackgroundColor(it)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                OutlinedButton(
+                                    onClick = {
+                                        viewModel.setBackgroundColor("transparent")
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(
+                                        stringResource(Res.string.transparent_default),
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
                                 }
                             }
                         }
@@ -510,7 +609,9 @@ fun AnnouncementsTab(
                                         Box(
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .aspectRatio(if (useAbbrev) POSITION_TILE_ASPECT_ABBREV else POSITION_TILE_ASPECT_FULL)
+                                                .aspectRatio(if (
+                                                    useAbbrev
+                                                ) POSITION_TILE_ASPECT_ABBREV else POSITION_TILE_ASPECT_FULL)
                                                 .clip(RoundedCornerShape(3.dp))
                                                 .background(
                                                     if (isSelected) MaterialTheme.colorScheme.primary
@@ -607,10 +708,12 @@ fun AnnouncementsTab(
                             textAlign = TextAlign.Center
                         )
 
-                        val amPmSuffix = if (use24Hour) "" else " " + stringResource(if (targetIsPm) Res.string.timer_pm else Res.string.timer_am)
+                        val amPmSuffix = if (use24Hour) ""
+                            else " " + stringResource(if (targetIsPm) Res.string.timer_pm else Res.string.timer_am)
                         Text(
                             text = "$timerTargetTimeLabel %02d:%02d:%02d%s".format(
-                                displayHour(viewModel.targetHour), viewModel.targetMinute, viewModel.targetSecond, amPmSuffix
+                                displayHour(viewModel.targetHour), viewModel.targetMinute, viewModel
+                                    .targetSecond, amPmSuffix
                             ),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary,
@@ -645,28 +748,69 @@ fun AnnouncementsTab(
                                 verticalAlignment = Alignment.Top
                             ) {
                                 TimerColumn(hrText, hrLabel,
-                                    onIncrement = { viewModel.stepTimerHours(1); viewModel.saveToSettings(onSettingsChange) },
-                                    onDecrement = { viewModel.stepTimerHours(-1); viewModel.saveToSettings(onSettingsChange) },
-                                    onValueChange = { v -> val d = v.filter { it.isDigit() }.take(2); hrText = d; d.toIntOrNull()?.let { viewModel.setTimerHours(it); viewModel.saveToSettings(onSettingsChange) } }
+                                    onIncrement = {
+                                        viewModel.stepTimerHours(1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    onDecrement = {
+                                        viewModel.stepTimerHours(-1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    onValueChange = {
+                                        v -> val d = v.filter { it.isDigit() }.take(2)
+                                        hrText = d
+                                        d.toIntOrNull()?.let {
+                                            viewModel.setTimerHours(it)
+                                            viewModel.saveToSettings(onSettingsChange)
+                                        }
+                                    }
                                 )
                                 sepBox()
                                 TimerColumn(minText, minLabel,
-                                    onIncrement = { viewModel.stepTimerMinutes(1); viewModel.saveToSettings(onSettingsChange) },
-                                    onDecrement = { viewModel.stepTimerMinutes(-1); viewModel.saveToSettings(onSettingsChange) },
-                                    onValueChange = { v -> val d = v.filter { it.isDigit() }.take(2); minText = d; d.toIntOrNull()?.let { viewModel.setTimerMinutes(it); viewModel.saveToSettings(onSettingsChange) } }
+                                    onIncrement = {
+                                        viewModel.stepTimerMinutes(1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    onDecrement = {
+                                        viewModel.stepTimerMinutes(-1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    onValueChange = {
+                                        v -> val d = v.filter { it.isDigit() }.take(2)
+                                        minText = d
+                                        d.toIntOrNull()?.let {
+                                            viewModel.setTimerMinutes(it)
+                                            viewModel.saveToSettings(onSettingsChange)
+                                        }
+                                    }
                                 )
                                 sepBox()
                                 TimerColumn(secText, secLabel,
-                                    onIncrement = { viewModel.stepTimerSeconds(1); viewModel.saveToSettings(onSettingsChange) },
-                                    onDecrement = { viewModel.stepTimerSeconds(-1); viewModel.saveToSettings(onSettingsChange) },
-                                    onValueChange = { v -> val d = v.filter { it.isDigit() }.take(2); secText = d; d.toIntOrNull()?.let { viewModel.setTimerSeconds(it.coerceIn(0, MAX_SECOND)); viewModel.saveToSettings(onSettingsChange) } }
+                                    onIncrement = {
+                                        viewModel.stepTimerSeconds(1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    onDecrement = {
+                                        viewModel.stepTimerSeconds(-1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    onValueChange = {
+                                        v -> val d = v.filter { it.isDigit() }.take(2)
+                                        secText = d
+                                        d.toIntOrNull()?.let {
+                                            viewModel.setTimerSeconds(it.coerceIn(0, MAX_SECOND))
+                                            viewModel.saveToSettings(onSettingsChange)
+                                        }
+                                    }
                                 )
                             }
                         } else if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
                             var tHrText by remember { mutableStateOf("%02d".format(displayHour(viewModel.targetHour))) }
                             var tMinText by remember { mutableStateOf("%02d".format(viewModel.targetMinute)) }
                             var tSecText by remember { mutableStateOf("%02d".format(viewModel.targetSecond)) }
-                            LaunchedEffect(viewModel.targetHour) { tHrText = "%02d".format(displayHour(viewModel.targetHour)) }
+                            LaunchedEffect(viewModel.targetHour) {
+                                tHrText = "%02d".format(displayHour(viewModel.targetHour))
+                            }
                             LaunchedEffect(viewModel.targetMinute) { tMinText = "%02d".format(viewModel.targetMinute) }
                             LaunchedEffect(viewModel.targetSecond) { tSecText = "%02d".format(viewModel.targetSecond) }
                             Row(
@@ -675,8 +819,14 @@ fun AnnouncementsTab(
                                 verticalAlignment = Alignment.Top
                             ) {
                                 TimerColumn(tHrText, hrLabel,
-                                    onIncrement = { viewModel.stepTargetHour(1); viewModel.saveToSettings(onSettingsChange) },
-                                    onDecrement = { viewModel.stepTargetHour(-1); viewModel.saveToSettings(onSettingsChange) },
+                                    onIncrement = {
+                                        viewModel.stepTargetHour(1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    onDecrement = {
+                                        viewModel.stepTargetHour(-1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
                                     onValueChange = { v ->
                                         val d = v.filter { it.isDigit() }.take(2)
                                         tHrText = d
@@ -699,22 +849,50 @@ fun AnnouncementsTab(
                                 )
                                 sepBox()
                                 TimerColumn(tMinText, minLabel,
-                                    onIncrement = { viewModel.stepTargetMinute(1); viewModel.saveToSettings(onSettingsChange) },
-                                    onDecrement = { viewModel.stepTargetMinute(-1); viewModel.saveToSettings(onSettingsChange) },
-                                    onValueChange = { v -> val d = v.filter { it.isDigit() }.take(2); tMinText = d; d.toIntOrNull()?.let { viewModel.setTargetMinute(it); viewModel.saveToSettings(onSettingsChange) } }
+                                    onIncrement = {
+                                        viewModel.stepTargetMinute(1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    onDecrement = {
+                                        viewModel.stepTargetMinute(-1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    onValueChange = {
+                                        v -> val d = v.filter { it.isDigit() }.take(2)
+                                        tMinText = d
+                                        d.toIntOrNull()?.let {
+                                            viewModel.setTargetMinute(it)
+                                            viewModel.saveToSettings(onSettingsChange)
+                                        }
+                                    }
                                 )
                                 sepBox()
                                 TimerColumn(tSecText, secLabel,
-                                    onIncrement = { viewModel.stepTargetSecond(1); viewModel.saveToSettings(onSettingsChange) },
-                                    onDecrement = { viewModel.stepTargetSecond(-1); viewModel.saveToSettings(onSettingsChange) },
-                                    onValueChange = { v -> val d = v.filter { it.isDigit() }.take(2); tSecText = d; d.toIntOrNull()?.let { viewModel.setTargetSecond(it.coerceIn(0, MAX_SECOND)); viewModel.saveToSettings(onSettingsChange) } }
+                                    onIncrement = {
+                                        viewModel.stepTargetSecond(1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    onDecrement = {
+                                        viewModel.stepTargetSecond(-1)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    onValueChange = {
+                                        v -> val d = v.filter { it.isDigit() }.take(2)
+                                        tSecText = d
+                                        d.toIntOrNull()?.let {
+                                            viewModel.setTargetSecond(it.coerceIn(0, MAX_SECOND))
+                                            viewModel.saveToSettings(onSettingsChange)
+                                        }
+                                    }
                                 )
                                 if (!use24Hour) {
                                     sepBox()
                                     AmPmToggle(
                                         isPm = targetIsPm,
                                         onToggle = {
-                                            viewModel.setTargetHour((viewModel.targetHour + HOURS_PER_HALF_DAY) % HOURS_PER_DAY)
+                                            viewModel.setTargetHour((
+                                                viewModel.targetHour + HOURS_PER_HALF_DAY
+                                            ) % HOURS_PER_DAY)
                                             viewModel.saveToSettings(onSettingsChange)
                                         }
                                     )
@@ -727,12 +905,16 @@ fun AnnouncementsTab(
                                 "HH:mm:ss" to stringResource(Res.string.timer_clock_format_24h_sec),
                                 "HH:mm" to stringResource(Res.string.timer_clock_format_24h)
                             )
-                            val patternForLabel = clockFormatLabels.entries.associate { (pattern, label) -> label to pattern }
+                            val patternForLabel =
+                                clockFormatLabels.entries.associate { (pattern, label) -> label to pattern }
                             DropdownSettingsField(
                                 value = clockFormatLabels[viewModel.liveClockFormat] ?: viewModel.liveClockFormat,
                                 options = clockFormatLabels.values.toList(),
                                 onValueChange = { picked ->
-                                    patternForLabel[picked]?.let { viewModel.setLiveClockFormat(it); viewModel.saveToSettings(onSettingsChange) }
+                                    patternForLabel[picked]?.let {
+                                        viewModel.setLiveClockFormat(it)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    }
                                 },
                                 label = stringResource(Res.string.timer_clock_format),
                                 modifier = Modifier.fillMaxWidth()
@@ -747,7 +929,8 @@ fun AnnouncementsTab(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             itemVerticalAlignment = Alignment.CenterVertically
                         ) {
-                            val total = viewModel.timerHours * 3600 + viewModel.timerMinutes * 60 + viewModel.timerSeconds
+                            val total =
+                                viewModel.timerHours * 3600 + viewModel.timerMinutes * 60 + viewModel.timerSeconds
                             // All four modes now have a real play/pause concept — pressing it on one
                             // stops any other timer/clock ticker AND the announcement text (mutually
                             // exclusive, see isTimerRunning/announcementTextIsLive above) since they
@@ -757,11 +940,17 @@ fun AnnouncementsTab(
                                     viewModel.saveToSettings(onSettingsChange)
                                     viewModel.startPauseTimer(presenterManager)
                                 },
-                                enabled = viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || isTimerRunning,
+                                enabled =
+                                    viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || isTimerRunning,
                                 tooltipText = if (isTimerRunning) pauseLabel else startLabel,
-                                painter = painterResource(if (isTimerRunning) Res.drawable.ic_pause else Res.drawable.ic_play),
-                                containerColor = if (isTimerRunning) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = if (isTimerRunning) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
+                                painter =
+                                    painterResource(if (
+                                        isTimerRunning
+                                    ) Res.drawable.ic_pause else Res.drawable.ic_play),
+                                containerColor = if (isTimerRunning) MaterialTheme.colorScheme.secondaryContainer
+                                    else MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = if (isTimerRunning) MaterialTheme.colorScheme.onSecondaryContainer
+                                    else MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             // Reset only makes sense for Timer/Duration, which count down/up from a
                             // starting point. Specific Time and the live Clock always track the wall
@@ -777,7 +966,11 @@ fun AnnouncementsTab(
                             }
                             // Stage Monitor already shows its own always-on clock, so the plain
                             // "Clock" timer mode has nothing extra to send there.
-                            if (presenterManager != null && canSendToStageMonitor && viewModel.timerMode != Constants.TIMER_MODE_CLOCK_DISPLAY) {
+                            if (
+                                presenterManager != null
+                                    && canSendToStageMonitor
+                                    && viewModel.timerMode != Constants.TIMER_MODE_CLOCK_DISPLAY
+                            ) {
                                 ActionIconButton(
                                     onClick = {
                                         // Sending is the only thing (besides Go Live) allowed to mark the
@@ -786,23 +979,40 @@ fun AnnouncementsTab(
                                             // Sending Specific Time to Stage Monitor also (re)starts its
                                             // ticker if it wasn't already running via the play/pause button.
                                             if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
-                                                presenterManager.startAnnouncementSpecificTime(viewModel.targetHour, viewModel.targetMinute, viewModel.targetSecond)
+                                                presenterManager.startAnnouncementSpecificTime(
+                                                    viewModel.targetHour,
+                                                    viewModel.targetMinute,
+                                                    viewModel.targetSecond
+                                                )
                                             }
                                             presenterManager.setAnnouncementTickerLive(true)
                                         }
                                         val liveText = AnnouncementsViewModel.formatTimer(timerDisplayValue)
                                         toggleStageMonitor(liveText)
                                     },
-                                    tooltipText = if (isSentToStageMonitor) stringResource(Res.string.tooltip_hide_from_stage_monitor) else stringResource(Res.string.tooltip_send_to_stage_monitor),
-                                    icon = if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast,
-                                    containerColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                                    contentColor = if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                    tooltipText =
+                                        if (isSentToStageMonitor)
+                                            stringResource(Res.string.tooltip_hide_from_stage_monitor)
+                                        else stringResource(Res.string.tooltip_send_to_stage_monitor),
+                                    icon = if (isSentToStageMonitor) Icons.Default.CastConnected
+                                        else Icons.Default.Cast,
+                                    containerColor =
+                                        if (isSentToStageMonitor) MaterialTheme.colorScheme.secondaryContainer
+                                            else MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor =
+                                        if (isSentToStageMonitor) MaterialTheme.colorScheme.onSecondaryContainer
+                                            else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             if (onAddToSchedule != null) {
                                 AddToScheduleButton(
                                     onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) },
-                                    enabled = viewModel.text.isNotBlank() || viewModel.timerMode != Constants.TIMER_MODE_DURATION || viewModel.timerHours > 0 || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0,
+                                    enabled =
+                                        viewModel.text.isNotBlank()
+                                            || viewModel.timerMode != Constants.TIMER_MODE_DURATION
+                                            || viewModel.timerHours > 0
+                                            || viewModel.timerMinutes > 0
+                                            || viewModel.timerSeconds > 0,
                                     tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
                                 )
                             }
@@ -814,12 +1024,21 @@ fun AnnouncementsTab(
                                         // is one of only two places (with Send to Stage Monitor) allowed
                                         // to mark the ticker live — the play/pause button stays preview-only.
                                         when (viewModel.timerMode) {
-                                            Constants.TIMER_MODE_CLOCK -> presenterManager.startAnnouncementSpecificTime(viewModel.targetHour, viewModel.targetMinute, viewModel.targetSecond)
-                                            Constants.TIMER_MODE_CLOCK_DISPLAY -> presenterManager.startAnnouncementClockDisplay(viewModel.liveClockFormat)
+                                            Constants.TIMER_MODE_CLOCK -> presenterManager
+                                                .startAnnouncementSpecificTime(
+                                                viewModel.targetHour,
+                                                viewModel.targetMinute,
+                                                viewModel.targetSecond
+                                            )
+                                            Constants.TIMER_MODE_CLOCK_DISPLAY -> presenterManager
+                                                .startAnnouncementClockDisplay(viewModel.liveClockFormat)
                                             else -> {}
                                         }
                                         presenterManager.setAnnouncementTickerLive(true)
-                                        val liveText = if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) viewModel.liveClockText else AnnouncementsViewModel.formatTimer(timerDisplayValue)
+                                        val liveText =
+                                            if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY)
+                                                viewModel.liveClockText
+                                            else AnnouncementsViewModel.formatTimer(timerDisplayValue)
                                         presenterManager.setAnnouncementText(liveText)
                                         presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
                                     },
@@ -831,7 +1050,10 @@ fun AnnouncementsTab(
                         // Expired text field — only meaningful for modes that actually reach an
                         // endpoint (Timer countdown, Specific Time). Duration (count-up) and the
                         // live Clock display never "expire".
-                        if (viewModel.timerMode == Constants.TIMER_MODE_DURATION || viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
+                        if (
+                            viewModel.timerMode == Constants.TIMER_MODE_DURATION
+                                || viewModel.timerMode == Constants.TIMER_MODE_CLOCK
+                        ) {
                             SectionLabel(stringResource(Res.string.timer_expired_text_label))
                             Box(
                                 modifier = Modifier
@@ -842,14 +1064,24 @@ fun AnnouncementsTab(
                             ) {
                                 BasicTextField(
                                     value = viewModel.timerExpiredText,
-                                    onValueChange = { viewModel.setTimerExpiredText(it); viewModel.saveToSettings(onSettingsChange) },
-                                    textStyle = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface),
+                                    onValueChange = {
+                                        viewModel.setTimerExpiredText(it)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    textStyle =
+                                        MaterialTheme.typography
+                                            .bodySmall
+                                            .copy(color = MaterialTheme.colorScheme.onSurface),
                                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                     maxLines = 4,
                                     modifier = Modifier.fillMaxWidth(),
                                     decorationBox = { inner ->
                                         if (viewModel.timerExpiredText.isEmpty()) {
-                                            Text(stringResource(Res.string.timer_expired_text_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                                            Text(
+                                                stringResource(Res.string.timer_expired_text_hint),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                            )
                                         }
                                         inner()
                                     }
@@ -872,7 +1104,9 @@ fun AnnouncementsTab(
                             state = rememberDraggableState { delta ->
                                 leftPanelPx = (leftPanelPx + delta).coerceIn(
                                     with(density) { 150.dp.toPx() },
-                                    (twoColWidthPx - with(density) { 100.dp.toPx() }).coerceAtLeast(with(density) { 150.dp.toPx() })
+                                    (
+                                        twoColWidthPx - with(density) { 100.dp.toPx() }
+                                    ).coerceAtLeast(with(density) { 150.dp.toPx() })
                                 )
                             },
                             onDragStopped = { saveLeftPanel() }
@@ -891,7 +1125,8 @@ fun AnnouncementsTab(
                     // shows the clock/specific-time value even while text is the one live on screen.
                     val previewText = when {
                         isTimerExpired -> viewModel.timerExpiredText.ifBlank { timerExpiredLabel }
-                        isTimerRunning && viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY -> viewModel.liveClockText
+                        isTimerRunning
+                            && viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY -> viewModel.liveClockText
                         isTimerRunning -> AnnouncementsViewModel.formatTimer(timerDisplayValue)
                         else -> viewModel.text
                     }
@@ -977,7 +1212,11 @@ fun AnnouncementsTab(
                                 val textComposable: @Composable () -> Unit = {
                                     Box(
                                         modifier = Modifier
-                                            .then(if (isHorizontal) Modifier.wrapContentWidth(unbounded = true) else Modifier)
+                                            .then(
+                                                if (isHorizontal) Modifier.wrapContentWidth(
+                                                    unbounded = true
+                                                ) else Modifier
+                                            )
                                             .wrapContentHeight()
                                             .background(
                                                 if (viewModel.backgroundColor == "transparent") Color.Transparent
@@ -1002,7 +1241,9 @@ fun AnnouncementsTab(
                                         Box(
                                             modifier = Modifier
                                                 .align(slideAlignment)
-                                                .graphicsLayer { translationX = previewContainerWidthPx * offsetFraction },
+                                                .graphicsLayer {
+                                                    translationX = previewContainerWidthPx * offsetFraction
+                                                },
                                             contentAlignment = Alignment.Center
                                         ) { textComposable() }
                                     } else {
@@ -1010,7 +1251,9 @@ fun AnnouncementsTab(
                                             modifier = Modifier
                                                 .fillMaxHeight()
                                                 .align(slideAlignment)
-                                                .graphicsLayer { translationY = previewContainerHeightPx * offsetFraction },
+                                                .graphicsLayer {
+                                                    translationY = previewContainerHeightPx * offsetFraction
+                                                },
                                             contentAlignment = Alignment.Center
                                         ) { textComposable() }
                                     }
@@ -1033,7 +1276,10 @@ fun AnnouncementsTab(
                                 AnimatedContent(
                                     targetState = previewKey,
                                     transitionSpec = {
-                                        if (!isShowingLiveTimerValue && viewModel.animationType == Constants.ANIMATION_FADE)
+                                        if (
+                                            !isShowingLiveTimerValue
+                                                && viewModel.animationType == Constants.ANIMATION_FADE
+                                        )
                                             fadeIn(tween(previewDuration)) togetherWith fadeOut(tween(previewDuration))
                                         else
                                             EnterTransition.None togetherWith ExitTransition.None
@@ -1102,7 +1348,11 @@ fun AnnouncementsTab(
                         )
                         TooltipArea(
                             tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    shape = MaterialTheme.shapes.extraSmall,
+                                    tonalElevation = 4.dp
+                                ) {
                                     Text(
                                         stringResource(Res.string.announcement_loop_tooltip),
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -1110,7 +1360,10 @@ fun AnnouncementsTab(
                                     )
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                            tooltipPlacement = TooltipPlacement.ComponentRect(
+                                anchor = Alignment.BottomCenter,
+                                offset = DpOffset(0.dp, 4.dp)
+                            )
                         ) {
                             NumberSettingsTextField(
                                 label = stringResource(Res.string.announcement_loop_count),
@@ -1208,7 +1461,11 @@ private fun TimerColumn(
         ) {
             Icon(Icons.Default.Remove, contentDescription = null)
         }
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        )
     }
 }
 

@@ -245,7 +245,10 @@ class PicturesViewModel(
     ) {
         clearImages()
         _selectedFolder.value = File(folderPath)
-        val cacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/picture-folders/$folderId")
+        val cacheDir = File(
+            System.getProperty("user.home"),
+            ".churchpresenter/instance-link/cache/picture-folders/$folderId"
+        )
         cacheDir.mkdirs()
         scope.launch {
             for (index in 0 until imageCount) {
@@ -378,7 +381,12 @@ class PicturesViewModel(
         presenterManager.setShowPresenterWindow(true)
         onInstanceLinkSendProject?.let { send ->
             getScheduleData()?.let { (folderPath, folderName, imageCount) ->
-                send(ScheduleItem.PictureItem(id = java.util.UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))
+                send(ScheduleItem.PictureItem(
+                    id = java.util.UUID.randomUUID().toString(),
+                    folderPath = folderPath,
+                    folderName = folderName,
+                    imageCount = imageCount
+                ))
             }
         }
     }

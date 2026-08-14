@@ -60,14 +60,20 @@ object DeviceInfoReport {
 
         val deckLinkAvailable = try { DeckLinkManager.isAvailable() } catch (_: Exception) { false }
         val deckLinkDevices = if (deckLinkAvailable) {
-            try { DeckLinkManager.listDevices().map { deviceLine(it.index, it.name) } } catch (_: Exception) { emptyList() }
+            try {
+                DeckLinkManager.listDevices().map { deviceLine(it.index, it.name) }
+            } catch (_: Exception) { emptyList() }
         } else emptyList()
 
         val vlcAvailable = try { isVlcAvailable } catch (_: Exception) { false }
 
         val fileManager = FileManager()
-        val songFolders = try { fileManager.getSongFoldersInDirectory(settings.songSettings.storageDirectory) } catch (_: Exception) { emptyList() }
-        val bibleFiles = try { fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory) } catch (_: Exception) { emptyList() }
+        val songFolders = try {
+            fileManager.getSongFoldersInDirectory(settings.songSettings.storageDirectory)
+        } catch (_: Exception) { emptyList() }
+        val bibleFiles = try {
+            fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory)
+        } catch (_: Exception) { emptyList() }
 
         return DeviceFacts(
             appVersion = appVersion,

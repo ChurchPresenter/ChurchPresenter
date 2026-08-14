@@ -21,7 +21,11 @@ class StatisticsHelpersTest {
 
     @Test
     fun `medium ranges bucket by month`() {
-        assertEquals(ActivityGranularity.MONTHLY, activityGranularityFor(91 * day), "just past 90 days flips to monthly")
+        assertEquals(
+            ActivityGranularity.MONTHLY,
+            activityGranularityFor(91 * day),
+            "just past 90 days flips to monthly"
+        )
         assertEquals(ActivityGranularity.MONTHLY, activityGranularityFor(730 * day), "two years is the monthly ceiling")
     }
 

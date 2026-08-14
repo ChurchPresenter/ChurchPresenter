@@ -167,7 +167,10 @@ class SongSettingsTabRecompositionTest {
         autoFitButtons()[0].performScrollTo().assertIsNotEnabled()
 
         runOnIdle {
-            manager.setLyricSection(LyricSection(title = "Here Is Love", lines = listOf("Here is love vast as the ocean")))
+            manager.setLyricSection(LyricSection(
+                title = "Here Is Love",
+                lines = listOf("Here is love vast as the ocean")
+            ))
             manager.setPresentingMode(Presenting.LYRICS)
         }
         waitForIdle()

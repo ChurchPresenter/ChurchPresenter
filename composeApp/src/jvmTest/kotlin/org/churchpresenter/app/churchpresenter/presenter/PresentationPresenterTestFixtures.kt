@@ -26,7 +26,11 @@ internal fun placedLayer(
     state: LayerState = LayerState.VISIBLE,
     id: String = "layer",
 ): PlacedLayer = PlacedLayer(
-    spec = LayerSpec.StaticComposite(id = id, zIndex = 0, boundsPt = RectPt(0.0, 0.0, width.toDouble(), height.toDouble())),
+    spec = LayerSpec.StaticComposite(
+        id = id,
+        zIndex = 0,
+        boundsPt = RectPt(0.0, 0.0, width.toDouble(), height.toDouble())
+    ),
     bitmap = solidColorBitmap(width, height, color),
     offsetXPx = offsetXPx,
     offsetYPx = offsetYPx,

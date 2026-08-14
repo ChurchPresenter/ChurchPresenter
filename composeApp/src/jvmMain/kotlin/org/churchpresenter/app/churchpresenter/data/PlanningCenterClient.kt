@@ -140,7 +140,8 @@ object PlanningCenterClient {
         try {
             val bodyParams = formParams + mapOf("client_id" to clientId, "client_secret" to clientSecret)
             val body = bodyParams.entries.joinToString("&") { (k, v) -> "$k=${v.encodeURLParameter()}" }
-            val basicAuth = java.util.Base64.getEncoder().encodeToString("$clientId:$clientSecret".toByteArray(Charsets.UTF_8))
+            val basicAuth =
+                java.util.Base64.getEncoder().encodeToString("$clientId:$clientSecret".toByteArray(Charsets.UTF_8))
             val response = http.post(TOKEN_URL) {
                 header("Authorization", "Basic $basicAuth")
                 contentType(ContentType.Application.FormUrlEncoded)
@@ -188,7 +189,10 @@ object PlanningCenterClient {
     @Serializable
     internal data class PersonResponse(val data: PersonData = PersonData())
 
-    suspend fun getCurrentPerson(accessToken: String, http: HttpClient = defaultHttp): PersonOutcome = withContext(Dispatchers.IO) {
+    suspend fun getCurrentPerson(
+        accessToken: String,
+        http: HttpClient = defaultHttp
+    ): PersonOutcome = withContext(Dispatchers.IO) {
         try {
             val response = http.get(ME_URL) {
                 header("Authorization", "Bearer $accessToken")
@@ -275,7 +279,10 @@ object PlanningCenterClient {
         data object Failure : ArrangementOutcome
     }
 
-    suspend fun listServiceTypes(accessToken: String, http: HttpClient = defaultHttp): ServiceTypesOutcome = withContext(Dispatchers.IO) {
+    suspend fun listServiceTypes(
+        accessToken: String,
+        http: HttpClient = defaultHttp
+    ): ServiceTypesOutcome = withContext(Dispatchers.IO) {
         try {
             val response = http.get("$SERVICES_BASE_URL/service_types") {
                 header("Authorization", "Bearer $accessToken")
@@ -396,7 +403,8 @@ object PlanningCenterClient {
                     val arrangementRef = rel?.get("arrangement")?.jsonObject?.get("data")
                         ?.let { it as? JsonObject }
                     val songId = songRef?.get("id")?.jsonPrimitive?.contentOrNull
-                    val songAttrs = songId?.let { includedByKey["Song::$it"]?.jsonObject?.get("attributes")?.jsonObject }
+                    val songAttrs =
+                        songId?.let { includedByKey["Song::$it"]?.jsonObject?.get("attributes")?.jsonObject }
 
                     PlanItem(
                         id = obj["id"]?.jsonPrimitive?.contentOrNull ?: "",
@@ -454,7 +462,9 @@ object PlanningCenterClient {
                 ArrangementOutcome.Success(
                     ArrangementDetail(
                         chordChart = chordChart,
-                        lyrics = pcoLyrics?.takeIf { it.isNotBlank() } ?: PlanningCenterLyricsFormatter.stripChords(chordChart)
+                        lyrics =
+                            pcoLyrics?.takeIf { it.isNotBlank() } ?: PlanningCenterLyricsFormatter
+                                .stripChords(chordChart)
                     )
                 )
             } catch (e: Exception) {
@@ -623,7 +633,10 @@ object PlanningCenterClient {
     }
 
     /** Fetches raw bytes for an attachment thumbnail preview (public S3 URL, no auth); null on any failure. */
-    suspend fun fetchThumbnailBytes(url: String, http: HttpClient = defaultHttp): ByteArray? = withContext(Dispatchers.IO) {
+    suspend fun fetchThumbnailBytes(
+        url: String,
+        http: HttpClient = defaultHttp
+    ): ByteArray? = withContext(Dispatchers.IO) {
         try {
             val response = http.get(url)
             if (response.status.value in 200..299) response.body() else null

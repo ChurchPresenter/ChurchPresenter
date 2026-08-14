@@ -330,7 +330,10 @@ internal fun ContactUsDialogContent(
                             }
                         }
                     ) {
-                        Text(stringResource(Res.string.contact_open_browser), style = MaterialTheme.typography.labelLarge)
+                        Text(
+                            stringResource(Res.string.contact_open_browser),
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
 
                     Spacer(modifier = Modifier.weight(1f))

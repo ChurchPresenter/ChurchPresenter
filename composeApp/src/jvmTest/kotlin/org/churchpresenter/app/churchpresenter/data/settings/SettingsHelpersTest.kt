@@ -192,8 +192,18 @@ class BibleSettingsSwapTest {
     /** Both translations set to clearly different values, so styling that stayed put is visible. */
     private fun configured() = BibleSettings(primaryBible = "kjv.spb", secondaryBible = "synodal.spb")
         .migrateTranslations()
-        .updateTranslation(0) { it.copy(textColor = "#111111", textFontSize = 40, textFontType = "Georgia", textBold = true) }
-        .updateTranslation(1) { it.copy(textColor = "#222222", textFontSize = 80, textFontType = "Arial", textBold = false) }
+        .updateTranslation(0) { it.copy(
+            textColor = "#111111",
+            textFontSize = 40,
+            textFontType = "Georgia",
+            textBold = true
+        ) }
+        .updateTranslation(1) { it.copy(
+            textColor = "#222222",
+            textFontSize = 80,
+            textFontType = "Arial",
+            textBold = false
+        ) }
 
     @Test
     fun `the two bibles change places`() {
@@ -599,9 +609,20 @@ class CompanionSatelliteSettingsTest {
 
     @Test
     fun `each placement reports its own grid`() {
-        assertEquals(4 to 8, settings.rowsFor(CompanionSurfacePlacement.TAB) to settings.columnsFor(CompanionSurfacePlacement.TAB))
-        assertEquals(2 to 3, settings.rowsFor(CompanionSurfacePlacement.LEFT_SIDEBAR) to settings.columnsFor(CompanionSurfacePlacement.LEFT_SIDEBAR))
-        assertEquals(6 to 1, settings.rowsFor(CompanionSurfacePlacement.RIGHT_SIDEBAR) to settings.columnsFor(CompanionSurfacePlacement.RIGHT_SIDEBAR))
+        assertEquals(
+            4 to 8,
+            settings.rowsFor(CompanionSurfacePlacement.TAB) to settings.columnsFor(CompanionSurfacePlacement.TAB)
+        )
+        assertEquals(
+            2 to 3,
+            settings.rowsFor(CompanionSurfacePlacement.LEFT_SIDEBAR) to settings
+                .columnsFor(CompanionSurfacePlacement.LEFT_SIDEBAR)
+        )
+        assertEquals(
+            6 to 1,
+            settings.rowsFor(CompanionSurfacePlacement.RIGHT_SIDEBAR) to settings
+                .columnsFor(CompanionSurfacePlacement.RIGHT_SIDEBAR)
+        )
     }
 
     @Test

@@ -295,7 +295,12 @@ private fun BufferedImage.trimmed(margin: Int = 8): BufferedImage {
 
     val x = (left - margin).coerceAtLeast(0)
     val y = (top - margin).coerceAtLeast(0)
-    return getSubimage(x, y, (right + margin - x).coerceAtMost(width - x), (bottom + margin - y).coerceAtMost(height - y))
+    return getSubimage(
+        x,
+        y,
+        (right + margin - x).coerceAtMost(width - x),
+        (bottom + margin - y).coerceAtMost(height - y)
+    )
 }
 
 /**

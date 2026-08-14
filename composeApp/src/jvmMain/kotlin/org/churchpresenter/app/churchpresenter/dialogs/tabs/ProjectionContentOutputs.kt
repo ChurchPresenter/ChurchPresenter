@@ -133,7 +133,93 @@ internal fun ContentOutputsMonitorPreview(
         if (assignment.showBible) {
             // An empty selection means every translation, so the whole stack is shown.
             val shownNames = if (assignment.bibleTranslations.isEmpty()) translationNames
-                              else assignment.bibleTranslations.filter { it in translationNames.indices }.map { translationNames[it] }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                              else assignment.bibleTranslations.filter {
+                                                                                                                                                  it in translationNames.indices
+                                                                                                                                              }.map { translationNames[it] }
             add(
                 if (translationNames.size > 1 && shownNames.isNotEmpty())
                     bibleListFormat.format(bibleLabel, shownNames.joinToString(", "))
@@ -344,12 +430,16 @@ internal fun ContentOutputsDialog(
                                 // this too, or a translation deselected earlier stays deselected
                                 // even though the button says "all".
                                 bibleTranslations = emptyList(),
-                                songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode
+                                songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH
+                                    else a.songMode
                             )
                             onApply(a)
                         },
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) { Text(stringResource(Res.string.content_outputs_select_all), style = MaterialTheme.typography.labelSmall) }
+                    ) { Text(
+                        stringResource(Res.string.content_outputs_select_all),
+                        style = MaterialTheme.typography.labelSmall
+                    ) }
                     Spacer(modifier = Modifier.width(8.dp))
                     OutlinedButton(
                         shape = RoundedCornerShape(6.dp),
@@ -364,7 +454,10 @@ internal fun ContentOutputsDialog(
                             onApply(a)
                         },
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) { Text(stringResource(Res.string.content_outputs_clear_all), style = MaterialTheme.typography.labelSmall) }
+                    ) { Text(
+                        stringResource(Res.string.content_outputs_clear_all),
+                        style = MaterialTheme.typography.labelSmall
+                    ) }
                 }
 
                 // Content
@@ -410,7 +503,15 @@ internal fun ContentOutputsDialog(
                 contentGroup.chunked(2).forEach { pair ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         pair.forEach { col ->
-                            ContentOutputsToggle(Modifier.weight(1f), col, assignment, isBrowserSource, webDeckLinkTooltip, webSnapshotTooltip, onApply)
+                            ContentOutputsToggle(
+                                Modifier.weight(1f),
+                                col,
+                                assignment,
+                                isBrowserSource,
+                                webDeckLinkTooltip,
+                                webSnapshotTooltip,
+                                onApply
+                            )
                         }
                         if (pair.size == 1) Spacer(modifier = Modifier.weight(1f))
                     }
@@ -421,7 +522,15 @@ internal fun ContentOutputsDialog(
                 backgroundGroup.chunked(2).forEach { pair ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         pair.forEach { col ->
-                            ContentOutputsToggle(Modifier.weight(1f), col, assignment, isBrowserSource, webDeckLinkTooltip, webSnapshotTooltip, onApply)
+                            ContentOutputsToggle(
+                                Modifier.weight(1f),
+                                col,
+                                assignment,
+                                isBrowserSource,
+                                webDeckLinkTooltip,
+                                webSnapshotTooltip,
+                                onApply
+                            )
                         }
                         if (pair.size == 1) Spacer(modifier = Modifier.weight(1f))
                     }

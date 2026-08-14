@@ -61,7 +61,11 @@ fun SourcePropertiesPanel(
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
-        Text(stringResource(Res.string.canvas_transform), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            stringResource(Res.string.canvas_transform),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
         val t = source.transform
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -81,7 +85,13 @@ fun SourcePropertiesPanel(
             }
         }
 
-        PropertySliderWithInput(stringResource(Res.string.canvas_rotation), t.rotation, -MAX_ROTATION_DEGREES, MAX_ROTATION_DEGREES, "°") { v ->
+        PropertySliderWithInput(
+            stringResource(Res.string.canvas_rotation),
+            t.rotation,
+            -MAX_ROTATION_DEGREES,
+            MAX_ROTATION_DEGREES,
+            "°"
+        ) { v ->
             onSourceUpdate(updateTransform(source, t.copy(rotation = v)))
         }
         PropertySlider(stringResource(Res.string.canvas_opacity), t.opacity, 0f, 1f) { v ->

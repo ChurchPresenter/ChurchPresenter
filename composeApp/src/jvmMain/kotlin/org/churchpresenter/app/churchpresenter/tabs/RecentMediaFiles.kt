@@ -39,15 +39,39 @@ internal object RecentMediaFiles {
     }
 
     internal fun load() {
-        try { if (file.exists()) { val json = Json { ignoreUnknownKeys = true }; val list = json.decodeFromString<List<String>>(file.readText()); paths.clear(); paths.addAll(list.take(MAX)) } } catch (_: Exception) {}
-        try { if (pinnedFile.exists()) { val json = Json { ignoreUnknownKeys = true }; val list = json.decodeFromString<List<String>>(pinnedFile.readText()); pinned.clear(); pinned.addAll(list) } } catch (_: Exception) {}
+        try {
+            if (file.exists()) {
+                val json = Json {
+                    ignoreUnknownKeys = true
+                }; val list = json.decodeFromString<List<String>>(
+                    file.readText()
+                ); paths.clear(); paths.addAll(list.take(MAX))
+            }
+        } catch (_: Exception) {}
+        try {
+            if (pinnedFile.exists()) {
+                val json = Json {
+                    ignoreUnknownKeys = true
+                }; val list = json.decodeFromString<List<String>>(
+                    pinnedFile.readText()
+                ); pinned.clear(); pinned.addAll(list)
+            }
+        } catch (_: Exception) {}
     }
 
     private fun save() {
-        try { file.parentFile?.mkdirs(); val json = Json { encodeDefaults = true }; file.writeText(json.encodeToString(paths.toList())) } catch (_: Exception) {}
+        try {
+            file.parentFile?.mkdirs()
+            val json = Json { encodeDefaults = true }
+            file.writeText(json.encodeToString(paths.toList())) } catch (_: Exception) {
+        }
     }
 
     private fun savePinned() {
-        try { pinnedFile.parentFile?.mkdirs(); val json = Json { encodeDefaults = true }; pinnedFile.writeText(json.encodeToString(pinned.toList())) } catch (_: Exception) {}
+        try {
+            pinnedFile.parentFile?.mkdirs()
+            val json = Json { encodeDefaults = true }
+            pinnedFile.writeText(json.encodeToString(pinned.toList())) } catch (_: Exception) {
+        }
     }
 }

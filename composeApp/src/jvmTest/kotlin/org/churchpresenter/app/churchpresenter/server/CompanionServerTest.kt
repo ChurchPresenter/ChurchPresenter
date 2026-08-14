@@ -140,7 +140,12 @@ class CompanionServerTest {
         server.updateSchedule(
             listOf(
                 ScheduleItem.SongItem(id = "s1", songNumber = 1, title = "Amazing Grace", songbook = "Hymnal"),
-                ScheduleItem.LabelItem(id = "l1", text = "Offering", textColor = "#FFFFFF", backgroundColor = "#000000"),
+                ScheduleItem.LabelItem(
+                    id = "l1",
+                    text = "Offering",
+                    textColor = "#FFFFFF",
+                    backgroundColor = "#000000"
+                ),
             ),
         )
         val body = client.get(url(Constants.ENDPOINT_SCHEDULE)).bodyAsText()
@@ -254,7 +259,12 @@ class CompanionServerTest {
                 incoming.receive()
 
                 server.updateSchedule(
-                    listOf(ScheduleItem.LabelItem(id = "after-connect", text = "Broadcast Me", textColor = "#FFF", backgroundColor = "#000")),
+                    listOf(ScheduleItem.LabelItem(
+                        id = "after-connect",
+                        text = "Broadcast Me",
+                        textColor = "#FFF",
+                        backgroundColor = "#000"
+                    )),
                 )
 
                 // Read until the broadcast for THIS change arrives, rather than reading until the

@@ -132,7 +132,10 @@ internal fun PresenterOutputContent(
                         appSettings.bibleSettings, appSettings.songSettings, effectiveMode, prevEffectiveMode,
                     )
                         if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                        Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                        Crossfade(
+                            targetState = effectiveMode,
+                            animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
+                        ) { mode ->
                             PresenterModeContent(
                                 mode = mode,
                                 screenAssignment = screenAssignment,

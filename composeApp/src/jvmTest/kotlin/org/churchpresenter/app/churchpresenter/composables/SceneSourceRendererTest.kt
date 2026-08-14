@@ -72,7 +72,11 @@ class SceneSourceRendererTest {
 
             setContent {
                 MaterialTheme {
-                    SceneSourceRenderer(SceneSource.ImageSource(id = "i1", name = "Photo", filePath = file.absolutePath))
+                    SceneSourceRenderer(SceneSource.ImageSource(
+                        id = "i1",
+                        name = "Photo",
+                        filePath = file.absolutePath
+                    ))
                 }
             }
             onNodeWithContentDescription("Photo").assertExists("a valid image file must render as an Image")
@@ -98,7 +102,11 @@ class SceneSourceRendererTest {
             file.writeText("this is not image data")
             setContent {
                 MaterialTheme {
-                    SceneSourceRenderer(SceneSource.ImageSource(id = "i3", name = "Photo", filePath = file.absolutePath))
+                    SceneSourceRenderer(SceneSource.ImageSource(
+                        id = "i3",
+                        name = "Photo",
+                        filePath = file.absolutePath
+                    ))
                 }
             }
             onNodeWithText("Image not found").assertExists("a corrupt file must be caught, not crash the renderer")
@@ -116,7 +124,12 @@ class SceneSourceRendererTest {
                 setContent {
                     MaterialTheme {
                         SceneSourceRenderer(
-                            SceneSource.ImageSource(id = "i4", name = "P", filePath = file.absolutePath, contentScale = scale)
+                            SceneSource.ImageSource(
+                                id = "i4",
+                                name = "P",
+                                filePath = file.absolutePath,
+                                contentScale = scale
+                            )
                         )
                     }
                 }
@@ -191,7 +204,13 @@ class SceneSourceRendererTest {
     fun `bold and italic text sources render without error`() = runComposeUiTest {
         setContent {
             MaterialTheme {
-                SceneSourceRenderer(SceneSource.TextSource(id = "t5", name = "T", text = "Styled", bold = true, italic = true))
+                SceneSourceRenderer(SceneSource.TextSource(
+                    id = "t5",
+                    name = "T",
+                    text = "Styled",
+                    bold = true,
+                    italic = true
+                ))
             }
         }
         onNodeWithText("Styled").assertExists()
@@ -293,7 +312,9 @@ class SceneSourceRendererTest {
                 SceneSourceRenderer(
                     SceneSource.ShapeSource(
                         id = "s3", name = "S", shapeType = "freehand",
-                        strokeColor = "#FFFFFF", points = listOf(org.churchpresenter.app.churchpresenter.models.PathPoint(0.5f, 0.5f)),
+                        strokeColor =
+                            "#FFFFFF", points =
+                                listOf(org.churchpresenter.app.churchpresenter.models.PathPoint(0.5f, 0.5f)),
                     ),
                     modifier = Modifier.testTag("renderer").size(40.dp),
                 )
@@ -313,7 +334,13 @@ class SceneSourceRendererTest {
             setContent {
                 MaterialTheme {
                     SceneSourceRenderer(
-                        SceneSource.ShapeSource(id = "s4", name = "S", shapeType = type, points = points, strokeColor = "#FFFFFF"),
+                        SceneSource.ShapeSource(
+                            id = "s4",
+                            name = "S",
+                            shapeType = type,
+                            points = points,
+                            strokeColor = "#FFFFFF"
+                        ),
                         modifier = Modifier.testTag("renderer"),
                     )
                 }
@@ -327,7 +354,13 @@ class SceneSourceRendererTest {
         setContent {
             MaterialTheme {
                 SceneSourceRenderer(
-                    SceneSource.ShapeSource(id = "s5", name = "S", shapeType = "line", points = emptyList(), strokeColor = "#FFFFFF"),
+                    SceneSource.ShapeSource(
+                        id = "s5",
+                        name = "S",
+                        shapeType = "line",
+                        points = emptyList(),
+                        strokeColor = "#FFFFFF"
+                    ),
                     modifier = Modifier.testTag("renderer"),
                 )
             }
@@ -392,7 +425,13 @@ class SceneSourceRendererTest {
         setContent {
             MaterialTheme {
                 SceneSourceRenderer(
-                    SceneSource.ShapeSource(id = "s9", name = "S", shapeType = "arrow", points = emptyList(), strokeColor = "#FFFFFF"),
+                    SceneSource.ShapeSource(
+                        id = "s9",
+                        name = "S",
+                        shapeType = "arrow",
+                        points = emptyList(),
+                        strokeColor = "#FFFFFF"
+                    ),
                     modifier = Modifier.testTag("renderer"),
                 )
             }
@@ -692,7 +731,12 @@ class SceneSourceRendererTest {
         setContent {
             MaterialTheme {
                 SceneSourceRenderer(
-                    SceneSource.BibleSource(id = "b2", name = "B", verseText = "In the beginning...", referenceText = "Genesis 1:1")
+                    SceneSource.BibleSource(
+                        id = "b2",
+                        name = "B",
+                        verseText = "In the beginning...",
+                        referenceText = "Genesis 1:1"
+                    )
                 )
             }
         }
@@ -704,7 +748,12 @@ class SceneSourceRendererTest {
     fun `a Bible source with no reference text does not show a reference line`() = runComposeUiTest {
         setContent {
             MaterialTheme {
-                SceneSourceRenderer(SceneSource.BibleSource(id = "b3", name = "B", verseText = "Some verse", referenceText = ""))
+                SceneSourceRenderer(SceneSource.BibleSource(
+                    id = "b3",
+                    name = "B",
+                    verseText = "Some verse",
+                    referenceText = ""
+                ))
             }
         }
         onNodeWithText("Some verse").assertExists()
@@ -809,7 +858,12 @@ class SceneSourceRendererTest {
         runComposeUiTest {
             setContent {
                 MaterialTheme {
-                    SceneSourceRenderer(SceneSource.CameraSource(id = "cam1", name = "Cam", devicePath = "", deviceName = ""))
+                    SceneSourceRenderer(SceneSource.CameraSource(
+                        id = "cam1",
+                        name = "Cam",
+                        devicePath = "",
+                        deviceName = ""
+                    ))
                 }
             }
             onNodeWithText("Camera").assertExists()
@@ -821,7 +875,12 @@ class SceneSourceRendererTest {
             setContent {
                 MaterialTheme {
                     SceneSourceRenderer(
-                        SceneSource.CameraSource(id = "cam2", name = "Cam", devicePath = "", deviceName = "Logitech C920")
+                        SceneSource.CameraSource(
+                            id = "cam2",
+                            name = "Cam",
+                            devicePath = "",
+                            deviceName = "Logitech C920"
+                        )
                     )
                 }
             }

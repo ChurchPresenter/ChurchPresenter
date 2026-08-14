@@ -109,7 +109,8 @@ class LocalLibraryContentTest {
     }
 
     @Test
-    fun `a search matching nothing shows the empty state`() = dialog(downloadedFiles = listOf(File("worship-loop.mp4"))) {
+    fun `a search matching nothing shows the empty state`() =
+        dialog(downloadedFiles = listOf(File("worship-loop.mp4"))) {
         onNodeWithText("Filter by file name…").performTextInput("no such file")
 
         onNodeWithText("Nothing downloaded yet — use Search to add photos or videos.").assertExists()
@@ -126,7 +127,8 @@ class LocalLibraryContentTest {
     }
 
     @Test
-    fun `Cancel dismisses without selecting anything`() = dialog(downloadedFiles = listOf(File("worship-loop.mp4"))) { result ->
+    fun `Cancel dismisses without selecting anything`() =
+        dialog(downloadedFiles = listOf(File("worship-loop.mp4"))) { result ->
         onNodeWithText("Cancel").performClick()
 
         assertNull(result.selected)
@@ -150,7 +152,10 @@ class LocalLibraryContentTest {
 
         dialog(mediaType = StockMediaClient.StockMediaType.PHOTO, downloadedFiles = listOf(file)) {
             awaitUntil {
-                onAllNodesWithTag(LIBRARY_THUMBNAIL_IMAGE_TAG, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+                onAllNodesWithTag(
+                    LIBRARY_THUMBNAIL_IMAGE_TAG,
+                    useUnmergedTree = true
+                ).fetchSemanticsNodes().isNotEmpty()
             }
             onNodeWithTag(LIBRARY_THUMBNAIL_IMAGE_TAG, useUnmergedTree = true).assertExists()
         }

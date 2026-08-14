@@ -196,7 +196,8 @@ class SongPresenterLayoutRenderTest {
 
     @Test
     fun `look-ahead line mode on a lower third pairs lines for auto-fit`() {
-        val settings = AppSettings(songSettings = SongSettings(lowerThirdLookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE))
+        val settings =
+            AppSettings(songSettings = SongSettings(lowerThirdLookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE))
         val first = section(lines = listOf("first line", "second line"))
         val second = section(lines = listOf("third line"), header = "[Verse 2]")
         present(

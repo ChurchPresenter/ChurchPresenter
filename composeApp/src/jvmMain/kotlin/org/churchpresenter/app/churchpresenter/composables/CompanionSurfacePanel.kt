@@ -82,11 +82,17 @@ fun CompanionSurfacePanel(
             ) {
                 val (statusText, statusColor) = when (state.status) {
                     CompanionConnectionStatus.CONNECTING ->
-                        stringResource(Res.string.companion_satellite_status_connecting) to MaterialTheme.semantic.warning
+                        stringResource(Res.string.companion_satellite_status_connecting) to MaterialTheme.semantic
+                            .warning
                     CompanionConnectionStatus.ERROR ->
-                        stringResource(Res.string.companion_satellite_status_error, state.errorMessage) to MaterialTheme.colorScheme.error
+                        stringResource(
+                            Res.string.companion_satellite_status_error,
+                            state.errorMessage
+                        ) to MaterialTheme.colorScheme.error
                     else ->
-                        stringResource(Res.string.companion_satellite_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        stringResource(Res.string.companion_satellite_status_disconnected) to MaterialTheme.colorScheme
+                            .onSurface
+                            .copy(alpha = 0.6f)
                 }
                 Text(statusText, style = MaterialTheme.typography.bodyMedium, color = statusColor)
             }

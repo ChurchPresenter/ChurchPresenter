@@ -132,7 +132,14 @@ fun AnnouncementsPresenter(
 
         val effectiveFontSize = if (!isDirectional) {
             // Static/fade: fit to both width and height
-            remember(text, settings.fontSize, availableWidthPx, availableHeightPx, textStyle.fontFamily, textStyle.fontWeight) {
+            remember(
+                text,
+                settings.fontSize,
+                availableWidthPx,
+                availableHeightPx,
+                textStyle.fontFamily,
+                textStyle.fontWeight
+            ) {
                 calculateAutoFitFontSize(textMeasurer, text, textStyle, availableWidthPx, availableHeightPx)
                     .coerceAtMost(settings.fontSize)
             }

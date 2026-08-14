@@ -413,7 +413,8 @@ class Bible {
         }
 
         // Store full title and abbreviation
-        this.bibleTitle = bibleTitle ?: resourcePath.substringBeforeLast(".").substringAfterLast("/").substringAfterLast("\\")
+        this.bibleTitle =
+            bibleTitle ?: resourcePath.substringBeforeLast(".").substringAfterLast("/").substringAfterLast("\\")
         bibleAbbreviation = extractBibleAbbreviation(bibleTitle, resourcePath)
 
         // Build chapter index for O(1) lookup in getChapter()
@@ -421,7 +422,10 @@ class Bible {
     }
 
     /** Encodes (bookId, chapterNum) as a single Long key for the HashMap. */
-    private fun chapterKey(book: Int, chapter: Int): Long = book.toLong().shl(CHAPTER_KEY_BOOK_SHIFT) or chapter.toLong()
+    private fun chapterKey(
+        book: Int,
+        chapter: Int
+    ): Long = book.toLong().shl(CHAPTER_KEY_BOOK_SHIFT) or chapter.toLong()
 
     private fun buildChapterIndex() {
         chapterIndex.clear()

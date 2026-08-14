@@ -253,13 +253,17 @@ internal fun BibleDetectionPanel(
                     modifier = Modifier
                         .height(27.dp)
                         .background(
-                            if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme
+                                .primary
+                                .copy(alpha = 0.12f)
                             else MaterialTheme.colorScheme.surfaceVariant,
                             RoundedCornerShape(6.dp)
                         )
                         .border(
                             1.dp,
-                            if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme
+                                .primary
+                                .copy(alpha = 0.5f)
                             else MaterialTheme.colorScheme.outlineVariant,
                             RoundedCornerShape(6.dp)
                         )
@@ -318,13 +322,17 @@ internal fun BibleDetectionPanel(
                     modifier = Modifier
                         .height(27.dp)
                         .background(
-                            if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme
+                                .primary
+                                .copy(alpha = 0.12f)
                             else MaterialTheme.colorScheme.surfaceVariant,
                             RoundedCornerShape(6.dp)
                         )
                         .border(
                             1.dp,
-                            if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme
+                                .primary
+                                .copy(alpha = 0.5f)
                             else MaterialTheme.colorScheme.outlineVariant,
                             RoundedCornerShape(6.dp)
                         )
@@ -346,7 +354,8 @@ internal fun BibleDetectionPanel(
                             imageVector = Icons.Filled.Speed,
                             contentDescription = null,
                             modifier = Modifier.size(11.dp),
-                            tint = if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary
+                            tint =
+                                if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary
                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         )
                         Text(
@@ -355,7 +364,8 @@ internal fun BibleDetectionPanel(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             ),
-                            color = if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary
+                            color =
+                                if (continuationSpeed != ContinuationSpeed.BALANCED) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         )
                     }
@@ -484,8 +494,16 @@ internal fun BibleDetectionPanel(
                         }
 
                         listOf(
-                            Triple(DetectionTrack.TRANSCRIPTION, Icons.Filled.Mic, Res.string.bible_stt_track_transcription),
-                            Triple(DetectionTrack.TRANSLATION, Icons.Filled.Public, Res.string.bible_stt_track_translation),
+                            Triple(
+                                DetectionTrack.TRANSCRIPTION,
+                                Icons.Filled.Mic,
+                                Res.string.bible_stt_track_transcription
+                            ),
+                            Triple(
+                                DetectionTrack.TRANSLATION,
+                                Icons.Filled.Public,
+                                Res.string.bible_stt_track_translation
+                            ),
                         ).forEach { (track, icon, descRes) ->
                             if (track in ref.tracks) {
                                 TooltipArea(tooltip = {
@@ -510,7 +528,10 @@ internal fun BibleDetectionPanel(
                     }
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)) {
+                            withStyle(SpanStyle(
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )) {
                                 append(ref.label)
                             }
                             ref.verseText?.let { append("  $it") }

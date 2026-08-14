@@ -80,9 +80,15 @@ class LabelColorsTest {
         var mocha = ""
         setContent {
             ChurchPresenterTheme(themeMode = ThemeMode.DARK) { presets = themeLabelPresets() }
-            ChurchPresenterTheme(themeMode = ThemeMode.OCEAN) { ocean = cpColorToHex(MaterialTheme.colorScheme.primaryContainer) }
-            ChurchPresenterTheme(themeMode = ThemeMode.FOREST) { forest = cpColorToHex(MaterialTheme.colorScheme.primaryContainer) }
-            ChurchPresenterTheme(themeMode = ThemeMode.MOCHA) { mocha = cpColorToHex(MaterialTheme.colorScheme.primaryContainer) }
+            ChurchPresenterTheme(themeMode = ThemeMode.OCEAN) {
+                ocean = cpColorToHex(MaterialTheme.colorScheme.primaryContainer)
+            }
+            ChurchPresenterTheme(themeMode = ThemeMode.FOREST) {
+                forest = cpColorToHex(MaterialTheme.colorScheme.primaryContainer)
+            }
+            ChurchPresenterTheme(themeMode = ThemeMode.MOCHA) {
+                mocha = cpColorToHex(MaterialTheme.colorScheme.primaryContainer)
+            }
         }
 
         val bands = presets.map { it.background }

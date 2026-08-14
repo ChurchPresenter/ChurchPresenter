@@ -43,7 +43,8 @@ fun FileImagePicker(
             .height(32.dp)
             .clickable {
                 scope.launch {
-                    val path = if (imagePath.isNotEmpty()) Path(imagePath) else Path(System.getProperty(Constants.SystemProperties.USER_HOME))
+                    val path = if (imagePath.isNotEmpty()) Path(imagePath)
+                        else Path(System.getProperty(Constants.SystemProperties.USER_HOME))
                     val file = fileChooser.chooseSingle(
                         path = path,
                         filters = listOf(
@@ -74,7 +75,8 @@ fun FileImagePicker(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = if (imagePath.isEmpty()) stringResource(Res.string.no_image_selected) else imagePath.substringAfterLast('/').substringAfterLast('\\'),
+            text = if (imagePath.isEmpty()) stringResource(Res.string.no_image_selected)
+                else imagePath.substringAfterLast('/').substringAfterLast('\\'),
             style = MaterialTheme.typography.bodySmall,
             color = if (imagePath.isEmpty())
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)

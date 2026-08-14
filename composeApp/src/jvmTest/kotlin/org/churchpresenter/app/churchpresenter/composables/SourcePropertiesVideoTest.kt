@@ -138,7 +138,11 @@ class SourcePropertiesVideoTest {
             onNodeWithContentDescription("Browse").performClick()
             waitForIdle()
 
-            assertEquals("/tmp/bumper.mp4", (get() as SceneSource.VideoSource).filePath, "canceling must not touch the stored path")
+            assertEquals(
+                "/tmp/bumper.mp4",
+                (get() as SceneSource.VideoSource).filePath,
+                "canceling must not touch the stored path"
+            )
         }
     }
 

@@ -68,7 +68,9 @@ LaunchedEffect(remotePresentationPlayPauseFlow) {
 LaunchedEffect(remotePresentationLoopToggleFlow) {
     remotePresentationLoopToggleFlow?.collect {
         presentationViewModel.isLooping = !presentationViewModel.isLooping
-        onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(isLooping = presentationViewModel.isLooping)) }
+        onSettingsChange { s ->
+            s.copy(presentationSettings = s.presentationSettings.copy(isLooping = presentationViewModel.isLooping))
+        }
     }
 }
 LaunchedEffect(remotePresentationGotoFlow) {

@@ -202,7 +202,12 @@ class PlanningCenterScriptureDetectorTest {
     fun `resolving a single verse returns its text`() {
         val bible = bible(
             verses = mapOf(
-                (43 to 3) to listOf(BibleVerse(book = 43, chapter = 3, verseNumber = 16, verseText = "For God so loved the world")),
+                (43 to 3) to listOf(BibleVerse(
+                    book = 43,
+                    chapter = 3,
+                    verseNumber = 16,
+                    verseText = "For God so loved the world"
+                )),
             ),
         )
         val ref = detect("John 3:16", bible).single()
@@ -210,7 +215,11 @@ class PlanningCenterScriptureDetectorTest {
 
         assertEquals("For God so loved the world", resolved.verseText)
         assertEquals("John", resolved.bookName)
-        assertEquals(43, resolved.bookId, "the id travels alongside the name so a later lookup does not need to re-resolve it")
+        assertEquals(
+            43,
+            resolved.bookId,
+            "the id travels alongside the name so a later lookup does not need to re-resolve it"
+        )
         assertEquals(16, resolved.verseNumber)
         assertEquals("", resolved.verseRange, "a single verse has no range")
         assertEquals("John 3:16", resolved.displayReference)

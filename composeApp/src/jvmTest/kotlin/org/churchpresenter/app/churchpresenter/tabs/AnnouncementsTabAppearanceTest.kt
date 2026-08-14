@@ -57,7 +57,11 @@ class AnnouncementsTabAppearanceTest {
         assertEquals(Constants.ANIMATION_NONE, reports.settings?.animationType)
 
         select("Slide From Bottom")
-        assertEquals(Constants.ANIMATION_SLIDE_FROM_BOTTOM, reports.settings?.animationType, "back to the shipped default")
+        assertEquals(
+            Constants.ANIMATION_SLIDE_FROM_BOTTOM,
+            reports.settings?.animationType,
+            "back to the shipped default"
+        )
     }
 
     @Test

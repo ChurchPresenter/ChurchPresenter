@@ -383,7 +383,10 @@ class ScheduleViewModel(
                     _canRedo.value = false
                     clearAutoSave()
                     notifyChanged()
-                    CrashReporter.breadcrumb("Schedule opened (${file.fileName}, ${items.size} items)", category = "schedule")
+                    CrashReporter.breadcrumb(
+                        "Schedule opened (${file.fileName}, ${items.size} items)",
+                        category = "schedule"
+                    )
                 } catch (e: Exception) {
                     CrashReporter.reportException(e, "Opening schedule file")
                 }
@@ -408,10 +411,23 @@ class ScheduleViewModel(
     // ── Existing methods ──────────────────────────────────────────────────────
 
     fun addSong(songNumber: Int, title: String, songbook: String, songId: String = "") {
-        addOrPush(ScheduleItem.SongItem(id = UUID.randomUUID().toString(), songNumber = songNumber, title = title, songbook = songbook, songId = songId))
+        addOrPush(ScheduleItem.SongItem(
+            id = UUID.randomUUID().toString(),
+            songNumber = songNumber,
+            title = title,
+            songbook = songbook,
+            songId = songId
+        ))
     }
 
-    fun addBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String = "", bookId: Int = 0) {
+    fun addBibleVerse(
+        bookName: String,
+        chapter: Int,
+        verseNumber: Int,
+        verseText: String,
+        verseRange: String = "",
+        bookId: Int = 0
+    ) {
         addOrPush(ScheduleItem.BibleVerseItem(
             id = UUID.randomUUID().toString(),
             bookName = bookName,
@@ -424,23 +440,50 @@ class ScheduleViewModel(
     }
 
     fun addLabel(text: String, textColor: String, backgroundColor: String) {
-        addOrPush(ScheduleItem.LabelItem(id = UUID.randomUUID().toString(), text = text, textColor = textColor, backgroundColor = backgroundColor))
+        addOrPush(ScheduleItem.LabelItem(
+            id = UUID.randomUUID().toString(),
+            text = text,
+            textColor = textColor,
+            backgroundColor = backgroundColor
+        ))
     }
 
     fun addPicture(folderPath: String, folderName: String, imageCount: Int) {
-        addOrPush(ScheduleItem.PictureItem(id = UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))
+        addOrPush(ScheduleItem.PictureItem(
+            id = UUID.randomUUID().toString(),
+            folderPath = folderPath,
+            folderName = folderName,
+            imageCount = imageCount
+        ))
     }
 
     fun addPresentation(filePath: String, fileName: String, slideCount: Int, fileType: String) {
-        addOrPush(ScheduleItem.PresentationItem(id = UUID.randomUUID().toString(), filePath = filePath, fileName = fileName, slideCount = slideCount, fileType = fileType))
+        addOrPush(ScheduleItem.PresentationItem(
+            id = UUID.randomUUID().toString(),
+            filePath = filePath,
+            fileName = fileName,
+            slideCount = slideCount,
+            fileType = fileType
+        ))
     }
 
     fun addMedia(mediaUrl: String, mediaTitle: String, mediaType: String) {
-        addOrPush(ScheduleItem.MediaItem(id = UUID.randomUUID().toString(), mediaUrl = mediaUrl, mediaTitle = mediaTitle, mediaType = mediaType))
+        addOrPush(ScheduleItem.MediaItem(
+            id = UUID.randomUUID().toString(),
+            mediaUrl = mediaUrl,
+            mediaTitle = mediaTitle,
+            mediaType = mediaType
+        ))
     }
 
     fun addLowerThird(presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) {
-        addOrPush(ScheduleItem.LowerThirdItem(id = UUID.randomUUID().toString(), presetId = presetId, presetLabel = presetLabel, pauseAtFrame = pauseAtFrame, pauseDurationMs = pauseDurationMs))
+        addOrPush(ScheduleItem.LowerThirdItem(
+            id = UUID.randomUUID().toString(),
+            presetId = presetId,
+            presetLabel = presetLabel,
+            pauseAtFrame = pauseAtFrame,
+            pauseDurationMs = pauseDurationMs
+        ))
     }
 
     fun addAnnouncement(
@@ -517,7 +560,13 @@ class ScheduleViewModel(
     }
 
     fun addDictionary(number: String, word: String, transliteration: String, definition: String) {
-        addOrPush(ScheduleItem.DictionaryItem(id = UUID.randomUUID().toString(), number = number, word = word, transliteration = transliteration, definition = definition))
+        addOrPush(ScheduleItem.DictionaryItem(
+            id = UUID.randomUUID().toString(),
+            number = number,
+            word = word,
+            transliteration = transliteration,
+            definition = definition
+        ))
     }
 
     fun updateWebsiteTitle(url: String, title: String) {
@@ -541,7 +590,12 @@ class ScheduleViewModel(
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {
             pushUndoSnapshot()
-            _scheduleItems[index] = ScheduleItem.LabelItem(id = id, text = text, textColor = textColor, backgroundColor = backgroundColor)
+            _scheduleItems[index] = ScheduleItem.LabelItem(
+                id = id,
+                text = text,
+                textColor = textColor,
+                backgroundColor = backgroundColor
+            )
             notifyChanged()
         }
     }
@@ -665,13 +719,19 @@ class ScheduleViewModel(
             is ScheduleItem.BibleVerseItem -> onPresentBible?.invoke(item) ?: onPresenting(Presenting.BIBLE)
             is ScheduleItem.LabelItem -> { /* not presentable */ }
             is ScheduleItem.PictureItem -> onPresentPictures?.invoke(item) ?: onPresenting(Presenting.PICTURES)
-            is ScheduleItem.PresentationItem -> onPresentPresentation?.invoke(item) ?: onPresenting(Presenting.PRESENTATION)
+            is ScheduleItem.PresentationItem -> onPresentPresentation?.invoke(
+                item
+            ) ?: onPresenting(Presenting.PRESENTATION)
             is ScheduleItem.MediaItem -> onPresentMedia?.invoke(item) ?: onPresenting(Presenting.MEDIA)
             is ScheduleItem.LowerThirdItem -> onPresentLowerThird?.invoke(item)
-            is ScheduleItem.AnnouncementItem -> onPresentAnnouncement?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)
+            is ScheduleItem.AnnouncementItem -> onPresentAnnouncement?.invoke(
+                item
+            ) ?: onPresenting(Presenting.ANNOUNCEMENTS)
             is ScheduleItem.WebsiteItem -> onPresentWebsite?.invoke(item) ?: onPresenting(Presenting.WEBSITE)
             is ScheduleItem.SceneItem -> onPresentScene?.invoke(item) ?: onPresenting(Presenting.CANVAS)
-            is ScheduleItem.DictionaryItem -> onPresentDictionary?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)
+            is ScheduleItem.DictionaryItem -> onPresentDictionary?.invoke(
+                item
+            ) ?: onPresenting(Presenting.ANNOUNCEMENTS)
         }
     }
 
@@ -683,24 +743,59 @@ class ScheduleViewModel(
      * shape rather than the full sealed [ScheduleItem].
      */
     private fun ScheduleItemDto.toScheduleItem(): ScheduleItem? = when (type) {
-        "song" -> ScheduleItem.SongItem(id = id, songNumber = songNumber ?: 0, title = title ?: "", songbook = songbook ?: "")
+        "song" -> ScheduleItem.SongItem(
+            id = id,
+            songNumber = songNumber ?: 0,
+            title = title ?: "",
+            songbook = songbook ?: ""
+        )
         "bible" -> ScheduleItem.BibleVerseItem(
             id = id, bookName = bookName ?: "", chapter = chapter ?: 0, verseNumber = verseNumber ?: 0,
             verseText = text ?: "", verseRange = verseRange ?: ""
         )
-        "label" -> ScheduleItem.LabelItem(id = id, text = text ?: "", textColor = textColor ?: "#FFFFFF", backgroundColor = backgroundColor ?: "#2196F3")
-        "picture" -> ScheduleItem.PictureItem(id = id, folderPath = folderPath ?: "", folderName = folderName ?: "", imageCount = imageCount ?: 0)
+        "label" -> ScheduleItem.LabelItem(
+            id = id,
+            text = text ?: "",
+            textColor = textColor ?: "#FFFFFF",
+            backgroundColor = backgroundColor ?: "#2196F3"
+        )
+        "picture" -> ScheduleItem.PictureItem(
+            id = id,
+            folderPath = folderPath ?: "",
+            folderName = folderName ?: "",
+            imageCount = imageCount ?: 0
+        )
         "presentation" -> ScheduleItem.PresentationItem(
-            id = id, filePath = filePath ?: "", fileName = fileName ?: "", slideCount = slideCount ?: 0, fileType = fileType ?: ""
+            id =
+                id, filePath =
+                    filePath ?: "", fileName = fileName ?: "", slideCount = slideCount ?: 0, fileType = fileType ?: ""
         )
-        "media" -> ScheduleItem.MediaItem(id = id, mediaUrl = mediaUrl ?: "", mediaTitle = mediaTitle ?: "", mediaType = mediaType ?: "")
+        "media" -> ScheduleItem.MediaItem(
+            id = id,
+            mediaUrl = mediaUrl ?: "",
+            mediaTitle = mediaTitle ?: "",
+            mediaType = mediaType ?: ""
+        )
         "lower_third" -> ScheduleItem.LowerThirdItem(
-            id = id, presetId = presetId ?: "", presetLabel = presetLabel ?: "", pauseAtFrame = false, pauseDurationMs = 2000L
+            id =
+                id, presetId =
+                    presetId ?: "", presetLabel = presetLabel ?: "", pauseAtFrame = false, pauseDurationMs = 2000L
         )
-        "announcement" -> ScheduleItem.AnnouncementItem(id = id, text = text ?: "", textColor = textColor ?: "#FFFFFF", backgroundColor = backgroundColor ?: "#000000")
+        "announcement" -> ScheduleItem.AnnouncementItem(
+            id = id,
+            text = text ?: "",
+            textColor = textColor ?: "#FFFFFF",
+            backgroundColor = backgroundColor ?: "#000000"
+        )
         "website" -> ScheduleItem.WebsiteItem(id = id, url = url ?: "", title = title ?: url ?: "")
         "scene" -> ScheduleItem.SceneItem(id = id, sceneId = "", sceneName = displayText)
-        "dictionary" -> ScheduleItem.DictionaryItem(id = id, number = "", word = displayText, transliteration = "", definition = "")
+        "dictionary" -> ScheduleItem.DictionaryItem(
+            id = id,
+            number = "",
+            word = displayText,
+            transliteration = "",
+            definition = ""
+        )
         else -> null
     }
 }

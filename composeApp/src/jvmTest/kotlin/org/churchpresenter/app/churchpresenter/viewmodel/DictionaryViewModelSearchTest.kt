@@ -39,7 +39,11 @@ class DictionaryViewModelSearchTest {
         every { anyConstructed<InterlinearRepository>().getBooksWithHebrewData() } returns emptyList()
         every { anyConstructed<InterlinearRepository>().getChaptersForBook(any()) } returns emptyList()
         every { anyConstructed<InterlinearRepository>().getVersesInChapter(any(), any()) } returns emptyList()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(any(), any(), any()) } returns emptySet()
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(
+            any(),
+            any(),
+            any()
+        ) } returns emptySet()
     }
 
     @AfterTest
@@ -251,7 +255,10 @@ class DictionaryViewModelSearchTest {
     @Test
     fun `the passage filter tightens as chapter and verse are picked`() {
         val d = loaded()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf("G26", "G5485")
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf(
+            "G26",
+            "G5485"
+        )
         every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, 3, null) } returns setOf("G26")
         every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, 3, 16) } returns setOf("G26")
 
@@ -268,7 +275,11 @@ class DictionaryViewModelSearchTest {
     @Test
     fun `a passage with no dictionary words shows an empty list, not the whole dictionary`() {
         val d = loaded()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(any(), any(), any()) } returns emptySet()
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(
+            any(),
+            any(),
+            any()
+        ) } returns emptySet()
         d.filterEntryListByBook(43)
         assertTrue(d.searchResults.isEmpty())
     }
@@ -276,7 +287,11 @@ class DictionaryViewModelSearchTest {
     @Test
     fun `clearing the passage filter brings the whole dictionary back`() {
         val d = loaded()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(any(), any(), any()) } returns setOf("G26")
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(
+            any(),
+            any(),
+            any()
+        ) } returns setOf("G26")
         d.filterEntryListByBook(43)
         assertEquals(1, d.searchResults.size)
 
@@ -305,7 +320,10 @@ class DictionaryViewModelSearchTest {
     @Test
     fun `filtering to a passage that still contains the current word keeps it selected`() {
         val d = loaded()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf("G26", "G5485")
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf(
+            "G26",
+            "G5485"
+        )
         d.onEntrySelected(DictionaryFixture.agape)
 
         d.filterEntryListByBook(43)
@@ -316,7 +334,11 @@ class DictionaryViewModelSearchTest {
     @Test
     fun `filtering to a passage without the current word jumps to the first visible one`() {
         val d = loaded()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(43, null, null) } returns setOf("G5485")
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(
+            43,
+            null,
+            null
+        ) } returns setOf("G5485")
         d.onEntrySelected(DictionaryFixture.agape)
 
         d.filterEntryListByBook(43)
@@ -327,7 +349,11 @@ class DictionaryViewModelSearchTest {
     @Test
     fun `filtering to an empty passage leaves the current word up`() {
         val d = loaded()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(any(), any(), any()) } returns emptySet()
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(
+            any(),
+            any(),
+            any()
+        ) } returns emptySet()
         d.onEntrySelected(DictionaryFixture.agape)
 
         d.filterEntryListByBook(43)

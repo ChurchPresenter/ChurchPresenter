@@ -42,7 +42,11 @@ internal class BrowserSourceHub(
 
     internal fun updateBrowserSourceOutputs(outputs: List<ScreenAssignment>) {
         _browserSourceOutputs = outputs
-        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "browser_source_outputs", "count" to outputs.size))
+        InstanceLinkLogger.log(
+            InstanceLinkLogSide.PRIMARY,
+            "state_updated",
+            mapOf("type" to "browser_source_outputs", "count" to outputs.size)
+        )
     }
 
     fun browserSourceOutput(index: Int): ScreenAssignment? = _browserSourceOutputs.getOrNull(index)

@@ -31,12 +31,20 @@ class TunnelManagerTest {
 
     @Test
     fun `arm linux gets the linux arm64 binary`() {
-        assertTrue(cloudflaredDownloadUrl(isWin = false, isMac = false, isArm = true).endsWith("cloudflared-linux-arm64"))
+        assertTrue(cloudflaredDownloadUrl(
+            isWin = false,
+            isMac = false,
+            isArm = true
+        ).endsWith("cloudflared-linux-arm64"))
     }
 
     @Test
     fun `x64 linux is the fallback binary`() {
-        assertTrue(cloudflaredDownloadUrl(isWin = false, isMac = false, isArm = false).endsWith("cloudflared-linux-amd64"))
+        assertTrue(cloudflaredDownloadUrl(
+            isWin = false,
+            isMac = false,
+            isArm = false
+        ).endsWith("cloudflared-linux-amd64"))
     }
 
     @Test

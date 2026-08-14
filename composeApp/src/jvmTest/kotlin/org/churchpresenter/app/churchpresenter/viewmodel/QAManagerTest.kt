@@ -115,7 +115,10 @@ class QAManagerTest {
     fun `the cooldown is per ip, not global`() {
         val qa = openSession()
         assertNotNull(qa.submitQuestion("From A", clientIp = "10.0.0.1", cooldownSeconds = 30))
-        assertNotNull(qa.submitQuestion("From B", clientIp = "10.0.0.2", cooldownSeconds = 30), "one phone must not block the room")
+        assertNotNull(
+            qa.submitQuestion("From B", clientIp = "10.0.0.2", cooldownSeconds = 30),
+            "one phone must not block the room"
+        )
         assertFalse(qa.isRateLimited("10.0.0.2", 0))
     }
 
@@ -203,7 +206,11 @@ class QAManagerTest {
         qa.displayQuestion(second)
 
         assertEquals(second, qa.displayedQuestion?.id)
-        assertEquals(QuestionStatus.DONE, qa.findQuestion(first)?.status, "the outgoing question should be retired automatically")
+        assertEquals(
+            QuestionStatus.DONE,
+            qa.findQuestion(first)?.status,
+            "the outgoing question should be retired automatically"
+        )
     }
 
     @Test

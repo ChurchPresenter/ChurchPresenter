@@ -60,7 +60,9 @@ class STTSettingsContentTest {
 
         assertEquals(false, latest().bibleEngineSettings.enabled)
         onNodeWithText("Detect scripture").assertExists()
-        onNodeWithText("Help Dev — show live feedback buttons on the Bible tab (wrong passage / premature / missed passage)").assertDoesNotExist()
+        onNodeWithText(
+            "Help Dev — show live feedback buttons on the Bible tab (wrong passage / premature / missed passage)"
+        ).assertDoesNotExist()
     }
 
     // ── Toggles ──────────────────────────────────────────────────────────────────

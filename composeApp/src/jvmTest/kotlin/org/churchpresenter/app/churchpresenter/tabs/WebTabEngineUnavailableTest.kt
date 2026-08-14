@@ -11,14 +11,16 @@ import kotlin.test.assertEquals
 class WebTabEngineUnavailableTest {
 
     @Test
-    fun `WebTab with no engine shows the generic unavailable message`() = webTab(cefInitialized = false, cefMacOsUnsupported = false) { _, _ ->
+    fun `WebTab with no engine shows the generic unavailable message`() =
+        webTab(cefInitialized = false, cefMacOsUnsupported = false) { _, _ ->
         onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_TITLE).assertExists()
         onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_BODY).assertExists()
         onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_MACOS_TITLE).assertDoesNotExist()
     }
 
     @Test
-    fun `WebTab on an unsupported macOS shows the macOS-specific message`() = webTab(cefInitialized = false, cefMacOsUnsupported = true) { _, _ ->
+    fun `WebTab on an unsupported macOS shows the macOS-specific message`() =
+        webTab(cefInitialized = false, cefMacOsUnsupported = true) { _, _ ->
         onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_MACOS_TITLE).assertExists()
         onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_MACOS_BODY).assertExists()
         onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_TITLE).assertDoesNotExist()

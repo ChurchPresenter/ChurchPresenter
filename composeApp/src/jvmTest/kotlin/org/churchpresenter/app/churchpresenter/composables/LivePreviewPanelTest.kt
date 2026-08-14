@@ -83,7 +83,8 @@ class LivePreviewPanelTest {
     @Test
     fun `browser source outputs render as additional, separately labeled previews`() = runComposeUiTest {
         val settings = AppSettings(
-            projectionSettings = ProjectionSettings(browserSourceOutputs = listOf(ScreenAssignment(), ScreenAssignment()))
+            projectionSettings =
+                ProjectionSettings(browserSourceOutputs = listOf(ScreenAssignment(), ScreenAssignment()))
         )
         setContent {
             MaterialTheme {
@@ -292,7 +293,8 @@ class LivePreviewPanelTest {
         )
         for ((mode, chipText) in cases) {
             val settings = AppSettings(
-                projectionSettings = ProjectionSettings(screenAssignments = listOf(ScreenAssignment(displayMode = mode)))
+                projectionSettings =
+                    ProjectionSettings(screenAssignments = listOf(ScreenAssignment(displayMode = mode)))
             )
             setContent {
                 MaterialTheme {
@@ -409,7 +411,9 @@ class LivePreviewPanelTest {
                 }
             }
         }
-        onNodeWithText("0:00").assertExists("with a known duration, the slider shows the current position as a time label")
+        onNodeWithText("0:00").assertExists(
+            "with a known duration, the slider shows the current position as a time label"
+        )
     }
 
     @Test

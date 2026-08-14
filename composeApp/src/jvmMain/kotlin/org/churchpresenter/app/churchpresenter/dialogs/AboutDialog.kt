@@ -173,7 +173,9 @@ internal fun AboutDialogContent(
                         shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f),
                         onClick = {
-                            Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=bug_report.md"))
+                            Desktop.getDesktop().browse(java.net.URI(
+                                "https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=bug_report.md"
+                            ))
                         }
                     ) {
                         Text(stringResource(Res.string.report_bug), maxLines = 2, textAlign = TextAlign.Center)
@@ -182,10 +184,16 @@ internal fun AboutDialogContent(
                         shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f),
                         onClick = {
-                            Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"))
+                            Desktop.getDesktop().browse(java.net.URI(
+                                "https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"
+                            ))
                         }
                     ) {
-                        Text(stringResource(Res.string.submit_feature_request), maxLines = 2, textAlign = TextAlign.Center)
+                        Text(
+                            stringResource(Res.string.submit_feature_request),
+                            maxLines = 2,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -276,7 +284,14 @@ fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
 }
 
 @Composable
-fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onFileSaved: (() -> Unit)? = null, canvasWidth: Int? = null, canvasHeight: Int? = null) {
+fun LottieGenWindow(
+    theme: ThemeMode,
+    outputDir: File?,
+    onClose: () -> Unit,
+    onFileSaved: (() -> Unit)? = null,
+    canvasWidth: Int? = null,
+    canvasHeight: Int? = null
+) {
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.lottie_gen_window_title),

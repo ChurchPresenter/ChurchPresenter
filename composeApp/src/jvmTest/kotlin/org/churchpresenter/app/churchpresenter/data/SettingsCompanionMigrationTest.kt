@@ -148,7 +148,8 @@ class SettingsCompanionMigrationTest {
         val migrated = connection(
             """{"tabStartRow":0,"tabEndRow":1,"tabStartColumn":0,"tabEndColumn":2,
                 "leftSidebarStartRow":0,"leftSidebarEndRow":5,"leftSidebarStartColumn":0,"leftSidebarEndColumn":1,
-                "rightSidebarStartRow":0,"rightSidebarEndRow":2,"rightSidebarStartColumn":0,"rightSidebarEndColumn":3}""",
+                "rightSidebarStartRow":0, "rightSidebarEndRow":2, "rightSidebarStartColumn":0,
+                "rightSidebarEndColumn":3}""",
         )
 
         assertEquals(2 to 3, migrated.tabRows to migrated.tabColumns)
@@ -215,7 +216,10 @@ class SettingsCompanionMigrationTest {
             """{"companionSatelliteConnections":[{"rows":2,"columns":6,"tabStartRow":0,"tabEndRow":1}]}""",
         )
 
-        val json = SettingsManager().let { it.saveSettings(once); File(home, ".churchpresenter/settings.json").readText() }
+        val json = SettingsManager().let {
+            it.saveSettings(once)
+            File(home, ".churchpresenter/settings.json").readText()
+        }
         val twice = manager.migrateAndDecode(json.replace(Regex(""""settingsVersion":\d+,?"""), ""))
 
         assertEquals(

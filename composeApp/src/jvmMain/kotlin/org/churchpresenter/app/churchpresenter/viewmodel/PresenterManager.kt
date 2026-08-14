@@ -584,7 +584,13 @@ class PresenterManager {
     private val _currentLowerThirdName = mutableStateOf("")
     val currentLowerThirdName: State<String> = _currentLowerThirdName
 
-    fun setLottieContent(json: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long, presetName: String = "") {
+    fun setLottieContent(
+        json: String,
+        pauseAtFrame: Boolean,
+        pauseFrame: Float,
+        pauseDurationMs: Long,
+        presetName: String = ""
+    ) {
         _lottieJsonContent.value = json
         _lottiePauseAtFrame.value = pauseAtFrame
         _lottiePauseFrame.value = pauseFrame
@@ -853,7 +859,10 @@ class PresenterManager {
                 Constants.TIMER_MODE_COUNT_UP -> startAnnouncementCountUp(0)
                 Constants.TIMER_MODE_CLOCK -> startAnnouncementSpecificTime(targetHour, targetMinute, targetSecond)
                 Constants.TIMER_MODE_CLOCK_DISPLAY -> startAnnouncementClockDisplay(liveClockFormat)
-                else -> startAnnouncementCountdown(timerHours * SECONDS_PER_HOUR + timerMinutes * SECONDS_PER_MINUTE + timerSeconds, timerExpiredText)
+                else -> startAnnouncementCountdown(
+                    timerHours * SECONDS_PER_HOUR + timerMinutes * SECONDS_PER_MINUTE + timerSeconds,
+                    timerExpiredText
+                )
             }
         }
         _announcementTickerLive.value = true

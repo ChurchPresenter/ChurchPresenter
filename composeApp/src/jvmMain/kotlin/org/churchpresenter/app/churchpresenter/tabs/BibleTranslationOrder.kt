@@ -96,7 +96,10 @@ internal fun TranslationOrderSelector(
                     if (expanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
                     RoundedCornerShape(10.dp),
                 )
-                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { expanded = true }
                 .padding(horizontal = 10.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -113,7 +116,11 @@ internal fun TranslationOrderSelector(
                 Spacer(Modifier.height(1.dp))
                 Text(
                     text = primaryName,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 13.sp, fontWeight = FontWeight.SemiBold),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 13.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -192,7 +199,8 @@ private fun TranslationOrderPanel(
                         .zIndex(if (isDragged) 1f else 0f)
                         .graphicsLayer { translationY = if (isDragged) dragOffsetY else 0f }
                         .background(
-                            if (isPrimary) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.28f) else Color.Transparent,
+                            if (isPrimary) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.28f)
+                                else Color.Transparent,
                             RoundedCornerShape(9.dp),
                         )
                         .border(
@@ -243,7 +251,8 @@ private fun TranslationOrderPanel(
                         modifier = Modifier
                             .size(22.dp)
                             .background(
-                                if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                                if (isPrimary) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.surfaceVariant,
                                 RoundedCornerShape(7.dp),
                             ),
                         contentAlignment = Alignment.Center,
@@ -252,12 +261,16 @@ private fun TranslationOrderPanel(
                             text = "${index + 1}",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (isPrimary) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
 
                     Column(modifier = Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
                             Text(
                                 text = name,
                                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -328,7 +341,10 @@ private fun ReorderArrowButton(
     Box(
         modifier = Modifier
             .size(width = 22.dp, height = 16.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 1f else 0.4f), RoundedCornerShape(5.dp))
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 1f else 0.4f),
+                RoundedCornerShape(5.dp)
+            )
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.outlineVariant.copy(alpha = if (enabled) 1f else 0.5f),
@@ -351,7 +367,8 @@ private fun ReorderArrowButton(
             painter = icon,
             contentDescription = contentDescription,
             modifier = Modifier.size(10.dp),
-            tint = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+            tint = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
         )
     }
 }

@@ -361,10 +361,13 @@ fun WebTab(
                     }
                 },
                 enabled = urlInput.isNotBlank() && urlInput != "https://",
-                tooltipText = stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add),
+                tooltipText =
+                    stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add),
                 icon = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                containerColor = if (isBookmarked) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = if (isBookmarked) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                containerColor = if (isBookmarked) MaterialTheme.colorScheme.tertiaryContainer
+                    else MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = if (isBookmarked) MaterialTheme.colorScheme.onTertiaryContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             // Add to Schedule
@@ -529,7 +532,10 @@ fun WebTab(
                     modifier = Modifier.clickable { useInteractivePreview = !useInteractivePreview }
                 ) {
                     Text(
-                        text = stringResource(if (useInteractivePreview) Res.string.interactive_mode else Res.string.mirror_mode),
+                        text =
+                            stringResource(if (
+                                useInteractivePreview
+                            ) Res.string.interactive_mode else Res.string.mirror_mode),
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
@@ -595,7 +601,12 @@ fun WebTab(
                         }
                         if (typeBuffer.isNotEmpty()) {
                             IconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
-                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.web_clear_typed_text), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_close),
+                                    contentDescription = stringResource(Res.string.web_clear_typed_text),
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
@@ -730,7 +741,11 @@ fun WebTab(
                             .pointerInput(liveBrowser) {
                                 // Forward scroll via CefBrowser_N.sendMouseWheelEvent (reflection)
                                 if (liveBrowser == null) return@pointerInput
-                                val sendWheel = findMethod(liveBrowser, "sendMouseWheelEvent", MouseWheelEvent::class.java)
+                                val sendWheel = findMethod(
+                                    liveBrowser,
+                                    "sendMouseWheelEvent",
+                                    MouseWheelEvent::class.java
+                                )
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()
@@ -1094,9 +1109,15 @@ private const val JS_BACKSPACE = """
 private const val JS_ENTER = """
     (function(){
       var el=document.activeElement; if(!el) return;
-      var down = new KeyboardEvent('keydown', {key:'Enter', code:'Enter', keyCode:13, which:13, bubbles:true, cancelable:true});
+      var down = new KeyboardEvent(
+          'keydown',
+          {key:'Enter', code:'Enter', keyCode:13, which:13, bubbles:true, cancelable:true}
+      );
       var cancelled = !el.dispatchEvent(down);
-      el.dispatchEvent(new KeyboardEvent('keyup', {key:'Enter', code:'Enter', keyCode:13, which:13, bubbles:true, cancelable:true}));
+      el.dispatchEvent(new KeyboardEvent(
+          'keyup',
+          {key:'Enter', code:'Enter', keyCode:13, which:13, bubbles:true, cancelable:true}
+      ));
       if (!cancelled && el.form) {
         if (el.form.requestSubmit) el.form.requestSubmit();
         else el.form.submit();
@@ -1106,7 +1127,10 @@ private const val JS_ENTER = """
 
 private const val JS_FOCUS_FIRST_INPUT = """
     (function(){
-      var el=document.querySelector('input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]),textarea,[contenteditable=true]');
+      var el=
+          document.querySelector(
+              'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]),textarea,[contenteditable=true]'
+          );
       if (el) el.focus();
     })();
 """

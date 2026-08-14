@@ -130,9 +130,17 @@ fun SongPresenter(
     val laItalic = if (isLowerThird) ss.lowerThirdLookAheadNextItalic else ss.lookAheadNextItalic
     val laUnderline = if (isLowerThird) ss.lowerThirdLookAheadNextUnderline else ss.lookAheadNextUnderline
     val laShadowEnabled = if (isLowerThird) ss.lowerThirdLookAheadNextShadow else ss.lookAheadNextShadow
-    val laShadowColor = parseHexColor(if (isLowerThird) ss.lowerThirdLookAheadNextShadowColor else ss.lookAheadNextShadowColor)
-    val laShadowSizeMul = (if (isLowerThird) ss.lowerThirdLookAheadNextShadowSize else ss.lookAheadNextShadowSize) / 100f
-    val laShadowAlpha = ((if (isLowerThird) ss.lowerThirdLookAheadNextShadowOpacity else ss.lookAheadNextShadowOpacity) / 100f).coerceIn(0f, 1f)
+    val laShadowColor =
+        parseHexColor(if (isLowerThird) ss.lowerThirdLookAheadNextShadowColor else ss.lookAheadNextShadowColor)
+    val laShadowSizeMul =
+        (if (isLowerThird) ss.lowerThirdLookAheadNextShadowSize else ss.lookAheadNextShadowSize) / 100f
+    val laShadowAlpha =
+        ((if (
+            isLowerThird
+        ) ss.lowerThirdLookAheadNextShadowOpacity else ss.lookAheadNextShadowOpacity) / 100f).coerceIn(
+            0f,
+            1f
+        )
 
     // Per-element shadow customization (resolved per fullscreen / lower third)
     fun makeSongShadow(color: String, size: Int, opacity: Int, alphaScale: Float = 0.78f): Shadow {
@@ -264,7 +272,8 @@ fun SongPresenter(
         effectiveType == Constants.BACKGROUND_GRADIENT -> Modifier
         useVideoBackground -> Modifier.background(Color.Black)
         effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null ->
-            Modifier.alpha(effectiveOpacity).paint(painter = BitmapPainter(backgroundImageBitmap), contentScale = ContentScale.Crop)
+            Modifier.alpha(effectiveOpacity)
+                .paint(painter = BitmapPainter(backgroundImageBitmap), contentScale = ContentScale.Crop)
 
         effectiveType == Constants.BACKGROUND_IMAGE ->
             Modifier.background(Color.Black)
@@ -330,14 +339,24 @@ fun SongPresenter(
         val scaledTitleFontSize = (effectiveTitleFontSize * scaleFactor).sp
         val settingsLyricsFontSize = if (lookAheadEnabled) {
             if (isLowerThird) ss.lowerThirdLookAheadFontSize else ss.lookAheadFontSize
-        } else if (isLowerThird) appSettings.songSettings.lyricsLowerThirdFontSize else appSettings.songSettings.lyricsFontSize
+        } else if (
+            isLowerThird
+        ) appSettings.songSettings.lyricsLowerThirdFontSize else appSettings.songSettings.lyricsFontSize
         val effectiveSongNumberFontSize =
-            if (isLowerThird) appSettings.songSettings.songNumberLowerThirdFontSize else appSettings.songSettings.songNumberFontSize
+            if (isLowerThird) appSettings.songSettings.songNumberLowerThirdFontSize
+                else appSettings.songSettings.songNumberFontSize
 
         // Auto-fit: compute the largest font size that fits ALL sections without line wrapping.
         // Uses the reference 1920×1080 coordinate space (margins subtracted).
         val autoFitTextMeasurer = rememberTextMeasurer()
-        val autoFitFontSize = remember(allLyricSections, isLowerThird, lookAheadEnabled, languageOverride, appSettings.songSettings, appSettings.projectionSettings) {
+        val autoFitFontSize = remember(
+            allLyricSections,
+            isLowerThird,
+            lookAheadEnabled,
+            languageOverride,
+            appSettings.songSettings,
+            appSettings.projectionSettings
+        ) {
             if (allLyricSections.isEmpty()) null
             else {
                 val ld = effectiveLangDisplay
@@ -347,7 +366,8 @@ fun SongPresenter(
                 val topBottom = ld == Constants.SONG_LANG_BOTH &&
                         ss.bilingualLayout == Constants.BILINGUAL_TOP_BOTTOM && hasBilingual
 
-                val fullWidth = 1920 - appSettings.projectionSettings.windowLeft - appSettings.projectionSettings.windowRight -
+                val fullWidth =
+                    1920 - appSettings.projectionSettings.windowLeft - appSettings.projectionSettings.windowRight -
                         appSettings.songSettings.marginLeft - appSettings.songSettings.marginRight
                 // In side-by-side bilingual mode, each column gets half the width
                 val refWidth = if (sideBySide) fullWidth / 2 else fullWidth
@@ -400,7 +420,8 @@ fun SongPresenter(
                         if (next != null) {
                             section.copy(
                                 lines = section.lines + next.lines,
-                                secondaryLines = if (section.secondaryLines.isNotEmpty() || next.secondaryLines.isNotEmpty())
+                                secondaryLines =
+                                    if (section.secondaryLines.isNotEmpty() || next.secondaryLines.isNotEmpty())
                                     section.secondaryLines + next.secondaryLines else emptyList()
                             )
                         } else section
@@ -422,14 +443,22 @@ fun SongPresenter(
                         allLyricSections.first { it.title.length == len }.title
                     } ?: ""
                     if (longestTitle.isNotEmpty()) {
-                        reserved += autoFitTextMeasurer.measure(longestTitle, titleStyle, density = referenceDensity).size.height
+                        reserved += autoFitTextMeasurer.measure(
+                            longestTitle,
+                            titleStyle,
+                            density = referenceDensity
+                        ).size.height
                     }
                 }
                 if (fitNumberDisplay != Constants.NONE && fitNumberPosition == Constants.ABOVE_VERSE) {
                     val numStyle = TextStyle(fontSize = fitNumberFontSize.sp, fontFamily = titleFontFamily)
                     val maxNum = allLyricSections.maxOfOrNull { it.songNumber } ?: 0
                     if (maxNum > 0) {
-                        reserved += autoFitTextMeasurer.measure(maxNum.toString(), numStyle, density = referenceDensity).size.height
+                        reserved += autoFitTextMeasurer.measure(
+                            maxNum.toString(),
+                            numStyle,
+                            density = referenceDensity
+                        ).size.height
                     }
                 }
 
@@ -458,10 +487,14 @@ fun SongPresenter(
         val scaledLyricsFontSize = (effectiveLyricsFontSize * scaleFactor).sp
         val scaledSongNumberFontSize = (effectiveSongNumberFontSize * scaleFactor).sp
 
-        val leftOffSet = ((appSettings.projectionSettings.windowLeft + appSettings.songSettings.marginLeft) * scaleFactor).dp
-        val rightOffSet = ((appSettings.projectionSettings.windowRight + appSettings.songSettings.marginRight) * scaleFactor).dp
-        val topOffSet = ((appSettings.projectionSettings.windowTop + appSettings.songSettings.marginTop) * scaleFactor).dp
-        val bottomOffSet = ((appSettings.projectionSettings.windowBottom + appSettings.songSettings.marginBottom) * scaleFactor).dp
+        val leftOffSet =
+            ((appSettings.projectionSettings.windowLeft + appSettings.songSettings.marginLeft) * scaleFactor).dp
+        val rightOffSet =
+            ((appSettings.projectionSettings.windowRight + appSettings.songSettings.marginRight) * scaleFactor).dp
+        val topOffSet =
+            ((appSettings.projectionSettings.windowTop + appSettings.songSettings.marginTop) * scaleFactor).dp
+        val bottomOffSet =
+            ((appSettings.projectionSettings.windowBottom + appSettings.songSettings.marginBottom) * scaleFactor).dp
 
         if (isLowerThird) {
             val lowerThirdFraction = appSettings.projectionSettings.lowerThirdHeightPercent / 100f
@@ -473,7 +506,9 @@ fun SongPresenter(
                     .fillMaxWidth()
                     .fillMaxHeight(lowerThirdFraction)
                     .align(Alignment.BottomCenter)
-                    .then(if (effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) Modifier else bgModifier)
+                    .then(if (
+                        effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null
+                    ) Modifier else bgModifier)
             ) {
                 if (effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
                     Image(
@@ -485,13 +520,17 @@ fun SongPresenter(
                     )
                 }
                 if (useVideoBackground) {
-                    LoopingVideoBackground(videoPath = effectiveVideoPath, modifier = Modifier.fillMaxSize().alpha(effectiveOpacity))
+                    LoopingVideoBackground(
+                        videoPath = effectiveVideoPath,
+                        modifier = Modifier.fillMaxSize().alpha(effectiveOpacity)
+                    )
                 }
             }
             // Gradient overlay
             if (bgConfig.gradientEnabled) {
                 val gradientTop = parseHexColor(bgConfig.gradientTopColor).copy(alpha = bgConfig.gradientTopOpacity)
-                val gradientBottom = parseHexColor(bgConfig.gradientBottomColor).copy(alpha = bgConfig.gradientBottomOpacity)
+                val gradientBottom =
+                    parseHexColor(bgConfig.gradientBottomColor).copy(alpha = bgConfig.gradientBottomOpacity)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -535,7 +574,8 @@ fun SongPresenter(
                 val titleConfigured = titleDisplay != Constants.NONE
                 val numberConfigured = numberDisplay != Constants.NONE && section.songNumber > 0
                 val effectiveTitlePosition = if (isLowerThird) ss.titleLowerThirdPosition else ss.titlePosition
-                val effectiveSongNumberPosition = if (isLowerThird) ss.songNumberLowerThirdPosition else ss.songNumberPosition
+                val effectiveSongNumberPosition = if (isLowerThird) ss.songNumberLowerThirdPosition
+                    else ss.songNumberPosition
                 // isLowerThirdVertical forces bilingual content to stack (one below the other)
                 // instead of side-by-side — see the useSideBySide gate further below — same
                 // band/geometry as horizontal otherwise.
@@ -592,7 +632,9 @@ fun SongPresenter(
                             // Look-ahead = 1 verse: all lines of next section
                             nextSection.lines
                         }
-                    } else if (lookAheadEnabled && isLineMode && effectiveLineIndex in 0 until allDisplayLines.size - 1) {
+                    } else if (lookAheadEnabled
+                        && isLineMode
+                        && effectiveLineIndex in 0 until allDisplayLines.size - 1) {
                         // No next section but there's a next line in the current section
                         if (laIsLineMode) listOf(allDisplayLines[effectiveLineIndex + 1]) else emptyList()
                     } else {
@@ -611,7 +653,8 @@ fun SongPresenter(
                     } else emptyList()
 
                     // Build look-ahead secondary lines
-                    val laSecondaryLines: List<String> = if (nextSection != null && nextSection.secondaryLines.isNotEmpty()) {
+                    val laSecondaryLines: List<String> =
+                        if (nextSection != null && nextSection.secondaryLines.isNotEmpty()) {
                         if (laIsLineMode) {
                             if (isLineMode && effectiveLineIndex >= 0) {
                                 if (effectiveLineIndex + 1 < (section.secondaryLines.size)) {
@@ -625,7 +668,9 @@ fun SongPresenter(
                         } else {
                             nextSection.secondaryLines
                         }
-                    } else if (lookAheadEnabled && isLineMode && effectiveLineIndex in 0 until section.secondaryLines.size - 1) {
+                    } else if (lookAheadEnabled
+                        && isLineMode
+                        && effectiveLineIndex in 0 until section.secondaryLines.size - 1) {
                         if (laIsLineMode) listOf(section.secondaryLines[effectiveLineIndex + 1]) else emptyList()
                     } else {
                         emptyList()
@@ -676,9 +721,11 @@ fun SongPresenter(
 
                     // Combined secondary lines with look-ahead start index
                     val combinedSecondaryLines = effectiveSecondaryDisplayLines + effectiveLaSecondaryLines
-                    val secondaryLaStart = if (effectiveLaSecondaryLines.isNotEmpty()) effectiveSecondaryDisplayLines.size else -1
+                    val secondaryLaStart =
+                        if (effectiveLaSecondaryLines.isNotEmpty()) effectiveSecondaryDisplayLines.size else -1
 
-                    val effectiveTitle = if (langDisplay == Constants.SONG_LANG_SECONDARY && section.secondaryTitle.isNotEmpty()) {
+                    val effectiveTitle =
+                        if (langDisplay == Constants.SONG_LANG_SECONDARY && section.secondaryTitle.isNotEmpty()) {
                         section.secondaryTitle
                     } else {
                         section.title
@@ -688,7 +735,9 @@ fun SongPresenter(
                     // A Row-split side-by-side layout doesn't fit a narrow vertical band — falls
                     // through to the top/bottom bilingual branch below, which already special-cases
                     // isLowerThird (true for vertical too) with a compact stacked layout.
-                    val useSideBySide = appSettings.songSettings.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE && !isLowerThirdVertical
+                    val useSideBySide =
+                        appSettings.songSettings.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE
+                            && !isLowerThirdVertical
 
                     // Look-ahead text style with full font controls
                     val laBaseShadow = Shadow(
@@ -703,7 +752,8 @@ fun SongPresenter(
                         shadow = if (laShadowEnabled) laBaseShadow else null
                     )
                     // Look-ahead next uses auto-fit capped at its own configured max
-                    val laAutoFitEnabled = if (isLowerThird) ss.lowerThirdLookAheadNextFontSizeAutoFit else ss.lookAheadNextFontSizeAutoFit
+                    val laAutoFitEnabled = if (isLowerThird) ss.lowerThirdLookAheadNextFontSizeAutoFit
+                        else ss.lookAheadNextFontSizeAutoFit
                     val effectiveLaFontSize = if (laAutoFitEnabled) {
                         (autoFitFontSize ?: laFontSize).coerceAtMost(laFontSize)
                     } else laFontSize
@@ -734,13 +784,22 @@ fun SongPresenter(
                     @Composable
                     fun EndOfSongIndicator() {
                         // Always reserve space so lyrics don't shift when the indicator appears on the last section
-                        val visible = section.isLastSection && (!isLineMode || effectiveLineIndex >= allDisplayLines.size - 1)
+                        val visible =
+                            section.isLastSection && (!isLineMode || effectiveLineIndex >= allDisplayLines.size - 1)
                         val indicatorAlpha = if (visible) 1f else 0f
                         Spacer(modifier = Modifier.padding(top = (4 * scaleFactor).dp))
                         val indicatorPad = " ".repeat(ss.endOfSongIndicatorSpacing)
                         val indicatorText = "$indicatorPad*$indicatorPad"
-                        Row(modifier = Modifier.fillMaxWidth().alpha(indicatorAlpha), horizontalArrangement = Arrangement.Center) {
-                            repeat(INDICATOR_REPEAT_COUNT) { Text(text = indicatorText, fontSize = scaledLyricsFontSize, color = lyricsColor, style = lyricsTextStyleScaled) }
+                        Row(
+                            modifier = Modifier.fillMaxWidth().alpha(indicatorAlpha),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            repeat(INDICATOR_REPEAT_COUNT) { Text(
+                                text = indicatorText,
+                                fontSize = scaledLyricsFontSize,
+                                color = lyricsColor,
+                                style = lyricsTextStyleScaled
+                            ) }
                         }
                     }
 
@@ -770,7 +829,10 @@ fun SongPresenter(
 
                     // Renders title and/or song number for a given position (ABOVE_VERSE or BELOW_VERSE)
                     val samePosition = effectiveTitlePosition == effectiveSongNumberPosition
-                    val sameHorizontal = (if (isLowerThird) ss.songNumberLowerThirdHorizontalAlignment else ss.songNumberHorizontalAlignment) ==
+                    val sameHorizontal =
+                        (if (
+                            isLowerThird
+                        ) ss.songNumberLowerThirdHorizontalAlignment else ss.songNumberHorizontalAlignment) ==
                             (if (isLowerThird) ss.titleLowerThirdHorizontalAlignment else ss.titleHorizontalAlignment)
                     val numberBeforeTitle = ss.songNumberBeforeTitle
 
@@ -814,7 +876,8 @@ fun SongPresenter(
 
                         if (hasTitleHere && hasNumberHere && samePosition) {
                             if (sameHorizontal) {
-                                val sharedHAlign = if (isLowerThird) ss.songNumberLowerThirdHorizontalAlignment else ss.songNumberHorizontalAlignment
+                                val sharedHAlign = if (isLowerThird) ss.songNumberLowerThirdHorizontalAlignment
+                                    else ss.songNumberHorizontalAlignment
                                 val arrangement = when (sharedHAlign) {
                                     Constants.LEFT -> Arrangement.Start
                                     Constants.CENTER -> Arrangement.Center
@@ -822,9 +885,13 @@ fun SongPresenter(
                                 }
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = arrangement) {
                                     if (numberBeforeTitle) {
-                                        NumberPart(visibilityAlpha = numberAlpha); Spacer(modifier = Modifier.padding(horizontal = (4 * scaleFactor).dp)); TitlePart(visibilityAlpha = titleAlpha)
+                                        NumberPart(visibilityAlpha = numberAlpha); Spacer(
+                                            modifier = Modifier.padding(horizontal = (4 * scaleFactor).dp)
+                                        ); TitlePart(visibilityAlpha = titleAlpha)
                                     } else {
-                                        TitlePart(visibilityAlpha = titleAlpha); Spacer(modifier = Modifier.padding(horizontal = (4 * scaleFactor).dp)); NumberPart(visibilityAlpha = numberAlpha)
+                                        TitlePart(visibilityAlpha = titleAlpha); Spacer(
+                                            modifier = Modifier.padding(horizontal = (4 * scaleFactor).dp)
+                                        ); NumberPart(visibilityAlpha = numberAlpha)
                                     }
                                 }
                             } else {
@@ -862,7 +929,10 @@ fun SongPresenter(
                                             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                                             horizontalArrangement = Arrangement.SpaceEvenly
                                         ) {
-                                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
+                                            Column(
+                                                modifier = Modifier.weight(1f),
+                                                verticalArrangement = Arrangement.Bottom
+                                            ) {
                                                 combinedPrimaryLines.forEachIndexed { idx, line ->
                                                     LookAheadSpacer(idx, primaryLaStart)
                                                     LyricLine(idx, line, primaryLaStart)
@@ -870,7 +940,10 @@ fun SongPresenter(
                                                 EndOfSongIndicator()
                                                 LookAheadPlaceholder()
                                             }
-                                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
+                                            Column(
+                                                modifier = Modifier.weight(1f),
+                                                verticalArrangement = Arrangement.Bottom
+                                            ) {
                                                 combinedSecondaryLines.forEachIndexed { idx, line ->
                                                     LookAheadSpacer(idx, secondaryLaStart)
                                                     LyricLine(idx, line, secondaryLaStart)
@@ -902,7 +975,10 @@ fun SongPresenter(
                                             // Full screen: each language gets its own half
                                             val halfAlignment = contentAlignment
                                             Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                                                Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
+                                                Box(
+                                                    modifier = Modifier.fillMaxWidth().weight(1f),
+                                                    contentAlignment = halfAlignment
+                                                ) {
                                                     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                                         combinedPrimaryLines.forEachIndexed { idx, line ->
                                                             LookAheadSpacer(idx, primaryLaStart)
@@ -913,7 +989,10 @@ fun SongPresenter(
                                                     }
                                                 }
                                                 Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
-                                                Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
+                                                Box(
+                                                    modifier = Modifier.fillMaxWidth().weight(1f),
+                                                    contentAlignment = halfAlignment
+                                                ) {
                                                     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
                                                         combinedSecondaryLines.forEachIndexed { idx, line ->
                                                             LookAheadSpacer(idx, secondaryLaStart)
@@ -960,7 +1039,10 @@ fun SongPresenter(
                 var displayedPrevious by remember { mutableStateOf(LyricSection()) }
                 var currentAlpha by remember { mutableStateOf(1f) }
                 var previousAlpha by remember { mutableStateOf(0f) }
-                val pendingQueue = remember { kotlinx.coroutines.channels.Channel<LyricSection>(kotlinx.coroutines.channels.Channel.CONFLATED) }
+                val pendingQueue =
+                    remember {
+                        kotlinx.coroutines.channels.Channel<LyricSection>(kotlinx.coroutines.channels.Channel.CONFLATED)
+                    }
 
                 // Queue section changes
                 LaunchedEffect(lyricSection) {

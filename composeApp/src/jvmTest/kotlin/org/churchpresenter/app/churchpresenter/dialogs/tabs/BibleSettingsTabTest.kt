@@ -508,16 +508,20 @@ class BibleSettingsTabTest {
             { t(it).textFontType }, { t(it).textFontSize }, { t(it).textHorizontalAlignment },
             { s, v -> s.updateTranslation(0) { x -> x.copy(textFontSize = v) } }),
         Target("text, lower third",
-            { t(it).lowerThirdTextBold }, { t(it).lowerThirdTextItalic }, { t(it).lowerThirdTextUnderline }, { t(it).lowerThirdTextShadow },
-            { t(it).lowerThirdTextFontType }, { t(it).lowerThirdTextFontSize }, { t(it).lowerThirdTextHorizontalAlignment },
+            { t(it).lowerThirdTextBold }, { t(it).lowerThirdTextItalic }, { t(it).lowerThirdTextUnderline },
+            { t(it).lowerThirdTextShadow },
+            { t(it).lowerThirdTextFontType }, { t(it).lowerThirdTextFontSize },
+            { t(it).lowerThirdTextHorizontalAlignment },
             { s, v -> s.updateTranslation(0) { x -> x.copy(lowerThirdTextFontSize = v) } }),
         Target("reference, full screen",
             { t(it).referenceBold }, { t(it).referenceItalic }, { t(it).referenceUnderline }, { t(it).referenceShadow },
             { t(it).referenceFontType }, { t(it).referenceFontSize }, { t(it).referenceHorizontalAlignment },
             { s, v -> s.updateTranslation(0) { x -> x.copy(referenceFontSize = v) } }),
         Target("reference, lower third",
-            { t(it).lowerThirdReferenceBold }, { t(it).lowerThirdReferenceItalic }, { t(it).lowerThirdReferenceUnderline }, { t(it).lowerThirdReferenceShadow },
-            { t(it).lowerThirdReferenceFontType }, { t(it).lowerThirdReferenceFontSize }, { t(it).lowerThirdReferenceHorizontalAlignment },
+            { t(it).lowerThirdReferenceBold }, { t(it).lowerThirdReferenceItalic },
+            { t(it).lowerThirdReferenceUnderline }, { t(it).lowerThirdReferenceShadow },
+            { t(it).lowerThirdReferenceFontType }, { t(it).lowerThirdReferenceFontSize },
+            { t(it).lowerThirdReferenceHorizontalAlignment },
             { s, v -> s.updateTranslation(0) { x -> x.copy(lowerThirdReferenceFontSize = v) } }),
     )
 
@@ -563,14 +567,54 @@ class BibleSettingsTabTest {
     )
 
     private val colourTargets = listOf(
-        ColourTarget("primary text full screen", "#110000", { t(it).textColor }, { s, v -> s.updateTranslation(0) { x -> x.copy(textColor = v) } }),
-        ColourTarget("primary text lower third", "#220000", { t(it).lowerThirdTextColor }, { s, v -> s.updateTranslation(0) { x -> x.copy(lowerThirdTextColor = v) } }),
-        ColourTarget("primary reference full screen", "#330000", { t(it).referenceColor }, { s, v -> s.updateTranslation(0) { x -> x.copy(referenceColor = v) } }),
-        ColourTarget("primary reference lower third", "#440000", { t(it).lowerThirdReferenceColor }, { s, v -> s.updateTranslation(0) { x -> x.copy(lowerThirdReferenceColor = v) } }),
-        ColourTarget("secondary text full screen", "#550000", { t(it, 1).textColor }, { s, v -> s.updateTranslation(1) { x -> x.copy(textColor = v) } }),
-        ColourTarget("secondary text lower third", "#660000", { t(it, 1).lowerThirdTextColor }, { s, v -> s.updateTranslation(1) { x -> x.copy(lowerThirdTextColor = v) } }),
-        ColourTarget("secondary reference full screen", "#770000", { t(it, 1).referenceColor }, { s, v -> s.updateTranslation(1) { x -> x.copy(referenceColor = v) } }),
-        ColourTarget("secondary reference lower third", "#880000", { t(it, 1).lowerThirdReferenceColor }, { s, v -> s.updateTranslation(1) { x -> x.copy(lowerThirdReferenceColor = v) } }),
+        ColourTarget(
+            "primary text full screen",
+            "#110000",
+            { t(it).textColor },
+            { s, v -> s.updateTranslation(0) { x -> x.copy(textColor = v) } }
+        ),
+        ColourTarget(
+            "primary text lower third",
+            "#220000",
+            { t(it).lowerThirdTextColor },
+            { s, v -> s.updateTranslation(0) { x -> x.copy(lowerThirdTextColor = v) } }
+        ),
+        ColourTarget(
+            "primary reference full screen",
+            "#330000",
+            { t(it).referenceColor },
+            { s, v -> s.updateTranslation(0) { x -> x.copy(referenceColor = v) } }
+        ),
+        ColourTarget(
+            "primary reference lower third",
+            "#440000",
+            { t(it).lowerThirdReferenceColor },
+            { s, v -> s.updateTranslation(0) { x -> x.copy(lowerThirdReferenceColor = v) } }
+        ),
+        ColourTarget(
+            "secondary text full screen",
+            "#550000",
+            { t(it, 1).textColor },
+            { s, v -> s.updateTranslation(1) { x -> x.copy(textColor = v) } }
+        ),
+        ColourTarget(
+            "secondary text lower third",
+            "#660000",
+            { t(it, 1).lowerThirdTextColor },
+            { s, v -> s.updateTranslation(1) { x -> x.copy(lowerThirdTextColor = v) } }
+        ),
+        ColourTarget(
+            "secondary reference full screen",
+            "#770000",
+            { t(it, 1).referenceColor },
+            { s, v -> s.updateTranslation(1) { x -> x.copy(referenceColor = v) } }
+        ),
+        ColourTarget(
+            "secondary reference lower third",
+            "#880000",
+            { t(it, 1).lowerThirdReferenceColor },
+            { s, v -> s.updateTranslation(1) { x -> x.copy(lowerThirdReferenceColor = v) } }
+        ),
     )
 
     /** Every colour field given its own distinct hex, so each is findable by what it shows. */
@@ -643,7 +687,11 @@ class BibleSettingsTabTest {
     // named for it, so a failure says which button on which target broke.
 
     /** Clicks style toggle [letter] on target [index] and checks only that target's flag flipped. */
-    private fun ComposeUiTest.assertStyleToggles(index: Int, letter: String, flag: (Target) -> (BibleSettings) -> Boolean) {
+    private fun ComposeUiTest.assertStyleToggles(
+        index: Int,
+        letter: String,
+        flag: (Target) -> (BibleSettings) -> Boolean
+    ) {
         val harness = showTab()
         val target = targets[index]
         val before = flag(target)(harness.current.bibleSettings)
@@ -702,16 +750,20 @@ class BibleSettingsTabTest {
 
 
     @Test
-    fun `underline on the primary text, full screen`() = runComposeUiTest { assertStyleToggles(0, "U") { it.underline } }
+    fun `underline on the primary text, full screen`() =
+        runComposeUiTest { assertStyleToggles(0, "U") { it.underline } }
 
     @Test
-    fun `underline on the primary text, lower third`() = runComposeUiTest { assertStyleToggles(1, "U") { it.underline } }
+    fun `underline on the primary text, lower third`() =
+        runComposeUiTest { assertStyleToggles(1, "U") { it.underline } }
 
     @Test
-    fun `underline on the primary reference, full screen`() = runComposeUiTest { assertStyleToggles(2, "U") { it.underline } }
+    fun `underline on the primary reference, full screen`() =
+        runComposeUiTest { assertStyleToggles(2, "U") { it.underline } }
 
     @Test
-    fun `underline on the primary reference, lower third`() = runComposeUiTest { assertStyleToggles(3, "U") { it.underline } }
+    fun `underline on the primary reference, lower third`() =
+        runComposeUiTest { assertStyleToggles(3, "U") { it.underline } }
 
 
 

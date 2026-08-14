@@ -139,7 +139,10 @@ internal fun BibleColumnHeaderRow(
                         val crossRefsLabel = stringResource(Res.string.bible_cross_references_title)
                         TooltipArea(
                             tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    shape = MaterialTheme.shapes.extraSmall
+                                ) {
                                     Text(
                                         stringResource(Res.string.bible_cross_references),
                                         color = MaterialTheme.colorScheme.inverseOnSurface,
@@ -148,7 +151,10 @@ internal fun BibleColumnHeaderRow(
                                     )
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+                            tooltipPlacement = TooltipPlacement.ComponentRect(
+                                anchor = Alignment.BottomCenter,
+                                offset = DpOffset(0.dp, 4.dp)
+                            ),
                         ) {
                             Row(
                                 modifier = Modifier
@@ -195,7 +201,10 @@ internal fun BibleColumnHeaderRow(
                     val holdLiveState = holdLive
                     TooltipArea(
                         tooltip = {
-                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.inverseSurface,
+                                shape = MaterialTheme.shapes.extraSmall
+                            ) {
                                 Text(
                                     if (holdPillActive) holdLiveStr else verseSelectionHint,
                                     color = MaterialTheme.colorScheme.inverseOnSurface,
@@ -204,7 +213,10 @@ internal fun BibleColumnHeaderRow(
                                 )
                             }
                         },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                        tooltipPlacement = TooltipPlacement.ComponentRect(
+                            anchor = Alignment.BottomCenter,
+                            offset = DpOffset(0.dp, 4.dp)
+                        )
                     ) {
                         Box(
                             modifier = Modifier
@@ -265,15 +277,18 @@ internal fun BibleColumnHeaderRow(
                     }
 
                     if (sttToggleVisible) {
-                        val sttActionStr = if (sttConnected) stringResource(Res.string.stt_disconnect) else stringResource(Res.string.stt_connect)
+                        val sttActionStr = if (sttConnected) stringResource(Res.string.stt_disconnect)
+                            else stringResource(Res.string.stt_connect)
                         ActionIconButton(
                             onClick = {
                                 onSttToggle()
                             },
                             tooltipText = sttActionStr,
                             icon = Icons.Filled.Mic,
-                            containerColor = if (sttConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = if (sttConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                            containerColor = if (sttConnected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = if (sttConnected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
@@ -289,7 +304,12 @@ internal fun BibleColumnHeaderRow(
                             tooltipContent = {
                                 val pair = translations
                                 Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                                    Text(stringResource(Res.string.swap_bibles_hint), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        stringResource(Res.string.swap_bibles_hint),
+                                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                     pair.forEachIndexed { position, item ->
                                         Text(
                                             "${position + 1}. ${item.fileName.substringBeforeLast('.').ifEmpty { "-" }}",

@@ -121,7 +121,9 @@ fun SettingsTextField(
                             Box(contentAlignment = Alignment.CenterStart) {
                                 if (placeholder != null && value.isEmpty()) {
                                     CompositionLocalProvider(
-                                        LocalContentColor provides MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                        LocalContentColor provides MaterialTheme.colorScheme
+                                            .onSurface
+                                            .copy(alpha = 0.38f)
                                     ) {
                                         placeholder()
                                     }

@@ -26,7 +26,17 @@ class SongColumnsTest {
     fun `multiple songbooks and an add-action include both optional columns in place`() {
         val cols = availableSongColumns(songbookCount = 3, hasAddToSchedule = true)
         assertEquals(
-            listOf("number", "title", "songbook", "tune", "play_count", "author", "composer", "add_to_schedule", "favorites"),
+            listOf(
+                "number",
+                "title",
+                "songbook",
+                "tune",
+                "play_count",
+                "author",
+                "composer",
+                "add_to_schedule",
+                "favorites"
+            ),
             cols,
         )
     }

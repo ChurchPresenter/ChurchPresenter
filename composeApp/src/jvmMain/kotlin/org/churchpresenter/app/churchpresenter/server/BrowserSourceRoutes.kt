@@ -56,7 +56,10 @@ internal fun Route.browserSourceRoutes(
                     // a client always gets JS that matches this server's current wire protocol,
                     // rather than silently running stale JS against a since-changed stream format.
                     call.response.headers.append(HttpHeaders.CacheControl, "no-store")
-                    call.respondText(server.browserSourceOverlayPageHtml(displayIndex, output, bgOverride), ContentType.Text.Html)
+                    call.respondText(
+                        server.browserSourceOverlayPageHtml(displayIndex, output, bgOverride),
+                        ContentType.Text.Html
+                    )
                 }
 
                 // WebSocket delta stream of this output's off-screen-rendered content — see

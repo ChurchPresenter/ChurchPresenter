@@ -194,7 +194,9 @@ object SharedCameraFrameCache {
 
     private suspend fun runFfmpegCapture(source: SceneSource.CameraSource, entry: CacheEntry) {
         val path = source.devicePath
-        System.err.println("[Camera] Starting camera capture for device: $path, format: ${source.videoFormat.ifEmpty { "auto" }}")
+        System.err.println(
+            "[Camera] Starting camera capture for device: $path, format: ${source.videoFormat.ifEmpty { "auto" }}"
+        )
 
         val command = buildFfmpegCommand(source) ?: run {
             System.err.println("[Camera] Unknown device path scheme: $path")
@@ -211,7 +213,8 @@ object SharedCameraFrameCache {
                 delay(DEVICE_RELEASE_DELAY_MS)
             }
 
-            System.err.println("[Camera] Opening device (attempt ${consecutiveFailures + 1}): ${command.joinToString(" ")}")
+            System.err
+                .println("[Camera] Opening device (attempt ${consecutiveFailures + 1}): ${command.joinToString(" ")}")
             val process = withContext(Dispatchers.IO) {
                 try {
                     ProcessBuilder(command).redirectErrorStream(false).start()
@@ -292,7 +295,11 @@ object SharedCameraFrameCache {
                             bgraBytesToArgbPixels(frameBuf, pixelBuf)
                         }
 
-                        val img = java.awt.image.BufferedImage(videoW, videoH, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+                        val img = java.awt.image.BufferedImage(
+                            videoW,
+                            videoH,
+                            java.awt.image.BufferedImage.TYPE_INT_ARGB
+                        )
                         img.setRGB(0, 0, videoW, videoH, pixelBuf, 0, videoW)
                         entry.frame.value = img.toComposeImageBitmap()
                         frameCount++
@@ -313,7 +320,9 @@ object SharedCameraFrameCache {
 
                     framesProduced = frameCount > 0
                     if (framesProduced) {
-                        System.err.println("[Camera] Stream interrupted after $frameCount frames (exit $exitCode), restarting...")
+                        System.err.println(
+                            "[Camera] Stream interrupted after $frameCount frames (exit $exitCode), restarting..."
+                        )
                     } else {
                         System.err.println("[Camera] ffmpeg exited with code $exitCode without producing any frames")
                         synchronized(stderrLines) {

@@ -191,7 +191,11 @@ fun BackgroundSettingsTab(
                             )
                             OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
-                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
+                                    s.copy(
+                                        backgroundSettings = s.backgroundSettings.copy(
+                                            defaultBackgroundOpacity = opacity
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -206,7 +210,11 @@ fun BackgroundSettingsTab(
                                 imagePath = settings.backgroundSettings.defaultBackgroundImage,
                                 onImagePathChange = { path ->
                                     onSettingsChange { s ->
-                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundImage = path))
+                                        s.copy(
+                                            backgroundSettings = s.backgroundSettings.copy(
+                                                defaultBackgroundImage = path
+                                            )
+                                        )
                                     }
                                 },
                                 pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
@@ -218,7 +226,11 @@ fun BackgroundSettingsTab(
                             )
                             OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
-                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
+                                    s.copy(
+                                        backgroundSettings = s.backgroundSettings.copy(
+                                            defaultBackgroundOpacity = opacity
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -233,7 +245,11 @@ fun BackgroundSettingsTab(
                                 videoPath = settings.backgroundSettings.defaultBackgroundVideo,
                                 onVideoPathChange = { path ->
                                     onSettingsChange { s ->
-                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundVideo = path))
+                                        s.copy(
+                                            backgroundSettings = s.backgroundSettings.copy(
+                                                defaultBackgroundVideo = path
+                                            )
+                                        )
                                     }
                                 },
                                 pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
@@ -244,7 +260,11 @@ fun BackgroundSettingsTab(
                             )
                             OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
-                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
+                                    s.copy(
+                                        backgroundSettings = s.backgroundSettings.copy(
+                                            defaultBackgroundOpacity = opacity
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -276,7 +296,11 @@ fun BackgroundSettingsTab(
                         selectedType = settings.backgroundSettings.defaultLowerThirdBackgroundType,
                         onTypeSelected = { type ->
                             onSettingsChange { s ->
-                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundType = type))
+                                s.copy(
+                                    backgroundSettings = s.backgroundSettings.copy(
+                                        defaultLowerThirdBackgroundType = type
+                                    )
+                                )
                             }
                         },
                         defaultLabel = "Follow Default",
@@ -302,13 +326,21 @@ fun BackgroundSettingsTab(
                                 color = settings.backgroundSettings.defaultLowerThirdBackgroundColor,
                                 onColorChange = { color ->
                                     onSettingsChange { s ->
-                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundColor = color))
+                                        s.copy(
+                                            backgroundSettings = s.backgroundSettings.copy(
+                                                defaultLowerThirdBackgroundColor = color
+                                            )
+                                        )
                                     }
                                 }
                             )
                             OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
-                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
+                                    s.copy(
+                                        backgroundSettings = s.backgroundSettings.copy(
+                                            defaultLowerThirdBackgroundOpacity = opacity
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -323,7 +355,11 @@ fun BackgroundSettingsTab(
                                 imagePath = settings.backgroundSettings.defaultLowerThirdBackgroundImage,
                                 onImagePathChange = { path ->
                                     onSettingsChange { s ->
-                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundImage = path))
+                                        s.copy(
+                                            backgroundSettings = s.backgroundSettings.copy(
+                                                defaultLowerThirdBackgroundImage = path
+                                            )
+                                        )
                                     }
                                 },
                                 pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
@@ -335,7 +371,11 @@ fun BackgroundSettingsTab(
                             )
                             OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
-                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
+                                    s.copy(
+                                        backgroundSettings = s.backgroundSettings.copy(
+                                            defaultLowerThirdBackgroundOpacity = opacity
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -350,7 +390,11 @@ fun BackgroundSettingsTab(
                                 videoPath = settings.backgroundSettings.defaultLowerThirdBackgroundVideo,
                                 onVideoPathChange = { path ->
                                     onSettingsChange { s ->
-                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundVideo = path))
+                                        s.copy(
+                                            backgroundSettings = s.backgroundSettings.copy(
+                                                defaultLowerThirdBackgroundVideo = path
+                                            )
+                                        )
                                     }
                                 },
                                 pexelsApiKey = settings.stockPhotoSettings.pexelsApiKey,
@@ -361,7 +405,11 @@ fun BackgroundSettingsTab(
                             )
                             OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
                                 onSettingsChange { s ->
-                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
+                                    s.copy(
+                                        backgroundSettings = s.backgroundSettings.copy(
+                                            defaultLowerThirdBackgroundOpacity = opacity
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -745,7 +793,10 @@ private fun BackgroundTypeDropdown(
             .heightIn(min = 36.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { expanded = true }
             .padding(horizontal = 11.dp, vertical = 8.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -887,7 +938,11 @@ private fun TooltipIconButton(
 ) {
     TooltipArea(
         tooltip = {
-            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+            Surface(
+                color = MaterialTheme.colorScheme.inverseSurface,
+                shape = MaterialTheme.shapes.extraSmall,
+                tonalElevation = 4.dp
+            ) {
                 Text(
                     text = tooltip,
                     color = MaterialTheme.colorScheme.inverseOnSurface,
@@ -896,7 +951,10 @@ private fun TooltipIconButton(
                 )
             }
         },
-        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp)
+        )
     ) {
         IconButton(onClick = onClick) {
             Icon(icon, contentDescription = tooltip)

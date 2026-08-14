@@ -159,22 +159,64 @@ private fun CompanionConnectionCard(
     var hostText by remember(connection.id, connection.host) { mutableStateOf(connection.host) }
     var portText by remember(connection.id, connection.port) { mutableStateOf(connection.port.toString()) }
     var deviceIdText by remember(connection.id, connection.deviceId) { mutableStateOf(connection.deviceId) }
-    var leftSidebarDeviceIdText by remember(connection.id, connection.leftSidebarDeviceId) { mutableStateOf(connection.leftSidebarDeviceId) }
-    var rightSidebarDeviceIdText by remember(connection.id, connection.rightSidebarDeviceId) { mutableStateOf(connection.rightSidebarDeviceId) }
+    var leftSidebarDeviceIdText by remember(
+        connection.id,
+        connection.leftSidebarDeviceId
+    ) { mutableStateOf(connection.leftSidebarDeviceId) }
+    var rightSidebarDeviceIdText by remember(
+        connection.id,
+        connection.rightSidebarDeviceId
+    ) { mutableStateOf(connection.rightSidebarDeviceId) }
     var productNameText by remember(connection.id, connection.productName) { mutableStateOf(connection.productName) }
-    var reconnectDelayText by remember(connection.id, connection.reconnectDelayMs) { mutableStateOf(connection.reconnectDelayMs.toString()) }
+    var reconnectDelayText by remember(
+        connection.id,
+        connection.reconnectDelayMs
+    ) { mutableStateOf(connection.reconnectDelayMs.toString()) }
     var tabRowsText by remember(connection.id, connection.tabRows) { mutableStateOf(connection.tabRows.toString()) }
-    var tabColumnsText by remember(connection.id, connection.tabColumns) { mutableStateOf(connection.tabColumns.toString()) }
-    var tabBitmapSizeText by remember(connection.id, connection.tabBitmapSize) { mutableStateOf(connection.tabBitmapSize.toString()) }
-    var leftRowsText by remember(connection.id, connection.leftSidebarRows) { mutableStateOf(connection.leftSidebarRows.toString()) }
-    var leftColumnsText by remember(connection.id, connection.leftSidebarColumns) { mutableStateOf(connection.leftSidebarColumns.toString()) }
-    var leftBitmapSizeText by remember(connection.id, connection.leftSidebarBitmapSize) { mutableStateOf(connection.leftSidebarBitmapSize.toString()) }
-    var rightRowsText by remember(connection.id, connection.rightSidebarRows) { mutableStateOf(connection.rightSidebarRows.toString()) }
-    var rightColumnsText by remember(connection.id, connection.rightSidebarColumns) { mutableStateOf(connection.rightSidebarColumns.toString()) }
-    var rightBitmapSizeText by remember(connection.id, connection.rightSidebarBitmapSize) { mutableStateOf(connection.rightSidebarBitmapSize.toString()) }
-    var tabMaxButtonSizeText by remember(connection.id, connection.tabMaxButtonSizeDp) { mutableStateOf(connection.tabMaxButtonSizeDp.toString()) }
-    var leftMaxButtonSizeText by remember(connection.id, connection.leftSidebarMaxButtonSizeDp) { mutableStateOf(connection.leftSidebarMaxButtonSizeDp.toString()) }
-    var rightMaxButtonSizeText by remember(connection.id, connection.rightSidebarMaxButtonSizeDp) { mutableStateOf(connection.rightSidebarMaxButtonSizeDp.toString()) }
+    var tabColumnsText by remember(
+        connection.id,
+        connection.tabColumns
+    ) { mutableStateOf(connection.tabColumns.toString()) }
+    var tabBitmapSizeText by remember(
+        connection.id,
+        connection.tabBitmapSize
+    ) { mutableStateOf(connection.tabBitmapSize.toString()) }
+    var leftRowsText by remember(
+        connection.id,
+        connection.leftSidebarRows
+    ) { mutableStateOf(connection.leftSidebarRows.toString()) }
+    var leftColumnsText by remember(
+        connection.id,
+        connection.leftSidebarColumns
+    ) { mutableStateOf(connection.leftSidebarColumns.toString()) }
+    var leftBitmapSizeText by remember(
+        connection.id,
+        connection.leftSidebarBitmapSize
+    ) { mutableStateOf(connection.leftSidebarBitmapSize.toString()) }
+    var rightRowsText by remember(
+        connection.id,
+        connection.rightSidebarRows
+    ) { mutableStateOf(connection.rightSidebarRows.toString()) }
+    var rightColumnsText by remember(
+        connection.id,
+        connection.rightSidebarColumns
+    ) { mutableStateOf(connection.rightSidebarColumns.toString()) }
+    var rightBitmapSizeText by remember(
+        connection.id,
+        connection.rightSidebarBitmapSize
+    ) { mutableStateOf(connection.rightSidebarBitmapSize.toString()) }
+    var tabMaxButtonSizeText by remember(
+        connection.id,
+        connection.tabMaxButtonSizeDp
+    ) { mutableStateOf(connection.tabMaxButtonSizeDp.toString()) }
+    var leftMaxButtonSizeText by remember(
+        connection.id,
+        connection.leftSidebarMaxButtonSizeDp
+    ) { mutableStateOf(connection.leftSidebarMaxButtonSizeDp.toString()) }
+    var rightMaxButtonSizeText by remember(
+        connection.id,
+        connection.rightSidebarMaxButtonSizeDp
+    ) { mutableStateOf(connection.rightSidebarMaxButtonSizeDp.toString()) }
 
     SettingsSection(
         title = connection.name.ifBlank { stringResource(Res.string.companion_satellite_settings) },
@@ -196,12 +238,18 @@ private fun CompanionConnectionCard(
                 if (viewModel != null) {
                     val primary = primaryPlacement(connection)
                     val state = primary?.let { viewModel.connectionStates[CompanionSurfaceSlot(connection.id, it)] }
-                        ?: CompanionConnectionUiState(CompanionSurfaceSlot(connection.id, CompanionSurfacePlacement.TAB))
+                        ?: CompanionConnectionUiState(CompanionSurfaceSlot(
+                            connection.id,
+                            CompanionSurfacePlacement.TAB
+                        ))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        if (state.status == CompanionConnectionStatus.CONNECTED || state.status == CompanionConnectionStatus.CONNECTING) {
+                        if (
+                            state.status == CompanionConnectionStatus.CONNECTED
+                                || state.status == CompanionConnectionStatus.CONNECTING
+                        ) {
                             OutlinedButton(onClick = { viewModel.disconnectAll(connection) }) {
                                 Text(stringResource(Res.string.companion_satellite_disconnect))
                             }
@@ -230,11 +278,18 @@ private fun CompanionConnectionCard(
                         if (state.status != CompanionConnectionStatus.CONNECTED) {
                             val (statusText, statusColor) = when (state.status) {
                                 CompanionConnectionStatus.CONNECTING ->
-                                    stringResource(Res.string.companion_satellite_status_connecting) to MaterialTheme.semantic.warning
+                                    stringResource(
+                                        Res.string.companion_satellite_status_connecting
+                                    ) to MaterialTheme.semantic.warning
                                 CompanionConnectionStatus.ERROR ->
-                                    stringResource(Res.string.companion_satellite_status_error, state.errorMessage) to MaterialTheme.colorScheme.error
+                                    stringResource(
+                                        Res.string.companion_satellite_status_error,
+                                        state.errorMessage
+                                    ) to MaterialTheme.colorScheme.error
                                 else ->
-                                    stringResource(Res.string.companion_satellite_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    stringResource(
+                                        Res.string.companion_satellite_status_disconnected
+                                    ) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             }
                             Text(statusText, style = MaterialTheme.typography.bodySmall, color = statusColor)
                         }
@@ -340,7 +395,9 @@ private fun CompanionConnectionCard(
                         value = reconnectDelayText,
                         onValueChange = { v ->
                             reconnectDelayText = v
-                            v.toIntOrNull()?.let { onUpdate { copy(reconnectDelayMs = it.coerceAtLeast(MIN_RECONNECT_DELAY_MS)) } }
+                            v.toIntOrNull()?.let {
+                                onUpdate { copy(reconnectDelayMs = it.coerceAtLeast(MIN_RECONNECT_DELAY_MS)) }
+                            }
                         },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -371,13 +428,25 @@ private fun CompanionConnectionCard(
                     checked = connection.showInTab,
                     onCheckedChange = { onUpdate { copy(showInTab = it) } },
                     rowsText = tabRowsText,
-                    onRowsChange = { v -> tabRowsText = v; v.toIntOrNull()?.let { onUpdate { copy(tabRows = it.coerceAtLeast(1)) } } },
+                    onRowsChange = {
+                        v -> tabRowsText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(tabRows = it.coerceAtLeast(1)) } }
+                    },
                     columnsText = tabColumnsText,
-                    onColumnsChange = { v -> tabColumnsText = v; v.toIntOrNull()?.let { onUpdate { copy(tabColumns = it.coerceAtLeast(1)) } } },
+                    onColumnsChange = {
+                        v -> tabColumnsText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(tabColumns = it.coerceAtLeast(1)) } }
+                    },
                     bitmapSizeText = tabBitmapSizeText,
-                    onBitmapSizeChange = { v -> tabBitmapSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(tabBitmapSize = it.coerceAtLeast(1)) } } },
+                    onBitmapSizeChange = {
+                        v -> tabBitmapSizeText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(tabBitmapSize = it.coerceAtLeast(1)) } }
+                    },
                     maxButtonSizeText = tabMaxButtonSizeText,
-                    onMaxButtonSizeChange = { v -> tabMaxButtonSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(tabMaxButtonSizeDp = it.coerceAtLeast(0)) } } }
+                    onMaxButtonSizeChange = {
+                        v -> tabMaxButtonSizeText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(tabMaxButtonSizeDp = it.coerceAtLeast(0)) } }
+                    }
                 )
 
                 CompanionPlacementBlock(
@@ -385,13 +454,25 @@ private fun CompanionConnectionCard(
                     checked = connection.showInLeftSidebar,
                     onCheckedChange = { onUpdate { copy(showInLeftSidebar = it) } },
                     rowsText = leftRowsText,
-                    onRowsChange = { v -> leftRowsText = v; v.toIntOrNull()?.let { onUpdate { copy(leftSidebarRows = it.coerceAtLeast(1)) } } },
+                    onRowsChange = {
+                        v -> leftRowsText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(leftSidebarRows = it.coerceAtLeast(1)) } }
+                    },
                     columnsText = leftColumnsText,
-                    onColumnsChange = { v -> leftColumnsText = v; v.toIntOrNull()?.let { onUpdate { copy(leftSidebarColumns = it.coerceAtLeast(1)) } } },
+                    onColumnsChange = {
+                        v -> leftColumnsText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(leftSidebarColumns = it.coerceAtLeast(1)) } }
+                    },
                     bitmapSizeText = leftBitmapSizeText,
-                    onBitmapSizeChange = { v -> leftBitmapSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(leftSidebarBitmapSize = it.coerceAtLeast(1)) } } },
+                    onBitmapSizeChange = {
+                        v -> leftBitmapSizeText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(leftSidebarBitmapSize = it.coerceAtLeast(1)) } }
+                    },
                     maxButtonSizeText = leftMaxButtonSizeText,
-                    onMaxButtonSizeChange = { v -> leftMaxButtonSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(leftSidebarMaxButtonSizeDp = it.coerceAtLeast(0)) } } }
+                    onMaxButtonSizeChange = {
+                        v -> leftMaxButtonSizeText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(leftSidebarMaxButtonSizeDp = it.coerceAtLeast(0)) } }
+                    }
                 )
 
                 CompanionPlacementBlock(
@@ -399,13 +480,25 @@ private fun CompanionConnectionCard(
                     checked = connection.showInRightSidebar,
                     onCheckedChange = { onUpdate { copy(showInRightSidebar = it) } },
                     rowsText = rightRowsText,
-                    onRowsChange = { v -> rightRowsText = v; v.toIntOrNull()?.let { onUpdate { copy(rightSidebarRows = it.coerceAtLeast(1)) } } },
+                    onRowsChange = {
+                        v -> rightRowsText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(rightSidebarRows = it.coerceAtLeast(1)) } }
+                    },
                     columnsText = rightColumnsText,
-                    onColumnsChange = { v -> rightColumnsText = v; v.toIntOrNull()?.let { onUpdate { copy(rightSidebarColumns = it.coerceAtLeast(1)) } } },
+                    onColumnsChange = {
+                        v -> rightColumnsText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(rightSidebarColumns = it.coerceAtLeast(1)) } }
+                    },
                     bitmapSizeText = rightBitmapSizeText,
-                    onBitmapSizeChange = { v -> rightBitmapSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(rightSidebarBitmapSize = it.coerceAtLeast(1)) } } },
+                    onBitmapSizeChange = {
+                        v -> rightBitmapSizeText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(rightSidebarBitmapSize = it.coerceAtLeast(1)) } }
+                    },
                     maxButtonSizeText = rightMaxButtonSizeText,
-                    onMaxButtonSizeChange = { v -> rightMaxButtonSizeText = v; v.toIntOrNull()?.let { onUpdate { copy(rightSidebarMaxButtonSizeDp = it.coerceAtLeast(0)) } } }
+                    onMaxButtonSizeChange = {
+                        v -> rightMaxButtonSizeText = v
+                        v.toIntOrNull()?.let { onUpdate { copy(rightSidebarMaxButtonSizeDp = it.coerceAtLeast(0)) } }
+                    }
                 )
             }
         }
@@ -424,7 +517,10 @@ private fun CompanionConnectionCard(
         if (canRemove) {
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = onRemove) {
-                Text(stringResource(Res.string.companion_satellite_remove_connection), color = MaterialTheme.colorScheme.error)
+                Text(
+                    stringResource(Res.string.companion_satellite_remove_connection),
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         }
     }

@@ -116,8 +116,11 @@ internal fun ComposeUiTest.renderedLines(): List<String> =
 internal fun ComposeUiTest.rowsUnder(heading: String): List<Triple<String, String, String>> {
     val all = onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.Text))
         .fetchSemanticsNodes(atLeastOneRootRequired = false)
-        .map { it.boundsInRoot to (it.config.getOrNull(SemanticsProperties.Text)?.joinToString("") { t -> t.text } ?: "") }
-    val headings = all.filter { it.second.startsWith(StatsLabel.TOP_SONGS) || it.second.startsWith(StatsLabel.TOP_VERSES) }
+        .map {
+            it.boundsInRoot to (it.config.getOrNull(SemanticsProperties.Text)?.joinToString("") { t -> t.text } ?: "")
+        }
+    val headings =
+        all.filter { it.second.startsWith(StatsLabel.TOP_SONGS) || it.second.startsWith(StatsLabel.TOP_VERSES) }
         .sortedBy { it.first.top }
     val start = headings.firstOrNull { it.second == heading } ?: error("no section headed \"$heading\"")
     val nextTop = headings.firstOrNull { it.first.top > start.first.top }?.first?.top ?: Float.MAX_VALUE

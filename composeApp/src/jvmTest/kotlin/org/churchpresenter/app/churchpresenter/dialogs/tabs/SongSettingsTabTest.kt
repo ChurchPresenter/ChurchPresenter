@@ -132,7 +132,11 @@ class SongSettingsTabTest {
     @Test
     fun `the show-number lower-third dropdown stores Every Page`() = songTab { get ->
         chooseShowOption(ShowDropdown.NUMBER_LOWER_THIRD, "Every Page")
-        assertEquals(Constants.EVERY_PAGE, get().songSettings.showNumberLowerThird, "the lower-third choice is separate")
+        assertEquals(
+            Constants.EVERY_PAGE,
+            get().songSettings.showNumberLowerThird,
+            "the lower-third choice is separate"
+        )
         assertEquals(Constants.FIRST_PAGE, get().songSettings.showNumber, "the fullscreen choice must be untouched")
         // Only the untouched dropdown is asserted on screen: a dropdown that was just clicked
         // echoes the choice from its own state, so its display proves nothing. See the round-trip
@@ -203,7 +207,11 @@ class SongSettingsTabTest {
 
         horizontalAlignButton(group, HAlign.CENTER).performScrollTo().performClick()
         waitForIdle()
-        assertEquals(Constants.CENTER, get().songSettings.songNumberLowerThirdHorizontalAlignment, "centre must be stored")
+        assertEquals(
+            Constants.CENTER,
+            get().songSettings.songNumberLowerThirdHorizontalAlignment,
+            "centre must be stored"
+        )
     }
 
     @Test
@@ -221,7 +229,11 @@ class SongSettingsTabTest {
         horizontalAlignButton(HAlignGroup.SONG_NUMBER_FULLSCREEN, HAlign.CENTER).performScrollTo().performClick()
         waitForIdle()
 
-        assertEquals(Constants.BELOW_VERSE, get().songSettings.titlePosition, "the title must have moved below the verse")
+        assertEquals(
+            Constants.BELOW_VERSE,
+            get().songSettings.titlePosition,
+            "the title must have moved below the verse"
+        )
         onNodeWithTag("song_songNumberBeforeTitle")
             .assertExists("matching the number's layout to the title's must reveal the ordering checkbox")
         onNodeWithText("Number before title").assertExists("the checkbox must be captioned")
@@ -290,7 +302,11 @@ class SongSettingsTabTest {
      */
     @Test
     fun `every option can be picked in every show dropdown`() {
-        val options = listOf("None" to Constants.NONE, "First Page" to Constants.FIRST_PAGE, "Every Page" to Constants.EVERY_PAGE)
+        val options = listOf(
+            "None" to Constants.NONE,
+            "First Page" to Constants.FIRST_PAGE,
+            "Every Page" to Constants.EVERY_PAGE
+        )
         val readers = listOf<(SongSettings) -> String>(
             { it.showNumber },
             { it.showNumberLowerThird },
@@ -534,7 +550,11 @@ class SongSettingsTabTest {
             },
         ) { get ->
             retypeNumberField(showing = 124, to = 300)
-            assertEquals(300, get().songSettings.titleLowerThirdShadowSize, "the lower-third shadow size must be stored")
+            assertEquals(
+                300,
+                get().songSettings.titleLowerThirdShadowSize,
+                "the lower-third shadow size must be stored"
+            )
             retypeNumberField(showing = 78, to = 55)
             assertEquals(55, get().songSettings.titleLowerThirdShadowOpacity, "the intensity must be stored")
         }

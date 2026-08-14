@@ -268,7 +268,11 @@ class SongsTabSelectionTest {
 
     @Test
     fun `a song with one verse still goes live with a section`() =
-        songsTab(songs = listOf(SongFixture(number = "1", title = "Single", lyrics = listOf("[Verse 1]", "one line")))) { _, reports ->
+        songsTab(songs = listOf(SongFixture(
+            number = "1",
+            title = "Single",
+            lyrics = listOf("[Verse 1]", "one line")
+        ))) { _, reports ->
             clickRow("Single")
             goLive()
             assertNotNull(reports.selectedSection, "a one-verse song is still a song")

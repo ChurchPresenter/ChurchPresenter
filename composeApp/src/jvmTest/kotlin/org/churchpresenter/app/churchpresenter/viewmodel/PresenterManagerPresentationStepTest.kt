@@ -129,7 +129,10 @@ class PresenterManagerPresentationStepTest {
     fun `advancing with no live player falls through to slide navigation`() {
         val pm = manager()
 
-        assertFalse(pm.advancePresentationStep(staticDeck(), slideIndex = 0), "false tells the caller to change slides instead")
+        assertFalse(
+            pm.advancePresentationStep(staticDeck(), slideIndex = 0),
+            "false tells the caller to change slides instead"
+        )
     }
 
     @Test

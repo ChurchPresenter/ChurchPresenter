@@ -46,7 +46,8 @@ fun FileVideoPicker(
                 scope.launch {
                     val file = fileChooser.chooseSingle(
                         path = Path(videoPath),
-                        filters = listOf(FileNameExtensionFilter(videoFilesFilterStr, "mp4", "mov", "avi", "mkv", "webm")),
+                        filters =
+                            listOf(FileNameExtensionFilter(videoFilesFilterStr, "mp4", "mov", "avi", "mkv", "webm")),
                         title = "",
                         selectDirectory = false
                     )
@@ -69,7 +70,8 @@ fun FileVideoPicker(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = if (videoPath.isEmpty()) stringResource(Res.string.no_video_selected) else videoPath.substringAfterLast('/').substringAfterLast('\\'),
+            text = if (videoPath.isEmpty()) stringResource(Res.string.no_video_selected)
+                else videoPath.substringAfterLast('/').substringAfterLast('\\'),
             style = MaterialTheme.typography.bodySmall,
             color = if (videoPath.isEmpty())
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)

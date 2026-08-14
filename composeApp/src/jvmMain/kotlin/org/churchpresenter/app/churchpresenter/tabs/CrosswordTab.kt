@@ -342,7 +342,10 @@ fun CrosswordTab(
                                     // Unlock next level if this is the furthest solved
                                     if (currentLevelIdx >= unlockedLevel) {
                                         onSettingsChange { s ->
-                                            s.copy(crosswordUnlockedLevel = maxOf(s.crosswordUnlockedLevel, currentLevelIdx + 1))
+                                            s.copy(crosswordUnlockedLevel = maxOf(
+                                                s.crosswordUnlockedLevel,
+                                                currentLevelIdx + 1
+                                            ))
                                         }
                                     }
                                     // Advance to the next level automatically

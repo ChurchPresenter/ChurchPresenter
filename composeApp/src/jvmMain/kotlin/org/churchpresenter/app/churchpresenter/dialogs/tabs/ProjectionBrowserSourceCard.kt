@@ -134,7 +134,8 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             var showRemoveConfirm by remember { mutableStateOf(false) }
-            val overlayUrl = if (serverUrl.isNotBlank()) "$serverUrl${Constants.ENDPOINT_BROWSER_SOURCE}/${i + 1}" else null
+            val overlayUrl = if (serverUrl.isNotBlank()) "$serverUrl${Constants.ENDPOINT_BROWSER_SOURCE}/${i + 1}"
+                else null
             val apiKeyParam = if (output.browserSourceApiKeyRequired && settings.serverSettings.apiKey.isNotBlank())
                 "apiKey=${settings.serverSettings.apiKey}" else null
             fun urlWithBg(bg: String): String =
@@ -185,14 +186,20 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                             onClick = { copyText(urlWithBg("transparent")) },
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                         ) {
-                            Text(stringResource(Res.string.copy_url_transparent), style = MaterialTheme.typography.labelSmall)
+                            Text(
+                                stringResource(Res.string.copy_url_transparent),
+                                style = MaterialTheme.typography.labelSmall
+                            )
                         }
                         Button(
                             shape = RoundedCornerShape(6.dp),
                             onClick = { copyText(urlWithBg("black")) },
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                         ) {
-                            Text(stringResource(Res.string.copy_url_black_bg), style = MaterialTheme.typography.labelSmall)
+                            Text(
+                                stringResource(Res.string.copy_url_black_bg),
+                                style = MaterialTheme.typography.labelSmall
+                            )
                         }
                     }
                     Button(
@@ -221,7 +228,10 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                     onDismissRequest = { showRemoveConfirm = false },
                     title = { Text(stringResource(Res.string.confirm_delete)) },
                     text = {
-                        Text(stringResource(Res.string.browser_source_confirm_remove_message, stringResource(Res.string.browser_source_output_label, i + 1)))
+                        Text(stringResource(
+                            Res.string.browser_source_confirm_remove_message,
+                            stringResource(Res.string.browser_source_output_label, i + 1)
+                        ))
                     },
                     confirmButton = {
                         TextButton(
@@ -251,8 +261,14 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
             Row(verticalAlignment = Alignment.Top) {
                 Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     @OptIn(ExperimentalMaterial3Api::class)
-                    Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                    Column(
+                        modifier = Modifier.width(langDropdownWidth),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().height(contentLabelHeight),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
                             Text(
                                 text = stringResource(Res.string.display_mode),
                                 style = MaterialTheme.typography.bodySmall,
@@ -286,15 +302,24 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                                         displayModeExpanded = false
                                         val updated = output.copy(displayMode = modeValue)
                                         onSettingsChange { s ->
-                                            s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                            s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(
+                                                i,
+                                                updated
+                                            ))
                                         }
                                     }
                                 )
                             }
                         }
                     }
-                    Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                    Column(
+                        modifier = Modifier.width(langDropdownWidth),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().height(contentLabelHeight),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
                             Text(
                                 text = stringResource(Res.string.browser_source_resolution),
                                 style = MaterialTheme.typography.bodySmall,
@@ -327,7 +352,10 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                                         resolutionExpanded = false
                                         val updated = output.copy(browserSourceWidth = w, browserSourceHeight = h)
                                         onSettingsChange { s ->
-                                            s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                            s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(
+                                                i,
+                                                updated
+                                            ))
                                         }
                                     }
                                 )
@@ -335,7 +363,10 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                         }
                     }
                     Column(modifier = Modifier.width(cellWidth), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().height(contentLabelHeight),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
                             Text(
                                 text = stringResource(Res.string.browser_source_fps),
                                 style = MaterialTheme.typography.bodySmall,
@@ -368,7 +399,10 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                                         fpsExpanded = false
                                         val updated = output.copy(browserSourceFps = fps)
                                         onSettingsChange { s ->
-                                            s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                            s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(
+                                                i,
+                                                updated
+                                            ))
                                         }
                                     }
                                 )
@@ -376,8 +410,14 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                         }
                     }
                     @OptIn(ExperimentalMaterial3Api::class)
-                    Column(modifier = Modifier.width(langDropdownWidth), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomCenter) {
+                    Column(
+                        modifier = Modifier.width(langDropdownWidth),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().height(contentLabelHeight),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
                             Text(
                                 text = stringResource(Res.string.browser_source_require_api_key),
                                 style = MaterialTheme.typography.bodySmall,
@@ -388,8 +428,11 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                             )
                         }
                         TooltipBox(
-                            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                            tooltip = { PlainTooltip { Text(stringResource(Res.string.browser_source_uses_server_api_key)) } },
+                            positionProvider =
+                                TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                            tooltip = {
+                                PlainTooltip { Text(stringResource(Res.string.browser_source_uses_server_api_key)) }
+                            },
                             state = rememberTooltipState()
                         ) {
                             Checkbox(
@@ -397,7 +440,10 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                                 onCheckedChange = { checked ->
                                     val updated = output.copy(browserSourceApiKeyRequired = checked)
                                     onSettingsChange { s ->
-                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(
+                                            i,
+                                            updated
+                                        ))
                                     }
                                 }
                             )
@@ -405,7 +451,10 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                     }
                     // Content Outputs — opens a modal listing every content type + background.
                     Column(modifier = Modifier.weight(1f)) {
-                        Box(modifier = Modifier.fillMaxWidth().height(contentLabelHeight), contentAlignment = Alignment.BottomStart) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().height(contentLabelHeight),
+                            contentAlignment = Alignment.BottomStart
+                        ) {
                             Text(
                                 text = stringResource(Res.string.content_outputs),
                                 style = MaterialTheme.typography.bodySmall,
@@ -423,7 +472,11 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                             Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = stringResource(Res.string.content_outputs_enabled_short, enabledCount, totalCount),
+                                text = stringResource(
+                                    Res.string.content_outputs_enabled_short,
+                                    enabledCount,
+                                    totalCount
+                                ),
                                 style = MaterialTheme.typography.labelSmall
                             )
                         }
@@ -445,7 +498,10 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                                 isBrowserSource = true,
                                 onApply = { updated ->
                                     onSettingsChange { s ->
-                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+                                        s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(
+                                            i,
+                                            updated
+                                        ))
                                     }
                                 },
                                 onDismiss = { showContentDialog = false }

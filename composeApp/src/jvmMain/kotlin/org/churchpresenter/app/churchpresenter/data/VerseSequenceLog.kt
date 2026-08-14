@@ -123,7 +123,10 @@ class VerseSequenceLog(
                 .thenByDescending { seen[it.key] ?: 0L }
                 .thenBy { it.key })
             .take(limit)
-            .mapNotNull { (target, count) -> unpackRef(target)?.let { LearnedRef(it.first, it.second, it.third, count) } }
+            .mapNotNull { (
+                target,
+                count
+            ) -> unpackRef(target)?.let { LearnedRef(it.first, it.second, it.third, count) } }
             .toList()
     }
 

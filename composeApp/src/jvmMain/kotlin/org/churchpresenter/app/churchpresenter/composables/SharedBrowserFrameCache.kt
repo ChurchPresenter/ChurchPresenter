@@ -137,13 +137,19 @@ object SharedBrowserFrameCache {
                         })
                     })
                     cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                        put("expression", "document.documentElement.style.background='transparent';document.body.style.background='transparent';")
+                        put(
+                            "expression",
+                            "document.documentElement.style.background='transparent';document.body.style.background='transparent';"
+                        )
                     })
                 } else {
                     // Reset to default (opaque white) background
                     cdp.sendAsync("Emulation.setDefaultBackgroundColorOverride", buildJsonObject {})
                     cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                        put("expression", "document.documentElement.style.background='';document.body.style.background='';")
+                        put(
+                            "expression",
+                            "document.documentElement.style.background='';document.body.style.background='';"
+                        )
                     })
                 }
             } catch (_: Exception) {}
@@ -153,7 +159,8 @@ object SharedBrowserFrameCache {
     /** Update capture FPS without restarting the browser. */
     fun setFps(sourceId: String, fps: Int) {
         val entry = synchronized(this) { entries[sourceId] } ?: return
-        entry.captureIntervalMs = (MILLIS_PER_SECOND / fps.coerceIn(MIN_FPS, MAX_FPS)).coerceAtLeast(MIN_CAPTURE_INTERVAL_MS)
+        entry.captureIntervalMs =
+            (MILLIS_PER_SECOND / fps.coerceIn(MIN_FPS, MAX_FPS)).coerceAtLeast(MIN_CAPTURE_INTERVAL_MS)
     }
 
     /** Get the current URL flow for a source (for properties panel display). */
@@ -174,12 +181,18 @@ object SharedBrowserFrameCache {
                 delay(NAVIGATE_SETTLE_MS) // wait for page load
                 if (forceTransparent) {
                     cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                        put("expression", "document.documentElement.style.background='transparent';document.body.style.background='transparent';")
+                        put(
+                            "expression",
+                            "document.documentElement.style.background='transparent';document.body.style.background='transparent';"
+                        )
                     })
                 }
                 if (customCss.isNotBlank()) {
                     cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                        put("expression", "var s=document.createElement('style');s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);")
+                        put(
+                            "expression",
+                            "var s=document.createElement('style');s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);"
+                        )
                     })
                 }
             } catch (_: Exception) {}
@@ -237,7 +250,13 @@ object SharedBrowserFrameCache {
 
         // Fallback: check PATH
         val names = if (isWindows) listOf("msedge.exe", "chrome.exe")
-                    else listOf("google-chrome-stable", "google-chrome", "chromium-browser", "chromium", "microsoft-edge-stable")
+                    else listOf(
+                        "google-chrome-stable",
+                        "google-chrome",
+                        "chromium-browser",
+                        "chromium",
+                        "microsoft-edge-stable"
+                    )
         val whichCmd = if (isWindows) "where" else "which"
         for (name in names) {
             try {
@@ -365,7 +384,8 @@ object SharedBrowserFrameCache {
         }
         entry.userDataDir = userDataDir
 
-        System.err.println("[BrowserSource] Launching headless browser: $browserPath on port $port (userData=$userDataDir)")
+        System.err
+            .println("[BrowserSource] Launching headless browser: $browserPath on port $port (userData=$userDataDir)")
 
         val command = buildBrowserLaunchCommand(browserPath, port, userDataDir.absolutePath, renderWidth, renderHeight)
 
@@ -427,18 +447,25 @@ object SharedBrowserFrameCache {
             // Inject transparency CSS
             if (forceTransparent) {
                 cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                    put("expression", "document.documentElement.style.background='transparent';document.body.style.background='transparent';")
+                    put(
+                        "expression",
+                        "document.documentElement.style.background='transparent';document.body.style.background='transparent';"
+                    )
                 })
             }
             if (customCss.isNotBlank()) {
                 cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                    put("expression", "var s=document.createElement('style');s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);")
+                    put(
+                        "expression",
+                        "var s=document.createElement('style');s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);"
+                    )
                 })
             }
         }
 
         // Start capture loop
-        entry.captureIntervalMs = (MILLIS_PER_SECOND / fps.coerceIn(MIN_FPS, MAX_FPS)).coerceAtLeast(MIN_STARTUP_CAPTURE_INTERVAL_MS)
+        entry.captureIntervalMs =
+            (MILLIS_PER_SECOND / fps.coerceIn(MIN_FPS, MAX_FPS)).coerceAtLeast(MIN_STARTUP_CAPTURE_INTERVAL_MS)
         System.err.println("[BrowserSource] Starting capture loop at ${fps}fps")
 
         var frameCount = 0
@@ -599,7 +626,8 @@ object SharedBrowserFrameCache {
                     }
 
                     override fun onError(webSocket: WebSocket, error: Throwable) {
-                        System.err.println("[BrowserSource] WebSocket error: ${error::class.simpleName}: ${error.message}")
+                        System.err
+                            .println("[BrowserSource] WebSocket error: ${error::class.simpleName}: ${error.message}")
                         pending.values.forEach { it.complete(null) }
                     }
 
@@ -641,10 +669,14 @@ object SharedBrowserFrameCache {
                     System.err.println("[BrowserSource] CDP send '$method': WebSocket is null")
                     return null
                 }
-                socket.sendText(msg.toString(), true)?.get(WEBSOCKET_SEND_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
+                socket.sendText(
+                    msg.toString(),
+                    true
+                )?.get(WEBSOCKET_SEND_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
             } catch (e: Exception) {
                 pending.remove(id)
-                System.err.println("[BrowserSource] CDP sendText '$method' failed: ${e::class.simpleName}: ${e.message}")
+                System.err
+                    .println("[BrowserSource] CDP sendText '$method' failed: ${e::class.simpleName}: ${e.message}")
                 return null
             }
 

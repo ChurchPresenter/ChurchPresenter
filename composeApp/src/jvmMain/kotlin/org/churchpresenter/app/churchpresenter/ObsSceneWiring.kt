@@ -49,7 +49,12 @@ internal fun ObsSceneWiring(
             }
     }
     // Sync QA settings to server — admin auth reuses the server API key, just like the presentation remote
-    LaunchedEffect(appSettings.serverSettings.apiKeyEnabled, appSettings.serverSettings.apiKey, appSettings.qaSettings.rateLimitCooldownSeconds, appSettings.qaSettings.votingEnabled) {
+    LaunchedEffect(
+        appSettings.serverSettings.apiKeyEnabled,
+        appSettings.serverSettings.apiKey,
+        appSettings.qaSettings.rateLimitCooldownSeconds,
+        appSettings.qaSettings.votingEnabled
+    ) {
         companionServer.qaAdminPassword = activeApiKey(appSettings.serverSettings)
         companionServer.qaCooldownSeconds = appSettings.qaSettings.rateLimitCooldownSeconds
         companionServer.qaVotingEnabled = appSettings.qaSettings.votingEnabled

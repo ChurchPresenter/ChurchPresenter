@@ -116,7 +116,13 @@ fun STTTab(
                 enabled = !connected && !connecting,
                 trailingIcon = {
                     if (!connected && !connecting && urlInput.isNotEmpty()) {
-                        IconButton(onClick = { urlInput = "" }, colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                        IconButton(
+                            onClick = { urlInput = "" },
+                            colors =
+                                IconButtonDefaults.iconButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                        ) {
                             Icon(
                                 imageVector = Icons.Filled.Clear,
                                 contentDescription = stringResource(Res.string.clear),
@@ -149,7 +155,12 @@ fun STTTab(
             } else {
                 ActionIconButton(
                     onClick = {
-                        val url = if (urlInput.isNotBlank() && !urlInput.startsWith("http://") && !urlInput.startsWith("https://")) "http://$urlInput" else urlInput
+                        val url =
+                            if (urlInput.isNotBlank() && !urlInput.startsWith(
+                                "http://"
+                            ) && !urlInput.startsWith("https://"))
+                                "http://$urlInput"
+                            else urlInput
                         urlInput = url
                         onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(serverUrl = url)) }
                         sttManager.connect(url)
@@ -201,7 +212,12 @@ fun STTTab(
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
         // Live preview area
-        Text(stringResource(Res.string.stt_live_preview), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+        Text(
+            stringResource(Res.string.stt_live_preview),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
 
         val maxSeg = sttSettings.maxSegments
         val displaySegments = if (maxSeg > 0) segments.takeLast(maxSeg) else segments
@@ -251,11 +267,21 @@ fun STTTab(
                         Column(
                             modifier = Modifier.fillMaxSize().verticalScroll(transcriptionScrollState).padding(4.dp)
                         ) {
-                            Text(stringResource(Res.string.stt_transcription_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                            Text(
+                                stringResource(Res.string.stt_transcription_label),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                             Spacer(Modifier.height(4.dp))
                             displaySegments.forEach { segment ->
                                 Text(
-                                    text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.onSurface),
+                                    text = applyHighlighting(
+                                        segment.text,
+                                        highlightedWords,
+                                        highlightingEnabled,
+                                        MaterialTheme.colorScheme.onSurface
+                                    ),
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.padding(vertical = 1.dp)
                                 )
@@ -286,11 +312,21 @@ fun STTTab(
                         Column(
                             modifier = Modifier.fillMaxSize().verticalScroll(translationScrollState).padding(4.dp)
                         ) {
-                            Text(stringResource(Res.string.stt_translation_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                            Text(
+                                stringResource(Res.string.stt_translation_label),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
                             Spacer(Modifier.height(4.dp))
                             displayTranslation.forEach { segment ->
                                 Text(
-                                    text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.primary),
+                                    text = applyHighlighting(
+                                        segment.text,
+                                        highlightedWords,
+                                        highlightingEnabled,
+                                        MaterialTheme.colorScheme.primary
+                                    ),
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.padding(vertical = 1.dp)
                                 )
@@ -349,7 +385,8 @@ internal fun applyHighlighting(
                 "$wb$escaped$we"
             }
             var flags = java.util.regex.Pattern.UNICODE_CHARACTER_CLASS
-            if (!hw.caseSensitive) flags = flags or java.util.regex.Pattern.CASE_INSENSITIVE or java.util.regex.Pattern.UNICODE_CASE
+            if (!hw.caseSensitive) flags =
+                flags or java.util.regex.Pattern.CASE_INSENSITIVE or java.util.regex.Pattern.UNICODE_CASE
             val regex = java.util.regex.Pattern.compile(rawPattern, flags).toRegex()
             regex.findAll(text).forEach { match ->
                 for (j in match.range) colors[j] = highlightColor

@@ -42,7 +42,11 @@ fun ConnectionStatusRow(
         InstanceLinkStatus.CONNECTED -> MaterialTheme.semantic.success to Res.string.instance_link_status_connected
         InstanceLinkStatus.CONNECTING -> MaterialTheme.semantic.warning to Res.string.instance_link_status_connecting
         InstanceLinkStatus.ERROR -> MaterialTheme.colorScheme.error to Res.string.instance_link_status_error
-        InstanceLinkStatus.DISCONNECTED -> MaterialTheme.colorScheme.onSurfaceVariant to Res.string.instance_link_status_disconnected
+        InstanceLinkStatus.DISCONNECTED -> MaterialTheme
+            .colorScheme
+            .onSurfaceVariant to Res
+            .string
+            .instance_link_status_disconnected
     }
     val label = when {
         status == InstanceLinkStatus.CONNECTED && connectedLabel != null -> connectedLabel

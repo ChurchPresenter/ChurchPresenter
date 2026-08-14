@@ -262,7 +262,13 @@ internal fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, on
             v.toIntOrNull()?.let { onUpdate(source.copy(captureHeight = it.coerceAtLeast(1))) }
         }
     }
-    PropertySliderWithInput(stringResource(Res.string.canvas_capture_interval), source.captureInterval.toFloat(), MIN_CAPTURE_INTERVAL_MS, MAX_CAPTURE_INTERVAL_MS, "ms") { v ->
+    PropertySliderWithInput(
+        stringResource(Res.string.canvas_capture_interval),
+        source.captureInterval.toFloat(),
+        MIN_CAPTURE_INTERVAL_MS,
+        MAX_CAPTURE_INTERVAL_MS,
+        "ms"
+    ) { v ->
         onUpdate(source.copy(captureInterval = v.toInt()))
     }
 }

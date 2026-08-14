@@ -54,7 +54,9 @@ class StatisticsFileFormatTest {
     fun `a tally written by an older build is read`() {
         statsFile.writeText(
             """{"songDisplayCounts":{"Hymnal::42":{"songNumber":42,"title":"Amazing Grace","songbook":"Hymnal","count":7}},
-                "verseDisplayCounts":{"KJV::John::3::16":{"bibleName":"KJV","bookName":"John","chapter":3,"verseNumber":16,"count":4}}}""",
+                "verseDisplayCounts":{
+                    "KJV::John::3::16":{"bibleName":"KJV","bookName":"John","chapter":3,"verseNumber":16,"count":4}
+                }}""",
         )
 
         val stats = StatisticsManager()
@@ -119,7 +121,11 @@ class StatisticsFileFormatTest {
 
         val keys = json.decodeFromString(DisplayStatistics.serializer(), statsFile.readText()).songDisplayCounts.keys
 
-        assertEquals(setOf("Hymnal::1", "Songs of Praise::1"), keys, "the key is the identity — merging them loses a song")
+        assertEquals(
+            setOf("Hymnal::1", "Songs of Praise::1"),
+            keys,
+            "the key is the identity — merging them loses a song"
+        )
     }
 
     // ── The event log on disk ───────────────────────────────────────────────────

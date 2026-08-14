@@ -80,14 +80,26 @@ class AnnouncementsPresenterRenderTest {
 
     @Test
     fun `a horizontal slide aligns to the position's vertical component`() {
-        render(AnnouncementsSettings(animationType = Constants.ANIMATION_SLIDE_FROM_LEFT, position = Constants.TOP_LEFT))
-        render(AnnouncementsSettings(animationType = Constants.ANIMATION_SLIDE_FROM_LEFT, position = Constants.BOTTOM_LEFT))
+        render(AnnouncementsSettings(
+            animationType = Constants.ANIMATION_SLIDE_FROM_LEFT,
+            position = Constants.TOP_LEFT
+        ))
+        render(AnnouncementsSettings(
+            animationType = Constants.ANIMATION_SLIDE_FROM_LEFT,
+            position = Constants.BOTTOM_LEFT
+        ))
     }
 
     @Test
     fun `a vertical slide aligns to the position's horizontal component`() {
-        render(AnnouncementsSettings(animationType = Constants.ANIMATION_SLIDE_FROM_TOP, position = Constants.CENTER_LEFT))
-        render(AnnouncementsSettings(animationType = Constants.ANIMATION_SLIDE_FROM_TOP, position = Constants.CENTER_RIGHT))
+        render(AnnouncementsSettings(
+            animationType = Constants.ANIMATION_SLIDE_FROM_TOP,
+            position = Constants.CENTER_LEFT
+        ))
+        render(AnnouncementsSettings(
+            animationType = Constants.ANIMATION_SLIDE_FROM_TOP,
+            position = Constants.CENTER_RIGHT
+        ))
     }
 
     @Test

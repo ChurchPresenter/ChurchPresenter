@@ -287,7 +287,8 @@ fun main() {
                     x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height,
                 )
             }
-            val deckLinkCount = deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
+            val deckLinkCount =
+                deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
 
             val proj = appSettings.projectionSettings
             val assignments = reconcileScreenAssignments(proj.screenAssignments, nonPrimaryDisplays, deckLinkCount)
@@ -446,7 +447,12 @@ fun main() {
         var mirroredBackgroundSettings by remember { mutableStateOf<BackgroundSettings?>(null) }
         val instanceLinkConnectionStatusForBackgrounds by instanceLinkViewModel.connectionStatus.collectAsState()
         val instanceLinkBackgroundsSignal by instanceLinkViewModel.backgroundsUpdatedSignal.collectAsState()
-        LaunchedEffect(instanceLinkConnectionStatusForBackgrounds, appSettings.instanceLink.mirrorBackgrounds, appSettings.instanceLink.role, instanceLinkBackgroundsSignal) {
+        LaunchedEffect(
+            instanceLinkConnectionStatusForBackgrounds,
+            appSettings.instanceLink.mirrorBackgrounds,
+            appSettings.instanceLink.role,
+            instanceLinkBackgroundsSignal
+        ) {
             if (!shouldMirrorRemoteBackgrounds(
                     status = instanceLinkConnectionStatusForBackgrounds,
                     role = appSettings.instanceLink.role,
@@ -501,7 +507,11 @@ fun main() {
             prevTunnelWasConnected.value = isConnected
         }
         var presentationFrozen by remember { mutableStateOf(false) }
-        LaunchedEffect(appSettings.presentationRemoteSettings.remoteControlEnabled, appSettings.serverSettings.apiKeyEnabled, appSettings.serverSettings.apiKey) {
+        LaunchedEffect(
+            appSettings.presentationRemoteSettings.remoteControlEnabled,
+            appSettings.serverSettings.apiKeyEnabled,
+            appSettings.serverSettings.apiKey
+        ) {
             val activeApiKey = activeApiKey(appSettings.serverSettings)
             companionServer.updatePresentationRemoteSettings(appSettings.presentationRemoteSettings, activeApiKey)
         }
@@ -537,7 +547,12 @@ fun main() {
                 }
                 val qaDisplayUrlState = rememberUpdatedState(qaDisplayUrl)
                 val bsOutput = browserSourceOutputAt(appSettings.projectionSettings.browserSourceOutputs, i)
-                val renderer = remember(i, bsOutput.browserSourceWidth, bsOutput.browserSourceHeight, bsOutput.browserSourceFps) {
+                val renderer = remember(
+                    i,
+                    bsOutput.browserSourceWidth,
+                    bsOutput.browserSourceHeight,
+                    bsOutput.browserSourceFps
+                ) {
                     BrowserSourceVideoRenderer(
                         presenterManager, appSettingsState, screenAssignmentState, effectiveModeState,
                         outputIndex = i,
@@ -570,7 +585,9 @@ fun main() {
         val remoteSelectPictureFlow =
             remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 8) }
         val remoteSelectPresentationFlow =
-            remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 8) }
+            remember {
+                kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 8)
+            }
         var dialogDismissSignal by remember { mutableStateOf(0) }
         var showOptionsDialog by remember { mutableStateOf(false) }
         var optionsDialogInitialTab by remember { mutableStateOf(0) }
@@ -1065,7 +1082,8 @@ fun main() {
                                                 includePrereleases = appSettings.participateInPrereleases
                                             )
                                             pendingUpdateCheckWasManual = true
-                                            appSettings = appSettings.copy(lastUpdateCheckTimestamp = System.currentTimeMillis())
+                                            appSettings =
+                                                appSettings.copy(lastUpdateCheckTimestamp = System.currentTimeMillis())
                                             settingsManager.saveSettings(appSettings)
                                         }
                                     },
@@ -1113,11 +1131,14 @@ fun main() {
                                     var showBanner by remember { mutableStateOf(true) }
                                     if (showBanner) {
                                         Box(
-                                            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer),
+                                            modifier =
+                                                Modifier.fillMaxSize()
+                                                    .background(MaterialTheme.colorScheme.errorContainer),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
-                                                text = "Video backgrounds disabled after ${CrashReporter.consecutiveCrashes} consecutive crashes.  [Re-enable]  [Dismiss]",
+                                                text =
+                                                    "Video backgrounds disabled after ${CrashReporter.consecutiveCrashes} consecutive crashes.  [Re-enable]  [Dismiss]",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onErrorContainer,
                                                 modifier = Modifier.onPreviewKeyEvent {
@@ -1139,12 +1160,17 @@ fun main() {
                                     shouldUseRemoteContent(instanceLinkStatus, appSettings.instanceLink.role)
                                 MainDesktop(
                                     hostWindow = window,
-                                    instanceLinkConnectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
-                                    instanceLinkNextRetryAtMs = instanceLinkViewModel.nextRetryAtMs.collectAsState().value,
-                                    instanceLinkBibleUpdatedSignal = instanceLinkViewModel.bibleUpdatedSignal.collectAsState().value,
-                                    instanceLinkSecondaryBibleUpdatedSignal = instanceLinkViewModel.secondaryBibleUpdatedSignal.collectAsState().value,
+                                    instanceLinkConnectionStatus =
+                                        instanceLinkViewModel.connectionStatus.collectAsState().value,
+                                    instanceLinkNextRetryAtMs =
+                                        instanceLinkViewModel.nextRetryAtMs.collectAsState().value,
+                                    instanceLinkBibleUpdatedSignal =
+                                        instanceLinkViewModel.bibleUpdatedSignal.collectAsState().value,
+                                    instanceLinkSecondaryBibleUpdatedSignal =
+                                        instanceLinkViewModel.secondaryBibleUpdatedSignal.collectAsState().value,
                                     instanceLinkFollowingHost = appSettings.instanceLink.primaryHost,
-                                    connectedInstanceLinkFollowerCount = companionServer.connectedInstanceLinkFollowers.collectAsState().value.size,
+                                    connectedInstanceLinkFollowerCount =
+                                        companionServer.connectedInstanceLinkFollowers.collectAsState().value.size,
                                     onInstanceLinkConnect = {
                                         val link = appSettings.instanceLink
                                         setInstanceLinkEnabled(true)
@@ -1157,19 +1183,34 @@ fun main() {
                                         setInstanceLinkEnabled(false)
                                         instanceLinkViewModel.disconnect()
                                     },
-                                    instanceLinkRemoteSchedule = instanceLinkViewModel.remoteSchedule.collectAsState().value,
-                                    instanceLinkRemoteSongCatalog = instanceLinkViewModel.remoteSongCatalog.collectAsState().value,
-                                    instanceLinkFetchSongDetail = { number, songbook -> instanceLinkViewModel.fetchSongDetail(number, songbook) },
+                                    instanceLinkRemoteSchedule =
+                                        instanceLinkViewModel.remoteSchedule.collectAsState().value,
+                                    instanceLinkRemoteSongCatalog =
+                                        instanceLinkViewModel.remoteSongCatalog.collectAsState().value,
+                                    instanceLinkFetchSongDetail =
+                                        { number, songbook -> instanceLinkViewModel.fetchSongDetail(
+                                        number,
+                                        songbook
+                                    ) },
                                     instanceLinkFetchBibleFile = { instanceLinkViewModel.fetchBibleFile() },
                                     instanceLinkBibleSyncMode = appSettings.instanceLink.bibleSyncMode,
-                                    instanceLinkFetchSecondaryBibleFile = { instanceLinkViewModel.fetchSecondaryBibleFile() },
-                                    instanceLinkFetchBibleTranslations = { instanceLinkViewModel.fetchBibleTranslations() },
-                                    instanceLinkOnSecondaryBibleFilePathChanged = { path -> companionServer.updateSecondaryBibleFilePath(path) },
-                                    instanceLinkOnBibleFilePathsChanged = { paths -> companionServer.updateBibleFilePaths(paths) },
+                                    instanceLinkFetchSecondaryBibleFile = {
+                                        instanceLinkViewModel.fetchSecondaryBibleFile()
+                                    },
+                                    instanceLinkFetchBibleTranslations = {
+                                        instanceLinkViewModel.fetchBibleTranslations()
+                                    },
+                                    instanceLinkOnSecondaryBibleFilePathChanged = { path ->
+                                        companionServer.updateSecondaryBibleFilePath(path)
+                                    },
+                                    instanceLinkOnBibleFilePathsChanged = { paths ->
+                                        companionServer.updateBibleFilePaths(paths)
+                                    },
                                     instanceLinkSendAddToSchedule = if (canPushToSchedule(appSettings.instanceLink)) {
                                         { item -> instanceLinkViewModel.sendAddToSchedule(item) }
                                     } else null,
-                                    instanceLinkSendRemoveFromSchedule = if (canPushToSchedule(appSettings.instanceLink)) {
+                                    instanceLinkSendRemoveFromSchedule =
+                                        if (canPushToSchedule(appSettings.instanceLink)) {
                                         { id -> instanceLinkViewModel.sendRemoveFromSchedule(id) }
                                     } else null,
                                     instanceLinkRole = appSettings.instanceLink.role,
@@ -1178,11 +1219,21 @@ fun main() {
                                     } else null,
                                     instanceLinkSendVerse = if (instanceLinkIsControllerConnected) {
                                         { bookName, chapter, verseNumber, verseText, verseRange ->
-                                            instanceLinkViewModel.sendSelectBibleVerse(bookName, chapter, verseNumber, verseText, verseRange)
+                                            instanceLinkViewModel.sendSelectBibleVerse(
+                                                bookName,
+                                                chapter,
+                                                verseNumber,
+                                                verseText,
+                                                verseRange
+                                            )
                                         }
                                     } else null,
                                     instanceLinkSendSongSection = if (instanceLinkIsControllerConnected) {
-                                        { number, section, lineIndex -> instanceLinkViewModel.sendSelectSongSection(number, section, lineIndex) }
+                                        { number, section, lineIndex -> instanceLinkViewModel.sendSelectSongSection(
+                                            number,
+                                            section,
+                                            lineIndex
+                                        ) }
                                     } else null,
                                     instanceLinkSendClear = if (instanceLinkIsControllerConnected) {
                                         { instanceLinkViewModel.sendClear() }
@@ -1203,7 +1254,10 @@ fun main() {
                                         { instanceLinkViewModel.sendPreviousSlide() }
                                     } else null,
                                     instanceLinkFetchPictureImageBytes = if (instanceLinkUsesRemoteContent) {
-                                        { folderId, index -> instanceLinkViewModel.fetchPictureImageBytes(folderId, index) }
+                                        { folderId, index -> instanceLinkViewModel.fetchPictureImageBytes(
+                                            folderId,
+                                            index
+                                        ) }
                                     } else null,
                                     instanceLinkFetchPresentationSlideBytes = if (instanceLinkUsesRemoteContent) {
                                         { id, index -> instanceLinkViewModel.fetchPresentationSlideBytes(id, index) }
@@ -1255,12 +1309,22 @@ fun main() {
                                         companionServer.updateBible(
                                             bible,
                                             translation,
-                                            filePath = bibleFilePath(appSettings.bibleSettings.storageDirectory, translation)
+                                            filePath = bibleFilePath(
+                                                appSettings.bibleSettings.storageDirectory,
+                                                translation
+                                            )
                                         )
                                     },
                                     onScheduleChanged = { items -> companionServer.updateSchedule(items) },
                                     onPresentationSlidesLoaded = { id, filePath, fileName, fileType, slides, notes ->
-                                        companionServer.updatePresentation(id, filePath, fileName, fileType, slides, notes)
+                                        companionServer.updatePresentation(
+                                            id,
+                                            filePath,
+                                            fileName,
+                                            fileType,
+                                            slides,
+                                            notes
+                                        )
                                     },
                                     onPicturesLoaded = { folderId, folderName, folderPath, imageFiles ->
                                         companionServer.updatePictures(folderId, folderName, folderPath, imageFiles)
@@ -1307,7 +1371,9 @@ fun main() {
                                     qaManager = qaManager,
                                     tunnelStatus = tunnelStatus,
                                     tunnelUrl = tunnelUrl ?: "",
-                                    onStartTunnel = { companionServer.tunnelManager.start(appSettings.serverSettings.port) },
+                                    onStartTunnel = {
+                                        companionServer.tunnelManager.start(appSettings.serverSettings.port)
+                                    },
                                     onStopTunnel = { companionServer.tunnelManager.stop() },
                                     qaDisplayUrl = qaDisplayUrl,
                                     onQaDisplayUrlChanged = { qaDisplayUrl = it },
@@ -1370,7 +1436,9 @@ fun main() {
                                             enabled = updated.serverSettings.apiKeyEnabled,
                                             key = updated.serverSettings.apiKey
                                         )
-                                        companionServer.updateFileUploadEnabled(updated.serverSettings.fileUploadEnabled)
+                                        companionServer.updateFileUploadEnabled(
+                                            updated.serverSettings.fileUploadEnabled
+                                        )
                                         companionServer.updateMaxMediaUploadMb(updated.serverSettings.maxMediaUploadMb)
                                         companionServer.updateAtemConfig(
                                             updated.atemSettings,
@@ -1424,7 +1492,8 @@ fun main() {
                                     settings = appSettings.instanceLink,
                                     connectionStatus = instanceLinkViewModel.connectionStatus.collectAsState().value,
                                     remoteLiveState = instanceLinkViewModel.remoteLiveState.collectAsState().value,
-                                    remoteScheduleCount = instanceLinkViewModel.remoteSchedule.collectAsState().value.size,
+                                    remoteScheduleCount =
+                                        instanceLinkViewModel.remoteSchedule.collectAsState().value.size,
                                     lastMessageAtMs = instanceLinkViewModel.lastMessageAtMs.collectAsState().value,
                                     onConnect = { edited ->
                                         val link = edited.copy(enabled = true)
@@ -1494,7 +1563,8 @@ fun main() {
                                         appSettings = appSettings.copy(participateInPrereleases = enabled)
                                         settingsManager.saveSettings(appSettings)
                                         coroutineScope.launch {
-                                            pendingUpdateResult = UpdateChecker.checkForUpdate(includePrereleases = enabled)
+                                            pendingUpdateResult =
+                                                UpdateChecker.checkForUpdate(includePrereleases = enabled)
                                         }
                                     },
                                     updateCheckInterval = appSettings.updateCheckInterval,
@@ -1578,7 +1648,8 @@ fun main() {
                                 )
                                 RemoteActivityToastHost(
                                     notifications = remoteActivityNotifications,
-                                    connectedInstanceLinkFollowers = companionServer.connectedInstanceLinkFollowers.collectAsState().value,
+                                    connectedInstanceLinkFollowers =
+                                        companionServer.connectedInstanceLinkFollowers.collectAsState().value,
                                     onDismiss = { n -> remoteActivityNotifications.remove(n) },
                                     onDismissAll = { remoteActivityNotifications.clear() },
                                     onBlockForSession = { n ->

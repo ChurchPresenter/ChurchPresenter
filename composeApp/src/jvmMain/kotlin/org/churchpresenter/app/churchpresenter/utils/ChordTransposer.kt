@@ -133,7 +133,12 @@ object ChordTransposer {
      * With [showChords] off the whole line comes back as one chord-free segment, so the same
      * renderer draws the plain-lyrics view without a second code path.
      */
-    fun parseLine(line: String, steps: Int = 0, flats: Boolean = false, showChords: Boolean = true): List<ChordSegment> {
+    fun parseLine(
+        line: String,
+        steps: Int = 0,
+        flats: Boolean = false,
+        showChords: Boolean = true
+    ): List<ChordSegment> {
         if (!showChords || !hasChords(line)) {
             return listOf(ChordSegment("", if (showChords) line else stripChords(line)))
         }

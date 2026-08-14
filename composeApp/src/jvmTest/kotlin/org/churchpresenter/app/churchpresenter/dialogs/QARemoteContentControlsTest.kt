@@ -78,7 +78,11 @@ class QARemoteContentControlsTest {
 
     @Test
     fun `a display address that exactly equals the server also counts as local`() =
-        qaRemoteTab(qaDisplayUrl = SERVER, tunnelUrl = TUNNEL, tunnelStatus = TunnelStatus.Connected(TUNNEL)) { _, changes ->
+        qaRemoteTab(
+            qaDisplayUrl = SERVER,
+            tunnelUrl = TUNNEL,
+            tunnelStatus = TunnelStatus.Connected(TUNNEL)
+        ) { _, changes ->
             onNodeWithText("Public").performClick()
             waitForIdle()
             assertEquals(listOf(TUNNEL), changes(), "the Public button must still switch to the tunnel")

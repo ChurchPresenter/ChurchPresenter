@@ -489,7 +489,9 @@ class AtemClient(val host: String, val port: Int = 9910) {
         val knownStills = lastKnownState?.stillSlots
         if (!knownStills.isNullOrEmpty() && knownStills.none { it.index == slot }) {
             // 1-based in messages to match ATEM Software Control's numbering
-            throw Exception("Still slot ${slot + 1} does not exist on this ATEM (available: 1–${knownStills.maxOf { it.index } + 1})")
+            throw Exception(
+                "Still slot ${slot + 1} does not exist on this ATEM (available: 1–${knownStills.maxOf { it.index } + 1})"
+            )
         }
 
         opMutex.withLock {
@@ -532,7 +534,9 @@ class AtemClient(val host: String, val port: Int = 9910) {
         val knownClips = lastKnownState?.clipSlots
         if (!knownClips.isNullOrEmpty() && knownClips.none { it.index == slot }) {
             // 1-based in messages to match ATEM Software Control's numbering
-            throw Exception("Clip slot ${slot + 1} does not exist on this ATEM (available: 1–${knownClips.maxOf { it.index } + 1})")
+            throw Exception(
+                "Clip slot ${slot + 1} does not exist on this ATEM (available: 1–${knownClips.maxOf { it.index } + 1})"
+            )
         }
         val storeId = slot + 1   // clip stores are 1-based; store 0 is the still pool
 
@@ -540,7 +544,12 @@ class AtemClient(val host: String, val port: Int = 9910) {
             // Drop any buffered clip-store state from before this upload so a later readiness wait
             // (awaitClipReady) only reacts to MPCS updates produced by this upload.
             pendingCommands.removeAll { it.first == "MPCS" }
-            sendCommandAndWait("LOCK", buildLockPayload(storeId, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
+            sendCommandAndWait(
+                "LOCK",
+                buildLockPayload(storeId, locked = true),
+                "LKOB",
+                timeout = CMD_TIMEOUT_MS.toLong()
+            )
             try {
                 // Clear the clip slot before uploading new frames
                 sendCommandAndWait(
@@ -958,7 +967,17 @@ class AtemClient(val host: String, val port: Int = 9910) {
             }
             (0 until mixEffectCount).map { byMe[it] ?: 0 }
         } else emptyList()
-        return AtemState(fps, mode, parseStillSlots(m), parseClipSlots(m), clipMaxFrames, unassigned, mixEffectCount, keyersPerMe, downstreamKeyers)
+        return AtemState(
+            fps,
+            mode,
+            parseStillSlots(m),
+            parseClipSlots(m),
+            clipMaxFrames,
+            unassigned,
+            mixEffectCount,
+            keyersPerMe,
+            downstreamKeyers
+        )
     }
 
     /**

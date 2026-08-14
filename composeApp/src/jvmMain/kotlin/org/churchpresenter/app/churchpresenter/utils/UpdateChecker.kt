@@ -219,7 +219,8 @@ object UpdateChecker {
             // True once the server answered at all — any HTTP status counts,
             // since a 4xx/5xx means the request arrived and a retry won't help.
             fun tryBeacon(): Boolean = try {
-                val url = URI("$DOWNLOAD_BEACON_URL?platform=${currentPlatformId()}&source=app&version=$version").toURL()
+                val url =
+                    URI("$DOWNLOAD_BEACON_URL?platform=${currentPlatformId()}&source=app&version=$version").toURL()
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "POST"
                 // The website's CSRF middleware 403s cross-origin POSTs with a

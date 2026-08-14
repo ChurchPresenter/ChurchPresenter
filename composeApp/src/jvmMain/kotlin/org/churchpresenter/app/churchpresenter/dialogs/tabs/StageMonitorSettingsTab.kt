@@ -131,7 +131,11 @@ fun StageMonitorSettingsTab(
                         availableFonts = availableFonts,
                         onStyleChange = { block ->
                             update {
-                                copy(zoneStyles = zoneStyles + (StageMonitorStyleZone.FULL_SCREEN to styleFor(StageMonitorStyleZone.FULL_SCREEN).block()))
+                                copy(zoneStyles = zoneStyles + (
+                                    StageMonitorStyleZone.FULL_SCREEN to styleFor(
+                                        StageMonitorStyleZone.FULL_SCREEN
+                                    ).block()
+                                ))
                             }
                         }
                     )
@@ -238,9 +242,14 @@ private fun StageMonitorContentSection(
     update: (StageMonitorSettings.() -> StageMonitorSettings) -> Unit
 ) {
     // Bible/Songs/Next are always meant to share the screen with other zones, never take it over.
-    val noFullScreenTypes = setOf(StageMonitorContentType.BIBLE, StageMonitorContentType.SONGS, StageMonitorContentType.NEXT)
+    val noFullScreenTypes = setOf(
+        StageMonitorContentType.BIBLE,
+        StageMonitorContentType.SONGS,
+        StageMonitorContentType.NEXT
+    )
     val allZones = StageMonitorZone.entries.map { zoneLabel(it) }
-    val zonesWithoutFullScreen = StageMonitorZone.entries.filter { it != StageMonitorZone.FULL_SCREEN }.map { zoneLabel(it) }
+    val zonesWithoutFullScreen =
+        StageMonitorZone.entries.filter { it != StageMonitorZone.FULL_SCREEN }.map { zoneLabel(it) }
     val zoneByLabel = StageMonitorZone.entries.associateBy { zoneLabel(it) }
     val types = StageMonitorContentType.entries
     val columns = types.chunked((types.size + 3) / 4)
@@ -264,7 +273,9 @@ private fun StageMonitorContentSection(
                             value = zoneLabel(sm.zoneFor(type)),
                             options = if (type in noFullScreenTypes) zonesWithoutFullScreen else allZones,
                             onValueChange = { picked ->
-                                zoneByLabel[picked]?.let { zone -> update { copy(contentZones = contentZones + (type to zone)) } }
+                                zoneByLabel[picked]?.let { zone ->
+                                    update { copy(contentZones = contentZones + (type to zone)) }
+                                }
                             },
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
@@ -309,7 +320,10 @@ private fun StageMonitorLayoutPreviewSection(sm: StageMonitorSettings) {
                 }
                 Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
                     ZoneLabelCell(text = labelsFor(StageMonitorZone.BOTTOM_LEFT), modifier = Modifier.weight(1f))
-                    ZoneLabelCell(text = labelsFor(StageMonitorZone.BOTTOM_MIDDLE), modifier = Modifier.weight(BOTTOM_MIDDLE_WEIGHT))
+                    ZoneLabelCell(
+                        text = labelsFor(StageMonitorZone.BOTTOM_MIDDLE),
+                        modifier = Modifier.weight(BOTTOM_MIDDLE_WEIGHT)
+                    )
                     ZoneLabelCell(text = labelsFor(StageMonitorZone.BOTTOM_RIGHT), modifier = Modifier.weight(1f))
                 }
             }
@@ -488,7 +502,8 @@ private fun QuadrantFontSettings(
     SettingRow(stringResource(Res.string.shadow_settings)) {
         ShadowDetailRow(
             shadowColor = shadowColor, shadowSize = shadowSize, shadowOpacity = shadowOpacity,
-            onColorChange = onShadowColorChange, onSizeChange = onShadowSizeChange, onOpacityChange = onShadowOpacityChange
+            onColorChange =
+                onShadowColorChange, onSizeChange = onShadowSizeChange, onOpacityChange = onShadowOpacityChange
         )
     }
 }

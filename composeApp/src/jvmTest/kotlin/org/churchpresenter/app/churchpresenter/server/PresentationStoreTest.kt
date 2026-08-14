@@ -52,7 +52,11 @@ class PresentationStoreTest {
         broadcasts.clear()
         val s = store()
         s.updatePresentation("p1", "/decks/a.pptx", "a.pptx", "pptx", slides("0.jpg"))
-        assertTrue(broadcasts.any { it.type == org.churchpresenter.app.churchpresenter.utils.Constants.WS_EVENT_PRESENTATION_UPDATED })
+        assertTrue(
+            broadcasts.any {
+                it.type == org.churchpresenter.app.churchpresenter.utils.Constants.WS_EVENT_PRESENTATION_UPDATED
+            }
+        )
     }
 
     @Test

@@ -63,7 +63,8 @@ internal fun webTab(
                             reports.settingsChanges++
                             reports.settingsAfterChange = transform(reports.settingsAfterChange ?: appSettings)
                         },
-                        onAddToSchedule = if (includeAddToSchedule) { url, title -> reports.scheduled += url to title } else null,
+                        onAddToSchedule = if (includeAddToSchedule) { url, title -> reports.scheduled += url to title }
+                            else null,
                         onUpdateScheduleTitle = { url, title -> reports.titleUpdates += url to title },
                         cefInitialized = cefInitialized,
                         cefMacOsUnsupported = cefMacOsUnsupported,

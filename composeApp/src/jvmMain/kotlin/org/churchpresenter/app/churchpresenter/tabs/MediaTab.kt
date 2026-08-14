@@ -187,12 +187,17 @@ fun MediaTab(
 
     if (!vlcAvailable) {
         Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Icon(
-                    imageVector = if (vlcArchMismatch || vlcLoadFailed) Icons.Default.Warning else Icons.Default.Videocam,
+                    imageVector = if (vlcArchMismatch || vlcLoadFailed) Icons.Default.Warning
+                        else Icons.Default.Videocam,
                     contentDescription = null,
                     modifier = Modifier.size(64.dp),
-                    tint = if (vlcArchMismatch || vlcLoadFailed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                    tint = if (vlcArchMismatch || vlcLoadFailed) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )
                 Text(stringResource(Res.string.media_vlc_required), style = MaterialTheme.typography.titleMedium)
                 Text(
@@ -261,8 +266,14 @@ fun MediaTab(
                         shortcuts.matches(ShortcutAction.CLEAR_OUTPUT, keyEvent) && presenterManager != null -> {
                             viewModel.pause(); presenterManager.requestClearDisplay(); true
                         }
-                        viewModel.isLoaded && shortcuts.matches(ShortcutAction.MEDIA_PLAY_PAUSE, keyEvent) -> { viewModel.togglePlayPause(); true }
-                        viewModel.isLoaded && shortcuts.matches(ShortcutAction.MEDIA_MUTE, keyEvent) -> { viewModel.toggleMute(); true }
+                        viewModel.isLoaded && shortcuts.matches(
+                            ShortcutAction.MEDIA_PLAY_PAUSE,
+                            keyEvent
+                        ) -> { viewModel.togglePlayPause(); true }
+                        viewModel.isLoaded && shortcuts.matches(
+                            ShortcutAction.MEDIA_MUTE,
+                            keyEvent
+                        ) -> { viewModel.toggleMute(); true }
                         else -> false
                     }
                 } else false
@@ -295,13 +306,36 @@ fun MediaTab(
                                 val f = FileChooser.platformInstance.chooseSingle(
                                     path = Path(appSettings.mediaStorageDirectory),
                                     title = selectFileLabel,
-                                    filters = listOf(FileNameExtensionFilter(mediaFilesLabel, "mp4","mov","avi","mkv","wmv","flv","webm","m4v","mp3","wav","flac","aac","ogg","wma","m4a","aiff","opus")),
+                                    filters =
+                                        listOf(FileNameExtensionFilter(
+                                            mediaFilesLabel,
+                                            "mp4",
+                                            "mov",
+                                            "avi",
+                                            "mkv",
+                                            "wmv",
+                                            "flv",
+                                            "webm",
+                                            "m4v",
+                                            "mp3",
+                                            "wav",
+                                            "flac",
+                                            "aac",
+                                            "ogg",
+                                            "wma",
+                                            "m4a",
+                                            "aiff",
+                                            "opus"
+                                        )),
                                     selectDirectory = false
                                 )
                                 if (f != null) {
                                     val ext = f.extension.lowercase()
-                                    val type = if (ext in Constants.AUDIO_EXTENSIONS) Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
-                                    if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
+                                    val type = if (ext in Constants.AUDIO_EXTENSIONS) Constants.MEDIA_TYPE_AUDIO
+                                        else Constants.MEDIA_TYPE_LOCAL
+                                    if (
+                                        presenterManager?.presentingMode?.value == Presenting.MEDIA
+                                    ) presenterManager.requestClearDisplay()
                                     viewModel.loadMedia(f.absolutePathString(), type)
                                     RecentMediaFiles.add(f.absolutePathString())
                                 }
@@ -315,12 +349,25 @@ fun MediaTab(
                         ),
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
                     ) {
-                        Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
+                        Icon(
+                            painterResource(Res.drawable.ic_folder),
+                            contentDescription = null,
+                            modifier = Modifier.size(13.dp)
+                        )
                         Spacer(Modifier.width(7.dp))
-                        Text(stringResource(Res.string.media_select_file), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold))
+                        Text(
+                            stringResource(Res.string.media_select_file),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
                     }
                     Text(
-                        text = if (viewModel.isLoaded && viewModel.mediaType != Constants.MEDIA_TYPE_URL) viewModel.mediaTitle
+                        text =
+                            if (
+                                viewModel.isLoaded && viewModel.mediaType != Constants.MEDIA_TYPE_URL
+                            ) viewModel.mediaTitle
                                else stringResource(Res.string.media_no_source),
                         style = MaterialTheme.typography.bodySmall,
                         color = if (viewModel.isLoaded && viewModel.mediaType != Constants.MEDIA_TYPE_URL)
@@ -352,12 +399,21 @@ fun MediaTab(
                                 value = urlInput,
                                 onValueChange = { urlInput = it },
                                 modifier = Modifier.fillMaxWidth(),
-                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                textStyle =
+                                    MaterialTheme.typography
+                                        .bodyMedium
+                                        .copy(color = MaterialTheme.colorScheme.onSurface),
                                 singleLine = true,
                                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                 decorationBox = { innerTextField ->
                                     if (urlInput.isEmpty()) {
-                                        Text(stringResource(Res.string.media_url_placeholder), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        Text(
+                                            stringResource(Res.string.media_url_placeholder),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
                                     }
                                     innerTextField()
                                 }
@@ -367,7 +423,9 @@ fun MediaTab(
                     Button(
                         onClick = {
                             if (urlInput.isNotBlank()) {
-                                if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
+                                if (
+                                    presenterManager?.presentingMode?.value == Presenting.MEDIA
+                                ) presenterManager.requestClearDisplay()
                                 val url = urlInput.trim()
                                 viewModel.loadMedia(url, Constants.MEDIA_TYPE_URL)
                                 RecentMediaFiles.add(url)
@@ -382,7 +440,13 @@ fun MediaTab(
                         ),
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
                     ) {
-                        Text(stringResource(Res.string.media_load), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold))
+                        Text(
+                            stringResource(Res.string.media_load),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
                     }
                 }
             }
@@ -401,44 +465,107 @@ fun MediaTab(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(stringResource(Res.string.recent), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                Text(
+                    stringResource(Res.string.recent),
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(Res.string.clear_recents),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
                     IconButton(onClick = { RecentMediaFiles.clear() }, modifier = Modifier.size(20.dp)) {
-                        Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                        Icon(
+                            painterResource(Res.drawable.ic_close),
+                            contentDescription = stringResource(Res.string.clear),
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
                     }
                 }
-                LazyRow(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                LazyRow(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     lazyItems(recentOrdered) { path ->
                         val isPinned = path in RecentMediaFiles.pinned
                         val isActive = viewModel.isLoaded && viewModel.mediaUrl == path
-                        val displayName = if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("rtsp://")) path else java.io.File(path).name
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        val displayName =
+                            if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("rtsp://"))
+                                path
+                            else java.io.File(path).name
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
                             Box(
                                 modifier = Modifier
                                     .height(26.dp)
-                                    .background(if (isActive) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent, RoundedCornerShape(6.dp))
-                                    .border(1.dp, if (isActive) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+                                    .background(
+                                        if (isActive) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
+                                        RoundedCornerShape(6.dp)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        if (isActive) MaterialTheme.colorScheme.outline
+                                            else MaterialTheme.colorScheme.outlineVariant,
+                                        RoundedCornerShape(6.dp)
+                                    )
                                     .clickable {
                                         val ext = java.io.File(path).extension.lowercase()
                                         val type = when {
-                                            path.startsWith("http://") || path.startsWith("https://") || path.startsWith("rtsp://") -> Constants.MEDIA_TYPE_URL
+                                            path.startsWith("http://")
+                                                || path.startsWith("https://")
+                                                || path.startsWith("rtsp://") -> Constants.MEDIA_TYPE_URL
                                             ext in Constants.AUDIO_EXTENSIONS -> Constants.MEDIA_TYPE_AUDIO
                                             else -> Constants.MEDIA_TYPE_LOCAL
                                         }
-                                        if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
+                                        if (
+                                            presenterManager?.presentingMode?.value == Presenting.MEDIA
+                                        ) presenterManager.requestClearDisplay()
                                         viewModel.loadMedia(path, type)
                                         RecentMediaFiles.add(path)
                                     }
                                     .padding(horizontal = 10.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(displayName, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f), maxLines = 1)
+                                Text(
+                                    displayName,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                                    color = if (isActive) MaterialTheme.colorScheme.onSurface
+                                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                                    maxLines = 1
+                                )
                             }
-                            IconButton(onClick = { RecentMediaFiles.togglePin(path) }, modifier = Modifier.size(20.dp)) {
-                                Icon(painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star), contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin), modifier = Modifier.size(12.dp), tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f))
+                            IconButton(
+                                onClick = { RecentMediaFiles.togglePin(path) },
+                                modifier = Modifier.size(20.dp)
+                            ) {
+                                Icon(
+                                    painterResource(if (
+                                        isPinned
+                                    ) Res.drawable.ic_star_filled else Res.drawable.ic_star),
+                                    contentDescription =
+                                        stringResource(if (
+                                            isPinned
+                                        ) Res.string.recent_unpin else Res.string.recent_pin),
+                                    modifier = Modifier.size(12.dp),
+                                    tint = if (isPinned) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+                                )
                             }
                         }
                     }
@@ -460,16 +587,52 @@ fun MediaTab(
             // Transport (inner gap 4dp)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.media_seek_backward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(Res.string.media_seek_backward),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
-                    IconButton(onClick = { viewModel.seekBackward() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(Res.drawable.ic_fast_rewind), contentDescription = stringResource(Res.string.media_seek_backward), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f))
+                    IconButton(
+                        onClick = { viewModel.seekBackward() },
+                        enabled = viewModel.isLoaded,
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Icon(
+                            painterResource(Res.drawable.ic_fast_rewind),
+                            contentDescription = stringResource(Res.string.media_seek_backward),
+                            modifier = Modifier.size(16.dp),
+                            tint =
+                                MaterialTheme.colorScheme
+                                    .onSurface
+                                    .copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f)
+                        )
                     }
                 }
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
                     FilledIconButton(
                         onClick = { viewModel.togglePlayPause() },
@@ -483,25 +646,74 @@ fun MediaTab(
                     ) {
                         Icon(
                             painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
-                            contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
+                            contentDescription =
+                                stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
                             modifier = Modifier.size(15.dp),
                         )
                     }
                 }
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.stop), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(Res.string.stop),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
-                    IconButton(onClick = { viewModel.stop() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(Res.drawable.ic_stop), contentDescription = stringResource(Res.string.stop), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f))
+                    IconButton(
+                        onClick = { viewModel.stop() },
+                        enabled = viewModel.isLoaded,
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Icon(
+                            painterResource(Res.drawable.ic_stop),
+                            contentDescription = stringResource(Res.string.stop),
+                            modifier = Modifier.size(16.dp),
+                            tint =
+                                MaterialTheme.colorScheme
+                                    .onSurface
+                                    .copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f)
+                        )
                     }
                 }
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.media_seek_forward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(Res.string.media_seek_forward),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
-                    IconButton(onClick = { viewModel.seekForward() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(Res.drawable.ic_fast_forward), contentDescription = stringResource(Res.string.media_seek_forward), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f))
+                    IconButton(
+                        onClick = { viewModel.seekForward() },
+                        enabled = viewModel.isLoaded,
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Icon(
+                            painterResource(Res.drawable.ic_fast_forward),
+                            contentDescription = stringResource(Res.string.media_seek_forward),
+                            modifier = Modifier.size(16.dp),
+                            tint =
+                                MaterialTheme.colorScheme
+                                    .onSurface
+                                    .copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f)
+                        )
                     }
                 }
             }
@@ -515,15 +727,37 @@ fun MediaTab(
             // Volume
             Box {
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
-                    IconButton(onClick = { volumeExpanded = !volumeExpanded }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
+                    IconButton(
+                        onClick = { volumeExpanded = !volumeExpanded },
+                        enabled = viewModel.isLoaded,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
-                            painter = painterResource(if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
+                            painter =
+                                painterResource(if (
+                                    viewModel.isMuted || viewModel.volume == 0f
+                                ) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
                             contentDescription = stringResource(Res.string.media_volume),
                             modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f)
+                            tint =
+                                MaterialTheme.colorScheme
+                                    .onSurface
+                                    .copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f)
                         )
                     }
                 }
@@ -535,11 +769,20 @@ fun MediaTab(
                         properties = PopupProperties(focusable = true)
                     ) {
                         Surface(shape = RoundedCornerShape(8.dp), tonalElevation = 8.dp, shadowElevation = 8.dp) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                            ) {
                                 IconButton(onClick = { viewModel.toggleMute() }, modifier = Modifier.size(24.dp)) {
                                     Icon(
-                                        painterResource(if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
-                                        contentDescription = stringResource(if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute),
+                                        painterResource(if (
+                                            viewModel.isMuted || viewModel.volume == 0f
+                                        ) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
+                                        contentDescription =
+                                            stringResource(if (
+                                                viewModel.isMuted
+                                            ) Res.string.media_unmute else Res.string.media_mute),
                                         modifier = Modifier.size(18.dp),
                                     )
                                 }
@@ -608,12 +851,17 @@ fun MediaTab(
         }
 
         // ── Content area ──────────────────────────────────────────────
-        val isPresenting = presenterManager?.presentingMode?.value == Presenting.MEDIA && presenterManager.showPresenterWindow.value
+        val isPresenting =
+            presenterManager?.presentingMode?.value == Presenting.MEDIA && presenterManager.showPresenterWindow.value
 
         if (viewModel.isLoaded && viewModel.isAudioFile) {
             VideoPlayer(viewModel = viewModel, modifier = Modifier.size(0.dp))
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(Res.string.media_audio_continues), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    stringResource(Res.string.media_audio_continues),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         } else {
             if (viewModel.isLoaded) SoftwareVideoPlayer(viewModel = viewModel, modifier = Modifier.size(0.dp))
@@ -625,7 +873,14 @@ fun MediaTab(
                 modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 6.dp)
             )
 
-            Box(modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp, vertical = 0.dp).padding(bottom = 16.dp), contentAlignment = Alignment.Center) {
+            Box(
+                modifier =
+                    Modifier.weight(1f)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 0.dp)
+                        .padding(bottom = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 Box(
                     modifier = Modifier
                         .aspectRatio(presenterAspectRatio())
@@ -634,16 +889,50 @@ fun MediaTab(
                     contentAlignment = Alignment.Center
                 ) {
                     when {
-                        isPresenting -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Default.Movie, contentDescription = null, modifier = Modifier.size(56.dp), tint = Color.White.copy(alpha = 0.6f))
-                            Text(stringResource(Res.string.media_now_presenting), style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = 0.8f))
-                            Text(viewModel.mediaTitle, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        isPresenting -> Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Movie,
+                                contentDescription = null,
+                                modifier = Modifier.size(56.dp),
+                                tint = Color.White.copy(alpha = 0.6f)
+                            )
+                            Text(
+                                stringResource(Res.string.media_now_presenting),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color.White.copy(alpha = 0.8f)
+                            )
+                            Text(
+                                viewModel.mediaTitle,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.5f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                         viewModel.isLoaded -> SharedVideoOutputDisplay(modifier = Modifier.fillMaxSize())
-                        else -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(56.dp), tint = Color.White.copy(alpha = 0.4f))
-                            Text(stringResource(Res.string.media_no_source), style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = 0.6f))
-                            Text(stringResource(Res.string.media_select_to_begin), style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.4f))
+                        else -> Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Videocam,
+                                contentDescription = null,
+                                modifier = Modifier.size(56.dp),
+                                tint = Color.White.copy(alpha = 0.4f)
+                            )
+                            Text(
+                                stringResource(Res.string.media_no_source),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color.White.copy(alpha = 0.6f)
+                            )
+                            Text(
+                                stringResource(Res.string.media_select_to_begin),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.4f)
+                            )
                         }
                     }
                 }
@@ -735,16 +1024,30 @@ private fun MediaSeekBar(
                 val top = cy - trackH / 2f
                 val radius = CornerRadius(trackH / 2f, trackH / 2f)
                 // Base track
-                drawRoundRect(color = trackColor, topLeft = Offset(0f, top), size = Size(size.width, trackH), cornerRadius = radius)
+                drawRoundRect(
+                    color = trackColor,
+                    topLeft = Offset(0f, top),
+                    size = Size(size.width, trackH),
+                    cornerRadius = radius
+                )
                 // Buffered (loaded-ahead) region
                 if (bufferedFraction > 0f) {
-                    drawRoundRect(color = bufferedColor, topLeft = Offset(0f, top), size = Size(size.width * bufferedFraction, trackH), cornerRadius = radius)
+                    drawRoundRect(
+                        color = bufferedColor,
+                        topLeft = Offset(0f, top),
+                        size = Size(size.width * bufferedFraction, trackH),
+                        cornerRadius = radius
+                    )
                 }
                 // Played region — teal gradient
                 if (playedFraction > 0f) {
                     val playedW = size.width * playedFraction
                     drawRoundRect(
-                        brush = Brush.horizontalGradient(listOf(playedStart, primary), startX = 0f, endX = playedW.coerceAtLeast(trackH)),
+                        brush = Brush.horizontalGradient(
+                            listOf(playedStart, primary),
+                            startX = 0f,
+                            endX = playedW.coerceAtLeast(trackH)
+                        ),
                         topLeft = Offset(0f, top),
                         size = Size(playedW, trackH),
                         cornerRadius = radius
@@ -753,7 +1056,11 @@ private fun MediaSeekBar(
                 // Hover handle — fades/scales in only on hover or drag
                 if (handleAlpha > HANDLE_VISIBLE_ALPHA) {
                     val hx = (size.width * playedFraction).coerceIn(0f, size.width)
-                    drawCircle(color = handleColor.copy(alpha = handleAlpha), radius = 6.dp.toPx() * handleScale, center = Offset(hx, cy))
+                    drawCircle(
+                        color = handleColor.copy(alpha = handleAlpha),
+                        radius = 6.dp.toPx() * handleScale,
+                        center = Offset(hx, cy)
+                    )
                 }
             }
         }

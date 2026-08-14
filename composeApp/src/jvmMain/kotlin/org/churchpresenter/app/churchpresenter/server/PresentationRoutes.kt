@@ -71,7 +71,11 @@ internal fun Route.presentationRoutes(
                     val resolvedId = _scheduleItemToPresentationId[id] ?: id
                     val dto = _presentationCatalogs[resolvedId]
                     if (dto == null) {
-                        server.logRest("/api/presentations/{id}", HttpStatusCode.NotFound.value, "not_found_or_not_yet_rendered")
+                        server.logRest(
+                            "/api/presentations/{id}",
+                            HttpStatusCode.NotFound.value,
+                            "not_found_or_not_yet_rendered"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Presentation not found or not yet rendered")
                         return@get
                     }
@@ -85,17 +89,31 @@ internal fun Route.presentationRoutes(
                  */
                 get("${Constants.ENDPOINT_PRESENTATIONS}/{id}/slides/{index}") {
                     if (!server.checkApiKey(call)) return@get
-                    val id    = call.parameters["id"]    ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
-                    val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(HttpStatusCode.BadRequest, "Invalid index"); return@get }
+                    val id    = call.parameters["id"]    ?: run {
+                        call.respond(HttpStatusCode.BadRequest, "Missing id")
+                        return@get
+                    }
+                    val index = call.parameters["index"]?.toIntOrNull() ?: run {
+                        call.respond(HttpStatusCode.BadRequest, "Invalid index")
+                        return@get
+                    }
                     val resolvedId = _scheduleItemToPresentationId[id] ?: id
                     val slides = _slideBytes[resolvedId]
                     if (slides == null) {
-                        server.logRest("/api/presentations/{id}/slides/{index}", HttpStatusCode.NotFound.value, "presentation_not_found")
+                        server.logRest(
+                            "/api/presentations/{id}/slides/{index}",
+                            HttpStatusCode.NotFound.value,
+                            "presentation_not_found"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Presentation not found")
                         return@get
                     }
                     if (index < 0 || index >= slides.size) {
-                        server.logRest("/api/presentations/{id}/slides/{index}", HttpStatusCode.NotFound.value, "slide_index_out_of_range")
+                        server.logRest(
+                            "/api/presentations/{id}/slides/{index}",
+                            HttpStatusCode.NotFound.value,
+                            "slide_index_out_of_range"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Slide index out of range")
                         return@get
                     }
@@ -128,7 +146,8 @@ internal fun Route.presentationRoutes(
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     scope.launch { server.onSelectSlide.emit(SelectSlideRequest(id = id, index = index)) }
-                    val presentationName = _presentationCatalogs[_scheduleItemToPresentationId[id] ?: id]?.fileName ?: id
+                    val presentationName =
+                        _presentationCatalogs[_scheduleItemToPresentationId[id] ?: id]?.fileName ?: id
                     scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                         actionType = "present",
                         title = presentationName,
@@ -171,7 +190,10 @@ internal fun Route.presentationRoutes(
                         val safeName = File(name).name.ifBlank { "upload.pdf" }
                         val ext = safeName.substringAfterLast('.', "").lowercase()
                         if (ext !in setOf("pdf", "ppt", "pptx", "key")) {
-                            call.respond(HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
+                            call.respond(
+                                HttpStatusCode.UnsupportedMediaType,
+                                """{"error":"unsupported file type: $ext"}"""
+                            )
                             return@post
                         }
                         val base64Match = Regex("^data:[^;]+;base64,(.+)$").find(data)
@@ -180,7 +202,10 @@ internal fun Route.presentationRoutes(
                             return@post
                         }
                         val fileBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
-                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_presentations").also { it.mkdirs() }
+                        val uploadDir = File(
+                            System.getProperty("user.home"),
+                            ".churchpresenter/device_presentations"
+                        ).also { it.mkdirs() }
                         val uniqueName = if (File(uploadDir, safeName).exists()) {
                             val ts   = System.currentTimeMillis()
                             val base = safeName.substringBeforeLast('.', safeName)
@@ -210,7 +235,10 @@ internal fun Route.presentationRoutes(
                             ContentType.Application.Json
                         )
                     } catch (e: Exception) {
-                        call.respond(HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
+                        call.respond(
+                            HttpStatusCode.InternalServerError,
+                            """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}"""
+                        )
                     }
                 }
 
@@ -235,7 +263,10 @@ internal fun Route.presentationRoutes(
                         val maxBytes = _maxMediaUploadMb.value.toLong() * 1024 * 1024
                         val contentLength = call.request.headers["Content-Length"]?.toLongOrNull() ?: 0L
                         if (contentLength > maxBytes) {
-                            call.respond(HttpStatusCode.PayloadTooLarge, """{"error":"file too large (max ${_maxMediaUploadMb.value} MB)"}""")
+                            call.respond(
+                                HttpStatusCode.PayloadTooLarge,
+                                """{"error":"file too large (max ${_maxMediaUploadMb.value} MB)"}"""
+                            )
                             return@post
                         }
                         val rawName = call.request.queryParameters["name"]
@@ -247,10 +278,16 @@ internal fun Route.presentationRoutes(
                         val ext = safeName.substringAfterLast('.', "").lowercase()
                         // Accept exactly what the desktop media player (VLC) can play.
                         if (ext !in Constants.VIDEO_EXTENSIONS && ext !in Constants.AUDIO_EXTENSIONS) {
-                            call.respond(HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
+                            call.respond(
+                                HttpStatusCode.UnsupportedMediaType,
+                                """{"error":"unsupported file type: $ext"}"""
+                            )
                             return@post
                         }
-                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_media").also { it.mkdirs() }
+                        val uploadDir = File(
+                            System.getProperty("user.home"),
+                            ".churchpresenter/device_media"
+                        ).also { it.mkdirs() }
                         val uniqueName = if (File(uploadDir, safeName).exists()) {
                             val ts   = System.currentTimeMillis()
                             val base = safeName.substringBeforeLast('.', safeName)
@@ -263,7 +300,8 @@ internal fun Route.presentationRoutes(
                                 file.outputStream().use { out -> input.copyTo(out, bufferSize = 1 shl 20) }
                             }
                         }
-                        val mediaType = if (ext in Constants.AUDIO_EXTENSIONS) Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
+                        val mediaType = if (ext in Constants.AUDIO_EXTENSIONS) Constants.MEDIA_TYPE_AUDIO
+                            else Constants.MEDIA_TYPE_LOCAL
                         val uploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                         scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                             actionType = "upload",
@@ -277,7 +315,10 @@ internal fun Route.presentationRoutes(
                             ContentType.Application.Json
                         )
                     } catch (e: Exception) {
-                        call.respond(HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
+                        call.respond(
+                            HttpStatusCode.InternalServerError,
+                            """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}"""
+                        )
                     }
                 }
 

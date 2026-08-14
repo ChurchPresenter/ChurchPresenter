@@ -137,7 +137,12 @@ class BibleSearchAndNumberingTest {
     fun `a chapter with no match returns nothing even though the book matches`() {
         val bible = plainBible()
 
-        assertTrue(bible.searchBible(false, Regex("shepherd", RegexOption.IGNORE_CASE), book = 19, chapter = 1).isEmpty())
+        assertTrue(bible.searchBible(
+            false,
+            Regex("shepherd", RegexOption.IGNORE_CASE),
+            book = 19,
+            chapter = 1
+        ).isEmpty())
     }
 
     @Test

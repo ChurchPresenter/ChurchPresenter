@@ -38,13 +38,21 @@ class MainDesktopSttAndEscapeTest {
 
     @Test
     fun `reconnecting to the same url that was already persisted has nothing new to persist`() {
-        val settings = AppSettings(sttSettings = STTSettings(serverUrl = "http://host:8080", lastConnectedUrl = "http://host:8080"))
+        val settings =
+            AppSettings(sttSettings = STTSettings(
+                serverUrl = "http://host:8080",
+                lastConnectedUrl = "http://host:8080"
+            ))
         assertNull(sttUrlToPersist(settings, sttConnected = true))
     }
 
     @Test
     fun `connecting to a different url than what was last persisted returns the new one`() {
-        val settings = AppSettings(sttSettings = STTSettings(serverUrl = "http://new-host:9090", lastConnectedUrl = "http://old-host:8080"))
+        val settings =
+            AppSettings(sttSettings = STTSettings(
+                serverUrl = "http://new-host:9090",
+                lastConnectedUrl = "http://old-host:8080"
+            ))
         assertEquals("http://new-host:9090", sttUrlToPersist(settings, sttConnected = true))
     }
 

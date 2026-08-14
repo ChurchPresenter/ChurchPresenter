@@ -49,7 +49,8 @@ object CrosswordDecoder {
      * (direction, row, col), or null if the file is malformed or empty.
      * Layout is null when the file predates the LAYOUT section.
      */
-    fun decodeFile(base64Content: String): Triple<String, List<CrosswordClue>, Map<Pair<Int, CrosswordDirection>, Pair<Int, Int>>?>? = try {
+    fun decodeFile(base64Content: String): Triple<String, List<CrosswordClue>, Map<Pair<Int, CrosswordDirection>,
+    Pair<Int, Int>>?>? = try {
         val bytes = Base64.getDecoder().decode(base64Content.trim())
         val keyBytes = CROSSWORD_XOR_KEY.encodeToByteArray()
         val decoded = ByteArray(bytes.size) { i ->
@@ -69,7 +70,8 @@ object CrosswordDecoder {
      *   DOWN:
      *   2. Clue text | ANSWER
      */
-    private fun parseText(text: String): Triple<String, List<CrosswordClue>, Map<Pair<Int, CrosswordDirection>, Pair<Int, Int>>?>? {
+    private fun parseText(text: String): Triple<String, List<CrosswordClue>, Map<Pair<Int, CrosswordDirection>,
+    Pair<Int, Int>>?>? {
         var title = "Crossword"
         val clues = mutableListOf<CrosswordClue>()
         // Key is (clueNumber, direction) so two words sharing the same sequential number
@@ -204,7 +206,8 @@ object CrosswordLayoutEngine {
         placed: List<PlacedEntry>,
         clue: CrosswordClue
     ): Triple<Int, Int, CrosswordDirection>? {
-        val opposite = if (clue.direction == CrosswordDirection.ACROSS) CrosswordDirection.DOWN else CrosswordDirection.ACROSS
+        val opposite = if (clue.direction == CrosswordDirection.ACROSS) CrosswordDirection.DOWN
+            else CrosswordDirection.ACROSS
         for (dir in listOf(clue.direction, opposite)) {
             for (pw in placed) {
                 // Only intersect words running in the opposite direction

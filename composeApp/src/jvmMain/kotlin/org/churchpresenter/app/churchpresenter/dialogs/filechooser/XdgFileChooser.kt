@@ -57,7 +57,15 @@ object XdgFileChooser : FileChooser() {
         context = "XdgFileChooser.saveImpl",
         attempt = {
             saveSelection(
-                openFileChooser(location, filters, title, suggestedName, selectDirectory = false, multiple = false, DBusFileChooser::SaveFile)
+                openFileChooser(
+                    location,
+                    filters,
+                    title,
+                    suggestedName,
+                    selectDirectory = false,
+                    multiple = false,
+                    DBusFileChooser::SaveFile
+                )
             )
         },
         fallback = { SwingFileChooser.fallbackSave(location, suggestedName, filters, title) }

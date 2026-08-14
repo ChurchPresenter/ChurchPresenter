@@ -151,7 +151,11 @@ class InstanceLinkViewModel {
     fun sendSelectPicture(folderId: String, index: Int, fileName: String?) =
         client.sendSelectPicture(folderId, index, fileName)
 
-    fun sendSelectSongSection(number: String, section: Int, lineIndex: Int = -1) = client.sendSelectSongSection(number, section, lineIndex)
+    fun sendSelectSongSection(
+        number: String,
+        section: Int,
+        lineIndex: Int = -1
+    ) = client.sendSelectSongSection(number, section, lineIndex)
 
     fun sendSelectSlide(id: String, index: Int) = client.sendSelectSlide(id, index)
 

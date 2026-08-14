@@ -92,7 +92,8 @@ fun RemoteActivityToastHost(
                 RemoteActivityToast(
                     notification = current,
                     remaining = notifications.size - 1,
-                    isInstanceLinkFollower = current.clientId.isNotBlank() && current.clientId in connectedInstanceLinkFollowers,
+                    isInstanceLinkFollower =
+                        current.clientId.isNotBlank() && current.clientId in connectedInstanceLinkFollowers,
                     onDismiss = { onDismiss(current) },
                     onDismissAll = onDismissAll,
                     onBlockForSession = { onBlockForSession(current) }
@@ -162,7 +163,9 @@ private fun RemoteActivityToast(
 
     val bodyTitle = notification.title.ifBlank {
         when (notification.type) {
-            RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_presentation_connect_detail)
+            RemoteEventType.PRESENTATION_CONNECT -> stringResource(
+                Res.string.remote_activity_presentation_connect_detail
+            )
             RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect_detail)
             else -> ""
         }

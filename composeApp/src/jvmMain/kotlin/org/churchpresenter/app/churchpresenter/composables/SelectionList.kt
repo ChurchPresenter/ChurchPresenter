@@ -95,7 +95,8 @@ fun SelectionListWithIndex(
                 items = list,
                 key = { index, item -> "$index-$item" }
             ) { index, item ->
-                val isSelected = if (selectedIndices != null) selectedIndices.contains(index) else index == selectedIndex
+                val isSelected = if (selectedIndices != null) selectedIndices.contains(index)
+                    else index == selectedIndex
                 Text(
                     text = item,
                     style = MaterialTheme.typography.bodyMedium,

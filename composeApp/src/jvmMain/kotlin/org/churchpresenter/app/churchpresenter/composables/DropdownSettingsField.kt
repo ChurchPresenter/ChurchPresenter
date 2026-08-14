@@ -95,7 +95,10 @@ fun DropdownSettingsField(
             .heightIn(min = 42.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { expanded = true }
             .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
         contentAlignment = Alignment.CenterStart
     ) {

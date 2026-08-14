@@ -58,7 +58,12 @@ class ColorMathTest {
 
     @Test fun `converting a colour to HSV reads the expected hue, saturation and value`() {
         val (hr, sr, vr) = cpColorToHsv(Color(255, 0, 0))
-        assertApprox(0f, hr, 0.5f, "red hue"); assertApprox(1f, sr, 0.01f, "red sat"); assertApprox(1f, vr, 0.01f, "red val")
+        assertApprox(
+            0f,
+            hr,
+            0.5f,
+            "red hue"
+        ); assertApprox(1f, sr, 0.01f, "red sat"); assertApprox(1f, vr, 0.01f, "red val")
 
         val (hg, _, _) = cpColorToHsv(Color(0, 255, 0))
         assertApprox(120f, hg, 0.5f, "green hue")

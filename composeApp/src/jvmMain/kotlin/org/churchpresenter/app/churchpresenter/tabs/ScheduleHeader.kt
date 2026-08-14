@@ -396,7 +396,10 @@ internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Mo
                 drawContent()
                 drawRoundRect(
                     color = borderColor,
-                    style = Stroke(width = strokeWidthPx, pathEffect = PathEffect.dashPathEffect(floatArrayOf(DASH_ON_PX, DASH_OFF_PX))),
+                    style = Stroke(
+                        width = strokeWidthPx,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(DASH_ON_PX, DASH_OFF_PX))
+                    ),
                     cornerRadius = CornerRadius(cornerRadiusPx)
                 )
             }

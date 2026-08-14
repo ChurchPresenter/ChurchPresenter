@@ -233,7 +233,14 @@ fun PresentationTab(
     instanceLinkFetchPresentationSlideBytes: (suspend (id: String, index: Int) -> ByteArray?)? = null,
     selectedPresentationItem: ScheduleItem.PresentationItem? = null,
     presenterManager: PresenterManager? = null,
-    onSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>, slideNotes: List<String>) -> Unit)? = null,
+    onSlidesLoaded: ((
+        id: String,
+        filePath: String,
+        fileName: String,
+        fileType: String,
+        slideFiles: List<File>,
+        slideNotes: List<String>
+    ) -> Unit)? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     viewModel: PresentationViewModel = remember { PresentationViewModel(appSettings) },
     tunnelStatus: TunnelStatus = TunnelStatus.Idle,
@@ -320,7 +327,14 @@ fun PresentationTab(
             val f = viewModel.selectedPresentation
             if (f != null && viewModel.slideFiles.isNotEmpty()) {
                 val id = f.absolutePath.hashCode().toUInt().toString(16)
-                onSlidesLoaded?.invoke(id, f.absolutePath, f.nameWithoutExtension, f.extension.lowercase(), viewModel.slideFiles.toList(), viewModel.slideNotes.toList())
+                onSlidesLoaded?.invoke(
+                    id,
+                    f.absolutePath,
+                    f.nameWithoutExtension,
+                    f.extension.lowercase(),
+                    viewModel.slideFiles.toList(),
+                    viewModel.slideNotes.toList()
+                )
             }
             // Arrow-key navigation needs the tab to hold keyboard focus. Previously only the
             // schedule-item path requested it, so decks opened via the file dialog or the
@@ -412,11 +426,18 @@ fun PresentationTab(
                     // Instance Link Controller mode: next/prev must still reach the primary's own
                     // live presentation even though this Controller's own slide list is empty — the
                     // normal case, since Controller mode doesn't mirror the primary's content.
-                    val hasInstanceLinkNav = onInstanceLinkSendNextSlide != null || onInstanceLinkSendPreviousSlide != null
+                    val hasInstanceLinkNav =
+                        onInstanceLinkSendNextSlide != null || onInstanceLinkSendPreviousSlide != null
                     return@onKeyEvent if (hasInstanceLinkNav) {
                         when {
-                            goesBack(shortcuts, keyEvent) -> { viewModel.previousSlide(onInstanceLinkSendPreviousSlide); true }
-                            goesForward(shortcuts, keyEvent) -> { viewModel.nextSlide(onInstanceLinkSendNextSlide); true }
+                            goesBack(
+                                shortcuts,
+                                keyEvent
+                            ) -> { viewModel.previousSlide(onInstanceLinkSendPreviousSlide); true }
+                            goesForward(
+                                shortcuts,
+                                keyEvent
+                            ) -> { viewModel.nextSlide(onInstanceLinkSendNextSlide); true }
                             else -> false
                         }
                     } else false
@@ -424,7 +445,10 @@ fun PresentationTab(
                 when {
                     goesBack(shortcuts, keyEvent) -> { goPrevious(); true }
                     goesForward(shortcuts, keyEvent) -> { goNext(); true }
-                    shortcuts.matches(ShortcutAction.PRESENTATION_PLAY_PAUSE, keyEvent) -> { viewModel.togglePlayPause(); true }
+                    shortcuts.matches(
+                        ShortcutAction.PRESENTATION_PLAY_PAUSE,
+                        keyEvent
+                    ) -> { viewModel.togglePlayPause(); true }
                     // Clicker blank-screen button ('b' or '.' depending on model): toggle the
                     // same Blank Output state as the eye button — a truly blank output
                     // (PowerPoint's own 'B'), NOT Clear Display, which shows the configured
@@ -476,7 +500,11 @@ fun PresentationTab(
                 ),
                 contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
             ) {
-                Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
+                Icon(
+                    painterResource(Res.drawable.ic_folder),
+                    contentDescription = null,
+                    modifier = Modifier.size(13.dp)
+                )
                 Spacer(Modifier.width(7.dp))
                 Text(
                     stringResource(Res.string.select_presentation_file_button),
@@ -499,7 +527,11 @@ fun PresentationTab(
             }
             if (viewModel.isLoading && viewModel.totalSlides > 0) {
                 Text(
-                    text = stringResource(Res.string.loading_slides_progress, viewModel.slideFiles.size, viewModel.totalSlides),
+                    text = stringResource(
+                        Res.string.loading_slides_progress,
+                        viewModel.slideFiles.size,
+                        viewModel.totalSlides
+                    ),
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -515,10 +547,15 @@ fun PresentationTab(
                 ActionIconButton(
                     onClick = onFreezeToggle,
                     enabled = viewModel.slideFiles.isNotEmpty(),
-                    tooltipText = stringResource(if (presentationFrozen) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
+                    tooltipText =
+                        stringResource(if (
+                            presentationFrozen
+                        ) Res.string.presentation_unfreeze_output else Res.string.presentation_freeze_output),
                     icon = if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                    containerColor = if (presentationFrozen) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = if (presentationFrozen) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
+                    containerColor = if (presentationFrozen) MaterialTheme.colorScheme.errorContainer
+                        else MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = if (presentationFrozen) MaterialTheme.colorScheme.onErrorContainer
+                        else MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
             ActionIconButton(
@@ -533,7 +570,12 @@ fun PresentationTab(
                 AddToScheduleButton(
                     onClick = {
                         val f = viewModel.selectedPresentation ?: return@AddToScheduleButton
-                        onAddToSchedule(f.absolutePath, f.nameWithoutExtension, viewModel.slideFiles.size, f.extension.lowercase())
+                        onAddToSchedule(
+                            f.absolutePath,
+                            f.nameWithoutExtension,
+                            viewModel.slideFiles.size,
+                            f.extension.lowercase()
+                        )
                     },
                     enabled = viewModel.selectedPresentation != null,
                     tooltipText = stringResource(Res.string.add_to_schedule)
@@ -589,7 +631,10 @@ fun PresentationTab(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         // ── Recent files bar ──────────────────────────────────────────
-        val recentOrdered = RecentPresentationFiles.pinned + RecentPresentationFiles.files.filter { it !in RecentPresentationFiles.pinned }
+        val recentOrdered =
+            RecentPresentationFiles.pinned + RecentPresentationFiles
+                .files
+                .filter { it !in RecentPresentationFiles.pinned }
         if (recentOrdered.isNotEmpty()) {
             Row(
                 modifier = Modifier
@@ -606,11 +651,28 @@ fun PresentationTab(
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(Res.string.clear_recents),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
                     IconButton(onClick = { RecentPresentationFiles.clear() }, modifier = Modifier.size(20.dp)) {
-                        Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                        Icon(
+                            painterResource(Res.drawable.ic_close),
+                            contentDescription = stringResource(Res.string.clear),
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
                     }
                 }
                 LazyRow(
@@ -621,7 +683,10 @@ fun PresentationTab(
                     lazyItems(recentOrdered) { path ->
                         val isPinned = path in RecentPresentationFiles.pinned
                         val isActive = viewModel.selectedPresentation?.absolutePath == path
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
                             Box(
                                 modifier = Modifier
                                     .height(26.dp)
@@ -629,7 +694,12 @@ fun PresentationTab(
                                         if (isActive) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
                                         RoundedCornerShape(6.dp)
                                     )
-                                    .border(1.dp, if (isActive) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+                                    .border(
+                                        1.dp,
+                                        if (isActive) MaterialTheme.colorScheme.outline
+                                            else MaterialTheme.colorScheme.outlineVariant,
+                                        RoundedCornerShape(6.dp)
+                                    )
                                     .clickable {
                                         val f = File(path)
                                         if (f.exists()) {
@@ -643,16 +713,27 @@ fun PresentationTab(
                                 Text(
                                     text = File(path).name,
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                                    color = if (isActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                                    color = if (isActive) MaterialTheme.colorScheme.onSurface
+                                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
                                     maxLines = 1
                                 )
                             }
-                            IconButton(onClick = { RecentPresentationFiles.togglePin(path) }, modifier = Modifier.size(20.dp)) {
+                            IconButton(
+                                onClick = { RecentPresentationFiles.togglePin(path) },
+                                modifier = Modifier.size(20.dp)
+                            ) {
                                 Icon(
-                                    painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
-                                    contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
+                                    painter =
+                                        painterResource(if (
+                                            isPinned
+                                        ) Res.drawable.ic_star_filled else Res.drawable.ic_star),
+                                    contentDescription =
+                                        stringResource(if (
+                                            isPinned
+                                        ) Res.string.recent_unpin else Res.string.recent_pin),
                                     modifier = Modifier.size(12.dp),
-                                    tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+                                    tint = if (isPinned) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
                                 )
                             }
                         }
@@ -692,16 +773,45 @@ fun PresentationTab(
             // Transport (inner gap: 4dp)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(Res.string.previous_image),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
                     IconButton(onClick = goPrevious, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(Res.drawable.ic_skip_previous), contentDescription = stringResource(Res.string.previous_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                        Icon(
+                            painterResource(Res.drawable.ic_skip_previous),
+                            contentDescription = stringResource(Res.string.previous_image),
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
                     }
                 }
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
                     FilledIconButton(
                         onClick = { viewModel.togglePlayPause() },
@@ -713,31 +823,63 @@ fun PresentationTab(
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
-                        Icon(painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play), contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), modifier = Modifier.size(15.dp))
+                        Icon(
+                            painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
+                            contentDescription =
+                                stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
+                            modifier = Modifier.size(15.dp)
+                        )
                     }
                 }
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(Res.string.next_image),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
                     IconButton(onClick = goNext, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(Res.drawable.ic_skip_next), contentDescription = stringResource(Res.string.next_image), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                        Icon(
+                            painterResource(Res.drawable.ic_skip_next),
+                            contentDescription = stringResource(Res.string.next_image),
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
                     }
                 }
             }
 
             if (viewModel.slideFiles.isNotEmpty()) {
                 Text(
-                    text = stringResource(Res.string.slide_counter, viewModel.selectedSlideIndex + 1, viewModel.slideFiles.size),
+                    text = stringResource(
+                        Res.string.slide_counter,
+                        viewModel.selectedSlideIndex + 1,
+                        viewModel.slideFiles.size
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
                     modifier = Modifier.widthIn(min = 60.dp)
                 )
                 // Build progress of the live animated slide (only shown when it has builds).
                 val liveFrame = presenterManager?.presentationFrame?.value
-                if (liveFrame != null && liveFrame.stepCount > 0 && liveFrame.slideIndex == viewModel.selectedSlideIndex) {
+                if (
+                    liveFrame != null && liveFrame.stepCount > 0 && liveFrame.slideIndex == viewModel.selectedSlideIndex
+                ) {
                     Text(
-                        text = stringResource(Res.string.presentation_builds_counter, liveFrame.completedSteps, liveFrame.stepCount),
+                        text = stringResource(
+                            Res.string.presentation_builds_counter,
+                            liveFrame.completedSteps,
+                            liveFrame.stepCount
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                         modifier = Modifier.widthIn(min = 60.dp)
@@ -747,13 +889,27 @@ fun PresentationTab(
 
             // Loop button
             TooltipArea(
-                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                tooltip = { Surface(
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    shape = MaterialTheme.shapes.extraSmall,
+                    tonalElevation = 4.dp
+                ) { Text(
+                    stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.bodySmall
+                ) } },
+                tooltipPlacement = TooltipPlacement.ComponentRect(
+                    anchor = Alignment.BottomCenter,
+                    offset = DpOffset(0.dp, 4.dp)
+                )
             ) {
                 IconButton(
                     onClick = {
                         viewModel.isLooping = !viewModel.isLooping
-                        onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(isLooping = viewModel.isLooping)) }
+                        onSettingsChange { s ->
+                            s.copy(presentationSettings = s.presentationSettings.copy(isLooping = viewModel.isLooping))
+                        }
                     },
                     modifier = Modifier.size(28.dp),
                     colors = if (viewModel.isLooping) IconButtonDefaults.iconButtonColors(
@@ -766,7 +922,8 @@ fun PresentationTab(
                 ) {
                     Icon(
                         painterResource(Res.drawable.ic_refresh),
-                        contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
+                        contentDescription =
+                            stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
                         modifier = Modifier.size(16.dp),
                     )
                 }
@@ -795,16 +952,46 @@ fun PresentationTab(
                     .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(stringResource(Res.string.auto_scroll_interval).uppercase(), fontSize = 8.sp, lineHeight = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
-                Text("${appSettings.presentationSettings.autoScrollInterval.toInt()} ${stringResource(Res.string.unit_s)}", style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                Text(
+                    stringResource(Res.string.auto_scroll_interval).uppercase(),
+                    fontSize = 8.sp,
+                    lineHeight = 9.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.9.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    maxLines = 1
+                )
+                Text(
+                    "${appSettings.presentationSettings.autoScrollInterval.toInt()} ${stringResource(Res.string.unit_s)}",
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
             }
             if (editingInterval) {
                 AlertDialog(
                     onDismissRequest = { editingInterval = false },
                     title = { Text(stringResource(Res.string.auto_scroll_interval)) },
-                    text = { OutlinedTextField(value = intervalInput, onValueChange = { intervalInput = it }, suffix = { Text(stringResource(Res.string.unit_s)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)) },
-                    confirmButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { intervalInput.toIntOrNull()?.coerceIn(1, MAX_AUTO_SCROLL_SECONDS)?.let { v -> viewModel.autoScrollInterval = v.toFloat(); onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(autoScrollInterval = v.toFloat())) } }; editingInterval = false }) { Text(stringResource(Res.string.ok)) } },
-                    dismissButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) { Text(stringResource(Res.string.cancel)) } }
+                    text = { OutlinedTextField(
+                        value = intervalInput,
+                        onValueChange = { intervalInput = it },
+                        suffix = { Text(stringResource(Res.string.unit_s)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    ) },
+                    confirmButton =
+                        { TextButton(shape = RoundedCornerShape(
+                            6.dp
+                        ), onClick = { intervalInput.toIntOrNull()?.coerceIn(
+                        1,
+                        MAX_AUTO_SCROLL_SECONDS
+                    )?.let { v -> viewModel.autoScrollInterval = v.toFloat(); onSettingsChange { s ->
+                        s.copy(presentationSettings = s.presentationSettings.copy(autoScrollInterval = v.toFloat()))
+                    } }; editingInterval = false }) { Text(stringResource(Res.string.ok)) } },
+                    dismissButton = { TextButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = { editingInterval = false }
+                    ) { Text(stringResource(Res.string.cancel)) } }
                 )
             }
 
@@ -818,16 +1005,46 @@ fun PresentationTab(
                     .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(stringResource(Res.string.transition_duration).uppercase(), fontSize = 8.sp, lineHeight = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
-                Text("${appSettings.presentationSettings.transitionDuration.toInt()} ${stringResource(Res.string.unit_ms)}", style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                Text(
+                    stringResource(Res.string.transition_duration).uppercase(),
+                    fontSize = 8.sp,
+                    lineHeight = 9.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.9.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    maxLines = 1
+                )
+                Text(
+                    "${appSettings.presentationSettings.transitionDuration.toInt()} ${stringResource(Res.string.unit_ms)}",
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
             }
             if (editingTransition) {
                 AlertDialog(
                     onDismissRequest = { editingTransition = false },
                     title = { Text(stringResource(Res.string.transition_duration)) },
-                    text = { OutlinedTextField(value = transitionInput, onValueChange = { transitionInput = it }, suffix = { Text(stringResource(Res.string.unit_ms)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)) },
-                    confirmButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { transitionInput.toIntOrNull()?.coerceIn(MIN_TRANSITION_MS, MAX_TRANSITION_MS)?.let { v -> viewModel.transitionDuration = v.toFloat(); onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(transitionDuration = v.toFloat())) } }; editingTransition = false }) { Text(stringResource(Res.string.ok)) } },
-                    dismissButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) { Text(stringResource(Res.string.cancel)) } }
+                    text = { OutlinedTextField(
+                        value = transitionInput,
+                        onValueChange = { transitionInput = it },
+                        suffix = { Text(stringResource(Res.string.unit_ms)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    ) },
+                    confirmButton =
+                        { TextButton(shape = RoundedCornerShape(
+                            6.dp
+                        ), onClick = { transitionInput.toIntOrNull()?.coerceIn(
+                        MIN_TRANSITION_MS,
+                        MAX_TRANSITION_MS
+                    )?.let { v -> viewModel.transitionDuration = v.toFloat(); onSettingsChange { s ->
+                        s.copy(presentationSettings = s.presentationSettings.copy(transitionDuration = v.toFloat()))
+                    } }; editingTransition = false }) { Text(stringResource(Res.string.ok)) } },
+                    dismissButton = { TextButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = { editingTransition = false }
+                    ) { Text(stringResource(Res.string.cancel)) } }
                 )
             }
 
@@ -947,7 +1164,11 @@ fun PresentationTab(
                             val bitmap by produceState<ImageBitmap?>(initialValue = null, slideFile) {
                                 value = withContext(Dispatchers.IO) {
                                     try {
-                                        org.jetbrains.skia.Image.makeFromEncoded(slideFile.readBytes()).toComposeImageBitmap()
+                                        org.jetbrains
+                                            .skia
+                                            .Image
+                                            .makeFromEncoded(slideFile.readBytes())
+                                            .toComposeImageBitmap()
                                     } catch (_: Exception) {
                                         null
                                     }
@@ -970,7 +1191,11 @@ fun PresentationTab(
                                             val cur = viewModel.slideFiles.getOrNull(index)?.let { f ->
                                                 withContext(Dispatchers.IO) {
                                                     try {
-                                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                                        org.jetbrains
+                                                            .skia
+                                                            .Image
+                                                            .makeFromEncoded(f.readBytes())
+                                                            .toComposeImageBitmap()
                                                     } catch (_: Exception) {
                                                         null
                                                     }
@@ -979,7 +1204,11 @@ fun PresentationTab(
                                             val next = viewModel.slideFiles.getOrNull(index + 1)?.let { f ->
                                                 withContext(Dispatchers.IO) {
                                                     try {
-                                                        org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                                                        org.jetbrains
+                                                            .skia
+                                                            .Image
+                                                            .makeFromEncoded(f.readBytes())
+                                                            .toComposeImageBitmap()
                                                     } catch (_: Exception) {
                                                         null
                                                     }
@@ -987,7 +1216,9 @@ fun PresentationTab(
                                             }
                                             presenterManager.setSelectedSlide(cur)
                                             presenterManager.setNextSlide(next)
-                                            presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(index) { "" })
+                                            presenterManager.setPresenterNotes(
+                                                viewModel.slideNotes.getOrElse(index) { "" }
+                                            )
                                         }
                                         presenterManager.setPresentingMode(Presenting.PRESENTATION)
                                         viewModel.deck?.let { presenterManager.presentationShowSlide(it, index) }
@@ -1012,14 +1243,25 @@ fun PresentationTab(
                     val currentLoadError = viewModel.loadError
                     Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                         if (!viewModel.isLoading && currentLoadError != null) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 Text(
                                     text = stringResource(
                                         when (currentLoadError) {
-                                            PresentationLoadError.PASSWORD_PROTECTED -> Res.string.presentation_error_password_protected
-                                            PresentationLoadError.EMPTY_DOCUMENT -> Res.string.presentation_error_empty_document
-                                            PresentationLoadError.LIBRARY_MISSING -> Res.string.presentation_error_library_missing
-                                            PresentationLoadError.RENDER_FAILED -> Res.string.presentation_error_render_failed
+                                            PresentationLoadError.PASSWORD_PROTECTED -> Res
+                                                .string
+                                                .presentation_error_password_protected
+                                            PresentationLoadError.EMPTY_DOCUMENT -> Res
+                                                .string
+                                                .presentation_error_empty_document
+                                            PresentationLoadError.LIBRARY_MISSING -> Res
+                                                .string
+                                                .presentation_error_library_missing
+                                            PresentationLoadError.RENDER_FAILED -> Res
+                                                .string
+                                                .presentation_error_render_failed
                                         }
                                     ),
                                     style = MaterialTheme.typography.bodyLarge,
@@ -1029,17 +1271,35 @@ fun PresentationTab(
                                 )
                             }
                         } else {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
                                 CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                                Text(stringResource(Res.string.loading_slides), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                Text(
+                                    stringResource(Res.string.loading_slides),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
                             }
                         }
                     }
                 } else {
                     Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(stringResource(Res.string.select_presentation_file), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                            Text(stringResource(Res.string.supported_formats), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                stringResource(Res.string.select_presentation_file),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                            Text(
+                                stringResource(Res.string.supported_formats),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            )
                             Text(
                                 stringResource(Res.string.presentation_static_note),
                                 style = MaterialTheme.typography.bodySmall,
@@ -1064,23 +1324,39 @@ fun PresentationTab(
                             Row(
                                 modifier = Modifier
                                     .background(
-                                        if (viewModel.selectedPresentation == f) MaterialTheme.colorScheme.surfaceVariant
+                                        if (viewModel.selectedPresentation == f) MaterialTheme.colorScheme
+                                            .surfaceVariant
                                         else Color.Transparent,
                                         RoundedCornerShape(6.dp)
                                     )
-                                    .border(1.dp, if (viewModel.selectedPresentation == f) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+                                    .border(
+                                        1.dp,
+                                        if (viewModel.selectedPresentation == f) MaterialTheme.colorScheme.outline
+                                            else MaterialTheme.colorScheme.outlineVariant,
+                                        RoundedCornerShape(6.dp)
+                                    )
                                     .clickable { viewModel.selectPresentation(f) }
                                     .padding(horizontal = 10.dp, vertical = 5.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Text(f.nameWithoutExtension, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
+                                Text(
+                                    f.nameWithoutExtension,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1
+                                )
                                 IconButton(onClick = {
                                     val inRecents = f.absolutePath in RecentPresentationFiles.files
                                     val inPinned = f.absolutePath in RecentPresentationFiles.pinned
                                     viewModel.removePresentation(f, isInRecentsOrPinned = inRecents || inPinned)
                                 }, modifier = Modifier.size(16.dp)) {
-                                    Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.remove), modifier = Modifier.size(10.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                    Icon(
+                                        painterResource(Res.drawable.ic_close),
+                                        contentDescription = stringResource(Res.string.remove),
+                                        modifier = Modifier.size(10.dp),
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                    )
                                 }
                             }
                         }
@@ -1192,7 +1468,8 @@ private fun SlideThumbnail(
                     fontSize = 11.5.sp,
                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
                 ),
-                color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.62f),
+                color = if (isSelected) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.62f),
                 maxLines = 1
             )
         }

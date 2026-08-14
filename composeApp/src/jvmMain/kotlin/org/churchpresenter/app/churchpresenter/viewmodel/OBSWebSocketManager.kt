@@ -69,7 +69,9 @@ class OBSWebSocketManager {
                     val identifiedText = (incoming.receive() as? Frame.Text)?.readText()
                         ?: error("Expected Identified frame")
                     val identified = Json.parseToJsonElement(identifiedText).jsonObject
-                    check(identified["op"]?.jsonPrimitive?.int == 2) { "Authentication failed — check your OBS password" }
+                    check(identified["op"]?.jsonPrimitive?.int == 2) {
+                        "Authentication failed — check your OBS password"
+                    }
 
                     withContext(Dispatchers.Main) { _status.value = ConnectionStatus.CONNECTED }
                     CrashReporter.breadcrumb("OBS connected ($host:$port)", category = "integration")

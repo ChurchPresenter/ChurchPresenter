@@ -222,7 +222,11 @@ fun SongsTab(
                     )
                 )
             } else {
-                onInstanceLinkSendSongSection?.invoke(song.number, viewModel.selectedSectionIndex.value, viewModel.selectedLineIndex.value)
+                onInstanceLinkSendSongSection?.invoke(
+                    song.number,
+                    viewModel.selectedSectionIndex.value,
+                    viewModel.selectedLineIndex.value
+                )
             }
         }
         live.songId = items.getOrNull(idx)?.songId
@@ -602,7 +606,10 @@ fun SongsTab(
                     }
                 },
                 dismissButton = {
-                    TextButton(shape = RoundedCornerShape(6.dp), onClick = { dialogs.closeDelete(); dialogs.closeDelete() }) {
+                    TextButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = { dialogs.closeDelete(); dialogs.closeDelete() }
+                    ) {
                         Text(stringResource(Res.string.cancel))
                     }
                 }

@@ -407,7 +407,10 @@ internal fun EditSongContent(
                                 // A recessed track, so the filled tab on it is the brightest thing
                                 // in the row rather than one of two similar surfaces.
                                 modifier = Modifier
-                                    .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(9.dp))
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceContainerLowest,
+                                        RoundedCornerShape(9.dp)
+                                    )
                                     .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(9.dp))
                                     .padding(2.dp),
                                 horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -451,7 +454,11 @@ internal fun EditSongContent(
                             value = paneValue,
                             onValueChange = { setPaneValue(it) },
                             onPasteChordSheet = { sheet ->
-                                setPaneValue(insertSnippet(paneValue, ChordSheetImporter.convert(sheet), ownLine = false))
+                                setPaneValue(insertSnippet(
+                                    paneValue,
+                                    ChordSheetImporter.convert(sheet),
+                                    ownLine = false
+                                ))
                             },
                             modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 14.dp),
                             placeholder = {
@@ -510,7 +517,8 @@ internal fun EditSongContent(
                     }
                     Button(
                         shape = RoundedCornerShape(9.dp),
-                        enabled = !isDuplicate && (!isNewSong || (editedSongbook.isNotBlank() && editedTitle.isNotBlank())),
+                        enabled =
+                            !isDuplicate && (!isNewSong || (editedSongbook.isNotBlank() && editedTitle.isNotBlank())),
                         onClick = {
                             val updatedSong = SongItem(
                                 number = editedNumber,
@@ -522,7 +530,8 @@ internal fun EditSongContent(
                                 lyrics = editedLyrics.text.split("\n"),
                                 secondaryTitle = editedSecondaryTitle,
                                 secondaryLyrics = editedSecondaryLyrics.text.split("\n").let {
-                                    if (it.all { line -> line.isBlank() || line.trim().startsWith("[") }) emptyList() else it
+                                    if (it.all { line -> line.isBlank() || line.trim().startsWith("[") }) emptyList()
+                                        else it
                                 },
                                 sourceFile = song.sourceFile,
                                 ccliNumber = editedCcli
@@ -647,7 +656,11 @@ private fun RowScope.SongbookCard(
                     onClick = { onSongbookChange(originalSongbook); isAddingNew = false },
                     modifier = Modifier.size(20.dp),
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = stringResource(Res.string.cancel), modifier = Modifier.size(14.dp))
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = stringResource(Res.string.cancel),
+                        modifier = Modifier.size(14.dp)
+                    )
                 }
             }
         }
@@ -881,7 +894,11 @@ private fun rememberLyricsHighlight(): VisualTransformation {
                         } else {
                             verse
                         }
-                        pushStyle(SpanStyle(color = ink, background = ink.copy(alpha = 0.16f), fontWeight = FontWeight.Bold))
+                        pushStyle(SpanStyle(
+                            color = ink,
+                            background = ink.copy(alpha = 0.16f),
+                            fontWeight = FontWeight.Bold
+                        ))
                         append(line)
                         pop()
                     } else {

@@ -47,7 +47,10 @@ class DictionaryPresenterRenderTest {
 
     @Test
     fun `an entry shows its word and definition`() = runDict(elohim) {
-        onNodeWithText("ʼĕlôhîym", substring = true).assertExists("the original-language word is the point of the slide")
+        onNodeWithText(
+            "ʼĕlôhîym",
+            substring = true
+        ).assertExists("the original-language word is the point of the slide")
         onNodeWithText("the supreme God", substring = true).assertExists("the definition must reach the screen")
     }
 

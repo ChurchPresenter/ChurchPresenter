@@ -46,8 +46,14 @@ object PlanningCenterScriptureDetector {
                 val chapter = match.groupValues[2].toIntOrNull() ?: return@mapNotNull null
                 val verseStart = match.groupValues[3].toIntOrNull() ?: return@mapNotNull null
                 val verseEnd = match.groupValues[4].toIntOrNull() ?: verseStart
-                val (bookId, bookName) = bookNamesById.firstOrNull { (_, name) -> name.equals(bookText, ignoreCase = true) }
-                    ?: BibleBookAbbreviations.resolveBookId(bookText)?.let { id -> bookNamesById.firstOrNull { (bid, _) -> bid == id } }
+                val (
+                    bookId,
+                    bookName
+                ) = bookNamesById.firstOrNull { (_, name) -> name.equals(bookText, ignoreCase = true) }
+                    ?: BibleBookAbbreviations.resolveBookId(bookText)?.let { id -> bookNamesById.firstOrNull { (
+                        bid,
+                        _
+                    ) -> bid == id } }
                     ?: return@mapNotNull null
                 DetectedReference(bookId, bookName, chapter, verseStart, verseEnd)
             }
@@ -73,7 +79,8 @@ object PlanningCenterScriptureDetector {
         val selected = chapterVerses.filter { it.verseNumber in reference.verseStart..reference.verseEnd }
         if (selected.isEmpty()) return null
         val text = selected.sortedBy { it.verseNumber }.joinToString(" ") { it.verseText }
-        val range = if (reference.verseEnd > reference.verseStart) "${reference.verseStart}-${reference.verseEnd}" else ""
+        val range = if (reference.verseEnd > reference.verseStart) "${reference.verseStart}-${reference.verseEnd}"
+            else ""
         return ResolvedVerses(
             bookName = reference.bookName,
             bookId = reference.bookId,

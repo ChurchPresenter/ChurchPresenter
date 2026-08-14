@@ -290,7 +290,12 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 }
                 if (searchQuery.isNotEmpty()) {
                     IconButton(onClick = { onSearchQueryChange("") }, modifier = Modifier.size(30.dp)) {
-                        Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.search_clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_close),
+                            contentDescription = stringResource(Res.string.search_clear),
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
@@ -334,9 +339,18 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
                 } else {
-                    Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_search),
+                        contentDescription = stringResource(Res.string.search),
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
             }
 
@@ -369,7 +383,8 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                 event.button?.isSecondary == true
                             ) {
                                 val pos = event.changes.firstOrNull()?.position
-                                if (pos != null) columns.menuOffset = with(density) { DpOffset(pos.x.toDp(), pos.y.toDp()) }
+                                if (pos != null) columns.menuOffset =
+                                    with(density) { DpOffset(pos.x.toDp(), pos.y.toDp()) }
                                 columns.showMenu = true
                             }
                         }
@@ -439,7 +454,10 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             .then(reorderDragMod),
                         contentAlignment = Alignment.Center
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
                             // Deliberately unlabelled: this is a column header whose click
                             // SORTS, so naming it "Add to Schedule" would name it after an
                             // action it does not perform. Giving a sortable header its proper
@@ -454,7 +472,10 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             )
                             if (isSorted) {
                                 Icon(
-                                    painter = painterResource(if (currentSortAscending) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
+                                    painter =
+                                        painterResource(if (
+                                            currentSortAscending
+                                        ) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
                                     contentDescription = null,
                                     modifier = Modifier.size(8.dp),
                                     tint = cellColor
@@ -489,7 +510,10 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                             )
                             if (isSorted) {
                                 Icon(
-                                    painter = painterResource(if (currentSortAscending) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
+                                    painter =
+                                        painterResource(if (
+                                            currentSortAscending
+                                        ) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
                                     contentDescription = null,
                                     modifier = Modifier.size(10.dp),
                                     tint = cellColor
@@ -720,7 +744,12 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                 Box(modifier = Modifier.width(6.dp))
                                 when (colId) {
                                     "add_to_schedule" -> IconButton(
-                                        onClick = { onAddToSchedule?.invoke(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId) },
+                                        onClick = { onAddToSchedule?.invoke(
+                                            song.number.toIntOrNull() ?: 0,
+                                            song.title,
+                                            song.songbook,
+                                            song.songId
+                                        ) },
                                         modifier = Modifier.size(24.dp)
                                     ) {
                                         Icon(
@@ -773,7 +802,12 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                     )
                                 },
                                 onClick = {
-                                    onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId)
+                                    onAddToSchedule(
+                                        song.number.toIntOrNull() ?: 0,
+                                        song.title,
+                                        song.songbook,
+                                        song.songId
+                                    )
                                     showContextMenu = false
                                 }
                             )
@@ -781,15 +815,21 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                         DropdownMenuItem(
                             text = {
                                 val isFav = song.songId in favorites
-                                Text(stringResource(if (isFav) Res.string.remove_from_favorites else Res.string.add_to_favorites))
+                                Text(stringResource(if (
+                                    isFav
+                                ) Res.string.remove_from_favorites else Res.string.add_to_favorites))
                             },
                             leadingIcon = {
                                 val isFav = song.songId in favorites
                                 Icon(
-                                    painter = painterResource(if (isFav) Res.drawable.ic_star_filled else Res.drawable.ic_star),
+                                    painter =
+                                        painterResource(if (
+                                            isFav
+                                        ) Res.drawable.ic_star_filled else Res.drawable.ic_star),
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp),
-                                    tint = if (isFav) MaterialTheme.semantic.favorite else MaterialTheme.colorScheme.onSurfaceVariant
+                                    tint = if (isFav) MaterialTheme.semantic.favorite
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             },
                             onClick = {
@@ -815,7 +855,10 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                         )
                         HorizontalDivider()
                         DropdownMenuItem(
-                            text = { Text(stringResource(Res.string.delete_saved_string), color = MaterialTheme.colorScheme.error) },
+                            text = { Text(
+                                stringResource(Res.string.delete_saved_string),
+                                color = MaterialTheme.colorScheme.error
+                            ) },
                             leadingIcon = {
                                 Icon(
                                     painter = painterResource(Res.drawable.ic_delete),
@@ -895,11 +938,23 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                 Spacer(modifier = Modifier.weight(1f))
                 TooltipArea(
                     tooltip = {
-                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                            Text(stringResource(Res.string.song_favorites_clear), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                        Surface(
+                            color = MaterialTheme.colorScheme.inverseSurface,
+                            shape = MaterialTheme.shapes.extraSmall,
+                            tonalElevation = 4.dp
+                        ) {
+                            Text(
+                                stringResource(Res.string.song_favorites_clear),
+                                color = MaterialTheme.colorScheme.inverseOnSurface,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
                     IconButton(onClick = {
                         onClearFavorites()
@@ -961,7 +1016,8 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = if (song.number.isNotBlank()) "${song.number}. ${song.title}" else song.title,
+                                        text = if (song.number.isNotBlank()) "${song.number}. ${song.title}"
+                                            else song.title,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         maxLines = 1,
@@ -971,7 +1027,12 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                                     if (onAddToSchedule != null) {
                                         IconButton(
                                             onClick = {
-                                                onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId)
+                                                onAddToSchedule(
+                                                    song.number.toIntOrNull() ?: 0,
+                                                    song.title,
+                                                    song.songbook,
+                                                    song.songId
+                                                )
                                             },
                                             modifier = Modifier.size(20.dp)
                                         ) {

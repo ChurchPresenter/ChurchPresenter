@@ -52,7 +52,12 @@ class SongsViewModelEditDeleteTest {
     }
 
     private fun viewModel(): SongsViewModel {
-        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined, enableFolderWatcher = false)
+        val vm = SongsViewModel(
+            AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false
+        )
         created.add(vm)
         awaitUntil("songs") { vm.filteredSongItems.value.size >= 3 }
         return vm

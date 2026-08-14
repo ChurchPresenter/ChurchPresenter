@@ -404,7 +404,11 @@ private fun StepIconBadge(icon: ImageVector) {
                 Brush.linearGradient(
                     listOf(
                         MaterialTheme.colorScheme.surfaceVariant,
-                        lerp(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.primary, ACTIVE_STEP_TINT)
+                        lerp(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            MaterialTheme.colorScheme.primary,
+                            ACTIVE_STEP_TINT
+                        )
                     )
                 )
             )
@@ -567,7 +571,11 @@ private fun WelcomeStep() {
                     Brush.linearGradient(
                         listOf(
                             MaterialTheme.colorScheme.surfaceVariant,
-                            lerp(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.primary, ACTIVE_STEP_TINT)
+                            lerp(
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                MaterialTheme.colorScheme.primary,
+                                ACTIVE_STEP_TINT
+                            )
                         )
                     )
                 )
@@ -902,7 +910,8 @@ internal fun VlcStep(
                             imageVector = if (vlcOk) Icons.Filled.CheckCircle else Icons.Filled.Warning,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
-                            tint = if (vlcOk) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.error
+                            tint = if (vlcOk) MaterialTheme.colorScheme.inverseSurface
+                                else MaterialTheme.colorScheme.error
                         )
                         Text(
                             text = stringResource(
@@ -915,7 +924,8 @@ internal fun VlcStep(
                             ),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (vlcOk) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.error
+                            color = if (vlcOk) MaterialTheme.colorScheme.inverseSurface
+                                else MaterialTheme.colorScheme.error
                         )
                     }
                     if (!vlcOk) {

@@ -72,7 +72,9 @@ class PresentationTabScheduleItemTest {
         val file = pdf(pages = 2)
         presentationTab(
             selectedPresentationItem = ScheduleItem.PresentationItem(
-                id = "item-1", filePath = file.absolutePath, fileName = file.nameWithoutExtension, slideCount = 2, fileType = "pdf",
+                id =
+                    "item-1", filePath =
+                        file.absolutePath, fileName = file.nameWithoutExtension, slideCount = 2, fileType = "pdf",
             ),
         ) { vm, _ ->
             awaitLoaded(vm, slides = 2)
@@ -85,7 +87,9 @@ class PresentationTabScheduleItemTest {
     @Test
     fun `a schedule item whose file is missing and has no remote fetch loads nothing`() = presentationTab(
         selectedPresentationItem = ScheduleItem.PresentationItem(
-            id = "item-2", filePath = "/no/such/file/does-not-exist.pdf", fileName = "does-not-exist", slideCount = 3, fileType = "pdf",
+            id =
+                "item-2", filePath =
+                    "/no/such/file/does-not-exist.pdf", fileName = "does-not-exist", slideCount = 3, fileType = "pdf",
         ),
     ) { vm, _ ->
         waitForIdle()
@@ -98,7 +102,9 @@ class PresentationTabScheduleItemTest {
     fun `a schedule item whose file is missing falls back to Instance Link fetch`() {
         presentationTab(
             selectedPresentationItem = ScheduleItem.PresentationItem(
-                id = "item-3", filePath = "/no/such/file/mirrored-deck.pdf", fileName = "mirrored-deck", slideCount = 2, fileType = "pdf",
+                id =
+                    "item-3", filePath =
+                        "/no/such/file/mirrored-deck.pdf", fileName = "mirrored-deck", slideCount = 2, fileType = "pdf",
             ),
             instanceLinkFetchPresentationSlideBytes = { _, _ -> jpegBytes() },
         ) { vm, _ ->

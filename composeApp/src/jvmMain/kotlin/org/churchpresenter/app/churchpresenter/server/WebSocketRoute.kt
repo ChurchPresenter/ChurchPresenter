@@ -54,7 +54,11 @@ internal fun Route.webSocketRoute(
                     if (_apiKeyEnabled.value && _apiKey.value.isNotEmpty()) {
                         val provided = queryKey ?: headerKey ?: ""
                         if (provided != _apiKey.value) {
-                            InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_unauthorized", mapOf("reason" to "bad_api_key"))
+                            InstanceLinkLogger.log(
+                                InstanceLinkLogSide.PRIMARY,
+                                "follower_unauthorized",
+                                mapOf("reason" to "bad_api_key")
+                            )
                             send(Frame.Text("{\"error\":\"Unauthorized\"}"))
                             return@webSocket
                         }
@@ -80,7 +84,11 @@ internal fun Route.webSocketRoute(
                     if (!isInstanceLinkFollower) UsageEvents.recordOncePerRun(UsageEvent.MOBILE_APP_CONNECTED)
                     if (isInstanceLinkFollower && wsClientId.isNotEmpty()) {
                         _connectedInstanceLinkFollowers.value = _connectedInstanceLinkFollowers.value + wsClientId
-                        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_connected", mapOf("deviceId" to wsClientId))
+                        InstanceLinkLogger.log(
+                            InstanceLinkLogSide.PRIMARY,
+                            "follower_connected",
+                            mapOf("deviceId" to wsClientId)
+                        )
                     }
 
                     // Subscribed to the server.broadcast flow BEFORE the connect snapshot is written, and
@@ -126,7 +134,10 @@ internal fun Route.webSocketRoute(
                     }
                     send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
                         WebSocketMessage(Constants.WS_EVENT_SCHEDULE_UPDATED,
-                            json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(schedule, schedule.size))))))
+                            json.encodeToString(
+                                ScheduleResponse.serializer(),
+                                ScheduleResponse(schedule, schedule.size)
+                            )))))
                     val presentationCatalog = _presentationCatalog.value
                     if (presentationCatalog.presentations.isNotEmpty()) {
                         send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
@@ -155,7 +166,8 @@ internal fun Route.webSocketRoute(
                     send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
                         WebSocketMessage(
                             type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
-                            payload = """{"id":"${server._currentPresentationId}","index":${server._currentSlideIndex},"total":${server._currentSlideTotalCount},"isPlaying":${server._presentationIsPlaying},"isLive":${server._presentationIsLive}}"""
+                            payload =
+                                """{"id":"${server._currentPresentationId}","index":${server._currentSlideIndex},"total":${server._currentSlideTotalCount},"isPlaying":${server._presentationIsPlaying},"isLive":${server._presentationIsLive}}"""
                         ))))
                     _liveState.value?.let { state ->
                         send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
@@ -220,33 +232,77 @@ internal fun Route.webSocketRoute(
                                         scope.launch { server.onSelectPicture.emit(req) }
                                         val folderName = _pictureCatalogs[req.folderId]?.folderName ?: req.folderId
                                         val imageLabel = req.fileName ?: "Image ${req.index}"
-                                        scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction("present", folderName, imageLabel, wsClientId)) }
+                                        scope.launch {
+                                            server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
+                                                "present",
+                                                folderName,
+                                                imageLabel,
+                                                wsClientId
+                                            ))
+                                        }
                                         sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_SELECT_SONG_SECTION -> {
-                                        val req = json.decodeFromString(SelectSongSectionRequest.serializer(), msg.payload)
+                                        val req = json.decodeFromString(
+                                            SelectSongSectionRequest.serializer(),
+                                            msg.payload
+                                        )
                                         scope.launch { server.onSelectSongSection.emit(req) }
-                                        scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction("present", "Song ${req.number}", "Section ${req.section}", wsClientId)) }
+                                        scope.launch {
+                                            server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
+                                                "present",
+                                                "Song ${req.number}",
+                                                "Section ${req.section}",
+                                                wsClientId
+                                            ))
+                                        }
                                         sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_SELECT_SLIDE -> {
                                         val req = json.decodeFromString(SelectSlideRequest.serializer(), msg.payload)
                                         scope.launch { server.onSelectSlide.emit(req) }
-                                        val presName = _presentationCatalogs[_scheduleItemToPresentationId[req.id] ?: req.id]?.fileName ?: req.id
-                                        scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction("present", presName, "Slide ${req.index + 1}", wsClientId)) }
+                                        val presName =
+                                            _presentationCatalogs[_scheduleItemToPresentationId[req.id] ?: req.id]?.fileName ?: req.id
+                                        scope.launch {
+                                            server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
+                                                "present",
+                                                presName,
+                                                "Slide ${req.index + 1}",
+                                                wsClientId
+                                            ))
+                                        }
                                         sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_SELECT_BIBLE_VERSE -> {
-                                        val req = json.decodeFromString(SelectBibleVerseRequest.serializer(), msg.payload)
+                                        val req = json.decodeFromString(
+                                            SelectBibleVerseRequest.serializer(),
+                                            msg.payload
+                                        )
                                         scope.launch { server.onSelectBibleVerse.emit(req) }
-                                        val ref = if (req.verseRange.isNotEmpty()) "${req.bookName} ${req.chapter}:${req.verseRange}"
+                                        val ref =
+                                            if (
+                                                req.verseRange.isNotEmpty()
+                                            ) "${req.bookName} ${req.chapter}:${req.verseRange}"
                                                   else "${req.bookName} ${req.chapter}:${req.verseNumber}"
-                                        scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction("present", ref, req.verseText.take(SUMMARY_PREVIEW_CHARS), wsClientId)) }
+                                        scope.launch {
+                                            server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
+                                                "present",
+                                                ref,
+                                                req.verseText.take(SUMMARY_PREVIEW_CHARS),
+                                                wsClientId
+                                            ))
+                                        }
                                         sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_CLEAR -> {
                                         scope.launch { server.onClear.emit(Unit) }
-                                        scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction("clear", "Clear Display", clientId = wsClientId)) }
+                                        scope.launch {
+                                            server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
+                                                "clear",
+                                                "Clear Display",
+                                                clientId = wsClientId
+                                            ))
+                                        }
                                         sendCommandAck(msg.commandId, ok = true)
                                     }
                                     Constants.WS_CMD_BIBLE_HOLD -> {
@@ -309,12 +365,17 @@ internal fun Route.webSocketRoute(
                                     }
                                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {
                                         val item = server.parseRemoteItem(msg.payload)
-                                            ?: json.decodeFromString(AddToScheduleRequest.serializer(), msg.payload).item
+                                            ?: json.decodeFromString(
+                                                AddToScheduleRequest.serializer(),
+                                                msg.payload
+                                            ).item
                                         val pending = PendingRemoteRequest(item, wsClientId)
                                         scope.launch {
                                             server.onAddToSchedule.emit(pending)
-                                            val allowed = try { pending.decision.await() } catch (_: Exception) { false }
-                                            val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                            val allowed =
+                                                try { pending.decision.await() } catch (_: Exception) { false }
+                                            val response = if (allowed) """{"ok":true}"""
+                                                else """{"ok":false,"reason":"denied"}"""
                                             try { send(Frame.Text(response)) } catch (_: Exception) { }
                                         }
                                         // Ack "queued" immediately — the operator's approval can take
@@ -331,8 +392,10 @@ internal fun Route.webSocketRoute(
                                             val pending = PendingBatchRequest(items, wsClientId)
                                             scope.launch {
                                                 server.onAddBatchToSchedule.emit(pending)
-                                                val allowed = try { pending.decision.await() } catch (_: Exception) { false }
-                                                val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                                val allowed =
+                                                    try { pending.decision.await() } catch (_: Exception) { false }
+                                                val response = if (allowed) """{"ok":true}"""
+                                                    else """{"ok":false,"reason":"denied"}"""
                                                 try { send(Frame.Text(response)) } catch (_: Exception) { }
                                             }
                                             sendCommandAck(msg.commandId, ok = true, reason = "pending_approval")
@@ -346,20 +409,28 @@ internal fun Route.webSocketRoute(
                                         val pending = PendingRemoteRequest(item, wsClientId)
                                         scope.launch {
                                             server.onProject.emit(pending)
-                                            val allowed = try { pending.decision.await() } catch (_: Exception) { false }
-                                            val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                            val allowed =
+                                                try { pending.decision.await() } catch (_: Exception) { false }
+                                            val response = if (allowed) """{"ok":true}"""
+                                                else """{"ok":false,"reason":"denied"}"""
                                             try { send(Frame.Text(response)) } catch (_: Exception) { }
                                         }
                                         sendCommandAck(msg.commandId, ok = true, reason = "pending_approval")
                                     }
                                     Constants.WS_CMD_REMOVE_FROM_SCHEDULE -> {
-                                        val req = json.decodeFromString(RemoveFromScheduleRequest.serializer(), msg.payload)
-                                        val label = _schedule.value.firstOrNull { it.id == req.id }?.displayText ?: req.id
+                                        val req = json.decodeFromString(
+                                            RemoveFromScheduleRequest.serializer(),
+                                            msg.payload
+                                        )
+                                        val label =
+                                            _schedule.value.firstOrNull { it.id == req.id }?.displayText ?: req.id
                                         val pending = PendingRemoveRequest(req.id, label, wsClientId)
                                         scope.launch {
                                             server.onRemoveFromSchedule.emit(pending)
-                                            val allowed = try { pending.decision.await() } catch (_: Exception) { false }
-                                            val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                            val allowed =
+                                                try { pending.decision.await() } catch (_: Exception) { false }
+                                            val response = if (allowed) """{"ok":true}"""
+                                                else """{"ok":false,"reason":"denied"}"""
                                             try { send(Frame.Text(response)) } catch (_: Exception) { }
                                         }
                                         sendCommandAck(msg.commandId, ok = true, reason = "pending_approval")
@@ -378,7 +449,11 @@ internal fun Route.webSocketRoute(
                         broadcastJob.cancel()
                         if (isInstanceLinkFollower && wsClientId.isNotEmpty()) {
                             _connectedInstanceLinkFollowers.value = _connectedInstanceLinkFollowers.value - wsClientId
-                            InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "follower_disconnected", mapOf("deviceId" to wsClientId))
+                            InstanceLinkLogger.log(
+                                InstanceLinkLogSide.PRIMARY,
+                                "follower_disconnected",
+                                mapOf("deviceId" to wsClientId)
+                            )
                         }
                     }
                 }

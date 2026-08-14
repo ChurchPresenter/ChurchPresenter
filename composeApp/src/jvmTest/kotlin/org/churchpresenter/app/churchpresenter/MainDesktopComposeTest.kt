@@ -701,13 +701,30 @@ class MainDesktopComposeTest {
                     SelectBibleVerseRequest(bookName = "No Such Book", chapter = 1, verseNumber = 1),
                 )
                 flows.remoteSelectSong.emit(
-                    ScheduleItem.SongItem(id = "a", songNumber = 1, title = "A Test Song", songbook = "Hymnal", songId = "Hymnal::1"),
+                    ScheduleItem.SongItem(
+                        id = "a",
+                        songNumber = 1,
+                        title = "A Test Song",
+                        songbook = "Hymnal",
+                        songId = "Hymnal::1"
+                    ),
                 )
                 flows.remoteSelectPicture.emit(
-                    ScheduleItem.PictureItem(id = "b", folderPath = folder.absolutePath, folderName = folder.name, imageCount = 3),
+                    ScheduleItem.PictureItem(
+                        id = "b",
+                        folderPath = folder.absolutePath,
+                        folderName = folder.name,
+                        imageCount = 3
+                    ),
                 )
                 flows.remoteSelectPresentation.emit(
-                    ScheduleItem.PresentationItem(id = "c", filePath = File(dir, "deck.pptx").absolutePath, fileName = "deck", slideCount = 0, fileType = "pptx"),
+                    ScheduleItem.PresentationItem(
+                        id = "c",
+                        filePath = File(dir, "deck.pptx").absolutePath,
+                        fileName = "deck",
+                        slideCount = 0,
+                        fileType = "pptx"
+                    ),
                 )
                 flows.uploadPresentation.emit(File(dir, "uploaded.pptx"))
             }
@@ -754,8 +771,22 @@ class MainDesktopComposeTest {
                     instanceLinkRole = InstanceLinkRole.CONTROLLED,
                     instanceLinkFollowingHost = "10.0.0.9",
                     instanceLinkRemoteSchedule = listOf(
-                        ScheduleItemDto(id = "1", type = "song", displayText = "A Test Song", songNumber = 1, title = "A Test Song", songbook = "Hymnal"),
-                        ScheduleItemDto(id = "2", type = "bible", displayText = "John 3:16", bookName = "John", chapter = 3, verseNumber = 16),
+                        ScheduleItemDto(
+                            id = "1",
+                            type = "song",
+                            displayText = "A Test Song",
+                            songNumber = 1,
+                            title = "A Test Song",
+                            songbook = "Hymnal"
+                        ),
+                        ScheduleItemDto(
+                            id = "2",
+                            type = "bible",
+                            displayText = "John 3:16",
+                            bookName = "John",
+                            chapter = 3,
+                            verseNumber = 16
+                        ),
                     ),
                     instanceLinkFetchSongDetail = { _, _ -> null },
                     instanceLinkFetchBibleFile = { null },

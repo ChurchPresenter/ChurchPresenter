@@ -418,7 +418,9 @@ class QARemoteContentTest {
             waitForIdle()
             assertEquals("#0A0B0C", h.settings.shadowColor)
 
-            onNode(hasSetTextAction() and hasText("100") and hasImeAction(ImeAction.Default)).performTextReplacement("60")
+            onNode(hasSetTextAction() and hasText("100") and hasImeAction(
+                ImeAction.Default
+            )).performTextReplacement("60")
             waitForIdle()
             assertEquals(60, h.settings.shadowSize)
 
@@ -434,7 +436,9 @@ class QARemoteContentTest {
         initialQaSettings = QASettings(fontType = "Arial"),
         availableFonts = listOf("Arial", "Helvetica", "Courier New"),
     ) { h ->
-        onNode(hasSetTextAction() and hasImeAction(ImeAction.Done) and hasText("Arial")).performTextReplacement("Helvetica")
+        onNode(hasSetTextAction() and hasImeAction(
+            ImeAction.Done
+        ) and hasText("Arial")).performTextReplacement("Helvetica")
         waitForIdle()
         onNode(hasSetTextAction() and hasImeAction(ImeAction.Done) and hasText("Helvetica")).performImeAction()
         waitForIdle()

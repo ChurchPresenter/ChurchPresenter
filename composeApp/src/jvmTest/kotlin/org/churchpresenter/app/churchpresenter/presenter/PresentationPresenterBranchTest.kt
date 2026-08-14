@@ -58,7 +58,10 @@ class PresentationPresenterBranchTest {
     fun `a live frame renders the canvas path, not the static slide`() = runComposeUiTest {
         setContent {
             Box(screen) {
-                PresentationPresenter(frame = presentationFrame(listOf(placedLayer(Color.Red))), slide = ImageBitmap(8, 8))
+                PresentationPresenter(
+                    frame = presentationFrame(listOf(placedLayer(Color.Red))),
+                    slide = ImageBitmap(8, 8)
+                )
             }
         }
         onNodeWithContentDescription(presentedSlide).assertDoesNotExist()

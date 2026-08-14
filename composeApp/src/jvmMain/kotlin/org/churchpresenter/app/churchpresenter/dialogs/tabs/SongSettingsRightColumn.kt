@@ -145,24 +145,54 @@ internal fun RightColumn(
     SettingsSection(title = stringResource(Res.string.fullscreen_display)) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         val fsDisplayMode = settings.songSettings.fullscreenDisplayMode
-        Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+        Text(
+            text = stringResource(Res.string.display_mode_label),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
             SegmentedButton(
                 selected = fsDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE,
-                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } },
+                onClick = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(
+                            fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE
+                        ))
+                    }
+                },
                 shape = segmentedItemShape(index = 0, count = 2),
-                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = MaterialTheme.colorScheme.primary,
+                    activeContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                 icon = {}
-            ) { Text(stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
+            ) { Text(
+                stringResource(Res.string.display_mode_one_verse),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1
+            ) }
             SegmentedButton(
                 selected = fsDisplayMode == Constants.SONG_DISPLAY_MODE_LINE,
-                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } },
+                onClick = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(
+                            fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_LINE
+                        ))
+                    }
+                },
                 shape = segmentedItemShape(index = 1, count = 2),
-                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = MaterialTheme.colorScheme.primary,
+                    activeContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                 icon = {}
-            ) { Text(stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
+            ) { Text(
+                stringResource(Res.string.display_mode_one_line),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1
+            ) }
         }
         val fsModes = listOf(
             Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both),
@@ -173,9 +203,16 @@ internal fun RightColumn(
             fsModes.forEachIndexed { index, (mode, label) ->
                 SegmentedButton(
                     selected = settings.songSettings.fullscreenLanguageDisplay == mode,
-                    onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenLanguageDisplay = mode)) } },
+                    onClick = {
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(fullscreenLanguageDisplay = mode))
+                        }
+                    },
                     shape = segmentedItemShape(index = index, count = fsModes.size),
-                    colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                    colors = SegmentedButtonDefaults.colors(
+                        activeContainerColor = MaterialTheme.colorScheme.primary,
+                        activeContentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                     icon = {}
                 ) { Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1) }
@@ -187,16 +224,32 @@ internal fun RightColumn(
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             NumberSettingsTextField(
                 initialText = settings.songSettings.lyricsFontSize,
-                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSize = it)) } },
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSize = it)) }
+                },
                 range = 8..150
             )
             TooltipArea(
-                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                tooltip = { Surface(
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    shape = MaterialTheme.shapes.extraSmall,
+                    tonalElevation = 4.dp
+                ) { Text(
+                    stringResource(Res.string.auto_fit_checkbox_tooltip),
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.bodySmall
+                ) } },
+                tooltipPlacement = TooltipPlacement.ComponentRect(
+                    anchor = Alignment.BottomCenter,
+                    offset = DpOffset(0.dp, 4.dp)
+                )
             ) {
                 LabeledCheckbox(
                     checked = settings.songSettings.lyricsFontSizeAutoFit,
-                    onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSizeAutoFit = it)) } },
+                    onCheckedChange = {
+                        onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSizeAutoFit = it)) }
+                    },
                     controlModifier = Modifier.size(24.dp),
                     label = stringResource(Res.string.auto_fit),
                     modifier = Modifier.testTag("song_lyricsFontSizeAutoFit"),
@@ -205,8 +258,20 @@ internal fun RightColumn(
             }
             if (presenterManager != null) {
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_button_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(Res.string.auto_fit_button_tooltip),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
                     TextButton(
                         shape = RoundedCornerShape(6.dp),
@@ -221,7 +286,8 @@ internal fun RightColumn(
                                 fontFamily = systemFontFamilyOrDefault(ss.lyricsFontType),
                                 fontWeight = if (ss.lyricsBold) FontWeight.Bold else FontWeight.Normal,
                                 fontStyle = if (ss.lyricsItalic) FontStyle.Italic else FontStyle.Normal,
-                                textDecoration = if (ss.lyricsUnderline) TextDecoration.Underline else TextDecoration.None
+                                textDecoration = if (ss.lyricsUnderline) TextDecoration.Underline
+                                    else TextDecoration.None
                             )
                             val availW = 1920 - proj.windowLeft - proj.windowRight - ss.marginLeft - ss.marginRight
                             val availH = 1080 - proj.windowTop - proj.windowBottom - ss.marginTop - ss.marginBottom
@@ -232,11 +298,23 @@ internal fun RightColumn(
                                     fontWeight = if (ss.titleBold) FontWeight.Bold else FontWeight.Normal,
                                     fontStyle = if (ss.titleItalic) FontStyle.Italic else FontStyle.Normal
                                 )
-                                val titleResult = textMeasurer.measure(section.title, titleStyle.copy(fontSize = ss.titleFontSize.sp), density = Density(1f))
+                                val titleResult = textMeasurer.measure(
+                                    section.title,
+                                    titleStyle.copy(fontSize = ss.titleFontSize.sp),
+                                    density = Density(1f)
+                                )
                                 titleResult.size.height
                             } else 0
-                            val fullSize = calculateAutoFitFontSize(textMeasurer, lyricsText, baseStyle, availW, availH - titleH)
-                            onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSize = fullSize)) }
+                            val fullSize = calculateAutoFitFontSize(
+                                textMeasurer,
+                                lyricsText,
+                                baseStyle,
+                                availW,
+                                availH - titleH
+                            )
+                            onSettingsChange { s ->
+                                s.copy(songSettings = s.songSettings.copy(lyricsFontSize = fullSize))
+                            }
                         },
                         modifier = Modifier.height(32.dp),
                         contentPadding = PaddingValues(horizontal = 8.dp)
@@ -252,7 +330,9 @@ internal fun RightColumn(
         FontSettingsDropdown(
             value = settings.songSettings.lyricsFontType,
             fonts = availableFonts,
-            onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontType = it)) } }
+            onValueChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontType = it)) }
+            }
         )
     }
 
@@ -260,7 +340,9 @@ internal fun RightColumn(
         HorizontalAlignmentButtons(
             selectedAlignment = settings.songSettings.lyricsHorizontalAlignment,
             onAlignmentChange = { storedValue ->
-                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsHorizontalAlignment = storedValue)) }
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(lyricsHorizontalAlignment = storedValue))
+                }
             },
             leftValue = Constants.LEFT,
             centerValue = Constants.CENTER,
@@ -281,8 +363,12 @@ internal fun RightColumn(
             underline = settings.songSettings.lyricsUnderline,
             shadow = settings.songSettings.lyricsShadow,
             onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsBold = it)) } },
-            onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsItalic = it)) } },
-            onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsUnderline = it)) } },
+            onItalicChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsItalic = it)) }
+            },
+            onUnderlineChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsUnderline = it)) }
+            },
             onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadow = it)) } }
         )
     }
@@ -291,9 +377,15 @@ internal fun RightColumn(
             shadowColor = settings.songSettings.lyricsShadowColor,
             shadowSize = settings.songSettings.lyricsShadowSize,
             shadowOpacity = settings.songSettings.lyricsShadowOpacity,
-            onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowColor = it)) } },
-            onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowSize = it)) } },
-            onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowOpacity = it)) } }
+            onColorChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowColor = it)) }
+            },
+            onSizeChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowSize = it)) }
+            },
+            onOpacityChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowOpacity = it)) }
+            }
         )
     }
 
@@ -302,24 +394,54 @@ internal fun RightColumn(
     SettingsSection(title = stringResource(Res.string.lower_third_display)) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         val ltDisplayMode = settings.songSettings.lowerThirdDisplayMode
-        Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+        Text(
+            text = stringResource(Res.string.display_mode_label),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().height(28.dp)) {
             SegmentedButton(
                 selected = ltDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE,
-                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } },
+                onClick = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(
+                            lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE
+                        ))
+                    }
+                },
                 shape = segmentedItemShape(index = 0, count = 2),
-                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = MaterialTheme.colorScheme.primary,
+                    activeContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                 icon = {}
-            ) { Text(stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
+            ) { Text(
+                stringResource(Res.string.display_mode_one_verse),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1
+            ) }
             SegmentedButton(
                 selected = ltDisplayMode == Constants.SONG_DISPLAY_MODE_LINE,
-                onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } },
+                onClick = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(
+                            lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_LINE
+                        ))
+                    }
+                },
                 shape = segmentedItemShape(index = 1, count = 2),
-                colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = MaterialTheme.colorScheme.primary,
+                    activeContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                 icon = {}
-            ) { Text(stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.labelSmall, maxLines = 1) }
+            ) { Text(
+                stringResource(Res.string.display_mode_one_line),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1
+            ) }
         }
         val ltModes = listOf(
             Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both),
@@ -330,9 +452,16 @@ internal fun RightColumn(
             ltModes.forEachIndexed { index, (mode, label) ->
                 SegmentedButton(
                     selected = settings.songSettings.lowerThirdLanguageDisplay == mode,
-                    onClick = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLanguageDisplay = mode)) } },
+                    onClick = {
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(lowerThirdLanguageDisplay = mode))
+                        }
+                    },
                     shape = segmentedItemShape(index = index, count = ltModes.size),
-                    colors = SegmentedButtonDefaults.colors(activeContainerColor = MaterialTheme.colorScheme.primary, activeContentColor = MaterialTheme.colorScheme.onPrimary),
+                    colors = SegmentedButtonDefaults.colors(
+                        activeContainerColor = MaterialTheme.colorScheme.primary,
+                        activeContentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                     icon = {}
                 ) { Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1) }
@@ -344,16 +473,34 @@ internal fun RightColumn(
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             NumberSettingsTextField(
                 initialText = settings.songSettings.lyricsLowerThirdFontSize,
-                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSize = it)) } },
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSize = it)) }
+                },
                 range = 8..150
             )
             TooltipArea(
-                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                tooltip = { Surface(
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    shape = MaterialTheme.shapes.extraSmall,
+                    tonalElevation = 4.dp
+                ) { Text(
+                    stringResource(Res.string.auto_fit_checkbox_tooltip),
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.bodySmall
+                ) } },
+                tooltipPlacement = TooltipPlacement.ComponentRect(
+                    anchor = Alignment.BottomCenter,
+                    offset = DpOffset(0.dp, 4.dp)
+                )
             ) {
                 LabeledCheckbox(
                     checked = settings.songSettings.lyricsLowerThirdFontSizeAutoFit,
-                    onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSizeAutoFit = it)) } },
+                    onCheckedChange = {
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSizeAutoFit = it))
+                        }
+                    },
                     controlModifier = Modifier.size(24.dp),
                     label = stringResource(Res.string.auto_fit),
                     modifier = Modifier.testTag("song_lyricsLowerThirdFontSizeAutoFit"),
@@ -362,8 +509,20 @@ internal fun RightColumn(
             }
             if (presenterManager != null) {
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_button_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    tooltip = { Surface(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        tonalElevation = 4.dp
+                    ) { Text(
+                        stringResource(Res.string.auto_fit_button_tooltip),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    ) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
+                    )
                 ) {
                 TextButton(
                     shape = RoundedCornerShape(6.dp),
@@ -378,7 +537,8 @@ internal fun RightColumn(
                             fontFamily = systemFontFamilyOrDefault(ss.lyricsLowerThirdFontType),
                             fontWeight = if (ss.lyricsLowerThirdBold) FontWeight.Bold else FontWeight.Normal,
                             fontStyle = if (ss.lyricsLowerThirdItalic) FontStyle.Italic else FontStyle.Normal,
-                            textDecoration = if (ss.lyricsLowerThirdUnderline) TextDecoration.Underline else TextDecoration.None
+                            textDecoration = if (ss.lyricsLowerThirdUnderline) TextDecoration.Underline
+                                else TextDecoration.None
                         )
                         val availW = 1920 - proj.windowLeft - proj.windowRight - ss.marginLeft - ss.marginRight
                         val availH = 1080 - proj.windowTop - proj.windowBottom - ss.marginTop - ss.marginBottom
@@ -390,11 +550,17 @@ internal fun RightColumn(
                                 fontWeight = if (ss.titleLowerThirdBold) FontWeight.Bold else FontWeight.Normal,
                                 fontStyle = if (ss.titleLowerThirdItalic) FontStyle.Italic else FontStyle.Normal
                             )
-                            val titleResult = textMeasurer.measure(section.title, titleStyle.copy(fontSize = ss.titleLowerThirdFontSize.sp), density = Density(1f))
+                            val titleResult = textMeasurer.measure(
+                                section.title,
+                                titleStyle.copy(fontSize = ss.titleLowerThirdFontSize.sp),
+                                density = Density(1f)
+                            )
                             titleResult.size.height
                         } else 0
                         val ltSize = calculateAutoFitFontSize(textMeasurer, lyricsText, baseStyle, availW, ltH - titleH)
-                        onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSize = ltSize)) }
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSize = ltSize))
+                        }
                     },
                     modifier = Modifier.height(32.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp)
@@ -410,7 +576,9 @@ internal fun RightColumn(
         FontSettingsDropdown(
             value = settings.songSettings.lyricsLowerThirdFontType,
             fonts = availableFonts,
-            onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontType = it)) } }
+            onValueChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontType = it)) }
+            }
         )
     }
 
@@ -418,7 +586,9 @@ internal fun RightColumn(
         HorizontalAlignmentButtons(
             selectedAlignment = settings.songSettings.lyricsLowerThirdHorizontalAlignment,
             onAlignmentChange = { storedValue ->
-                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdHorizontalAlignment = storedValue)) }
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdHorizontalAlignment = storedValue))
+                }
             },
             leftValue = Constants.LEFT,
             centerValue = Constants.CENTER,
@@ -431,17 +601,27 @@ internal fun RightColumn(
             label = stringResource(Res.string.color),
             modifier = Modifier.width(120.dp),
             color = settings.songSettings.lyricsLowerThirdColor,
-            onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdColor = it)) } }
+            onColorChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdColor = it)) }
+            }
         )
         TextStyleButtons(
             bold = settings.songSettings.lyricsLowerThirdBold,
             italic = settings.songSettings.lyricsLowerThirdItalic,
             underline = settings.songSettings.lyricsLowerThirdUnderline,
             shadow = settings.songSettings.lyricsLowerThirdShadow,
-            onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdBold = it)) } },
-            onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdItalic = it)) } },
-            onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdUnderline = it)) } },
-            onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadow = it)) } }
+            onBoldChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdBold = it)) }
+            },
+            onItalicChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdItalic = it)) }
+            },
+            onUnderlineChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdUnderline = it)) }
+            },
+            onShadowChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadow = it)) }
+            }
         )
     }
     AnimatedVisibility(visible = settings.songSettings.lyricsLowerThirdShadow) {
@@ -449,9 +629,15 @@ internal fun RightColumn(
             shadowColor = settings.songSettings.lyricsLowerThirdShadowColor,
             shadowSize = settings.songSettings.lyricsLowerThirdShadowSize,
             shadowOpacity = settings.songSettings.lyricsLowerThirdShadowOpacity,
-            onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowColor = it)) } },
-            onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowSize = it)) } },
-            onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowOpacity = it)) } }
+            onColorChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowColor = it)) }
+            },
+            onSizeChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowSize = it)) }
+            },
+            onOpacityChange = {
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowOpacity = it)) }
+            }
         )
     }
     }

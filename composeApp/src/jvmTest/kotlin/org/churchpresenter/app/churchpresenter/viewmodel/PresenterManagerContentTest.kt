@@ -62,7 +62,13 @@ class PresenterManagerContentTest {
     @Test
     fun `loading a lower third records its preset and pause settings`() {
         val pm = manager()
-        pm.setLottieContent(json = "", pauseAtFrame = true, pauseFrame = 30f, pauseDurationMs = 4_000, presetName = "Speaker Name")
+        pm.setLottieContent(
+            json = "",
+            pauseAtFrame = true,
+            pauseFrame = 30f,
+            pauseDurationMs = 4_000,
+            presetName = "Speaker Name"
+        )
 
         assertEquals("Speaker Name", pm.currentLowerThirdName.value)
         assertEquals(listOf(Presenting.LOWER_THIRD), reported)

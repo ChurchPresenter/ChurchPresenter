@@ -345,10 +345,16 @@ private fun SingleDisplayPreview(
                     if (effectiveMode != Presenting.NONE && showsContent) {
                         val modeCrossfadeOn = appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade
                         val modeCrossfadeDur = maxOf(
-                            if (appSettings.bibleSettings.crossfade) appSettings.bibleSettings.transitionDuration.toInt() else 0,
-                            if (appSettings.songSettings.crossfade) appSettings.songSettings.transitionDuration.toInt() else 0
+                            if (appSettings.bibleSettings.crossfade) appSettings.bibleSettings
+                                .transitionDuration
+                                .toInt() else 0,
+                            if (appSettings.songSettings.crossfade) appSettings.songSettings.transitionDuration.toInt()
+                                else 0
                         ).coerceAtLeast(100)
-                        Crossfade(targetState = effectiveMode, animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
+                        Crossfade(
+                            targetState = effectiveMode,
+                            animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)
+                        ) { mode ->
                         when (mode) {
                             Presenting.BIBLE ->
                                 BiblePresenter(
@@ -396,7 +402,10 @@ private fun SingleDisplayPreview(
                                 )
                             Presenting.MEDIA ->
                                 if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
-                                    MediaPresenter(modifier = Modifier.fillMaxSize(), transitionAlpha = mediaTransitionAlpha)
+                                    MediaPresenter(
+                                        modifier = Modifier.fillMaxSize(),
+                                        transitionAlpha = mediaTransitionAlpha
+                                    )
                                 }
                             Presenting.LOWER_THIRD ->
                                 LowerThirdPresenter(
@@ -417,7 +426,10 @@ private fun SingleDisplayPreview(
                             Presenting.QA -> {
                                 val showQRCode by presenterManager.showQRCodeOnDisplay
                                 if (showQRCode) {
-                                    QAQRCodePresenter(url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa", qaSettings = appSettings.qaSettings)
+                                    QAQRCodePresenter(
+                                        url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
+                                        qaSettings = appSettings.qaSettings
+                                    )
                                 } else {
                                     QAPresenter(question = displayedQuestion, qaSettings = appSettings.qaSettings)
                                 }
@@ -454,7 +466,9 @@ private fun SingleDisplayPreview(
         // A second JFXPanel instance can't be scaled/clipped by Compose.
         // Instead, WebTab pushes a snapshot bitmap every 200ms via PresenterManager
         // so this panel shows a pixel-accurate mirror including scroll position.
-        if (screenAssignment.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR && effectiveMode == Presenting.WEBSITE) {
+        if (
+            screenAssignment.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR && effectiveMode == Presenting.WEBSITE
+        ) {
             val snapshot = webSnapshot
             if (snapshot != null) {
                 Image(
@@ -543,7 +557,8 @@ private fun SingleDisplayPreview(
             ) {
                 Icon(
                     imageVector = if (lockedMode != null) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                    contentDescription = if (lockedMode != null) stringResource(Res.string.unlock_screen) else stringResource(Res.string.lock_screen_to_tab),
+                    contentDescription = if (lockedMode != null) stringResource(Res.string.unlock_screen)
+                        else stringResource(Res.string.lock_screen_to_tab),
                     modifier = Modifier.size(13.dp)
                 )
             }

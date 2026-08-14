@@ -260,10 +260,16 @@ fun CanvasTab(
 
             // Resolve live presentation display for aspect ratio checks
             val presentationAssignment0 = appSettings.projectionSettings.getAssignment(0)
-            val presentationBounds0 = remember(presentationAssignment0.targetDisplay, presentationAssignment0.targetBoundsX, presentationAssignment0.targetBoundsY) {
+            val presentationBounds0 = remember(
+                presentationAssignment0.targetDisplay,
+                presentationAssignment0.targetBoundsX,
+                presentationAssignment0.targetBoundsY
+            ) {
                 assignedDisplayBounds(presentationAssignment0)
             }
-            val displayAr0 = if (presentationBounds0.height > 0) presentationBounds0.width.toFloat() / presentationBounds0.height else 0f
+            val displayAr0 =
+                if (presentationBounds0.height > 0) presentationBounds0.width.toFloat() / presentationBounds0.height
+                    else 0f
 
             @OptIn(ExperimentalFoundationApi::class)
             LazyColumn(modifier = Modifier.weight(SCENE_LIST_WEIGHT).fillMaxWidth()) {
@@ -281,7 +287,10 @@ fun CanvasTab(
                                 else Color.Transparent
                             )
                             .drawBehind {
-                                if (isSelected) drawRect(color = sceneAccentColor, size = Size(SELECTION_BAR_WIDTH, size.height))
+                                if (isSelected) drawRect(
+                                    color = sceneAccentColor,
+                                    size = Size(SELECTION_BAR_WIDTH, size.height)
+                                )
                             }
                             .padding(start = 12.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -306,7 +315,12 @@ fun CanvasTab(
                                 },
                                 modifier = Modifier.size(20.dp)
                             ) {
-                                Icon(Icons.Filled.Check, contentDescription = stringResource(Res.string.canvas_rename_confirm), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
+                                Icon(
+                                    Icons.Filled.Check,
+                                    contentDescription = stringResource(Res.string.canvas_rename_confirm),
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             }
                         } else {
                             Text(
@@ -323,15 +337,32 @@ fun CanvasTab(
                                     )
                             )
                             if (isMismatched) {
-                                Icon(Icons.Filled.Warning, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.error)
+                                Icon(
+                                    Icons.Filled.Warning,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.error
+                                )
                             }
                             TooltipArea(
                                 tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(stringResource(Res.string.canvas_rename_scene), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.inverseSurface,
+                                        shape = MaterialTheme.shapes.extraSmall,
+                                        tonalElevation = 4.dp
+                                    ) {
+                                        Text(
+                                            stringResource(Res.string.canvas_rename_scene),
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                                tooltipPlacement = TooltipPlacement.ComponentRect(
+                                    anchor = Alignment.BottomCenter,
+                                    offset = DpOffset(0.dp, 4.dp)
+                                )
                             ) {
                                 IconButton(
                                     onClick = {
@@ -350,11 +381,23 @@ fun CanvasTab(
                             }
                             TooltipArea(
                                 tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(stringResource(Res.string.canvas_remove_scene), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.inverseSurface,
+                                        shape = MaterialTheme.shapes.extraSmall,
+                                        tonalElevation = 4.dp
+                                    ) {
+                                        Text(
+                                            stringResource(Res.string.canvas_remove_scene),
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                                tooltipPlacement = TooltipPlacement.ComponentRect(
+                                    anchor = Alignment.BottomCenter,
+                                    offset = DpOffset(0.dp, 4.dp)
+                                )
                             ) {
                                 IconButton(
                                     onClick = { sceneViewModel.removeScene(scene.id) },
@@ -410,7 +453,10 @@ fun CanvasTab(
                                     else Color.Transparent
                                 )
                                 .drawBehind {
-                                    if (isSelected) drawRect(color = sourceAccentColor, size = Size(SELECTION_BAR_WIDTH, size.height))
+                                    if (isSelected) drawRect(
+                                        color = sourceAccentColor,
+                                        size = Size(SELECTION_BAR_WIDTH, size.height)
+                                    )
                                 }
                                 .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -418,11 +464,23 @@ fun CanvasTab(
                             // Visibility toggle
                             TooltipArea(
                                 tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(stringResource(Res.string.canvas_toggle_visibility), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.inverseSurface,
+                                        shape = MaterialTheme.shapes.extraSmall,
+                                        tonalElevation = 4.dp
+                                    ) {
+                                        Text(
+                                            stringResource(Res.string.canvas_toggle_visibility),
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                                tooltipPlacement = TooltipPlacement.ComponentRect(
+                                    anchor = Alignment.BottomCenter,
+                                    offset = DpOffset(0.dp, 4.dp)
+                                )
                             ) {
                                 IconButton(
                                     onClick = { sceneViewModel.toggleSourceVisibility(source.id) },
@@ -440,11 +498,23 @@ fun CanvasTab(
                             // Lock toggle
                             TooltipArea(
                                 tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(stringResource(Res.string.canvas_toggle_lock), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.inverseSurface,
+                                        shape = MaterialTheme.shapes.extraSmall,
+                                        tonalElevation = 4.dp
+                                    ) {
+                                        Text(
+                                            stringResource(Res.string.canvas_toggle_lock),
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                                tooltipPlacement = TooltipPlacement.ComponentRect(
+                                    anchor = Alignment.BottomCenter,
+                                    offset = DpOffset(0.dp, 4.dp)
+                                )
                             ) {
                                 IconButton(
                                     onClick = { sceneViewModel.toggleSourceLock(source.id) },
@@ -480,11 +550,23 @@ fun CanvasTab(
                     Box {
                         TooltipArea(
                             tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.canvas_add_source), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                Surface(
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    shape = MaterialTheme.shapes.extraSmall,
+                                    tonalElevation = 4.dp
+                                ) {
+                                    Text(
+                                        stringResource(Res.string.canvas_add_source),
+                                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                            tooltipPlacement = TooltipPlacement.ComponentRect(
+                                anchor = Alignment.BottomCenter,
+                                offset = DpOffset(0.dp, 4.dp)
+                            )
                         ) {
                             IconButton(
                                 onClick = { showAddMenu = true; activeTool = "select" },
@@ -652,11 +734,23 @@ fun CanvasTab(
                     if (currentSelectedId != null) {
                         TooltipArea(
                             tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.canvas_delete_source), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                Surface(
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    shape = MaterialTheme.shapes.extraSmall,
+                                    tonalElevation = 4.dp
+                                ) {
+                                    Text(
+                                        stringResource(Res.string.canvas_delete_source),
+                                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                            tooltipPlacement = TooltipPlacement.ComponentRect(
+                                anchor = Alignment.BottomCenter,
+                                offset = DpOffset(0.dp, 4.dp)
+                            )
                         ) {
                             IconButton(
                                 onClick = { sceneViewModel.removeSource(currentSelectedId) },
@@ -672,11 +766,23 @@ fun CanvasTab(
                         }
                         TooltipArea(
                             tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.canvas_source_move_forward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                Surface(
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    shape = MaterialTheme.shapes.extraSmall,
+                                    tonalElevation = 4.dp
+                                ) {
+                                    Text(
+                                        stringResource(Res.string.canvas_source_move_forward),
+                                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                            tooltipPlacement = TooltipPlacement.ComponentRect(
+                                anchor = Alignment.BottomCenter,
+                                offset = DpOffset(0.dp, 4.dp)
+                            )
                         ) {
                             IconButton(
                                 onClick = { sceneViewModel.moveSourceDown(currentSelectedId) },
@@ -692,11 +798,23 @@ fun CanvasTab(
                         }
                         TooltipArea(
                             tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.canvas_source_move_backward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                Surface(
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    shape = MaterialTheme.shapes.extraSmall,
+                                    tonalElevation = 4.dp
+                                ) {
+                                    Text(
+                                        stringResource(Res.string.canvas_source_move_backward),
+                                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                            tooltipPlacement = TooltipPlacement.ComponentRect(
+                                anchor = Alignment.BottomCenter,
+                                offset = DpOffset(0.dp, 4.dp)
+                            )
                         ) {
                             IconButton(
                                 onClick = { sceneViewModel.moveSourceUp(currentSelectedId) },
@@ -766,11 +884,23 @@ fun CanvasTab(
                             val isActive = activeTool == tool.id
                             TooltipArea(
                                 tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(tool.label, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.inverseSurface,
+                                        shape = MaterialTheme.shapes.extraSmall,
+                                        tonalElevation = 4.dp
+                                    ) {
+                                        Text(
+                                            tool.label,
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                                tooltipPlacement = TooltipPlacement.ComponentRect(
+                                    anchor = Alignment.BottomCenter,
+                                    offset = DpOffset(0.dp, 4.dp)
+                                )
                             ) {
                                 IconButton(
                                     onClick = { activeTool = tool.id },
@@ -847,13 +977,19 @@ fun CanvasTab(
 
                 // Aspect ratio mismatch warning
                 val presentationAssignment = appSettings.projectionSettings.getAssignment(0)
-                val presentationBounds = remember(presentationAssignment.targetDisplay, presentationAssignment.targetBoundsX, presentationAssignment.targetBoundsY) {
+                val presentationBounds = remember(
+                    presentationAssignment.targetDisplay,
+                    presentationAssignment.targetBoundsX,
+                    presentationAssignment.targetBoundsY
+                ) {
                     assignedDisplayBounds(presentationAssignment)
                 }
                 val displayW = presentationBounds.width
                 val displayH = presentationBounds.height
                 val displayAr = if (displayH > 0) displayW.toFloat() / displayH else 0f
-                val sceneAr = if (currentScene.canvasHeight > 0) currentScene.canvasWidth.toFloat() / currentScene.canvasHeight else 0f
+                val sceneAr =
+                    if (currentScene.canvasHeight > 0) currentScene.canvasWidth.toFloat() / currentScene.canvasHeight
+                        else 0f
                 if (displayAr > 0f && kotlin.math.abs(displayAr - sceneAr) > ASPECT_EPSILON) {
                     Row(
                         modifier = Modifier
@@ -884,7 +1020,10 @@ fun CanvasTab(
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
                         ) {
-                            Text(stringResource(Res.string.canvas_fix_aspect_ratio), style = MaterialTheme.typography.labelSmall)
+                            Text(
+                                stringResource(Res.string.canvas_fix_aspect_ratio),
+                                style = MaterialTheme.typography.labelSmall
+                            )
                         }
                     }
                 }

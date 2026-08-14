@@ -310,7 +310,10 @@ fun SongChordPreview(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
                     val insertLabel = stringResource(Res.string.song_insert_chord)
                     palette.forEach { chord ->
                         val inSong = chord in used

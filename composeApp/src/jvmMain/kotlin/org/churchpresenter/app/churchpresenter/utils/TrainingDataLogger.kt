@@ -95,7 +95,9 @@ object TrainingDataLogger {
             logDir.listFiles()?.forEach { file ->
                 val n = file.name
                 val dated = file.isFile && (
-                    (n.endsWith(".jsonl") && (n.startsWith(LIVE_REF_PREFIX) || n.startsWith(OUTCOME_PREFIX) || n.startsWith(FLAG_PREFIX))) ||
+                    (n.endsWith(".jsonl") && (n.startsWith(
+                        LIVE_REF_PREFIX
+                    ) || n.startsWith(OUTCOME_PREFIX) || n.startsWith(FLAG_PREFIX))) ||
                         n.endsWith(".db") || n.endsWith(".db.tmp")
                 )
                 if (dated && file.lastModified() < cutoff) file.delete()
@@ -258,7 +260,8 @@ object TrainingDataLogger {
                 append(",\"kind\":\"").append(esc(kind)).append("\"")
                 if (book != null) append(",\"book\":").append(book) else append(",\"book\":null")
                 if (chapter != null) append(",\"chapter\":").append(chapter) else append(",\"chapter\":null")
-                if (verseStart != null) append(",\"verseStart\":").append(verseStart) else append(",\"verseStart\":null")
+                if (verseStart != null) append(",\"verseStart\":").append(verseStart)
+                    else append(",\"verseStart\":null")
                 if (verseEnd != null) append(",\"verseEnd\":").append(verseEnd) else append(",\"verseEnd\":null")
                 if (displayChapter != null) append(",\"displayChapter\":").append(displayChapter)
                 else append(",\"displayChapter\":null")

@@ -59,7 +59,11 @@ class CefManagerTest {
 
     @Test
     fun `jcefRootDir on Windows uses a writable ProgramData path`() {
-        val root = CefManager.jcefRootDir(osName = "Windows 11", programData = dir.absolutePath, homeDir = "/should-not-be-used")
+        val root = CefManager.jcefRootDir(
+            osName = "Windows 11",
+            programData = dir.absolutePath,
+            homeDir = "/should-not-be-used"
+        )
         assertEquals(File(dir, "ChurchPresenter").absolutePath, root.absolutePath)
         assertTrue(root.isDirectory, "jcefRootDir must actually create the ProgramData directory")
     }
@@ -71,7 +75,11 @@ class CefManagerTest {
         File(programData, "ChurchPresenter").writeText("not a directory")
         val home = File(dir, "home").apply { mkdirs() }
 
-        val root = CefManager.jcefRootDir(osName = "Windows 11", programData = programData.absolutePath, homeDir = home.absolutePath)
+        val root = CefManager.jcefRootDir(
+            osName = "Windows 11",
+            programData = programData.absolutePath,
+            homeDir = home.absolutePath
+        )
 
         assertEquals(File(home, ".churchpresenter").absolutePath, root.absolutePath)
     }
@@ -79,7 +87,11 @@ class CefManagerTest {
     @Test
     fun `jcefRootDir on non-Windows always uses the home directory`() {
         val home = File(dir, "home").apply { mkdirs() }
-        val root = CefManager.jcefRootDir(osName = "Mac OS X", programData = dir.absolutePath, homeDir = home.absolutePath)
+        val root = CefManager.jcefRootDir(
+            osName = "Mac OS X",
+            programData = dir.absolutePath,
+            homeDir = home.absolutePath
+        )
         assertEquals(File(home, ".churchpresenter").absolutePath, root.absolutePath)
     }
 
@@ -91,7 +103,10 @@ class CefManagerTest {
 
         CefManager.cleanupLegacyJcef(activeRoot = churchDir, homeDir = home)
 
-        assertTrue(legacyJcef.isDirectory, "nothing should be deleted when the active root already is the home directory")
+        assertTrue(
+            legacyJcef.isDirectory,
+            "nothing should be deleted when the active root already is the home directory"
+        )
     }
 
     @Test
@@ -137,7 +152,9 @@ class CefManagerTest {
 
     @Test
     fun `jcefRootDir with no arguments resolves to a churchpresenter directory`() {
-        assertTrue(CefManager.jcefRootDir().name == ".churchpresenter" || CefManager.jcefRootDir().name == "ChurchPresenter")
+        assertTrue(
+            CefManager.jcefRootDir().name == ".churchpresenter" || CefManager.jcefRootDir().name == "ChurchPresenter"
+        )
     }
 
     @Test

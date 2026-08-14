@@ -221,7 +221,10 @@ class Songs {
             }
 
             // Add empty line after current section if there are more non-chorus sections coming
-            val hasMoreSections = sections.subList(i + 1, sections.size).any { it.type != Constants.SECTION_TYPE_CHORUS }
+            val hasMoreSections = sections.subList(
+                i + 1,
+                sections.size
+            ).any { it.type != Constants.SECTION_TYPE_CHORUS }
             if (hasMoreSections) {
                 lyrics.add("") // Empty line separator after section
             }

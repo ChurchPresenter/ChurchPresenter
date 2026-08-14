@@ -175,7 +175,12 @@ private fun BibleViewModel.nextChapterPosition(bible: Bible): Pair<Int, Int>? {
     return (bookIndex + 1).takeIf { it < _books.value.size }?.let { it to 1 }
 }
 
-internal fun BibleViewModel.buildNextVerseList(bookId: Int, chapter: Int, verseNumber: Int, verseText: String): List<SelectedVerse> {
+internal fun BibleViewModel.buildNextVerseList(
+    bookId: Int,
+    chapter: Int,
+    verseNumber: Int,
+    verseText: String
+): List<SelectedVerse> {
     val verseList = mutableListOf<SelectedVerse>()
     if (verseText.isNotEmpty()) {
         verseList.add(

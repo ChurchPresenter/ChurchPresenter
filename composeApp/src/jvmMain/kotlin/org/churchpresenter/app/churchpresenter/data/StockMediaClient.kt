@@ -76,10 +76,19 @@ object StockMediaClient {
     )
 
     @Serializable
-    internal data class PexelsVideoFile(val link: String, val quality: String? = null, val file_type: String? = null, val width: Int? = null)
+    internal data class PexelsVideoFile(
+        val link: String,
+        val quality: String? = null,
+        val file_type: String? = null,
+        val width: Int? = null
+    )
 
     @Serializable
-    internal data class PexelsVideo(val id: Long, val image: String, val video_files: List<PexelsVideoFile> = emptyList())
+    internal data class PexelsVideo(
+        val id: Long,
+        val image: String,
+        val video_files: List<PexelsVideoFile> = emptyList()
+    )
 
     @Serializable
     internal data class PexelsVideoResponse(
@@ -261,7 +270,8 @@ object StockMediaClient {
                     val parsed = json.decodeFromString(PixabayVideoResponse.serializer(), body)
                     SearchOutcome.Success(
                         items = parsed.hits.mapNotNull { video ->
-                            val file = video.videos.medium ?: video.videos.small ?: video.videos.large ?: video.videos.tiny
+                            val file =
+                                video.videos.medium ?: video.videos.small ?: video.videos.large ?: video.videos.tiny
                             file?.let {
                                 StockMediaItem(
                                     id = video.id.toString(),
@@ -280,7 +290,10 @@ object StockMediaClient {
     }
 
     /** Fetches raw bytes for a thumbnail preview; returns null on any failure. */
-    suspend fun fetchThumbnailBytes(url: String, http: HttpClient = defaultHttp): ByteArray? = withContext(Dispatchers.IO) {
+    suspend fun fetchThumbnailBytes(
+        url: String,
+        http: HttpClient = defaultHttp
+    ): ByteArray? = withContext(Dispatchers.IO) {
         try {
             val response = http.get(url)
             if (response.status.value in 200..299) response.body() else null

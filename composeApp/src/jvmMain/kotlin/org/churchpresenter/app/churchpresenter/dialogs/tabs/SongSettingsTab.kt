@@ -101,7 +101,9 @@ private fun TitleSlideColumn(
         Column {
             LabeledCheckbox(
                 checked = settings.songSettings.titleSlideEnabled,
-                onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleSlideEnabled = it)) } },
+                onCheckedChange = {
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleSlideEnabled = it)) }
+                },
                 controlModifier = Modifier.size(24.dp),
                 label = stringResource(Res.string.enabled),
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("song_titleSlideEnabled"),

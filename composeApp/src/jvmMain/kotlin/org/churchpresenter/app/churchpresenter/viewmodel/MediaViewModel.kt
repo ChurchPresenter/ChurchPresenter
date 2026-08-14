@@ -55,7 +55,12 @@ class MediaViewModel {
     private val _mediaFinished = mutableStateOf(false)
     val mediaFinished: Boolean get() = _mediaFinished.value
 
-    fun markFinished() { _mediaFinished.value = true; _isPlaying.value = false; _currentPosition.value = 0L; _seekVersion.intValue++ }
+    fun markFinished() {
+        _mediaFinished.value = true
+        _isPlaying.value = false
+        _currentPosition.value = 0L
+        _seekVersion.intValue++
+    }
     fun clearFinished() { _mediaFinished.value = false }
 
 

@@ -17,7 +17,9 @@ style:
     active: true
     forbiddenPatterns: 'androidx\.compose\.material\.(?!icons)'
   MaxLineLength:
-    active: false
+    active: true
+    excludeCommentStatements: true
+    excludeRawStrings: true
   MagicNumber:
     active: true
     ignorePropertyDeclaration: true

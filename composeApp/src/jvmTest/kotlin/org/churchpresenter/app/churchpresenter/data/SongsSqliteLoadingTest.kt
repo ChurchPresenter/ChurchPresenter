@@ -177,7 +177,11 @@ class SongsSqliteLoadingTest {
     fun `a blank songbook name falls back to the file name`() {
         val songs = loadSqlite(Row(number = "1", title = "A"), songbook = "", name = "Grace Hymns.sps")
 
-        assertEquals("Grace Hymns", songs.getSongs().single().songbook, "an empty title would leave a blank filter entry")
+        assertEquals(
+            "Grace Hymns",
+            songs.getSongs().single().songbook,
+            "an empty title would leave a blank filter entry"
+        )
     }
 
     // ── Lyrics ──────────────────────────────────────────────────────────────────

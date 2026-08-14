@@ -61,7 +61,10 @@ internal fun Route.mediaAndAssetRoutes(
                  */
                 get("${Constants.ENDPOINT_PICTURES}/{id}") {
                     if (!server.checkApiKey(call)) return@get
-                    val id = call.parameters["id"] ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(HttpStatusCode.BadRequest, "Missing id")
+                        return@get
+                    }
                     val catalog = _pictureCatalogs[id]
                     if (catalog == null) {
                         server.logRest("/api/pictures/{id}", HttpStatusCode.NotFound.value, "folder_not_found")
@@ -78,22 +81,40 @@ internal fun Route.mediaAndAssetRoutes(
                  */
                 get("${Constants.ENDPOINT_PICTURES}/{id}/images/{index}") {
                     if (!server.checkApiKey(call)) return@get
-                    val id    = call.parameters["id"]    ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
-                    val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(HttpStatusCode.BadRequest, "Invalid index"); return@get }
+                    val id    = call.parameters["id"]    ?: run {
+                        call.respond(HttpStatusCode.BadRequest, "Missing id")
+                        return@get
+                    }
+                    val index = call.parameters["index"]?.toIntOrNull() ?: run {
+                        call.respond(HttpStatusCode.BadRequest, "Invalid index")
+                        return@get
+                    }
                     val files = _pictureFiles[id]
                     if (files == null) {
-                        server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.NotFound.value, "folder_not_found")
+                        server.logRest(
+                            "/api/pictures/{id}/images/{index}",
+                            HttpStatusCode.NotFound.value,
+                            "folder_not_found"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Picture folder not found")
                         return@get
                     }
                     if (index < 0 || index >= files.size) {
-                        server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.NotFound.value, "index_out_of_range")
+                        server.logRest(
+                            "/api/pictures/{id}/images/{index}",
+                            HttpStatusCode.NotFound.value,
+                            "index_out_of_range"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Image index out of range")
                         return@get
                     }
                     val file = files[index]
                     if (!file.exists()) {
-                        server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.NotFound.value, "file_not_found_on_disk")
+                        server.logRest(
+                            "/api/pictures/{id}/images/{index}",
+                            HttpStatusCode.NotFound.value,
+                            "file_not_found_on_disk"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Image file not found on disk")
                         return@get
                     }
@@ -105,7 +126,11 @@ internal fun Route.mediaAndAssetRoutes(
                             server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.OK.value)
                             call.respondBytes(jpegBytes, ContentType.Image.JPEG)
                         } else {
-                            server.logRest("/api/pictures/{id}/images/{index}", HttpStatusCode.InternalServerError.value, "heic_conversion_failed")
+                            server.logRest(
+                                "/api/pictures/{id}/images/{index}",
+                                HttpStatusCode.InternalServerError.value,
+                                "heic_conversion_failed"
+                            )
                             call.respond(HttpStatusCode.InternalServerError, "Failed to convert HEIC image")
                         }
                     } else {
@@ -122,7 +147,10 @@ internal fun Route.mediaAndAssetRoutes(
                  */
                 get("${Constants.ENDPOINT_MEDIA_STREAM}/{id}") {
                     if (!server.checkApiKey(call)) return@get
-                    val id = call.parameters["id"] ?: run { call.respond(HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(HttpStatusCode.BadRequest, "Missing id")
+                        return@get
+                    }
                     val path = _scheduleItemToMediaPath[id]
                     if (path == null) {
                         server.logRest("/api/media/stream/{id}", HttpStatusCode.NotFound.value, "media_item_not_found")
@@ -131,7 +159,11 @@ internal fun Route.mediaAndAssetRoutes(
                     }
                     val file = File(path)
                     if (!file.exists()) {
-                        server.logRest("/api/media/stream/{id}", HttpStatusCode.NotFound.value, "file_not_found_on_disk")
+                        server.logRest(
+                            "/api/media/stream/{id}",
+                            HttpStatusCode.NotFound.value,
+                            "file_not_found_on_disk"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Media file not found on disk")
                         return@get
                     }
@@ -171,13 +203,21 @@ internal fun Route.mediaAndAssetRoutes(
                     if (!server.checkApiKey(call)) return@get
                     val path = server._secondaryBibleFilePath
                     if (path.isEmpty()) {
-                        server.logRest("/api/bible/file/secondary", HttpStatusCode.NotFound.value, "no_secondary_bible_loaded")
+                        server.logRest(
+                            "/api/bible/file/secondary",
+                            HttpStatusCode.NotFound.value,
+                            "no_secondary_bible_loaded"
+                        )
                         call.respond(HttpStatusCode.NotFound, "No secondary bible loaded")
                         return@get
                     }
                     val file = File(path)
                     if (!file.exists()) {
-                        server.logRest("/api/bible/file/secondary", HttpStatusCode.NotFound.value, "file_not_found_on_disk")
+                        server.logRest(
+                            "/api/bible/file/secondary",
+                            HttpStatusCode.NotFound.value,
+                            "file_not_found_on_disk"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Secondary bible file not found on disk")
                         return@get
                     }
@@ -228,25 +268,38 @@ internal fun Route.mediaAndAssetRoutes(
                         Constants.BACKGROUND_SLOT_DEFAULT ->
                             if (isVideo) settings.defaultBackgroundVideo else settings.defaultBackgroundImage
                         Constants.BACKGROUND_SLOT_DEFAULT_LOWER_THIRD ->
-                            if (isVideo) settings.defaultLowerThirdBackgroundVideo else settings.defaultLowerThirdBackgroundImage
+                            if (isVideo) settings.defaultLowerThirdBackgroundVideo
+                                else settings.defaultLowerThirdBackgroundImage
                         Constants.BACKGROUND_SLOT_BIBLE ->
-                            if (isVideo) settings.bibleBackground.backgroundVideo else settings.bibleBackground.backgroundImage
+                            if (isVideo) settings.bibleBackground.backgroundVideo
+                                else settings.bibleBackground.backgroundImage
                         Constants.BACKGROUND_SLOT_BIBLE_LOWER_THIRD ->
-                            if (isVideo) settings.bibleLowerThirdBackground.backgroundVideo else settings.bibleLowerThirdBackground.backgroundImage
+                            if (isVideo) settings.bibleLowerThirdBackground.backgroundVideo
+                                else settings.bibleLowerThirdBackground.backgroundImage
                         Constants.BACKGROUND_SLOT_SONG ->
-                            if (isVideo) settings.songBackground.backgroundVideo else settings.songBackground.backgroundImage
+                            if (isVideo) settings.songBackground.backgroundVideo
+                                else settings.songBackground.backgroundImage
                         Constants.BACKGROUND_SLOT_SONG_LOWER_THIRD ->
-                            if (isVideo) settings.songLowerThirdBackground.backgroundVideo else settings.songLowerThirdBackground.backgroundImage
+                            if (isVideo) settings.songLowerThirdBackground.backgroundVideo
+                                else settings.songLowerThirdBackground.backgroundImage
                         else -> ""
                     }
                     if (path.isBlank()) {
-                        server.logRest("/api/backgrounds/asset/{slot}", HttpStatusCode.NotFound.value, "no_asset_configured_for_slot")
+                        server.logRest(
+                            "/api/backgrounds/asset/{slot}",
+                            HttpStatusCode.NotFound.value,
+                            "no_asset_configured_for_slot"
+                        )
                         call.respond(HttpStatusCode.NotFound, "No asset configured for slot")
                         return@get
                     }
                     val file = File(path)
                     if (!file.exists()) {
-                        server.logRest("/api/backgrounds/asset/{slot}", HttpStatusCode.NotFound.value, "file_not_found_on_disk")
+                        server.logRest(
+                            "/api/backgrounds/asset/{slot}",
+                            HttpStatusCode.NotFound.value,
+                            "file_not_found_on_disk"
+                        )
                         call.respond(HttpStatusCode.NotFound, "Background asset not found on disk")
                         return@get
                     }
@@ -266,7 +319,9 @@ internal fun Route.mediaAndAssetRoutes(
                         val req = json.decodeFromString(SelectPictureRequest.serializer(), call.receiveText())
                         // Resolve index by filename when provided — immune to sort-order mismatch
                         val resolvedIndex = req.fileName
-                            ?.let { name -> _pictureFiles[req.folderId]?.indexOfFirst { it.name == name }?.takeIf { it >= 0 } }
+                            ?.let { name ->
+                                _pictureFiles[req.folderId]?.indexOfFirst { it.name == name }?.takeIf { it >= 0 }
+                            }
                             ?: req.index
                         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                         scope.launch { server.onSelectPicture.emit(req.copy(index = resolvedIndex)) }
@@ -319,7 +374,10 @@ internal fun Route.mediaAndAssetRoutes(
                         // date so uploads from different days are catalogued separately.
                         val dateStr = java.time.LocalDate.now().toString()   // "yyyy-MM-dd"
                         val dateFolderId = "${deviceUploadsFolderId}_$dateStr"
-                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads/$dateStr").also { it.mkdirs() }
+                        val uploadDir = File(
+                            System.getProperty("user.home"),
+                            ".churchpresenter/device_uploads/$dateStr"
+                        ).also { it.mkdirs() }
                         // Ensure the file name is unique by appending a timestamp if needed
                         val uniqueName = if (File(uploadDir, safeName).exists()) {
                             val ts = System.currentTimeMillis()
@@ -372,7 +430,10 @@ internal fun Route.mediaAndAssetRoutes(
                             ContentType.Application.Json
                         )
                     } catch (e: Exception) {
-                        call.respond(HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"","\\\"")}"}""")
+                        call.respond(
+                            HttpStatusCode.InternalServerError,
+                            """{"error":"upload failed: ${e.message?.replace("\"","\\\"")}"}"""
+                        )
                     }
                 }
 

@@ -114,7 +114,8 @@ class MainDesktopPanelResizeTest {
     @Test
     fun `saving one panel's width leaves the other panel's collapsed flag untouched`() {
         val before = AppSettings(
-            windowedLayout = AppSettings().windowedLayout.copy(schedulePanelCollapsed = true, previewPanelCollapsed = true),
+            windowedLayout =
+                AppSettings().windowedLayout.copy(schedulePanelCollapsed = true, previewPanelCollapsed = true),
         )
         val after = withScheduleWidth(before, isMaximized = false, widthDp = 340)
 

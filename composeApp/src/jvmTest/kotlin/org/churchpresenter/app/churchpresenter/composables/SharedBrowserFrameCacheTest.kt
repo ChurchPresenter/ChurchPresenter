@@ -144,7 +144,8 @@ class SharedBrowserFrameCacheTest {
         val cdp = cdpConnection()
         cdp.connect("ws://127.0.0.1:${fake.port}/devtools/page/FAKE")
 
-        val result = runBlocking { cdp.sendAsync("Page.navigate", buildJsonObject { put("url", "https://example.com") }) }
+        val result =
+            runBlocking { cdp.sendAsync("Page.navigate", buildJsonObject { put("url", "https://example.com") }) }
 
         assertTrue(result != null, "the fake server always answers with a result object")
         val sent = Json.parseToJsonElement(
