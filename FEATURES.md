@@ -225,13 +225,15 @@
 - `dialogs/tabs/AtemSettingsTab.kt`, `dialogs/tabs/OBSSettingsTab.kt`, `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
 
 ## Reporting & Licensing
-- **CCLI usage reports** — automatically track every song and verse you present and export date-filtered CSV/Excel reports for license reporting.
-- **Statistics & charts** — see your most-used songs and passages over any time period.
+- **One statistics window** — every song and verse you present is tracked automatically, then reported in one place: songs, Bible and activity-over-time tabs over whichever period you pick.
+- **Pick a period** — last 3, 6 or 12 months, any calendar year, all time, or an exact From/To range.
+- **CCLI usage reports** — export date-filtered CSV/Excel for license reporting, with CCLI numbers resolved from your song library.
+- **Tidy the numbers** — remove a single song or verse from the selected period, or clear everything; both ask first.
 
 **Source locations:**
 - `data/StatisticsManager.kt`
-- `dialogs/CCLIReportDialog.kt`
-- `dialogs/StatisticsDialog.kt`, `dialogs/tabs/StatisticsTab.kt`
+- `dialogs/CCLIReportDialog.kt` — the statistics window itself
+- `data/StatisticsPeriod.kt` — the period presets shared by its pills and its date pickers
 
 ## Personalization & Workflow
 - **14 languages** — full interface translation including English, Spanish, French, German, Portuguese, Dutch, Polish, Czech, Slovak, Romanian, Ukrainian, Russian, Belarusian and Kazakh.

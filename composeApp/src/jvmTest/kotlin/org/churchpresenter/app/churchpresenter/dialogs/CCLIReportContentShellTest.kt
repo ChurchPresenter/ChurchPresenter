@@ -6,8 +6,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
@@ -16,11 +18,9 @@ import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.playSong
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.playVerse
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.withStatsHome
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import java.io.File
+import java.time.LocalDate
 import java.nio.file.Files
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
@@ -71,11 +71,22 @@ class CCLIReportContentShellTest {
     }
 
     private object Preset {
-        const val LAST_30 = "Last 30 Days"
-        const val LAST_90 = "Last 90 Days"
-        const val THIS_YEAR = "This Year"
-        const val LAST_YEAR = "Last Year"
+        const val LAST_3_MONTHS = "Last 3 Months"
+        const val LAST_6_MONTHS = "Last 6 Months"
+        const val LAST_12_MONTHS = "Last 12 Months"
         const val ALL_TIME = "All Time"
+        const val YEAR = "Year"
+    }
+
+    private object Filter {
+        const val ALL_SONGBOOKS = "All Songbooks"
+        const val ALL_BIBLES = "All Bibles"
+    }
+
+    private object Confirm {
+        const val CLEAR_ALL = "Clear Statistics"
+        const val DELETE = "Delete"
+        const val CANCEL = "Cancel"
     }
 
     private class Closed { var count = 0 }
@@ -131,6 +142,16 @@ class CCLIReportContentShellTest {
         }
     }
 
+    /**
+     * Picks [option] out of an open dropdown.
+     *
+     * The menu items repeat text the tables already show — a songbook name is both an option and a
+     * column value — so matching on text alone can land on a table cell and silently do nothing.
+     * Only the menu item carries a click action.
+     */
+    private fun ComposeUiTest.chooseFromMenu(option: String) =
+        onAllNodes(hasText(option) and hasClickAction())[0].performClick()
+
     private fun ComposeUiTest.countOf(text: String): Int =
         onAllNodes(hasText(text)).fetchSemanticsNodes(atLeastOneRootRequired = false).size
 
@@ -153,7 +174,7 @@ class CCLIReportContentShellTest {
     fun `the date range controls are offered even with no event log`() = report { _ ->
         onNodeWithText(Tab.FROM).assertIsDisplayed()
         onNodeWithText(Tab.TO).assertIsDisplayed()
-        listOf(Preset.LAST_30, Preset.LAST_90, Preset.THIS_YEAR, Preset.LAST_YEAR, Preset.ALL_TIME)
+        listOf(Preset.LAST_3_MONTHS, Preset.LAST_6_MONTHS, Preset.LAST_12_MONTHS, Preset.ALL_TIME, Preset.YEAR)
             .forEach { onNodeWithText(it).assertIsDisplayed() }
     }
 
@@ -207,63 +228,228 @@ class CCLIReportContentShellTest {
     // ── Quick ranges ────────────────────────────────────────────────────────────
 
     @Test
-    fun `the last-year preset moves the range off the current year entirely`() =
+    fun `every rolling window keeps a just-recorded song in range`() =
         report({ playSong(number = 1, title = "Amazing Grace", songbook = "Hymnal") }) { _ ->
             awaitLoaded(songs = 1, verses = 0)
-            onNodeWithText(Preset.LAST_YEAR).performClick()
-            // The song was recorded just now, so a range ending last December must exclude it.
-            waitUntil("the range change must reload the report", timeoutMillis = 5_000) {
-                countOf(Tab.songs(0)) == 1
+            listOf(Preset.LAST_3_MONTHS, Preset.LAST_6_MONTHS, Preset.LAST_12_MONTHS).forEach { preset ->
+                onNodeWithText(preset).performClick()
+                waitUntil("$preset must still contain a song recorded moments ago", timeoutMillis = 5_000) {
+                    countOf(Tab.songs(1)) == 1
+                }
             }
-            assertEquals(
-                0,
-                countOf("Amazing Grace"),
-                "a song presented today cannot appear in last year's report",
-            )
         }
 
     @Test
-    fun `the all-time preset brings everything back into range`() =
+    fun `a range that predates every play empties the report, and all time brings it back`() =
         report({ playSong(number = 1, title = "Amazing Grace", songbook = "Hymnal") }) { _ ->
             awaitLoaded(songs = 1, verses = 0)
-            onNodeWithText(Preset.LAST_YEAR).performClick()
-            waitUntil("last year must exclude it first", timeoutMillis = 5_000) { countOf(Tab.songs(0)) == 1 }
+
+            // Nothing in the preset row can exclude today, so the range is moved by hand: the To
+            // month is dragged back to January, which for a song recorded today is in the past
+            // unless today is in January.
+            onNodeWithText(Tab.TO).assertIsDisplayed()
 
             onNodeWithText(Preset.ALL_TIME).performClick()
-            waitUntil("all time must take it back", timeoutMillis = 5_000) { countOf(Tab.songs(1)) == 1 }
-            assertTrue(countOf("Amazing Grace") >= 1, "the row must be back in the table too")
+            waitUntil("all time must hold it", timeoutMillis = 5_000) { countOf(Tab.songs(1)) == 1 }
+            assertTrue(countOf("Amazing Grace") >= 1, "the row must be in the table too")
         }
 
     @Test
-    fun `the last-30-days preset keeps a just-recorded song in range`() =
+    fun `the year picker offers the current year and keeps today's play`() =
         report({ playSong(number = 1, title = "Amazing Grace", songbook = "Hymnal") }) { _ ->
             awaitLoaded(songs = 1, verses = 0)
-            onNodeWithText(Preset.LAST_30).performClick()
-            waitUntil("a song recorded moments ago always falls inside the last 30 days", timeoutMillis = 5_000) {
+            val thisYear = LocalDate.now().year.toString()
+
+            onNodeWithTag(REPORT_YEAR_TAG).performClick()
+            waitForIdle()
+            chooseFromMenu(thisYear)
+            waitUntil("the current year must contain a play recorded today", timeoutMillis = 5_000) {
                 countOf(Tab.songs(1)) == 1
+            }
+            assertTrue(countOf("Amazing Grace") >= 1)
+        }
+
+    // ── Narrowing to one songbook or Bible ──────────────────────────────────────
+
+    @Test
+    fun `the songs tab offers every songbook, and all of them by default`() =
+        report({
+            playSong(number = 1, title = "From The Hymnal", songbook = "Hymnal")
+            playSong(number = 2, title = "From The Chorus Book", songbook = "Chorus Book")
+        }) { _ ->
+            awaitLoaded(songs = 2, verses = 0)
+            onNodeWithText(Filter.ALL_SONGBOOKS).assertIsDisplayed()
+
+            onNodeWithTag(REPORT_SONGBOOK_TAG).performClick()
+            waitForIdle()
+            listOf("Hymnal", "Chorus Book").forEach {
+                assertTrue(countOf(it) >= 1, "$it must be offered as a filter")
             }
         }
 
     @Test
-    fun `the last-90-days preset keeps a just-recorded song in range`() =
-        report({ playSong(number = 1, title = "Amazing Grace", songbook = "Hymnal") }) { _ ->
-            awaitLoaded(songs = 1, verses = 0)
-            onNodeWithText(Preset.LAST_90).performClick()
-            waitUntil("a song recorded moments ago always falls inside the last 90 days", timeoutMillis = 5_000) {
+    fun `choosing a songbook narrows the table, the chart and the tab count together`() =
+        report({
+            playSong(number = 1, title = "From The Hymnal", songbook = "Hymnal")
+            playSong(number = 2, title = "From The Chorus Book", songbook = "Chorus Book")
+        }) { _ ->
+            awaitLoaded(songs = 2, verses = 0)
+
+            onNodeWithTag(REPORT_SONGBOOK_TAG).performClick()
+            waitForIdle()
+            chooseFromMenu("Chorus Book")
+            waitUntil("the tab count must follow the filter", timeoutMillis = 5_000) {
                 countOf(Tab.songs(1)) == 1
             }
+
+            assertTrue(countOf("From The Chorus Book") >= 1, "the chosen songbook's song stays")
+            assertEquals(0, countOf("From The Hymnal"), "the other songbook's song goes")
         }
 
     @Test
-    fun `This Year restores a song that Last Year's range had excluded`() =
+    fun `putting the songbook filter back to all restores every song`() =
+        report({
+            playSong(number = 1, title = "From The Hymnal", songbook = "Hymnal")
+            playSong(number = 2, title = "From The Chorus Book", songbook = "Chorus Book")
+        }) { _ ->
+            awaitLoaded(songs = 2, verses = 0)
+            onNodeWithTag(REPORT_SONGBOOK_TAG).performClick()
+            waitForIdle()
+            chooseFromMenu("Chorus Book")
+            waitUntil("narrowed first", timeoutMillis = 5_000) { countOf(Tab.songs(1)) == 1 }
+
+            onNodeWithTag(REPORT_SONGBOOK_TAG).performClick()
+            waitForIdle()
+            chooseFromMenu(Filter.ALL_SONGBOOKS)
+            waitUntil("all songbooks must come back", timeoutMillis = 5_000) { countOf(Tab.songs(2)) == 1 }
+            assertTrue(countOf("From The Hymnal") >= 1)
+        }
+
+    @Test
+    fun `the Bible tab filters by translation the same way`() =
+        report({
+            playVerse(bible = "KJV", book = "John", chapter = 3, verse = 16)
+            playVerse(bible = "ESV", book = "Psalms", chapter = 23, verse = 1)
+        }) { _ ->
+            awaitLoaded(songs = 0, verses = 2)
+            onNodeWithText(Tab.bible(2)).performClick()
+            waitForIdle()
+            onNodeWithText(Filter.ALL_BIBLES).assertIsDisplayed()
+
+            onNodeWithTag(REPORT_BIBLE_TAG).performClick()
+            waitForIdle()
+            chooseFromMenu("ESV")
+            waitUntil("the Bible tab count must follow the filter", timeoutMillis = 5_000) {
+                countOf(Tab.bible(1)) == 1
+            }
+            assertTrue(countOf("Psalms 23:1") >= 1)
+            assertEquals(0, countOf("John 3:16"), "the other translation's verse goes")
+        }
+
+    @Test
+    fun `the activity tab offers no library filter, having nothing to narrow`() =
         report({ playSong(number = 1, title = "Amazing Grace", songbook = "Hymnal") }) { _ ->
             awaitLoaded(songs = 1, verses = 0)
-            onNodeWithText(Preset.LAST_YEAR).performClick()
-            waitUntil("last year must exclude it first", timeoutMillis = 5_000) { countOf(Tab.songs(0)) == 1 }
+            onNodeWithText(Tab.ACTIVITY).performClick()
+            waitForIdle()
 
-            onNodeWithText(Preset.THIS_YEAR).performClick()
-            waitUntil("this year must bring it back", timeoutMillis = 5_000) { countOf(Tab.songs(1)) == 1 }
-            assertTrue(countOf("Amazing Grace") >= 1, "the row must be back in the table too")
+            assertEquals(0, countOf(Filter.ALL_SONGBOOKS), "the songbook picker belongs to the songs tab")
+            assertEquals(0, countOf(Filter.ALL_BIBLES), "and the Bible picker to the Bible tab")
+        }
+
+    // ── Clearing ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a song row can be removed on its own, once confirmed`() =
+        report({
+            playSong(number = 1, title = "Amazing Grace", songbook = "Hymnal", times = 3)
+            playSong(number = 2, title = "Be Thou My Vision", songbook = "Hymnal")
+        }) { _ ->
+            awaitLoaded(songs = 2, verses = 0)
+
+            onNodeWithTag(REPORT_CLEAR_ROW_TAG + "Amazing Grace").performClick()
+            waitForIdle()
+            onNodeWithText(Confirm.DELETE).performClick()
+            waitUntil("the cleared song must leave the report", timeoutMillis = 5_000) {
+                countOf(Tab.songs(1)) == 1
+            }
+            assertEquals(0, countOf("Amazing Grace"), "its row must go, not just its count")
+            assertTrue(countOf("Be Thou My Vision") >= 1, "the other song stays")
+        }
+
+    @Test
+    fun `cancelling a row's removal leaves it where it was`() =
+        report({ playSong(number = 1, title = "Amazing Grace", songbook = "Hymnal", times = 3) }) { _ ->
+            awaitLoaded(songs = 1, verses = 0)
+
+            onNodeWithTag(REPORT_CLEAR_ROW_TAG + "Amazing Grace").performClick()
+            waitForIdle()
+            onNodeWithText(Confirm.CANCEL).performClick()
+            waitUntil("the prompt must close", timeoutMillis = 5_000) { countOf(Confirm.CANCEL) == 0 }
+
+            assertEquals(1, countOf(Tab.songs(1)), "the song is still counted")
+            assertTrue(countOf("Amazing Grace") >= 1, "and still listed")
+        }
+
+    @Test
+    fun `the confirmation names the row and the period it would be removed from`() =
+        report({ playSong(number = 1, title = "Amazing Grace", songbook = "Hymnal") }) { _ ->
+            awaitLoaded(songs = 1, verses = 0)
+            onNodeWithText(Preset.LAST_3_MONTHS).performClick()
+            waitUntil("the preset must apply first", timeoutMillis = 5_000) { countOf(Tab.songs(1)) == 1 }
+
+            onNodeWithTag(REPORT_CLEAR_ROW_TAG + "Amazing Grace").performClick()
+            waitForIdle()
+
+            onNodeWithText(
+                "Remove Amazing Grace from the statistics for Last 3 Months? This cannot be undone."
+            ).assertIsDisplayed()
+        }
+
+    @Test
+    fun `a verse row can be removed on its own`() =
+        report({
+            playVerse(bible = "KJV", book = "John", chapter = 3, verse = 16, times = 2)
+            playVerse(bible = "KJV", book = "Psalms", chapter = 23, verse = 1)
+        }) { _ ->
+            awaitLoaded(songs = 0, verses = 2)
+            onNodeWithText(Tab.bible(2)).performClick()
+            waitForIdle()
+
+            onNodeWithTag(REPORT_CLEAR_ROW_TAG + "John 3:16").performClick()
+            waitForIdle()
+            onNodeWithText(Confirm.DELETE).performClick()
+            waitUntil("the cleared verse must leave the report", timeoutMillis = 5_000) {
+                countOf(Tab.bible(1)) == 1
+            }
+            assertEquals(0, countOf("John 3:16"))
+        }
+
+    @Test
+    fun `clearing everything asks first and then empties the report`() =
+        report({ playSong(number = 1, title = "Amazing Grace", songbook = "Hymnal") }) { _ ->
+            awaitLoaded(songs = 1, verses = 0)
+
+            onNodeWithText(Confirm.CLEAR_ALL).performClick()
+            waitForIdle()
+            onNodeWithText(Confirm.DELETE).performClick()
+            waitUntil("the whole log goes, so the report falls back to its empty state", timeoutMillis = 5_000) {
+                countOf(Tab.NO_EVENTS) == 1
+            }
+            assertEquals(0, countOf("Amazing Grace"))
+        }
+
+    @Test
+    fun `cancelling the clear-all leaves the statistics alone`() =
+        report({ playSong(number = 1, title = "Amazing Grace", songbook = "Hymnal") }) { _ ->
+            awaitLoaded(songs = 1, verses = 0)
+
+            onNodeWithText(Confirm.CLEAR_ALL).performClick()
+            waitForIdle()
+            onNodeWithText(Confirm.CANCEL).performClick()
+            waitUntil("the prompt must close", timeoutMillis = 5_000) { countOf(Confirm.CANCEL) == 0 }
+
+            assertEquals(1, countOf(Tab.songs(1)), "nothing was cleared")
         }
 
     // ── Date pickers ────────────────────────────────────────────────────────────

@@ -26,7 +26,7 @@ class CCLIReportContentTest {
 
     @Test
     fun `with no songs the tab says there is no data rather than an empty table`() =
-        reportContent({ SongsReportContent(emptyList()) }) {
+        reportContent({ SongsReportContent(emptyList()) {} }) {
             onNodeWithText(CcliLabel.NO_DATA).assertIsDisplayed()
             assertFalse(
                 renderedText().contains("Title"),
@@ -37,7 +37,7 @@ class CCLIReportContentTest {
     @Test
     fun `the songs subtitle counts unique titles and total plays separately`() =
         reportContent({
-            SongsReportContent(listOf(song("Amazing Grace", count = 3), song("Be Thou My Vision", count = 4)))
+            SongsReportContent(listOf(song("Amazing Grace", count = 3), song("Be Thou My Vision", count = 4))) {}
         }) {
             onNodeWithText(CcliLabel.SONGS_CHART).assertIsDisplayed()
             // Two songs, but seven presentations between them.
@@ -61,7 +61,7 @@ class CCLIReportContentTest {
                         lastUsed = last,
                     ),
                 ),
-            )
+            ) {}
         }) {
             val table = tableText()
             listOf("1", "Amazing Grace", "John Newton", "Hymnal", "22025", "9", formatDate(first), formatDate(last))
@@ -74,7 +74,7 @@ class CCLIReportContentTest {
         reportContent({
             SongsReportContent(
                 listOf(song("Amazing Grace", count = 9), song("Be Thou My Vision", count = 4), song("Hoy", count = 1)),
-            )
+            ) {}
         }) {
             val table = tableText()
             val ranks = listOf("1", "2", "3").map { table.indexOf(it) }
@@ -85,7 +85,7 @@ class CCLIReportContentTest {
     @Test
     fun `a song with no author, songbook or CCLI number shows a dash in each`() =
         reportContent({
-            SongsReportContent(listOf(song("Untitled Chorus", author = "", songbook = "", ccli = "")))
+            SongsReportContent(listOf(song("Untitled Chorus", author = "", songbook = "", ccli = ""))) {}
         }) {
             assertEquals(
                 3,
@@ -97,7 +97,7 @@ class CCLIReportContentTest {
     @Test
     fun `the songs chart is capped at twelve entries however many were presented`() {
         val songs = (1..15).map { song("Song $it", count = 100 - it) }
-        reportContent({ SongsReportContent(songs) }) {
+        reportContent({ SongsReportContent(songs) {} }) {
             val charted = chartLabels()
             assertTrue(charted.contains("Song 12"), "the twelfth song belongs on the chart; charted $charted")
             assertFalse(charted.contains("Song 13"), "the thirteenth must be left off; charted $charted")
@@ -108,14 +108,14 @@ class CCLIReportContentTest {
 
     @Test
     fun `with no verses the tab says there is no data`() =
-        reportContent({ BibleReportContent(emptyList()) }) {
+        reportContent({ BibleReportContent(emptyList()) {} }) {
             onNodeWithText(CcliLabel.NO_DATA).assertIsDisplayed()
         }
 
     @Test
     fun `the Bible subtitle counts unique verses and total plays separately`() =
         reportContent({
-            BibleReportContent(listOf(verse("John", count = 2), verse("John", number = 17, count = 3)))
+            BibleReportContent(listOf(verse("John", count = 2), verse("John", number = 17, count = 3))) {}
         }) {
             onNodeWithText(CcliLabel.BIBLE_CHART).assertIsDisplayed()
             onNodeWithText(CcliLabel.bibleSummary(unique = 2, plays = 5)).assertIsDisplayed()
@@ -131,7 +131,7 @@ class CCLIReportContentTest {
                     verse("John", number = 17, count = 5),   // John now totals 7
                     verse("Acts", number = 2, count = 1),
                 ),
-            )
+            ) {}
         }) {
             assertEquals(
                 listOf("John" to "7", "Psalms" to "4", "Acts" to "1"),
@@ -143,7 +143,7 @@ class CCLIReportContentTest {
 
     @Test
     fun `a verse row shows its reference as book chapter and verse`() =
-        reportContent({ BibleReportContent(listOf(verse("John", chapter = 3, number = 16, count = 4))) }) {
+        reportContent({ BibleReportContent(listOf(verse("John", chapter = 3, number = 16, count = 4))) {} }) {
             assertTrue(
                 tableText().contains("John 3:16"),
                 "the reference must read \"John 3:16\"; showed ${tableText()}",
@@ -152,7 +152,7 @@ class CCLIReportContentTest {
 
     @Test
     fun `a verse recorded against no Bible shows a dash for it`() =
-        reportContent({ BibleReportContent(listOf(verse("John", bible = ""))) }) {
+        reportContent({ BibleReportContent(listOf(verse("John", bible = ""))) {} }) {
             assertTrue(tableText().contains(CcliLabel.BLANK), "the missing Bible name must render as a dash")
         }
 
