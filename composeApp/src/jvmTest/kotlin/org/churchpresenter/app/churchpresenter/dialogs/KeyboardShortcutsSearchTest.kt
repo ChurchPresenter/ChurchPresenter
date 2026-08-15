@@ -7,6 +7,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -20,21 +21,12 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.test.withKeyDown
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.app.churchpresenter.models.ShortcutScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/**
- * Filtering the Keyboard Shortcuts dialog.
- *
- * Search matches the action's description **and** its keys. The key half is the part worth testing
- * hard: bindings render platform-specifically — `Ctrl+Shift+N` on Windows and Linux, `⌃⇧N` on
- * macOS — so a naive implementation that matched only what is on screen would work on one OS and
- * silently match nothing on the other. These run on whichever platform the suite is on and assert
- * that both spellings work either way.
- */
 class KeyboardShortcutsSearchTest {
-
     private class Saves {
         val saved = mutableListOf<AppSettings>()
         var dismissed = 0
@@ -64,12 +56,12 @@ class KeyboardShortcutsSearchTest {
         waitForIdle()
     }
 
-    /** Whether this action's row is currently rendered. The collection form is the public one. */
+    private fun selectedCategoryActions() =
+        ShortcutAction.entries.filter { it.scope == ShortcutScope.entries.first() }
+
     private fun ComposeUiTest.rowExists(action: ShortcutAction) =
         onAllNodesWithTag(shortcutChipTag(action))
             .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
-
-    // ── Matching on the description ─────────────────────────────────────────────
 
     @Test
     fun `a description query narrows the list`() = dialog {
@@ -87,16 +79,15 @@ class KeyboardShortcutsSearchTest {
     }
 
     @Test
-    fun `a category with nothing matching disappears entirely`() = dialog {
-        onNodeWithText("Media Tab").assertExists()
+    fun `a search spans categories the rail has not selected`() = dialog {
+        assertTrue(!rowExists(ShortcutAction.BIBLE_NEXT_VERSE), "the Menus category opens first")
 
         search("verse")
 
-        onNodeWithText("Media Tab").assertDoesNotExist()
-        onNodeWithText("Bible Tab").assertExists()
+        assertTrue(rowExists(ShortcutAction.BIBLE_NEXT_VERSE))
+        assertTrue(!rowExists(ShortcutAction.MEDIA_MUTE))
+        onNodeWithTag(SHORTCUT_SECTION_TITLE_TAG).assertTextEquals("Search results")
     }
-
-    // ── Matching on the keys ────────────────────────────────────────────────────
 
     @Test
     fun `a plain key name finds the action bound to it`() = dialog {
@@ -108,7 +99,6 @@ class KeyboardShortcutsSearchTest {
 
     @Test
     fun `a modifier word finds it whichever way the platform draws the binding`() = dialog {
-        // On macOS these rows display "⌃Z", not "Ctrl+Z". Typing the word must still find them.
         search("ctrl")
 
         assertTrue(rowExists(ShortcutAction.UNDO))
@@ -125,7 +115,6 @@ class KeyboardShortcutsSearchTest {
 
     @Test
     fun `a modifier alias finds it`() = dialog {
-        // "control" and "command" are what people type; neither is the rendered label on either OS.
         search("control")
 
         assertTrue(rowExists(ShortcutAction.UNDO))
@@ -139,14 +128,6 @@ class KeyboardShortcutsSearchTest {
         assertTrue(!rowExists(ShortcutAction.UNDO))
     }
 
-    // ── Arrows, which cannot be typed ───────────────────────────────────────────
-
-    /**
-     * The arrows are the one binding you cannot search for by its own glyph.
-     *
-     * `←` is not on the keyboard, so before the aliases existed an arrow binding could only be
-     * found by its description — which is exactly the gap that was reported.
-     */
     @Test
     fun `an arrow binding is found by typing its name`() = dialog {
         search("left")
@@ -173,8 +154,6 @@ class KeyboardShortcutsSearchTest {
 
         assertTrue(rowExists(ShortcutAction.BIBLE_PREVIOUS_CHAPTER))
     }
-
-    // ── Press-key mode ──────────────────────────────────────────────────────────
 
     private fun ComposeUiTest.enterPressMode() {
         onNodeWithTag(SHORTCUT_PRESS_MODE_TAG).performClick()
@@ -203,8 +182,6 @@ class KeyboardShortcutsSearchTest {
         enterPressMode()
         pressToSearch(Key.DirectionLeft, ctrl = true)
 
-        // Nothing ships on Ctrl+←, so a filter that ignored modifiers would wrongly list every
-        // plain-← binding here.
         assertTrue(!rowExists(ShortcutAction.BIBLE_PREVIOUS_CHAPTER))
         onNodeWithTag(SHORTCUT_NO_RESULTS_TAG).assertExists()
     }
@@ -217,8 +194,6 @@ class KeyboardShortcutsSearchTest {
         val message = onNodeWithTag(SHORTCUT_NO_RESULTS_TAG).fetchSemanticsNode()
             .config.getOrNull(SemanticsProperties.Text).orEmpty().joinToString("") { it.text }
 
-        // The bug this guards: the message is built from the text query, which is empty in this
-        // mode, so it would have read: No results found for "".
         assertTrue(message.trim().endsWith("\"\"").not(), "the message must name the chord: '$message'")
         assertTrue("Z" !in message)
     }
@@ -235,12 +210,13 @@ class KeyboardShortcutsSearchTest {
     fun `leaving press mode drops its filter`() = dialog {
         enterPressMode()
         pressToSearch(Key.DirectionLeft)
-        assertTrue(!rowExists(ShortcutAction.MEDIA_MUTE))
+        assertTrue(rowExists(ShortcutAction.BIBLE_PREVIOUS_CHAPTER))
 
         onNodeWithTag(SHORTCUT_PRESS_MODE_TAG).performClick()
         waitForIdle()
 
-        ShortcutAction.entries.forEach { assertTrue(rowExists(it), "$it should be back") }
+        selectedCategoryActions().forEach { assertTrue(rowExists(it), "$it should be back") }
+        assertTrue(!rowExists(ShortcutAction.BIBLE_PREVIOUS_CHAPTER), "and only that category")
     }
 
     @Test
@@ -248,19 +224,14 @@ class KeyboardShortcutsSearchTest {
         search("verse")
         enterPressMode()
 
-        // Both filters narrowing the same list at once has no sensible reading, so each clears the
-        // other. With nothing pressed yet, everything is listed.
-        ShortcutAction.entries.forEach { assertTrue(rowExists(it)) }
+        assertTrue(!rowExists(ShortcutAction.BIBLE_NEXT_VERSE), "the verse query is gone")
+        selectedCategoryActions().forEach { assertTrue(rowExists(it)) }
     }
-
-    // ── Empty and cleared ───────────────────────────────────────────────────────
 
     @Test
     fun `a query matching nothing says so and names the query`() = dialog {
         search("zzzznotathing")
 
-        // Read off the tagged node rather than searching for the text: the query is also sitting in
-        // the search box, so a plain text match finds two nodes.
         val message = onNodeWithTag(SHORTCUT_NO_RESULTS_TAG).fetchSemanticsNode()
             .config.getOrNull(SemanticsProperties.Text).orEmpty().joinToString("") { it.text }
 
@@ -269,34 +240,30 @@ class KeyboardShortcutsSearchTest {
     }
 
     @Test
-    fun `clearing the search brings every row back`() = dialog {
+    fun `clearing the search restores the selected category`() = dialog {
         search("verse")
-        assertTrue(!rowExists(ShortcutAction.MEDIA_MUTE))
+        assertTrue(rowExists(ShortcutAction.BIBLE_NEXT_VERSE))
 
         onNodeWithContentDescription("Clear search").performClick()
         waitForIdle()
 
-        ShortcutAction.entries.forEach {
+        selectedCategoryActions().forEach {
             assertTrue(rowExists(it), "$it should be listed again once the search is cleared")
         }
         onNodeWithTag(SHORTCUT_NO_RESULTS_TAG).assertDoesNotExist()
     }
 
     @Test
-    fun `every row is listed before anything is typed`() = dialog {
-        ShortcutAction.entries.forEach { assertTrue(rowExists(it)) }
+    fun `the first category is listed in full before anything is typed`() = dialog {
+        selectedCategoryActions().forEach { assertTrue(rowExists(it)) }
         onNodeWithTag(SHORTCUT_NO_RESULTS_TAG).assertDoesNotExist()
     }
-
-    // ── Search is view state, not settings ──────────────────────────────────────
 
     @Test
     fun `searching does not change what Apply saves`() = dialog { result ->
         search("verse")
         onNodeWithText("Apply").performClick()
 
-        // A filtered view must save exactly what an unfiltered one would — no overrides at all here,
-        // since nothing was edited.
         assertEquals(1, result.saved.size)
         assertEquals(emptyMap(), result.saved.last().keyboardShortcutSettings.overrides)
     }

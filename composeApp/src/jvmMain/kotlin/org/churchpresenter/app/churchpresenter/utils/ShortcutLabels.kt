@@ -112,6 +112,30 @@ fun KeyChord.label(useSymbols: Boolean): String {
 }
 
 /**
+ * This chord split into the parts it is drawn as: one per modifier held, then the key itself.
+ *
+ * The shortcuts dialog draws each part as its own keycap, and that split cannot be recovered from
+ * [label] — the macOS form has no separator at all (`⌃⇧N`), so slicing the rendered string would
+ * work on Windows and Linux and produce one wide cap on a Mac.
+ */
+@Composable
+fun KeyChord.keyCaps(): List<String> = buildList {
+    if (isMac) {
+        // Same fixed order as the label, which is the Mac convention regardless of press order.
+        if (ctrl) add("⌃")
+        if (alt) add("⌥")
+        if (shift) add("⇧")
+        if (meta) add("⌘")
+    } else {
+        if (ctrl) add(stringResource(Res.string.key_mod_ctrl))
+        if (meta) add(stringResource(Res.string.key_mod_meta))
+        if (alt) add(stringResource(Res.string.key_mod_alt))
+        if (shift) add(stringResource(Res.string.key_mod_shift))
+    }
+    add(keyDisplayName(key))
+}
+
+/**
  * A typeable name for a key that is otherwise drawn as an un-typeable glyph.
  *
  * Only the four arrows need this. Every other symbol the app binds — `.` `,` `/` `[` and the rest —

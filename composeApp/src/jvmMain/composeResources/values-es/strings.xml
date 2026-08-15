@@ -190,6 +190,28 @@
     <string name="shortcut_description_undo">Deshacer el último cambio del programa</string>
     <string name="shortcut_description_redo">Rehacer el último cambio deshecho</string>
     <string name="shortcut_description_reorder_image">Reordenar imagen</string>
+    <string name="shortcut_scope_menus_hint">Aceleradores de menú, procesados antes que nada</string>
+    <string name="shortcut_scope_global_hint">Disponible en cualquier parte de la aplicación</string>
+    <string name="shortcut_scope_bible_hint">Activo mientras la pestaña Biblia está enfocada</string>
+    <string name="shortcut_scope_songs_hint">Activo mientras la pestaña Cantos está enfocada</string>
+    <string name="shortcut_scope_pictures_hint">Activo mientras la pestaña Imágenes está enfocada</string>
+    <string name="shortcut_scope_presentation_hint">Activo mientras la pestaña Presentación está enfocada</string>
+    <string name="shortcut_scope_media_hint">Activo durante la reproducción de audio y vídeo</string>
+    <string name="shortcut_scope_canvas_hint">Activo al editar una escena del lienzo</string>
+    <string name="shortcut_scope_mouse_hint">Gestos que no se pueden reasignar</string>
+    <string name="shortcut_conflicts_none">Sin conflictos</string>
+    <string name="shortcut_conflicts_one">1 conflicto</string>
+    <string name="shortcut_conflicts_many">%1$d conflictos</string>
+    <string name="shortcut_conflicts_title">Conflictos</string>
+    <string name="shortcut_conflicts_subtitle_one">1 atajo comparte una combinación</string>
+    <string name="shortcut_conflicts_subtitle_many">%1$d atajos comparten una combinación</string>
+    <string name="shortcut_search_results">Resultados de búsqueda</string>
+    <string name="shortcut_search_match_one">1 coincidencia</string>
+    <string name="shortcut_search_match_many">%1$d coincidencias</string>
+    <string name="shortcut_unsaved_one">1 cambio sin guardar</string>
+    <string name="shortcut_unsaved_many">%1$d cambios sin guardar</string>
+    <string name="shortcut_rebind_hint">Haga clic para reasignar</string>
+    <string name="shortcut_recording_stop">Dejar de escuchar</string>
 
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Configuración de texto y colores</string>

@@ -190,6 +190,28 @@
     <string name="shortcut_description_undo">Laatste programmawijziging ongedaan maken</string>
     <string name="shortcut_description_redo">Laatste ongedaan gemaakte wijziging opnieuw uitvoeren</string>
     <string name="shortcut_description_reorder_image">Afbeelding herordenen</string>
+    <string name="shortcut_scope_menus_hint">Menusneltoetsen, worden als eerste verwerkt</string>
+    <string name="shortcut_scope_global_hint">Overal in de app beschikbaar</string>
+    <string name="shortcut_scope_bible_hint">Actief wanneer het Bijbel-tabblad de focus heeft</string>
+    <string name="shortcut_scope_songs_hint">Actief wanneer het Liederen-tabblad de focus heeft</string>
+    <string name="shortcut_scope_pictures_hint">Actief wanneer het Afbeeldingen-tabblad de focus heeft</string>
+    <string name="shortcut_scope_presentation_hint">Actief wanneer het Presentatie-tabblad de focus heeft</string>
+    <string name="shortcut_scope_media_hint">Actief tijdens het afspelen van audio en video</string>
+    <string name="shortcut_scope_canvas_hint">Actief tijdens het bewerken van een canvasscène</string>
+    <string name="shortcut_scope_mouse_hint">Gebaren die niet opnieuw toe te wijzen zijn</string>
+    <string name="shortcut_conflicts_none">Geen conflicten</string>
+    <string name="shortcut_conflicts_one">1 conflict</string>
+    <string name="shortcut_conflicts_many">%1$d conflicten</string>
+    <string name="shortcut_conflicts_title">Conflicten</string>
+    <string name="shortcut_conflicts_subtitle_one">1 sneltoets deelt een combinatie</string>
+    <string name="shortcut_conflicts_subtitle_many">%1$d sneltoetsen delen een combinatie</string>
+    <string name="shortcut_search_results">Zoekresultaten</string>
+    <string name="shortcut_search_match_one">1 overeenkomst</string>
+    <string name="shortcut_search_match_many">%1$d overeenkomsten</string>
+    <string name="shortcut_unsaved_one">1 wijziging niet opgeslagen</string>
+    <string name="shortcut_unsaved_many">%1$d wijzigingen niet opgeslagen</string>
+    <string name="shortcut_rebind_hint">Klik om opnieuw toe te wijzen</string>
+    <string name="shortcut_recording_stop">Stoppen met luisteren</string>
 
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Tekstinstellingen en kleuren</string>

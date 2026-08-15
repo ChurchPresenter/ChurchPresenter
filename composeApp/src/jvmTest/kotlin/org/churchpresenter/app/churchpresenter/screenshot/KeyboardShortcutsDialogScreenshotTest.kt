@@ -21,31 +21,36 @@ import androidx.compose.ui.unit.Density
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.KeyboardShortcutSettings
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialogContent
+import org.churchpresenter.app.churchpresenter.dialogs.SHORTCUT_CONFLICTS_FILTER_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.SHORTCUT_PRESS_MODE_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.SHORTCUT_PRESS_PANEL_TAG
+import org.churchpresenter.app.churchpresenter.dialogs.shortcutCategoryTag
+import org.churchpresenter.app.churchpresenter.dialogs.shortcutChipTag
 import org.churchpresenter.app.churchpresenter.models.KeyChord
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.app.churchpresenter.models.ShortcutScope
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
 import kotlin.test.Test
 
 /**
  * The Keyboard Shortcuts dialog (Help → Keyboard Shortcuts, F1), in both themes.
  *
- * One row per rebindable action grouped by the scope that decides what can collide with what, a
- * read-only Mouse section at the bottom, and Cancel/Apply/OK. This is now the only place shortcuts
- * are both listed and changed — the editing UI was briefly a Settings tab and was merged in here.
+ * A category rail on the left, one category's rows beside it, and Cancel/Apply/OK under both. This
+ * is the only place shortcuts are both listed and changed — the editing UI was briefly a Settings
+ * tab and was merged in here, and the separate capture window was folded into the row.
  *
  * What changes the shape of a row rather than a value in it:
  *
- *  - **Whether the action is customized.** An untouched row offers *Clear*; one the user has moved
- *    offers *Reset*. Which of the two is showing is the only sign in the row that a binding is no
- *    longer the shipped one, so both are shot.
- *  - **Whether the action is bound at all.** An unbound row reads "Not set" rather than an empty
- *    chip. Save As ships that way, so the default image already carries one; the customized image
- *    adds a deliberately cleared row.
+ *  - **Whether the action is customized.** The caps are tinted, and the row's one button turns from
+ *    *Clear* into *Reset*. The footer also starts counting, but only against what was passed in.
+ *  - **Whether the action is bound at all.** An unbound row reads "Not set" rather than empty caps.
+ *  - **Whether it clashes with another binding.** The row, its caps and the rail entry all take the
+ *    error colour and the row names what else answers to the combination.
+ *  - **Whether it is listening.** The caps are replaced by the recording chip for as long as the
+ *    row holds the keyboard.
  *
- * The capture dialog is not shot: it is a `DialogWindow`, which needs a real window and cannot be
- * composed by the test runner. Its states are covered by `ShortcutCaptureContentTest`.
+ * Light and dark are **separate images** here rather than stacked: the dialog is 720 tall, and a
+ * stacked pair is a strip no reviewer can take in at once.
  *
  * **These are macOS renders**, so modifiers appear as `⌃⌥⇧⌘` rather than `Ctrl+Alt+…`. That is what
  * the same code produces on this platform, not a defect — see the platform table in AGENT.md before
@@ -56,26 +61,23 @@ class KeyboardShortcutsDialogScreenshotTest {
     @Test
     fun `as it opens`() = shoot("defaults")
 
+    /**
+     * The Global category, with bindings moved, cleared and left alone side by side.
+     *
+     * Shot on Global rather than the category the dialog opens on because that is where the seeded
+     * overrides land — a customized row is only visible in its own category now.
+     */
     @Test
-    fun `with customized bindings`() = shoot(
-        "customized",
-        settings = AppSettings(
-            keyboardShortcutSettings = KeyboardShortcutSettings(
-                overrides = mapOf(
-                    ShortcutAction.UNDO.name to listOf(KeyChord.of(Key.U, ctrl = true)),
-                    ShortcutAction.SAVE_SCHEDULE.name to listOf(KeyChord.of(Key.S, ctrl = true, shift = true)),
-                    ShortcutAction.CLEAR_OUTPUT.name to emptyList(),
-                    ShortcutAction.SWITCH_TO_BIBLE.name to listOf(KeyChord.of(Key.B, ctrl = true, alt = true)),
-                )
-            )
-        ),
-    )
+    fun `with customized bindings`() = shoot("customized", settings = CUSTOMIZED) {
+        onNodeWithTag(shortcutCategoryTag(ShortcutScope.GLOBAL)).performClick()
+        waitForIdle()
+    }
 
     /**
-     * Filtered down to one category.
+     * Filtered down by a search.
      *
-     * The search box matches descriptions *and* keys, and drops any category with nothing in it —
-     * so a filtered dialog is a visibly different layout, not the same list with rows greyed out.
+     * A search overrides the rail and spans every category, so each row carries the category it
+     * came from — three of them read "Play / Pause" and only the tag tells them apart.
      */
     @Test
     fun `filtered by a search`() = shoot("filtered") {
@@ -88,7 +90,6 @@ class KeyboardShortcutsDialogScreenshotTest {
      *
      * A distinct layout, not a variant of the text search: the box stops accepting text and shows
      * the chord instead, because the arrow keys have to reach the filter rather than move a cursor.
-     * This is also the only shot where the header's listening state is visible.
      */
     @Test
     fun `filtered by a pressed key`() = shoot("press_key") {
@@ -98,20 +99,41 @@ class KeyboardShortcutsDialogScreenshotTest {
         waitForIdle()
     }
 
+    /**
+     * Two actions on one combination, collected by the toolbar's filter.
+     *
+     * The only state where the error colour is on screen at all — the toolbar count, the rail dot,
+     * the row and its caps.
+     */
+    @Test
+    fun `showing the conflicts`() = shoot("conflicts", settings = CLASHING) {
+        onNodeWithTag(SHORTCUT_CONFLICTS_FILTER_TAG).performClick()
+        waitForIdle()
+    }
+
+    /** A row listening for a new combination, which is what replaced the capture window. */
+    @Test
+    fun `recording a new binding`() = shoot("recording") {
+        onNodeWithTag(shortcutCategoryTag(ShortcutScope.MEDIA)).performClick()
+        waitForIdle()
+        onNodeWithTag(shortcutChipTag(ShortcutAction.MEDIA_MUTE)).performClick()
+        waitForIdle()
+    }
+
     // ── Harness ─────────────────────────────────────────────────────────────────────────────────
 
     /**
      * Shot at the dialog's real size rather than the runner's default window.
      *
-     * `KeyboardShortcutsDialog` opens at 760×720, and at the default 1024 the rows stretch and the
-     * gap between description and key chip is far wider than anyone will ever see. The point of a
-     * committed image is that a reviewer can approve what ships.
+     * `KeyboardShortcutsDialog` opens at 900×720 — wide enough for the rail and a full row beside
+     * it — and at the runner's default the rows stretch far past anything anyone will see. The
+     * point of a committed image is that a reviewer can approve what ships.
      */
     private fun shoot(
         name: String,
         settings: AppSettings = AppSettings(),
         drive: SkikoComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = separateThemes(SECTION, name) { mode, file ->
         runSkikoComposeUiTest(size = Size(DIALOG_WIDTH, DIALOG_HEIGHT), density = Density(1f)) {
             setContent {
                 ChurchPresenterTheme(themeMode = mode) {
@@ -137,7 +159,27 @@ class KeyboardShortcutsDialogScreenshotTest {
         const val SECTION = "keyboardShortcutsDialog"
 
         /** Matches the DialogWindow size in `KeyboardShortcutsDialog`. */
-        const val DIALOG_WIDTH = 760f
+        const val DIALOG_WIDTH = 900f
         const val DIALOG_HEIGHT = 720f
+
+        /** Moved, moved again and unbound — every state a Global row can be in at once. */
+        val CUSTOMIZED = AppSettings(
+            keyboardShortcutSettings = KeyboardShortcutSettings(
+                overrides = mapOf(
+                    ShortcutAction.UNDO.name to listOf(KeyChord.of(Key.U, ctrl = true)),
+                    ShortcutAction.CLEAR_OUTPUT.name to emptyList(),
+                    ShortcutAction.SWITCH_TO_BIBLE.name to listOf(KeyChord.of(Key.B, ctrl = true, alt = true)),
+                )
+            )
+        )
+
+        /** Mute moved onto Undo's chord, which is global and so competes with it. */
+        val CLASHING = AppSettings(
+            keyboardShortcutSettings = KeyboardShortcutSettings(
+                overrides = mapOf(
+                    ShortcutAction.MEDIA_MUTE.name to listOf(KeyChord.of(Key.Z, ctrl = true))
+                )
+            )
+        )
     }
 }

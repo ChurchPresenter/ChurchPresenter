@@ -217,6 +217,28 @@
     <string name="shortcut_description_redo">Tee uuesti viimane tühistatud muudatus</string>
     <string name="shortcut_description_reorder_item">Järjesta element ümber</string>
     <string name="shortcut_description_reorder_image">Järjesta pilt ümber</string>
+    <string name="shortcut_scope_menus_hint">Menüü kiirklahvid, töödeldakse enne kõike muud</string>
+    <string name="shortcut_scope_global_hint">Saadaval kõikjal rakenduses</string>
+    <string name="shortcut_scope_bible_hint">Aktiivne, kui Piibli vahekaart on fookuses</string>
+    <string name="shortcut_scope_songs_hint">Aktiivne, kui Laulude vahekaart on fookuses</string>
+    <string name="shortcut_scope_pictures_hint">Aktiivne, kui Piltide vahekaart on fookuses</string>
+    <string name="shortcut_scope_presentation_hint">Aktiivne, kui Esitluse vahekaart on fookuses</string>
+    <string name="shortcut_scope_media_hint">Aktiivne heli ja video esitamise ajal</string>
+    <string name="shortcut_scope_canvas_hint">Aktiivne lõuendi stseeni muutmisel</string>
+    <string name="shortcut_scope_mouse_hint">Žestid, mida ei saa ümber määrata</string>
+    <string name="shortcut_conflicts_none">Konflikte pole</string>
+    <string name="shortcut_conflicts_one">1 konflikt</string>
+    <string name="shortcut_conflicts_many">%1$d konflikti</string>
+    <string name="shortcut_conflicts_title">Konfliktid</string>
+    <string name="shortcut_conflicts_subtitle_one">1 otsetee kasutab sama kombinatsiooni</string>
+    <string name="shortcut_conflicts_subtitle_many">%1$d otseteed kasutavad sama kombinatsiooni</string>
+    <string name="shortcut_search_results">Otsingutulemused</string>
+    <string name="shortcut_search_match_one">1 vaste</string>
+    <string name="shortcut_search_match_many">%1$d vastet</string>
+    <string name="shortcut_unsaved_one">1 salvestamata muudatus</string>
+    <string name="shortcut_unsaved_many">%1$d salvestamata muudatust</string>
+    <string name="shortcut_rebind_hint">Klõpsa ümber määramiseks</string>
+    <string name="shortcut_recording_stop">Lõpeta kuulamine</string>
 
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Teksti seaded ja värvid</string>

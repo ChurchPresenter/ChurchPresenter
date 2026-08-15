@@ -197,6 +197,20 @@ internal fun stackedThemes(
 }
 
 /**
+ * Runs [shoot] once per theme and writes each render as its own golden —
+ * `screenshots/<section>/<name>_light.png` and `<name>_dark.png`.
+ *
+ * [stackedThemes] is the default and reviews a state as a single image; this exists for a suite
+ * whose states are tall enough that stacking makes a strip too long to read at a glance. Both write
+ * under [SCREENSHOT_ROOT], so either way the CI comparison matches the files by path.
+ */
+internal fun separateThemes(section: String, name: String, shoot: (ThemeMode, File) -> Unit) {
+    THEMES.forEach { (suffix, mode) ->
+        shoot(mode, File("$SCREENSHOT_ROOT/$section/${name}_$suffix.png"))
+    }
+}
+
+/**
  * A small component in both themes, stacked.
  *
  * [drive] runs before the shot — click to open a menu, type into a field. [rootIndex] 1 then shoots
