@@ -98,6 +98,26 @@ data class ActivityPoint(
     val verseCount: Int
 )
 
+// ── Item identity ─────────────────────────────────────────────────────────────
+
+/**
+ * What identifies one song across both stores.
+ *
+ * The aggregate map is keyed by the catalog `songId`, which is not a field of [SongDisplayEntry] and
+ * has no counterpart in the event log, so a song is matched on these three fields instead — the same
+ * grouping [getAllSongsInRange] uses. A title edited between plays therefore splits into two rows,
+ * exactly as it already does in the CCLI report.
+ */
+data class SongKey(val songbook: String, val songNumber: Int, val title: String)
+
+/** What identifies one verse. Both stores agree on this composite. */
+data class VerseKey(val bibleName: String, val bookName: String, val chapter: Int, val verseNumber: Int)
+
+internal fun SongPlayEvent.key() = SongKey(songbook, songNumber, title)
+internal fun SongDisplayEntry.key() = SongKey(songbook, songNumber, title)
+internal fun VersePlayEvent.key() = VerseKey(bibleName, bookName, chapter, verseNumber)
+internal fun VerseDisplayEntry.key() = VerseKey(bibleName, bookName, chapter, verseNumber)
+
 internal enum class ActivityGranularity { WEEKLY, MONTHLY, YEARLY }
 
 private const val WEEKLY_MAX_DAYS = 90
@@ -124,6 +144,37 @@ internal fun activityGranularityFor(rangeMs: Long): ActivityGranularity {
         else -> ActivityGranularity.YEARLY
     }
 }
+
+/** Whether this timestamp falls within the bounds; a null bound is unbounded. */
+internal fun Long.inRange(fromMs: Long?, toMs: Long?): Boolean =
+    (fromMs == null || this >= fromMs) && (toMs == null || this <= toMs)
+
+/**
+ * Applies a per-item deletion to the all-time song counters: clearing the whole history drops the
+ * entry outright, otherwise its count falls by [removed] and the entry goes once it reaches zero.
+ */
+internal fun Map<String, SongDisplayEntry>.withSongCleared(
+    key: SongKey,
+    removed: Int,
+    clearAll: Boolean
+): Map<String, SongDisplayEntry> = mapNotNull { (mapKey, entry) ->
+    if (entry.key() != key) return@mapNotNull mapKey to entry
+    if (clearAll) return@mapNotNull null
+    val count = (entry.count - removed).coerceAtLeast(0)
+    if (count == 0) null else mapKey to entry.copy(count = count)
+}.toMap()
+
+/** The verse counterpart of [withSongCleared]. */
+internal fun Map<String, VerseDisplayEntry>.withVerseCleared(
+    key: VerseKey,
+    removed: Int,
+    clearAll: Boolean
+): Map<String, VerseDisplayEntry> = mapNotNull { (mapKey, entry) ->
+    if (entry.key() != key) return@mapNotNull mapKey to entry
+    if (clearAll) return@mapNotNull null
+    val count = (entry.count - removed).coerceAtLeast(0)
+    if (count == 0) null else mapKey to entry.copy(count = count)
+}.toMap()
 
 /** RFC-4180 CSV field: wrap in double quotes and double any embedded quote. */
 internal fun csvQuote(s: String): String = "\"${s.replace("\"", "\"\"")}\""
@@ -202,7 +253,12 @@ class StatisticsManager {
         }
     }
 
-    // ── All-time aggregate queries (used by existing StatisticsDialog) ─────────
+    // ── All-time aggregate queries ─────────────────────────────────────────────
+    //
+    // No screen renders these two any more — the report window reads the dated event log instead.
+    // They stay as the only readable view of the counter store, which is still live: [getSongPlayCount]
+    // feeds the play-count column and its sort in the songs list, and these are what the tests assert
+    // recording against.
 
     fun getTopSongsBySongbook(limit: Int = 15): Map<String, List<SongDisplayEntry>> =
         statistics.songDisplayCounts.values
@@ -336,6 +392,41 @@ class StatisticsManager {
         }
     }
 
+    /**
+     * Deletes one song's plays. A null range clears all of its history; otherwise only the events
+     * timestamped within [fromMs]..[toMs], and the all-time counter is reduced by however many were
+     * removed. Returns the number of events removed.
+     *
+     * Plays recorded before the event log existed have no dated events, so nothing can be removed
+     * for them and the row stays — there is genuinely nothing dated to delete.
+     */
+    fun clearSong(key: SongKey, fromMs: Long? = null, toMs: Long? = null): Int = synchronized(lock) {
+        val clearAll = fromMs == null && toMs == null
+        val kept = eventLog.songEvents.filterNot { it.key() == key && it.timestamp.inRange(fromMs, toMs) }
+        val removed = eventLog.songEvents.size - kept.size
+        eventLog = eventLog.copy(songEvents = kept)
+        statistics = statistics.copy(
+            songDisplayCounts = statistics.songDisplayCounts.withSongCleared(key, removed, clearAll)
+        )
+        save()
+        saveLog()
+        removed
+    }
+
+    /** The verse counterpart of [clearSong]. */
+    fun clearVerse(key: VerseKey, fromMs: Long? = null, toMs: Long? = null): Int = synchronized(lock) {
+        val clearAll = fromMs == null && toMs == null
+        val kept = eventLog.verseEvents.filterNot { it.key() == key && it.timestamp.inRange(fromMs, toMs) }
+        val removed = eventLog.verseEvents.size - kept.size
+        eventLog = eventLog.copy(verseEvents = kept)
+        statistics = statistics.copy(
+            verseDisplayCounts = statistics.verseDisplayCounts.withVerseCleared(key, removed, clearAll)
+        )
+        save()
+        saveLog()
+        removed
+    }
+
     fun clearStatistics() {
         synchronized(lock) {
             statistics = DisplayStatistics()
@@ -382,57 +473,6 @@ class StatisticsManager {
     } catch (_: Exception) {
         CcliLookup(emptyMap(), emptyMap())
     }
-
-    fun exportStatisticsToXls(file: File): Boolean = try {
-        val workbook = HSSFWorkbook()
-        val headerStyle = workbook.createCellStyle().apply {
-            fillForegroundColor = IndexedColors.LIGHT_CORNFLOWER_BLUE.index
-            fillPattern = FillPatternType.SOLID_FOREGROUND
-            setFont(workbook.createFont().apply { bold = true })
-        }
-
-        val songsSheet = workbook.createSheet("Top Songs")
-        var rowIndex = 0
-        val songHeaderRow = songsSheet.createRow(rowIndex++)
-        listOf("Rank", "Songbook", "Number", "Title", "Count").forEachIndexed { col, label ->
-            songHeaderRow.createCell(col).also { it.setCellValue(label); it.cellStyle = headerStyle }
-        }
-        statistics.songDisplayCounts.values.sortedByDescending { it.count }
-            .groupBy { it.songbook }.toSortedMap()
-            .forEach { (_, entries) ->
-                entries.sortedByDescending { it.count }.forEachIndexed { rank, entry ->
-                    val row = songsSheet.createRow(rowIndex++)
-                    row.writeCells(
-                        (rank + 1).toDouble(), entry.songbook, entry.songNumber.toDouble(),
-                        entry.title, entry.count.toDouble()
-                    )
-                }
-            }
-        for (column in 0..4) songsSheet.autoSizeColumn(column)
-
-        val versesSheet = workbook.createSheet("Top Verses")
-        rowIndex = 0
-        val verseHeaderRow = versesSheet.createRow(rowIndex++)
-        listOf("Rank", "Bible", "Book", "Chapter", "Verse", "Count").forEachIndexed { col, label ->
-            verseHeaderRow.createCell(col).also { it.setCellValue(label); it.cellStyle = headerStyle }
-        }
-        statistics.verseDisplayCounts.values.sortedByDescending { it.count }
-            .groupBy { it.bibleName }.toSortedMap()
-            .forEach { (_, entries) ->
-                entries.sortedByDescending { it.count }.forEachIndexed { rank, entry ->
-                    val row = versesSheet.createRow(rowIndex++)
-                    row.writeCells(
-                        (rank + 1).toDouble(), entry.bibleName, entry.bookName,
-                        entry.chapter.toDouble(), entry.verseNumber.toDouble(), entry.count.toDouble()
-                    )
-                }
-            }
-        for (column in 0..5) versesSheet.autoSizeColumn(column)
-
-        file.outputStream().use { workbook.write(it) }
-        workbook.close()
-        true
-    } catch (_: Exception) { false }
 
     fun exportCcliCsv(file: File, fromMs: Long, toMs: Long): Boolean = try {
         val songs = getAllSongsInRange(fromMs, toMs)
