@@ -68,7 +68,8 @@ data class AppSettings(
     val analyticsReportingEnabled: Boolean = true,
     val participateInPrereleases: Boolean = false,
     val updateCheckInterval: UpdateCheckInterval = UpdateCheckInterval.EVERY_LAUNCH,
-    val lastUpdateCheckTimestamp: Long = 0L
+    val lastUpdateCheckTimestamp: Long = 0L,
+    val storyPrompt: StoryPromptState = StoryPromptState()
 ) {
     /** What the song identified by [songId] is played at — tempo and capo together. */
     fun tuningFor(songId: String): SongTuning =

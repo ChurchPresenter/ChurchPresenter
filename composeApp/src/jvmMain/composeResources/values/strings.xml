@@ -2300,4 +2300,21 @@
     <string name="tab_strip_scroll_forward">Scroll tabs forward</string>
     <string name="stock_photo_show_key">Show API key</string>
     <string name="stock_photo_hide_key">Hide API key</string>
+
+    <string name="story_prompt_window_title">Share Your Story</string>
+    <string name="story_prompt_badge">We'd love to hear from you</string>
+    <string name="story_prompt_heading">Has Church Presenter helped your church?</string>
+    <string name="story_prompt_body_1">Church Presenter is built for Sunday mornings like yours, and the best way we know whether it's working is to hear from the people running it.</string>
+    <string name="story_prompt_body_2">If the app has helped your church, we'd love to hear about it — whether that's:</string>
+    <string name="story_prompt_example_1">A smoother service order</string>
+    <string name="story_prompt_example_2">Scripture on the screen without a scramble</string>
+    <string name="story_prompt_example_3">One less subscription to pay for</string>
+    <string name="story_prompt_body_3">Send us a few lines and let us know if we can share them on the home page, along with your name and church.</string>
+    <string name="story_prompt_body_4">Your story helps other churches decide whether this is the right fit for them.</string>
+    <string name="story_prompt_quote">Every church runs it a little differently.</string>
+    <string name="story_prompt_screenshot">Church Presenter running on a booth computer</string>
+    <string name="story_prompt_share">Share your story</string>
+    <string name="story_prompt_later">Maybe later</string>
+    <string name="story_prompt_reassurance">Nothing is published without your OK.</string>
+    <string name="menu_developer_story_prompt">Share Your Story Dialog</string>
 </resources>
