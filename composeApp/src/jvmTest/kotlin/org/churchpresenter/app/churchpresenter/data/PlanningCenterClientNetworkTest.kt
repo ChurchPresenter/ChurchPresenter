@@ -643,4 +643,181 @@ class PlanningCenterClientNetworkTest {
 
         assertEquals(HttpMethod.Post, requests.single().method)
     }
+
+    // ── A token the org has revoked scope for ───────────────────────────────────
+
+    /**
+     * Planning Center answers 403, not 401, when the token is valid but the connected user has lost
+     * access to Services — an admin removing a permission, or a plan moving to a service type the
+     * user cannot see. The app has to treat that as "reconnect", exactly like an expired token:
+     * read as a plain failure it shows a generic error and leaves the user with no way forward.
+     */
+    @Test
+    fun `a forbidden response is treated as unauthorized on every services endpoint`() {
+        fun forbidden(): Unit = respondWith("""{}""", HttpStatusCode.Forbidden)
+
+        forbidden()
+        assertEquals(
+            PlanningCenterClient.ServiceTypesOutcome.Unauthorized,
+            runBlocking { PlanningCenterClient.listServiceTypes("tok", http = http) },
+        )
+        forbidden()
+        assertEquals(
+            PlanningCenterClient.PlansOutcome.Unauthorized,
+            runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
+        )
+        forbidden()
+        assertEquals(
+            PlanningCenterClient.PlanItemsOutcome.Unauthorized,
+            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+        )
+        forbidden()
+        assertEquals(
+            PlanningCenterClient.ArrangementOutcome.Unauthorized,
+            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+        )
+        forbidden()
+        assertEquals(
+            PlanningCenterClient.AttachmentsOutcome.Unauthorized,
+            runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+        )
+        forbidden()
+        assertEquals(
+            PlanningCenterClient.AttachmentUrlOutcome.Unauthorized,
+            runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) },
+        )
+    }
+
+    @Test
+    fun `a forbidden response asking who is connected is unauthorized too`() {
+        respondWith("""{}""", HttpStatusCode.Forbidden)
+        assertEquals(
+            PlanningCenterClient.PersonOutcome.Unauthorized,
+            runBlocking { PlanningCenterClient.getCurrentPerson("tok", http = http) },
+        )
+    }
+
+    // ── A 200 that is not shaped like the API documents ─────────────────────────
+
+    /**
+     * Each list reads `data` as an array and falls back to an empty one. A 200 whose body has no
+     * `data` key at all is what a proxy, a captive portal or a maintenance page returns, and it
+     * must come back as "nothing to show" rather than throw and be reported as a network error the
+     * user cannot act on.
+     */
+    @Test
+    fun `a success body with no data key lists nothing rather than failing`() {
+        respondWith("""{"meta":{"total_count":0}}""")
+        assertTrue(
+            assertIs<PlanningCenterClient.ServiceTypesOutcome.Success>(
+                runBlocking { PlanningCenterClient.listServiceTypes("tok", http = http) },
+            ).serviceTypes.isEmpty(),
+        )
+
+        respondWith("""{"meta":{"total_count":0}}""")
+        assertTrue(
+            assertIs<PlanningCenterClient.PlansOutcome.Success>(
+                runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
+            ).plans.isEmpty(),
+        )
+
+        respondWith("""{"meta":{"total_count":0}}""")
+        assertTrue(
+            assertIs<PlanningCenterClient.PlanItemsOutcome.Success>(
+                runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+            ).items.isEmpty(),
+        )
+
+        respondWith("""{"meta":{"total_count":0}}""")
+        assertTrue(
+            assertIs<PlanningCenterClient.AttachmentsOutcome.Success>(
+                runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+            ).attachments.isEmpty(),
+        )
+    }
+
+    @Test
+    fun `an arrangement body with no data object has no lyrics rather than failing`() {
+        respondWith("""{"meta":{}}""")
+
+        val detail = assertIs<PlanningCenterClient.ArrangementOutcome.Success>(
+            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+        ).detail
+
+        assertEquals("", detail.lyrics)
+    }
+
+    @Test
+    fun `a service type carrying neither id nor name is listed blank rather than dropped`() {
+        // Dropping it would leave the picker shorter than the count the API reported, with no clue
+        // why. A blank row is visible and reportable.
+        respondWith("""{"data":[{}]}""")
+
+        assertEquals(
+            PlanningCenterClient.ServiceType("", ""),
+            assertIs<PlanningCenterClient.ServiceTypesOutcome.Success>(
+                runBlocking { PlanningCenterClient.listServiceTypes("tok", http = http) },
+            ).serviceTypes.single(),
+        )
+    }
+
+    @Test
+    fun `a plan with no attributes at all falls back to the generic label`() {
+        respondWith("""{"data":[{"id":"9"}]}""")
+
+        assertEquals(
+            PlanningCenterClient.Plan("9", "Untitled Plan", ""),
+            assertIs<PlanningCenterClient.PlansOutcome.Success>(
+                runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
+            ).plans.single(),
+        )
+    }
+
+    @Test
+    fun `a plan item with no attributes or relationships still lists`() {
+        // The schedule is built from these; an item that arrives bare has to appear so the operator
+        // sees something is wrong with it, rather than silently shortening the service.
+        respondWith("""{"data":[{"id":"7"}]}""")
+
+        val item = assertIs<PlanningCenterClient.PlanItemsOutcome.Success>(
+            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+        ).items.single()
+
+        assertEquals("7", item.id)
+        assertEquals("", item.title)
+        assertEquals("item", item.itemType, "an item with no type is a plain item")
+        assertEquals(0, item.sequence)
+        assertNull(item.songId)
+        assertNull(item.arrangementId)
+    }
+
+    @Test
+    fun `an included entry with no type or id is keyed without matching any song`() {
+        // The included array is keyed "Type::id". An entry missing either cannot be matched, and
+        // must not collide with a real song's key and hand it the wrong title.
+        respondWith(
+            """{"data":[{"id":"7","relationships":{"song":{"data":{"id":"55"}}}}],
+                "included":[{"attributes":{"title":"Orphaned"}}]}""",
+        )
+
+        val item = assertIs<PlanningCenterClient.PlanItemsOutcome.Success>(
+            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+        ).items.single()
+
+        assertEquals("55", item.songId)
+        assertNull(item.songTitle, "an unkeyable included entry must not be matched to this song")
+    }
+
+    @Test
+    fun `an attachment with no id is left out`() {
+        // Its id is what the download call is made with; listing one without it offers the operator
+        // a file that cannot be fetched.
+        respondWith("""{"data":[{"attributes":{"filename":"handout.pdf"}}]}""")
+
+        assertTrue(
+            assertIs<PlanningCenterClient.AttachmentsOutcome.Success>(
+                runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+            ).attachments.isEmpty(),
+        )
+    }
 }

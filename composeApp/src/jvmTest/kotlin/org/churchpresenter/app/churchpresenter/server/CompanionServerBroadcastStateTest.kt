@@ -278,4 +278,58 @@ class CompanionServerBroadcastStateTest {
         }
         throw AssertionError("timed out waiting for $what")
     }
+
+    // ── Frames whose payload is not an object ─────────────────────────────────
+    //
+    // The two below are the only broadcasts that do not carry a JSON object: one carries nothing
+    // at all and the other a bare integer. [framesOf] parses every payload as an object, so they
+    // need the raw string — and that difference is exactly what a phone's decoder has to cope
+    // with, so it is worth pinning rather than papering over.
+
+    /** Every frame of [type] received so far, payload left as the raw string it was sent as. */
+    private fun rawPayloadsOf(type: String): List<String> =
+        received.mapNotNull { raw ->
+            val msg = json.parseToJsonElement(raw).jsonObject
+            if (msg["type"]?.jsonPrimitive?.content != type) return@mapNotNull null
+            msg["payload"]?.jsonPrimitive?.content.orEmpty()
+        }
+
+    @Test
+    fun `clearing the display reaches connected phones as an empty frame`() {
+        // The phone blanks its own preview off this. It carries no payload because there is
+        // nothing to say beyond "whatever was live is not any more" — but the frame itself still
+        // has to arrive, or a remote keeps showing content the room can no longer see.
+        server.broadcastDisplayCleared()
+
+        awaitUntil("the display-cleared frame") {
+            rawPayloadsOf(Constants.WS_EVENT_DISPLAY_CLEARED).isNotEmpty()
+        }
+        assertEquals("", rawPayloadsOf(Constants.WS_EVENT_DISPLAY_CLEARED).single())
+    }
+
+    @Test
+    fun `the live song section reaches connected phones as a bare index`() {
+        // Sent every time the operator moves through a song, so the phone can highlight the verse
+        // being sung. The payload is the index on its own, not wrapped in an object.
+        server.broadcastSongSectionSelected(3)
+
+        awaitUntil("the song-section frame") {
+            rawPayloadsOf(Constants.WS_EVENT_SONG_SECTION_SELECTED).isNotEmpty()
+        }
+        assertEquals("3", rawPayloadsOf(Constants.WS_EVENT_SONG_SECTION_SELECTED).single())
+    }
+
+    @Test
+    fun `the same song section going live twice is broadcast twice`() {
+        // No matching-value guard here, for the same reason freeze has none: a phone that missed
+        // a frame is re-synced by the next one. Re-selecting the section being sung is also how an
+        // operator re-fires it after a manual override, and the phone has to follow.
+        server.broadcastSongSectionSelected(0)
+        awaitUntil("the first frame") { rawPayloadsOf(Constants.WS_EVENT_SONG_SECTION_SELECTED).size == 1 }
+
+        server.broadcastSongSectionSelected(0)
+
+        awaitUntil("the second frame") { rawPayloadsOf(Constants.WS_EVENT_SONG_SECTION_SELECTED).size == 2 }
+        assertEquals(listOf("0", "0"), rawPayloadsOf(Constants.WS_EVENT_SONG_SECTION_SELECTED))
+    }
 }

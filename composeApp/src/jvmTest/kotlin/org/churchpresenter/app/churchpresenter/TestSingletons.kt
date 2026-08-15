@@ -21,6 +21,10 @@ import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
  * `InstanceLinkLoggerTest` then counts lines in a file nothing is writing to any more. The failure
  * lands in a class that did nothing wrong, which is what makes it expensive to diagnose.
  *
+ * `CrashReporter` used to belong on this list too. It now resolves its four paths on every access
+ * instead of caching them in fields, so it follows `user.home` rather than needing to be pinned
+ * ahead of a swap — see the comment on `CrashReporter.appDir`.
+ *
  * Call [latchToTestHome] as the FIRST line of `@BeforeTest`, before `System.setProperty("user.home", …)`.
  * It is idempotent and costs one appended line per JVM.
  */

@@ -83,26 +83,40 @@ class PlanningCenterDownloadTest {
         dir = Files.createTempDirectory("cp-pco-download-test").toFile()
         server = FakeAttachmentHost(payload)
         server.start()
-        awaitListening(server.port)
+        awaitRouting(server.port)
     }
 
     /**
-     * `engine.start(wait = false)` returns before Netty has bound the port, so the first request can
-     * beat the server up and come back as a NetworkError (connection refused) instead of Success.
-     * Wait for the positive signal — the port accepting a TCP connection — before any test runs.
-     * Localhost binds in a few ms; the deadline only exists to fail loudly if the server never came up.
+     * Waits until the host actually *serves a route*, not merely until its port accepts.
+     *
+     * `engine.start(wait = false)` returns before Netty has bound, so the first request could beat
+     * the server up and come back as a NetworkError. Waiting on a TCP connect fixed that much —
+     * but binding the socket and installing the routing table are two different moments, and a
+     * request landing between them is answered **404 by a server with no routes yet**. That is not
+     * a NetworkError, it is a `Failure`, which is what `an attachment is written where it was asked
+     * for` intermittently saw in a full suite: the outcome the test asserts against is a plain
+     * "the server said no", indistinguishable from a real one.
+     *
+     * So the signal is the route replying 200 — the same thing the tests go on to rely on. Under a
+     * loaded machine the bind-to-routing gap widens, which is why this only ever bit in a full run.
+     * The deadline exists to fail loudly if the host never comes up, never as the success path.
      */
-    private fun awaitListening(port: Int) {
+    private fun awaitRouting(port: Int) {
         val deadline = System.currentTimeMillis() + 5000
         while (System.currentTimeMillis() < deadline) {
-            try {
-                java.net.Socket().use { it.connect(java.net.InetSocketAddress("127.0.0.1", port), 200) }
-                return
-            } catch (_: Exception) {
-                Thread.sleep(10)
-            }
+            val code = runCatching {
+                (java.net.URI("http://127.0.0.1:$port/attachment.pdf").toURL().openConnection()
+                    as java.net.HttpURLConnection).run {
+                    connectTimeout = 200
+                    readTimeout = 200
+                    requestMethod = "GET"
+                    try { responseCode } finally { disconnect() }
+                }
+            }.getOrNull()
+            if (code == 200) return
+            Thread.sleep(10)
         }
-        error("fake attachment host never came up on port $port")
+        error("fake attachment host never served its routes on port $port")
     }
 
     @AfterTest

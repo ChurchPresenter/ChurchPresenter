@@ -34,10 +34,29 @@ private const val RELEASE_SAMPLE_RATE = 0.2
  */
 object CrashReporter {
 
-    private val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
-    private val runningFile = File(System.getProperty("user.home"), ".churchpresenter/.running")
-    private val crashCountFile = File(System.getProperty("user.home"), ".churchpresenter/.crash_count")
-    private val installIdFile = File(System.getProperty("user.home"), ".churchpresenter/.install_id")
+    /**
+     * Resolved on every access, NOT cached in a field.
+     *
+     * These are `get()` rather than `val` on purpose. As plain fields they were built in the
+     * object's initialiser, which runs the first time anything anywhere touches [CrashReporter] —
+     * so whatever `user.home` happened to say at that instant was baked in for the life of the
+     * JVM. In production that is harmless, because `user.home` never changes.
+     *
+     * In the test suite it is not. Dozens of test classes redirect `user.home` to a temporary
+     * directory and delete it in teardown, and several of them reach code that breadcrumbs through
+     * here — `CompanionServer.start` is the usual one. Whichever won the race pinned the reporter
+     * to a directory that no longer exists, and `CrashReporterTest` then read an install id it
+     * never wrote and found no crash files at all, in a class that had done nothing wrong. Which
+     * class won depended on execution order, so it moved every time a test was added anywhere.
+     *
+     * Resolving per access costs a property lookup and removes the whole failure mode.
+     * `LottieRenderCache.cacheDir` is `get()` for the same reason.
+     */
+    private val appDir: File get() = File(System.getProperty("user.home"), ".churchpresenter")
+    private val crashDir: File get() = File(appDir, "crash-reports")
+    private val runningFile: File get() = File(appDir, ".running")
+    private val crashCountFile: File get() = File(appDir, ".crash_count")
+    private val installIdFile: File get() = File(appDir, ".install_id")
     private val timestampFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss")
     private const val MAX_AGE_DAYS = 30L
     private const val CRASH_THRESHOLD = 2 // disable video backgrounds after this many consecutive crashes

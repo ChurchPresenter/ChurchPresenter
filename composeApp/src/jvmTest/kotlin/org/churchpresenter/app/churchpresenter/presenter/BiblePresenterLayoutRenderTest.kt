@@ -138,6 +138,114 @@ class BiblePresenterLayoutRenderTest {
     }
 
     @Test
+    fun `a translation asking for an abbreviation it does not have shows the reference alone`() = runComposeUiTest {
+        // The abbreviation is derived from the module's title, and a module with a blank title has
+        // none. The flag is still on in settings, so both halves of the condition matter: shown
+        // unguarded this draws "John 3:16 " with a trailing separator and nothing after it.
+        val settings = AppSettings(
+            bibleSettings = BibleSettings().withTranslations(
+                listOf(BibleTranslationSettings(fileName = "untitled.spb", showAbbreviation = true)),
+            ),
+        )
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = listOf(
+                        verse("For God so loved the world", 16, abbreviation = "", fileName = "untitled.spb"),
+                    ),
+                    appSettings = settings,
+                    isLowerThird = true,
+                )
+            }
+        }
+
+        onNodeWithText("John 3:16", substring = true).assertExists("the reference still has to show")
+    }
+
+    @Test
+    fun `a full-screen translation asking for an abbreviation it does not have shows the reference alone`() = runComposeUiTest {
+        // Same rule on the full-screen path, which builds its reference in a different place.
+        val settings = AppSettings(
+            bibleSettings = BibleSettings().withTranslations(
+                listOf(BibleTranslationSettings(fileName = "untitled.spb", showAbbreviation = true)),
+            ),
+        )
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = listOf(
+                        verse("For God so loved the world", 16, abbreviation = "", fileName = "untitled.spb"),
+                    ),
+                    appSettings = settings,
+                )
+            }
+        }
+
+        onNodeWithText("John 3:16", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a bilingual band drops the abbreviation of whichever translation lacks one`() = runComposeUiTest {
+        // The band builds its two references independently, so the guard has to hold on each
+        // side. Here the primary has an abbreviation and the secondary does not, and both are
+        // asking for one — the side that has none must fall back to the plain reference rather
+        // than draw a leading separator with nothing before it.
+        val settings = AppSettings(
+            bibleSettings = BibleSettings().withTranslations(
+                listOf(
+                    BibleTranslationSettings(fileName = "kjv.spb", showAbbreviation = true),
+                    BibleTranslationSettings(fileName = "untitled.spb", showAbbreviation = true),
+                ),
+            ),
+        )
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = listOf(
+                        verse("For God so loved the world", 16, fileName = "kjv.spb"),
+                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "", fileName = "untitled.spb"),
+                    ),
+                    appSettings = settings,
+                    isLowerThird = true,
+                )
+            }
+        }
+
+        onNodeWithText("KJV John 3:16", substring = true).assertExists("the side that has one still shows it")
+        onNodeWithText("Иоанна 3:16", substring = true).assertExists("and the side that does not still shows its reference")
+    }
+
+    @Test
+    fun `a parallel pair selected as a range shows the range on both sides`() = runComposeUiTest {
+        // A multi-verse selection carries its span in verseRange, and the secondary reference is
+        // built from that rather than from the single verse number — otherwise the two columns
+        // disagree about what is on screen.
+        val settings = AppSettings(
+            bibleSettings = BibleSettings().withTranslations(
+                listOf(
+                    BibleTranslationSettings(fileName = "kjv.spb"),
+                    BibleTranslationSettings(fileName = "rst.spb"),
+                ),
+            ),
+        )
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = listOf(
+                        verse("For God so loved the world", 16, fileName = "kjv.spb").copy(verseRange = "16-17"),
+                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb")
+                            .copy(verseRange = "16-17"),
+                    ),
+                    appSettings = settings,
+                )
+            }
+        }
+
+        onNodeWithText("John 3:16-17", substring = true).assertExists("the primary side spans the selection")
+        onNodeWithText("Иоанна 3:16-17", substring = true).assertExists("and so does the secondary")
+    }
+
+    @Test
     fun `the band styles the translation it is actually showing`() = runComposeUiTest {
         // Assigned the third of three. The band used to hand slot 0 the first translation's style
         // whatever was in it, so this verse would have been drawn with kjv's abbreviation setting.
