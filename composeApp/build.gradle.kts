@@ -988,14 +988,42 @@ tasks.register("printCoverageLink") {
             }
         }.getOrNull()
 
-        logger.lifecycle("")
-        if (testSummary != null) logger.lifecycle("Tests:    $testSummary")
-        if (lines != null) {
-            logger.lifecycle("Coverage:")
-            lines.forEach { logger.lifecycle("  $it") }
+        val summaryLines = buildList {
+            if (testSummary != null) add("Tests:    $testSummary")
+            if (lines != null) {
+                add("Coverage:")
+                lines.forEach { add("  $it") }
+            }
         }
+
+        logger.lifecycle("")
+        summaryLines.forEach { logger.lifecycle(it) }
+        // The HTML tree only exists on the machine that produced it. On a CI runner it is deleted
+        // with the workspace when the job ends, so the line is noise there -- a `file://` path
+        // pointing at a directory the reader has no way to open. Printed locally, skipped in CI.
+        //
         // Three slashes: File.toURI() yields "file:/path", which many terminals refuse to linkify.
-        logger.lifecycle("Report:   file://${htmlIndex.absolutePath}")
+        if (System.getenv("GITHUB_ACTIONS") != "true") {
+            logger.lifecycle("Report:   file://${htmlIndex.absolutePath}")
+        }
+
+        // Also put it on the run's summary page. The job log is ~14 minutes of Gradle output and
+        // the numbers land in the middle of it; the step summary is the page a reviewer actually
+        // opens from a pull request. Best-effort -- a coverage print must never fail a build.
+        System.getenv("GITHUB_STEP_SUMMARY")?.takeIf { it.isNotBlank() }?.let { path ->
+            runCatching {
+                File(path).appendText(
+                    buildString {
+                        appendLine("### Unit test coverage")
+                        appendLine()
+                        appendLine("```")
+                        summaryLines.forEach { appendLine(it) }
+                        appendLine("```")
+                        appendLine()
+                    }
+                )
+            }
+        }
     }
 }
 
