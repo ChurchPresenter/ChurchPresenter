@@ -96,4 +96,53 @@ class AtemUploadStatusTest {
         AtemUploadStatus.clear(id)
         assertNull(AtemUploadStatus.state.value, "clearing the current upload leaves the bar idle")
     }
+
+    @Test
+    fun `a stale upload cannot flip the current one into processing or complete it`() {
+        // The two phase transitions are gated the same way as progress. An older upload reaching
+        // its ingest phase after a newer one started would show the operator the wrong upload
+        // apparently finishing, and the bar would jump to full while the real transfer is still
+        // running.
+        val old = AtemUploadStatus.begin("old", clip = true, slot = 1)
+        val current = AtemUploadStatus.begin("new", clip = true, slot = 2)
+
+        AtemUploadStatus.startProcessing(old)
+        AtemUploadStatus.complete(old)
+
+        val s = assertNotNull(AtemUploadStatus.state.value)
+        assertEquals(current, s.id)
+        assertTrue(!s.processing, "the newer upload is still transferring, not ingesting")
+        assertEquals(0f, s.progress, "and its bar must not have been driven to full")
+    }
+
+    @Test
+    fun `a stale upload cannot put its error on the current one`() {
+        // The worst of the four to get wrong: the operator is shown a failure against an upload
+        // that is running fine, and stops it.
+        val old = AtemUploadStatus.begin("old", clip = false, slot = 1)
+        val current = AtemUploadStatus.begin("new", clip = false, slot = 2)
+
+        AtemUploadStatus.fail(old, "the old one broke")
+
+        val s = assertNotNull(AtemUploadStatus.state.value)
+        assertEquals(current, s.id)
+        assertNull(s.error, "a failure belongs to the upload that had it")
+    }
+
+    @Test
+    fun `a late call against an idle bar leaves it idle`() {
+        // Every upload ends with clear(), and the callbacks behind these can arrive after it —
+        // a progress tick already in flight, or a failure raised during teardown. With nothing on
+        // the bar there is no id to match, and none of them may resurrect it.
+        val id = AtemUploadStatus.begin("finished", clip = false, slot = 1)
+        AtemUploadStatus.clear(id)
+
+        AtemUploadStatus.progress(id, 0.5f)
+        AtemUploadStatus.startProcessing(id)
+        AtemUploadStatus.complete(id)
+        AtemUploadStatus.fail(id, "too late")
+        AtemUploadStatus.clear(id)
+
+        assertNull(AtemUploadStatus.state.value, "nothing may put a bar back on screen after it cleared")
+    }
 }

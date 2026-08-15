@@ -321,4 +321,130 @@ class SongFileParserTest {
         assertEquals("Empty", song.title, "falls back to the filename")
         assertTrue(song.lyrics.isEmpty())
     }
+
+    // ── Headers that are not well formed ────────────────────────────────────────
+
+    @Test
+    fun `a header line with no colon is skipped rather than ending the parse`() {
+        // Hand-edited `.song` files carry stray lines in the header block — a note, a leftover
+        // word. There is no key to read, and the rest of the header still has to be picked up.
+        val song = assertNotNull(
+            parser.parseSongContent(
+                """
+                ---
+                just a stray line
+                : leading colon with no key
+                author: John Newton
+                ---
+
+                [Primary]
+                title: Amazing Grace
+
+                Amazing grace
+                """.trimIndent(),
+            ),
+        )
+
+        assertEquals("John Newton", song.author, "the well-formed line after the junk still reads")
+        assertEquals(listOf("Amazing grace"), song.lyrics)
+    }
+
+    @Test
+    fun `a header that is opened and never closed does not swallow the song`() {
+        // A truncated write, or a file edited to death. The opening `---` has no partner, so
+        // there is no end index to slice at — the whole file would otherwise be read as header
+        // and the song would come back with no lyrics at all.
+        val song = assertNotNull(
+            parser.parseSongContent(
+                """
+                ---
+                author: John Newton
+
+                [Primary]
+                title: Amazing Grace
+
+                Amazing grace
+                """.trimIndent(),
+            ),
+        )
+
+        assertEquals("Amazing Grace", song.title, "the song still names itself")
+        assertEquals(listOf("Amazing grace"), song.lyrics, "and its lyrics are still reachable")
+    }
+
+    // ── Writing the halves of a header ──────────────────────────────────────────
+
+    @Test
+    fun `a song credited to an author alone still gets a header`() {
+        // The header is written when ANY of the four fields is set, and each is written on its
+        // own. A song with only an author must not lose it for want of a composer.
+        val path = File(tempDir, "Author Only.song").path
+        parser.writeSongFile(
+            SongItem(number = "", title = "Author Only", author = "John Newton", lyrics = listOf("One line")),
+            path,
+        )
+
+        val written = File(path).readText()
+        assertTrue("author: John Newton" in written, written)
+        assertTrue("composer:" !in written, "an absent field must not be written blank: $written")
+
+        val reloaded = assertNotNull(parser.parseSongFile(path))
+        assertEquals("John Newton", reloaded.author)
+        assertEquals("", reloaded.composer)
+    }
+
+    @Test
+    fun `a song carrying only a ccli number still gets a header`() {
+        // The reporting path sets this on its own, with no credits at all — the branch that
+        // decides whether a header exists has to consider it too.
+        val path = File(tempDir, "Ccli Only.song").path
+        parser.writeSongFile(
+            SongItem(number = "", title = "Ccli Only", ccliNumber = "22025", lyrics = listOf("One line")),
+            path,
+        )
+
+        assertEquals("22025", assertNotNull(parser.parseSongFile(path)).ccliNumber)
+    }
+
+    @Test
+    fun `a translation with lyrics but no title of its own round-trips`() {
+        // The secondary section is written when EITHER field is set, and its title line only when
+        // there is one. A translation whose title was never filled in must still keep its lyrics.
+        val path = File(tempDir, "Untitled Translation.song").path
+        parser.writeSongFile(
+            SongItem(
+                number = "",
+                title = "Amazing Grace",
+                lyrics = listOf("Amazing grace"),
+                secondaryTitle = "",
+                secondaryLyrics = listOf("Удивительная благодать"),
+            ),
+            path,
+        )
+
+        val reloaded = assertNotNull(parser.parseSongFile(path))
+        assertEquals("", reloaded.secondaryTitle)
+        assertEquals(listOf("Удивительная благодать"), reloaded.secondaryLyrics, "the translation must survive")
+    }
+
+    @Test
+    fun `a translation with a title but no lyrics yet round-trips`() {
+        // The other half of the same condition: the operator named the translation in the editor
+        // and has not typed it in yet. Saving must not drop the name they entered.
+        val path = File(tempDir, "Named Translation.song").path
+        parser.writeSongFile(
+            SongItem(
+                number = "",
+                title = "Amazing Grace",
+                lyrics = listOf("Amazing grace"),
+                secondaryTitle = "Удивительная благодать",
+                secondaryLyrics = emptyList(),
+            ),
+            path,
+        )
+
+        val reloaded = assertNotNull(parser.parseSongFile(path))
+        assertEquals("Удивительная благодать", reloaded.secondaryTitle)
+        assertTrue(reloaded.secondaryLyrics.isEmpty())
+    }
 }

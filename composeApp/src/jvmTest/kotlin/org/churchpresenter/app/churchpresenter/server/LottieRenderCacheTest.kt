@@ -2,6 +2,8 @@ package org.churchpresenter.app.churchpresenter.server
 
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import java.io.File
+import java.io.IOException
+import java.nio.ByteBuffer
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -230,5 +232,106 @@ class LottieRenderCacheTest {
         assertEquals(LottieRenderCache.MAX_ENTRIES, dir.listFiles { f -> f.extension == "lrcc" }?.size)
         (0 until 5).forEach { assertFalse(files[it].exists(), "file $it should have been evicted") }
         (5 until total).forEach { assertTrue(files[it].exists(), "file $it should have survived") }
+    }
+
+    // ── Malformed lottie JSON ────────────────────────────────────────────────
+
+    @Test
+    fun `a canvas missing a dimension has no size`() {
+        // A lottie exported without one of these is not renderable at any size, and the caller has
+        // to be told so rather than handed a half-read pair.
+        assertNull(LottieRenderCache.lottieCanvasSize("""{"w":1920}"""), "no height")
+        assertNull(LottieRenderCache.lottieCanvasSize("""{"h":1080}"""), "no width")
+    }
+
+    @Test
+    fun `a canvas with a negative dimension is rejected like a zero one`() {
+        assertNull(LottieRenderCache.lottieCanvasSize("""{"w":1920,"h":-1080}"""))
+    }
+
+    @Test
+    fun `a lottie with no out-point has no duration`() {
+        // `op` is the only field with no sensible default: without it there is no end to the clip.
+        assertNull(LottieRenderCache.lottieDurationMs("""{"w":10,"h":10,"fr":30,"ip":0}"""))
+        assertNull(LottieRenderCache.clipFrameCount("""{"w":10,"h":10,"fr":30,"ip":0}""", fps = 25.0))
+    }
+
+    @Test
+    fun `a missing in-point is read as frame zero`() {
+        // Unlike `op`, a missing `ip` has an obvious meaning — the clip starts at the beginning —
+        // and most exporters omit it. Defaulting keeps those files playable.
+        assertEquals(3_000L, LottieRenderCache.lottieDurationMs("""{"w":10,"h":10,"fr":30,"op":90}"""))
+    }
+
+    // ── Reading a damaged cache file ─────────────────────────────────────────
+
+    @Test
+    fun `a file that is not a render cache is refused by its magic`() {
+        // The cache directory is under the user's home and named by content hash. Anything else
+        // that lands there — a truncated download, an unrelated file renamed — must fail on open
+        // rather than be read as frame offsets and seek wildly through it.
+        val file = File(tempHome.toFile(), "not-a-cache.lrcc").apply { writeBytes("XXXX".toByteArray() + ByteArray(32)) }
+
+        assertFailsWith<IOException> { LottieRenderCache.Reader(file) }
+    }
+
+    @Test
+    fun `a cache file from another version is refused`() {
+        // The format carries a version byte precisely so an old file is rejected instead of being
+        // decoded under the current layout, which would produce garbage frames on screen.
+        val file = File(tempHome.toFile(), "old-version.lrcc").apply {
+            writeBytes("LRCC".toByteArray() + byteArrayOf(99) + ByteArray(32))
+        }
+
+        assertFailsWith<IOException> { LottieRenderCache.Reader(file) }
+    }
+
+    // ── Eviction edge cases ──────────────────────────────────────────────────
+
+    @Test
+    fun `eviction on a cache directory that was never created does nothing`() {
+        // Eviction runs after every render, including the very first one on a fresh install where
+        // the directory may not exist yet. Listing it returns null there, not an empty array.
+        val dir = LottieRenderCache.cacheDir
+        check(dir.toPath().startsWith(tempHome)) { "refusing to touch a cache outside the test home: $dir" }
+        dir.deleteRecursively()
+
+        LottieRenderCache.evictOldEntries()
+
+        assertFalse(dir.exists(), "eviction must not create the directory it was asked to tidy")
+    }
+
+    // ── Decoding a frame that promises more than it holds ────────────────────
+
+    @Test
+    fun `a literal run longer than the frame stops at the last pixel`() {
+        // The pixel count comes from the file header and the run lengths from the payload. A run
+        // that overshoots must fill to the end and stop, not write past the frame.
+        val payload = ByteBuffer.allocate(Int.SIZE_BYTES * 5).apply {
+            putInt(-4)                       // four literal pixels...
+            putInt(0xFF0000FF.toInt())
+            putInt(0xFF00FF00.toInt())
+            putInt(0xFFFF0000.toInt())
+            putInt(0xFFFFFFFF.toInt())
+        }.array()
+
+        val decoded = LottieRenderCache.decodeArgbRle(payload, pixelCount = 2)  // ...into a two-pixel frame
+
+        assertEquals(2, decoded.size)
+        assertEquals(0xFF0000FF.toInt(), decoded[0])
+        assertEquals(0xFF00FF00.toInt(), decoded[1])
+    }
+
+    @Test
+    fun `a solid run longer than the frame fills only the frame`() {
+        val payload = ByteBuffer.allocate(Int.SIZE_BYTES * 2).apply {
+            putInt(10)                       // a ten-pixel run...
+            putInt(0xFF123456.toInt())
+        }.array()
+
+        val decoded = LottieRenderCache.decodeArgbRle(payload, pixelCount = 3)  // ...into a three-pixel frame
+
+        assertEquals(3, decoded.size)
+        decoded.forEach { assertEquals(0xFF123456.toInt(), it) }
     }
 }

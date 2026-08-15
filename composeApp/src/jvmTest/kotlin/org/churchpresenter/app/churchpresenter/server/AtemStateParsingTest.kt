@@ -283,4 +283,103 @@ class AtemStateParsingTest {
     fun `a header-only packet yields no commands`() {
         assertTrue(client.parseAllCommands(ByteArray(12)).isEmpty())
     }
+
+    // ── Malformed payloads the parsers still have to survive ────────────────────
+
+    @Test
+    fun `a used still slot with a zero-length name reports no name`() {
+        // The device sets isUsed before the name is written during an upload. Reading a
+        // zero-length name as anything but empty would slice into the hash bytes that follow.
+        val slots = client.parseStillSlots(mapOf("MPfe" to listOf(stillSlot(1, used = true, name = ""))))
+
+        assertEquals("", slots.single().name)
+        assertTrue(slots.single().isUsed, "it is still an occupied slot")
+    }
+
+    @Test
+    fun `a clip name filling the whole field is read to its end`() {
+        // The name is null-terminated inside a fixed 64-byte field. A name that fills the field
+        // has no terminator, and scanning for one must fall back to the field length rather than
+        // return -1 and slice to a negative end.
+        val name = "x".repeat(64)
+        val slots = client.parseClipSlots(mapOf("MPCS" to listOf(clipSlot(0, used = true, name = name))))
+
+        assertEquals(name, slots.single().name)
+    }
+
+    @Test
+    fun `a media pool settings payload shorter than its layout leaves capacity unknown`() {
+        // Distinct from MPSp being absent entirely (covered above): here the command arrived but
+        // is truncated. Reading it would report a capacity of whatever follows in memory, and the
+        // upload path sizes clips against that number.
+        val (maxFrames, unassigned) = client.parseMediaPoolSettings(
+            mapOf("MPSp" to listOf(ByteArray(9))),
+        )
+
+        assertTrue(maxFrames.isEmpty())
+        assertEquals(0, unassigned)
+    }
+
+    @Test
+    fun `a mix effect config payload too short to carry a keyer count is skipped`() {
+        // _MeC is one command per M/E bus. A truncated one must not be read as "bus 0 has N
+        // keyers" — the bus it describes simply keeps its default of none.
+        val state = client.parseAtemState(
+            mapOf(
+                "_top" to listOf(byteArrayOf(1, 0, 1)),
+                "_MeC" to listOf(ByteArray(1)),
+            ),
+        )
+
+        assertEquals(listOf(0), state.keyersPerMe)
+    }
+
+    @Test
+    fun `a command header claiming an impossible length stops the scan`() {
+        // A length below the 8-byte command header cannot be advanced past — trusting it would
+        // leave the offset unmoved and spin forever on the same bytes.
+        val packet = ByteArray(12 + 8)
+        packet[12] = 0
+        packet[13] = 3   // a 3-byte command: shorter than its own header
+
+        assertTrue(client.parseAllCommands(packet).isEmpty())
+    }
+
+    // ── The file-description payload's optional pieces ──────────────────────────
+
+    @Test
+    fun `a blank file name is written as no name at all`() {
+        // Stills carry a name and clip frames do not; the caller passes null for a frame, but an
+        // empty string reaches here too and must leave the name field zeroed rather than write a
+        // zero-length string over it.
+        val payload = client.buildFileDescriptionPayload(transferId = 7, name = "", md5 = ByteArray(16) { 9 })
+
+        assertEquals(212, payload.size)
+        assertTrue(payload.copyOfRange(2, 66).all { it.toInt() == 0 }, "the name field stays clear")
+        assertTrue(payload.copyOfRange(194, 210).all { it.toInt() == 9 }, "the md5 is still written")
+    }
+
+    @Test
+    fun `a file name longer than the field is truncated to fit`() {
+        // The field is 64 bytes and the switcher does not bounds-check what it is sent; writing
+        // past it would run into the md5 area of the same buffer.
+        val payload = client.buildFileDescriptionPayload(
+            transferId = 1,
+            name = "n".repeat(100),
+            md5 = ByteArray(16),
+        )
+
+        assertEquals(212, payload.size)
+        assertTrue(payload.copyOfRange(2, 66).all { it.toInt() == 'n'.code }, "the field is filled")
+        assertEquals(0, payload[66].toInt(), "and nothing is written past it")
+    }
+
+    @Test
+    fun `a short md5 is written without overrunning the digest field`() {
+        val payload = client.buildFileDescriptionPayload(transferId = 1, name = null, md5 = ByteArray(4) { 7 })
+
+        assertEquals(212, payload.size)
+        assertTrue(payload.copyOfRange(194, 198).all { it.toInt() == 7 })
+        assertTrue(payload.copyOfRange(198, 210).all { it.toInt() == 0 })
+    }
 }

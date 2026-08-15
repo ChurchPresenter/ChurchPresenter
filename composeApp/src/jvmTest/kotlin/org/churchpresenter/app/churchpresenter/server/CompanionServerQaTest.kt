@@ -518,6 +518,66 @@ class CompanionServerQaTest {
         assertEquals("He said \"hi\"\nthen left", listed[0].jsonObject.str("text"))
     }
 
+    @Test
+    fun `a downvote is recorded as one, and anything else counts as up`() {
+        // The direction arrives as free text from the phone. Only "down" means down; everything
+        // else — a typo, an older client sending nothing, a crafted value — has to fall to "up"
+        // rather than be stored verbatim and then fail to match on the next read.
+        val qa = openSession()
+        server.qaVotingEnabled = true
+        val down = submit("Downvote me").obj().str("id")
+        val odd = submit("Odd direction").obj().str("id")
+        qa.approveQuestion(down)
+        qa.approveQuestion(odd)
+
+        val downResponse = post("/api/qa/vote", """{"questionId":"$down","direction":"down"}""")
+        val oddResponse = post("/api/qa/vote", """{"questionId":"$odd","direction":"sideways"}""")
+
+        assertEquals(HttpStatusCode.OK, downResponse.status)
+        assertEquals("down", downResponse.obj().str("voted"))
+        assertEquals("down", qa.getVoteDirection(down, "127.0.0.1"))
+        assertEquals(HttpStatusCode.OK, oddResponse.status)
+        assertEquals("up", qa.getVoteDirection(odd, "127.0.0.1"), "an unrecognised direction is an upvote")
+    }
+
+    @Test
+    fun `a vote behind a plain forwarding proxy is keyed on the forwarded address`() {
+        // The tunnel sends CF-Connecting-IP, but a church running its own reverse proxy sends only
+        // X-Forwarded-For. Both have to identify the phone, or one deployment lets a single vote
+        // count for the whole room.
+        val qa = openSession()
+        server.qaVotingEnabled = true
+        val id = submit("Where is the nursery?").obj().str("id")
+        qa.approveQuestion(id)
+
+        val voted = runBlocking {
+            client.post(url("/api/qa/vote")) {
+                header("X-Forwarded-For", "203.0.113.50, 198.51.100.7")
+                setBody("""{"questionId":"$id","direction":"up"}""")
+            }
+        }
+
+        assertEquals(HttpStatusCode.OK, voted.status)
+        assertEquals("up", qa.getVoteDirection(id, "203.0.113.50"))
+        assertNull(qa.getVoteDirection(id, "127.0.0.1"), "the vote must not be recorded against the proxy")
+    }
+
+    @Test
+    fun `the approved list behind a plain forwarding proxy marks this phone's vote`() {
+        val qa = openSession()
+        server.qaVotingEnabled = true
+        val id = submit("Where is the nursery?").obj().str("id")
+        qa.approveQuestion(id)
+        qa.voteForQuestion(id, "203.0.113.60", "up")
+
+        val mine = runBlocking {
+            client.get(url("/api/qa/approved")) {
+                header("X-Forwarded-For", "203.0.113.60, 198.51.100.7")
+            }
+        }.array()
+
+        assertEquals("up", mine.single().jsonObject.getValue("voted").jsonPrimitive.content)
+    }
     // ── The pages a phone loads ─────────────────────────────────────────────────
 
     @Test

@@ -101,11 +101,24 @@ class BibleViewModelFollowerTest {
         throw AssertionError("timed out after ${timeoutMs}ms waiting for $what")
     }
 
+    /**
+     * The first verse of a chapter, or `""` while the chapter has none.
+     *
+     * Every caller below polls this inside [awaitUntil] until the expected wording appears, and a
+     * replica swap moves the loaded Bible out from under it: `loadChapter` bumps the selection
+     * token to say "the selection changed", which during the swap it has — to nothing, because the
+     * Bible being read is mid-replacement. Taking `first()` there threw out of the *condition*, and
+     * since [awaitUntil] does not catch, the whole test died on a transient state it was in the
+     * middle of waiting out.
+     *
+     * Empty is the honest answer for that window, and it keeps the wait ending on a positive
+     * signal — the wording the caller asked for — rather than on an exception or a timeout.
+     */
     private fun BibleViewModel.verseTextAt(bookIndex: Int, chapter: Int): String {
         val token = verseSelectionToken.value
         loadChapter(bookIndex, chapter)
         awaitUntil("chapter load") { verseSelectionToken.value > token }
-        return verses.value.first()
+        return verses.value.firstOrNull().orEmpty()
     }
 
     // ── Reference-only mode ─────────────────────────────────────────────────────

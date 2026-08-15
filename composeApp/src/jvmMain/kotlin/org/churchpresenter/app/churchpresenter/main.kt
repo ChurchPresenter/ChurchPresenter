@@ -126,7 +126,7 @@ import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
-import org.churchpresenter.app.churchpresenter.dialogs.StatisticsDialog
+import org.churchpresenter.app.churchpresenter.dialogs.CCLIReportDialog
 import org.churchpresenter.app.churchpresenter.dialogs.UpdateAvailableDialog
 import org.churchpresenter.app.churchpresenter.data.settings.answered
 import org.churchpresenter.app.churchpresenter.data.settings.isDue
@@ -1509,7 +1509,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 },
                                 onDismiss = { showKeyboardShortcutsDialog = false; dialogDismissSignal++ }
                             )
-                            StatisticsDialog(
+                            CCLIReportDialog(
                                 isVisible = showStatisticsDialog,
                                 theme = theme,
                                 statisticsManager = statisticsManager,
