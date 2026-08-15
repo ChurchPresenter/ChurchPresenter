@@ -95,6 +95,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkCommandFailure
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.composables.isJavaFxAvailable
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.data.Bible
@@ -208,14 +209,23 @@ fun main() {
     if (shouldBundleDefaultBible(startupSettings.bibleSettings)) {
         try {
             val defaultBibleDir = File(AppDataDir.resolve(), Constants.DEFAULT_BIBLES_FOLDER)
-            defaultBibleDir.mkdirs()
-            val targetFile = File(defaultBibleDir, "kjv1769.spb")
-            if (!targetFile.exists()) {
-                targetFile.writeBytes(runBlocking { Res.readBytes("files/bible_samples/kjv1769.spb") })
+            val problem = bundledBibleDirProblem(defaultBibleDir)
+            if (problem != null) {
+                // Nothing to write into, so the settings are left pointing at no Bible at all — the
+                // setup wizard then asks for a folder, which is the honest outcome here.
+                CrashReporter.reportWarning(
+                    "Bundled KJV skipped: Bibles folder $problem",
+                    tags = mapOf("subsystem" to "bible_bundle", "reason" to problem)
+                )
+            } else {
+                val targetFile = File(defaultBibleDir, "kjv1769.spb")
+                if (!targetFile.exists()) {
+                    targetFile.writeBytes(runBlocking { Res.readBytes("files/bible_samples/kjv1769.spb") })
+                }
+                SettingsManager().saveSettings(
+                    startupSettings.withBundledBible(defaultBibleDir.absolutePath, "kjv1769.spb")
+                )
             }
-            SettingsManager().saveSettings(
-                startupSettings.withBundledBible(defaultBibleDir.absolutePath, "kjv1769.spb")
-            )
         } catch (e: Exception) {
             CrashReporter.reportException(e, "Bundling default KJV Bible")
         }
@@ -251,6 +261,7 @@ fun main() {
     }
 
     preWarmJavaFX()
+    CrashReporter.setTag("javafx.available", isJavaFxAvailable().toString())
 
     CefManager.init()
     CrashReporter.setTag("jcef.available", CefManager.initialized.toString())

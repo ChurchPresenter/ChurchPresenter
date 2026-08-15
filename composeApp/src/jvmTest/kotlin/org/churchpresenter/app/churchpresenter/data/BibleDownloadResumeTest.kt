@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandleScope
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.HttpTimeoutCapability
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -18,6 +19,7 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
@@ -232,6 +234,22 @@ class BibleDownloadResumeTest {
             "an unreachable host is not a slow connection and must not be described as one",
         )
         assertEquals(3, attempts)
+    }
+
+    @Test
+    fun `a module download asks for a longer connect than the shared client allows`() {
+        // The shared client's 8 s connect is sized for the catalogue, which has a cached listing to
+        // fall back on. A module has none, and the reported failure was a user whose handshake to
+        // ebible.org never finished inside it — so the request must override that, not inherit it.
+        val engine = MockEngine { whole() }
+
+        download(engine)
+
+        val configured = engine.requestHistory.single()
+            .getCapabilityOrNull(HttpTimeoutCapability)
+            ?.connectTimeoutMillis
+        assertNotNull(configured, "the download request set no connect timeout of its own")
+        assertTrue(configured >= 30_000L, "was $configured ms")
     }
 
     @Test

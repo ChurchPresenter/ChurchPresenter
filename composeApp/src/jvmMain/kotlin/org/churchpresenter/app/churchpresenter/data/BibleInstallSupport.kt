@@ -72,14 +72,26 @@ internal object BibleInstallSupport {
      */
     private const val DOWNLOAD_SOCKET_TIMEOUT_MS = 30_000L
 
+    /**
+     * How long the connect for a module may take. Deliberately far longer than the client-wide
+     * [defaultHttp] value, which is sized for the catalogue: a small JSON fetch that is better
+     * abandoned quickly than left hanging, because the browser has a cached listing to fall back on.
+     *
+     * A module download has no such fallback, and the users who need it most are the ones on the
+     * slowest links — the reported case reached `ebible.org` from Ukraine and never completed a TCP
+     * handshake inside 8 s, so all three attempts died at connect and the install failed without a
+     * byte ever being asked for.
+     */
+    private const val DOWNLOAD_CONNECT_TIMEOUT_MS = 30_000L
+
     internal const val DEFAULT_DOWNLOAD_RETRY_FLOOR_MS = 2_000L
     private const val MAX_DOWNLOAD_RETRY_DELAY_MS = 30_000L
 
     /**
      * This client also fetches eBible's catalogue (`EBibleSource.catalog`), which is one small file
-     * and wants a whole-request cap. [downloadTo] overrides both timeouts per request, because a
-     * module on a throttled line needs the opposite: no request cap at all, and a shorter stall
-     * threshold that starts a resume sooner.
+     * and wants a whole-request cap and a connect it gives up on quickly. [downloadTo] overrides all
+     * three per request, because a module on a throttled line needs the opposite: no request cap at
+     * all, a shorter stall threshold that starts a resume sooner, and a patient connect.
      */
     val defaultHttp: HttpClient by lazy {
         HttpClient(CIO) {
@@ -170,6 +182,7 @@ internal object BibleInstallSupport {
                     timeout {
                         requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
                         socketTimeoutMillis = DOWNLOAD_SOCKET_TIMEOUT_MS
+                        connectTimeoutMillis = DOWNLOAD_CONNECT_TIMEOUT_MS
                     }
                 }.execute { response -> receiveBody(response, destination, resumeFrom, state, onProgress) }
                 if (status !in HTTP_SUCCESS_RANGE) return DownloadResult(status, state.written)

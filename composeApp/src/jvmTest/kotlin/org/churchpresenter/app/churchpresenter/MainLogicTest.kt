@@ -644,6 +644,47 @@ class MainLogicTest {
     }
 
     @Test
+    fun `a bibles folder that can be created is reported as ready`() {
+        val dir = Files.createTempDirectory("cp-bundle-dir").toFile()
+        try {
+            val nested = File(dir, "Bibles")
+
+            assertNull(bundledBibleDirProblem(nested), "a fresh folder should be created")
+            assertTrue(nested.isDirectory)
+            assertNull(bundledBibleDirProblem(nested), "and asking again must accept the one made")
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `a bibles path occupied by a file is named, not left to fail at the write`() {
+        // The reported failure surfaced as FileNotFoundException about kjv1769.spb, which reads as a
+        // missing app resource rather than a folder that could not be made.
+        val dir = Files.createTempDirectory("cp-bundle-dir").toFile()
+        try {
+            val occupied = File(dir, "Bibles").apply { writeText("not a folder") }
+
+            assertEquals("occupied by a file", bundledBibleDirProblem(occupied))
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `a bibles folder that cannot be created is named`() {
+        val dir = Files.createTempDirectory("cp-bundle-dir").toFile()
+        try {
+            // A directory cannot be made below a plain file, whatever the filesystem.
+            val blocked = File(File(dir, "wall").apply { writeText("x") }, "Bibles")
+
+            assertEquals("could not be created", bundledBibleDirProblem(blocked))
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `the licence counts as accepted at this version or a later one`() {
         assertTrue(isEulaAccepted(acceptedVersion = 1, currentVersion = 1))
         assertTrue(isEulaAccepted(acceptedVersion = 2, currentVersion = 1))

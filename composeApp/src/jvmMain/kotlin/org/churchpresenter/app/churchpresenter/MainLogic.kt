@@ -365,6 +365,26 @@ internal fun announcementDisplayMs(sliderSpan: Long, animationDuration: Long, lo
 internal fun shouldBundleDefaultBible(settings: BibleSettings): Boolean =
     settings.storageDirectory.isEmpty() && settings.primaryBible.isEmpty()
 
+/**
+ * Makes sure [dir] is a directory that can be written to, and names the problem when it cannot be.
+ *
+ * The bundling code used to call `mkdirs()` and ignore what it answered, so a folder that could not
+ * be created surfaced a sentence later as `FileNotFoundException: …/Bibles/kjv1769.spb (No such
+ * file or directory)` — a message about a file, for a problem with its parent, which reads as a
+ * missing resource in the app rather than a home directory the process cannot write into.
+ *
+ * The reason is a fixed phrase, never the path: it is reported to the crash service, and a user's
+ * home directory carries their name.
+ *
+ * @return null when the directory is ready, otherwise why it is not.
+ */
+internal fun bundledBibleDirProblem(dir: File): String? = when {
+    dir.isDirectory -> if (dir.canWrite()) null else "not writable"
+    dir.exists() -> "occupied by a file"
+    dir.mkdirs() -> null
+    else -> "could not be created"
+}
+
 /** Whether the licence has already been accepted, at this build's version of it or a later one. */
 internal fun isEulaAccepted(acceptedVersion: Int, currentVersion: Int): Boolean =
     acceptedVersion >= currentVersion
