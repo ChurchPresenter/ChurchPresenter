@@ -10,6 +10,14 @@ import churchpresenter.composeapp.generated.resources.shortcut_category_menus
 import churchpresenter.composeapp.generated.resources.shortcut_category_pictures
 import churchpresenter.composeapp.generated.resources.shortcut_category_presentation
 import churchpresenter.composeapp.generated.resources.shortcut_category_songs
+import churchpresenter.composeapp.generated.resources.shortcut_scope_bible_hint
+import churchpresenter.composeapp.generated.resources.shortcut_scope_canvas_hint
+import churchpresenter.composeapp.generated.resources.shortcut_scope_global_hint
+import churchpresenter.composeapp.generated.resources.shortcut_scope_media_hint
+import churchpresenter.composeapp.generated.resources.shortcut_scope_menus_hint
+import churchpresenter.composeapp.generated.resources.shortcut_scope_pictures_hint
+import churchpresenter.composeapp.generated.resources.shortcut_scope_presentation_hint
+import churchpresenter.composeapp.generated.resources.shortcut_scope_songs_hint
 import churchpresenter.composeapp.generated.resources.shortcut_description_add_to_schedule
 import churchpresenter.composeapp.generated.resources.shortcut_description_blank_output
 import churchpresenter.composeapp.generated.resources.shortcut_description_clicker_next
@@ -62,16 +70,20 @@ import org.jetbrains.compose.resources.StringResource
  * Schedule* in the Edit menu and *Delete Selected Source* in the Canvas tab at the same time —
  * which is exactly what the app does today. Folding the two scopes together would report that
  * shipped pair as a conflict.
+ *
+ * [hintRes] is the one-line answer to "when does this apply?", shown under the heading in the
+ * shortcuts dialog. It belongs to the scope rather than to the dialog because it *describes the
+ * dispatch rule above* — the same rule that decides what collides with what.
  */
-enum class ShortcutScope(val titleRes: StringResource) {
-    MENU(Res.string.shortcut_category_menus),
-    GLOBAL(Res.string.shortcut_category_global),
-    BIBLE(Res.string.shortcut_category_bible),
-    SONGS(Res.string.shortcut_category_songs),
-    PICTURES(Res.string.shortcut_category_pictures),
-    PRESENTATION(Res.string.shortcut_category_presentation),
-    MEDIA(Res.string.shortcut_category_media),
-    CANVAS(Res.string.shortcut_category_canvas);
+enum class ShortcutScope(val titleRes: StringResource, val hintRes: StringResource) {
+    MENU(Res.string.shortcut_category_menus, Res.string.shortcut_scope_menus_hint),
+    GLOBAL(Res.string.shortcut_category_global, Res.string.shortcut_scope_global_hint),
+    BIBLE(Res.string.shortcut_category_bible, Res.string.shortcut_scope_bible_hint),
+    SONGS(Res.string.shortcut_category_songs, Res.string.shortcut_scope_songs_hint),
+    PICTURES(Res.string.shortcut_category_pictures, Res.string.shortcut_scope_pictures_hint),
+    PRESENTATION(Res.string.shortcut_category_presentation, Res.string.shortcut_scope_presentation_hint),
+    MEDIA(Res.string.shortcut_category_media, Res.string.shortcut_scope_media_hint),
+    CANVAS(Res.string.shortcut_category_canvas, Res.string.shortcut_scope_canvas_hint);
 
     /**
      * Whether a binding in this scope competes with one in [other].

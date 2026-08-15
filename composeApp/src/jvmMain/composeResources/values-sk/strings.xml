@@ -190,6 +190,28 @@
     <string name="shortcut_description_undo">Späť posledná zmena programu</string>
     <string name="shortcut_description_redo">Znovu vykonať poslednú zrušenú zmenu</string>
     <string name="shortcut_description_reorder_image">Zmeniť poradie obrázka</string>
+    <string name="shortcut_scope_menus_hint">Klávesové skratky ponúk, spracované ako prvé</string>
+    <string name="shortcut_scope_global_hint">Dostupné kdekoľvek v aplikácii</string>
+    <string name="shortcut_scope_bible_hint">Aktívne, keď je vybraná záložka Biblia</string>
+    <string name="shortcut_scope_songs_hint">Aktívne, keď je vybraná záložka Piesne</string>
+    <string name="shortcut_scope_pictures_hint">Aktívne, keď je vybraná záložka Obrázky</string>
+    <string name="shortcut_scope_presentation_hint">Aktívne, keď je vybraná záložka Prezentácia</string>
+    <string name="shortcut_scope_media_hint">Aktívne počas prehrávania zvuku a videa</string>
+    <string name="shortcut_scope_canvas_hint">Aktívne pri úprave scény na plátne</string>
+    <string name="shortcut_scope_mouse_hint">Gestá, ktoré nemožno zmeniť</string>
+    <string name="shortcut_conflicts_none">Žiadne konflikty</string>
+    <string name="shortcut_conflicts_one">1 konflikt</string>
+    <string name="shortcut_conflicts_many">Konfliktov: %1$d</string>
+    <string name="shortcut_conflicts_title">Konflikty</string>
+    <string name="shortcut_conflicts_subtitle_one">1 skratka používa rovnakú kombináciu</string>
+    <string name="shortcut_conflicts_subtitle_many">Skratiek s rovnakou kombináciou: %1$d</string>
+    <string name="shortcut_search_results">Výsledky hľadania</string>
+    <string name="shortcut_search_match_one">1 zhoda</string>
+    <string name="shortcut_search_match_many">Zhôd: %1$d</string>
+    <string name="shortcut_unsaved_one">1 neuložená zmena</string>
+    <string name="shortcut_unsaved_many">Neuložených zmien: %1$d</string>
+    <string name="shortcut_rebind_hint">Kliknutím zmeníte skratku</string>
+    <string name="shortcut_recording_stop">Zastaviť snímanie</string>
 
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Nastavenia textu a farby</string>

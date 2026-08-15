@@ -13,7 +13,6 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class ShortcutMapTest {
-
     private fun mapWith(vararg overrides: Pair<ShortcutAction, List<KeyChord>>) =
         ShortcutMap.from(KeyboardShortcutSettings(overrides.associate { it.first.name to it.second }))
 
@@ -37,7 +36,6 @@ class ShortcutMapTest {
 
         assertTrue(map.chordsFor(ShortcutAction.CLEAR_OUTPUT).isEmpty())
         assertFalse(map.matches(ShortcutAction.CLEAR_OUTPUT, keyDown(Key.Escape)))
-        // Absent, by contrast, still resolves to the default.
         assertTrue(ShortcutMap.DEFAULT.matches(ShortcutAction.CLEAR_OUTPUT, keyDown(Key.Escape)))
     }
 
@@ -47,7 +45,6 @@ class ShortcutMapTest {
             KeyboardShortcutSettings(overrides = mapOf("AN_ACTION_FROM_A_LATER_RELEASE" to listOf(KeyChord.of(Key.J))))
         )
 
-        // The unknown entry must not disturb anything else, and must not throw on load.
         assertEquals(ShortcutAction.UNDO.defaults, map.chordsFor(ShortcutAction.UNDO))
     }
 
@@ -72,7 +69,6 @@ class ShortcutMapTest {
 
     @Test
     fun `the same key in two different tab scopes is not a conflict`() {
-        // Space is play/pause in Media, Pictures and Presentation, and always has been.
         assertNull(
             ShortcutMap.DEFAULT.conflictFor(KeyChord.of(Key.Spacebar), ShortcutAction.MEDIA_PLAY_PAUSE)
         )
@@ -80,8 +76,6 @@ class ShortcutMapTest {
 
     @Test
     fun `Delete across the menu and the Canvas tab is not a conflict`() {
-        // Menu accelerators are dispatched by the MenuBar before focus-based handlers see the
-        // event, so this pair coexists in the shipped app.
         assertNull(
             ShortcutMap.DEFAULT.conflictFor(KeyChord.of(Key.Delete), ShortcutAction.CANVAS_DELETE_SOURCE)
         )
@@ -109,11 +103,46 @@ class ShortcutMapTest {
     }
 
     @Test
+    fun `the shipped bindings collide nowhere`() {
+        assertEquals(emptyMap(), ShortcutMap.DEFAULT.conflicts())
+    }
+
+    @Test
+    fun `a clash is reported under both halves of the pair`() {
+        val map = mapWith(ShortcutAction.MEDIA_MUTE to listOf(KeyChord.of(Key.Z, ctrl = true)))
+
+        assertEquals(listOf(ShortcutAction.UNDO), map.conflicts()[ShortcutAction.MEDIA_MUTE])
+        assertEquals(listOf(ShortcutAction.MEDIA_MUTE), map.conflicts()[ShortcutAction.UNDO])
+    }
+
+    @Test
+    fun `the same key in two tab scopes is left out, as it is for conflictFor`() {
+        assertFalse(ShortcutAction.MEDIA_PLAY_PAUSE in ShortcutMap.DEFAULT.conflicts())
+        assertFalse(ShortcutAction.PICTURES_PLAY_PAUSE in ShortcutMap.DEFAULT.conflicts())
+    }
+
+    @Test
+    fun `an unbound action never collides with another unbound one`() {
+        val map = mapWith(
+            ShortcutAction.MEDIA_MUTE to emptyList(),
+            ShortcutAction.UNDO to emptyList(),
+        )
+
+        assertEquals(emptyMap(), map.conflicts())
+    }
+
+    @Test
+    fun `two actions sharing both of their chords name each other once`() {
+        val map = mapWith(ShortcutAction.PRESENTATION_PREVIOUS to ShortcutAction.PRESENTATION_NEXT.defaults)
+
+        assertEquals(listOf(ShortcutAction.PRESENTATION_NEXT), map.conflicts()[ShortcutAction.PRESENTATION_PREVIOUS])
+    }
+
+    @Test
     fun `isCustomized tracks whether the binding has moved off the default`() {
         assertFalse(ShortcutMap.DEFAULT.isCustomized(ShortcutAction.UNDO))
         assertTrue(mapWith(ShortcutAction.UNDO to listOf(KeyChord.of(Key.U))).isCustomized(ShortcutAction.UNDO))
         assertTrue(mapWith(ShortcutAction.UNDO to emptyList()).isCustomized(ShortcutAction.UNDO))
-        // An override that happens to equal the default is not a customization.
         assertFalse(mapWith(ShortcutAction.UNDO to ShortcutAction.UNDO.defaults).isCustomized(ShortcutAction.UNDO))
     }
 

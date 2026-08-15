@@ -287,6 +287,30 @@
     <string name="shortcut_description_reorder_item">Reorder item</string>
     <string name="shortcut_description_reorder_image">Reorder image</string>
 
+    <!-- Keyboard Shortcuts dialog: category rail, conflicts filter and inline rebinding -->
+    <string name="shortcut_scope_menus_hint">Menu accelerators, handled before anything else</string>
+    <string name="shortcut_scope_global_hint">Available anywhere in the app</string>
+    <string name="shortcut_scope_bible_hint">Active while the Bible tab is focused</string>
+    <string name="shortcut_scope_songs_hint">Active while the Songs tab is focused</string>
+    <string name="shortcut_scope_pictures_hint">Active while the Pictures tab is focused</string>
+    <string name="shortcut_scope_presentation_hint">Active while the Presentation tab is focused</string>
+    <string name="shortcut_scope_media_hint">Active during audio and video playback</string>
+    <string name="shortcut_scope_canvas_hint">Active while editing a canvas scene</string>
+    <string name="shortcut_scope_mouse_hint">Gestures, which cannot be rebound</string>
+    <string name="shortcut_conflicts_none">No conflicts</string>
+    <string name="shortcut_conflicts_one">1 conflict</string>
+    <string name="shortcut_conflicts_many">%1$d conflicts</string>
+    <string name="shortcut_conflicts_title">Conflicts</string>
+    <string name="shortcut_conflicts_subtitle_one">1 shortcut shares a combination</string>
+    <string name="shortcut_conflicts_subtitle_many">%1$d shortcuts share a combination</string>
+    <string name="shortcut_search_results">Search results</string>
+    <string name="shortcut_search_match_one">1 match</string>
+    <string name="shortcut_search_match_many">%1$d matches</string>
+    <string name="shortcut_unsaved_one">1 change not saved</string>
+    <string name="shortcut_unsaved_many">%1$d changes not saved</string>
+    <string name="shortcut_rebind_hint">Click to rebind</string>
+    <string name="shortcut_recording_stop">Stop listening</string>
+
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Text Settings and Colors</string>
     <string name="background">Background</string>

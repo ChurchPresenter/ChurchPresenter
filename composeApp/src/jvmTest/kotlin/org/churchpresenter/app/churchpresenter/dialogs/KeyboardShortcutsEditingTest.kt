@@ -5,16 +5,22 @@ package org.churchpresenter.app.churchpresenter.dialogs
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.withKeyDown
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.KeyboardShortcutSettings
 import org.churchpresenter.app.churchpresenter.models.KeyChord
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.app.churchpresenter.models.ShortcutScope
 import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,19 +28,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-/**
- * Editing bindings in the Keyboard Shortcuts dialog.
- *
- * The reference listing itself is covered by [KeyboardShortcutsContentTest]; this suite is about
- * the controls that changed it — which used to live in a Settings tab and were merged in here so
- * shortcuts are seen and set in one place.
- *
- * Edits are pending until Apply or OK, so most of these assert on what the dialog *reports*, not on
- * what a settings file contains.
- */
 class KeyboardShortcutsEditingTest {
-
-    /** What the dialog handed back, so a test asserts the outcome rather than that a stub ran. */
     private class Saves {
         val saved = mutableListOf<AppSettings>()
         var dismissed = 0
@@ -63,42 +57,121 @@ class KeyboardShortcutsEditingTest {
         keyboardShortcutSettings = KeyboardShortcutSettings(overrides = mapOf(action.name to chords))
     )
 
+    private fun ComposeUiTest.show(action: ShortcutAction) {
+        onNodeWithTag(shortcutCategoryTag(action.scope)).performClick()
+        waitForIdle()
+    }
+
     private fun ComposeUiTest.chipFor(action: ShortcutAction) = onNodeWithTag(shortcutChipTag(action))
     private fun ComposeUiTest.revertFor(action: ShortcutAction) = onNodeWithTag(shortcutRevertTag(action))
 
-    /** The overrides in the most recent save, which is the only committed state a test can read. */
+    private fun ComposeUiTest.rebind(action: ShortcutAction, key: Key, ctrl: Boolean = false) {
+        chipFor(action).performScrollTo().performClick()
+        waitForIdle()
+        onNodeWithTag(shortcutRecordingTag(action)).performKeyInput {
+            if (ctrl) withKeyDown(Key.CtrlLeft) { pressKey(key) } else pressKey(key)
+        }
+        waitForIdle()
+    }
+
     private fun Saves.lastOverrides() = saved.last().keyboardShortcutSettings.overrides
 
-    // ── Rows ────────────────────────────────────────────────────────────────────
-
     @Test
-    fun `every action has a row`() = dialog {
-        ShortcutAction.entries.forEach { chipFor(it).assertExists() }
+    fun `every action has a row in its own category`() = dialog {
+        ShortcutScope.entries.forEach { scope ->
+            onNodeWithTag(shortcutCategoryTag(scope)).performClick()
+            waitForIdle()
+            ShortcutAction.entries.filter { it.scope == scope }.forEach { chipFor(it).assertExists() }
+        }
     }
 
     @Test
     fun `a row shows the shipped binding when nothing has been changed`() = dialog {
-        chipFor(ShortcutAction.MEDIA_MUTE).assertTextEquals("M")
+        show(ShortcutAction.MEDIA_MUTE)
+        chipFor(ShortcutAction.MEDIA_MUTE).assertContentDescriptionEquals("M")
     }
 
     @Test
     fun `a row shows the override once one is set`() =
         dialog(withOverride(ShortcutAction.MEDIA_MUTE, listOf(KeyChord.of(Key.J)))) {
-            chipFor(ShortcutAction.MEDIA_MUTE).assertTextEquals("J")
+            show(ShortcutAction.MEDIA_MUTE)
+            chipFor(ShortcutAction.MEDIA_MUTE).assertContentDescriptionEquals("J")
         }
 
     @Test
     fun `an unbound action reads Not set rather than empty`() =
         dialog(withOverride(ShortcutAction.MEDIA_MUTE, emptyList())) {
-            chipFor(ShortcutAction.MEDIA_MUTE).assertTextEquals("Not set")
+            show(ShortcutAction.MEDIA_MUTE)
+            chipFor(ShortcutAction.MEDIA_MUTE).assertContentDescriptionEquals("Not set")
         }
 
-    // ── Clear, Reset, Reset All ─────────────────────────────────────────────────
+    @Test
+    fun `clicking the keys listens for a combination`() = dialog {
+        show(ShortcutAction.MEDIA_MUTE)
+        chipFor(ShortcutAction.MEDIA_MUTE).performScrollTo().performClick()
+
+        onNodeWithTag(shortcutRecordingTag(ShortcutAction.MEDIA_MUTE)).assertExists()
+        assertTrue(
+            onAllNodesWithTag(shortcutChipTag(ShortcutAction.MEDIA_MUTE))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty(),
+            "the caps are replaced by the listening chip, not shown beside it",
+        )
+    }
+
+    @Test
+    fun `the pressed combination becomes the binding`() = dialog { result ->
+        show(ShortcutAction.MEDIA_MUTE)
+        rebind(ShortcutAction.MEDIA_MUTE, Key.J, ctrl = true)
+
+        chipFor(ShortcutAction.MEDIA_MUTE).assertExists()
+        onNodeWithText("Apply").performClick()
+        assertEquals(
+            listOf(KeyChord.of(Key.J, ctrl = true)),
+            result.lastOverrides()[ShortcutAction.MEDIA_MUTE.name],
+        )
+    }
+
+    @Test
+    fun `a bare modifier is not recorded as the binding`() = dialog {
+        show(ShortcutAction.MEDIA_MUTE)
+        chipFor(ShortcutAction.MEDIA_MUTE).performScrollTo().performClick()
+        waitForIdle()
+
+        onNodeWithTag(shortcutRecordingTag(ShortcutAction.MEDIA_MUTE)).performKeyInput {
+            pressKey(Key.CtrlLeft)
+        }
+        waitForIdle()
+
+        onNodeWithTag(shortcutRecordingTag(ShortcutAction.MEDIA_MUTE)).assertExists()
+    }
+
+    @Test
+    fun `Escape is recorded rather than cancelling`() = dialog {
+        show(ShortcutAction.MEDIA_MUTE)
+        rebind(ShortcutAction.MEDIA_MUTE, Key.Escape)
+
+        chipFor(ShortcutAction.MEDIA_MUTE).assertContentDescriptionEquals("Esc")
+    }
+
+    @Test
+    fun `the stop button leaves the binding alone`() = dialog { result ->
+        show(ShortcutAction.MEDIA_MUTE)
+        chipFor(ShortcutAction.MEDIA_MUTE).performScrollTo().performClick()
+        waitForIdle()
+
+        onNodeWithContentDescription("Stop listening").performClick()
+        waitForIdle()
+
+        chipFor(ShortcutAction.MEDIA_MUTE).assertContentDescriptionEquals("M")
+        onNodeWithText("Apply").performClick()
+        assertEquals(emptyMap(), result.lastOverrides())
+    }
 
     @Test
     fun `Clear unbinds the action`() = dialog { result ->
+        show(ShortcutAction.MEDIA_MUTE)
         revertFor(ShortcutAction.MEDIA_MUTE).performScrollTo().performClick()
-        chipFor(ShortcutAction.MEDIA_MUTE).assertTextEquals("Not set")
+        chipFor(ShortcutAction.MEDIA_MUTE).assertContentDescriptionEquals("Not set")
 
         onNodeWithText("Apply").performClick()
         assertEquals(emptyList(), result.lastOverrides()[ShortcutAction.MEDIA_MUTE.name])
@@ -107,12 +180,11 @@ class KeyboardShortcutsEditingTest {
     @Test
     fun `Reset removes the override entirely rather than writing the default back`() =
         dialog(withOverride(ShortcutAction.MEDIA_MUTE, listOf(KeyChord.of(Key.J)))) { result ->
+            show(ShortcutAction.MEDIA_MUTE)
             revertFor(ShortcutAction.MEDIA_MUTE).performScrollTo().performClick()
-            chipFor(ShortcutAction.MEDIA_MUTE).assertTextEquals("M")
+            chipFor(ShortcutAction.MEDIA_MUTE).assertContentDescriptionEquals("M")
 
             onNodeWithText("Apply").performClick()
-            // Absent, not "present and equal to the default" — that distinction is what lets a
-            // later release change a default for users who never touched the action.
             assertFalse(result.lastOverrides().containsKey(ShortcutAction.MEDIA_MUTE.name))
         }
 
@@ -127,8 +199,9 @@ class KeyboardShortcutsEditingTest {
             )
         )
         dialog(settings) { result ->
+            show(ShortcutAction.MEDIA_MUTE)
             onNodeWithTag(SHORTCUT_RESET_ALL_TAG).performClick()
-            chipFor(ShortcutAction.MEDIA_MUTE).assertTextEquals("M")
+            chipFor(ShortcutAction.MEDIA_MUTE).assertContentDescriptionEquals("M")
 
             onNodeWithText("Apply").performClick()
             assertEquals(emptyMap(), result.lastOverrides())
@@ -138,6 +211,7 @@ class KeyboardShortcutsEditingTest {
     @Test
     fun `editing one action leaves the others untouched`() =
         dialog(withOverride(ShortcutAction.MEDIA_MUTE, listOf(KeyChord.of(Key.J)))) { result ->
+            show(ShortcutAction.MEDIA_PLAY_PAUSE)
             revertFor(ShortcutAction.MEDIA_PLAY_PAUSE).performScrollTo().performClick()
 
             onNodeWithText("Apply").performClick()
@@ -152,10 +226,9 @@ class KeyboardShortcutsEditingTest {
 
     @Test
     fun `the dialog writes only to keyboardShortcutSettings`() {
-        // Compared against the *seeded* instance, not a fresh AppSettings(): several of its
-        // defaults are freshly generated UUIDs, so two constructions never compare equal.
         val initial = AppSettings()
         dialog(initial) { result ->
+            show(ShortcutAction.MEDIA_MUTE)
             revertFor(ShortcutAction.MEDIA_MUTE).performScrollTo().performClick()
             onNodeWithText("Apply").performClick()
 
@@ -164,10 +237,29 @@ class KeyboardShortcutsEditingTest {
         }
     }
 
-    // ── Cancel / Apply / OK ─────────────────────────────────────────────────────
+    @Test
+    fun `the footer counts pending edits and drops the count once they are saved`() = dialog {
+        onNodeWithTag(SHORTCUT_UNSAVED_TAG).assertDoesNotExist()
+
+        show(ShortcutAction.MEDIA_MUTE)
+        revertFor(ShortcutAction.MEDIA_MUTE).performScrollTo().performClick()
+        waitForIdle()
+        onNodeWithTag(SHORTCUT_UNSAVED_TAG).assertExists()
+
+        onNodeWithTag(SHORTCUT_RESET_ALL_TAG).performClick()
+        waitForIdle()
+        onNodeWithTag(SHORTCUT_UNSAVED_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a binding saved in an earlier session is not counted as pending`() =
+        dialog(withOverride(ShortcutAction.MEDIA_MUTE, listOf(KeyChord.of(Key.J)))) {
+            onNodeWithTag(SHORTCUT_UNSAVED_TAG).assertDoesNotExist()
+        }
 
     @Test
     fun `Cancel dismisses without saving`() = dialog { result ->
+        show(ShortcutAction.MEDIA_MUTE)
         revertFor(ShortcutAction.MEDIA_MUTE).performScrollTo().performClick()
         onNodeWithText("Cancel", substring = true).performClick()
 
@@ -177,6 +269,7 @@ class KeyboardShortcutsEditingTest {
 
     @Test
     fun `Apply saves without dismissing`() = dialog { result ->
+        show(ShortcutAction.MEDIA_MUTE)
         revertFor(ShortcutAction.MEDIA_MUTE).performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
@@ -186,6 +279,7 @@ class KeyboardShortcutsEditingTest {
 
     @Test
     fun `OK saves and dismisses`() = dialog { result ->
+        show(ShortcutAction.MEDIA_MUTE)
         revertFor(ShortcutAction.MEDIA_MUTE).performScrollTo().performClick()
         onNodeWithText("OK", substring = true).performClick()
 
@@ -195,23 +289,16 @@ class KeyboardShortcutsEditingTest {
 
     @Test
     fun `an edit is visible in the row before it is applied`() = dialog { result ->
+        show(ShortcutAction.MEDIA_MUTE)
         revertFor(ShortcutAction.MEDIA_MUTE).performScrollTo().performClick()
 
-        chipFor(ShortcutAction.MEDIA_MUTE).assertTextEquals("Not set")
+        chipFor(ShortcutAction.MEDIA_MUTE).assertContentDescriptionEquals("Not set")
         assertTrue(result.saved.isEmpty(), "the row updates from pending state, not from a save")
     }
 
-    // ── Pending edits and conflicts ─────────────────────────────────────────────
-
-    /**
-     * The regression test for validating against saved rather than pending state.
-     *
-     * The capture dialog is handed this dialog's own map, so a binding cleared a moment ago frees
-     * its key immediately. Asserted on the map built from what the dialog reports, since the
-     * capture window itself cannot be composed by the test runner.
-     */
     @Test
     fun `clearing a binding frees its chord before Apply`() = dialog { result ->
+        show(ShortcutAction.CLEAR_OUTPUT)
         revertFor(ShortcutAction.CLEAR_OUTPUT).performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 

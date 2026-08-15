@@ -47,6 +47,34 @@ class ShortcutMap internal constructor(
                 chordsFor(other).any { it == chord }
         }
 
+    /**
+     * Every action that shares a binding with another it competes with, and what it collides with.
+     *
+     * The same question [conflictFor] answers for one chord, asked of the whole registry at once —
+     * the shortcuts dialog needs the full picture to count conflicts, mark the categories holding
+     * one, and name the clash under a row, and doing that through the pairwise call would walk the
+     * registry once per action.
+     *
+     * An unbound action never appears: two actions with no chords share nothing. Entries are
+     * symmetric, so a colliding pair is listed under both halves.
+     */
+    fun conflicts(): Map<ShortcutAction, List<ShortcutAction>> {
+        val sharing = mutableMapOf<KeyChord, MutableList<ShortcutAction>>()
+        ShortcutAction.entries.forEach { action ->
+            chordsFor(action).forEach { chord -> sharing.getOrPut(chord) { mutableListOf() } += action }
+        }
+        val found = mutableMapOf<ShortcutAction, MutableSet<ShortcutAction>>()
+        sharing.values.filter { it.size > 1 }.forEach { actions ->
+            actions.forEach { action ->
+                // A set, because two actions bound to the same *two* chords would otherwise name
+                // each other twice — Previous Slide and Next Slide each carry an arrow pair.
+                val clashes = actions.filter { it != action && it.scope.overlaps(action.scope) }
+                if (clashes.isNotEmpty()) found.getOrPut(action) { linkedSetOf() } += clashes
+            }
+        }
+        return found.mapValues { (_, clashes) -> clashes.toList() }
+    }
+
     /** True when the user has moved this action off the binding it ships with. */
     fun isCustomized(action: ShortcutAction): Boolean = chordsFor(action) != action.defaults
 

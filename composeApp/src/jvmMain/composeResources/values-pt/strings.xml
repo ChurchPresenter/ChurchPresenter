@@ -190,6 +190,28 @@
     <string name="shortcut_description_undo">Desfazer a última alteração do programa</string>
     <string name="shortcut_description_redo">Refazer a última alteração desfeita</string>
     <string name="shortcut_description_reorder_image">Reordenar imagem</string>
+    <string name="shortcut_scope_menus_hint">Aceleradores de menu, processados antes de tudo</string>
+    <string name="shortcut_scope_global_hint">Disponível em qualquer parte da aplicação</string>
+    <string name="shortcut_scope_bible_hint">Ativo quando a aba Bíblia está em foco</string>
+    <string name="shortcut_scope_songs_hint">Ativo quando a aba Músicas está em foco</string>
+    <string name="shortcut_scope_pictures_hint">Ativo quando a aba Imagens está em foco</string>
+    <string name="shortcut_scope_presentation_hint">Ativo quando a aba Apresentação está em foco</string>
+    <string name="shortcut_scope_media_hint">Ativo durante a reprodução de áudio e vídeo</string>
+    <string name="shortcut_scope_canvas_hint">Ativo ao editar uma cena do canvas</string>
+    <string name="shortcut_scope_mouse_hint">Gestos que não podem ser reatribuídos</string>
+    <string name="shortcut_conflicts_none">Sem conflitos</string>
+    <string name="shortcut_conflicts_one">1 conflito</string>
+    <string name="shortcut_conflicts_many">%1$d conflitos</string>
+    <string name="shortcut_conflicts_title">Conflitos</string>
+    <string name="shortcut_conflicts_subtitle_one">1 atalho partilha uma combinação</string>
+    <string name="shortcut_conflicts_subtitle_many">%1$d atalhos partilham uma combinação</string>
+    <string name="shortcut_search_results">Resultados da pesquisa</string>
+    <string name="shortcut_search_match_one">1 correspondência</string>
+    <string name="shortcut_search_match_many">%1$d correspondências</string>
+    <string name="shortcut_unsaved_one">1 alteração não guardada</string>
+    <string name="shortcut_unsaved_many">%1$d alterações não guardadas</string>
+    <string name="shortcut_rebind_hint">Clique para reatribuir</string>
+    <string name="shortcut_recording_stop">Parar de escutar</string>
 
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Configurações de Texto e Cores</string>
