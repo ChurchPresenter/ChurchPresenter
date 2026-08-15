@@ -1,9 +1,11 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -89,6 +91,36 @@ class PresenterManagerContentTest {
     }
 
     @Test
+    fun `the pause settings a lower third was loaded with are readable back`() {
+        // The playback loop in main.kt holds the frame on `pauseFrame` for `pauseDurationMs`
+        // before playing through. It reads all three off the manager rather than being passed
+        // them, so a value recorded but not exposed stops the hold happening at all.
+        val pm = manager()
+
+        pm.setLottieContent(json = "{}", pauseAtFrame = true, pauseFrame = 42.5f, pauseDurationMs = 3_500, presetName = "Welcome")
+
+        assertTrue(pm.lottiePauseAtFrame.value)
+        assertEquals(42.5f, pm.lottiePauseFrame.value)
+        assertEquals(3_500L, pm.lottiePauseDurationMs.value)
+        assertEquals("{}", pm.lottieJsonContent.value)
+    }
+
+    @Test
+    fun `content set without a preset name reports an empty one`() {
+        // The preset name defaults away for content that did not come from a saved preset — the
+        // generator's live preview, or a graphic pushed over Instance Link. It is informational
+        // only, so it has to be blank rather than carry the previous preset's name into the
+        // live-state broadcast.
+        val pm = manager()
+        pm.setLottieContent(json = "{}", pauseAtFrame = true, pauseFrame = 1f, pauseDurationMs = 100, presetName = "Named")
+
+        pm.setLottieContent(json = "{}", pauseAtFrame = false, pauseFrame = 0f, pauseDurationMs = 0)
+
+        assertEquals("", pm.currentLowerThirdName.value)
+        assertFalse(pm.lottiePauseAtFrame.value, "the new content's settings replace the old ones wholesale")
+    }
+
+    @Test
     fun `lottie playback progress is not broadcast`() {
         val pm = manager()
         pm.setLottieProgress(0.5f)
@@ -145,5 +177,49 @@ class PresenterManagerContentTest {
         pm.identifyBrowserSourceOutput(0)
         assertEquals(setOf(0, 2), pm.browserSourceIdentifying.value, "several outputs can flash at once")
         assertTrue(reported.isEmpty(), "identifying is an operator aid, not live content")
+    }
+
+    // ── Canvas scenes ───────────────────────────────────────────────────────────
+
+    @Test
+    fun `the active scene is broadcast as a canvas change`() {
+        // A linked instance mirrors the canvas by scene, so the change has to reach the wire under
+        // CANVAS — reported as anything else and a follower renders the previous scene while the
+        // primary has moved on.
+        val pm = manager()
+        val scene = Scene(id = "scene-1", name = "Welcome")
+
+        pm.setActiveScene(scene)
+
+        assertEquals(scene, pm.activeScene.value)
+        assertEquals(listOf(Presenting.CANVAS), reported)
+    }
+
+    @Test
+    fun `clearing the active scene is still a canvas change`() {
+        // Taking the canvas down is as much a change as putting it up; a follower left on the old
+        // scene would keep showing it after the primary went to black.
+        val pm = manager()
+        pm.setActiveScene(Scene(id = "scene-1", name = "Welcome"))
+        reported.clear()
+
+        pm.setActiveScene(null)
+
+        assertEquals(null, pm.activeScene.value)
+        assertEquals(listOf(Presenting.CANVAS), reported)
+    }
+
+    // ── Q&A fade ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the qa transition alpha is local fade state and is not broadcast`() {
+        // Ticks every frame during a crossfade. Broadcasting it would flood the link for something
+        // the follower renders on its own, exactly as with the announcement and lottie fades.
+        val pm = manager()
+
+        pm.setQaTransitionAlpha(0.25f)
+
+        assertEquals(0.25f, pm.qaTransitionAlpha.value)
+        assertTrue(reported.isEmpty(), "a fade frame is not a content change")
     }
 }

@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.utils
 
 import io.sentry.SentryLevel
 import java.io.File
+import java.nio.file.Files
 import io.sentry.Breadcrumb
 import io.sentry.SentryEvent
 import io.sentry.protocol.Message
@@ -339,6 +340,70 @@ class CrashReporterTest {
     @Test
     fun `latestCrashFile is null when no crash reports exist`() {
         assertNull(CrashReporter.latestCrashFile())
+    }
+
+    // ── The report directory not being there ────────────────────────────────────
+    //
+    // Newly reachable, and deliberately so: the four paths now resolve from `user.home` on every
+    // access rather than being cached in fields, so pointing the reporter at a home that has never
+    // been written to is an ordinary state rather than an impossible one.
+
+    @Test
+    fun `latestCrashFile is null when the report directory does not exist`() {
+        crashDir.deleteRecursively()
+
+        assertNull(CrashReporter.latestCrashFile(), "listing a directory that is not there yields null, not a throw")
+    }
+
+    @Test
+    fun `cleanOldLogs on a missing report directory does nothing and does not create it`() {
+        // Runs at startup before anything has been written, on a fresh install.
+        crashDir.deleteRecursively()
+
+        CrashReporter.cleanOldLogs()
+
+        assertFalse(crashDir.exists(), "a sweep must not conjure the directory it was asked to tidy")
+    }
+
+    /**
+     * The paths follow `user.home`; they are not resolved once and kept.
+     *
+     * This is the regression guard for a bug that cost five full test runs. The four `File`s used
+     * to be plain fields, built in the object's initialiser — which runs the first time *anything*
+     * touches [CrashReporter]. Whatever `user.home` said at that instant was baked in for the life
+     * of the JVM. Dozens of test classes redirect `user.home` to a temp dir and delete it in
+     * teardown, and several reach code that breadcrumbs through here, so whichever won the race
+     * pinned the reporter to a directory that no longer existed. This class then failed a dozen
+     * assertions having done nothing wrong, and which class won moved every time a test was added
+     * anywhere in the suite.
+     *
+     * Turning the fields into `get()` removed the whole failure mode. If they are ever turned back
+     * into `val`s, this fails immediately and says why — rather than surfacing weeks later as a
+     * dozen unexplained failures in an unrelated class.
+     */
+    @Test
+    fun `the report paths follow a changed user home rather than being fixed at first touch`() {
+        val realHome = System.getProperty("user.home")
+        val otherHome = Files.createTempDirectory("cp-crash-home").toFile()
+        try {
+            System.setProperty("user.home", otherHome.absolutePath)
+
+            CrashReporter.writeCrashCount(7)
+
+            val landed = File(otherHome, ".churchpresenter/.crash_count")
+            assertTrue(landed.isFile, "the count must be written under the home in force at the time")
+            assertEquals("7", landed.readText().trim())
+            assertEquals(7, CrashReporter.readCrashCount(), "and read back from the same place")
+        } finally {
+            System.setProperty("user.home", realHome)
+            otherHome.deleteRecursively()
+        }
+
+        assertEquals(
+            0,
+            CrashReporter.readCrashCount(),
+            "back under the original home, the count written elsewhere must not be visible",
+        )
     }
 
     @Test

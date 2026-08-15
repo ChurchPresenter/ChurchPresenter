@@ -12,9 +12,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -338,6 +340,12 @@ class CompanionServerScheduleMappingTest {
                 request.decision.complete(true)
             }
         }
+        // The collector is not subscribed the moment `launch` returns, and onAddToSchedule has
+        // replay = 0: a request emitted before it subscribes is dropped on the floor, its decision
+        // is never completed, and the endpoint — which suspends until the desktop answers — hangs
+        // until the HTTP client gives up. Wait for the subscription itself, which is a positive
+        // signal and so costs nothing once the collector is live.
+        withTimeout(5_000) { server.onAddToSchedule.subscriptionCount.first { it > 0 } }
         val response = async {
             client.post(url(Constants.ENDPOINT_SCHEDULE_ADD)) { setBody(body) }
         }.await()

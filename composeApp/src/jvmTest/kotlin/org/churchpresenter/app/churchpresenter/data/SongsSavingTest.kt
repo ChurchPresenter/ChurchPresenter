@@ -342,4 +342,45 @@ class SongsSavingTest {
         )
         assertEquals("Hymnal", load(file).getSongs().single().songbook)
     }
+
+    @Test
+    fun `blank and truncated lines in a songbook are skipped when looking for the song`() {
+        // Hand-edited `.sps` files carry both: a blank line left between songs, and a row cut
+        // short by a bad export. Neither parses into a song, but the save path scans the raw
+        // lines, so it has to step over them — matching one would rewrite it as a full row and
+        // replace whatever was there with a different song entirely.
+        val file = File(dir, "library.sps").also {
+            it.writeText(
+                "##SongPresenter\n##Hymnal\n" +
+                    "\n" +
+                    "9#\$#Truncated\n" +
+                    row("1", "Amazing Grace", lyrics = "Verse 1@%amazing grace") + "\n",
+                Charsets.UTF_8,
+            )
+        }
+        val songs = load(file)
+        val original = songs.getSongs().single { it.title == "Amazing Grace" }
+
+        assertTrue(songs.saveSongToFile(original, original.copy(tune = "D"), dir.absolutePath))
+
+        val lines = file.readLines()
+        assertEquals("", lines[2], "the blank line is left exactly as it was")
+        assertEquals("9#\$#Truncated", lines[3], "and so is the row too short to be a song")
+        assertEquals("D", storedRow(file, "Amazing Grace")[3], "the edit landed on the real row")
+    }
+
+    @Test
+    fun `updating a song the library does not hold changes nothing`() {
+        // The editor works on a copy, and the library underneath can have been reloaded from disk
+        // in between — a folder watcher firing while the dialog is open. Writing at a stale index
+        // would replace an unrelated song with this one.
+        val file = writeSongbook(row("1", "First"), row("2", "Second"))
+        val songs = load(file)
+        val before = songs.getSongs().map { it.title }
+        val stranger = songs.getSongs().first().copy(number = "99", title = "Not in the library")
+
+        songs.updateSong(stranger, stranger.copy(title = "Rewritten"))
+
+        assertEquals(before, songs.getSongs().map { it.title }, "no song may be replaced by one that is not there")
+    }
 }

@@ -14,6 +14,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -114,6 +115,57 @@ class SongsViewModelLibraryTest {
         val vm = SongsViewModel(AppSettings(), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined, enableFolderWatcher = false).also { created.add(it) }
         awaitUntil("the load to finish") { !vm.isLoading.value }
         assertTrue(vm.filteredSongItems.value.isEmpty())
+    }
+
+    // ── Reading a selection that is not there ───────────────────────────────────
+    //
+    // Every read of the current song is guarded on the index, because the two can come apart: the
+    // library reloads on a folder watch, a filter narrows the list under a selection made against
+    // the wider one, or a linked instance sends a selection this machine's library cannot satisfy.
+    // The guards must answer "nothing", never index into the list.
+
+    @Test
+    fun `nothing is selected in an empty library`() {
+        val vm = SongsViewModel(AppSettings(), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined, enableFolderWatcher = false).also { created.add(it) }
+        awaitUntil("the load to finish") { !vm.isLoading.value }
+
+        assertNull(vm.getSelectedSong(), "an empty library has no current song")
+        assertTrue(vm.getLyricSections().isEmpty(), "and so no sections to present")
+    }
+
+    @Test
+    fun `a selection past the end of the library reads as nothing`() {
+        // What a schedule saved against a larger library produces after songs are deleted.
+        val vm = viewModel()
+        vm.selectSong(999)
+
+        assertNull(vm.getSelectedSong())
+        assertTrue(vm.getLyricSections().isEmpty())
+    }
+
+    @Test
+    fun `a negative selection reads as nothing`() {
+        // -1 is the "nothing chosen yet" value the list starts on, and both readers see it before
+        // the operator has clicked anything.
+        val vm = viewModel()
+        vm.selectSong(-1)
+
+        assertNull(vm.getSelectedSong())
+        assertTrue(vm.getLyricSections().isEmpty())
+    }
+
+    @Test
+    fun `a song whose number is not a number presents as song zero`() {
+        // Numbers come from the file name and are free text — "42a" for a second setting of the
+        // same hymn is a real convention. The slide carries an Int, so an unparseable number has to
+        // fall to 0 rather than throw while the song is going live.
+        writeSong(songbook = "Hymnal", number = "42a", title = "Alternate Setting", lyrics = listOf("[Verse 1]", "A line"))
+        val vm = viewModel()
+        vm.selectByTitle("Alternate Setting")
+
+        val section = assertNotNull(vm.getSelectedSong())
+        assertEquals(0, section.songNumber, "an unparseable number must not stop the song presenting")
+        assertEquals("Alternate Setting", section.title)
     }
 
     // ── Section navigation ──────────────────────────────────────────────────────

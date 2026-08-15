@@ -105,6 +105,25 @@ jobs:
               print(f'{t:>8.1f}s  {n:>5}  {name}')
           PY
 
+      # Prints the six JaCoCo counters into the log and onto the run's summary page, in the same
+      # format `./gradlew :composeApp:check` shows locally (minus the file:// link to the HTML tree,
+      # which does not survive the runner). Nothing else in CI reported a coverage number -- the
+      # floor below only speaks up when it is breached, so a run could move coverage several points
+      # in either direction and say nothing.
+      #
+      # `-x jvmTest` for the same reason it is on the floor step: jacocoTestReport `dependsOn`
+      # jvmTest, and after a FAILED suite that dependency is not up to date, so without this the
+      # step would relaunch the whole 14-minute suite inside its own budget. The report is built
+      # from the exec data the step above already wrote.
+      #
+      # Advisory after a failure, like the floor: the exec data is then from a run that stopped
+      # early, so the numbers are understated. Still worth printing -- it is the only place the
+      # counters appear -- but they are not comparable with a green run's.
+      - name: Coverage summary
+        if: always()
+        timeout-minutes: 10
+        run: ./gradlew :composeApp:jacocoTestReport -x jvmTest
+
       # The 75% line-coverage floor, off the execution data the tests above just produced. Its
       # denominator excludes the app-entry wiring that only runs under a real display -- see
       # jacocoTestCoverageVerification in composeApp/build.gradle.kts. `if: always()` so a coverage

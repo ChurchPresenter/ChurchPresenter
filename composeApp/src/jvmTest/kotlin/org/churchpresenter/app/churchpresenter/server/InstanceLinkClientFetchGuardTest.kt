@@ -146,6 +146,46 @@ class InstanceLinkClientFetchGuardTest {
     }
 
     @Test
+    fun `a follower carrying the api key is served every bible module the primary has`() {
+        // The bible endpoints are separate from the assets above and each attaches the key on its
+        // own. A follower mirroring the primary's translations downloads the whole set through
+        // these three, so a key missing from any one of them leaves the follower with a partial
+        // library and no error to explain it.
+        val primaryPort = startPrimary(apiKey = "s3cret")
+        val primary = requireNotNull(server)
+        val primaryFile = SpbFixture.spbFile(dir, name = "p.spb")
+        val secondaryFile = SpbFixture.spbFile(
+            dir,
+            name = "s.spb",
+            content = SpbFixture.sampleContent(title = "Secondary Bible"),
+        )
+        primary.updateBible(SpbFixture.loadedBible(dir), "KJV", filePath = primaryFile.absolutePath)
+        primary.updateSecondaryBibleFilePath(secondaryFile.absolutePath)
+        primary.updateBibleFilePaths(listOf(primaryFile.absolutePath, secondaryFile.absolutePath))
+
+        val client = client()
+        client.connect(
+            host = "127.0.0.1", port = primaryPort, apiKey = "s3cret",
+            deviceId = "follower", reconnectDelayMs = 60_000,
+        )
+        awaitUntil("the bible to be fetchable with the key") {
+            runBlocking { client.fetchBibleFile() } != null
+        }
+
+        runBlocking {
+            assertEquals(
+                secondaryFile.readBytes().toList(),
+                assertNotNull(client.fetchSecondaryBibleFile()).toList(),
+            )
+            assertEquals(
+                listOf("p.spb", "s.spb"),
+                client.fetchBibleTranslations().map { it.first },
+                "the manifest order is the presentation order and has to survive the download",
+            )
+        }
+    }
+
+    @Test
     fun `a follower without the api key is refused by a protected primary`() {
         val primaryPort = startPrimary(apiKey = "s3cret")
         val primary = requireNotNull(server)

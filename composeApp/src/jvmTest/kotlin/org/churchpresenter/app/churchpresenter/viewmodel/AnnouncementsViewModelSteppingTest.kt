@@ -197,4 +197,78 @@ class AnnouncementsViewModelSteppingTest {
 
         assertEquals(300, vm.timerRemaining, "returning to duration mode shows the full configured time")
     }
+
+    // ── stepTimerHours: the one spinner with no roll-over above it ──────────────
+
+    @Test
+    fun `stepping hours up adds an hour to the countdown`() {
+        // Unlike minutes and seconds there is nothing above hours to carry into, so this is a
+        // plain add — and it still has to move the remaining preview with it, like every other
+        // duration edit.
+        val vm = vm()
+        vm.setTimerMinutes(30) // 1800s configured and remaining
+
+        vm.stepTimerHours(1)
+
+        assertEquals(1, vm.timerHours)
+        assertEquals(1800 + 3600, vm.timerRemaining, "the extra hour extends the countdown")
+    }
+
+    @Test
+    fun `stepping hours down stops at zero rather than going negative`() {
+        // The only guard on this field. A negative hour count would make the configured total
+        // negative and the countdown display nonsense.
+        val vm = vm()
+
+        vm.stepTimerHours(-1)
+
+        assertEquals(0, vm.timerHours)
+        assertEquals(0, vm.timerRemaining, "and the remaining preview cannot go below zero either")
+    }
+
+    @Test
+    fun `stepping hours down from a set value returns the time it added`() {
+        val vm = vm()
+        vm.stepTimerHours(2)
+        assertEquals(7200, vm.timerRemaining)
+
+        vm.stepTimerHours(-1)
+
+        assertEquals(1, vm.timerHours)
+        assertEquals(3600, vm.timerRemaining, "removing an hour takes back exactly what it added")
+    }
+
+    @Test
+    fun `stepping hours by zero leaves the countdown untouched`() {
+        // The delta guard: a no-op edit must not re-seed the remaining time from the configured
+        // fields, which would discard a countdown already part-way through.
+        val vm = vm()
+        vm.setTimerMinutes(10)
+        vm.stepTimerHours(0)
+
+        assertEquals(600, vm.timerRemaining)
+    }
+
+    // ── The plain appearance setters ────────────────────────────────────────────
+
+    @Test
+    fun `the text style setters each record their own field`() {
+        // These are written straight through with no clamping, so what matters is that each lands
+        // on the field it names — a copy-paste slip here silently applies the wrong style to every
+        // announcement, and nothing else would catch it.
+        val vm = vm()
+
+        vm.setFontType("Georgia")
+        vm.setUnderline(true)
+        vm.setShadow(true)
+        vm.setPosition(Constants.BOTTOM)
+        vm.setTimerTextColor("#FF0000")
+
+        assertEquals("Georgia", vm.fontType)
+        assertEquals(true, vm.underline)
+        assertEquals(true, vm.shadow)
+        assertEquals(Constants.BOTTOM, vm.position)
+        assertEquals("#FF0000", vm.timerTextColor)
+        assertEquals(false, vm.bold, "a setter must not disturb the fields it does not name")
+    }
 }

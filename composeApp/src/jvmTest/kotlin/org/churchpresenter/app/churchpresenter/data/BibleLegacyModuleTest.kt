@@ -404,6 +404,56 @@ class BibleLegacyModuleTest {
     }
 
     @Test
+    fun `a book list stops at the first verse when the module has no separator`() {
+        // The scan reads until it sees a separator OR a line starting with "B" — a code reference.
+        // Modules written without a separator exist, and without the second stop condition this
+        // path reads the entire 4 MB of verse text looking for one, which is the stall the
+        // header-only load exists to avoid.
+        val file = File(dir, "no-separator.spb").also {
+            it.writeText(
+                """
+                ##Title: No Separator
+                1 Genesis 50
+                43 John 21
+                B001C001V001 1 1 1 In the beginning.
+                B043C003V016 43 3 16 For God so loved the world.
+                """.trimIndent(),
+                Charsets.UTF_8,
+            )
+        }
+
+        val b = Bible().also { it.loadBooksOnly(file.absolutePath) }
+
+        assertEquals(listOf("Genesis", "John"), b.getBooks())
+        assertEquals(0, b.getVerseCount(), "the verses below must not have been read")
+    }
+
+    @Test
+    fun `blank lines in the header are stepped over rather than ending the scan`() {
+        // Modules exported by hand carry blank lines between the title and the book list. A blank
+        // line is neither a separator nor a header line, and dropping it has to leave the books
+        // after it still readable.
+        val file = File(dir, "blank-lines.spb").also {
+            it.writeText(
+                """
+                ##Title: Spaced Out
+
+                1 Genesis 50
+
+                43 John 21
+                -----
+                B001C001V001 1 1 1 In the beginning.
+                """.trimIndent(),
+                Charsets.UTF_8,
+            )
+        }
+
+        val b = Bible().also { it.loadBooksOnly(file.absolutePath) }
+
+        assertEquals(listOf("Genesis", "John"), b.getBooks(), "a blank line must not truncate the list")
+    }
+
+    @Test
     fun `a book found only in the verse data is named from the list the caller supplied`() {
         val file = File(dir, "partial-header.spb").also {
             it.writeText(

@@ -26,6 +26,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -105,6 +106,13 @@ class CompanionServerPictureCatalogTest {
         }
     }
 
+    /** A plain GET against any path on the shared server, optionally carrying the api key. */
+    private fun getting(path: String, apiKey: String? = null): HttpResponse = runBlocking {
+        client.get("http://127.0.0.1:$port$path") {
+            apiKey?.let { header(Constants.HEADER_API_KEY, it) }
+        }
+    }
+
     private fun HttpResponse.obj(): JsonObject =
         json.parseToJsonElement(runBlocking { bodyAsText() }).jsonObject
 
@@ -169,5 +177,80 @@ class CompanionServerPictureCatalogTest {
 
         assertEquals(HttpStatusCode.Unauthorized, getPictures().status)
         assertEquals(HttpStatusCode.OK, getPictures(apiKey = "s3cret").status)
+    }
+
+    @Test
+    fun `every asset route behind the catalogue is behind the key too`() {
+        // Guarding the catalogue alone would be theatre: the entries in it are URLs, and anyone who
+        // has seen one — or guesses a folder id — can fetch the file directly. Each of these
+        // carries its own check, so each is asserted rather than assumed from the one above.
+        loadFolder("advent-01.jpg")
+        server.updateApiKey(enabled = true, key = "s3cret")
+
+        val guarded = listOf(
+            "${Constants.ENDPOINT_PICTURES}/folder-1",
+            "${Constants.ENDPOINT_PICTURES}/folder-1/images/0",
+            "${Constants.ENDPOINT_BIBLE_FILE}/secondary",
+            "${Constants.ENDPOINT_BIBLE_FILE}/translations",
+            "${Constants.ENDPOINT_BIBLE_FILE}/translation/0",
+        )
+
+        guarded.forEach { path ->
+            assertEquals(
+                HttpStatusCode.Unauthorized,
+                getting(path).status,
+                "$path answered without the key",
+            )
+        }
+    }
+
+    @Test
+    fun `a bible translation index that is not there is a not-found`() {
+        // The follower asks by position in the primary's manifest, and the two can disagree — a
+        // translation removed on the primary between the manifest and the download. A 404 tells it
+        // to re-read the manifest; anything else looks like the link itself is broken.
+        server.updateApiKey(enabled = false, key = "")
+
+        assertEquals(
+            HttpStatusCode.NotFound,
+            getting("${Constants.ENDPOINT_BIBLE_FILE}/translation/99").status,
+            "an index past the end of the manifest",
+        )
+        assertEquals(
+            HttpStatusCode.NotFound,
+            getting("${Constants.ENDPOINT_BIBLE_FILE}/translation/not-a-number").status,
+            "and an index that is not a number at all",
+        )
+    }
+
+    // ── What the desktop reads back off the server ──────────────────────────────
+
+    /**
+     * `getImageFile` and `activeFolderId` are the desktop's side of the same catalogue.
+     *
+     * The remote-select handler in `MainDesktop` resolves a picture chosen on a phone through
+     * these rather than through the Pictures tab's own state, because the phone can select out of
+     * a folder the tab does not currently have open — a `device_uploads` selection is the usual
+     * case. Reading the wrong file here puts a different image on the screen than the one tapped.
+     */
+    @Test
+    fun `an image chosen remotely resolves to the file at that index`() {
+        loadFolder("advent-01.jpg", "advent-02.jpg")
+
+        assertEquals("folder-1", server.activeFolderId)
+        assertEquals("advent-01.jpg", server.getImageFile("folder-1", 0)?.name)
+        assertEquals("advent-02.jpg", server.getImageFile("folder-1", 1)?.name)
+    }
+
+    @Test
+    fun `an index or folder the server does not have resolves to nothing`() {
+        // A phone holding a stale catalogue asks for an index that has since gone. Returning the
+        // wrong file would be worse than returning none: the operator sees a picture they did not
+        // choose and has no way to tell it was the wrong one.
+        loadFolder("advent-01.jpg")
+
+        assertNull(server.getImageFile("folder-1", 5), "past the end of the folder")
+        assertNull(server.getImageFile("folder-1", -1), "before the start of it")
+        assertNull(server.getImageFile("some-other-folder", 0), "a folder that is not the open one")
     }
 }

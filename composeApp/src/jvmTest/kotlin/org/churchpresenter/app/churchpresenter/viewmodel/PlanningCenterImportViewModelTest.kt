@@ -174,6 +174,64 @@ class PlanningCenterImportViewModelTest {
         assertEquals("Sunday", vm.plans.single().title)
     }
 
+    @Test
+    fun `an account with no service types selects nothing and asks for no plans`() {
+        // A connected user whose organisation has none, or whose permissions hide them all. The
+        // auto-select picks the first, and with nothing to pick the plans request must not be made
+        // with a blank service-type id — Planning Center answers that with a 404 the dialog would
+        // surface as a generic failure.
+        coEvery { PlanningCenterClient.listServiceTypes(any(), any()) } returns
+            PlanningCenterClient.ServiceTypesOutcome.Success(emptyList())
+        coEvery { PlanningCenterClient.listUpcomingPlans(any(), any(), any()) } returns
+            PlanningCenterClient.PlansOutcome.Success(listOf(PlanningCenterClient.Plan("p", "Should not load", "")))
+        // Built directly rather than through viewModel(): that helper seeds a service-type id, and
+        // the auto-select only runs when none is stored yet — which is the state being tested.
+        val vm = PlanningCenterImportViewModel(
+            initialAccessToken = "valid-token",
+            initialRefreshToken = "refresh-token",
+            initialExpiresAtEpochMs = System.currentTimeMillis() + 3_600_000,
+            initialServiceTypeId = "",
+            importSongbookName = "Planning Center",
+            onTokensRefreshed = { a, r, e -> refreshed.add(Triple(a, r, e)) },
+        )
+
+        vm.loadServiceTypes()
+        awaitUntil("the load to settle") { !vm.isLoadingServiceTypes }
+
+        assertTrue(vm.serviceTypes.isEmpty())
+        assertEquals("", vm.selectedServiceTypeId, "there is nothing to select")
+        assertTrue(vm.plans.isEmpty(), "and so no plan request was made")
+    }
+
+    @Test
+    fun `an expired session while loading plans surfaces a reconnect message`() {
+        // The token can go stale between listing service types and listing their plans — the
+        // dialog is open for as long as the operator takes to choose. Each call has to recognise
+        // the 401 for itself, or this one reads as a plain failure and offers no way forward.
+        coEvery { PlanningCenterClient.listUpcomingPlans(any(), any(), any()) } returns
+            PlanningCenterClient.PlansOutcome.Unauthorized
+        val vm = viewModel()
+
+        vm.selectServiceType("st-2")
+        awaitUntil("the error") { vm.errorMessage != null }
+
+        assertTrue(vm.errorMessage!!.contains("reconnect", ignoreCase = true))
+        assertTrue(vm.plans.isEmpty())
+    }
+
+    @Test
+    fun `an expired session while loading plan items surfaces a reconnect message`() {
+        coEvery { PlanningCenterClient.getPlanItems(any(), any(), any(), any()) } returns
+            PlanningCenterClient.PlanItemsOutcome.Unauthorized
+        val vm = viewModel()
+
+        vm.selectPlan("plan-1")
+        awaitUntil("the error") { vm.errorMessage != null }
+
+        assertTrue(vm.errorMessage!!.contains("reconnect", ignoreCase = true))
+        assertTrue(vm.planItems.isEmpty())
+    }
+
     // ── Token refresh ───────────────────────────────────────────────────────────
 
     @Test

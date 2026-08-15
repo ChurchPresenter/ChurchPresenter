@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.server
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.delete
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -175,6 +176,10 @@ class CompanionServerQaModerationTest {
 
     private fun delete(path: String, password: String? = null): HttpResponse = runBlocking {
         client.delete(url(path)) { password?.let { p -> header("X-QA-Password", p) } }
+    }
+
+    private fun get(path: String, password: String? = null): HttpResponse = runBlocking {
+        client.get(url(path)) { password?.let { p -> header("X-QA-Password", p) } }
     }
 
     private fun HttpResponse.text(): String = runBlocking { bodyAsText() }
@@ -465,6 +470,70 @@ class CompanionServerQaModerationTest {
         assertEquals(0, prompts.size)
     }
 
+    // ── With no session manager at all ──────────────────────────────────────────
+
+    /**
+     * Every moderation route reaches for `server.qaManager` with a safe call and falls back.
+     *
+     * That manager is null until the operator opens a session, and it is set back to null when one
+     * is closed — so a moderator phone still holding the admin page from the last service posts
+     * into exactly this state. Each route has to answer it rather than throw: an unanswered request
+     * leaves the phone spinning on a page the operator cannot see.
+     */
+    @Test
+    fun `moderating with no session open is a not-found rather than a crash`() {
+        playOperator(allow = true)
+
+        // resetState leaves qaManager null; no openSession() here on purpose.
+        assertEquals(HttpStatusCode.NotFound, post("/api/qa/questions/anything/approve").status)
+        assertEquals(HttpStatusCode.NotFound, post("/api/qa/questions/anything/deny").status)
+        assertEquals(HttpStatusCode.NotFound, post("/api/qa/questions/anything/done").status)
+        assertEquals(HttpStatusCode.NotFound, post("/api/qa/questions/anything/display").status)
+        assertEquals(HttpStatusCode.NotFound, delete("/api/qa/questions/anything").status)
+        assertEquals(
+            HttpStatusCode.NotFound,
+            post("/api/qa/questions/anything/edit", """{"text":"rewritten"}""").status,
+        )
+    }
+
+    @Test
+    fun `the prompt for a question that is not there carries no text`() {
+        // The lookup that fills the prompt is a safe call too. With no manager there is nothing to
+        // name, and the operator is shown an empty string rather than the word "null".
+        val prompts = playOperator(allow = true)
+
+        post("/api/qa/questions/anything/deny")
+
+        assertEquals("", prompts.single().text)
+        assertEquals("anything", prompts.single().questionId)
+    }
+
+    @Test
+    fun `adding a question with no session open is refused`() {
+        // Unlike the others this is a bad request, not a not-found: the question was never going to
+        // exist, so there is nothing to fail to find.
+        playOperator(allow = true)
+
+        val response = post("/api/qa/add", """{"text":"from the desk","name":""}""")
+
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
+    fun `clearing with no session open succeeds and changes nothing`() {
+        // These two are the exception: there is nothing to clear, and reporting a failure would
+        // make the admin page show an error for having asked to tidy an already-empty screen.
+        playOperator(allow = true)
+
+        assertEquals(HttpStatusCode.OK, post("/api/qa/clear-display").status)
+        assertEquals(HttpStatusCode.OK, post("/api/qa/clear-all").status)
+    }
+
+    @Test
+    fun `the queue is an empty list rather than an error with no session open`() {
+        // The moderator's page polls this on a timer. Between services it must render as empty.
+        assertEquals("[]", get("/api/qa/questions").text())
+    }
     // ── The password guard ──────────────────────────────────────────────────────
 
     @Test
