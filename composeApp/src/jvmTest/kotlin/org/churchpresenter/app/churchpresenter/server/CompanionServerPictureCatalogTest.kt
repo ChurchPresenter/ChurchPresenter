@@ -106,6 +106,13 @@ class CompanionServerPictureCatalogTest {
         }
     }
 
+    /** A plain GET against any path on the shared server, optionally carrying the api key. */
+    private fun getting(path: String, apiKey: String? = null): HttpResponse = runBlocking {
+        client.get("http://127.0.0.1:$port$path") {
+            apiKey?.let { header(Constants.HEADER_API_KEY, it) }
+        }
+    }
+
     private fun HttpResponse.obj(): JsonObject =
         json.parseToJsonElement(runBlocking { bodyAsText() }).jsonObject
 
@@ -170,6 +177,50 @@ class CompanionServerPictureCatalogTest {
 
         assertEquals(HttpStatusCode.Unauthorized, getPictures().status)
         assertEquals(HttpStatusCode.OK, getPictures(apiKey = "s3cret").status)
+    }
+
+    @Test
+    fun `every asset route behind the catalogue is behind the key too`() {
+        // Guarding the catalogue alone would be theatre: the entries in it are URLs, and anyone who
+        // has seen one — or guesses a folder id — can fetch the file directly. Each of these
+        // carries its own check, so each is asserted rather than assumed from the one above.
+        loadFolder("advent-01.jpg")
+        server.updateApiKey(enabled = true, key = "s3cret")
+
+        val guarded = listOf(
+            "${Constants.ENDPOINT_PICTURES}/folder-1",
+            "${Constants.ENDPOINT_PICTURES}/folder-1/images/0",
+            "${Constants.ENDPOINT_BIBLE_FILE}/secondary",
+            "${Constants.ENDPOINT_BIBLE_FILE}/translations",
+            "${Constants.ENDPOINT_BIBLE_FILE}/translation/0",
+        )
+
+        guarded.forEach { path ->
+            assertEquals(
+                HttpStatusCode.Unauthorized,
+                getting(path).status,
+                "$path answered without the key",
+            )
+        }
+    }
+
+    @Test
+    fun `a bible translation index that is not there is a not-found`() {
+        // The follower asks by position in the primary's manifest, and the two can disagree — a
+        // translation removed on the primary between the manifest and the download. A 404 tells it
+        // to re-read the manifest; anything else looks like the link itself is broken.
+        server.updateApiKey(enabled = false, key = "")
+
+        assertEquals(
+            HttpStatusCode.NotFound,
+            getting("${Constants.ENDPOINT_BIBLE_FILE}/translation/99").status,
+            "an index past the end of the manifest",
+        )
+        assertEquals(
+            HttpStatusCode.NotFound,
+            getting("${Constants.ENDPOINT_BIBLE_FILE}/translation/not-a-number").status,
+            "and an index that is not a number at all",
+        )
     }
 
     // ── What the desktop reads back off the server ──────────────────────────────

@@ -400,6 +400,50 @@ class EBibleSourceTest {
     }
 
     @Test
+    fun `a server error falls back to the cached catalogue rather than emptying the list`() {
+        // The no-cache variant below is a Failure. With a cache, eBible having a bad day must not
+        // cost a church its browse list — the catalogue barely changes week to week, so a stale
+        // copy is worth far more than an empty dialog. Distinct from the unreachable-host case
+        // above: this one connects and is answered, just not with a catalogue.
+        fetch(httpServing(csv("eng,engbsb,Berean,,public domain,True,True,2024-01-01")), now = 1_000L)
+        EBibleSource.clearMemoryCache()
+        val muchLater = 1_000L + 30L * 24 * 60 * 60 * 1000
+
+        val outcome = assertIs<BibleCatalogOutcome.Success>(
+            fetch(httpServing("upstream broke", status = HttpStatusCode.InternalServerError), now = muchLater),
+        )
+
+        assertTrue(outcome.stale, "the dialog has to be able to say this is not fresh")
+        assertEquals("engbsb", outcome.modules.single().identifier)
+    }
+
+    @Test
+    fun `a catalogue that arrives empty falls back to the cached one`() {
+        // A 200 carrying something that is not a catalogue — a captive portal, a maintenance page,
+        // a truncated CSV. Parsing yields nothing, and replacing a good cached list with nothing
+        // would look to the operator exactly like every translation having been withdrawn.
+        fetch(httpServing(csv("eng,engbsb,Berean,,public domain,True,True,2024-01-01")), now = 1_000L)
+        EBibleSource.clearMemoryCache()
+        val muchLater = 1_000L + 30L * 24 * 60 * 60 * 1000
+
+        val outcome = assertIs<BibleCatalogOutcome.Success>(
+            fetch(httpServing("<html>we are down for maintenance</html>"), now = muchLater),
+        )
+
+        assertTrue(outcome.stale)
+        assertEquals("engbsb", outcome.modules.single().identifier, "the cached list survives")
+    }
+
+    @Test
+    fun `an empty catalogue with no cache is a failure, and the cache is not overwritten`() {
+        // The other half of the same branch. Nothing parsed and nothing cached leaves nothing to
+        // show — but it must also not write the unparseable body over the cache file, or the next
+        // run starts from a cache it cannot read either.
+        assertEquals(BibleCatalogOutcome.Failure, fetch(httpServing("<html>maintenance</html>")))
+        assertFalse(cacheFile.isFile, "an unparseable body must not become the cache")
+    }
+
+    @Test
     fun `a cache file that parses to no translations is treated as no cache at all`() {
         // Only the header row, no data — a corrupt or truncated write from a previous run.
         cacheFile.parentFile.mkdirs()

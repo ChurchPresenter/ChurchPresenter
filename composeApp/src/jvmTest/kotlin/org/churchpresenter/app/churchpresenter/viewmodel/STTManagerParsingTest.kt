@@ -125,6 +125,33 @@ class STTManagerParsingTest {
         assertEquals("partial", stt.inProgressTranslation.value)
     }
 
+    @Test
+    fun `an in-progress value of some other type is shown as its own text`() {
+        // `in_progress` is whatever the STT server put there — the two parsers accept a string and
+        // (for translation) an object, and everything else falls through to `toString()`. A server
+        // sending a bare number is the realistic case, and it has to reach the screen as the
+        // characters the speaker is part-way through rather than being dropped to blank.
+        val stt = manager()
+
+        stt.transcription("""{"in_progress":2026}""")
+        assertEquals("2026", stt.inProgressText.value)
+
+        stt.translation("""{"in_progress":2026}""")
+        assertEquals("2026", stt.inProgressTranslation.value)
+    }
+
+    @Test
+    fun `an in-progress array does not crash the caption`() {
+        // The other shape a loose server can produce. Nothing renders an array usefully, but the
+        // parser must not throw — this runs on every socket frame while someone is speaking, and
+        // an exception here stops captions for the rest of the service.
+        val stt = manager()
+
+        stt.transcription("""{"in_progress":["a","b"]}""")
+
+        assertTrue(stt.inProgressText.value.isNotEmpty(), "something readable, rather than a blank line")
+    }
+
     // ── Word highlighting ────────────────────────────────────────────────────────
 
     @Test
