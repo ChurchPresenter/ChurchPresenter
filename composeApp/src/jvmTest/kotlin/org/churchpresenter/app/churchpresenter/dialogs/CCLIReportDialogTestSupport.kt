@@ -11,8 +11,11 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.data.ActivityPoint
+import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.SongSummary
 import org.churchpresenter.app.churchpresenter.data.VerseSummary
+import java.io.File
+import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -39,6 +42,53 @@ import java.util.Locale
  * rather than hardcoded. A hardcoded "Jan 5, 2026" would pass in one timezone and fail in another;
  * this still proves the cell shows *that* song's `firstUsed` in *that* column.
  */
+
+// ── Isolated home + seeding ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Runs [block] with `user.home` pointed at a fresh temp directory.
+ *
+ * [StatisticsManager] resolves `user.home` in its field initialisers and writes `statistics.json`
+ * and `play_log.json` under it, so without this a test would read — and the clear tests would
+ * destroy — the developer's real play history.
+ */
+internal fun <T> withStatsHome(block: (home: File) -> T): T {
+    val home = Files.createTempDirectory("cp-stats").toFile()
+    val previous = System.getProperty("user.home")
+    System.setProperty("user.home", home.absolutePath)
+    return try {
+        block(home)
+    } finally {
+        System.setProperty("user.home", previous)
+        home.deleteRecursively()
+    }
+}
+
+/** Records [times] displays of one song, which is how it earns its count. */
+internal fun StatisticsManager.playSong(
+    number: Int,
+    title: String,
+    songbook: String,
+    times: Int = 1,
+) = repeat(times) {
+    recordSongDisplay(
+        songId = "$songbook#$number",
+        songNumber = number,
+        title = title,
+        songbook = songbook,
+    )
+}
+
+/** Records [times] displays of one verse. */
+internal fun StatisticsManager.playVerse(
+    bible: String,
+    book: String,
+    chapter: Int,
+    verse: Int,
+    times: Int = 1,
+) = repeat(times) {
+    recordVerseDisplay(bibleName = bible, bookName = book, chapter = chapter, verseNumber = verse)
+}
 
 // ── Harness ─────────────────────────────────────────────────────────────────────────────────────
 

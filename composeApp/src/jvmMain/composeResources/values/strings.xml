@@ -1405,12 +1405,24 @@
     <string name="statistics_verse_count">%1$d verses</string>
     <string name="clear_statistics">Clear Statistics</string>
     <string name="times_displayed">times</string>
-    <string name="menu_statistics">Statistics</string>
+    <string name="menu_statistics">CCLI Reports</string>
     <string name="export_to_xls">Export to XLS</string>
     <string name="statistics_exported_success">Statistics exported successfully.</string>
     <string name="statistics_exported_error">Failed to export statistics.</string>
     <string name="file_chooser_save_statistics">Save Statistics As</string>
     <string name="file_filter_xls">Excel Spreadsheet (*.xls)</string>
+    <string name="stats_period_label">Period:</string>
+    <string name="stats_period_all_time">All Time</string>
+    <string name="stats_period_last_3_months">Last 3 Months</string>
+    <string name="stats_period_last_6_months">Last 6 Months</string>
+    <string name="stats_period_last_12_months">Last 12 Months</string>
+    <string name="stats_period_year">Year</string>
+    <string name="stats_filter_all_songbooks">All Songbooks</string>
+    <string name="stats_filter_all_bibles">All Bibles</string>
+    <string name="stats_period_custom">the selected dates</string>
+    <string name="stats_clear_item">Remove from statistics</string>
+    <string name="stats_clear_item_confirm">Remove %1$s from the statistics for %2$s? This cannot be undone.</string>
+    <string name="stats_clear_all_confirm">Clear all statistics? This also deletes the play history the CCLI report is built from. This cannot be undone.</string>
 
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Add to Schedule</string>
@@ -1831,7 +1843,7 @@
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI Report</string>
-    <string name="ccli_report_title">CCLI Usage Report</string>
+    <string name="ccli_report_title">CCLI Reports</string>
     <string name="ccli_preset_30d">Last 30 Days</string>
     <string name="ccli_preset_90d">Last 90 Days</string>
     <string name="ccli_preset_this_year">This Year</string>

@@ -255,7 +255,7 @@ class NavigationTopBarTest {
             assertEquals("Edit", edit.text)
             assertEquals(2, edit.itemCount)
             assertEquals("Settings", edit.getItem(0).text)
-            assertEquals("Statistics", edit.getItem(1).text)
+            assertEquals("CCLI Reports", edit.getItem(1).text)
             for (i in 0 until edit.itemCount) edit.getItem(i).doClick()
         }
         assertEquals(1, settings)
