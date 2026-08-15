@@ -24,7 +24,6 @@ import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseDisplayEntry
 import org.churchpresenter.app.churchpresenter.data.VersePlayEvent
 import org.churchpresenter.app.churchpresenter.dialogs.CCLIReportContent
-import org.churchpresenter.app.churchpresenter.dialogs.StatisticsContent
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import java.io.File
@@ -62,14 +61,11 @@ class AppPreviewStatisticsScreenshotTest {
         }
     }
 
+    /** Clearing everything asks first — this is the prompt it asks with. */
     @Test
-    fun statistics() = dialog("statistics", 700.dp, 620.dp) { mode ->
-        StatisticsContent(
-            theme = mode,
-            statisticsManager = StatisticsManager(),
-            onOpenCcliReport = {},
-            onDismiss = {},
-        )
+    fun `clear confirmation`() = ccli("ccli_report_clear_confirm") {
+        onAllNodes(hasText("Clear Statistics"))[0].performClick()
+        waitForIdle()
     }
 
     @Test

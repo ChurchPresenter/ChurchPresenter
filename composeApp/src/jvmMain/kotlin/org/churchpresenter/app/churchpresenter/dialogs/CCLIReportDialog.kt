@@ -7,6 +7,9 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +30,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -38,6 +44,7 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.foundation.layout.PaddingValues
@@ -51,6 +58,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -59,6 +67,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -91,12 +100,24 @@ import churchpresenter.composeapp.generated.resources.ccli_legend_bible
 import churchpresenter.composeapp.generated.resources.ccli_legend_songs
 import churchpresenter.composeapp.generated.resources.ccli_no_data
 import churchpresenter.composeapp.generated.resources.ccli_no_events
-import churchpresenter.composeapp.generated.resources.ccli_preset_30d
-import churchpresenter.composeapp.generated.resources.ccli_preset_90d
-import churchpresenter.composeapp.generated.resources.ccli_preset_all_time
-import churchpresenter.composeapp.generated.resources.ccli_preset_last_year
-import churchpresenter.composeapp.generated.resources.ccli_preset_this_year
+import churchpresenter.composeapp.generated.resources.cancel
+import churchpresenter.composeapp.generated.resources.clear_statistics
+import churchpresenter.composeapp.generated.resources.confirm_delete
+import churchpresenter.composeapp.generated.resources.delete_saved_string
+import churchpresenter.composeapp.generated.resources.em_dash
+import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ccli_report_title
+import churchpresenter.composeapp.generated.resources.stats_filter_all_bibles
+import churchpresenter.composeapp.generated.resources.stats_filter_all_songbooks
+import churchpresenter.composeapp.generated.resources.stats_clear_all_confirm
+import churchpresenter.composeapp.generated.resources.stats_clear_item
+import churchpresenter.composeapp.generated.resources.stats_clear_item_confirm
+import churchpresenter.composeapp.generated.resources.stats_period_all_time
+import churchpresenter.composeapp.generated.resources.stats_period_last_12_months
+import churchpresenter.composeapp.generated.resources.stats_period_last_3_months
+import churchpresenter.composeapp.generated.resources.stats_period_last_6_months
+import churchpresenter.composeapp.generated.resources.stats_period_custom
+import churchpresenter.composeapp.generated.resources.stats_period_year
 import churchpresenter.composeapp.generated.resources.ccli_songs_chart
 import churchpresenter.composeapp.generated.resources.ccli_songs_summary
 import churchpresenter.composeapp.generated.resources.ccli_stat_bible_verses
@@ -136,12 +157,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.data.ActivityPoint
+import org.churchpresenter.app.churchpresenter.data.ROLLING_MONTHS
+import org.churchpresenter.app.churchpresenter.data.SongKey
 import org.churchpresenter.app.churchpresenter.data.SongSummary
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.app.churchpresenter.data.StatisticsPeriod
+import org.churchpresenter.app.churchpresenter.data.VerseKey
 import org.churchpresenter.app.churchpresenter.data.VerseSummary
+import org.churchpresenter.app.churchpresenter.data.availableYears
+import org.churchpresenter.app.churchpresenter.data.resolveDates
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -155,17 +184,30 @@ import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 private const val LAST_HOUR = 23
 private const val LAST_MINUTE = 59
 private const val LAST_SECOND = 59
-private const val PRESET_LAST_30_DAYS = 30
-private const val PRESET_LAST_90_DAYS = 90
-private const val PRESET_INDEX_LAST_YEAR = 3
-private const val PRESET_INDEX_ALL_TIME = 4
-private const val DECEMBER = 12
-private const val DECEMBER_LAST_DAY = 31
 private const val TOP_CHART_ENTRIES = 12
 private const val AXIS_TICK_COUNT = 4
 private const val TOOLTIP_VERTICAL_OFFSET_DP = 6
 private const val MIN_BAR_FRACTION = 0.004f
 private const val PILL_CORNER_PERCENT = 50
+
+private val CLEAR_COLUMN_WIDTH = 26.dp
+private val LIBRARY_PICKER_WIDTH = 190.dp
+
+/** The tab indices, so the filter row can tell which library it is narrowing. */
+private const val SONGS_TAB = 0
+private const val BIBLE_TAB = 1
+private const val ACTIVITY_TAB = 2
+
+/** Test tags: the pickers, and the per-row clear, which appends its row's label. */
+internal const val REPORT_YEAR_TAG = "reportYear"
+internal const val REPORT_SONGBOOK_TAG = "reportSongbook"
+internal const val REPORT_BIBLE_TAG = "reportBible"
+internal const val REPORT_CLEAR_ROW_TAG = "reportClearRow:"
+
+/** A row's delete, held until the confirmation is answered. The label names it in the prompt. */
+private data class PendingSongClear(val key: SongKey, val label: String)
+
+private data class PendingVerseClear(val key: VerseKey, val label: String)
 
 
 @Composable
@@ -247,13 +289,20 @@ internal fun CCLIReportContent(
     var songs by remember { mutableStateOf(emptyList<SongSummary>()) }
     var verses by remember { mutableStateOf(emptyList<VerseSummary>()) }
     var activity by remember { mutableStateOf(emptyList<ActivityPoint>()) }
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableStateOf(SONGS_TAB) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var statusIsSuccess by remember { mutableStateOf(true) }
-    // Which quick-range preset is currently highlighted (null once a date is edited by hand).
-    var activePreset by remember { mutableStateOf<Int?>(null) }
+    // The highlighted quick period, or null once a date is edited by hand.
+    var activePeriod by remember { mutableStateOf<StatisticsPeriod?>(null) }
+    // Which songbook / Bible the two report tabs are narrowed to; null is all of them.
+    var songbookFilter by remember { mutableStateOf<String?>(null) }
+    var bibleFilter by remember { mutableStateOf<String?>(null) }
+    var pendingSongClear by remember { mutableStateOf<PendingSongClear?>(null) }
+    var pendingVerseClear by remember { mutableStateOf<PendingVerseClear?>(null) }
+    var confirmClearAll by remember { mutableStateOf(false) }
 
-    val hasLog = remember { statisticsManager.hasEventLog() }
+    var earliestEvent by remember { mutableStateOf(statisticsManager.getEarliestEventTime()) }
+    var hasLog by remember { mutableStateOf(statisticsManager.hasEventLog()) }
 
     fun reload() {
         coroutineScope.launch {
@@ -261,19 +310,44 @@ internal fun CCLIReportContent(
             songs = withContext(Dispatchers.IO) { statisticsManager.getAllSongsInRange(f, t) }
             verses = withContext(Dispatchers.IO) { statisticsManager.getAllVersesInRange(f, t) }
             activity = withContext(Dispatchers.IO) { statisticsManager.getActivityByPeriod(f, t) }
+            earliestEvent = statisticsManager.getEarliestEventTime()
+            hasLog = statisticsManager.hasEventLog()
         }
     }
 
     LaunchedEffect(fromYear, fromMonth, fromDay, toYear, toMonth, toDay) { reload() }
 
-    fun applyPreset(daysBack: Int?) {
-        if (daysBack == null) {
-            fromYear = yearRange.first; fromMonth = 1; fromDay = 1
-            toYear = today.year; toMonth = today.monthValue; toDay = today.dayOfMonth
-        } else {
-            val from = today.minusDays(daysBack.toLong())
-            fromYear = from.year; fromMonth = from.monthValue; fromDay = from.dayOfMonth
-            toYear = today.year; toMonth = today.monthValue; toDay = today.dayOfMonth
+    /** Points the From/To fields at a quick period; both sides read [resolveDates] so they agree. */
+    fun applyPeriod(period: StatisticsPeriod) {
+        val (from, to) = period.resolveDates(today, earliestEvent)
+        activePeriod = period
+        fromYear = from.year; fromMonth = from.monthValue; fromDay = from.dayOfMonth
+        toYear = to.year; toMonth = to.monthValue; toDay = to.dayOfMonth
+    }
+
+    val songbooks = remember(songs) { songs.map { it.songbook }.distinct().sorted() }
+    val bibles = remember(verses) { verses.map { it.bibleName }.distinct().sorted() }
+    val shownSongs = remember(songs, songbookFilter) {
+        songbookFilter?.let { book -> songs.filter { it.songbook == book } } ?: songs
+    }
+    val shownVerses = remember(verses, bibleFilter) {
+        bibleFilter?.let { bible -> verses.filter { it.bibleName == bible } } ?: verses
+    }
+
+    val allTimeLabel = stringResource(Res.string.stats_period_all_time)
+    val rollingLabels = listOf(
+        stringResource(Res.string.stats_period_last_3_months),
+        stringResource(Res.string.stats_period_last_6_months),
+        stringResource(Res.string.stats_period_last_12_months),
+    )
+    val customLabel = stringResource(Res.string.stats_period_custom)
+    /** Names the active period for the confirmation prompts; hand-picked dates have no name. */
+    val periodLabelOf: (StatisticsPeriod?) -> String = { period ->
+        when (period) {
+            is StatisticsPeriod.AllTime -> allTimeLabel
+            is StatisticsPeriod.LastMonths -> rollingLabels[ROLLING_MONTHS.indexOf(period.months).coerceAtLeast(0)]
+            is StatisticsPeriod.Year -> period.year.toString()
+            null -> customLabel
         }
     }
 
@@ -297,26 +371,27 @@ internal fun CCLIReportContent(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // Preset buttons
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        PresetButton(stringResource(Res.string.ccli_preset_30d), active = activePreset == 0) {
-                            activePreset = 0; applyPreset(PRESET_LAST_30_DAYS)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ROLLING_MONTHS.forEachIndexed { index, months ->
+                            val period = StatisticsPeriod.LastMonths(months)
+                            PresetButton(rollingLabels[index], active = activePeriod == period) { applyPeriod(period) }
                         }
-                        PresetButton(stringResource(Res.string.ccli_preset_90d), active = activePreset == 1) {
-                            activePreset = 1; applyPreset(PRESET_LAST_90_DAYS)
+                        PresetButton(allTimeLabel, active = activePeriod == StatisticsPeriod.AllTime) {
+                            applyPeriod(StatisticsPeriod.AllTime)
                         }
-                        PresetButton(stringResource(Res.string.ccli_preset_this_year), active = activePreset == 2) {
-                            activePreset = 2
-                            fromYear = today.year; fromMonth = 1; fromDay = 1
-                            toYear = today.year; toMonth = today.monthValue; toDay = today.dayOfMonth
-                        }
-                        PresetButton(stringResource(Res.string.ccli_preset_last_year), active = activePreset == 3) {
-                            activePreset = PRESET_INDEX_LAST_YEAR
-                            fromYear = today.year - 1; fromMonth = 1; fromDay = 1
-                            toYear = today.year - 1; toMonth = DECEMBER; toDay = DECEMBER_LAST_DAY
-                        }
-                        PresetButton(stringResource(Res.string.ccli_preset_all_time), active = activePreset == 4) {
-                            activePreset = PRESET_INDEX_ALL_TIME; applyPreset(null)
-                        }
+
+                        Spacer(Modifier.width(6.dp))
+                        val years = remember(earliestEvent) { availableYears(today, earliestEvent) }
+                        val selectedYear = (activePeriod as? StatisticsPeriod.Year)?.year
+                        DropdownPicker(
+                            buttonLabel = selectedYear?.toString() ?: stringResource(Res.string.stats_period_year),
+                            options = years.map { it.toString() },
+                            modifier = Modifier.width(96.dp).testTag(REPORT_YEAR_TAG),
+                            onSelected = { idx -> applyPeriod(StatisticsPeriod.Year(years[idx])) }
+                        )
                     }
                     // Date pickers
                     Row(
@@ -327,15 +402,39 @@ internal fun CCLIReportContent(
                         DatePicker(
                             year = fromYear, month = fromMonth, day = fromDay,
                             yearRange = yearRange,
-                            onChanged = { y, m, d -> activePreset = null; fromYear = y; fromMonth = m; fromDay = d }
+                            onChanged = { y, m, d -> activePeriod = null; fromYear = y; fromMonth = m; fromDay = d }
                         )
                         Spacer(Modifier.width(16.dp))
                         Text(stringResource(Res.string.ccli_to), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         DatePicker(
                             year = toYear, month = toMonth, day = toDay,
                             yearRange = yearRange,
-                            onChanged = { y, m, d -> activePreset = null; toYear = y; toMonth = m; toDay = d }
+                            onChanged = { y, m, d -> activePeriod = null; toYear = y; toMonth = m; toDay = d }
                         )
+
+                        // The tab being looked at decides which library the filter narrows; the
+                        // activity chart spans everything, so it offers none.
+                        if (hasLog && selectedTab != ACTIVITY_TAB) {
+                            Spacer(Modifier.weight(1f))
+                            val filtering = selectedTab == SONGS_TAB
+                            val allLabel = if (filtering) {
+                                stringResource(Res.string.stats_filter_all_songbooks)
+                            } else {
+                                stringResource(Res.string.stats_filter_all_bibles)
+                            }
+                            val groups = if (filtering) songbooks else bibles
+                            val selected = if (filtering) songbookFilter else bibleFilter
+                            val dash = stringResource(Res.string.em_dash)
+                            LibraryPicker(
+                                label = selected?.ifBlank { dash } ?: allLabel,
+                                allLabel = allLabel,
+                                groups = groups,
+                                blankLabel = dash,
+                                testTag = if (filtering) REPORT_SONGBOOK_TAG else REPORT_BIBLE_TAG,
+                            ) { chosen ->
+                                if (filtering) songbookFilter = chosen else bibleFilter = chosen
+                            }
+                        }
                     }
                 }
 
@@ -354,19 +453,26 @@ internal fun CCLIReportContent(
                 } else {
                     // ── Tabs ─────────────────────────────────────────────
                     PrimaryTabRow(selectedTabIndex = selectedTab) {
-                        Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 },
-                            text = { Text(stringResource(Res.string.ccli_tab_songs) + " (${songs.size})") })
-                        Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 },
-                            text = { Text(stringResource(Res.string.ccli_tab_bible) + " (${verses.size})") })
-                        Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 },
+                        Tab(selected = selectedTab == SONGS_TAB, onClick = { selectedTab = SONGS_TAB },
+                            text = { Text(stringResource(Res.string.ccli_tab_songs) + " (${shownSongs.size})") })
+                        Tab(selected = selectedTab == BIBLE_TAB, onClick = { selectedTab = BIBLE_TAB },
+                            text = { Text(stringResource(Res.string.ccli_tab_bible) + " (${shownVerses.size})") })
+                        Tab(selected = selectedTab == ACTIVITY_TAB, onClick = { selectedTab = ACTIVITY_TAB },
                             text = { Text(stringResource(Res.string.ccli_tab_activity)) })
                     }
 
                     Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                         when (selectedTab) {
-                            0 -> SongsReportContent(songs)
-                            1 -> BibleReportContent(verses)
-                            2 -> ActivityContent(activity)
+                            SONGS_TAB -> SongsReportContent(shownSongs) { song ->
+                                pendingSongClear = PendingSongClear(SongKey(song.songbook, song.songNumber, song.title), song.title)
+                            }
+                            BIBLE_TAB -> BibleReportContent(shownVerses) { verse ->
+                                pendingVerseClear = PendingVerseClear(
+                                    VerseKey(verse.bibleName, verse.bookName, verse.chapter, verse.verseNumber),
+                                    "${verse.bookName} ${verse.chapter}:${verse.verseNumber}",
+                                )
+                            }
+                            ACTIVITY_TAB -> ActivityContent(activity)
                         }
                     }
                 }
@@ -426,10 +532,66 @@ internal fun CCLIReportContent(
                         }
                     ) { Text(stringResource(Res.string.ccli_export_xls)) }
 
+                    Button(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = { confirmClearAll = true },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        )
+                    ) { Text(stringResource(Res.string.clear_statistics)) }
+
                     Spacer(Modifier.weight(1f))
 
                     Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.close)) }
                 }
+            }
+
+            val periodLabel = periodLabelOf(activePeriod)
+
+            val pendingSong = pendingSongClear
+            if (pendingSong != null) {
+                ConfirmClearDialog(
+                    message = stringResource(Res.string.stats_clear_item_confirm, pendingSong.label, periodLabel),
+                    onConfirm = {
+                        pendingSongClear = null
+                        coroutineScope.launch {
+                            withContext(Dispatchers.IO) { statisticsManager.clearSong(pendingSong.key, fromMs(), toMs()) }
+                            reload()
+                        }
+                    },
+                    onDismiss = { pendingSongClear = null }
+                )
+            }
+
+            val pendingVerse = pendingVerseClear
+            if (pendingVerse != null) {
+                ConfirmClearDialog(
+                    message = stringResource(Res.string.stats_clear_item_confirm, pendingVerse.label, periodLabel),
+                    onConfirm = {
+                        pendingVerseClear = null
+                        coroutineScope.launch {
+                            withContext(Dispatchers.IO) { statisticsManager.clearVerse(pendingVerse.key, fromMs(), toMs()) }
+                            reload()
+                        }
+                    },
+                    onDismiss = { pendingVerseClear = null }
+                )
+            }
+
+            if (confirmClearAll) {
+                ConfirmClearDialog(
+                    message = stringResource(Res.string.stats_clear_all_confirm),
+                    onConfirm = {
+                        confirmClearAll = false
+                        statusMessage = null
+                        coroutineScope.launch {
+                            withContext(Dispatchers.IO) { statisticsManager.clearStatistics() }
+                            reload()
+                        }
+                    },
+                    onDismiss = { confirmClearAll = false }
+                )
             }
         }
     }
@@ -438,7 +600,7 @@ internal fun CCLIReportContent(
 // ── Songs tab ─────────────────────────────────────────────────────────────────
 
 @Composable
-internal fun SongsReportContent(songs: List<SongSummary>) {
+internal fun SongsReportContent(songs: List<SongSummary>, onClear: (SongSummary) -> Unit) {
     val primary = MaterialTheme.colorScheme.primary
     val totalPlays = songs.sumOf { it.count }
 
@@ -469,14 +631,14 @@ internal fun SongsReportContent(songs: List<SongSummary>) {
         HorizontalDivider(modifier = Modifier.fillMaxHeight().width(1.dp))
 
         // Right: full table
-        SongTable(songs = songs, modifier = Modifier.weight(1f).fillMaxHeight())
+        SongTable(songs = songs, onClear = onClear, modifier = Modifier.weight(1f).fillMaxHeight())
     }
 }
 
 // ── Bible tab ─────────────────────────────────────────────────────────────────
 
 @Composable
-internal fun BibleReportContent(verses: List<VerseSummary>) {
+internal fun BibleReportContent(verses: List<VerseSummary>, onClear: (VerseSummary) -> Unit) {
     val secondary = MaterialTheme.colorScheme.tertiary
     val totalPlays = verses.sumOf { it.count }
 
@@ -511,7 +673,7 @@ internal fun BibleReportContent(verses: List<VerseSummary>) {
 
         HorizontalDivider(modifier = Modifier.fillMaxHeight().width(1.dp))
 
-        VerseTable(verses = verses, modifier = Modifier.weight(1f).fillMaxHeight())
+        VerseTable(verses = verses, onClear = onClear, modifier = Modifier.weight(1f).fillMaxHeight())
     }
 }
 
@@ -587,7 +749,7 @@ internal fun ActivityContent(activity: List<ActivityPoint>) {
 // ── Tables ────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun SongTable(songs: List<SongSummary>, modifier: Modifier = Modifier) {
+private fun SongTable(songs: List<SongSummary>, onClear: (SongSummary) -> Unit, modifier: Modifier = Modifier) {
     val dateFmt = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
     val maxCount = remember(songs) { songs.maxOfOrNull { it.count } ?: 1 }
     val accent = MaterialTheme.colorScheme.primary
@@ -607,15 +769,20 @@ private fun SongTable(songs: List<SongSummary>, modifier: Modifier = Modifier) {
             TableHeader(stringResource(Res.string.ccli_col_used), 52.dp.value)
             TableHeader(stringResource(Res.string.ccli_col_first), 90.dp.value)
             TableHeader(stringResource(Res.string.ccli_col_last), 90.dp.value)
+            Spacer(Modifier.width(CLEAR_COLUMN_WIDTH))
         }
         HorizontalDivider()
         val listState = rememberLazyListState()
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                 itemsIndexed(songs) { index, song ->
+                    val interactionSource = remember(song) { MutableInteractionSource() }
+                    val hovered by interactionSource.collectIsHoveredAsState()
+                    val clearAlpha by animateFloatAsState(if (hovered) 1f else 0f, label = "songRowClearAlpha")
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .hoverable(interactionSource)
                             .background(if (index % 2 == 0) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                             .padding(start = 12.dp, end = 20.dp, top = 5.dp, bottom = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -629,6 +796,7 @@ private fun SongTable(songs: List<SongSummary>, modifier: Modifier = Modifier) {
                         UsageBadgeCell(song.count, maxCount, accent, fixedWidth = 52.dp.value)
                         TableCell(dateFmt.format(Date(song.firstUsed)), fixedWidth = 90.dp.value)
                         TableCell(dateFmt.format(Date(song.lastUsed)), fixedWidth = 90.dp.value)
+                        RowClearButton(label = song.title, alpha = clearAlpha) { onClear(song) }
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                 }
@@ -642,7 +810,7 @@ private fun SongTable(songs: List<SongSummary>, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun VerseTable(verses: List<VerseSummary>, modifier: Modifier = Modifier) {
+private fun VerseTable(verses: List<VerseSummary>, onClear: (VerseSummary) -> Unit, modifier: Modifier = Modifier) {
     val dateFmt = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
     val maxCount = remember(verses) { verses.maxOfOrNull { it.count } ?: 1 }
     val accent = MaterialTheme.colorScheme.tertiary
@@ -659,15 +827,20 @@ private fun VerseTable(verses: List<VerseSummary>, modifier: Modifier = Modifier
             TableHeader(stringResource(Res.string.ccli_col_used), 52.dp.value)
             TableHeader(stringResource(Res.string.ccli_col_first), 90.dp.value)
             TableHeader(stringResource(Res.string.ccli_col_last), 90.dp.value)
+            Spacer(Modifier.width(CLEAR_COLUMN_WIDTH))
         }
         HorizontalDivider()
         val listState = rememberLazyListState()
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                 itemsIndexed(verses) { index, verse ->
+                    val interactionSource = remember(verse) { MutableInteractionSource() }
+                    val hovered by interactionSource.collectIsHoveredAsState()
+                    val clearAlpha by animateFloatAsState(if (hovered) 1f else 0f, label = "verseRowClearAlpha")
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .hoverable(interactionSource)
                             .background(if (index % 2 == 0) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                             .padding(start = 12.dp, end = 20.dp, top = 5.dp, bottom = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -679,6 +852,10 @@ private fun VerseTable(verses: List<VerseSummary>, modifier: Modifier = Modifier
                         UsageBadgeCell(verse.count, maxCount, accent, fixedWidth = 52.dp.value)
                         TableCell(dateFmt.format(Date(verse.firstUsed)), fixedWidth = 90.dp.value)
                         TableCell(dateFmt.format(Date(verse.lastUsed)), fixedWidth = 90.dp.value)
+                        RowClearButton(
+                            label = "${verse.bookName} ${verse.chapter}:${verse.verseNumber}",
+                            alpha = clearAlpha,
+                        ) { onClear(verse) }
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                 }
@@ -689,6 +866,66 @@ private fun VerseTable(verses: List<VerseSummary>, modifier: Modifier = Modifier
             )
         }
     }
+}
+
+/**
+ * Narrows a report tab to one songbook or one Bible. The first option puts them all back.
+ *
+ * A library with no name shows as an em dash, the way the songs list renders it — an empty button
+ * would otherwise look like a broken option.
+ */
+@Composable
+private fun LibraryPicker(
+    label: String,
+    allLabel: String,
+    groups: List<String>,
+    blankLabel: String,
+    testTag: String,
+    onSelected: (String?) -> Unit,
+) {
+    DropdownPicker(
+        buttonLabel = label,
+        options = listOf(allLabel) + groups.map { it.ifBlank { blankLabel } },
+        modifier = Modifier.width(LIBRARY_PICKER_WIDTH).testTag(testTag),
+        onSelected = { index -> onSelected(if (index == 0) null else groups[index - 1]) }
+    )
+}
+
+/**
+ * The delete at the end of a table row, faded in on hover. Kept out of the tab order of a scanning
+ * eye when idle, but always in the semantics tree so a test can reach it.
+ */
+@Composable
+private fun RowClearButton(label: String, alpha: Float, onClear: () -> Unit) {
+    TooltipIconButton(
+        painter = painterResource(Res.drawable.ic_delete),
+        text = stringResource(Res.string.stats_clear_item),
+        onClick = onClear,
+        iconSize = 13.dp,
+        buttonSize = CLEAR_COLUMN_WIDTH,
+        iconTint = MaterialTheme.colorScheme.error,
+        modifier = Modifier.alpha(alpha).testTag(REPORT_CLEAR_ROW_TAG + label)
+    )
+}
+
+/** The house-style destructive confirmation: error-tinted confirm, plain cancel. */
+@Composable
+private fun ConfirmClearDialog(message: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.confirm_delete)) },
+        text = { Text(message, style = MaterialTheme.typography.bodyMedium) },
+        confirmButton = {
+            TextButton(shape = RoundedCornerShape(6.dp), onClick = onConfirm) {
+                Text(stringResource(Res.string.delete_saved_string), color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
+                Text(stringResource(Res.string.cancel))
+            }
+        }
+    )
 }
 
 // ── Charts ────────────────────────────────────────────────────────────────────

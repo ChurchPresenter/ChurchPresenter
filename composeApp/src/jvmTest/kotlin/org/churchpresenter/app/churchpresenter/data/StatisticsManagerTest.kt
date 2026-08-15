@@ -2,6 +2,9 @@ package org.churchpresenter.app.churchpresenter.data
 
 import java.io.File
 import java.nio.file.Files
+import java.time.LocalDate
+import java.time.ZoneId
+import kotlinx.serialization.json.Json
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -523,5 +526,198 @@ class StatisticsManagerTest {
         stats.sing("Amazing Grace")
 
         assertEquals(1, restarted().getSongPlayCount("Hymnal::1"))
+    }
+
+    // ── Periods ─────────────────────────────────────────────────────────────────
+
+    /**
+     * Two calendar years of history, written straight to the two files a manager reads at
+     * construction. Recording stamps events with the wall clock, so a past year can only be seeded
+     * this way.
+     */
+    private fun seedTwoYears() {
+        val zone = ZoneId.systemDefault()
+        fun stamp(year: Int, month: Int, day: Int) =
+            LocalDate.of(year, month, day).atTime(10, 30).atZone(zone).toInstant().toEpochMilli()
+
+        val songEvents = List(3) { SongPlayEvent(1, "Older Song", "Hymnal", "", stamp(LAST_YEAR, 5, 4)) } +
+            List(2) { SongPlayEvent(2, "This Year Song", "Hymnal", "", stamp(THIS_YEAR, 2, 1)) }
+        val verseEvents = List(4) { VersePlayEvent("KJV", "John", 3, 16, stamp(LAST_YEAR, 5, 4)) } +
+            List(1) { VersePlayEvent("KJV", "Psalms", 23, 1, stamp(THIS_YEAR, 2, 1)) }
+
+        val json = Json { encodeDefaults = true }
+        statsFile.parentFile.mkdirs()
+        statsFile.writeText(
+            json.encodeToString(
+                DisplayStatistics.serializer(),
+                DisplayStatistics(
+                    songDisplayCounts = mapOf(
+                        "id-older" to SongDisplayEntry(1, "Older Song", "Hymnal", 3),
+                        "id-newer" to SongDisplayEntry(2, "This Year Song", "Hymnal", 2),
+                    ),
+                    verseDisplayCounts = mapOf(
+                        "KJV::John::3::16" to VerseDisplayEntry("KJV", "John", 3, 16, 4),
+                        "KJV::Psalms::23::1" to VerseDisplayEntry("KJV", "Psalms", 23, 1, 1),
+                    ),
+                ),
+            )
+        )
+        logFile.writeText(
+            json.encodeToString(PlayEventLog.serializer(), PlayEventLog(songEvents, verseEvents))
+        )
+    }
+
+    private fun yearRange(year: Int) = StatisticsPeriod.Year(year).resolve(LocalDate.of(THIS_YEAR, 6, 1), null)
+
+    @Test
+    fun `a year's top songs hold only that year's plays`() {
+        seedTwoYears()
+        val stats = StatisticsManager()
+        val range = yearRange(LAST_YEAR)
+
+        val songs = stats.songsIn(range.fromMs..range.toMs)
+
+        assertEquals(listOf("Older Song"), songs.map { it.title })
+        assertEquals(3, songs.single().count)
+    }
+
+    @Test
+    fun `a year's top verses hold only that year's readings`() {
+        seedTwoYears()
+        val stats = StatisticsManager()
+        val range = yearRange(THIS_YEAR)
+
+        val verses = stats.versesIn(range.fromMs..range.toMs)
+
+        assertEquals(listOf("Psalms"), verses.map { it.bookName })
+    }
+
+    @Test
+    fun `clearing a song for one year leaves its other years alone`() {
+        seedTwoYears()
+        val stats = StatisticsManager()
+        val range = yearRange(LAST_YEAR)
+
+        val removed = stats.clearSong(SongKey("Hymnal", 1, "Older Song"), range.fromMs, range.toMs)
+
+        assertEquals(3, removed, "all three of last year's plays go")
+        val thisYear = yearRange(THIS_YEAR)
+        assertEquals(
+            listOf("This Year Song"),
+            stats.songsIn(thisYear.fromMs..thisYear.toMs).map { it.title },
+            "this year is untouched",
+        )
+        assertTrue(
+            stats.getAllSongsInRange(range.fromMs, range.toMs).isEmpty(),
+            "and nothing of the cleared year is left to report",
+        )
+    }
+
+    @Test
+    fun `clearing a song for a period drops its all-time count by what was removed`() {
+        seedTwoYears()
+        val stats = StatisticsManager()
+        val range = yearRange(THIS_YEAR)
+
+        stats.clearSong(SongKey("Hymnal", 2, "This Year Song"), range.fromMs, range.toMs)
+
+        val remaining = stats.getTopSongsBySongbook().getValue("Hymnal")
+        assertEquals(listOf("Older Song"), remaining.map { it.title }, "a count reduced to zero takes the row with it")
+        assertEquals(3, remaining.single().count, "the other song's tally is untouched")
+    }
+
+    @Test
+    fun `a song cleared for its whole history survives a restart`() {
+        seedTwoYears()
+        val stats = StatisticsManager()
+
+        val removed = stats.clearSong(SongKey("Hymnal", 1, "Older Song"))
+
+        assertEquals(3, removed)
+        assertEquals(
+            listOf("This Year Song"),
+            restarted().getTopSongsBySongbook().getValue("Hymnal").map { it.title },
+            "both files must have been written, or it comes back",
+        )
+    }
+
+    @Test
+    fun `clearing a verse for one year leaves its other years alone`() {
+        seedTwoYears()
+        val stats = StatisticsManager()
+        val range = yearRange(LAST_YEAR)
+
+        val removed = stats.clearVerse(VerseKey("KJV", "John", 3, 16), range.fromMs, range.toMs)
+
+        assertEquals(4, removed)
+        assertEquals(
+            listOf("Psalms"),
+            restarted().getTopVersesByBible().getValue("KJV").map { it.bookName },
+        )
+    }
+
+    @Test
+    fun `clearing a song that was only ever played outside the period changes nothing`() {
+        seedTwoYears()
+        val stats = StatisticsManager()
+        val range = yearRange(THIS_YEAR)
+
+        val removed = stats.clearSong(SongKey("Hymnal", 1, "Older Song"), range.fromMs, range.toMs)
+
+        assertEquals(0, removed)
+        assertEquals(3, stats.getTopSongsBySongbook().getValue("Hymnal").first { it.title == "Older Song" }.count)
+    }
+
+    @Test
+    fun `a play recorded before the event log existed cannot be cleared by period`() {
+        statsFile.parentFile.mkdirs()
+        statsFile.writeText(
+            Json.encodeToString(
+                DisplayStatistics.serializer(),
+                DisplayStatistics(songDisplayCounts = mapOf("id" to SongDisplayEntry(1, "Undated", "Hymnal", 7))),
+            )
+        )
+        val stats = StatisticsManager()
+        val range = yearRange(THIS_YEAR)
+
+        val removed = stats.clearSong(SongKey("Hymnal", 1, "Undated"), range.fromMs, range.toMs)
+
+        assertEquals(0, removed, "there are no dated events to remove")
+        assertEquals(
+            7,
+            stats.getTopSongsBySongbook().getValue("Hymnal").single().count,
+            "so the row stays at its full tally rather than silently losing plays",
+        )
+    }
+
+    @Test
+    fun `clearing the whole history of a song removes its row outright`() {
+        val stats = StatisticsManager()
+        stats.sing("Amazing Grace", number = 12, times = 4)
+
+        val removed = stats.clearSong(SongKey("Hymnal", 12, "Amazing Grace"))
+
+        assertEquals(4, removed)
+        assertTrue(stats.getTopSongsBySongbook().isEmpty())
+        assertFalse(stats.hasEventLog())
+    }
+
+    @Test
+    fun `clearing one song leaves every other song untouched`() {
+        val stats = StatisticsManager()
+        stats.sing("Amazing Grace", number = 12, times = 4)
+        stats.sing("Be Thou My Vision", number = 13, times = 2)
+
+        stats.clearSong(SongKey("Hymnal", 12, "Amazing Grace"))
+
+        assertEquals(
+            listOf("Be Thou My Vision"),
+            stats.getTopSongsBySongbook().getValue("Hymnal").map { it.title },
+        )
+    }
+
+    private companion object {
+        const val THIS_YEAR = 2026
+        const val LAST_YEAR = 2025
     }
 }
