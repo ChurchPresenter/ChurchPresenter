@@ -2222,4 +2222,20 @@
     <string name="bible_catalog_language_named">%1$s · %2$s (%3$d)</string>
     <string name="bible_catalog_language_named_native">%1$s · %2$s · %3$s (%4$d)</string>
     <string name="stage_monitor_show_chords">Akkoorden tonen</string>
+    <string name="story_prompt_window_title">Deel uw verhaal</string>
+    <string name="story_prompt_badge">We horen graag van u</string>
+    <string name="story_prompt_heading">Heeft Church Presenter uw kerk geholpen?</string>
+    <string name="story_prompt_body_1">Church Presenter is gemaakt voor zondagochtenden zoals die van u, en we komen er het best achter of het werkt door de mensen te horen die ermee werken.</string>
+    <string name="story_prompt_body_2">Als de app uw kerk heeft geholpen, horen we dat graag — of dat nu is:</string>
+    <string name="story_prompt_example_1">Een soepelere volgorde van de dienst</string>
+    <string name="story_prompt_example_2">De Schrift op het scherm zonder gehaast</string>
+    <string name="story_prompt_example_3">Eén abonnement minder om te betalen</string>
+    <string name="story_prompt_body_3">Stuur ons een paar regels en laat weten of we ze op de homepage mogen tonen, samen met uw naam en kerk.</string>
+    <string name="story_prompt_body_4">Uw verhaal helpt andere kerken beslissen of dit bij hen past.</string>
+    <string name="story_prompt_quote">Elke kerk doet het net even anders.</string>
+    <string name="story_prompt_screenshot">Church Presenter op de computer in de regie</string>
+    <string name="story_prompt_share">Deel uw verhaal</string>
+    <string name="story_prompt_later">Misschien later</string>
+    <string name="story_prompt_reassurance">Er wordt niets gepubliceerd zonder uw toestemming.</string>
+    <string name="menu_developer_story_prompt">Dialoogvenster ‘Deel uw verhaal’</string>
 </resources>

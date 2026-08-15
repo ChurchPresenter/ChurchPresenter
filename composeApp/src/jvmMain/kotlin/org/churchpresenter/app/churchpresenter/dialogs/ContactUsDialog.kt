@@ -72,6 +72,13 @@ import java.net.URI
 
 private const val SENT_CONFIRMATION_MS = 1500L
 
+const val CONTACT_TYPE_TESTIMONIAL = "testimonial"
+
+internal fun initialContactType(
+    types: List<Pair<String, String>>,
+    initialTypeKey: String?,
+): Pair<String, String> = types.firstOrNull { it.second == initialTypeKey } ?: types.first()
+
 /**
  * Builds the submit request from the dialog's current field state, trimming free-text
  * fields the way the server expects. Split out from the [onSend][ContactUsDialog] closure
@@ -131,6 +138,7 @@ internal suspend fun submitContactRequest(
 fun ContactUsDialog(
     isVisible: Boolean,
     onDismiss: () -> Unit,
+    initialTypeKey: String? = null,
 ) {
     if (!isVisible) return
 
@@ -138,11 +146,11 @@ fun ContactUsDialog(
     val types = listOf(
         stringResource(Res.string.contact_type_feature) to "featureRequest",
         stringResource(Res.string.contact_type_feedback) to "feedback",
-        stringResource(Res.string.contact_type_testimonial) to "testimonial",
+        stringResource(Res.string.contact_type_testimonial) to CONTACT_TYPE_TESTIMONIAL,
         stringResource(Res.string.contact_type_bug) to "bugReport",
     )
 
-    var selectedType by remember { mutableStateOf(types.first()) }
+    var selectedType by remember { mutableStateOf(initialContactType(types, initialTypeKey)) }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }

@@ -107,7 +107,10 @@ private val DarkSemanticColors = SemanticColors(
  * silently hand a tenth theme the wrong half if it were not.
  */
 internal fun semanticColorsFor(scheme: ColorScheme): SemanticColors =
-    if (scheme.surface.luminance() < DARK_LUMINANCE_THRESHOLD) DarkSemanticColors else LightSemanticColors
+    if (isDarkScheme(scheme)) DarkSemanticColors else LightSemanticColors
+
+fun isDarkScheme(scheme: ColorScheme): Boolean =
+    scheme.surface.luminance() < DARK_LUMINANCE_THRESHOLD
 
 internal val LocalSemanticColors = staticCompositionLocalOf { LightSemanticColors }
 

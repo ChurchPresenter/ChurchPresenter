@@ -2222,4 +2222,20 @@
     <string name="bible_catalog_language_named">%1$s · %2$s (%3$d)</string>
     <string name="bible_catalog_language_named_native">%1$s · %2$s · %3$s (%4$d)</string>
     <string name="stage_monitor_show_chords">Afficher les accords</string>
+    <string name="story_prompt_window_title">Partagez votre histoire</string>
+    <string name="story_prompt_badge">Nous aimerions vous lire</string>
+    <string name="story_prompt_heading">Church Presenter a-t-il aidé votre église ?</string>
+    <string name="story_prompt_body_1">Church Presenter est conçu pour des dimanches matin comme le vôtre, et le meilleur moyen de savoir s’il fait son travail est d’entendre ceux qui l’utilisent.</string>
+    <string name="story_prompt_body_2">Si l’application a aidé votre église, nous aimerions le savoir — que ce soit :</string>
+    <string name="story_prompt_example_1">Un déroulé de culte plus fluide</string>
+    <string name="story_prompt_example_2">Les Écritures à l’écran sans précipitation</string>
+    <string name="story_prompt_example_3">Un abonnement de moins à payer</string>
+    <string name="story_prompt_body_3">Écrivez-nous quelques lignes et dites-nous si nous pouvons les publier sur la page d’accueil, avec votre nom et votre église.</string>
+    <string name="story_prompt_body_4">Votre témoignage aide d’autres églises à décider si cela leur convient.</string>
+    <string name="story_prompt_quote">Chaque église s’en sert un peu différemment.</string>
+    <string name="story_prompt_screenshot">Church Presenter sur l’ordinateur de la régie</string>
+    <string name="story_prompt_share">Partager mon histoire</string>
+    <string name="story_prompt_later">Peut-être plus tard</string>
+    <string name="story_prompt_reassurance">Rien n’est publié sans votre accord.</string>
+    <string name="menu_developer_story_prompt">Boîte de dialogue « Partagez votre histoire »</string>
 </resources>

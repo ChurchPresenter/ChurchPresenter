@@ -52,6 +52,7 @@ private fun navigationTopBar(
     onSetDevWindowAlwaysOnTop: (Boolean) -> Unit = {},
     onOpenStyleEditor: () -> Unit = {},
     onOpenMemoryMonitor: () -> Unit = {},
+    onOpenStoryPrompt: () -> Unit = {},
     block: JMenuBar.() -> Unit,
 ) = runComposeUiTest {
     val window = mockk<ComposeWindow>(relaxed = true)
@@ -96,6 +97,7 @@ private fun navigationTopBar(
                 onSetDevWindowAlwaysOnTop = onSetDevWindowAlwaysOnTop,
                 onOpenStyleEditor = onOpenStyleEditor,
                 onOpenMemoryMonitor = onOpenMemoryMonitor,
+                onOpenStoryPrompt = onOpenStoryPrompt,
             )
         }
     }
@@ -180,6 +182,7 @@ class NavigationTopBarTest {
         for (itemIndex in 0 until display.itemCount) display.getItem(itemIndex).doClick()
         developer.getItem(1).doClick()
         developer.getItem(2).doClick()
+        developer.getItem(3).doClick()
     }
 
     @Test
@@ -441,7 +444,7 @@ class NavigationTopBarTest {
             assertEquals(8, menuCount)
             val developer = getMenu(7)
             assertEquals("Developer", developer.text)
-            assertEquals(3, developer.itemCount)
+            assertEquals(4, developer.itemCount)
 
             val display = developer.getItem(0) as JMenu
             assertEquals("Display", display.text)
@@ -478,6 +481,20 @@ class NavigationTopBarTest {
         }
         assertEquals(1, styleEditor)
         assertEquals(1, memoryMonitor)
+    }
+
+    @Test
+    fun `developer menu story prompt item invokes its callback`() {
+        var storyPrompt = 0
+        navigationTopBar(
+            showDeveloperMenu = true,
+            onOpenStoryPrompt = { storyPrompt++ },
+        ) {
+            val developer = getMenu(7)
+            assertEquals("Share Your Story Dialog", developer.getItem(3).text)
+            developer.getItem(3).doClick()
+        }
+        assertEquals(1, storyPrompt)
     }
 
     @Test

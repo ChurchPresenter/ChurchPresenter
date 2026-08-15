@@ -43,6 +43,7 @@ import churchpresenter.composeapp.generated.resources.menu_developer_display
 import churchpresenter.composeapp.generated.resources.menu_developer_show_window
 import churchpresenter.composeapp.generated.resources.menu_developer_style_editor
 import churchpresenter.composeapp.generated.resources.menu_developer_memory_monitor
+import churchpresenter.composeapp.generated.resources.menu_developer_story_prompt
 import churchpresenter.composeapp.generated.resources.menu_disconnect
 import churchpresenter.composeapp.generated.resources.menu_edit
 import churchpresenter.composeapp.generated.resources.menu_exit
@@ -103,7 +104,8 @@ fun FrameWindowScope.NavigationTopBar(
     isDevWindowAlwaysOnTop: Boolean = false,
     onSetDevWindowAlwaysOnTop: (Boolean) -> Unit = {},
     onOpenStyleEditor: () -> Unit = {},
-    onOpenMemoryMonitor: () -> Unit = {}
+    onOpenMemoryMonitor: () -> Unit = {},
+    onOpenStoryPrompt: () -> Unit = {}
 ) {
 
     val fileLabel = stringResource(Res.string.menu_file)
@@ -339,6 +341,7 @@ fun FrameWindowScope.NavigationTopBar(
                 }
                 Item(stringResource(Res.string.menu_developer_style_editor), onClick = onOpenStyleEditor)
                 Item(stringResource(Res.string.menu_developer_memory_monitor), onClick = onOpenMemoryMonitor)
+                Item(stringResource(Res.string.menu_developer_story_prompt), onClick = onOpenStoryPrompt)
             }
         }
     }

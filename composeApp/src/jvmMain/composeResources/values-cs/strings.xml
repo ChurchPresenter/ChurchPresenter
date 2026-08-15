@@ -2204,4 +2204,20 @@
     <string name="bible_catalog_language_named">%1$s · %2$s (%3$d)</string>
     <string name="bible_catalog_language_named_native">%1$s · %2$s · %3$s (%4$d)</string>
     <string name="stage_monitor_show_chords">Zobrazit akordy</string>
+    <string name="story_prompt_window_title">Podělte se o svůj příběh</string>
+    <string name="story_prompt_badge">Rádi se od vás dozvíme</string>
+    <string name="story_prompt_heading">Pomohl Church Presenter vašemu sboru?</string>
+    <string name="story_prompt_body_1">Church Presenter vznikl pro nedělní bohoslužby, jako jsou ty vaše, a nejlépe se dozvíme, zda funguje, od lidí, kteří ho obsluhují.</string>
+    <string name="story_prompt_body_2">Pokud aplikace vašemu sboru pomohla, rádi o tom uslyšíme — ať už jde o:</string>
+    <string name="story_prompt_example_1">Plynulejší průběh bohoslužby</string>
+    <string name="story_prompt_example_2">Písmo na plátně bez shonu</string>
+    <string name="story_prompt_example_3">O jedno předplatné méně</string>
+    <string name="story_prompt_body_3">Napište nám pár řádků a dejte nám vědět, zda je můžeme uvést na hlavní stránce spolu s vaším jménem a sborem.</string>
+    <string name="story_prompt_body_4">Váš příběh pomůže dalším sborům rozhodnout se, zda je to to pravé i pro ně.</string>
+    <string name="story_prompt_quote">Každý sbor to dělá trochu jinak.</string>
+    <string name="story_prompt_screenshot">Church Presenter na počítači u techniky</string>
+    <string name="story_prompt_share">Sdílet svůj příběh</string>
+    <string name="story_prompt_later">Možná později</string>
+    <string name="story_prompt_reassurance">Bez vašeho souhlasu nic nezveřejníme.</string>
+    <string name="menu_developer_story_prompt">Dialog „Podělte se o svůj příběh“</string>
 </resources>

@@ -68,7 +68,9 @@ import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
 import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkToastHost
+import org.churchpresenter.app.churchpresenter.dialogs.CONTACT_TYPE_TESTIMONIAL
 import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
+import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
@@ -125,6 +127,11 @@ import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.dialogs.StatisticsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.UpdateAvailableDialog
+import org.churchpresenter.app.churchpresenter.data.settings.answered
+import org.churchpresenter.app.churchpresenter.data.settings.isDue
+import org.churchpresenter.app.churchpresenter.data.settings.recordingUse
+import org.churchpresenter.app.churchpresenter.data.settings.shown
+import org.churchpresenter.app.churchpresenter.data.settings.stampingInstall
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Desktop
 import java.awt.Dimension
@@ -154,6 +161,7 @@ private const val MILLIS_PER_MINUTE = 60_000L
 private const val CRASH_REPORT_RETRY_MS = 15_000L
 private const val OPTIONS_TAB_BACKGROUND = 3
 private const val UPDATE_CHECK_DELAY_MS = 5_000L
+private const val STORY_PROMPT_DELAY_MS = 8_000L
 
 private const val CURRENT_EULA_VERSION = 1
 
@@ -613,6 +621,8 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     var showContactDialog by remember { mutableStateOf(false) }
+    var contactDialogInitialType by remember { mutableStateOf<String?>(null) }
+    var showStoryPrompt by remember { mutableStateOf(false) }
     var showConverterWindow by remember { mutableStateOf(false) }
     var showLottieGenWindow by remember { mutableStateOf(false) }
     var showStyleEditorWindow by remember { mutableStateOf(false) }
@@ -661,6 +671,17 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                 pendingUpdateResult = result
                 pendingUpdateCheckWasManual = false
             }
+        }
+
+        val now = System.currentTimeMillis()
+        val storyPrompt = appSettings.storyPrompt.stampingInstall(now).recordingUse(now)
+        appSettings = appSettings.copy(storyPrompt = storyPrompt)
+        settingsManager.saveSettings(appSettings)
+        if (storyPrompt.isDue(now) && pendingUpdateResult == null) {
+            delay(STORY_PROMPT_DELAY_MS)
+            appSettings = appSettings.copy(storyPrompt = storyPrompt.shown(System.currentTimeMillis()))
+            settingsManager.saveSettings(appSettings)
+            showStoryPrompt = true
         }
     }
 
@@ -1140,6 +1161,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 onSetDevWindowAlwaysOnTop = { presenterManager.setDevWindowAlwaysOnTop(it) },
                                 onOpenStyleEditor = { showStyleEditorWindow = true },
                                 onOpenMemoryMonitor = { showMemoryMonitorWindow = true },
+                                onOpenStoryPrompt = { showStoryPrompt = true },
                             )
                             if (CrashReporter.didCrashLastRun && CrashReporter.videoBackgroundsDisabled) {
                                 var showBanner by remember { mutableStateOf(true) }
@@ -1516,7 +1538,23 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                             )
                             ContactUsDialog(
                                 isVisible = showContactDialog,
-                                onDismiss = { showContactDialog = false; dialogDismissSignal++ }
+                                onDismiss = {
+                                    showContactDialog = false
+                                    contactDialogInitialType = null
+                                    dialogDismissSignal++
+                                },
+                                initialTypeKey = contactDialogInitialType
+                            )
+                            ShareYourStoryDialog(
+                                isVisible = showStoryPrompt,
+                                onShare = {
+                                    appSettings = appSettings.copy(storyPrompt = appSettings.storyPrompt.answered())
+                                    settingsManager.saveSettings(appSettings)
+                                    showStoryPrompt = false
+                                    contactDialogInitialType = CONTACT_TYPE_TESTIMONIAL
+                                    showContactDialog = true
+                                },
+                                onDismiss = { showStoryPrompt = false; dialogDismissSignal++ }
                             )
                             if (showConverterWindow) {
                                 ConverterWindow(

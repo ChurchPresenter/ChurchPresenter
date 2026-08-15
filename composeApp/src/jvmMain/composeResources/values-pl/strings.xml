@@ -2194,4 +2194,20 @@
     <string name="bible_catalog_language_named">%1$s · %2$s (%3$d)</string>
     <string name="bible_catalog_language_named_native">%1$s · %2$s · %3$s (%4$d)</string>
     <string name="stage_monitor_show_chords">Pokaż akordy</string>
+    <string name="story_prompt_window_title">Podziel się swoją historią</string>
+    <string name="story_prompt_badge">Chętnie się od Ciebie dowiemy</string>
+    <string name="story_prompt_heading">Czy Church Presenter pomógł Twojemu kościołowi?</string>
+    <string name="story_prompt_body_1">Church Presenter powstał z myślą o takich niedzielnych nabożeństwach jak Twoje, a najlepiej dowiemy się, czy się sprawdza, od osób, które go obsługują.</string>
+    <string name="story_prompt_body_2">Jeśli aplikacja pomogła Twojemu kościołowi, chętnie o tym usłyszymy — na przykład:</string>
+    <string name="story_prompt_example_1">Płynniejszy przebieg nabożeństwa</string>
+    <string name="story_prompt_example_2">Pismo Święte na ekranie bez pośpiechu</string>
+    <string name="story_prompt_example_3">O jedną subskrypcję mniej</string>
+    <string name="story_prompt_body_3">Napisz do nas kilka zdań i daj znać, czy możemy je pokazać na stronie głównej wraz z Twoim imieniem i nazwą kościoła.</string>
+    <string name="story_prompt_body_4">Twoja historia pomaga innym kościołom zdecydować, czy to rozwiązanie jest dla nich.</string>
+    <string name="story_prompt_quote">Każdy kościół prowadzi to trochę inaczej.</string>
+    <string name="story_prompt_screenshot">Church Presenter na komputerze przy realizacji</string>
+    <string name="story_prompt_share">Podziel się historią</string>
+    <string name="story_prompt_later">Może później</string>
+    <string name="story_prompt_reassurance">Nic nie zostanie opublikowane bez Twojej zgody.</string>
+    <string name="menu_developer_story_prompt">Okno „Podziel się swoją historią”</string>
 </resources>

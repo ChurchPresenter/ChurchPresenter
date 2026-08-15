@@ -2195,4 +2195,20 @@
     <string name="bible_catalog_language_named">%1$s · %2$s (%3$d)</string>
     <string name="bible_catalog_language_named_native">%1$s · %2$s · %3$s (%4$d)</string>
     <string name="stage_monitor_show_chords">Аккордтарды көрсету</string>
+    <string name="story_prompt_window_title">Тарихыңызбен бөлісіңіз</string>
+    <string name="story_prompt_badge">Сізден естігенді қалаймыз</string>
+    <string name="story_prompt_heading">Church Presenter шіркеуіңізге көмектесті ме?</string>
+    <string name="story_prompt_body_1">Church Presenter дәл сіздікіндей жексенбілік қызметтерге арналған, ал оның жұмыс істеп тұрғанын білудің ең жақсы жолы — оны қолданатындардан есту.</string>
+    <string name="story_prompt_body_2">Егер бағдарлама шіркеуіңізге көмектессе, бұл туралы бізге айтыңыз — мысалы:</string>
+    <string name="story_prompt_example_1">Қызмет тәртібі үйлесімді болды</string>
+    <string name="story_prompt_example_2">Жазба экранда асығыссыз шығады</string>
+    <string name="story_prompt_example_3">Бір жазылым азайды</string>
+    <string name="story_prompt_body_3">Бізге бірнеше жол жазып, оларды атыңыз бен шіркеуіңіздің атауымен бірге басты бетте жариялауға бола ма, соны хабарлаңыз.</string>
+    <string name="story_prompt_body_4">Сіздің тарихыңыз басқа шіркеулерге бұл бағдарлама оларға қолайлы ма, соны шешуге көмектеседі.</string>
+    <string name="story_prompt_quote">Әр шіркеу оны сәл өзгеше жүргізеді.</string>
+    <string name="story_prompt_screenshot">Дыбыс операторының компьютеріндегі Church Presenter</string>
+    <string name="story_prompt_share">Тарихыңызбен бөлісу</string>
+    <string name="story_prompt_later">Кейінірек</string>
+    <string name="story_prompt_reassurance">Сіздің келісіміңізсіз ештеңе жарияланбайды.</string>
+    <string name="menu_developer_story_prompt">«Тарихыңызбен бөлісіңіз» диалогы</string>
 </resources>
