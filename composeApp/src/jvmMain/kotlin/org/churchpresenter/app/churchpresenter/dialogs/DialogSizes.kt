@@ -49,3 +49,6 @@ internal val MEMORY_MONITOR_WINDOW_HEIGHT: Dp = 500.dp
 internal val REMOTE_EVENT_DIALOG_WIDTH: Dp = 500.dp
 internal val REMOTE_EVENT_DIALOG_HEIGHT: Dp = 290.dp
 internal val REMOTE_EVENT_DIALOG_HEIGHT_QUEUED: Dp = 330.dp
+
+internal val SHARE_STORY_DIALOG_WIDTH: Dp = 930.dp
+internal val SHARE_STORY_DIALOG_HEIGHT: Dp = 470.dp

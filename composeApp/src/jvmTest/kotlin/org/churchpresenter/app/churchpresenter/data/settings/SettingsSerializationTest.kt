@@ -99,6 +99,7 @@ class SettingsSerializationTest {
         assertRoundTrips(LottiePreset())
         assertRoundTrips(LottieSearchReplacePair())
         assertRoundTrips(WebBookmark())
+        assertRoundTrips(StoryPromptState())
     }
 
     @Test
@@ -176,6 +177,7 @@ class SettingsSerializationTest {
         assertDecodesFromEmptyObject<LottiePreset>()
         assertDecodesFromEmptyObject<LottieSearchReplacePair>()
         assertDecodesFromEmptyObject<WebBookmark>()
+        assertDecodesFromEmptyObject<StoryPromptState>()
     }
 
     @Test
@@ -227,7 +229,7 @@ class SettingsSerializationTest {
             PlanningCenterSettings(), PresentationRemoteSettings(), PresentationSettings(), ProjectionSettings(),
             QASettings(), ScreenAssignment(), ServerSettings(), SongSettings(), StageMonitorSettings(),
             StageMonitorZoneStyle(), StockPhotoSettings(), StreamingSettings(), STTSettings(), WebBookmark(),
-            WindowLayoutSettings(),
+            WindowLayoutSettings(), StoryPromptState(),
         )
         for (settings in all) {
             assertTrue(exerciseComponents(settings) > 0, "${settings::class.simpleName} has no component accessors")
@@ -246,6 +248,33 @@ class SettingsSerializationTest {
         assertEquals(9000, decoded.serverSettings.port)
         assertEquals(false, decoded.analyticsReportingEnabled)
         assertEquals(1_726_000_000_000L, decoded.lastUpdateCheckTimestamp)
+    }
+
+    @Test
+    fun `the story prompt schedule survives a round-trip`() {
+        val populated = AppSettings(
+            storyPrompt = StoryPromptState(
+                installedAtMillis = 1_726_000_000_000L,
+                activeWeeks = setOf(2854L, 2855L, 2856L, 2857L),
+                timesShown = 2,
+                lastShownAtMillis = 1_728_000_000_000L,
+                finished = true,
+            ),
+        )
+        val decoded = json.decodeFromString<AppSettings>(json.encodeToString(populated))
+
+        assertEquals(populated.storyPrompt, decoded.storyPrompt)
+        assertEquals(setOf(2854L, 2855L, 2856L, 2857L), decoded.storyPrompt.activeWeeks)
+        assertEquals(2, decoded.storyPrompt.timesShown)
+        assertTrue(decoded.storyPrompt.finished)
+    }
+
+    @Test
+    fun `settings written before the story prompt existed decode to a fresh schedule`() {
+        val decoded = json.decodeFromString<AppSettings>("""{"language":"en"}""")
+
+        assertEquals(StoryPromptState(), decoded.storyPrompt)
+        assertEquals(0L, decoded.storyPrompt.installedAtMillis)
     }
 
     @Test

@@ -1,0 +1,10 @@
+The font file in this directory is a Google Font, licensed under the
+SIL Open Font License, Version 1.1 (https://openfontlicense.org/):
+
+  Cormorant Garamond   Copyright 2015 The Cormorant Project Authors
+
+The full OFL 1.1 license text is available at:
+https://openfontlicense.org/open-font-license-official-text/
+
+cormorant_garamond_italic.ttf is the italic at weight 400, instanced from the
+upstream variable font and subset to Latin, Latin Extended-A and Cyrillic.
