@@ -88,6 +88,7 @@ Presentation deps in `composeApp/build.gradle.kts` are mirrored in
 ```bash
 ./gradlew :composeApp:run              # run the app
 ./gradlew compileKotlinJvm             # fast compile check
+./gradlew :composeApp:detekt           # static analysis — CI's first gate, run it LAST before you stop
 ./gradlew :composeApp:check            # compile + all unit tests
 ./gradlew :composeApp:jacocoTestReport # coverage → build/reports/jacoco/jacocoTestReport/html/
 bash cleanup_check.sh                  # repo code-quality report
@@ -96,6 +97,15 @@ bash cleanup_check.sh                  # repo code-quality report
 ./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
 ./gradlew :composeApp:verifyRoborazziJvm --tests '*ScreenshotTest*'   # gate: fails past 0.5% of pixels
 ```
+
+**Run `./gradlew :composeApp:detekt` as the last step of any change that touched Kotlin**, before
+saying the work is done. It is the first job in `.github/workflows/test.yml`, so anything it catches
+fails the PR before a single test runs. It catches what the compiler will not: an unused import left
+behind by a refactor is a warning to `compileKotlinJvm` and a **build failure** to detekt, so
+"it compiles" and "the tests pass" are both green while CI is red. A baseline is configured at
+`config/detekt/baseline.xml` for pre-existing findings, but no such file exists today — nothing is
+suppressed, so a clean run is the expected result and every finding it prints is yours to fix.
+Never create or extend that baseline to silence one.
 
 **Verify before you commit a UI change, and re-record what it moved.** `verifyRoborazziJvm` compares
 the committed images against a fresh render and fails past `ScreenshotSupport.CHANGE_THRESHOLD`
