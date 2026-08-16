@@ -84,6 +84,16 @@ object X11WindowCapture {
         @JvmField var screen: Pointer? = null
     }
 
+    /**
+     * The Xlib and Xcomposite entry points this needs, bound by JNA.
+     *
+     * These are PascalCase because they are not Kotlin functions: `Native.load` resolves each one
+     * against a symbol of the *same name* exported by libX11 / libXcomposite, so `XOpenDisplay`
+     * has to be spelled the way C spells it. Renaming any of them to Kotlin's convention compiles
+     * perfectly and then fails at runtime with an UnsatisfiedLinkError -- on Linux only, which is
+     * the one platform the suite does not exercise this path on.
+     */
+    @Suppress("FunctionNaming")
     internal interface X11 : Library {
         fun XOpenDisplay(name: String?): Pointer?
         fun XGetWindowAttributes(display: Pointer, window: NativeLong, attrs: XWindowAttributes): Int

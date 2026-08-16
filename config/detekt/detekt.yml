@@ -71,7 +71,6 @@ naming:
   FunctionNaming:
     active: true
     ignoreAnnotated: ['Composable']
-    excludes: ['**/test/**', '**/jvmTest/**', '**/X11WindowCapture.kt']
   MatchingDeclarationName:
     active: true
 
