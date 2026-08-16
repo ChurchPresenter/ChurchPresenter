@@ -189,11 +189,18 @@ internal fun ComposeUiTest.captureTo(file: File, rootIndex: Int = 0) {
  * this function, and a new suite gets the behaviour without knowing to ask for it.
  */
 private fun ComposeUiTest.dismissHover() {
-    onAllNodes(isRoot()).fetchSemanticsNodes(atLeastOneRootRequired = false).forEachIndexed { index, _ ->
-        onAllNodes(isRoot())[index].performMouseInput { exit(Offset(-1f, -1f)) }
+    val roots = onAllNodes(isRoot()).fetchSemanticsNodes(atLeastOneRootRequired = false).size
+    repeat(roots) { index ->
+        // Moved out of bounds rather than `exit()`, which throws when nothing is hovering: the
+        // dispatcher exits hover by itself on a move that leaves the root, and does nothing when
+        // the pointer was never in it. So this is a no-op for the states nobody clicked.
+        onAllNodes(isRoot())[index].performMouseInput { moveTo(OFF_SCREEN) }
     }
     waitForIdle()
 }
+
+/** Out of every root's bounds, wherever that root is. */
+private val OFF_SCREEN = Offset(-1f, -1f)
 
 /**
  * Runs [shoot] once per theme and writes both renders into one `screenshots/<section>/<name>.png`,
