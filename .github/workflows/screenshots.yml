@@ -82,9 +82,12 @@ jobs:
         timeout-minutes: 20
         run: ./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
 
-      # So the rendered set can be fetched without running Gradle locally — this is where the
-      # website's screenshots come from now that none are committed. Uploaded before the comparison
-      # so a visual difference, which is advisory and never fails the job, cannot cost the artifact.
+      # So the rendered set can be fetched without running Gradle locally, and the source the
+      # website's screenshots should be taken from — not because the images are uncommitted (they
+      # are committed, under composeApp/screenshots, and AGENT.md is emphatic that they stay that
+      # way), but because these are the Linux renders and so are consistent with each other, which
+      # a set recorded on someone's macOS checkout is not. Uploaded before the comparison so a
+      # visual difference, which is advisory and never fails the job, cannot cost the artifact.
       - name: Upload the rendered screenshots
         uses: actions/upload-artifact@v4
         with:
