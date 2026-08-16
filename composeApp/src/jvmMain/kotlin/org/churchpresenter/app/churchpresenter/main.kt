@@ -54,6 +54,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ResolvedDisplay
@@ -186,6 +187,35 @@ internal fun acquireSingleInstanceLock(): Boolean {
     }
 }
 
+/**
+ * Writes the bundled KJV into the app's Bibles folder and points [settings] at it.
+ *
+ * When the folder cannot be used the bundle is skipped and settings are left pointing at no Bible
+ * at all — the setup wizard then asks for a folder, which is the honest outcome here.
+ */
+private fun bundleDefaultBible(settings: AppSettings) {
+    try {
+        val defaultBibleDir = File(AppDataDir.resolve(), Constants.DEFAULT_BIBLES_FOLDER)
+        val problem = bundledBibleDirProblem(defaultBibleDir)
+        if (problem != null) {
+            CrashReporter.reportWarning(
+                "Bundled KJV skipped: Bibles folder $problem",
+                tags = mapOf("subsystem" to "bible_bundle", "reason" to problem)
+            )
+            return
+        }
+        val targetFile = File(defaultBibleDir, "kjv1769.spb")
+        if (!targetFile.exists()) {
+            targetFile.writeBytes(runBlocking { Res.readBytes("files/bible_samples/kjv1769.spb") })
+        }
+        SettingsManager().saveSettings(
+            settings.withBundledBible(defaultBibleDir.absolutePath, "kjv1769.spb")
+        )
+    } catch (e: Exception) {
+        CrashReporter.reportException(e, "Bundling default KJV Bible")
+    }
+}
+
 fun main() {
     if (shouldForceMetalRenderer(System.getProperty("os.name", ""))) {
         System.setProperty("skiko.renderApi", "METAL")
@@ -206,30 +236,7 @@ fun main() {
     CrashReporter.initialize(startupSettings.analyticsReportingEnabled)
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
 
-    if (shouldBundleDefaultBible(startupSettings.bibleSettings)) {
-        try {
-            val defaultBibleDir = File(AppDataDir.resolve(), Constants.DEFAULT_BIBLES_FOLDER)
-            val problem = bundledBibleDirProblem(defaultBibleDir)
-            if (problem != null) {
-                // Nothing to write into, so the settings are left pointing at no Bible at all — the
-                // setup wizard then asks for a folder, which is the honest outcome here.
-                CrashReporter.reportWarning(
-                    "Bundled KJV skipped: Bibles folder $problem",
-                    tags = mapOf("subsystem" to "bible_bundle", "reason" to problem)
-                )
-            } else {
-                val targetFile = File(defaultBibleDir, "kjv1769.spb")
-                if (!targetFile.exists()) {
-                    targetFile.writeBytes(runBlocking { Res.readBytes("files/bible_samples/kjv1769.spb") })
-                }
-                SettingsManager().saveSettings(
-                    startupSettings.withBundledBible(defaultBibleDir.absolutePath, "kjv1769.spb")
-                )
-            }
-        } catch (e: Exception) {
-            CrashReporter.reportException(e, "Bundling default KJV Bible")
-        }
-    }
+    if (shouldBundleDefaultBible(startupSettings.bibleSettings)) bundleDefaultBible(startupSettings)
 
     val pendingUsageEvents = LiveMapReporter.eventsToReport(startupSettings, UsageEvents.unreported())
     val previousSessionMinutes = UsageEvents.lastSessionMinutes()
