@@ -79,7 +79,7 @@ exceptions:
   TooGenericExceptionCaught:
     active: false
   SwallowedException:
-    active: false
+    active: true
   TooGenericExceptionThrown:
     active: false
 
