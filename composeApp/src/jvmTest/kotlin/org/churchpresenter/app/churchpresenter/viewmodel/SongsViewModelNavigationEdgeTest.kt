@@ -182,6 +182,24 @@ class SongsViewModelNavigationEdgeTest {
     }
 
     @Test
+    fun `a search that swaps in a song with shorter sections pulls the line selection back in`() {
+        // The section index survives untouched here — the new song has more sections, not fewer —
+        // so the line index is the only thing left pointing outside the song. Verse 1 has two lines
+        // in "Empty Middle" and one in "Long Song", and a line index of 1 in a one-line section
+        // shows nothing at all while the list highlights a line that is not there.
+        val vm = viewModel()
+        vm.selectByTitle("Empty Middle")
+        vm.selectSection(0)
+        vm.setLineIndex(1)
+
+        vm.updateSearchQuery("Long")
+
+        assertEquals("Long Song", vm.filteredSongItems.value[vm.selectedSongIndex.value].title)
+        assertEquals(0, vm.selectedSectionIndex.value, "the section index was already in range")
+        assertEquals(0, vm.selectedLineIndex.value, "the line index is pulled into the shorter verse")
+    }
+
+    @Test
     fun `a re-sort that puts a shorter song under the selection re-clamps it`() {
         val vm = viewModel()
         vm.updateSort(Constants.SORT_TITLE) // ascending: Empty Middle, Long Song

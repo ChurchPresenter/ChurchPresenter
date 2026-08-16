@@ -7,6 +7,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.call.body
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentLength
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
@@ -18,6 +19,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -266,6 +268,24 @@ class CompanionServerPreloadTest {
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertTrue(response.bytes().isNotEmpty())
+    }
+
+    @Test
+    fun `a module arrives byte for byte, with a length the follower can trust`() {
+        // The module is streamed from a handle opened before the response starts — a Bible cache
+        // file can be deleted by its own instance while a follower is fetching it, and reopening it
+        // later threw where nothing could catch it. What the follower receives must not change:
+        // every byte of the file, and a Content-Length that matches them.
+        val (dir, name) = bibleFolder()
+        val file = File(dir, name)
+        server.updateBibleFilePaths(listOf(file.absolutePath))
+
+        val response = get("${Constants.ENDPOINT_BIBLE_FILE}/translation/0")
+        val received = response.bytes()
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertContentEquals(file.readBytes(), received)
+        assertEquals(file.length(), response.contentLength())
     }
 
     @Test
