@@ -69,9 +69,13 @@ private object JfxInit {
                     // from the native load. This runs on `main` before the window exists, so an
                     // escape is a silent failure to launch at all. JavaFX drives nothing the app
                     // cannot do without, so the toolkit is marked unavailable and startup carries
-                    // on. Throwable, not Exception: the native failures are Errors.
+                    // on. Throwable, not Exception: the native failures are Errors. A
+                    // VirtualMachineError is rethrown — the JVM is out of headroom, and carrying on
+                    // only moves the crash somewhere unrelated.
                     try {
                         JFXPanel()
+                    } catch (vme: VirtualMachineError) {
+                        throw vme
                     } catch (t: Throwable) {
                         available = false
                         CrashReporter.reportWarning(
@@ -115,7 +119,11 @@ private object JfxInit {
 /** Call once from main() to initialise JavaFX before other native toolkits (JCEF). */
 fun preWarmJavaFX() = JfxInit.ensureInit()
 
-/** False when the toolkit refused to start, so nothing tries to hand work to a dead JavaFX. */
+/**
+ * False when the toolkit refused to start. Diagnostics only — it is reported as a crash-service tag
+ * so these machines are identifiable, and nothing branches on it, because nothing in the app depends
+ * on JavaFX being alive. A future JavaFX consumer would be the thing that has to consult it.
+ */
 internal fun isJavaFxAvailable(): Boolean = JfxInit.available
 
 internal fun isMacOS(): Boolean {

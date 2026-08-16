@@ -187,16 +187,22 @@ internal fun acquireSingleInstanceLock(): Boolean {
     }
 }
 
+/** The Bible shipped in the app's resources and installed on a first run. */
+private const val BUNDLED_BIBLE_FILE = "kjv1769.spb"
+
 /**
  * Writes the bundled KJV into the app's Bibles folder and points [settings] at it.
  *
- * When the folder cannot be used the bundle is skipped and settings are left pointing at no Bible
- * at all — the setup wizard then asks for a folder, which is the honest outcome here.
+ * A folder that cannot be written to is not on its own a reason to skip: the copy may already be
+ * there from an earlier launch, and a read-only Bibles folder is a perfectly usable one — a managed
+ * install, or a folder locked down after the fact, whose settings were then reset. Only when there
+ * is no usable file *and* nowhere to put one is the bundle skipped and settings left pointing at no
+ * Bible at all, so the setup wizard asks for a folder.
  */
 private fun bundleDefaultBible(settings: AppSettings) {
     try {
         val defaultBibleDir = File(AppDataDir.resolve(), Constants.DEFAULT_BIBLES_FOLDER)
-        val problem = bundledBibleDirProblem(defaultBibleDir)
+        val problem = bundledBibleSkipReason(defaultBibleDir, BUNDLED_BIBLE_FILE)
         if (problem != null) {
             CrashReporter.reportWarning(
                 "Bundled KJV skipped: Bibles folder $problem",
@@ -204,12 +210,12 @@ private fun bundleDefaultBible(settings: AppSettings) {
             )
             return
         }
-        val targetFile = File(defaultBibleDir, "kjv1769.spb")
+        val targetFile = File(defaultBibleDir, BUNDLED_BIBLE_FILE)
         if (!targetFile.exists()) {
-            targetFile.writeBytes(runBlocking { Res.readBytes("files/bible_samples/kjv1769.spb") })
+            targetFile.writeBytes(runBlocking { Res.readBytes("files/bible_samples/$BUNDLED_BIBLE_FILE") })
         }
         SettingsManager().saveSettings(
-            settings.withBundledBible(defaultBibleDir.absolutePath, "kjv1769.spb")
+            settings.withBundledBible(defaultBibleDir.absolutePath, BUNDLED_BIBLE_FILE)
         )
     } catch (e: Exception) {
         CrashReporter.reportException(e, "Bundling default KJV Bible")

@@ -685,6 +685,43 @@ class MainLogicTest {
     }
 
     @Test
+    fun `a read-only bibles folder that already holds the bible is used, not skipped`() {
+        // Losing a working configuration is worse than the problem being guarded against: the copy
+        // is already there, so nothing needs writing and the settings must still be pointed at it.
+        val dir = Files.createTempDirectory("cp-bundle-dir").toFile()
+        try {
+            val bibles = File(dir, "Bibles").apply { mkdirs() }
+            File(bibles, "kjv1769.spb").writeText("bible")
+            // Windows ignores setWritable on a directory (it is a DOS attribute, not a permission),
+            // which is the same reason the "not writable" branch can fire spuriously there. Nothing
+            // to assert on a platform that cannot produce the state.
+            bibles.setWritable(false)
+            if (bibles.canWrite()) return
+
+            assertEquals("not writable", bundledBibleDirProblem(bibles), "the folder is still unwritable")
+            assertNull(
+                bundledBibleSkipReason(bibles, "kjv1769.spb"),
+                "but an existing copy means there is nothing to write, so the bundle is not skipped",
+            )
+        } finally {
+            File(dir, "Bibles").setWritable(true)
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `a bibles folder that cannot be made is skipped when it holds no bible`() {
+        val dir = Files.createTempDirectory("cp-bundle-dir").toFile()
+        try {
+            val blocked = File(File(dir, "wall").apply { writeText("x") }, "Bibles")
+
+            assertEquals("could not be created", bundledBibleSkipReason(blocked, "kjv1769.spb"))
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `the licence counts as accepted at this version or a later one`() {
         assertTrue(isEulaAccepted(acceptedVersion = 1, currentVersion = 1))
         assertTrue(isEulaAccepted(acceptedVersion = 2, currentVersion = 1))

@@ -385,6 +385,23 @@ internal fun bundledBibleDirProblem(dir: File): String? = when {
     else -> "could not be created"
 }
 
+/**
+ * Why the bundled Bible cannot be installed into [dir], or null when it can.
+ *
+ * A folder that cannot be written to only blocks the bundle when [fileName] is not already sitting
+ * in it. A read-only Bibles folder holding the copy from an earlier launch — a managed install, or
+ * one locked down after the fact and whose settings were later reset — is a working setup, and
+ * skipping it would throw that configuration away and send the user to the setup wizard instead.
+ * `canWrite()` on a directory is unreliable on Windows besides, so this branch can fire spuriously.
+ *
+ * The reason is a fixed phrase, never the path: it is reported to the crash service, and a user's
+ * home directory carries their name.
+ */
+internal fun bundledBibleSkipReason(dir: File, fileName: String): String? {
+    val problem = bundledBibleDirProblem(dir) ?: return null
+    return if (File(dir, fileName).isFile) null else problem
+}
+
 /** Whether the licence has already been accepted, at this build's version of it or a later one. */
 internal fun isEulaAccepted(acceptedVersion: Int, currentVersion: Int): Boolean =
     acceptedVersion >= currentVersion
