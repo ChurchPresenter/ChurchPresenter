@@ -441,4 +441,37 @@ class BiblePresenterStyleRenderTest {
         onNodeWithText("SECOND VERSE", substring = true).assertExists()
         onNodeWithText("FIRST VERSE", substring = true).assertDoesNotExist()
     }
+
+    @Test
+    fun `an image background with no file chosen yet falls back to black`() {
+        // The operator picks "Image" in settings and has not browsed for a file: the type is set
+        // and the path is still empty, which is a different branch from a path that does not
+        // resolve, and the one a half-configured install actually sits in.
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = ""),
+            ),
+        )
+        renderShowsText(settings)
+    }
+
+    @Test
+    fun `a video background with no file chosen yet renders without a decoder`() {
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                bibleBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO, backgroundVideo = ""),
+            ),
+        )
+        renderShowsText(settings)
+    }
+
+    @Test
+    fun `a lower third with an unchosen image path still draws the band`() {
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                bibleLowerThirdBackground = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = ""),
+            ),
+        )
+        renderShowsText(settings, isLowerThird = true)
+    }
 }

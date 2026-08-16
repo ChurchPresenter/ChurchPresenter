@@ -239,6 +239,28 @@ class AtemClientSocketTest {
     }
 
     @Test
+    fun `a clip slot the switcher does not have is refused with its real slot count`() {
+        // Locking a store the ATEM does not have is silently ignored by the device -- LKOB never
+        // comes and the upload would sit until its timeout -- so the slot is checked against the
+        // state dump first and the operator is told the real range instead.
+        FakeAtemSwitcher(clipSlotCount = 2).use { fake ->
+            val client = connected(fake)
+            try {
+                val error = assertFailsWith<Exception> {
+                    runBlocking {
+                        client.uploadClipEncoded(slot = 7, frameCount = 2, name = "oob", nextFrame = { frame(10) })
+                    }
+                }
+                assertTrue(error.message!!.contains("1–2"), "reports the real range, was: ${error.message}")
+                assertTrue(error.message!!.contains("8"), "names the slot the way the ATEM numbers it")
+                assertTrue(fake.commandsNamed("LOCK").isEmpty(), "nothing is locked for a refused upload")
+            } finally {
+                client.disconnect()
+            }
+        }
+    }
+
+    @Test
     fun `a clip with no frames is refused`() {
         FakeAtemSwitcher().use { fake ->
             val client = connected(fake)
