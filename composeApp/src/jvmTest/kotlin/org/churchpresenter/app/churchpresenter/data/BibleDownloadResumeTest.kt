@@ -9,6 +9,8 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.ByteReadChannel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.IOException
@@ -250,6 +252,52 @@ class BibleDownloadResumeTest {
             ?.connectTimeoutMillis
         assertNotNull(configured, "the download request set no connect timeout of its own")
         assertTrue(configured >= 30_000L, "was $configured ms")
+    }
+
+    @Test
+    fun `a connection the engine tears down resumes instead of passing as a cancellation`() {
+        // What the reported warning actually was: the response job dies with the connection, so the
+        // read fails with `Job was cancelled` while nothing here asked for anything to stop. Taking
+        // that at face value abandoned the install without a word and without a resume.
+        // MockEngine records an attempt only once its handler returns, so attempts are counted here.
+        var attempts = 0
+        val engine = MockEngine { request ->
+            attempts++
+            if (attempts == 1) throw CancellationException("Job was cancelled")
+            val start = rangeStartOf(request.headers[HttpHeaders.Range])
+            if (start == 0) whole() else tailFrom(start)
+        }
+
+        val result = download(engine)
+
+        assertEquals(body.size.toLong(), result.bytesWritten)
+        assertContentEquals(body, destination.readBytes())
+        assertEquals(2, attempts)
+    }
+
+    @Test
+    fun `the user closing the dialog still cancels the download`() {
+        val job = Job()
+        var attempts = 0
+        val engine = MockEngine {
+            attempts++
+            job.cancel()
+            throw CancellationException("Job was cancelled")
+        }
+
+        assertFailsWith<CancellationException> {
+            runBlocking(job) {
+                BibleInstallSupport.downloadTo(
+                    url = "https://example.invalid/module.zip",
+                    destination = destination,
+                    http = HttpClient(engine),
+                    expectedBytes = body.size.toLong(),
+                    retryFloorMs = 0L,
+                ) {}
+            }
+        }
+
+        assertEquals(1, attempts, "a cancelled install must not retry")
     }
 
     @Test

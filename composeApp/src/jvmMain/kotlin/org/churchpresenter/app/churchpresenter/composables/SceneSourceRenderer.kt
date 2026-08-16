@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -128,11 +129,10 @@ fun SceneSourceRenderer(
 @Composable
 private fun ImageSourceContent(source: SceneSource.ImageSource, modifier: Modifier) {
     val bitmap = remember(source.filePath) {
-        try {
-            val file = File(source.filePath)
-            if (file.exists()) SkiaImage.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
-            else null
-        } catch (_: Exception) { null }
+        // PictureDecoder, not Skia directly — a scene image is a file the operator chose, and the
+        // formats Skia refuses are ordinary camera and print output.
+        val file = File(source.filePath)
+        if (file.exists()) PictureDecoder.decodeOrNull(file)?.toComposeImageBitmap() else null
     }
 
     if (bitmap != null) {

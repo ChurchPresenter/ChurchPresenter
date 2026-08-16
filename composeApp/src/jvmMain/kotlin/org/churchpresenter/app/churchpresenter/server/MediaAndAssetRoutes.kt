@@ -3,15 +3,21 @@ package org.churchpresenter.app.churchpresenter.server
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.engine.BaseApplicationResponse
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
+import io.ktor.server.response.respondBytesWriter
 import io.ktor.server.response.respondFile
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.utils.io.writeFully
 import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
 import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +29,74 @@ import kotlinx.serialization.json.JsonPrimitive
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
+
+/** nginx's convention for a request the client abandoned before its response finished. */
+private const val STATUS_CLIENT_CLOSED_REQUEST = 499
+
+private const val FILE_COPY_BUFFER_BYTES = 64 * 1024
+
+/**
+ * Runs [send], treating a download the client walks away from as the ordinary event it is.
+ *
+ * A phone that closes the app, leaves Wi-Fi or cancels mid-file ends the response with fewer bytes
+ * written than the `Content-Length` already on the wire, and Ktor raises
+ * [BaseApplicationResponse.BodyLengthIsTooSmall] — or an [IOException] off the dead socket — for it.
+ * Uncaught, that reaches `StatusPages`, which tries to write "Internal server error" into a response
+ * that is already committed and reports the whole thing as a server fault. Nothing can be retried
+ * and nothing more can be sent, so it is recorded against [endpoint] and dropped.
+ *
+ * Anything else — a missing file, a fault in our own code — still escapes and is reported.
+ */
+internal suspend fun sendOrDropOnClientExit(server: CompanionServer, endpoint: String, send: suspend () -> Unit) {
+    try {
+        send()
+    } catch (_: BaseApplicationResponse.BodyLengthIsTooSmall) {
+        server.logRest(endpoint, STATUS_CLIENT_CLOSED_REQUEST, "download_ended_early")
+    } catch (_: IOException) {
+        server.logRest(endpoint, STATUS_CLIENT_CLOSED_REQUEST, "download_connection_lost")
+    }
+}
+
+/** [respondFile] under [sendOrDropOnClientExit]'s rule — every file this server streams goes out this way. */
+private suspend fun ApplicationCall.respondFileOrDrop(server: CompanionServer, endpoint: String, file: File) =
+    sendOrDropOnClientExit(server, endpoint) { respondFile(file) }
+
+/**
+ * Streams a Bible module from a handle opened before a byte of the response is committed.
+ *
+ * [respondFile] opens the file lazily, from inside a coroutine completion handler — so a module
+ * that is deleted between the `exists()` check and that open does not fail the request, it throws
+ * `FileNotFoundException` where nothing can catch it and the app records a fatal crash. A follower's
+ * own Bible cache is exactly such a file: `invalidateInstanceLinkBibleCache` deletes it whenever the
+ * link's translations change, and a second follower may be downloading it at that moment.
+ *
+ * Opening first collapses that race into an ordinary 404, and pins the bytes for the rest of the
+ * response. Range requests are not served here — every Bible fetch, mobile or follower, asks for the
+ * whole module — so this gives up nothing `PartialContent` was doing.
+ */
+private suspend fun ApplicationCall.respondBibleFile(server: CompanionServer, endpoint: String, file: File) {
+    val stream = try {
+        file.inputStream()
+    } catch (_: FileNotFoundException) {
+        server.logRest(endpoint, HttpStatusCode.NotFound.value, "file_vanished_before_send")
+        respond(HttpStatusCode.NotFound, "Bible file not found on disk")
+        return
+    }
+    server.logRest(endpoint, HttpStatusCode.OK.value)
+    sendOrDropOnClientExit(server, endpoint) {
+        stream.use { open ->
+            respondBytesWriter(ContentType.Application.OctetStream, contentLength = file.length()) {
+                val buffer = ByteArray(FILE_COPY_BUFFER_BYTES)
+                while (true) {
+                    val read = open.read(buffer)
+                    if (read <= 0) break
+                    writeFully(buffer, 0, read)
+                }
+                flush()
+            }
+        }
+    }
+}
 
 /**
  * Routes serving pictures, uploaded media and background assets.
@@ -156,7 +230,7 @@ private fun Route.mediaStreamAndBibleFileRoutes(
                         return@get
                     }
                     server.logRest("/api/media/stream/{id}", HttpStatusCode.OK.value)
-                    call.respondFile(file)
+                    call.respondFileOrDrop(server, "/api/media/stream/{id}", file)
                 }
 
                 /**
@@ -181,8 +255,7 @@ private fun Route.mediaStreamAndBibleFileRoutes(
                         call.respond(HttpStatusCode.NotFound, "Bible file not found on disk")
                         return@get
                     }
-                    server.logRest("/api/bible/file", HttpStatusCode.OK.value)
-                    call.respondFile(file)
+                    call.respondBibleFile(server, "/api/bible/file", file)
                 }
 
                 /** GET /api/bible/file/secondary — same as above, for a follower that opted in to
@@ -201,8 +274,7 @@ private fun Route.mediaStreamAndBibleFileRoutes(
                         call.respond(HttpStatusCode.NotFound, "Secondary bible file not found on disk")
                         return@get
                     }
-                    server.logRest("/api/bible/file/secondary", HttpStatusCode.OK.value)
-                    call.respondFile(file)
+                    call.respondBibleFile(server, "/api/bible/file/secondary", file)
                 }
 
                 /** Ordered Bible module names available to an Instance Link follower. */
@@ -217,10 +289,11 @@ private fun Route.mediaStreamAndBibleFileRoutes(
                     val index = call.parameters["index"]?.toIntOrNull()
                     val path = index?.let { server._bibleFilePaths.getOrNull(it) }
                     if (path == null || !File(path).exists()) {
+                        server.logRest("/api/bible/file/translation/{index}", HttpStatusCode.NotFound.value, "translation_not_found")
                         call.respond(HttpStatusCode.NotFound, "Bible translation not found")
                         return@get
                     }
-                    call.respondFile(File(path))
+                    call.respondBibleFile(server, "/api/bible/file/translation/{index}", File(path))
                 }
 
                 /** GET /api/backgrounds — current BackgroundSettings as JSON. Image/video fields are
@@ -283,7 +356,7 @@ private fun Route.backgroundAndPictureUploadRoutes(
                         return@get
                     }
                     server.logRest("/api/backgrounds/asset/{slot}", HttpStatusCode.OK.value)
-                    call.respondFile(file)
+                    call.respondFileOrDrop(server, "/api/backgrounds/asset/{slot}", file)
                 }
 
                 /**

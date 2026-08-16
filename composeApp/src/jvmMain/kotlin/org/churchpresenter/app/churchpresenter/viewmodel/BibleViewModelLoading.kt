@@ -12,6 +12,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
 import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.data.BibleInstallSupport
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
@@ -58,6 +59,19 @@ internal fun BibleViewModel.applyTranslationOrder() {
     if (_verses.value.isNotEmpty()) _verseSelectionToken.value++
 }
 
+
+/**
+ * Writes a cached module by building it beside its destination and moving it into place.
+ *
+ * `writeBytes` truncates the existing file first, so anything reading it at that moment — this
+ * instance's own server handing the module to a downstream follower, or a load already under way —
+ * sees a file that is briefly empty and then partly written. A move swaps whole files instead.
+ */
+private fun writeCacheFile(cacheFile: File, bytes: ByteArray) {
+    val part = File(cacheFile.parentFile, "${cacheFile.name}.part")
+    part.writeBytes(bytes)
+    BibleInstallSupport.moveIntoPlace(part, cacheFile)
+}
 
 internal fun BibleViewModel.invalidateInstanceLinkBibleCache() {
     val primary = File(remoteBibleCacheDir, "primary.spb")
@@ -110,7 +124,7 @@ internal fun BibleViewModel.setInstanceLinkSource(
                 remoteBibleCacheDir.mkdirs()
                 translations.mapIndexed { index, (fileName, bytes) ->
                     val cacheFile = File(remoteBibleCacheDir, "translation-$index.spb")
-                    cacheFile.writeBytes(bytes)
+                    writeCacheFile(cacheFile, bytes)
                     fileName to cacheFile
                 }
             }
@@ -137,7 +151,7 @@ internal fun BibleViewModel.setInstanceLinkSource(
             }
             withContext(ioDispatcher) {
                 remoteBibleCacheDir.mkdirs()
-                cacheFile.writeBytes(bytes)
+                writeCacheFile(cacheFile, bytes)
             }
             primaryDownloaded = true
         }
@@ -150,7 +164,7 @@ internal fun BibleViewModel.setInstanceLinkSource(
             if (bytes != null) {
                 withContext(ioDispatcher) {
                     remoteBibleCacheDir.mkdirs()
-                    secondaryCacheFile.writeBytes(bytes)
+                    writeCacheFile(secondaryCacheFile, bytes)
                 }
                 secondaryDownloaded = true
             }

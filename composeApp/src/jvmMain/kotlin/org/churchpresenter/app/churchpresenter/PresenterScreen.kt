@@ -17,9 +17,9 @@ import org.churchpresenter.app.churchpresenter.composables.keySignal
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import org.jetbrains.skia.Image
 import java.io.File
 
 @Composable
@@ -55,11 +55,11 @@ fun PresenterScreen(
 
     val backgroundImageBitmap = remember(bgType, bgImagePath, showBackground) {
         if (showBackground && bgType == Constants.BACKGROUND_IMAGE && bgImagePath.isNotEmpty()) {
-            try {
-                val file = File(bgImagePath)
-                if (file.exists()) Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
-                else null
-            } catch (_: Exception) { null }
+            // Through PictureDecoder, not Skia directly: a background is a file the operator
+            // chose, so it can be a CMYK JPEG, a TIFF, or a HEIC named .jpg — all of which Skia
+            // alone refuses, leaving a black screen on the output with nothing said.
+            val file = File(bgImagePath)
+            if (file.exists()) PictureDecoder.decodeOrNull(file)?.toComposeImageBitmap() else null
         } else null
     }
 
