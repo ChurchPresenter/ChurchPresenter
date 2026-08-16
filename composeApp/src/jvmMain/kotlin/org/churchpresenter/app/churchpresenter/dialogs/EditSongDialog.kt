@@ -111,6 +111,8 @@ import churchpresenter.composeapp.generated.resources.unit_bpm
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
+import org.churchpresenter.app.churchpresenter.composables.PaneTab
+import org.churchpresenter.app.churchpresenter.composables.PaneTabRow
 import org.churchpresenter.app.churchpresenter.composables.SectionInk
 import org.churchpresenter.app.churchpresenter.composables.SongChordPreview
 import org.churchpresenter.app.churchpresenter.composables.SongSectionKind
