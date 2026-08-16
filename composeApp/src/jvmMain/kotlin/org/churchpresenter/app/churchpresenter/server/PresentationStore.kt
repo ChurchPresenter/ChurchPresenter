@@ -168,7 +168,7 @@ internal class PresentationStore(
             writer.commit()
             committed = true
             jpegSlides to deck.slides.map { it.notes }
-        } catch (superseded: SlideCacheSupersededException) {
+        } catch (_: SlideCacheSupersededException) {
             // A tab render took the entry over after this one started; it finishes the job.
             null
         } finally {
@@ -203,6 +203,7 @@ internal class PresentationStore(
             // for any other render failure.
             CrashReporter.reportWarning(
                 "Presentation: Out of memory rendering ${file.extension.lowercase()} for companion API (server)",
+                throwable = oom,
                 tags = mapOf(
                     "subsystem" to "presentation",
                     "file.type" to file.extension.lowercase()

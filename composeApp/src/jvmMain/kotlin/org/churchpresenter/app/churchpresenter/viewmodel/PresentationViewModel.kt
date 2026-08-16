@@ -407,7 +407,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
                         // This render was superseded by a newer selectPresentation. Let it die here
                         // instead of rendering (and reporting) the rest of a deck nobody wants.
                         throw e
-                    } catch (e: SlideCacheSupersededException) {
+                    } catch (_: SlideCacheSupersededException) {
                         // Another render of the same deck — the companion server, or a re-select
                         // whose cancellation we haven't reached yet — owns the cache entry now.
                         // Stop quietly and leave the files to it.
@@ -441,7 +441,7 @@ class PresentationViewModel(private val appSettings: AppSettings? = null) {
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: SlideCacheSupersededException) {
+        } catch (_: SlideCacheSupersededException) {
             // Lost the entry to a newer render of the same deck between the last slide and the
             // commit. That render owns the result; this one is not a failure and shows no error.
         } catch (e: Exception) {

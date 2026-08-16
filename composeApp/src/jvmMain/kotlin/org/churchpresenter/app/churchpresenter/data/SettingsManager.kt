@@ -83,7 +83,7 @@ class SettingsManager {
                 val raw = settingsFile.readText()
                 try {
                     migrateAndDecode(raw, backupSource = settingsFile)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     // The document is unreadable — malformed JSON, a truncated write from a
                     // hard power-off, a bad hand-edit. Returning defaults here silently discards
                     // the user's entire configuration, so keep a copy they (or we) can recover
@@ -94,7 +94,7 @@ class SettingsManager {
             } else {
                 AppSettings() // Return default settings
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             AppSettings() // Return default settings on error
         }.also { cachedSettings = it }
     }
@@ -407,7 +407,7 @@ class SettingsManager {
             // incomplete but never touches the live settings.json.
             settingsTmpFile.writeText(json)
             Files.move(settingsTmpFile.toPath(), settingsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Silently handle error
         }
     }

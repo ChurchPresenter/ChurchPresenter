@@ -49,7 +49,7 @@ fun primaryScreenSizeDp(): DpSize = try {
     val bounds = GraphicsEnvironment.getLocalGraphicsEnvironment()
         .defaultScreenDevice.defaultConfiguration.bounds
     DpSize(bounds.width.dp, bounds.height.dp)
-} catch (e: HeadlessException) {
+} catch (_: HeadlessException) {
     DpSize(0.dp, 0.dp)
 }
 
