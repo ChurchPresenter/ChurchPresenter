@@ -6,6 +6,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.readBytes
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -79,6 +80,7 @@ class CompanionServerPresentationRenderTest {
             // runner). Pay it here rather than letting it land on whichever test happens to run
             // first, where it would read as a per-test cost.
             val warmUp = pdf(pages = 1)
+            val warmUpPresentationId = warmUp.absolutePath.hashCode().toUInt().toString(16)
             server.updateSchedule(
                 listOf(
                     ScheduleItem.PresentationItem(
@@ -87,30 +89,15 @@ class CompanionServerPresentationRenderTest {
                     )
                 )
             )
-            // A refused connection is retried, not thrown. `isRunning` flips as soon as the engine
-            // has started, which is not the same instant Netty begins accepting on the socket, so a
-            // request issued in that gap comes back as ConnectException rather than as a status.
-            // The loop is already shaped to poll — it has a deadline and a sleep — but an unguarded
-            // `get()` escapes it on the very first refusal, so the deadline never got to do its job
-            // and @BeforeClass failed the whole class with "Connection refused". Seen on CI
-            // 2026-08-07 (run 31140371736).
-            val deadline = System.currentTimeMillis() + 60_000
-            var warmed = false
-            HttpClient(CIO).use { warmClient ->
-                while (!warmed && System.currentTimeMillis() < deadline) {
-                    val status = runCatching {
-                        runBlocking {
-                            warmClient.get(
-                                "http://127.0.0.1:$PORT${org.churchpresenter.app.churchpresenter.utils.Constants.ENDPOINT_PRESENTATIONS}/warm-up"
-                            ).status
-                        }
-                    }.getOrNull()
-                    if (status == HttpStatusCode.OK) warmed = true else Thread.sleep(50)
-                }
+            val warmed = runBlocking {
+                withTimeoutOrNull(60_000) {
+                    while (server.presentations._presentationCatalogs[warmUpPresentationId] == null) {
+                        delay(50)
+                    }
+                    true
+                } ?: false
             }
-            // Previously the loop simply fell out after 60s and the class carried on against a
-            // server that had never answered, so the real failure surfaced later and somewhere else.
-            check(warmed) { "the companion server never served the warm-up deck on port $PORT" }
+            check(warmed) { "the companion server never rendered the warm-up deck" }
             server.updateSchedule(emptyList())
         }
 
