@@ -67,7 +67,7 @@ naming:
     active: true
     parameterPattern: '(_)?[a-z][A-Za-z0-9]*'
     privateParameterPattern: '(_)?[a-z][A-Za-z0-9]*'
-    excludes: ['**/test/**', '**/jvmTest/**', '**/PlanningCenterClient.kt', '**/StockMediaClient.kt']
+
   FunctionNaming:
     active: true
     ignoreAnnotated: ['Composable']

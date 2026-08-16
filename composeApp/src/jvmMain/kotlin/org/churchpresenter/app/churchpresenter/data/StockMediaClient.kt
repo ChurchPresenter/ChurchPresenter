@@ -11,6 +11,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
@@ -72,19 +73,28 @@ object StockMediaClient {
     @Serializable
     internal data class PexelsPhotoResponse(
         val photos: List<PexelsPhoto> = emptyList(),
-        val next_page: String? = null
+        @SerialName("next_page") val nextPage: String? = null
     )
 
     @Serializable
-    internal data class PexelsVideoFile(val link: String, val quality: String? = null, val file_type: String? = null, val width: Int? = null)
+    internal data class PexelsVideoFile(
+        val link: String,
+        val quality: String? = null,
+        @SerialName("file_type") val fileType: String? = null,
+        val width: Int? = null,
+    )
 
     @Serializable
-    internal data class PexelsVideo(val id: Long, val image: String, val video_files: List<PexelsVideoFile> = emptyList())
+    internal data class PexelsVideo(
+        val id: Long,
+        val image: String,
+        @SerialName("video_files") val videoFiles: List<PexelsVideoFile> = emptyList(),
+    )
 
     @Serializable
     internal data class PexelsVideoResponse(
         val videos: List<PexelsVideo> = emptyList(),
-        val next_page: String? = null
+        @SerialName("next_page") val nextPage: String? = null
     )
 
     // --- Pixabay DTOs ---
@@ -110,7 +120,11 @@ object StockMediaClient {
     )
 
     @Serializable
-    internal data class PixabayVideo(val id: Long, val videos: PixabayVideoFiles, val picture_id: String? = null)
+    internal data class PixabayVideo(
+        val id: Long,
+        val videos: PixabayVideoFiles,
+        @SerialName("picture_id") val pictureId: String? = null,
+    )
 
     @Serializable
     internal data class PixabayVideoResponse(
@@ -217,16 +231,16 @@ object StockMediaClient {
                                 downloadUrl = it.src.original
                             )
                         },
-                        hasMore = parsed.next_page != null
+                        hasMore = parsed.nextPage != null
                     )
                 }
                 StockMediaType.VIDEO -> {
                     val parsed = json.decodeFromString(PexelsVideoResponse.serializer(), body)
                     SearchOutcome.Success(
                         items = parsed.videos.mapNotNull { video ->
-                            val file = video.video_files.firstOrNull { it.quality == "hd" }
-                                ?: video.video_files.firstOrNull { it.file_type == "video/mp4" }
-                                ?: video.video_files.firstOrNull()
+                            val file = video.videoFiles.firstOrNull { it.quality == "hd" }
+                                ?: video.videoFiles.firstOrNull { it.fileType == "video/mp4" }
+                                ?: video.videoFiles.firstOrNull()
                             file?.let {
                                 StockMediaItem(
                                     id = video.id.toString(),
@@ -237,7 +251,7 @@ object StockMediaClient {
                                 )
                             }
                         },
-                        hasMore = parsed.next_page != null
+                        hasMore = parsed.nextPage != null
                     )
                 }
             }
