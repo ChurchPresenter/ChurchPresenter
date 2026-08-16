@@ -17,7 +17,11 @@ style:
     active: true
     forbiddenPatterns: 'androidx\.compose\.material\.(?!icons)'
   MaxLineLength:
-    active: false
+    active: true
+    maxLineLength: 120
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: false
   MagicNumber:
     active: true
     ignorePropertyDeclaration: true
@@ -36,11 +40,24 @@ style:
 
 complexity:
   LongMethod:
-    active: false
+    active: true
+    threshold: 60
   LongParameterList:
-    active: false
+    active: true
+    functionThreshold: 6
+    constructorThreshold: 7
+    ignoreDefaultParameters: false
+    ignoreAnnotated: ['Composable']
   TooManyFunctions:
-    active: false
+    active: true
+    thresholdInFiles: 11
+    thresholdInClasses: 11
+    thresholdInInterfaces: 11
+    thresholdInObjects: 11
+    thresholdInEnums: 11
+    ignoreDeprecated: false
+    ignorePrivate: false
+    ignoreOverridden: true
   CyclomaticComplexMethod:
     active: true
     threshold: 20
@@ -48,7 +65,8 @@ complexity:
     ignoreSingleWhenExpression: true
     ignoreSimpleWhenEntries: true
   LargeClass:
-    active: false
+    active: true
+    threshold: 600
   NestedBlockDepth:
     active: true
     ignoreAnnotated: ['Composable']
@@ -76,7 +94,7 @@ naming:
 
 exceptions:
   TooGenericExceptionCaught:
-    active: false
+    active: true
   SwallowedException:
     active: true
   TooGenericExceptionThrown:

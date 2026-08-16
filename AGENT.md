@@ -89,6 +89,7 @@ Presentation deps in `composeApp/build.gradle.kts` are mirrored in
 ./gradlew :composeApp:run              # run the app
 ./gradlew compileKotlinJvm             # fast compile check
 ./gradlew :composeApp:detekt           # static analysis — CI's first gate, run it LAST before you stop
+# NEVER run :composeApp:detektBaseline — it rewrites baseline.xml and absorbs your own new findings
 ./gradlew :composeApp:check            # compile + all unit tests
 ./gradlew :composeApp:jacocoTestReport # coverage → build/reports/jacoco/jacocoTestReport/html/
 bash cleanup_check.sh                  # repo code-quality report
@@ -102,10 +103,20 @@ bash cleanup_check.sh                  # repo code-quality report
 saying the work is done. It is the first job in `.github/workflows/test.yml`, so anything it catches
 fails the PR before a single test runs. It catches what the compiler will not: an unused import left
 behind by a refactor is a warning to `compileKotlinJvm` and a **build failure** to detekt, so
-"it compiles" and "the tests pass" are both green while CI is red. A baseline is configured at
-`config/detekt/baseline.xml` for pre-existing findings, but no such file exists today — nothing is
-suppressed, so a clean run is the expected result and every finding it prints is yours to fix.
-Never create or extend that baseline to silence one.
+"it compiles" and "the tests pass" are both green while CI is red. A clean run is the expected
+result and every finding it prints is yours to fix.
+
+`config/detekt/baseline.xml` holds the pre-existing findings from the day the size/length rules
+(`LongMethod`, `LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`,
+`TooGenericExceptionCaught`) were switched on — 2,388 of them, suppressed so those rules gate new
+code only.
+
+**NEVER run `./gradlew :composeApp:detektBaseline` again.** Not to refresh it, not to re-sort it,
+not "just to see". That task rewrites the file from the current tree, so it silently absorbs every
+finding you just introduced and the gate stops gating. The file is generated once and edited by
+hand from now on. **Never extend it to silence a new finding**, either. Entries are keyed by rule
+plus signature, so touching a baselined function can surface its finding — fix the finding and
+delete the entry.
 
 **Verify before you commit a UI change, and re-record what it moved.** `verifyRoborazziJvm` compares
 the committed images against a fresh render and fails past `ScreenshotSupport.CHANGE_THRESHOLD`
