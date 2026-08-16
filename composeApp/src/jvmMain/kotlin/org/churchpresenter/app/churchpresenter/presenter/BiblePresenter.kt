@@ -52,9 +52,9 @@ import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSet
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
-import org.jetbrains.skia.Image
 import java.io.File
 import kotlin.math.min
 
@@ -385,13 +385,9 @@ fun BiblePresenter(
 
     val backgroundImageBitmap = remember(effectiveType, effectiveImagePath, isLowerThird) {
         if (effectiveType == Constants.BACKGROUND_IMAGE && effectiveImagePath.isNotEmpty()) {
-            try {
-                val file = File(effectiveImagePath)
-                if (file.exists()) org.jetbrains.skia.Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
-                else null
-            } catch (_: Exception) {
-                null
-            }
+            // PictureDecoder, not Skia directly — see PresenterScreen for why.
+            val file = File(effectiveImagePath)
+            if (file.exists()) PictureDecoder.decodeOrNull(file)?.toComposeImageBitmap() else null
         } else null
     }
 
