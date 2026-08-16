@@ -365,6 +365,43 @@ internal fun announcementDisplayMs(sliderSpan: Long, animationDuration: Long, lo
 internal fun shouldBundleDefaultBible(settings: BibleSettings): Boolean =
     settings.storageDirectory.isEmpty() && settings.primaryBible.isEmpty()
 
+/**
+ * Makes sure [dir] is a directory that can be written to, and names the problem when it cannot be.
+ *
+ * The bundling code used to call `mkdirs()` and ignore what it answered, so a folder that could not
+ * be created surfaced a sentence later as `FileNotFoundException: …/Bibles/kjv1769.spb (No such
+ * file or directory)` — a message about a file, for a problem with its parent, which reads as a
+ * missing resource in the app rather than a home directory the process cannot write into.
+ *
+ * The reason is a fixed phrase, never the path: it is reported to the crash service, and a user's
+ * home directory carries their name.
+ *
+ * @return null when the directory is ready, otherwise why it is not.
+ */
+internal fun bundledBibleDirProblem(dir: File): String? = when {
+    dir.isDirectory -> if (dir.canWrite()) null else "not writable"
+    dir.exists() -> "occupied by a file"
+    dir.mkdirs() -> null
+    else -> "could not be created"
+}
+
+/**
+ * Why the bundled Bible cannot be installed into [dir], or null when it can.
+ *
+ * A folder that cannot be written to only blocks the bundle when [fileName] is not already sitting
+ * in it. A read-only Bibles folder holding the copy from an earlier launch — a managed install, or
+ * one locked down after the fact and whose settings were later reset — is a working setup, and
+ * skipping it would throw that configuration away and send the user to the setup wizard instead.
+ * `canWrite()` on a directory is unreliable on Windows besides, so this branch can fire spuriously.
+ *
+ * The reason is a fixed phrase, never the path: it is reported to the crash service, and a user's
+ * home directory carries their name.
+ */
+internal fun bundledBibleSkipReason(dir: File, fileName: String): String? {
+    val problem = bundledBibleDirProblem(dir) ?: return null
+    return if (File(dir, fileName).isFile) null else problem
+}
+
 /** Whether the licence has already been accepted, at this build's version of it or a later one. */
 internal fun isEulaAccepted(acceptedVersion: Int, currentVersion: Int): Boolean =
     acceptedVersion >= currentVersion
