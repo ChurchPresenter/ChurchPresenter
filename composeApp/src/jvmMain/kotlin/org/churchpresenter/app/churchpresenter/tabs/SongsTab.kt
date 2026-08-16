@@ -248,6 +248,8 @@ fun SongsTab(
     }
 
     val tabFocusRequester = remember { FocusRequester() }
+    // True while the caret is in the song search field — the tab's key handler stands down for it.
+    var searchFieldFocused by remember { mutableStateOf(false) }
     // Focus-lost rescue: arrow-key song/section/line navigation only works while the tab
     // holds keyboard focus AND the window is focused — full machinery in
     // composables/FocusLostRescue.kt (shared with Presentation/Bible).
@@ -388,7 +390,10 @@ fun SongsTab(
             .focusRescuePressHook(focusRescue)
             .focusable()
             .onPreviewKeyEvent { keyEvent ->
-                if (keyEvent.type == KeyEventType.KeyDown) {
+                // The handler sits on the tab root, so it sees every key before the search field
+                // does. While the caret is in that field the keys belong to the text — left/right
+                // move it, and nothing here may swallow them. Same rule as BibleTab.
+                if (keyEvent.type == KeyEventType.KeyDown && !searchFieldFocused) {
                     val isLineMode = isSongLineMode(appSettings.songSettings)
                     when {
                         shortcuts.matches(ShortcutAction.SONGS_PREVIOUS, keyEvent) -> {
@@ -455,6 +460,7 @@ fun SongsTab(
             favoriteSongs = { viewModel.getFavoriteSongs() },
             playCountFor = { id -> statisticsManager?.getSongPlayCount(id) },
             onSearchQueryChange = { viewModel.updateSearchQuery(it) },
+            onSearchFocusChanged = { searchFieldFocused = it },
             onFilterTypeChange = { viewModel.updateFilterType(it) },
             onSongbookChange = { viewModel.updateSelectedSongbook(it) },
             onSortChange = { viewModel.updateSort(it) },
