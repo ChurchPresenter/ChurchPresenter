@@ -75,6 +75,13 @@ class BibleTest {
     }
 
     @Test
+    fun `a leading word that only starts with a digit is not a book number`() {
+        val b = bible()
+        // "1st" is not the numeral in "1 Kings" — the significant word rule applies instead.
+        assertEquals("Kin", b.generateAbbreviation("1st Kings"))
+    }
+
+    @Test
     fun `a name with nothing worth shortening falls back to initials`() {
         val b = bible()
         assertEquals("AAB", b.generateAbbreviation("A a b"))

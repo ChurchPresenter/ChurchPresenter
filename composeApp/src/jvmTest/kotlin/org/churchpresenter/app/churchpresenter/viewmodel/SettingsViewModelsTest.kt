@@ -258,4 +258,31 @@ class LowerThirdSettingsViewModelTest {
         assertEquals(trigger + 1, vm.refreshTrigger)
         assertEquals("anim.json", vm.selectedFile, "the operator's selection should survive a re-read")
     }
+
+    @Test
+    fun `a folder path that is really a file lists nothing`() {
+        // A settings value left pointing at the animation itself rather than the folder holding it.
+        vm.setFolder(lottie("anim.json").path)
+        assertTrue(vm.filesInDirectory().isEmpty())
+    }
+
+    @Test
+    fun `a selection with no folder configured resolves to nothing`() {
+        // Selecting before a folder has been chosen leaves nothing to read or import from.
+        vm.selectFile("anim.json")
+
+        assertEquals("", vm.previewJsonContent())
+        assertEquals("", vm.importSourcePath())
+    }
+
+    @Test
+    fun `removing with no folder configured deletes nothing`() {
+        val stray = lottie("anim.json")
+        vm.selectFile("anim.json")
+
+        vm.removeSelectedFile()
+
+        assertTrue(stray.exists(), "with no folder there is no file to resolve, so nothing is deleted")
+        assertEquals("anim.json", vm.selectedFile, "and the selection is left as it was")
+    }
 }
