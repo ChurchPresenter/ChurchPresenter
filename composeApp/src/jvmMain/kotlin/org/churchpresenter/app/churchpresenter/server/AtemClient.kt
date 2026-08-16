@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -45,6 +46,18 @@ data class AtemState(
     val keyersPerMe: List<Int> = emptyList(),
     val downstreamKeyers: Int = 0
 )
+
+/**
+ * The switcher did not hold up its end of the protocol: it never answered, never acknowledged, or
+ * asked to have a packet resent that is no longer buffered.
+ *
+ * An [IOException] because that is what it is — a UDP conversation with a device on the network
+ * that stopped going anywhere, and every caller already treats a failed upload as an I/O failure.
+ * Deliberately distinct from the [IllegalArgumentException]s this client throws when the *caller*
+ * asked for something the device does not have (a slot outside the media pool, a frame with no
+ * pixels): those are a bug on this side of the wire, not a fault on it.
+ */
+class AtemProtocolException(message: String) : IOException(message)
 
 /**
  * Minimal ATEM switcher UDP client for uploading stills and clips to the media pool.
@@ -319,7 +332,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
             while (!helloReceived) {
                 if (System.currentTimeMillis() >= deadline ||
                     receiveAndProcess() == null
-                ) throw Exception("No response from ATEM at $host:$port")
+                ) throw AtemProtocolException("No response from ATEM at $host:$port")
             }
 
             // The hello response still carries our placeholder session id — the ATEM only
@@ -485,13 +498,13 @@ class AtemClient(val host: String, val port: Int = 9910) {
         name: String,
         onProgress: (Float) -> Unit = {}
     ) = withContext(Dispatchers.IO) {
-        if (frame.data.isEmpty()) throw Exception("Nothing to upload — frame rendering produced no pixels")
+        require(frame.data.isNotEmpty()) { "Nothing to upload — frame rendering produced no pixels" }
         val knownStills = lastKnownState?.stillSlots
-        if (!knownStills.isNullOrEmpty() && knownStills.none { it.index == slot }) {
+        if (!knownStills.isNullOrEmpty()) {
             // 1-based in messages to match ATEM Software Control's numbering
-            throw Exception(
+            require(knownStills.any { it.index == slot }) {
                 "Still slot ${slot + 1} does not exist on this ATEM (available: 1–${knownStills.maxOf { it.index } + 1})"
-            )
+            }
         }
 
         opMutex.withLock {
@@ -528,15 +541,15 @@ class AtemClient(val host: String, val port: Int = 9910) {
         nextFrame: suspend (Int) -> EncodedFrame,
         onProgress: (Float) -> Unit = {}
     ) = withContext(Dispatchers.IO) {
-        if (frameCount <= 0) throw Exception("Nothing to upload — clip rendering produced no frames")
+        require(frameCount > 0) { "Nothing to upload — clip rendering produced no frames" }
         // Locking a nonexistent store is silently ignored by the ATEM (LKOB never comes),
         // so validate the slot against the state dump up front for a clear error
         val knownClips = lastKnownState?.clipSlots
-        if (!knownClips.isNullOrEmpty() && knownClips.none { it.index == slot }) {
+        if (!knownClips.isNullOrEmpty()) {
             // 1-based in messages to match ATEM Software Control's numbering
-            throw Exception(
+            require(knownClips.any { it.index == slot }) {
                 "Clip slot ${slot + 1} does not exist on this ATEM (available: 1–${knownClips.maxOf { it.index } + 1})"
-            )
+            }
         }
         val storeId = slot + 1   // clip stores are 1-based; store 0 is the still pool
 
@@ -719,7 +732,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
      * The failure for an FTDE the transfer cannot retry past. Clip frames after index 0 usually
      * fail because the device's clip pool ran out of capacity, which is worth saying outright.
      */
-    private fun transferRejected(code: Int, name: String?, frameIndex: Int, retries: Int): Exception {
+    private fun transferRejected(code: Int, name: String?, frameIndex: Int, retries: Int): AtemProtocolException {
         val what = if (name == null) "clip frame $frameIndex" else "still"
         val hint = if (name == null && frameIndex > 0) {
             " — the clip may exceed the ATEM's clip pool capacity; try a shorter duration or lower fps"
@@ -727,9 +740,9 @@ class AtemClient(val host: String, val port: Int = 9910) {
             ""
         }
         return if (code == FTDE_CODE_RETRY) {
-            Exception("ATEM stayed busy uploading $what after $retries retries$hint")
+            AtemProtocolException("ATEM stayed busy uploading $what after $retries retries$hint")
         } else {
-            Exception("ATEM rejected $what (error code $code)$hint")
+            AtemProtocolException("ATEM rejected $what (error code $code)$hint")
         }
     }
 
@@ -887,7 +900,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
     /** Resend buffered in-flight packets starting from [fromId] (ATEM retransmit request). */
     private fun retransmitFrom(fromId: Int) {
         if (!inFlight.containsKey(fromId)) {
-            throw Exception("ATEM requested retransmit of packet $fromId, which is no longer buffered")
+            throw AtemProtocolException("ATEM requested retransmit of packet $fromId, which is no longer buffered")
         }
         var resending = false
         for ((id, bytes) in inFlight) {
@@ -908,10 +921,10 @@ class AtemClient(val host: String, val port: Int = 9910) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (inFlight.containsKey(pktId)) {
             val remaining = deadline - System.currentTimeMillis()
-            if (remaining <= 0) throw Exception("ATEM did not acknowledge within ${timeoutMs}ms")
+            if (remaining <= 0) throw AtemProtocolException("ATEM did not acknowledge within ${timeoutMs}ms")
             socket?.soTimeout = remaining.coerceAtLeast(1).toInt()
             val commands = receiveAndProcess()
-                ?: throw Exception("ATEM did not acknowledge within ${timeoutMs}ms")
+                ?: throw AtemProtocolException("ATEM did not acknowledge within ${timeoutMs}ms")
             stashInteresting(commands)
         }
     }
@@ -938,7 +951,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
             }
             if (result != null) return result
         }
-        throw Exception("ATEM did not respond with ${names.joinToString("/")} within ${timeoutMs}ms")
+        throw AtemProtocolException("ATEM did not respond with ${names.joinToString("/")} within ${timeoutMs}ms")
     }
 
     /**
