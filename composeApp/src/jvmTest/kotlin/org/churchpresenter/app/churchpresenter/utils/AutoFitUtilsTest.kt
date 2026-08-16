@@ -123,6 +123,13 @@ class AutoFitUtilsTest {
     }
 
     @Test
+    fun `all-sections fit degrades safely on a box with no height`() {
+        assertEquals(8, calculateAutoFitForAllSections(measurer, listOf(section("x")), style, 1920, 0))
+        assertEquals(8, calculateAutoFitForAllSections(measurer, listOf(section("x")), style, 1920, -10))
+        assertEquals(8, calculateAutoFitForAllSections(measurer, listOf(section("x")), style, -10, 1080))
+    }
+
+    @Test
     fun `the whole song is sized by its most demanding section`() {
         val shortOnly = listOf(section("Short line"))
         val withLongSection = listOf(

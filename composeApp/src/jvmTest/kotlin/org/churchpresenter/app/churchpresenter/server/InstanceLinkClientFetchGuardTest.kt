@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
+import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -276,5 +277,40 @@ class InstanceLinkClientFetchGuardTest {
         )
 
         assertNull(runBlocking { client.fetchSecondaryBibleFile() })
+    }
+
+    @Test
+    fun `a follower carrying the api key is served the primary's backgrounds`() {
+        val primaryPort = startPrimary(apiKey = "s3cret")
+        val primary = requireNotNull(server)
+        primary.updateBackgroundSettings(BackgroundSettings(defaultBackgroundColor = "#123456"))
+
+        val client = client()
+        client.connect(
+            host = "127.0.0.1", port = primaryPort, apiKey = "s3cret",
+            deviceId = "follower", reconnectDelayMs = 60_000,
+        )
+
+        val mirrored = assertNotNull(runBlocking { client.fetchBackgroundSettings() })
+        assertEquals("#123456", mirrored.defaultBackgroundColor)
+    }
+
+    @Test
+    fun `a follower without the api key is refused the primary's backgrounds`() {
+        val primaryPort = startPrimary(apiKey = "s3cret")
+        requireNotNull(server).updateBackgroundSettings(BackgroundSettings(defaultBackgroundColor = "#123456"))
+
+        val client = client()
+        client.connect(
+            host = "127.0.0.1", port = primaryPort, apiKey = "",
+            deviceId = "follower", reconnectDelayMs = 60_000,
+        )
+
+        runBlocking {
+            assertNull(client.fetchBackgroundSettings())
+            assertNull(client.fetchBackgroundAsset("default", isVideo = false))
+            assertNull(client.fetchLowerThirdJson("Speaker Name"))
+            assertNull(client.fetchPresentationSlideBytes("deck-1", 0))
+        }
     }
 }

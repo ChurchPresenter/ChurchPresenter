@@ -122,4 +122,35 @@ class UpdateCheckerSelectUpdateTest {
         val available = assertIs<UpdateCheckResult.Available>(result)
         assertEquals("", available.info.releaseNotes)
     }
+
+    @Test
+    fun `a release with no assets field at all is skipped`() {
+        val body = """[{"tag_name":"v26.2.0","draft":false,"prerelease":false,"html_url":"https://example.org/r","body":"n"}]"""
+
+        assertIs<UpdateCheckResult.UpToDate>(select(body))
+    }
+
+    @Test
+    fun `an asset with no download url does not count as an installer`() {
+        val body = releases(release("v26.2.0", assets = """[{"name":"app.msi"}]"""))
+
+        assertIs<UpdateCheckResult.UpToDate>(select(body))
+    }
+
+    @Test
+    fun `a release whose assets list is empty is skipped`() {
+        assertIs<UpdateCheckResult.UpToDate>(select(releases(release("v26.2.0", assets = "[]"))))
+    }
+
+    @Test
+    fun `a draft that is also newer is still skipped`() {
+        assertIs<UpdateCheckResult.UpToDate>(select(releases(release("v99.0.0", draft = true))))
+    }
+
+    @Test
+    fun `the first offerable release wins when several are newer`() {
+        val result = select(releases(release("v26.3.0"), release("v26.2.0")))
+
+        assertEquals("26.3.0", assertIs<UpdateCheckResult.Available>(result).info.latestVersion)
+    }
 }

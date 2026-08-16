@@ -4,6 +4,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
@@ -113,6 +115,13 @@ class CompanionServerPictureCatalogTest {
         }
     }
 
+    private fun posting(path: String, body: String, apiKey: String? = null): HttpResponse = runBlocking {
+        client.post("http://127.0.0.1:$port$path") {
+            apiKey?.let { header(Constants.HEADER_API_KEY, it) }
+            setBody(body)
+        }
+    }
+
     private fun HttpResponse.obj(): JsonObject =
         json.parseToJsonElement(runBlocking { bodyAsText() }).jsonObject
 
@@ -193,6 +202,9 @@ class CompanionServerPictureCatalogTest {
             "${Constants.ENDPOINT_BIBLE_FILE}/secondary",
             "${Constants.ENDPOINT_BIBLE_FILE}/translations",
             "${Constants.ENDPOINT_BIBLE_FILE}/translation/0",
+            Constants.ENDPOINT_BACKGROUNDS,
+            "${Constants.ENDPOINT_BACKGROUNDS}/asset/default",
+            "${Constants.ENDPOINT_MEDIA_STREAM}/media-1",
         )
 
         guarded.forEach { path ->
@@ -252,5 +264,44 @@ class CompanionServerPictureCatalogTest {
         assertNull(server.getImageFile("folder-1", 5), "past the end of the folder")
         assertNull(server.getImageFile("folder-1", -1), "before the start of it")
         assertNull(server.getImageFile("some-other-folder", 0), "a folder that is not the open one")
+    }
+
+    @Test
+    fun `the picture write routes are behind the key too`() {
+        loadFolder("advent-01.jpg")
+        server.updateApiKey(enabled = true, key = "s3cret")
+
+        assertEquals(
+            HttpStatusCode.Unauthorized,
+            posting("${Constants.ENDPOINT_PICTURES}/select", """{"folderId":"folder-1","index":0}""").status,
+        )
+        assertEquals(
+            HttpStatusCode.Unauthorized,
+            posting("${Constants.ENDPOINT_PICTURES}/upload", """{"name":"a.jpg","data":""}""").status,
+        )
+    }
+
+    @Test
+    fun `a media stream for an id the desktop does not know is a not-found`() {
+        server.updateApiKey(enabled = false, key = "")
+
+        assertEquals(
+            HttpStatusCode.NotFound,
+            getting("${Constants.ENDPOINT_MEDIA_STREAM}/no-such-media").status,
+        )
+    }
+
+    @Test
+    fun `a background asset for a slot with nothing configured is a not-found`() {
+        server.updateApiKey(enabled = false, key = "")
+
+        assertEquals(
+            HttpStatusCode.NotFound,
+            getting("${Constants.ENDPOINT_BACKGROUNDS}/asset/default?type=image").status,
+        )
+        assertEquals(
+            HttpStatusCode.NotFound,
+            getting("${Constants.ENDPOINT_BACKGROUNDS}/asset/default?type=video").status,
+        )
     }
 }

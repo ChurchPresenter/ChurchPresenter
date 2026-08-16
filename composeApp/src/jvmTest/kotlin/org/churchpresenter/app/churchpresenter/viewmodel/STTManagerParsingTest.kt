@@ -272,4 +272,25 @@ class STTManagerParsingTest {
         stt.setLive(true); assertTrue(stt.isLive.value)
         stt.setLive(false); assertTrue(!stt.isLive.value)
     }
+
+    @Test
+    fun `a translation payload with no segments array leaves the translation segments untouched`() {
+        val stt = manager()
+        stt.translation("""{"segments":[{"id":1,"translated_text":"hola"}]}""")
+
+        stt.translation("""{"target_language_name":"Spanish"}""")
+
+        assertEquals(1, stt.translationSegments.size)
+        assertEquals("Spanish", stt.translationLanguage.value)
+    }
+
+    @Test
+    fun `an empty segments array clears what was there`() {
+        val stt = manager()
+        stt.transcription("""{"segments":[{"id":1,"text":"first"}]}""")
+
+        stt.transcription("""{"segments":[]}""")
+
+        assertTrue(stt.segments.isEmpty())
+    }
 }

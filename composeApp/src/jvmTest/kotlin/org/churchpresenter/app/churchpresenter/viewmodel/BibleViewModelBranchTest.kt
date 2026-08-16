@@ -12,6 +12,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -361,5 +363,78 @@ class BibleViewModelBranchTest {
             verseText = "text", matchType = "explicit",
         )
         assertTrue(empty.detectedReferences.value.isEmpty())
+    }
+
+    @Test
+    fun `navigation does nothing with no bible loaded`() {
+        val empty = BibleViewModel(AppSettings())
+
+        assertFalse(empty.navigateNextVerse())
+        assertFalse(empty.navigatePreviousVerse())
+        assertFalse(empty.navigateNextChapter())
+        assertFalse(empty.navigatePreviousChapter())
+    }
+
+    @Test
+    fun `selecting by book id does nothing with no bible loaded`() {
+        val empty = BibleViewModel(AppSettings())
+
+        empty.selectVerseByBookId(43, 3, 16)
+
+        assertTrue(empty.verses.value.isEmpty())
+    }
+
+    @Test
+    fun `selecting by canonical ref is refused with no bible loaded`() {
+        val empty = BibleViewModel(AppSettings())
+
+        assertFalse(empty.selectVerseByCanonicalRef(43, 3, 16))
+    }
+
+    @Test
+    fun `there is no module reference with no bible loaded`() {
+        assertNull(BibleViewModel(AppSettings()).moduleRefFor(43, 3, 16))
+    }
+
+    @Test
+    fun `a module reference names the book as this module abbreviates it`() {
+        val ref = assertNotNull(vm.moduleRefFor(43, 3, 16))
+
+        assertEquals("John", ref.abbreviation)
+        assertEquals(3, ref.chapter)
+        assertEquals(16, ref.verse)
+        assertTrue(ref.text.isNotBlank())
+    }
+
+    @Test
+    fun `a module reference for a verse this module lacks is null`() {
+        assertNull(vm.moduleRefFor(43, 99, 1))
+    }
+
+    @Test
+    fun `selecting by book id for a book this module lacks changes nothing`() {
+        openChapter(vm, 0, 1)
+        val before = vm.verses.value
+
+        vm.selectVerseByBookId(35, 1, 1)
+        vm.selectVerseByBookId(-5, 1, 1)
+
+        assertEquals(before, vm.verses.value)
+    }
+
+    @Test
+    fun `updating the search query with no bible loaded is harmless`() {
+        val empty = BibleViewModel(AppSettings())
+
+        empty.updateSearchQuery("grace")
+
+        assertEquals("grace", empty.searchQuery.value)
+    }
+
+    @Test
+    fun `adding the current verse to the schedule is refused with nothing selected`() {
+        val empty = BibleViewModel(AppSettings())
+
+        assertFalse(empty.addCurrentVerseToSchedule { _, _, _, _, _, _ -> })
     }
 }

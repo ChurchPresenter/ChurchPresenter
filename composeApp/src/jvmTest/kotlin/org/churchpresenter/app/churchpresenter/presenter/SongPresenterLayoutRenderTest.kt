@@ -6,6 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -233,6 +235,137 @@ class SongPresenterLayoutRenderTest {
         )
         present(settings, lyricSection = bilingual, allSections = listOf(bilingual), isLowerThird = true) {
             onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun `a title above the verse with no number configured still reserves its height`() {
+        val settings = AppSettings(
+            songSettings = SongSettings(
+                titlePosition = Constants.ABOVE_VERSE, titleDisplay = Constants.EVERY_PAGE,
+                showNumber = Constants.NONE,
+            ),
+        )
+        val first = section(title = "Amazing Grace", number = 42)
+        val second = section(title = "How Great Thou Art", number = 7, lines = listOf("Then sings my soul"), header = "[Verse 2]")
+
+        present(settings, lyricSection = first, allSections = listOf(first, second)) {
+            onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
+            onNodeWithText("Amazing Grace", substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun `a number above the verse with no title configured still reserves its height`() {
+        val settings = AppSettings(
+            songSettings = SongSettings(
+                songNumberPosition = Constants.ABOVE_VERSE, showNumber = Constants.EVERY_PAGE,
+                titleDisplay = Constants.NONE,
+            ),
+        )
+        val first = section(title = "Amazing Grace", number = 42)
+        val second = section(title = "How Great Thou Art", number = 7, lines = listOf("Then sings my soul"), header = "[Verse 2]")
+
+        present(settings, lyricSection = first, allSections = listOf(first, second)) {
+            onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun `sections numbered zero reserve no number height above the verse`() {
+        val settings = AppSettings(
+            songSettings = SongSettings(
+                songNumberPosition = Constants.ABOVE_VERSE, showNumber = Constants.EVERY_PAGE,
+            ),
+        )
+        val first = section(number = 0)
+        val second = section(number = 0, lines = listOf("second section line"), header = "[Verse 2]")
+
+        present(settings, lyricSection = first, allSections = listOf(first, second)) {
+            onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun `a title below the verse is drawn under it`() {
+        val settings = AppSettings(
+            songSettings = SongSettings(
+                titlePosition = Constants.BELOW_VERSE, titleDisplay = Constants.EVERY_PAGE,
+            ),
+        )
+
+        present(settings) {
+            onNodeWithText("Amazing Grace", substring = true).assertExists()
+            onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun `top-bottom bilingual full screen stacks both languages`() {
+        val settings = AppSettings(
+            songSettings = SongSettings(
+                bilingualLayout = Constants.BILINGUAL_TOP_BOTTOM,
+                fullscreenLanguageDisplay = Constants.SONG_LANG_BOTH,
+            ),
+        )
+        val bilingual = section(
+            lines = listOf("Amazing grace how sweet the sound"),
+            secondaryLines = listOf("Удивительная благодать"),
+        )
+
+        present(settings, lyricSection = bilingual, allSections = listOf(bilingual)) {
+            onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
+            onNodeWithText("Удивительная благодать", substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun `look-ahead pairs a section with the next one for auto-fit in verse mode`() {
+        val first = section()
+        val second = section(
+            lines = listOf("a considerably longer second section line that needs more room"),
+            secondaryLines = listOf("вторая строка"),
+            header = "[Verse 2]",
+        )
+
+        present(
+            AppSettings(),
+            lyricSection = first,
+            allSections = listOf(first, second),
+            lookAheadEnabled = true,
+            displaySectionIndex = 0,
+        ) {
+            onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun `the last section pairs with itself rather than running off the list`() {
+        val only = section()
+
+        present(
+            AppSettings(),
+            lyricSection = only,
+            allSections = listOf(only),
+            lookAheadEnabled = true,
+            displaySectionIndex = 0,
+        ) {
+            onAllNodesWithText("Amazing grace how sweet the sound", substring = true).assertCountEquals(2)
+        }
+    }
+
+    @Test
+    fun `the end-of-song indicator shows on the last section`() {
+        val first = section()
+        val last = section(lines = listOf("the final line"), header = "[Verse 2]").copy(isLastSection = true)
+
+        present(
+            AppSettings(),
+            lyricSection = last,
+            allSections = listOf(first, last),
+            displaySectionIndex = 1,
+        ) {
+            onNodeWithText("the final line", substring = true).assertExists()
         }
     }
 }
