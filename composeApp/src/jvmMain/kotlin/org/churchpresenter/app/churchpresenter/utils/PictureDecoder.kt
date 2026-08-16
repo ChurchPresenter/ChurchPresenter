@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
 import javax.imageio.ImageIO
 
 /**
@@ -46,7 +47,7 @@ object PictureDecoder {
             runCatching { return Image.makeFromEncoded(png) }
         }
 
-        throw Exception("Failed to decode image ${file.name}: ${skiaError.message}", skiaError)
+        throw IOException("Failed to decode image ${file.name}: ${skiaError.message}", skiaError)
     }
 
     /** Decodes [file], or returns null if none of the decoders could read it. */

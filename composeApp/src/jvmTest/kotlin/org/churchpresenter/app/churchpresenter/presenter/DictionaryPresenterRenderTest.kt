@@ -10,6 +10,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.data.settings.DictionarySettings
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import kotlin.test.Test
 
 /**
@@ -37,10 +38,19 @@ class DictionaryPresenterRenderTest {
     private fun runDict(
         entry: StrongsEntry?,
         settings: DictionarySettings = DictionarySettings(),
+        outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+        transitionAlpha: Float = 1f,
         body: ComposeUiTest.() -> Unit,
     ) = runComposeUiTest {
         setContent {
-            Box(screen) { DictionaryPresenter(entry = entry, dictionarySettings = settings) }
+            Box(screen) {
+                DictionaryPresenter(
+                    entry = entry,
+                    dictionarySettings = settings,
+                    outputRole = outputRole,
+                    transitionAlpha = transitionAlpha,
+                )
+            }
         }
         body()
     }
@@ -90,6 +100,95 @@ class DictionaryPresenterRenderTest {
         elohim,
         DictionarySettings(wordShadow = true, wordShadowColor = "not a colour", referenceShadow = true),
     ) {
+        onNodeWithText("ʼĕlôhîym", substring = true).assertExists()
+    }
+
+    // ── Which parts of the entry are shown ──────────────────────────────────────
+
+    @Test
+    fun `turning the reference off drops the number and the pronunciation`() = runDict(
+        elohim,
+        DictionarySettings(showReference = false),
+    ) {
+        onNodeWithText("H430", substring = true).assertDoesNotExist()
+        onNodeWithText("el-o-heem'", substring = true).assertDoesNotExist()
+        onNodeWithText("ʼĕlôhîym", substring = true).assertExists("the word itself is a separate switch")
+    }
+
+    @Test
+    fun `turning the word off leaves the rest of the entry`() = runDict(
+        elohim,
+        DictionarySettings(showWord = false),
+    ) {
+        onNodeWithText("ʼĕlôhîym", substring = true).assertDoesNotExist()
+        onNodeWithText("the supreme God", substring = true).assertExists()
+    }
+
+    @Test
+    fun `turning the definition off leaves the word`() = runDict(
+        elohim,
+        DictionarySettings(showDefinition = false),
+    ) {
+        onNodeWithText("the supreme God", substring = true).assertDoesNotExist()
+        onNodeWithText("ʼĕlôhîym", substring = true).assertExists()
+    }
+
+    @Test
+    fun `turning the KJV usage off drops it`() = runDict(
+        elohim,
+        DictionarySettings(showKjvUsage = false),
+    ) {
+        onNodeWithText("God (2346x)", substring = true).assertDoesNotExist()
+        onNodeWithText("ʼĕlôhîym", substring = true).assertExists()
+    }
+
+    @Test
+    fun `an entry with nothing but a number shows only the number`() = runDict(
+        StrongsEntry(number = "H9999", word = "", transliteration = "", pronunciation = "", definition = "", kjvUsage = ""),
+    ) {
+        // Every field of the entry is switched on, so what is missing is the entry's own content —
+        // an empty field must draw nothing rather than an empty line pushing the layout around.
+        onNodeWithText("H9999", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a pronunciation identical to the transliteration is not printed twice`() = runDict(
+        elohim.copy(transliteration = "elohim", pronunciation = "elohim"),
+    ) {
+        onNodeWithText("elohim  •  elohim", substring = true).assertDoesNotExist()
+        onNodeWithText("elohim", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a pronunciation with no transliteration stands on its own`() = runDict(
+        elohim.copy(transliteration = ""),
+    ) {
+        // Without the transliteration there is nothing for the separator to sit between.
+        onNodeWithText("•", substring = true).assertDoesNotExist()
+        onNodeWithText("el-o-heem'", substring = true).assertExists()
+    }
+
+    @Test
+    fun `an italic word still reads the same`() = runDict(elohim, DictionarySettings(wordItalic = true, wordBold = true)) {
+        onNodeWithText("ʼĕlôhîym", substring = true).assertExists()
+    }
+
+    // ── The key output ──────────────────────────────────────────────────────────
+
+    @Test
+    fun `the key signal draws the same entry in plain white on black`() = runDict(
+        elohim,
+        outputRole = Constants.OUTPUT_ROLE_KEY,
+    ) {
+        // The key is a matte for a hardware keyer: the configured colours are replaced outright,
+        // but every piece of text still has to be there or the fill is keyed against nothing.
+        onNodeWithText("ʼĕlôhîym", substring = true).assertExists()
+        onNodeWithText("the supreme God", substring = true).assertExists()
+        onNodeWithText("God (2346x)", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a mid-transition entry is still on screen`() = runDict(elohim, transitionAlpha = 0.4f) {
         onNodeWithText("ʼĕlôhîym", substring = true).assertExists()
     }
 }

@@ -318,7 +318,7 @@ internal object BibleInstallSupport {
      * two are told apart so the user hears "your connection keeps stopping" rather than "you are
      * offline". Ktor wraps, so the cause chain is walked, but only far enough to stay cheap.
      */
-    private fun Throwable.isStall(depth: Int = 0): Boolean =
+    internal fun Throwable.isStall(depth: Int = 0): Boolean =
         this is SocketTimeoutException ||
             this is HttpRequestTimeoutException ||
             this is TruncatedBodyException ||

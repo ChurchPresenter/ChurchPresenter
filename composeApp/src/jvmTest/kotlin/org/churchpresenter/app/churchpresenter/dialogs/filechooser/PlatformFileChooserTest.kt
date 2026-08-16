@@ -1122,7 +1122,7 @@ class PlatformFileChooserTest {
 
         val result = FileKitFileChooser.withNativeDialog(
             context = "test",
-            attempt = { throw RuntimeException("no native dialog library") },
+            attempt = { throw IllegalStateException("no native dialog library") },
             fallback = { fellBack = true; "swing" },
         )
 

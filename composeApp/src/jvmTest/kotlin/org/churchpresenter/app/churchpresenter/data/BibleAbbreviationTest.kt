@@ -85,4 +85,18 @@ class BibleAbbreviationTest {
     fun `the file-name fallback drops the extension only`() {
         assertEquals("king.james", abbreviationOf("", fileName = "king.james.spb"))
     }
+
+    @Test
+    fun `a title that is only an empty aside falls back to the file name`() {
+        // Nothing is left of the title once the aside and its punctuation are gone, so the title
+        // cannot name the module at all.
+        assertEquals("ru_RST77", abbreviationOf("( )", fileName = "ru_RST77.spb"))
+    }
+
+    @Test
+    fun `a title of pure punctuation abbreviates to nothing`() {
+        // It is a title, so the file name is not consulted — but there is no letter or digit in it
+        // to build an abbreviation from either.
+        assertEquals("", abbreviationOf("...", fileName = "ru_RST77.spb"))
+    }
 }
