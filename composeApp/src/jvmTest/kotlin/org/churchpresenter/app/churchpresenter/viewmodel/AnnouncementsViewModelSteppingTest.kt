@@ -271,4 +271,97 @@ class AnnouncementsViewModelSteppingTest {
         assertEquals("#FF0000", vm.timerTextColor)
         assertEquals(false, vm.bold, "a setter must not disturb the fields it does not name")
     }
+
+    @Test
+    fun `stepping seconds up at the end of the last minute rolls the hour too`() {
+        // 0:59:55 + 5s is 1:00:00 — the carry has to go all the way through, not stop at the minute.
+        val vm = vm()
+        vm.setTimerMinutes(59); vm.setTimerSeconds(55)
+
+        vm.stepTimerSeconds(1)
+
+        assertEquals(0, vm.timerSeconds)
+        assertEquals(0, vm.timerMinutes)
+        assertEquals(1, vm.timerHours)
+    }
+
+    @Test
+    fun `stepping seconds down at the start of an hour borrows through the minute`() {
+        // 1:00:00 - 5s is 0:59:55.
+        val vm = vm()
+        vm.setTimerHours(1); vm.setTimerMinutes(0); vm.setTimerSeconds(0)
+
+        vm.stepTimerSeconds(-1)
+
+        assertEquals(55, vm.timerSeconds)
+        assertEquals(59, vm.timerMinutes)
+        assertEquals(0, vm.timerHours)
+    }
+
+    @Test
+    fun `stepping minutes within the hour just adds and subtracts one`() {
+        val vm = vm()
+        vm.setTimerMinutes(10)
+
+        vm.stepTimerMinutes(1); assertEquals(11, vm.timerMinutes)
+        vm.stepTimerMinutes(-1); assertEquals(10, vm.timerMinutes)
+        assertEquals(0, vm.timerHours, "nothing carried into the hour")
+    }
+
+    // ── stepTargetMinute / stepTargetSecond: the same wrapping on the clock target ─
+
+    @Test
+    fun `the target minute wraps forward into the next hour`() {
+        val vm = vm()
+        vm.setTargetHour(9); vm.setTargetMinute(59)
+
+        vm.stepTargetMinute(1)
+
+        assertEquals(0, vm.targetMinute)
+        assertEquals(10, vm.targetHour)
+    }
+
+    @Test
+    fun `the target minute wraps backward into the previous hour`() {
+        // The carry goes through the wrapping hour step, so 00:00 goes back to 23:59 rather than
+        // sticking at hour 0 — a countdown aimed at midnight was 23 hours out when it did.
+        val vm = vm()
+        vm.setTargetHour(0); vm.setTargetMinute(0)
+
+        vm.stepTargetMinute(-1)
+
+        assertEquals(59, vm.targetMinute)
+        assertEquals(23, vm.targetHour)
+    }
+
+    @Test
+    fun `the target second steps in fives and wraps into the minute`() {
+        val vm = vm()
+        vm.setTargetMinute(10); vm.setTargetSecond(55)
+
+        vm.stepTargetSecond(1)
+
+        assertEquals(0, vm.targetSecond)
+        assertEquals(11, vm.targetMinute)
+    }
+
+    @Test
+    fun `the target second wraps backward and borrows a minute`() {
+        val vm = vm()
+        vm.setTargetMinute(10); vm.setTargetSecond(0)
+
+        vm.stepTargetSecond(-1)
+
+        assertEquals(55, vm.targetSecond)
+        assertEquals(9, vm.targetMinute)
+    }
+
+    @Test
+    fun `the target second snaps to the grid without wrapping when it can`() {
+        val vm = vm()
+        vm.setTargetSecond(7)
+
+        vm.stepTargetSecond(-1); assertEquals(5, vm.targetSecond)
+        vm.stepTargetSecond(1); assertEquals(10, vm.targetSecond)
+    }
 }

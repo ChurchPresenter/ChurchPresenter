@@ -1,10 +1,12 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import io.sentry.Breadcrumb
 import io.sentry.NoOpTransportFactory
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.protocol.Message
+import io.sentry.protocol.SentryException
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -164,5 +166,52 @@ class CrashReporterSentryTest {
     @Test
     fun `an event with nothing in it survives scrubbing`() {
         CrashReporter.scrubEvent(SentryEvent())
+    }
+
+    @Test
+    fun `an exception value on the event is scrubbed`() {
+        val event = SentryEvent().apply {
+            exceptions = listOf(SentryException().apply { value = "open failed: /Users/someone/deck.pptx" })
+        }
+
+        CrashReporter.scrubEvent(event)
+
+        val scrubbed = assertNotNull(event.exceptions?.first()?.value)
+        assertFalse(scrubbed.contains("someone"), scrubbed)
+        assertTrue(scrubbed.contains("<user>"), scrubbed)
+    }
+
+    @Test
+    fun `a breadcrumb trail is scrubbed`() {
+        val event = SentryEvent().apply {
+            breadcrumbs = listOf(Breadcrumb().apply { message = "watching /Users/someone/Songs" })
+        }
+
+        CrashReporter.scrubEvent(event)
+
+        assertFalse(assertNotNull(event.breadcrumbs?.first()?.message).contains("someone"))
+    }
+
+    @Test
+    fun `a context block of strings is scrubbed entry by entry`() {
+        val event = SentryEvent()
+        event.contexts["jcef"] = mapOf("installDir" to "/Users/someone/jcef", "version" to 122)
+
+        CrashReporter.scrubEvent(event)
+
+        @Suppress("UNCHECKED_CAST")
+        val jcef = assertNotNull(event.contexts["jcef"] as? Map<String, Any?>)
+        assertEquals("/Users/<user>/jcef", jcef["installDir"])
+        assertEquals(122, jcef["version"], "a non-string value is carried through untouched")
+    }
+
+    @Test
+    fun `a context value that is not a block of its own is left alone`() {
+        val event = SentryEvent()
+        event.contexts["note"] = "/Users/someone/plain"
+
+        CrashReporter.scrubEvent(event)
+
+        assertEquals("/Users/someone/plain", event.contexts["note"])
     }
 }

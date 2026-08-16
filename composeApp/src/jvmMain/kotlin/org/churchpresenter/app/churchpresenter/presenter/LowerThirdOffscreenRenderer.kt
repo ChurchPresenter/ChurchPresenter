@@ -119,9 +119,7 @@ class LowerThirdOffscreenRenderer(
                 renderOnce().close()
                 delay(FRAME_INTERVAL_MS)
             }
-            if (!compositionLoaded) {
-                throw Exception("Lottie composition failed to load for off-screen rendering")
-            }
+            check(compositionLoaded) { "Lottie composition failed to load for off-screen rendering" }
 
             val intBuf = IntArray(width * height)
             block { progress ->
