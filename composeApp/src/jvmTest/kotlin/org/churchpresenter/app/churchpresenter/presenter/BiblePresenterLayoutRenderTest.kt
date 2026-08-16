@@ -506,4 +506,108 @@ class BiblePresenterLayoutRenderTest {
             "configured spacing must remain visible between translation blocks",
         )
     }
+
+    @Test
+    fun `a band whose second translation is switched off shows only the first`() = runComposeUiTest {
+        val settings = AppSettings(
+            bibleSettings = BibleSettings().withTranslations(
+                listOf(
+                    BibleTranslationSettings(fileName = "kjv.spb"),
+                    BibleTranslationSettings(fileName = "rst.spb", lowerThirdEnabled = false),
+                ),
+            ),
+        )
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = listOf(
+                        verse("For God so loved the world", 16, fileName = "kjv.spb"),
+                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb"),
+                    ),
+                    appSettings = settings,
+                    isLowerThird = true,
+                )
+            }
+        }
+
+        onNodeWithText("For God so loved the world", substring = true).assertExists()
+        onAllNodesWithText("Ибо так возлюбил Бог мир", substring = true).assertCountEquals(0)
+    }
+
+    @Test
+    fun `a full-screen output still shows both when the band's second translation is off`() = runComposeUiTest {
+        val settings = AppSettings(
+            bibleSettings = BibleSettings().withTranslations(
+                listOf(
+                    BibleTranslationSettings(fileName = "kjv.spb"),
+                    BibleTranslationSettings(fileName = "rst.spb", lowerThirdEnabled = false),
+                ),
+            ),
+        )
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = listOf(
+                        verse("For God so loved the world", 16, fileName = "kjv.spb"),
+                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb"),
+                    ),
+                    appSettings = settings,
+                )
+            }
+        }
+
+        onNodeWithText("For God so loved the world", substring = true).assertExists()
+        onNodeWithText("Ибо так возлюбил Бог мир", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a vertical band stacks a parallel pair`() = runComposeUiTest {
+        val settings = AppSettings(
+            bibleSettings = BibleSettings().withTranslations(
+                listOf(
+                    BibleTranslationSettings(fileName = "kjv.spb"),
+                    BibleTranslationSettings(fileName = "rst.spb"),
+                ),
+            ),
+        )
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = listOf(
+                        verse("For God so loved the world", 16, fileName = "kjv.spb"),
+                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb"),
+                    ),
+                    appSettings = settings,
+                    isLowerThird = true,
+                    isLowerThirdVertical = true,
+                )
+            }
+        }
+
+        onNodeWithText("For God so loved the world", substring = true).assertExists()
+        onNodeWithText("Ибо так возлюбил Бог мир", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a verse arriving with a second translation this output never asked for shows only the first`() = runComposeUiTest {
+        val settings = AppSettings(
+            bibleSettings = BibleSettings().withTranslations(
+                listOf(BibleTranslationSettings(fileName = "kjv.spb")),
+            ),
+        )
+        setContent {
+            Box(screen) {
+                BiblePresenter(
+                    selectedVerses = listOf(
+                        verse("For God so loved the world", 16, fileName = "kjv.spb"),
+                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb"),
+                    ),
+                    appSettings = settings,
+                )
+            }
+        }
+
+        onNodeWithText("For God so loved the world", substring = true).assertExists()
+        onAllNodesWithText("Ибо так возлюбил Бог мир", substring = true).assertCountEquals(0)
+    }
 }

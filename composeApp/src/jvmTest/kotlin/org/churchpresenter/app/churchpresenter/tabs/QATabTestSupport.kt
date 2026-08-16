@@ -17,6 +17,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.Dp
@@ -245,6 +246,18 @@ internal fun ComposeUiTest.showsQuestion(text: String): Boolean =
     onAllNodes(hasText(text, substring = true))
         .fetchSemanticsNodes(atLeastOneRootRequired = false)
         .isNotEmpty()
+
+/**
+ * Hovers the row carrying [text] and lets its tooltip open.
+ *
+ * The clock is advanced past `TooltipArea`'s open delay rather than waited out, so the tooltip is
+ * on screen by the time this returns without the test costing the delay in real time.
+ */
+internal fun ComposeUiTest.hoverQuestionRow(text: String) {
+    onAllNodes(hasText(text, substring = true))[0].performMouseInput { moveTo(center) }
+    mainClock.advanceTimeBy(600)
+    waitForIdle()
+}
 
 internal fun ComposeUiTest.typeQuestion(text: String) {
     qaAddField().performTextReplacement(text)

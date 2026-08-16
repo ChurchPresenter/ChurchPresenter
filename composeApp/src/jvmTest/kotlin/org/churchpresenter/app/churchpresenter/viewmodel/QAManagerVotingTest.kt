@@ -200,4 +200,46 @@ class QAManagerVotingTest {
 
         assertTrue(manager.isRateLimited("10.0.0.1", 3_600))
     }
+
+    @Test
+    fun `a vote direction the phone made up counts as neither up nor down`() {
+        val (manager, id) = approvedQuestion()
+
+        manager.voteForQuestion(id, "10.0.0.1", "sideways")
+
+        assertEquals(0, manager.question(id).upvotes)
+        assertEquals(0, manager.question(id).downvotes)
+        assertEquals("sideways", manager.getVoteDirection(id, "10.0.0.1"))
+    }
+
+    @Test
+    fun `an unidentified client has no recorded direction`() {
+        val (manager, id) = approvedQuestion()
+
+        manager.voteForQuestion(id, "", "up")
+
+        assertNull(manager.getVoteDirection(id, "10.0.0.1"))
+    }
+
+    @Test
+    fun `a phone that has not voted has no direction on a question`() {
+        val (manager, id) = approvedQuestion()
+
+        assertNull(manager.getVoteDirection(id, "10.0.0.9"))
+    }
+
+    @Test
+    fun `no direction is reported for a question that does not exist`() {
+        val (manager, _) = approvedQuestion()
+
+        assertNull(manager.getVoteDirection("no-such-question", "10.0.0.1"))
+    }
+
+    @Test
+    fun `a negative cooldown never rate limits`() {
+        val (manager, _) = approvedQuestion()
+        manager.submitQuestion("First", "", "10.0.0.1", 60, "device-1")
+
+        assertFalse(manager.isRateLimited("10.0.0.1", -5))
+    }
 }
