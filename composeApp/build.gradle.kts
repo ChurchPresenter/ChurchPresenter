@@ -903,7 +903,7 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.80".toBigDecimal()
             }
             limit {
                 counter = "LINE"
@@ -913,7 +913,7 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
             limit {
                 counter = "COMPLEXITY"
                 value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
+                minimum = "0.75".toBigDecimal()
             }
             limit {
                 counter = "METHOD"
@@ -936,6 +936,20 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
 tasks.register("printCoverageLink") {
     val reportDir = layout.buildDirectory.dir("reports/jacoco/jacocoTestReport")
     val testResultsDir = layout.buildDirectory.dir("test-results/jvmTest")
+    // Where to append the run's summary block, resolved at CONFIGURATION time from a property the
+    // CI client passes in -- not from this process's environment. `System.getenv` here reads the
+    // Gradle DAEMON's environment, which is frozen when the daemon starts, and GITHUB_STEP_SUMMARY
+    // is a fresh temp file PER STEP that the runner reads and discards as soon as that step ends.
+    // In practice the daemon is started by the Detekt step and still serving 26 minutes later when
+    // this task runs, so the block was being appended to a file belonging to a step that finished
+    // long before -- written successfully, read by nobody. Observed on run 31944001329: daemon up
+    // at 11:19:45 (Detekt), printCoverageLink at 11:45:25, same daemon.
+    //
+    // A `-P` property travels with each individual invocation, so it is the live path every time.
+    // The environment stays as the fallback for anyone running the task by hand.
+    val stepSummaryPath = providers.gradleProperty("stepSummary")
+        .orElse(providers.environmentVariable("GITHUB_STEP_SUMMARY"))
+        .orNull
     doLast {
         val dir = reportDir.get().asFile
         val htmlIndex = dir.resolve("html/index.html")
@@ -1010,7 +1024,7 @@ tasks.register("printCoverageLink") {
         // Also put it on the run's summary page. The job log is ~14 minutes of Gradle output and
         // the numbers land in the middle of it; the step summary is the page a reviewer actually
         // opens from a pull request. Best-effort -- a coverage print must never fail a build.
-        System.getenv("GITHUB_STEP_SUMMARY")?.takeIf { it.isNotBlank() }?.let { path ->
+        stepSummaryPath?.takeIf { it.isNotBlank() }?.let { path ->
             runCatching {
                 File(path).appendText(
                     buildString {
