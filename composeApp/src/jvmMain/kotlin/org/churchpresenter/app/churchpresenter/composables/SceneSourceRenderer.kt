@@ -98,6 +98,12 @@ private const val WINDOW_BOUNDS_FIELDS = 4
 private const val BOUNDS_WIDTH_INDEX = 2
 private const val BOUNDS_HEIGHT_INDEX = 3
 
+// libvlc media options. Written out per branch rather than collected into a list and spread: play()
+// is a Java vararg, so a spread copies the array on every call, and building the list allocated one
+// more object again for what is at most two constant strings.
+private const val VLC_OPT_TIGHT_CLOCK = ":clock-jitter=0"
+private const val VLC_OPT_LOOP = ":input-repeat=65535"
+
 @Composable
 fun SceneSourceRenderer(
     source: SceneSource,
@@ -307,9 +313,8 @@ private fun VideoSourceContent(
         delay(PLAYER_SETTLE_MS)
         try {
             mediaPlayer.audio().setVolume((source.volume * VOLUME_PERCENT_SCALE).toInt())
-            val options = mutableListOf(":clock-jitter=0")
-            if (source.loop) options.add(":input-repeat=65535")
-            mediaPlayer.media().play(file.absolutePath, *options.toTypedArray())
+            if (source.loop) mediaPlayer.media().play(file.absolutePath, VLC_OPT_TIGHT_CLOCK, VLC_OPT_LOOP)
+            else mediaPlayer.media().play(file.absolutePath, VLC_OPT_TIGHT_CLOCK)
         } catch (_: Throwable) { }
     }
 
