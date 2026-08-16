@@ -315,7 +315,7 @@ class Songs {
                 } ?: emptyArray()
                 spsFiles.any { updateSongInFile(it.absolutePath, originalSong, updatedSong) }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -330,7 +330,7 @@ class Songs {
             Files.write(path, lines, StandardCharsets.UTF_8)
         }
         index >= 0
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 

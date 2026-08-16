@@ -485,7 +485,7 @@ class PicturesViewModel(
                             StandardWatchEventKinds.ENTRY_DELETE
                         )
                         registered = true
-                    } catch (e: java.io.IOException) {
+                    } catch (_: java.io.IOException) {
                         if (++attempt >= MAX_RESCAN_ATTEMPTS || !folder.isDirectory) {
                             watchService.close()
                             return@launch
