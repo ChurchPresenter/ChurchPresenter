@@ -20,6 +20,7 @@ import org.churchpresenter.app.churchpresenter.tabs.lottieSized
 import org.churchpresenter.app.churchpresenter.tabs.lowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.ltButton
 import org.churchpresenter.app.churchpresenter.tabs.openAtemDialog
+import org.churchpresenter.app.churchpresenter.tabs.waitForAtemPrepared
 import org.churchpresenter.app.churchpresenter.tabs.selectPreset
 import java.io.File
 import kotlin.test.AfterTest
@@ -293,7 +294,8 @@ class LowerThirdTabScreenshotTest {
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
-        waitForIdle()
+        // Clip is a different cache entry from still, so the frame render starts over here too.
+        waitForAtemPrepared()
     }
 
     private companion object {

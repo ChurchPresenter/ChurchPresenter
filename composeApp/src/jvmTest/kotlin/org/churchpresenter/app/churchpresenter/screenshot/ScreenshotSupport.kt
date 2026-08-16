@@ -8,9 +8,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.RoborazziOptions
@@ -168,8 +170,29 @@ private val PART_OPTIONS =
  * [rootIndex] 1 shoots an open popup — a dropdown or menu is a compose root of its own.
  */
 internal fun ComposeUiTest.captureTo(file: File, rootIndex: Int = 0) {
+    dismissHover()
     val options = if (file.absoluteFile.startsWith(PARTS.absoluteFile)) PART_OPTIONS else GOLDEN_OPTIONS
     onAllNodes(isRoot())[rootIndex].captureRoboImage(file.path, options)
+}
+
+/**
+ * Takes the pointer off the UI, so no control is captured wearing a hover highlight.
+ *
+ * `performClick` injects a real press and leaves the cursor sitting where it landed, which puts a
+ * Material state layer over that control — an 8% wash of the content colour over its container — for
+ * as long as the pointer stays inside. Whether the hover has been delivered and animated in by the
+ * time the frame is grabbed is not something any of the waits here settle, so the same state came
+ * out of CI twice with the Go Live button in two different shades and `lower_third_light` was
+ * reported as changed on a run that changed nothing.
+ *
+ * Dismissing it here rather than at each call site is what makes it hold: every capture goes through
+ * this function, and a new suite gets the behaviour without knowing to ask for it.
+ */
+private fun ComposeUiTest.dismissHover() {
+    onAllNodes(isRoot()).fetchSemanticsNodes(atLeastOneRootRequired = false).forEachIndexed { index, _ ->
+        onAllNodes(isRoot())[index].performMouseInput { exit(Offset(-1f, -1f)) }
+    }
+    waitForIdle()
 }
 
 /**

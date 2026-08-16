@@ -243,6 +243,32 @@ internal fun ComposeUiTest.selectPreset(name: String) {
 /** The upload button's tooltip, which is also its content description. */
 internal const val ATEM_UPLOAD_LABEL = "Send to ATEM"
 
+/** The dialog's status line once the frames it will send have been rendered. */
+internal const val ATEM_READY = "Ready to upload"
+
+/**
+ * Waits until the open dialog's status line reads [ATEM_READY].
+ *
+ * Opening the dialog — and switching its mode — starts a background render of the frames the upload
+ * would send, and until that lands the status line is "Preparing frames" over a progress bar
+ * instead. Nothing in the dialog waits for it, so which of the two a test sees is decided by how
+ * fast the render finished, and the two states are different heights: the whole dialog below the
+ * line shifts with them.
+ *
+ * The `waitForIdle` first is what makes the wait mean something. `atemPrepareProgress` starts at
+ * `1f`, so the dialog's first composition claims "ready" before its `LaunchedEffect` has started the
+ * render and reported back - checking the text without letting that effect run could pass on the
+ * claim rather than on the render.
+ */
+internal fun ComposeUiTest.waitForAtemPrepared() {
+    waitForIdle()
+    waitUntil("the ATEM frame render finished", 5_000L) {
+        onAllNodesWithText(ATEM_READY)
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .isNotEmpty()
+    }
+}
+
 /**
  * Selects [presetName] — the upload button is disabled until one is chosen — then opens the ATEM
  * upload dialog.
@@ -265,6 +291,7 @@ internal fun ComposeUiTest.openAtemDialog(presetName: String = "Welcome") {
     waitUntil("the dialog's upload-mode rows are composed", 5_000L) {
         onAllNodes(isSelectable()).fetchSemanticsNodes().size >= 2
     }
+    waitForAtemPrepared()
 }
 
 @Composable
