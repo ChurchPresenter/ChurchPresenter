@@ -37,7 +37,7 @@ object Utils {
     fun systemFontFamilyOrDefault(fontName: String): FontFamily {
         return try {
             FontFamily(fontName)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             FontFamily.Default
         }
     }
@@ -99,7 +99,7 @@ object Utils {
                 }
                 else -> Color.White
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Color.White
         }
     }

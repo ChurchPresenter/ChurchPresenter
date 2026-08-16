@@ -232,7 +232,7 @@ class STTManager {
 
                 socket = s
                 s.connect()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 scope.launch { applyConnectError() }
             }
         }

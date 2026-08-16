@@ -391,7 +391,7 @@ fun ScheduleTab(
                                     handleDroppedFiles(files, vm)
                                 }
                                 event.dropComplete(true)
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 event.dropComplete(false)
                             }
                         }
