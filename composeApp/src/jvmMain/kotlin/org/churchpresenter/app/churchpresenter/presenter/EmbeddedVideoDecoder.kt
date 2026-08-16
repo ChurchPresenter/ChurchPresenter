@@ -31,6 +31,12 @@ import java.nio.ByteBuffer
 private const val FRAME_INTERVAL_MS = 16L
 private const val FULL_VOLUME = 100
 
+// The same libvlc options VideoPlayer uses, and passed the same way -- one argument at a time, so
+// play()'s Java vararg does not make the compiler copy an array on every open.
+private const val VLC_OPT_SOFTWARE_CODEC = ":codec=avcodec"
+private const val VLC_OPT_FAST_DECODE = ":avcodec-fast"
+private const val VLC_OPT_TIGHT_CLOCK = ":clock-jitter=0"
+
 /**
  * Decodes one embedded presentation video (Keynote or PowerPoint) live and republishes it as an
  * [ImageBitmap] sized/offset identically to the poster frame it replaces, so
@@ -124,13 +130,14 @@ internal class EmbeddedVideoDecoder(
         })
 
         player.audio().setVolume(0)
-        val codecOptions = arrayOf(":codec=avcodec", ":avcodec-fast", ":clock-jitter=0")
         // media().play() only queues the open/play command — libvlc transitions to actually
         // playing asynchronously, so a pause() issued synchronously right here can (and, observed
         // hands-on, does) race ahead of it and land on a player still "opening," making it a
         // no-op. The real gate is [pause]/[resume], called every frame by PresentationPlayer —
         // no need to duplicate the call here.
-        player.media().play(videoFile.absolutePath, *codecOptions)
+        player.media().play(
+            videoFile.absolutePath, VLC_OPT_SOFTWARE_CODEC, VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK,
+        )
 
         pollJob = scope.launch {
             var lastVersion = 0L

@@ -36,6 +36,14 @@ private const val VOLUME_PERCENT_SCALE = 100
 private const val STATE_SETTLE_MS = 250L
 private const val FRAME_INTERVAL_MS = 16L
 
+// libvlc media options, passed to play() one argument at a time rather than as an array: play() is
+// a Java vararg, so handing it an array makes the compiler copy that array at every call -- which
+// is exactly what detekt's SpreadOperator rule is there to stop.
+private const val VLC_OPT_SOFTWARE_CODEC = ":codec=avcodec"
+private const val VLC_OPT_FAST_DECODE = ":avcodec-fast"
+private const val VLC_OPT_TIGHT_CLOCK = ":clock-jitter=0"
+private const val VLC_OPT_NO_AUDIO = ":no-audio"
+
 /**
  * Initialises the JavaFX toolkit exactly once for the lifetime of the process.
  * Still needed for WebView (WebsitePresenter).
@@ -685,9 +693,11 @@ fun SoftwareVideoPlayer(
         // disables the audio track outright — volume-0 alone can still leak a brief pop
         // because libvlc's audio output is created asynchronously as playback starts, so
         // the gain isn't guaranteed to apply before the very first samples flow.
-        val codecOptions = arrayOf(":codec=avcodec", ":avcodec-fast", ":clock-jitter=0")
-        if (!audioEnabled) mp.media().play(mrl, *codecOptions, ":no-audio")
-        else mp.media().play(mrl, *codecOptions)
+        if (!audioEnabled) {
+            mp.media().play(mrl, VLC_OPT_SOFTWARE_CODEC, VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK, VLC_OPT_NO_AUDIO)
+        } else {
+            mp.media().play(mrl, VLC_OPT_SOFTWARE_CODEC, VLC_OPT_FAST_DECODE, VLC_OPT_TIGHT_CLOCK)
+        }
         // Auto-pause is handled by the playing() event listener above.
     }
 
