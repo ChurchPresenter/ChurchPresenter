@@ -23,24 +23,24 @@ class SerializationDtoConstructionTest {
         assertEquals(12345L, photo.id)
         assertEquals(src, photo.src)
 
-        val photoResponse = StockMediaClient.PexelsPhotoResponse(photos = listOf(photo), next_page = "p2")
+        val photoResponse = StockMediaClient.PexelsPhotoResponse(photos = listOf(photo), nextPage = "p2")
         assertEquals(listOf(photo), photoResponse.photos)
-        assertEquals("p2", photoResponse.next_page)
+        assertEquals("p2", photoResponse.nextPage)
 
-        val file = StockMediaClient.PexelsVideoFile(link = "https://v/hd.mp4", quality = "hd", file_type = "video/mp4", width = 1920)
+        val file = StockMediaClient.PexelsVideoFile(link = "https://v/hd.mp4", quality = "hd", fileType = "video/mp4", width = 1920)
         assertEquals("https://v/hd.mp4", file.link)
         assertEquals("hd", file.quality)
-        assertEquals("video/mp4", file.file_type)
+        assertEquals("video/mp4", file.fileType)
         assertEquals(1920, file.width)
 
-        val video = StockMediaClient.PexelsVideo(id = 77L, image = "https://img/thumb.jpg", video_files = listOf(file))
+        val video = StockMediaClient.PexelsVideo(id = 77L, image = "https://img/thumb.jpg", videoFiles = listOf(file))
         assertEquals(77L, video.id)
         assertEquals("https://img/thumb.jpg", video.image)
-        assertEquals(listOf(file), video.video_files)
+        assertEquals(listOf(file), video.videoFiles)
 
-        val videoResponse = StockMediaClient.PexelsVideoResponse(videos = listOf(video), next_page = null)
+        val videoResponse = StockMediaClient.PexelsVideoResponse(videos = listOf(video), nextPage = null)
         assertEquals(listOf(video), videoResponse.videos)
-        assertEquals(null, videoResponse.next_page)
+        assertEquals(null, videoResponse.nextPage)
     }
 
     @Test
@@ -64,10 +64,10 @@ class SerializationDtoConstructionTest {
         assertEquals(null, files.small)
         assertEquals(null, files.tiny)
 
-        val video = StockMediaClient.PixabayVideo(id = 55L, videos = files, picture_id = "abc123")
+        val video = StockMediaClient.PixabayVideo(id = 55L, videos = files, pictureId = "abc123")
         assertEquals(55L, video.id)
         assertEquals(files, video.videos)
-        assertEquals("abc123", video.picture_id)
+        assertEquals("abc123", video.pictureId)
 
         val videoResponse = StockMediaClient.PixabayVideoResponse(hits = listOf(video), totalHits = 1)
         assertEquals(listOf(video), videoResponse.hits)
@@ -76,15 +76,15 @@ class SerializationDtoConstructionTest {
 
     @Test
     fun `planning center token and person dtos round-trip their fields`() {
-        val token = PlanningCenterClient.TokenResponse(access_token = "tok", refresh_token = "ref", expires_in = 7200L)
-        assertEquals("tok", token.access_token)
-        assertEquals("ref", token.refresh_token)
-        assertEquals(7200L, token.expires_in)
+        val token = PlanningCenterClient.TokenResponse(accessToken = "tok", refreshToken = "ref", expiresIn = 7200L)
+        assertEquals("tok", token.accessToken)
+        assertEquals("ref", token.refreshToken)
+        assertEquals(7200L, token.expiresIn)
 
-        val attrs = PlanningCenterClient.PersonAttributes(name = "Pat Ringer", first_name = "Pat", last_name = "Ringer")
+        val attrs = PlanningCenterClient.PersonAttributes(name = "Pat Ringer", firstName = "Pat", lastName = "Ringer")
         assertEquals("Pat Ringer", attrs.name)
-        assertEquals("Pat", attrs.first_name)
-        assertEquals("Ringer", attrs.last_name)
+        assertEquals("Pat", attrs.firstName)
+        assertEquals("Ringer", attrs.lastName)
 
         val data = PlanningCenterClient.PersonData(id = "1", attributes = attrs)
         assertEquals("1", data.id)
@@ -99,13 +99,13 @@ class SerializationDtoConstructionTest {
         assertEquals(PlanningCenterClient.PersonData(), PlanningCenterClient.PersonResponse().data)
         assertEquals("", PlanningCenterClient.PersonData().id)
         assertEquals(null, PlanningCenterClient.PersonAttributes().name)
-        assertEquals("", PlanningCenterClient.TokenResponse().access_token)
+        assertEquals("", PlanningCenterClient.TokenResponse().accessToken)
 
         assertEquals(null, StockMediaClient.PixabayVideoFile(url = "u").thumbnail)
         assertEquals(null, StockMediaClient.PixabayVideoFiles().large)
-        assertEquals(null, StockMediaClient.PixabayVideo(id = 1L, videos = StockMediaClient.PixabayVideoFiles()).picture_id)
+        assertEquals(null, StockMediaClient.PixabayVideo(id = 1L, videos = StockMediaClient.PixabayVideoFiles()).pictureId)
         assertEquals(null, StockMediaClient.PexelsVideoFile(link = "l").quality)
-        assertEquals(emptyList(), StockMediaClient.PexelsVideo(id = 1L, image = "i").video_files)
+        assertEquals(emptyList(), StockMediaClient.PexelsVideo(id = 1L, image = "i").videoFiles)
         assertEquals(emptyList(), StockMediaClient.PexelsPhotoResponse().photos)
         assertEquals(emptyList(), StockMediaClient.PexelsVideoResponse().videos)
         assertEquals(0, StockMediaClient.PixabayPhotoResponse().totalHits)

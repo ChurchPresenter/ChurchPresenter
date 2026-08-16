@@ -15,6 +15,7 @@ import io.ktor.http.contentType
 import io.ktor.http.encodeURLParameter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -86,9 +87,9 @@ object PlanningCenterClient {
 
     @Serializable
     internal data class TokenResponse(
-        val access_token: String = "",
-        val refresh_token: String = "",
-        val expires_in: Long = 0L
+        @SerialName("access_token") val accessToken: String = "",
+        @SerialName("refresh_token") val refreshToken: String = "",
+        @SerialName("expires_in") val expiresIn: Long = 0L
     )
 
     suspend fun exchangeCodeForToken(
@@ -157,12 +158,12 @@ object PlanningCenterClient {
                 return@withContext TokenOutcome.Failure
             }
             val parsed = json.decodeFromString(TokenResponse.serializer(), response.body())
-            if (parsed.access_token.isBlank()) return@withContext TokenOutcome.InvalidCredentials
+            if (parsed.accessToken.isBlank()) return@withContext TokenOutcome.InvalidCredentials
             TokenOutcome.Success(
                 TokenSet(
-                    accessToken = parsed.access_token,
-                    refreshToken = parsed.refresh_token,
-                    expiresAtEpochMs = System.currentTimeMillis() + parsed.expires_in * 1000
+                    accessToken = parsed.accessToken,
+                    refreshToken = parsed.refreshToken,
+                    expiresAtEpochMs = System.currentTimeMillis() + parsed.expiresIn * 1000
                 )
             )
         } catch (e: Exception) {
@@ -178,8 +179,8 @@ object PlanningCenterClient {
     @Serializable
     internal data class PersonAttributes(
         val name: String? = null,
-        val first_name: String? = null,
-        val last_name: String? = null
+        @SerialName("first_name") val firstName: String? = null,
+        @SerialName("last_name") val lastName: String? = null
     )
 
     @Serializable
@@ -206,7 +207,7 @@ object PlanningCenterClient {
             val parsed = json.decodeFromString(PersonResponse.serializer(), response.body())
             val attrs = parsed.data.attributes
             val name = attrs.name
-                ?: listOfNotNull(attrs.first_name, attrs.last_name).joinToString(" ").ifBlank { "Connected" }
+                ?: listOfNotNull(attrs.firstName, attrs.lastName).joinToString(" ").ifBlank { "Connected" }
             PersonOutcome.Success(ConnectedPerson(displayName = name))
         } catch (e: Exception) {
             CrashReporter.reportWarning(
