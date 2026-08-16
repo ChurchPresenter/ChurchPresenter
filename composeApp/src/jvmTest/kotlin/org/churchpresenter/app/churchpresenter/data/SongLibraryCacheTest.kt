@@ -217,9 +217,13 @@ class SongLibraryCacheTest {
             lastModified = 0L,
         )
 
-        val scanned = parser.loadSongsFromDirectory(library.absolutePath, mapOf(strayEntry.song.sourceFile to strayEntry))
+        val scanned = parser.loadSongsFromDirectory(
+            library.absolutePath,
+            mapOf(strayEntry.song.sourceFile to strayEntry))
 
-        assertEquals("Amazing Grace", scanned.single().song.title, "entries are matched by path, not by position")
+        assertEquals("Amazing Grace",
+            scanned.single().song.title,
+            "entries are matched by path, not by position")
     }
 
     // ── The cache on disk ───────────────────────────────────────────────────────

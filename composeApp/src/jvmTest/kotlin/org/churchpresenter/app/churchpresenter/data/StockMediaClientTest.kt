@@ -264,10 +264,18 @@ class StockMediaClientTest {
         search(pexels, photo, key = "my-pexels-key", query = "autumn leaves", page = 3)
 
         val request = requests.single()
-        assertEquals("my-pexels-key", request.headers[HttpHeaders.Authorization], "Pexels rejects the request without it")
+        assertEquals(
+            "my-pexels-key",
+            request.headers[HttpHeaders.Authorization],
+            "Pexels rejects the request without it"
+        )
         assertEquals("autumn leaves", request.url.parameters["query"])
         assertEquals("3", request.url.parameters["page"])
-        assertEquals("landscape", request.url.parameters["orientation"], "a portrait background does not fill a screen")
+        assertEquals(
+            "landscape",
+            request.url.parameters["orientation"],
+            "a portrait background does not fill a screen"
+        )
     }
 
     @Test
@@ -277,7 +285,11 @@ class StockMediaClientTest {
         search(pixabay, photo, key = "my-pixabay-key", query = "autumn leaves")
 
         val request = requests.single()
-        assertEquals("my-pixabay-key", request.url.parameters["key"], "Pixabay takes the key in the URL, not a header")
+        assertEquals(
+            "my-pixabay-key",
+            request.url.parameters["key"],
+            "Pixabay takes the key in the URL, not a header"
+        )
         assertEquals("autumn leaves", request.url.parameters["q"])
         assertEquals("horizontal", request.url.parameters["orientation"])
         assertEquals("photo", request.url.parameters["image_type"])
@@ -318,13 +330,19 @@ class StockMediaClientTest {
         val outcome = search(pexels, photo, key = "   ")
 
         assertEquals(StockMediaClient.SearchOutcome.InvalidKey, outcome)
-        assertTrue(requests.isEmpty(), "a blank key is a question for the settings dialog, not for Pexels")
+        assertTrue(
+            requests.isEmpty(),
+            "a blank key is a question for the settings dialog, not for Pexels"
+        )
     }
 
     @Test
     fun `a rejected key is reported as a key problem`() {
         respondWith("""{"error":"unauthorized"}""", HttpStatusCode.Unauthorized)
-        assertEquals(StockMediaClient.SearchOutcome.InvalidKey, search(pexels, photo))
+        assertEquals(
+            StockMediaClient.SearchOutcome.InvalidKey,
+            search(pexels, photo)
+        )
 
         respondWith("""{"error":"forbidden"}""", HttpStatusCode.Forbidden)
         assertEquals(
@@ -349,7 +367,10 @@ class StockMediaClientTest {
     fun `any other refusal is a plain failure`() {
         respondWith("""{"error":"boom"}""", HttpStatusCode.InternalServerError)
 
-        assertEquals(StockMediaClient.SearchOutcome.Failure, search(pexels, photo))
+        assertEquals(
+            StockMediaClient.SearchOutcome.Failure,
+            search(pexels, photo)
+        )
     }
 
     @Test
@@ -367,14 +388,20 @@ class StockMediaClientTest {
     fun `a reply that is not the expected shape fails rather than crashing the dialog`() {
         respondWith("""{"photos":"this should have been a list"}""")
 
-        assertEquals(StockMediaClient.SearchOutcome.NetworkError, search(pexels, photo))
+        assertEquals(
+            StockMediaClient.SearchOutcome.NetworkError,
+            search(pexels, photo)
+        )
     }
 
     @Test
     fun `a search that matched nothing is a success with nothing in it`() {
         respondWith("""{"photos":[],"total_results":0}""")
 
-        assertTrue(items(search(pexels, photo)).isEmpty(), "no results is an answer, not an error")
+        assertTrue(
+            items(search(pexels, photo)).isEmpty(),
+            "no results is an answer, not an error"
+        )
     }
 
     // ── Downloading the one that was picked ─────────────────────────────────────
@@ -395,7 +422,11 @@ class StockMediaClientTest {
         val outcome = runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) }
 
         val file = assertIs<StockMediaClient.DownloadOutcome.Success>(outcome).file
-        assertEquals("pexels_12345.jpg", file.name, "the name has to say where it came from, so two ids never collide")
+        assertEquals(
+            "pexels_12345.jpg",
+            file.name,
+            "the name has to say where it came from, so two ids never collide"
+        )
         assertEquals("jpeg-bytes", file.readText())
         assertTrue(file.parentFile.name == "stock-backgrounds")
     }
@@ -404,7 +435,16 @@ class StockMediaClientTest {
     fun `a downloaded video is named as one`() {
         respondWithBytes("mp4-bytes".toByteArray())
 
-        val outcome = runBlocking { StockMediaClient.download(item(id = "77", source = pixabay, isVideo = true, url = "https://v/hd.mp4"), http = http, downloadDir = downloadDir) }
+        val outcome = runBlocking {
+            StockMediaClient.download(
+                item(
+                    id = "77",
+                    source = pixabay,
+                    isVideo = true,
+                    url = "https://v/hd.mp4"
+                ), http = http, downloadDir = downloadDir
+            )
+        }
 
         assertEquals(
             "pixabay_77.mp4",
@@ -427,14 +467,18 @@ class StockMediaClientTest {
     fun `a refused download is reported as a failure`() {
         http = HttpClient(MockEngine { respondError(HttpStatusCode.NotFound) })
 
-        assertEquals(StockMediaClient.DownloadOutcome.Failure, runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) })
+        assertEquals(
+            StockMediaClient.DownloadOutcome.Failure,
+            runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) })
     }
 
     @Test
     fun `a download that never connects is told apart from one that was refused`() {
         failToConnect()
 
-        assertEquals(StockMediaClient.DownloadOutcome.NetworkError, runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) })
+        assertEquals(
+            StockMediaClient.DownloadOutcome.NetworkError,
+            runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) })
     }
 
     @Test

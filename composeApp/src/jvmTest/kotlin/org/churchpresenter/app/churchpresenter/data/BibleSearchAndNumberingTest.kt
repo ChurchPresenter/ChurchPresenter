@@ -55,8 +55,21 @@ class BibleSearchAndNumberingTest {
                     books = listOf(SpbFixture.Book(19, "Псалтирь", 2)),
                     verses = listOf(
                         // display 22:1 carries the canonical code for 23:1
-                        SpbFixture.Verse(19, 22, 1, "Господь — Пастырь мой", codeChapter = 23),
-                        SpbFixture.Verse(19, 22, 2, "Он покоит меня", codeChapter = 23, codeVerse = 2),
+                        SpbFixture.Verse(
+                            19,
+                            22,
+                            1,
+                            "Господь — Пастырь мой",
+                            codeChapter = 23
+                        ),
+                        SpbFixture.Verse(
+                            19,
+                            22,
+                            2,
+                            "Он покоит меня",
+                            codeChapter = 23,
+                            codeVerse = 2
+                        ),
                     ),
                 ),
             ).absolutePath
@@ -73,7 +86,10 @@ class BibleSearchAndNumberingTest {
         val results = search(plainBible(), "God")
 
         assertTrue(results.isNotEmpty())
-        assertTrue(results.all { "god" in it.verseText.lowercase() }, results.map { it.verseText }.toString())
+        assertTrue(
+            results.all { "god" in it.verseText.lowercase() },
+            results.map { it.verseText }.toString()
+        )
     }
 
     @Test
@@ -85,7 +101,8 @@ class BibleSearchAndNumberingTest {
         assertEquals("1", result.verse)
         assertTrue(
             result.verseText.startsWith("Psalms 23:1 "),
-            "the result line carries its own reference so the list reads without a second lookup: ${result.verseText}",
+            "the result line carries its own reference so the " +
+                    "list reads without a second lookup: ${result.verseText}",
         )
     }
 
@@ -108,7 +125,13 @@ class BibleSearchAndNumberingTest {
         val bible = plainBible()
 
         val everywhere = search(bible, "the").size
-        val psalmsOnly = bible.searchBible(false, Regex("the", RegexOption.IGNORE_CASE), book = 19)
+        val psalmsOnly = bible.searchBible(
+            false,
+            Regex(
+                "the",
+                RegexOption.IGNORE_CASE
+            ), book = 19
+        )
 
         assertTrue(psalmsOnly.isNotEmpty())
         assertTrue(psalmsOnly.all { it.book == "Psalms" }, psalmsOnly.map { it.book }.toString())
@@ -119,8 +142,20 @@ class BibleSearchAndNumberingTest {
     fun `a search can be limited to one chapter`() {
         val bible = plainBible()
 
-        val wholeBook = bible.searchBible(false, Regex("the", RegexOption.IGNORE_CASE), book = 1)
-        val firstChapter = bible.searchBible(false, Regex("the", RegexOption.IGNORE_CASE), book = 1, chapter = 1)
+        val wholeBook = bible.searchBible(
+            false,
+            Regex(
+                "the",
+                RegexOption.IGNORE_CASE
+            ), book = 1
+        )
+        val firstChapter = bible.searchBible(
+            false,
+            Regex(
+                "the",
+                RegexOption.IGNORE_CASE
+            ), book = 1, chapter = 1
+        )
 
         assertTrue(firstChapter.all { it.chapter == "1" })
         assertTrue(firstChapter.size <= wholeBook.size)
@@ -130,14 +165,30 @@ class BibleSearchAndNumberingTest {
     fun `a book with no match returns nothing rather than falling back to the whole bible`() {
         val bible = plainBible()
 
-        assertTrue(bible.searchBible(false, Regex("shepherd", RegexOption.IGNORE_CASE), book = 1).isEmpty())
+        assertTrue(
+            bible.searchBible(
+                false,
+                Regex(
+                    "shepherd",
+                    RegexOption.IGNORE_CASE
+                ), book = 1
+            ).isEmpty()
+        )
     }
 
     @Test
     fun `a chapter with no match returns nothing even though the book matches`() {
         val bible = plainBible()
 
-        assertTrue(bible.searchBible(false, Regex("shepherd", RegexOption.IGNORE_CASE), book = 19, chapter = 1).isEmpty())
+        assertTrue(
+            bible.searchBible(
+                false,
+                Regex(
+                    "shepherd",
+                    RegexOption.IGNORE_CASE
+                ), book = 19, chapter = 1
+            ).isEmpty()
+        )
     }
 
     @Test
@@ -228,7 +279,8 @@ class BibleSearchAndNumberingTest {
         assertEquals(
             22,
             found.displayChapter,
-            "and it must be shown as this Bible's own Psalm 22 — showing 23 would name a psalm the reader is not looking at",
+            "and it must be shown as this Bible's own Psalm 22 — " +
+                    "showing 23 would name a psalm the reader is not looking at",
         )
         assertEquals(1, found.displayVerse)
     }

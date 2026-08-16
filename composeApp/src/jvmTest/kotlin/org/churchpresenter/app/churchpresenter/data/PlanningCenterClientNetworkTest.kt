@@ -57,7 +57,8 @@ class PlanningCenterClientNetworkTest {
     fun `an authorization code is exchanged for a token set`() {
         respondWith("""{"access_token":"tok-abc","refresh_token":"ref-abc","expires_in":7200}""")
 
-        val outcome = runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "the-code", http = http) }
+        val outcome =
+            runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "the-code", http = http) }
 
         val tokens = assertIs<PlanningCenterClient.TokenOutcome.Success>(outcome, "got $outcome").tokens
         assertEquals("tok-abc", tokens.accessToken)
@@ -147,11 +148,17 @@ class PlanningCenterClientNetworkTest {
 
     @Test
     fun `the connected person's name comes from the name attribute when present`() {
-        respondWith("""{"data":{"id":"1","attributes":{"name":"Pat Ringer","first_name":"Pat","last_name":"Ringer"}}}""")
+        respondWith(
+            """{"data":{"id":"1","attributes":{"name":"Pat Ringer",
+            |"first_name":"Pat","last_name":"Ringer"}}}""".trimMargin()
+        )
 
         val outcome = runBlocking { PlanningCenterClient.getCurrentPerson("tok", http = http) }
 
-        assertEquals("Pat Ringer", assertIs<PlanningCenterClient.PersonOutcome.Success>(outcome).person.displayName)
+        assertEquals(
+            "Pat Ringer",
+            assertIs<PlanningCenterClient.PersonOutcome.Success>(outcome).person.displayName
+        )
     }
 
     @Test
@@ -281,13 +288,28 @@ class PlanningCenterClientNetworkTest {
 
     @Test
     fun `a plan's title comes from the title attribute when present`() {
-        respondWith("""{"data":[{"id":"9","attributes":{"title":"Easter Sunday","dates":"April 12, 2026","series_title":"Easter"}}]}""")
+        respondWith(
+            """{"data":[{"id":"9","attributes":{"title":"Easter Sunday","dates":
+            |"April 12, 2026","series_title":"Easter"}}]}""".trimMargin()
+        )
 
         val plans = assertIs<PlanningCenterClient.PlansOutcome.Success>(
-            runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.listUpcomingPlans(
+                    "tok",
+                    "svc-1",
+                    http = http
+                )
+            },
         ).plans
 
-        assertEquals(PlanningCenterClient.Plan("9", "Easter Sunday", "April 12, 2026"), plans.single())
+        assertEquals(
+            PlanningCenterClient.Plan(
+                "9",
+                "Easter Sunday",
+                "April 12, 2026"
+            ), plans.single()
+        )
     }
 
     @Test
@@ -418,10 +440,21 @@ class PlanningCenterClientNetworkTest {
         )
 
         val item = assertIs<PlanningCenterClient.PlanItemsOutcome.Success>(
-            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getPlanItems(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    http = http
+                )
+            },
         ).items.single()
 
-        assertEquals("song-missing", item.songId, "the relationship itself is still recorded")
+        assertEquals(
+            "song-missing",
+            item.songId,
+            "the relationship itself is still recorded"
+        )
         assertNull(item.songTitle, "but nothing was included to read a title from")
     }
 
@@ -430,7 +463,14 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{}""", HttpStatusCode.Unauthorized)
         assertEquals(
             PlanningCenterClient.PlanItemsOutcome.Unauthorized,
-            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getPlanItems(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -439,7 +479,14 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{}""", HttpStatusCode.InternalServerError)
         assertEquals(
             PlanningCenterClient.PlanItemsOutcome.Failure,
-            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getPlanItems(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -457,11 +504,19 @@ class PlanningCenterClientNetworkTest {
     @Test
     fun `pco's own lyrics attribute is preferred over locally stripping the chord chart`() {
         respondWith(
-            """{"data":{"attributes":{"chord_chart":"[G]Amazing [C]grace","lyrics":"Amazing grace (server stripped)"}}}""",
+            """{"data":{"attributes":{"chord_chart":"[G]Amazing [C]grace","lyrics":
+                |"Amazing grace (server stripped)"}}}""".trimMargin(),
         )
 
         val detail = assertIs<PlanningCenterClient.ArrangementOutcome.Success>(
-            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getArrangementDetail(
+                    "tok",
+                    "song-1",
+                    "arr-1",
+                    http = http
+                )
+            },
         ).detail
 
         assertEquals("[G]Amazing [C]grace", detail.chordChart)
@@ -473,10 +528,22 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{"data":{"attributes":{"chord_chart":"[G]Amazing [C]grace","lyrics":""}}}""")
 
         val detail = assertIs<PlanningCenterClient.ArrangementOutcome.Success>(
-            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getArrangementDetail(
+                    "tok",
+                    "song-1",
+                    "arr-1",
+                    http = http
+                )
+            },
         ).detail
 
-        assertEquals(PlanningCenterLyricsFormatter.stripChords("[G]Amazing [C]grace"), detail.lyrics)
+        assertEquals(
+            PlanningCenterLyricsFormatter.stripChords(
+                "[G]Amazing [C]grace"
+            ),
+            detail.lyrics
+        )
     }
 
     @Test
@@ -484,7 +551,14 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{"data":{"attributes":{"chord_chart":"[G]Amazing [C]grace"}}}""")
 
         val detail = assertIs<PlanningCenterClient.ArrangementOutcome.Success>(
-            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getArrangementDetail(
+                    "tok",
+                    "song-1",
+                    "arr-1",
+                    http = http
+                )
+            },
         ).detail
 
         assertEquals("Amazing grace", detail.lyrics)
@@ -495,7 +569,14 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{}""", HttpStatusCode.Unauthorized)
         assertEquals(
             PlanningCenterClient.ArrangementOutcome.Unauthorized,
-            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getArrangementDetail(
+                    "tok",
+                    "song-1",
+                    "arr-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -504,7 +585,14 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{}""", HttpStatusCode.InternalServerError)
         assertEquals(
             PlanningCenterClient.ArrangementOutcome.Failure,
-            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getArrangementDetail(
+                    "tok",
+                    "song-1",
+                    "arr-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -513,7 +601,14 @@ class PlanningCenterClientNetworkTest {
         failToConnect()
         assertEquals(
             PlanningCenterClient.ArrangementOutcome.NetworkError,
-            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getArrangementDetail(
+                    "tok",
+                    "song-1",
+                    "arr-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -522,14 +617,30 @@ class PlanningCenterClientNetworkTest {
     @Test
     fun `an attachment is read with its thumbnail when one is present`() {
         respondWith(
-            """{"data":[{"id":"att-1","attributes":{"filename":"slides.pdf","thumbnail_url":"https://s3/thumb.jpg"}}]}""",
+            """{"data":[{"id":"att-1","attributes":{"filename":"slides.pdf",
+                |"thumbnail_url":"https://s3/thumb.jpg"}}]}""".trimMargin(),
         )
 
         val attachment = assertIs<PlanningCenterClient.AttachmentsOutcome.Success>(
-            runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getItemAttachments(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    "item-1",
+                    http = http
+                )
+            },
         ).attachments.single()
 
-        assertEquals(PlanningCenterClient.PlanAttachment("att-1", "slides.pdf", "https://s3/thumb.jpg"), attachment)
+        assertEquals(
+            PlanningCenterClient.PlanAttachment(
+                "att-1",
+                "slides.pdf",
+                "https://s3/thumb.jpg"
+            ),
+            attachment
+        )
     }
 
     @Test
@@ -537,7 +648,15 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{"data":[{"id":"att-1","attributes":{"filename":"slides.pdf"}}]}""")
 
         val attachment = assertIs<PlanningCenterClient.AttachmentsOutcome.Success>(
-            runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getItemAttachments(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    "item-1",
+                    http = http
+                )
+            },
         ).attachments.single()
 
         assertNull(attachment.thumbnailUrl)
@@ -552,7 +671,15 @@ class PlanningCenterClientNetworkTest {
         )
 
         val attachments = assertIs<PlanningCenterClient.AttachmentsOutcome.Success>(
-            runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getItemAttachments(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    "item-1",
+                    http = http
+                )
+            },
         ).attachments
 
         assertEquals(listOf("att-2"), attachments.map { it.id })
@@ -563,7 +690,15 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{}""", HttpStatusCode.Unauthorized)
         assertEquals(
             PlanningCenterClient.AttachmentsOutcome.Unauthorized,
-            runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getItemAttachments(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    "item-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -572,7 +707,15 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{}""", HttpStatusCode.InternalServerError)
         assertEquals(
             PlanningCenterClient.AttachmentsOutcome.Failure,
-            runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getItemAttachments(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    "item-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -581,7 +724,15 @@ class PlanningCenterClientNetworkTest {
         failToConnect()
         assertEquals(
             PlanningCenterClient.AttachmentsOutcome.NetworkError,
-            runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getItemAttachments(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    "item-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -591,9 +742,18 @@ class PlanningCenterClientNetworkTest {
     fun `an attachment open resolves to its download url`() {
         respondWith("""{"data":{"attributes":{"attachment_url":"https://s3/signed-link"}}}""")
 
-        val outcome = runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) }
+        val outcome = runBlocking {
+            PlanningCenterClient.resolveAttachmentDownloadUrl(
+                "tok",
+                "att-1",
+                http = http
+            )
+        }
 
-        assertEquals("https://s3/signed-link", assertIs<PlanningCenterClient.AttachmentUrlOutcome.Success>(outcome).url)
+        assertEquals(
+            "https://s3/signed-link",
+            assertIs<PlanningCenterClient.AttachmentUrlOutcome.Success>(outcome).url
+        )
     }
 
     @Test
@@ -602,7 +762,13 @@ class PlanningCenterClientNetworkTest {
 
         assertEquals(
             PlanningCenterClient.AttachmentUrlOutcome.Failure,
-            runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.resolveAttachmentDownloadUrl(
+                    "tok",
+                    "att-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -611,7 +777,13 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{}""", HttpStatusCode.Unauthorized)
         assertEquals(
             PlanningCenterClient.AttachmentUrlOutcome.Unauthorized,
-            runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.resolveAttachmentDownloadUrl(
+                    "tok",
+                    "att-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -620,7 +792,13 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{}""", HttpStatusCode.InternalServerError)
         assertEquals(
             PlanningCenterClient.AttachmentUrlOutcome.Failure,
-            runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.resolveAttachmentDownloadUrl(
+                    "tok",
+                    "att-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -631,7 +809,13 @@ class PlanningCenterClientNetworkTest {
         failToConnect()
         assertEquals(
             PlanningCenterClient.AttachmentUrlOutcome.Failure,
-            runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.resolveAttachmentDownloadUrl(
+                    "tok",
+                    "att-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -639,7 +823,13 @@ class PlanningCenterClientNetworkTest {
     fun `opening an attachment is a post, not a get`() {
         respondWith("""{"data":{"attributes":{"attachment_url":"https://s3/link"}}}""")
 
-        runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) }
+        runBlocking {
+            PlanningCenterClient.resolveAttachmentDownloadUrl(
+                "tok",
+                "att-1",
+                http = http
+            )
+        }
 
         assertEquals(HttpMethod.Post, requests.single().method)
     }
@@ -664,27 +854,61 @@ class PlanningCenterClientNetworkTest {
         forbidden()
         assertEquals(
             PlanningCenterClient.PlansOutcome.Unauthorized,
-            runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.listUpcomingPlans(
+                    "tok",
+                    "svc-1",
+                    http = http
+                )
+            },
         )
         forbidden()
         assertEquals(
             PlanningCenterClient.PlanItemsOutcome.Unauthorized,
-            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getPlanItems(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    http = http
+                )
+            },
         )
         forbidden()
         assertEquals(
             PlanningCenterClient.ArrangementOutcome.Unauthorized,
-            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getArrangementDetail(
+                    "tok",
+                    "song-1",
+                    "arr-1",
+                    http = http
+                )
+            },
         )
         forbidden()
         assertEquals(
             PlanningCenterClient.AttachmentsOutcome.Unauthorized,
-            runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getItemAttachments(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    "item-1",
+                    http = http
+                )
+            },
         )
         forbidden()
         assertEquals(
             PlanningCenterClient.AttachmentUrlOutcome.Unauthorized,
-            runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.resolveAttachmentDownloadUrl(
+                    "tok",
+                    "att-1",
+                    http = http
+                )
+            },
         )
     }
 
@@ -717,21 +941,42 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{"meta":{"total_count":0}}""")
         assertTrue(
             assertIs<PlanningCenterClient.PlansOutcome.Success>(
-                runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
+                runBlocking {
+                    PlanningCenterClient.listUpcomingPlans(
+                        "tok",
+                        "svc-1",
+                        http = http
+                    )
+                },
             ).plans.isEmpty(),
         )
 
         respondWith("""{"meta":{"total_count":0}}""")
         assertTrue(
             assertIs<PlanningCenterClient.PlanItemsOutcome.Success>(
-                runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+                runBlocking {
+                    PlanningCenterClient.getPlanItems(
+                        "tok",
+                        "svc-1",
+                        "plan-1",
+                        http = http
+                    )
+                },
             ).items.isEmpty(),
         )
 
         respondWith("""{"meta":{"total_count":0}}""")
         assertTrue(
             assertIs<PlanningCenterClient.AttachmentsOutcome.Success>(
-                runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+                runBlocking {
+                    PlanningCenterClient.getItemAttachments(
+                        "tok",
+                        "svc-1",
+                        "plan-1",
+                        "item-1",
+                        http = http
+                    )
+                },
             ).attachments.isEmpty(),
         )
     }
@@ -741,7 +986,14 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{"meta":{}}""")
 
         val detail = assertIs<PlanningCenterClient.ArrangementOutcome.Success>(
-            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getArrangementDetail(
+                    "tok",
+                    "song-1",
+                    "arr-1",
+                    http = http
+                )
+            },
         ).detail
 
         assertEquals("", detail.lyrics)
@@ -768,7 +1020,13 @@ class PlanningCenterClientNetworkTest {
         assertEquals(
             PlanningCenterClient.Plan("9", "Untitled Plan", ""),
             assertIs<PlanningCenterClient.PlansOutcome.Success>(
-                runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
+                runBlocking {
+                    PlanningCenterClient.listUpcomingPlans(
+                        "tok",
+                        "svc-1",
+                        http = http
+                    )
+                },
             ).plans.single(),
         )
     }
@@ -780,7 +1038,14 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{"data":[{"id":"7"}]}""")
 
         val item = assertIs<PlanningCenterClient.PlanItemsOutcome.Success>(
-            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getPlanItems(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    http = http
+                )
+            },
         ).items.single()
 
         assertEquals("7", item.id)
@@ -801,7 +1066,14 @@ class PlanningCenterClientNetworkTest {
         )
 
         val item = assertIs<PlanningCenterClient.PlanItemsOutcome.Success>(
-            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+            runBlocking {
+                PlanningCenterClient.getPlanItems(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    http = http
+                )
+            },
         ).items.single()
 
         assertEquals("55", item.songId)
@@ -816,7 +1088,15 @@ class PlanningCenterClientNetworkTest {
 
         assertTrue(
             assertIs<PlanningCenterClient.AttachmentsOutcome.Success>(
-                runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+                runBlocking {
+                    PlanningCenterClient.getItemAttachments(
+                        "tok",
+                        "svc-1",
+                        "plan-1",
+                        "item-1",
+                        http = http
+                    )
+                },
             ).attachments.isEmpty(),
         )
     }

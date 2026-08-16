@@ -61,17 +61,29 @@ class SettingsCompanionMigrationTest {
     fun `a grid configured before placements existed becomes the tab grid`() {
         val migrated = connection("""{"name":"Stream Deck","rows":2,"columns":6,"bitmapSize":120}""")
 
-        assertEquals(2, migrated.tabRows, "the deck reconnects on this grid — a reset here misplaces every button")
+        assertEquals(
+            2,
+            migrated.tabRows,
+            "the deck reconnects on this grid — a reset here misplaces every button"
+        )
         assertEquals(6, migrated.tabColumns)
         assertEquals(120, migrated.tabBitmapSize)
-        assertEquals("Stream Deck", migrated.name, "the rest of the connection is carried across untouched")
+        assertEquals(
+            "Stream Deck",
+            migrated.name,
+            "the rest of the connection is carried across untouched"
+        )
     }
 
     @Test
     fun `the other placements keep their defaults`() {
         val migrated = connection("""{"rows":2,"columns":6}""")
 
-        assertEquals(defaults.leftSidebarRows, migrated.leftSidebarRows, "the tab was the only placement that existed")
+        assertEquals(
+            defaults.leftSidebarRows,
+            migrated.leftSidebarRows,
+            "the tab was the only placement that existed"
+        )
         assertEquals(defaults.rightSidebarColumns, migrated.rightSidebarColumns)
     }
 
@@ -79,7 +91,11 @@ class SettingsCompanionMigrationTest {
     fun `a value already stored under the new name wins`() {
         val migrated = connection("""{"rows":2,"tabRows":9,"columns":6}""")
 
-        assertEquals(9, migrated.tabRows, "the new field is the one the user configured most recently")
+        assertEquals(
+            9,
+            migrated.tabRows,
+            "the new field is the one the user configured most recently"
+        )
         assertEquals(6, migrated.tabColumns, "the other old fields still migrate")
     }
 
@@ -101,7 +117,11 @@ class SettingsCompanionMigrationTest {
             ]}""",
         ).companionSatelliteConnections
 
-        assertEquals(listOf("Old", "New"), migrated.map { it.name }, "the order of configured surfaces is kept")
+        assertEquals(
+            listOf("Old", "New"),
+            migrated.map { it.name },
+            "the order of configured surfaces is kept"
+        )
         assertEquals(2, migrated[0].tabRows)
         assertEquals(3, migrated[1].tabRows)
     }
@@ -121,7 +141,9 @@ class SettingsCompanionMigrationTest {
     @Test
     fun `a range that did not start at zero keeps its size rather than its offset`() {
         // The offset is deliberately dropped — Companion's own per-surface start page replaced it.
-        val migrated = connection("""{"tabStartRow":2,"tabEndRow":3,"tabStartColumn":4,"tabEndColumn":7}""")
+        val migrated = connection(
+            """{"tabStartRow":2,"tabEndRow":3,"tabStartColumn":4,"tabEndColumn":7}"""
+        )
 
         assertEquals(2, migrated.tabRows)
         assertEquals(4, migrated.tabColumns)
@@ -129,7 +151,9 @@ class SettingsCompanionMigrationTest {
 
     @Test
     fun `a single row range is one row rather than none`() {
-        val migrated = connection("""{"tabStartRow":1,"tabEndRow":1,"tabStartColumn":3,"tabEndColumn":3}""")
+        val migrated = connection(
+            """{"tabStartRow":1,"tabEndRow":1,"tabStartColumn":3,"tabEndColumn":3}"""
+        )
 
         assertEquals(1, migrated.tabRows)
         assertEquals(1, migrated.tabColumns)
@@ -137,9 +161,14 @@ class SettingsCompanionMigrationTest {
 
     @Test
     fun `a back-to-front range still leaves a usable grid`() {
-        val migrated = connection("""{"tabStartRow":5,"tabEndRow":1,"tabStartColumn":9,"tabEndColumn":2}""")
+        val migrated = connection(
+            """{"tabStartRow":5,"tabEndRow":1,"tabStartColumn":9,"tabEndColumn":2}"""
+        )
 
-        assertTrue(migrated.tabRows >= 1, "a zero-row grid would register a surface with no buttons at all")
+        assertTrue(
+            migrated.tabRows >= 1,
+            "a zero-row grid would register a surface with no buttons at all"
+        )
         assertTrue(migrated.tabColumns >= 1)
     }
 
@@ -148,7 +177,8 @@ class SettingsCompanionMigrationTest {
         val migrated = connection(
             """{"tabStartRow":0,"tabEndRow":1,"tabStartColumn":0,"tabEndColumn":2,
                 "leftSidebarStartRow":0,"leftSidebarEndRow":5,"leftSidebarStartColumn":0,"leftSidebarEndColumn":1,
-                "rightSidebarStartRow":0,"rightSidebarEndRow":2,"rightSidebarStartColumn":0,"rightSidebarEndColumn":3}""",
+                "rightSidebarStartRow":0,"rightSidebarEndRow":2,"rightSidebarStartColumn":0,
+                "rightSidebarEndColumn":3}""",
         )
 
         assertEquals(2 to 3, migrated.tabRows to migrated.tabColumns)
@@ -160,7 +190,11 @@ class SettingsCompanionMigrationTest {
     fun `a count already stored alongside a range wins`() {
         val migrated = connection("""{"tabStartRow":0,"tabEndRow":9,"tabRows":3}""")
 
-        assertEquals(3, migrated.tabRows, "the range was the experiment; the count is what the user set after it")
+        assertEquals(
+            3,
+            migrated.tabRows,
+            "the range was the experiment; the count is what the user set after it"
+        )
     }
 
     @Test
@@ -186,7 +220,10 @@ class SettingsCompanionMigrationTest {
         manager.saveSettings(manager.loadSettings())
 
         val saved = File(home, ".churchpresenter/settings.json").readText()
-        assertTrue("tabStartRow" !in saved, "a dead field left in the file would be migrated again on every load")
+        assertTrue(
+            "tabStartRow" !in saved,
+            "a dead field left in the file would be migrated again on every load"
+        )
         assertTrue("tabEndColumn" !in saved)
         assertTrue("\"tabRows\":2" in saved, "and the size it stood for has to be there instead")
     }
@@ -203,7 +240,10 @@ class SettingsCompanionMigrationTest {
         assertEquals(2, migrated.tabRows, "the pre-placement grid")
         assertEquals(6, migrated.tabColumns)
         assertEquals(96, migrated.tabBitmapSize)
-        assertEquals(4, migrated.leftSidebarRows, "and the short-lived range on another placement")
+        assertEquals(
+            4, migrated.leftSidebarRows,
+            "and the short-lived range on another placement"
+        )
         assertEquals(2, migrated.leftSidebarColumns)
     }
 
@@ -215,8 +255,12 @@ class SettingsCompanionMigrationTest {
             """{"companionSatelliteConnections":[{"rows":2,"columns":6,"tabStartRow":0,"tabEndRow":1}]}""",
         )
 
-        val json = SettingsManager().let { it.saveSettings(once); File(home, ".churchpresenter/settings.json").readText() }
-        val twice = manager.migrateAndDecode(json.replace(Regex(""""settingsVersion":\d+,?"""), ""))
+        val json = SettingsManager().let {
+            it.saveSettings(once); File(home, ".churchpresenter/settings.json").readText()
+        }
+        val twice = manager.migrateAndDecode(
+            json.replace(Regex(""""settingsVersion":\d+,?"""), "")
+        )
 
         assertEquals(
             once.companionSatelliteConnections,
