@@ -65,6 +65,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -172,6 +173,7 @@ internal fun RowScope.SongListPane(
     favoriteSongs: () -> List<SongItem>,
     playCountFor: (String) -> Int?,
     onSearchQueryChange: (String) -> Unit,
+    onSearchFocusChanged: (Boolean) -> Unit,
     onFilterTypeChange: (String) -> Unit,
     onSongbookChange: (String) -> Unit,
     onSortChange: (String) -> Unit,
@@ -268,7 +270,8 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
                     BasicTextField(
                         value = searchQuery,
                         onValueChange = { onSearchQueryChange(it) },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
+                            .onFocusChanged { onSearchFocusChanged(it.isFocused) },
                         textStyle = MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onSurface
                         ),

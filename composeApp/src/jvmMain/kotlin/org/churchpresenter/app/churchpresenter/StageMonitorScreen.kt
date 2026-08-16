@@ -65,6 +65,7 @@ import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import churchpresenter.composeapp.generated.resources.song_key
 import churchpresenter.composeapp.generated.resources.song_capo
 import churchpresenter.composeapp.generated.resources.song_play
@@ -80,7 +81,6 @@ import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.toAlignment
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
-import org.jetbrains.skia.Image as SkiaImage
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import java.io.File
 import java.time.LocalTime
@@ -603,12 +603,9 @@ private fun buildTextStyle(
 private suspend fun loadImageBitmapFromPath(path: String?): ImageBitmap? {
     if (path == null) return null
     return withContext(Dispatchers.IO) {
-        try {
-            val bytes = File(path).readBytes()
-            SkiaImage.makeFromEncoded(bytes).toComposeImageBitmap()
-        } catch (_: Exception) {
-            null
-        }
+        // PictureDecoder, not Skia directly — the stage monitor draws the same operator-chosen
+        // files the output does, and must not blank on a format only the fallbacks read.
+        PictureDecoder.decodeOrNull(File(path))?.toComposeImageBitmap()
     }
 }
 

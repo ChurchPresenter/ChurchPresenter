@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onRoot
@@ -12,6 +13,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.app.churchpresenter.data.settings.KeyboardShortcutSettings
 import org.churchpresenter.app.churchpresenter.models.KeyChord
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
 import kotlin.test.Test
@@ -229,6 +231,81 @@ class SongsTabKeyboardTest {
                 vm.selectedSongIndex.value,
                 "the live song must not change under the congregation",
             )
+        }
+    }
+
+    // ── Typing in the search box ────────────────────────────────────────────────
+
+    /**
+     * The keys belong to the text while the caret is in the search field.
+     *
+     * The handler is an `onPreviewKeyEvent` on the tab root, so it sees every key before the field
+     * does. Unguarded, it swallowed left and right — the caret could not be moved through a query at
+     * all — and each keystroke navigated the song underneath instead, on a list the same keystrokes
+     * were re-filtering. That is what the reported crash walked off the end of.
+     */
+    /**
+     * One song with a verse long enough for a line step to be visible.
+     *
+     * The shared fixtures give every song a single line, so stepping a line there immediately falls
+     * through to the next section and leaves the line index back at 0 — which cannot tell a key that
+     * worked from a key that was swallowed.
+     */
+    private val multiLineSong = listOf(
+        SongFixture(
+            number = "1",
+            title = "Amazing Grace",
+            lyrics = listOf("[Verse 1]", "Amazing grace", "how sweet the sound", "that saved a wretch"),
+        )
+    )
+
+    @Test
+    fun `arrow keys in the search box leave the song alone`() {
+        songsTab(songs = multiLineSong, songSettings = lineMode()) { vm, _ ->
+            selectFirstSong(vm)
+            press(Key.DirectionRight)
+            val song = vm.selectedSongIndex.value
+            val section = vm.selectedSectionIndex.value
+            val line = vm.selectedLineIndex.value
+
+            search("grace")
+            listOf(Key.DirectionLeft, Key.DirectionRight, Key.DirectionUp, Key.DirectionDown)
+                .forEach { key ->
+                    searchBox().performKeyInput { pressKey(key) }
+                    waitForIdle()
+                }
+
+            assertEquals(song, vm.selectedSongIndex.value, "typing must not walk the song list")
+            assertEquals(section, vm.selectedSectionIndex.value)
+            assertEquals(line, vm.selectedLineIndex.value)
+        }
+    }
+
+    /** And has them back the moment the caret leaves it — the guard is a state, not a one-way door. */
+    @Test
+    fun `the keys navigate again once the search box loses focus`() {
+        val selection = mutableStateOf<ScheduleItem.SongItem?>(null)
+        songsTab(
+            songs = multiLineSong,
+            songSettings = lineMode(),
+            isPresenting = true,
+            scheduleSelection = selection,
+        ) { vm, _ ->
+            selectFirstSong(vm)
+            search("grace")
+            searchBox().performKeyInput { pressKey(Key.DirectionRight) }
+            waitForIdle()
+            assertEquals(0, vm.selectedLineIndex.value, "the caret is in the field, so nothing moved")
+
+            // Clicking a scheduled song is how the operator goes back to navigating: the tab takes
+            // keyboard focus for itself, which is what takes the caret out of the field.
+            selection.value = ScheduleItem.SongItem(
+                id = "schedule-1", songNumber = 1, title = "Amazing Grace", songbook = "Hymnal",
+            )
+            waitForIdle()
+            press(Key.DirectionRight)
+
+            assertTrue(vm.selectedLineIndex.value > 0, "was ${vm.selectedLineIndex.value}")
         }
     }
 
