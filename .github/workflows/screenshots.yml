@@ -107,3 +107,16 @@ jobs:
           # Edits the existing comment in place instead of stacking one per push, and marks it
           # resolved once a difference is fixed.
           outdated-comment-action: update
+          # How long a run's images stay on the `reg_actions` branch, which is where the pictures
+          # in the comment above are served from — so this is how long an old comment keeps them.
+          # **This is the only place that window is set.** The action prunes expired directories
+          # itself on its next run; nothing else decides what the branch holds.
+          #
+          # Below the default of 30 because the cost is uneven: an ordinary run stores only what
+          # changed (~1 MB), but one that moves the whole set stores actual+expected+diff for all
+          # 247 images at once — which is what a cross-platform re-record does, and what took the
+          # branch past 500 MB in its first nine days.
+          #
+          # Note this prunes files, not history, so it alone never shrinks the pack — see
+          # .github/workflows/reg-actions-prune.yml.
+          retention-days: 14

@@ -107,6 +107,19 @@ image to `composeApp/build/outputs/roborazzi/<name>_compare.png` and names it in
 essentially every file differs — see the table below. CI still records and posts the advisory
 `reg-actions` comparison; it does not verify.
 
+The pictures in that comment are served from a `reg_actions` branch, one directory per run. **How
+long they live is `retention-days` on the reg-actions step in `screenshots.yml` — the only place
+that window is set**; the action prunes expired directories itself. It prunes files and not history,
+though, so the pack grows regardless, which is what
+`.github/workflows/reg-actions-prune.yml` is for: monthly it rebuilds the branch as a single root
+commit over whatever the tip already holds, applying no retention of its own. Left alone the branch
+outgrew all of `main` in nine days.
+
+That branch is **not** the comparison baseline, despite the name. reg-actions resolves the expected
+images from the workflow *artifact* attached to the merge-base commit's run, so nothing done to the
+branch can affect whether a comparison works. Nothing under `composeApp/screenshots/` is affected
+either; those are the images reviewers approve.
+
 Known red, both pre-existing and neither a regression: `previewApp/about_*` draws
 `BuildConfig.VERSION_DISPLAY`, which carries the git hash and so changes on every commit, and
 `previewApp/dictionary_light` renders a 14,197-row list whose row heights are not stable between

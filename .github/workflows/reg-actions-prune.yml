@@ -1,0 +1,140 @@
+name: Collapse reg_actions history
+
+# Keeps the `reg_actions` branch's *history* from growing forever. Which run directories live on
+# that branch is not decided here — see `retention-days` on the reg-actions step in
+# `screenshots.yml`, which is the action's own setting and the only place to change the window.
+#
+# The two are separate problems and it matters that they stay separate. reg-actions prunes expired
+# directories itself, but it does so with `git add -A` and a normal commit, so every earlier commit
+# still references the blobs of every run ever recorded. Deleting the files reclaims nothing: the
+# pack only shrinks if the history goes too. Measured 2026-08-15, nine days after the branch was
+# created, with the default 30-day retention that had not yet expired anything: 123 commits and
+# 549.7 MB, against 206.3 MB for the whole of `main`.
+#
+# So this rebuilds the branch as a single root commit holding **exactly what the tip already has**.
+# It applies no policy of its own and drops no directory the action meant to keep, which is why it
+# can run on a blunt schedule without coordinating with anything.
+#
+# What it costs: the inline images in reg-actions PR comments are served from this branch by URL.
+# Collapsing history does not remove any file the tip still has, so live comments keep their
+# pictures; only directories the action itself already expired become unrecoverable. The images
+# reviewers actually approve are committed under `composeApp/screenshots` and are untouched.
+#
+# Note the branch is NOT the comparison baseline, despite the name suggesting it. reg-actions
+# resolves the expected images from the workflow *artifact* attached to the run matching the
+# merge-base commit (`findRunAndArtifact` in the action's `run.ts`); the branch only hosts images
+# for the comment. Nothing here can affect whether a comparison works.
+on:
+  schedule:
+    # Monthly, off-peak UTC. It only has to outpace pack growth, and each run rewrites the branch,
+    # so there is no reason to do it often.
+    - cron: '17 4 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  # To check whether a Screenshots run is in flight before force-pushing — see the pre-flight step.
+  actions: read
+
+concurrency:
+  # One at a time, and never cancel one midway: it force-pushes, so a half-run is worse than a
+  # late one.
+  group: reg-actions-collapse
+  cancel-in-progress: false
+
+jobs:
+  collapse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Concurrent Screenshots runs are fine with each other: each writes to its own
+      # `<date>_<runId>_reg` directory, so their commits touch disjoint paths, and the action
+      # rebases and retries on a non-fast-forward push. This job is the one thing that rewrites
+      # rather than appends, so it is the one thing that has to stay out of their way.
+      #
+      # Waiting for a quiet moment is belt-and-braces on top of --force-with-lease below: the lease
+      # makes a collision safe, this makes it unlikely. Neither is load-bearing for correctness —
+      # a run that does lose its upload still reports the right comparison, because that is
+      # computed from the artifact and not from this branch, and it re-uploads on the PR's next
+      # push anyway.
+      - name: Wait for any in-flight Screenshots run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 10); do
+            active=$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/screenshots.yml/runs?status=in_progress&per_page=1" \
+              --jq '.total_count' 2>/dev/null || echo 0)
+            queued=$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/screenshots.yml/runs?status=queued&per_page=1" \
+              --jq '.total_count' 2>/dev/null || echo 0)
+            if [ "$active" = "0" ] && [ "$queued" = "0" ]; then
+              echo "No Screenshots run in flight."
+              exit 0
+            fi
+            echo "Screenshots busy (in_progress=$active queued=$queued); waiting (attempt $attempt/10)."
+            sleep 60
+          done
+          echo "Still busy after 10 minutes — going ahead; --force-with-lease makes this safe."
+
+      # No actions/checkout: the working tree is never needed. The new commit is assembled with
+      # plumbing from the fetched tree, which avoids materialising a few hundred MB of PNGs.
+      - name: Rebuild the branch as a single root commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          set -euo pipefail
+
+          git init -q work
+          cd work
+          git remote add origin \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          # Re-read and rebuild on each attempt. A Screenshots run that lands between the fetch and
+          # the push trips the lease; the answer is to start again from its commit, not to give up
+          # for a month or to push over it.
+          for attempt in $(seq 1 5); do
+            rm -rf .git/shallow
+            git fetch -q --prune --depth=2 origin reg_actions 2>/dev/null || {
+              echo "No reg_actions branch yet — reg-actions creates it on its next run."
+              exit 0
+            }
+            OLD=$(git rev-parse FETCH_HEAD)
+
+            # Depth 2, not 1. The tip's whole tree comes with either, and that is all that is
+            # reused below — but under --depth=1 a commit has no parent present whether or not it
+            # has one, so a branch already collapsed to a root commit is indistinguishable from a
+            # shallow fetch of a long history. At depth 2 the commit count tells them apart.
+            if [ "$(git rev-list --count FETCH_HEAD)" = "1" ]; then
+              echo "Tip is already a root commit. Nothing to collapse."
+              exit 0
+            fi
+
+            TREE=$(git rev-parse FETCH_HEAD^{tree})
+            ENTRIES=$(git ls-tree FETCH_HEAD | wc -l)
+            echo "Attempt $attempt: collapsing to a root commit over $ENTRIES top-level entries."
+
+            NEW=$(git commit-tree "$TREE" \
+              -m "Collapse reg_actions history" \
+              -m "Rebuilt as a root commit over the $ENTRIES top-level entries the branch already had. No directory is dropped here; retention is the reg-actions step's retention-days in screenshots.yml." \
+              -m "See .github/workflows/reg-actions-prune.yml for why deleting files alone never shrinks the pack.")
+
+            # --force-with-lease so a run that pushed since the fetch is never silently clobbered:
+            # the push is refused and the loop rebuilds on top of whatever it wrote.
+            if git push --force-with-lease=refs/heads/reg_actions:"$OLD" \
+                 origin "$NEW:refs/heads/reg_actions"; then
+              echo "Collapsed. Tree unchanged; history is now one commit."
+              exit 0
+            fi
+
+            echo "Branch moved under us — refetching and retrying."
+            sleep $((attempt * 15))
+          done
+
+          echo "Could not collapse: the branch kept moving. Harmless, and the next run retries." >&2
+          exit 1
