@@ -82,9 +82,12 @@ jobs:
         timeout-minutes: 20
         run: ./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
 
-      # So the rendered set can be fetched without running Gradle locally — this is where the
-      # website's screenshots come from now that none are committed. Uploaded before the comparison
-      # so a visual difference, which is advisory and never fails the job, cannot cost the artifact.
+      # So the rendered set can be fetched without running Gradle locally, and the source the
+      # website's screenshots should be taken from — not because the images are uncommitted (they
+      # are committed, under composeApp/screenshots, and AGENT.md is emphatic that they stay that
+      # way), but because these are the Linux renders and so are consistent with each other, which
+      # a set recorded on someone's macOS checkout is not. Uploaded before the comparison so a
+      # visual difference, which is advisory and never fails the job, cannot cost the artifact.
       - name: Upload the rendered screenshots
         uses: actions/upload-artifact@v4
         with:
@@ -107,3 +110,16 @@ jobs:
           # Edits the existing comment in place instead of stacking one per push, and marks it
           # resolved once a difference is fixed.
           outdated-comment-action: update
+          # How long a run's images stay on the `reg_actions` branch, which is where the pictures
+          # in the comment above are served from — so this is how long an old comment keeps them.
+          # **This is the only place that window is set.** The action prunes expired directories
+          # itself on its next run; nothing else decides what the branch holds.
+          #
+          # Below the default of 30 because the cost is uneven: an ordinary run stores only what
+          # changed (~1 MB), but one that moves the whole set stores actual+expected+diff for all
+          # 247 images at once — which is what a cross-platform re-record does, and what took the
+          # branch past 500 MB in its first nine days.
+          #
+          # Note this prunes files, not history, so it alone never shrinks the pack — see
+          # .github/workflows/reg-actions-prune.yml.
+          retention-days: 14
