@@ -54,6 +54,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ResolvedDisplay
@@ -95,6 +96,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkCommandFailure
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.composables.isJavaFxAvailable
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.data.Bible
@@ -185,6 +187,41 @@ internal fun acquireSingleInstanceLock(): Boolean {
     }
 }
 
+/** The Bible shipped in the app's resources and installed on a first run. */
+private const val BUNDLED_BIBLE_FILE = "kjv1769.spb"
+
+/**
+ * Writes the bundled KJV into the app's Bibles folder and points [settings] at it.
+ *
+ * A folder that cannot be written to is not on its own a reason to skip: the copy may already be
+ * there from an earlier launch, and a read-only Bibles folder is a perfectly usable one — a managed
+ * install, or a folder locked down after the fact, whose settings were then reset. Only when there
+ * is no usable file *and* nowhere to put one is the bundle skipped and settings left pointing at no
+ * Bible at all, so the setup wizard asks for a folder.
+ */
+private fun bundleDefaultBible(settings: AppSettings) {
+    try {
+        val defaultBibleDir = File(AppDataDir.resolve(), Constants.DEFAULT_BIBLES_FOLDER)
+        val problem = bundledBibleSkipReason(defaultBibleDir, BUNDLED_BIBLE_FILE)
+        if (problem != null) {
+            CrashReporter.reportWarning(
+                "Bundled KJV skipped: Bibles folder $problem",
+                tags = mapOf("subsystem" to "bible_bundle", "reason" to problem)
+            )
+            return
+        }
+        val targetFile = File(defaultBibleDir, BUNDLED_BIBLE_FILE)
+        if (!targetFile.exists()) {
+            targetFile.writeBytes(runBlocking { Res.readBytes("files/bible_samples/$BUNDLED_BIBLE_FILE") })
+        }
+        SettingsManager().saveSettings(
+            settings.withBundledBible(defaultBibleDir.absolutePath, BUNDLED_BIBLE_FILE)
+        )
+    } catch (e: Exception) {
+        CrashReporter.reportException(e, "Bundling default KJV Bible")
+    }
+}
+
 fun main() {
     if (shouldForceMetalRenderer(System.getProperty("os.name", ""))) {
         System.setProperty("skiko.renderApi", "METAL")
@@ -205,21 +242,7 @@ fun main() {
     CrashReporter.initialize(startupSettings.analyticsReportingEnabled)
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
 
-    if (shouldBundleDefaultBible(startupSettings.bibleSettings)) {
-        try {
-            val defaultBibleDir = File(AppDataDir.resolve(), Constants.DEFAULT_BIBLES_FOLDER)
-            defaultBibleDir.mkdirs()
-            val targetFile = File(defaultBibleDir, "kjv1769.spb")
-            if (!targetFile.exists()) {
-                targetFile.writeBytes(runBlocking { Res.readBytes("files/bible_samples/kjv1769.spb") })
-            }
-            SettingsManager().saveSettings(
-                startupSettings.withBundledBible(defaultBibleDir.absolutePath, "kjv1769.spb")
-            )
-        } catch (e: Exception) {
-            CrashReporter.reportException(e, "Bundling default KJV Bible")
-        }
-    }
+    if (shouldBundleDefaultBible(startupSettings.bibleSettings)) bundleDefaultBible(startupSettings)
 
     val pendingUsageEvents = LiveMapReporter.eventsToReport(startupSettings, UsageEvents.unreported())
     val previousSessionMinutes = UsageEvents.lastSessionMinutes()
@@ -251,6 +274,7 @@ fun main() {
     }
 
     preWarmJavaFX()
+    CrashReporter.setTag("javafx.available", isJavaFxAvailable().toString())
 
     CefManager.init()
     CrashReporter.setTag("jcef.available", CefManager.initialized.toString())

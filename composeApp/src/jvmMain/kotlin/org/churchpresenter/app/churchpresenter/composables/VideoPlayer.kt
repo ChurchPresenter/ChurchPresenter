@@ -49,6 +49,11 @@ internal fun isJavaFxScreenReconfigRace(throwable: Throwable): Boolean =
 
 private object JfxInit {
     @Volatile private var initialised = false
+
+    /** False once the toolkit has been tried and refused to start; see [ensureInit]. */
+    @Volatile var available = true
+        private set
+
     fun ensureInit() {
         if (!initialised) {
             synchronized(this) {
@@ -58,7 +63,28 @@ private object JfxInit {
                     // from the classpath in this Compose Desktop build configuration
                     java.util.logging.Logger.getLogger("com.sun.javafx.application.PlatformImpl")
                         .level = java.util.logging.Level.SEVERE
-                    JFXPanel()
+                    // A machine whose JavaFX natives cannot start — no Prism pipeline, a headless
+                    // or restricted session, an incomplete install — throws out of the JFXPanel
+                    // constructor as `RuntimeException: No toolkit found`, or as a linkage error
+                    // from the native load. This runs on `main` before the window exists, so an
+                    // escape is a silent failure to launch at all. JavaFX drives nothing the app
+                    // cannot do without, so the toolkit is marked unavailable and startup carries
+                    // on. Throwable, not Exception: the native failures are Errors. A
+                    // VirtualMachineError is rethrown — the JVM is out of headroom, and carrying on
+                    // only moves the crash somewhere unrelated.
+                    try {
+                        JFXPanel()
+                    } catch (vme: VirtualMachineError) {
+                        throw vme
+                    } catch (t: Throwable) {
+                        available = false
+                        CrashReporter.reportWarning(
+                            "JavaFX toolkit unavailable (continuing without it)",
+                            throwable = t,
+                            tags = mapOf("subsystem" to "javafx_init")
+                        )
+                        return
+                    }
                     // Screen.notifySettingsChanged -> QuantumToolkit.assignScreensAdapters can NPE
                     // deep inside Prism/Glass when the OS reports a display change (monitor
                     // plugged/unplugged) while Prism's GraphicsPipeline isn't fully initialised.
@@ -92,6 +118,13 @@ private object JfxInit {
 
 /** Call once from main() to initialise JavaFX before other native toolkits (JCEF). */
 fun preWarmJavaFX() = JfxInit.ensureInit()
+
+/**
+ * False when the toolkit refused to start. Diagnostics only — it is reported as a crash-service tag
+ * so these machines are identifiable, and nothing branches on it, because nothing in the app depends
+ * on JavaFX being alive. A future JavaFX consumer would be the thing that has to consult it.
+ */
+internal fun isJavaFxAvailable(): Boolean = JfxInit.available
 
 internal fun isMacOS(): Boolean {
     val os = System.getProperty("os.name", "generic").lowercase(Locale.ENGLISH)
