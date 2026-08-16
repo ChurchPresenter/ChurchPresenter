@@ -322,4 +322,89 @@ class ApplyRemoteLiveStateTest {
             )
         }
     }
+
+    @Test
+    fun `a bible verse sent as wording is shown as sent`() {
+        val presenter = apply(
+            LiveStateDto(
+                contentType = "BIBLE",
+                bookName = "John",
+                chapter = 3,
+                verseNumber = 16,
+                verseText = "For God so loved the world.",
+                verseRange = "16-17",
+            )
+        )
+
+        val verse = presenter.selectedVerses.value.single()
+        assertEquals("John", verse.bookName)
+        assertEquals(3, verse.chapter)
+        assertEquals(16, verse.verseNumber)
+        assertEquals("For God so loved the world.", verse.verseText)
+        assertEquals("16-17", verse.verseRange)
+        assertEquals(Presenting.BIBLE, presenter.presentingMode.value)
+    }
+
+    @Test
+    fun `a bible verse with only a book name is shown with zeroed numbers rather than dropped`() {
+        val presenter = apply(LiveStateDto(contentType = "BIBLE", bookName = "Psalms"))
+
+        val verse = presenter.selectedVerses.value.single()
+        assertEquals("Psalms", verse.bookName)
+        assertEquals(0, verse.chapter)
+        assertEquals(0, verse.verseNumber)
+        assertEquals("", verse.verseText)
+        assertEquals("", verse.verseRange)
+    }
+
+    @Test
+    fun `a bible push with no book name shows nothing`() {
+        val presenter = apply(LiveStateDto(contentType = "BIBLE"))
+
+        assertTrue(presenter.selectedVerses.value.isEmpty())
+        assertEquals(Presenting.BIBLE, presenter.presentingMode.value)
+    }
+
+    @Test
+    fun `media with a url but no local player is not played`() {
+        val presenter = apply(
+            LiveStateDto(
+                contentType = "MEDIA",
+                mediaType = org.churchpresenter.app.churchpresenter.utils.Constants.MEDIA_TYPE_URL,
+                mediaUrl = "https://example.org/clip.mp4",
+            ),
+            onPlayRemoteMedia = null,
+        )
+
+        assertEquals(Presenting.MEDIA, presenter.presentingMode.value)
+        assertEquals("", presenter.currentMediaUrl.value)
+    }
+
+    @Test
+    fun `media typed as a url but carrying none is not played`() {
+        val played = mutableListOf<Pair<String, String>>()
+
+        apply(
+            LiveStateDto(
+                contentType = "MEDIA",
+                mediaType = org.churchpresenter.app.churchpresenter.utils.Constants.MEDIA_TYPE_URL,
+            ),
+            onPlayRemoteMedia = { url, type -> played += url to type },
+        )
+
+        assertTrue(played.isEmpty())
+    }
+
+    @Test
+    fun `media with neither a url nor a stream id is not played`() {
+        val played = mutableListOf<Pair<String, String>>()
+
+        val presenter = apply(
+            LiveStateDto(contentType = "MEDIA"),
+            onPlayRemoteMedia = { url, type -> played += url to type },
+        )
+
+        assertTrue(played.isEmpty())
+        assertEquals(Presenting.MEDIA, presenter.presentingMode.value)
+    }
 }

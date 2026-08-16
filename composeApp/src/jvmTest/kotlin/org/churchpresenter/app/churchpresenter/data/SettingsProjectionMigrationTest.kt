@@ -187,4 +187,44 @@ class SettingsProjectionMigrationTest {
         assertTrue(settings.projectionSettings.screenAssignments.isNotEmpty())
     }
 
+    @Test
+    fun `migrating the screens keeps the rest of the projection block`() {
+        val decoded = SettingsManager().migrateAndDecode(
+            """{"projectionSettings":{"vlcPath":"/opt/vlc","screenAssignments":[{"showBible":false}],"audioOutputDeviceId":"HDMI"}}"""
+        ).projectionSettings
+
+        assertEquals(Constants.SONG_LANG_OFF, decoded.screenAssignments.single().bibleMode)
+        assertEquals("/opt/vlc", decoded.vlcPath)
+        assertEquals("HDMI", decoded.audioOutputDeviceId)
+    }
+
+    @Test
+    fun `migrating the screens keeps the rest of the settings file`() {
+        val decoded = SettingsManager().migrateAndDecode(
+            """{"language":"ru","projectionSettings":{"screenAssignments":[{"showSongs":false}]}}"""
+        )
+
+        assertEquals(Constants.SONG_LANG_OFF, decoded.projectionSettings.screenAssignments.single().songMode)
+        assertEquals("ru", decoded.language)
+    }
+
+    @Test
+    fun `converting the numbered screens keeps the rest of the projection block`() {
+        val decoded = SettingsManager().migrateAndDecode(
+            """{"projectionSettings":{"vlcPath":"/opt/vlc","screen1Assignment":{"targetDisplay":1}}}"""
+        ).projectionSettings
+
+        assertEquals(1, decoded.screenAssignments.size)
+        assertEquals("/opt/vlc", decoded.vlcPath)
+    }
+
+    @Test
+    fun `converting the numbered screens keeps the rest of the settings file`() {
+        val decoded = SettingsManager().migrateAndDecode(
+            """{"language":"pl","projectionSettings":{"screen1Assignment":{"targetDisplay":1}}}"""
+        )
+
+        assertEquals(1, decoded.projectionSettings.screenAssignments.size)
+        assertEquals("pl", decoded.language)
+    }
 }

@@ -182,6 +182,31 @@ class StatisticsManagerTest {
         assertEquals(listOf(3, 1), top.getValue("KJV").map { it.count }, "most read first")
     }
 
+    @Test
+    fun `only the top few verses per bible are offered`() {
+        val stats = StatisticsManager()
+        stats.read("John", chapter = 3, verse = 16, bible = "KJV", times = 5)
+        stats.read("Psalms", chapter = 23, verse = 1, bible = "KJV", times = 4)
+        stats.read("Romans", chapter = 8, verse = 28, bible = "KJV", times = 3)
+
+        val top = stats.getTopVersesByBible(limit = 2)
+
+        assertEquals(2, top.getValue("KJV").size)
+        assertEquals(listOf(5, 4), top.getValue("KJV").map { it.count })
+    }
+
+    @Test
+    fun `a range that starts and ends exactly on an event includes it`() {
+        val stats = StatisticsManager()
+        stats.sing("Amazing Grace")
+        stats.read("John", chapter = 3, verse = 16)
+        val songAt = stats.songsIn(everything).single().firstUsed
+        val verseAt = stats.versesIn(everything).single().firstUsed
+
+        assertEquals(1, stats.getAllSongsInRange(songAt, songAt).size)
+        assertEquals(1, stats.getAllVersesInRange(verseAt, verseAt).size)
+    }
+
     // ── The report itself ───────────────────────────────────────────────────────
 
     @Test

@@ -5,6 +5,8 @@ package org.churchpresenter.app.churchpresenter.screenshot
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -209,12 +211,25 @@ internal fun appPreview(
  * schedule's sits far to the left of the tab area.
  */
 internal fun ComposeUiTest.goLive() {
+    // The tab's own button, not the schedule's: a click on a disabled control is silently swallowed,
+    // and the tab's is disabled until whatever it would put live has finished loading — the Lottie
+    // parse behind the lower-third preview, for one, which finishes off the composition thread and
+    // so outlives `waitForIdle`. Without this the shot came out with the preview still spinning in
+    // one theme and loaded in the other, from the same test.
+    waitUntil("the tab's Go Live button is enabled", 5_000L) {
+        onAllNodes(hasContentDescription("Go Live") and isEnabled())
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .any { it.boundsInRoot.left > PANEL_LEFT }
+    }
     val nodes = onAllNodesWithContentDescription("Go Live")
     val rightmost = nodes.fetchSemanticsNodes(atLeastOneRootRequired = false)
         .withIndex().maxByOrNull { it.value.boundsInRoot.left } ?: error("no Go Live button on screen")
     nodes[rightmost.index].performClick()
     waitForIdle()
 }
+
+/** Left of this is the schedule panel, which carries a Go Live on every row. */
+private const val PANEL_LEFT = 380f
 
 /**
  * A button by description inside the tab's own left panel — the timer panel carries its own Play
@@ -224,7 +239,7 @@ internal fun ComposeUiTest.clickInPanel(description: String) {
     val nodes = onAllNodesWithContentDescription(description)
     val inPanel = nodes.fetchSemanticsNodes(atLeastOneRootRequired = false)
         .withIndex()
-        .filter { it.value.boundsInRoot.left in 380f..820f }
+        .filter { it.value.boundsInRoot.left in PANEL_LEFT..820f }
     require(inPanel.isNotEmpty()) { "no \"$description\" button in the tab panel" }
     nodes[inPanel.first().index].performClick()
     waitForIdle()
@@ -243,7 +258,7 @@ internal fun ComposeUiTest.goLiveOnRow(rowText: String) {
         .withIndex()
         // x guard as well as y: a schedule row at the same height carries its own Go Live, and
         // without this the click lands on the schedule instead of the question.
-        .first { it.value.boundsInRoot.center.y in row.top..row.bottom && it.value.boundsInRoot.left > 380f }
+        .first { it.value.boundsInRoot.center.y in row.top..row.bottom && it.value.boundsInRoot.left > PANEL_LEFT }
     nodes[onRow.index].performClick()
     waitForIdle()
 }

@@ -125,4 +125,71 @@ class AtemClientProtocolTest {
         assertEquals("Sermon", String(p, 2, 6, Charsets.UTF_8))
         assertEquals(300, atem.u16(p, 66))
     }
+
+    @Test
+    fun `writeU32 lays out four big-endian bytes`() {
+        val buf = ByteArray(4)
+        atem.writeU32(buf, 0, 0x01020304)
+        assertEquals(listOf(0x01, 0x02, 0x03, 0x04), buf.map { it.toInt() and 0xFF })
+    }
+
+    @Test
+    fun `writeU32 keeps the top bit rather than sign-extending it`() {
+        val buf = ByteArray(4)
+        atem.writeU32(buf, 0, -1)
+        assertEquals(listOf(0xFF, 0xFF, 0xFF, 0xFF), buf.map { it.toInt() and 0xFF })
+    }
+
+    @Test
+    fun `u16 reads the full unsigned range`() {
+        assertEquals(0xFFFF, atem.u16(byteArrayOf(0xFF.toByte(), 0xFF.toByte()), 0))
+    }
+
+    @Test
+    fun `buildSetClipPayload truncates a name longer than its field`() {
+        val p = atem.buildSetClipPayload(clipIndex = 0, name = "n".repeat(80), frames = 1)
+        assertEquals(68, p.size)
+        assertTrue(p.copyOfRange(2, 46).all { it.toInt() == 'n'.code })
+        assertEquals(0, p[46].toInt())
+        assertEquals(1, atem.u16(p, 66))
+    }
+
+    @Test
+    fun `buildSetClipPayload accepts an empty name and no frames`() {
+        val p = atem.buildSetClipPayload(clipIndex = 5, name = "", frames = 0)
+        assertEquals(5, p[1].toInt())
+        assertTrue(p.copyOfRange(2, 66).all { it.toInt() == 0 })
+        assertEquals(0, atem.u16(p, 66))
+    }
+
+    @Test
+    fun `buildSetClipPayload writes a non-ascii name as utf-8`() {
+        val p = atem.buildSetClipPayload(clipIndex = 0, name = "Проповедь", frames = 10)
+        assertEquals("Проповедь", String(p, 2, "Проповедь".toByteArray(Charsets.UTF_8).size, Charsets.UTF_8))
+    }
+
+    @Test
+    fun `buildDataChunkPayload can frame an empty chunk`() {
+        val p = atem.buildDataChunkPayload(transferId = 1, data = byteArrayOf(1, 2, 3), offset = 0, length = 0)
+        assertEquals(4, p.size)
+        assertEquals(0, atem.u16(p, 2))
+    }
+
+    @Test
+    fun `buildUploadRequestPayload carries a size past the signed int range`() {
+        val p = atem.buildUploadRequestPayload(transferId = 1, storeId = 0, frameIndex = 0, size = -1)
+        assertEquals(listOf(0xFF, 0xFF, 0xFF, 0xFF), p.copyOfRange(8, 12).map { it.toInt() and 0xFF })
+    }
+
+    @Test
+    fun `buildFileDescriptionPayload treats an empty name as no name`() {
+        val p = atem.buildFileDescriptionPayload(transferId = 1, name = "", md5 = ByteArray(16) { 3 })
+        assertTrue(p.copyOfRange(2, 66).all { it.toInt() == 0 })
+        assertEquals(3, p[194].toInt())
+    }
+
+    @Test
+    fun `isCoveredByAck rejects a packet just outside the window`() {
+        assertFalse(atem.isCoveredByAck(ackId = 100, packetId = 101))
+    }
 }

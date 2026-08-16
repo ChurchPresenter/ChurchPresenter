@@ -31,6 +31,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -492,6 +493,108 @@ class CompanionServerScheduleMappingTest {
         assertEquals(path, presentation.filePath)
         assertEquals("Unopened", presentation.fileName, "with no catalogue the phone's own title is used")
         assertEquals(0, presentation.slideCount, "and the slide count is unknown until something renders it")
+    }
+
+    @Test
+    fun `an announcement posted with only its text takes every default`() {
+        val (status, item) = addAndApprove("""{"item":{"type":"announcement","announcementText":"Welcome"}}""")
+
+        assertEquals(HttpStatusCode.OK, status)
+        val announcement = assertNotNull(item as? ScheduleItem.AnnouncementItem, "got $item")
+        assertEquals("Welcome", announcement.text)
+        assertEquals("#FFFFFF", announcement.textColor)
+        assertEquals("#000000", announcement.backgroundColor)
+        assertEquals(48, announcement.fontSize)
+        assertEquals("SLIDE_FROM_BOTTOM", announcement.animationType)
+        assertEquals(500, announcement.animationDuration)
+        assertFalse(announcement.isTimer)
+        assertEquals(0, announcement.timerHours)
+        assertEquals(0, announcement.timerMinutes)
+        assertEquals(0, announcement.timerSeconds)
+        assertEquals("", announcement.timerExpiredText)
+        assertEquals("HH:mm:ss", announcement.liveClockFormat)
+    }
+
+    @Test
+    fun `an announcement's timer colour falls back to its text colour`() {
+        val (_, item) = addAndApprove(
+            """{"item":{"type":"announcement","announcementText":"Starting soon","textColor":"#FF0000"}}"""
+        )
+
+        val announcement = assertNotNull(item as? ScheduleItem.AnnouncementItem, "got $item")
+        assertEquals("#FF0000", announcement.timerTextColor)
+    }
+
+    @Test
+    fun `an announcement with an empty text is still an announcement`() {
+        val (status, item) = addAndApprove("""{"item":{"type":"announcement","announcementText":""}}""")
+
+        assertEquals(HttpStatusCode.OK, status)
+        val announcement = assertNotNull(item as? ScheduleItem.AnnouncementItem, "got $item")
+        assertEquals("", announcement.text)
+    }
+
+    @Test
+    fun `a timer posted with its own values keeps them`() {
+        val (_, item) = addAndApprove(
+            """{"item":{"type":"announcement","announcementText":"Countdown","isTimer":true,"timerHours":1,"timerMinutes":2,"timerSeconds":3,"timerExpiredText":"Time","liveClockFormat":"HH:mm"}}"""
+        )
+
+        val announcement = assertNotNull(item as? ScheduleItem.AnnouncementItem, "got $item")
+        assertTrue(announcement.isTimer)
+        assertEquals(1, announcement.timerHours)
+        assertEquals(2, announcement.timerMinutes)
+        assertEquals(3, announcement.timerSeconds)
+        assertEquals("Time", announcement.timerExpiredText)
+        assertEquals("HH:mm", announcement.liveClockFormat)
+    }
+
+    @Test
+    fun `a folder id the desktop has never heard of is refused`() {
+        val (status, item) = addAndApprove("""{"item":{"type":"picture","folder-id":"folder-nope"}}""")
+
+        assertEquals(HttpStatusCode.BadRequest, status)
+        assertNull(item)
+    }
+
+    @Test
+    fun `a picture carrying an explicit path is taken as sent, not looked up`() {
+        val folder = java.nio.file.Files.createTempDirectory("cp-remote-pictures-explicit").toFile()
+        try {
+            val images = listOf("a.jpg").map { java.io.File(folder, it).apply { writeBytes(byteArrayOf(9)) } }
+            server.updatePictures("folder-77", "Catalogued", folder.absolutePath, images)
+            val elsewhere = java.nio.file.Files.createTempDirectory("cp-remote-pictures-sent").toFile()
+
+            val (status, item) = addAndApprove(
+                """{"item":{"type":"picture","folder-id":"folder-77","folderPath":"${elsewhere.absolutePath}","folderName":"Sent","imageCount":4}}"""
+            )
+
+            assertEquals(HttpStatusCode.OK, status)
+            val picture = assertNotNull(item as? ScheduleItem.PictureItem, "got $item")
+            assertEquals(elsewhere.absolutePath, picture.folderPath)
+            assertEquals("Sent", picture.folderName)
+            assertEquals(4, picture.imageCount)
+            elsewhere.deleteRecursively()
+        } finally {
+            folder.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `a picture posted with no id of its own is given one`() {
+        val folder = java.nio.file.Files.createTempDirectory("cp-remote-pictures-blank-id").toFile()
+        try {
+            val images = listOf("a.jpg").map { java.io.File(folder, it).apply { writeBytes(byteArrayOf(9)) } }
+            server.updatePictures("folder-88", "Announcements", folder.absolutePath, images)
+
+            val (status, item) = addAndApprove("""{"item":{"type":"picture","id":"","folder-id":"folder-88"}}""")
+
+            assertEquals(HttpStatusCode.OK, status)
+            val picture = assertNotNull(item as? ScheduleItem.PictureItem, "got $item")
+            assertTrue(picture.id.isNotBlank())
+        } finally {
+            folder.deleteRecursively()
+        }
     }
 
     @Test

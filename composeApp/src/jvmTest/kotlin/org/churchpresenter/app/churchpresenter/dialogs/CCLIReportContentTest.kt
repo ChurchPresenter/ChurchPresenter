@@ -221,4 +221,60 @@ class CCLIReportContentTest {
             assertTrue(shown.contains("P20"), "the last period's label always shows, whatever the step; showed $shown")
             assertFalse(shown.contains("P2"), "with 20 periods, labels in between the step are dropped; showed $shown")
         }
+
+    @Test
+    fun `a mid-sized span narrows the bars rather than dropping periods`() =
+        reportContent({
+            ActivityContent((1..20).map { activity("P$it", songs = it, verses = it) })
+        }) {
+            onNodeWithText(CcliLabel.ACTIVITY_TITLE).assertIsDisplayed()
+            assertTrue(renderedText().contains("P1 – P20"), renderedText().toString())
+        }
+
+    @Test
+    fun `a span past two dozen periods still draws its first and last labels`() =
+        reportContent({
+            ActivityContent((1..40).map { activity("P$it", songs = 1, verses = 1) })
+        }) {
+            val shown = renderedText()
+            assertTrue(shown.contains("P1"), shown.toString())
+            assertTrue(shown.contains("P40"), shown.toString())
+        }
+
+    @Test
+    fun `a span of a single period is still charted`() =
+        reportContent({ ActivityContent(listOf(activity("Jan", 2, 3))) }) {
+            onNodeWithText(CcliLabel.ACTIVITY_TITLE).assertIsDisplayed()
+            assertTrue(renderedText().contains("Jan – Jan"), renderedText().toString())
+        }
+
+    @Test
+    fun `periods with nothing recorded still chart against the ones that have`() =
+        reportContent({
+            ActivityContent(listOf(activity("Jan", 0, 0), activity("Feb", 5, 5), activity("Mar", 0, 0)))
+        }) {
+            onNodeWithText(CcliLabel.ACTIVITY_TITLE).assertIsDisplayed()
+            assertTrue(renderedText().contains("Jan – Mar"), renderedText().toString())
+        }
+
+    @Test
+    fun `a song filed under no songbook is offered under its own filter label`() =
+        reportContent({
+            SongsReportContent(
+                listOf(song("Amazing Grace", songbook = "Hymnal"), song("Loose Song", songbook = "")),
+            ) {}
+        }) {
+            assertTrue(renderedText().contains("Loose Song"), renderedText().toString())
+        }
+
+    @Test
+    fun `a verse recorded against several bibles lists each of them`() =
+        reportContent({
+            BibleReportContent(
+                listOf(verse("John", bible = "KJV"), verse("John", chapter = 1, number = 1, bible = "Synodal")),
+            ) {}
+        }) {
+            assertTrue(renderedText().contains("KJV"), renderedText().toString())
+            assertTrue(renderedText().contains("Synodal"), renderedText().toString())
+        }
 }

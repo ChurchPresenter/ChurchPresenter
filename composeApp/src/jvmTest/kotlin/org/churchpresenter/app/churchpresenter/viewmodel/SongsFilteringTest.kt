@@ -80,6 +80,55 @@ class SongsFilteringTest {
         assertTrue(vm.songbooks.value.containsAll(listOf("Hymnal", "Worship")))
     }
 
+    @Test
+    fun `a song filed under no songbook is listed under the root`() {
+        val vm = vmWith("" to listOf("1" to "Loose Song"))
+
+        assertTrue(vm.songbooks.value.contains("/"))
+    }
+
+    @Test
+    fun `a nested songbook contributes each of its parent folders`() {
+        val vm = vmWith("Kids/AM/Preschool" to listOf("1" to "Jesus Loves Me"))
+
+        assertTrue(vm.songbooks.value.contains("Kids"))
+        assertTrue(vm.songbooks.value.contains("Kids/AM"))
+        assertTrue(vm.songbooks.value.contains("Kids/AM/Preschool"))
+    }
+
+    @Test
+    fun `selecting a song by details finds it by number and songbook`() {
+        val vm = vmWith(*defaultCatalog)
+
+        assertTrue(vm.selectSongByDetails(2, "How Great Thou Art", "Hymnal"))
+        assertEquals("How Great Thou Art", vm.filteredSongItems.value[vm.selectedSongIndex.value].title)
+    }
+
+    @Test
+    fun `selecting by details falls back to the title when the number does not match`() {
+        val vm = vmWith(*defaultCatalog)
+
+        assertTrue(vm.selectSongByDetails(999, "Blessed Be Your Name", "Nowhere"))
+        assertEquals("Blessed Be Your Name", vm.filteredSongItems.value[vm.selectedSongIndex.value].title)
+    }
+
+    @Test
+    fun `selecting by details for a song the library lacks is refused`() {
+        val vm = vmWith(*defaultCatalog)
+
+        assertFalse(vm.selectSongByDetails(404, "Not In The Library", "Hymnal"))
+    }
+
+    @Test
+    fun `selecting by details clears a filter that hides the song`() {
+        val vm = vmWith(*defaultCatalog)
+        vm.updateSelectedSongbook("Worship")
+        assertEquals(2, vm.filteredSongItems.value.size)
+
+        assertTrue(vm.selectSongByDetails(1, "Amazing Grace", "Hymnal"))
+        assertEquals("Amazing Grace", vm.filteredSongItems.value[vm.selectedSongIndex.value].title)
+    }
+
     // ── Contains ────────────────────────────────────────────────────────────────
 
     @Test

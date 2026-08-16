@@ -158,6 +158,40 @@ class PresentationViewModelTest {
     }
 
     @Test
+    fun `loading a path that is not there opens nothing`() {
+        val vm = viewModel()
+
+        vm.loadPresentationByPath(File(dir, "absent.pdf").absolutePath)
+
+        assertNull(vm.selectedPresentation)
+        assertTrue(vm.presentations.isEmpty())
+    }
+
+    @Test
+    fun `loading a path of an unsupported type opens nothing`() {
+        val vm = viewModel()
+        val notADeck = File(dir, "notes.txt").apply { writeText("plain text") }
+
+        vm.loadPresentationByPath(notADeck.absolutePath)
+
+        assertNull(vm.selectedPresentation)
+        assertTrue(vm.presentations.isEmpty())
+    }
+
+    @Test
+    fun `loading the same path twice lists it once`() {
+        val file = pdf(pages = 1)
+        val vm = viewModel()
+        vm.loadPresentationByPath(file.absolutePath)
+        awaitUntil("slides") { !vm.isLoading && vm.slideFiles.isNotEmpty() }
+
+        vm.loadPresentationByPath(file.absolutePath)
+        awaitUntil("slides again") { !vm.isLoading && vm.slideFiles.isNotEmpty() }
+
+        assertEquals(1, vm.presentations.count { it.absolutePath == file.absolutePath })
+    }
+
+    @Test
     fun `the load generation increments when slides finish`() {
         // PresentationTab keys a LaunchedEffect off this, including to re-focus for arrow keys.
         val vm = viewModel()

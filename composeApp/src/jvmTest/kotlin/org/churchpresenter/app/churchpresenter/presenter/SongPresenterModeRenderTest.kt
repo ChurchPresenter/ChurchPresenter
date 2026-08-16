@@ -226,4 +226,110 @@ class SongPresenterModeRenderTest {
         onNodeWithText("That saved a wretch like me", substring = true)
             .assertExists("the preview falls back for the same reason the main text does")
     }
+
+    @Test
+    fun `a secondary-only screen shows the translation when the song has one`() = runComposeUiTest {
+        val bilingual = LyricSection(
+            header = "[Verse 1]",
+            title = "Amazing Grace",
+            songNumber = 42,
+            type = Constants.SECTION_TYPE_VERSE,
+            lines = listOf("Amazing grace how sweet the sound"),
+            secondaryLines = listOf("Удивительная благодать"),
+        )
+        setContent {
+            Box(screen) {
+                SongPresenter(
+                    lyricSection = bilingual,
+                    appSettings = AppSettings(),
+                    languageOverride = Constants.SONG_LANG_SECONDARY,
+                )
+            }
+        }
+
+        onNodeWithText("Удивительная благодать", substring = true).assertExists()
+        onNodeWithText("Amazing grace how sweet the sound", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a both-languages screen shows the translation alongside the original`() = runComposeUiTest {
+        val bilingual = LyricSection(
+            header = "[Verse 1]",
+            title = "Amazing Grace",
+            songNumber = 42,
+            type = Constants.SECTION_TYPE_VERSE,
+            lines = listOf("Amazing grace how sweet the sound"),
+            secondaryLines = listOf("Удивительная благодать"),
+        )
+        setContent {
+            Box(screen) {
+                SongPresenter(
+                    lyricSection = bilingual,
+                    appSettings = AppSettings(),
+                    languageOverride = Constants.SONG_LANG_BOTH,
+                )
+            }
+        }
+
+        onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
+        onNodeWithText("Удивительная благодать", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a both-languages look-ahead previews the translation too`() = runComposeUiTest {
+        val current = LyricSection(
+            header = "[Verse 1]",
+            title = "Amazing Grace",
+            songNumber = 42,
+            type = Constants.SECTION_TYPE_VERSE,
+            lines = listOf("Amazing grace how sweet the sound"),
+            secondaryLines = listOf("Удивительная благодать"),
+        )
+        val next = LyricSection(
+            header = "[Verse 2]",
+            title = "Amazing Grace",
+            songNumber = 42,
+            type = Constants.SECTION_TYPE_VERSE,
+            lines = listOf("That saved a wretch like me"),
+            secondaryLines = listOf("Спасён я ею был"),
+        )
+        setContent {
+            Box(screen) {
+                SongPresenter(
+                    lyricSection = current,
+                    appSettings = AppSettings(),
+                    lookAheadEnabled = true,
+                    allLyricSections = listOf(current, next),
+                    displaySectionIndex = 0,
+                    languageOverride = Constants.SONG_LANG_BOTH,
+                )
+            }
+        }
+
+        onNodeWithText("Спасён я ею был", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a primary-only screen leaves the translation off even when the song has one`() = runComposeUiTest {
+        val bilingual = LyricSection(
+            header = "[Verse 1]",
+            title = "Amazing Grace",
+            songNumber = 42,
+            type = Constants.SECTION_TYPE_VERSE,
+            lines = listOf("Amazing grace how sweet the sound"),
+            secondaryLines = listOf("Удивительная благодать"),
+        )
+        setContent {
+            Box(screen) {
+                SongPresenter(
+                    lyricSection = bilingual,
+                    appSettings = AppSettings(),
+                    languageOverride = Constants.SONG_LANG_PRIMARY,
+                )
+            }
+        }
+
+        onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
+        onNodeWithText("Удивительная благодать", substring = true).assertDoesNotExist()
+    }
 }
