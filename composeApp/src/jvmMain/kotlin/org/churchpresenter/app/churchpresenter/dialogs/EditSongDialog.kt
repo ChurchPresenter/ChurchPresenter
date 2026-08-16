@@ -111,6 +111,8 @@ import churchpresenter.composeapp.generated.resources.unit_bpm
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
+import org.churchpresenter.app.churchpresenter.composables.PaneTab
+import org.churchpresenter.app.churchpresenter.composables.PaneTabRow
 import org.churchpresenter.app.churchpresenter.composables.SectionInk
 import org.churchpresenter.app.churchpresenter.composables.SongChordPreview
 import org.churchpresenter.app.churchpresenter.composables.SongSectionKind
@@ -403,15 +405,7 @@ internal fun EditSongContent(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Row(
-                                // A recessed track, so the filled tab on it is the brightest thing
-                                // in the row rather than one of two similar surfaces.
-                                modifier = Modifier
-                                    .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(9.dp))
-                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(9.dp))
-                                    .padding(2.dp),
-                                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                            ) {
+                            PaneTabRow {
                                 PaneTab(stringResource(Res.string.song_pane_lyrics), pane == LyricPane.PRIMARY) {
                                     pane = LyricPane.PRIMARY
                                 }
@@ -733,30 +727,6 @@ private fun RowScope.TempoCard(bpm: String, onBpmChange: (String) -> Unit, weigh
             )
         }
     }
-}
-
-/**
- * One of the two lyric panes' tabs.
- *
- * The selected one is filled with the accent rather than merely a shade lighter than its neighbour:
- * these two tabs decide which set of words every edit lands in, so which is live has to be readable
- * at a glance, not inferred from a small difference in surface tint.
- */
-@Composable
-private fun PaneTab(label: String, selected: Boolean, onClick: () -> Unit) {
-    Text(
-        text = label,
-        fontSize = 12.sp,
-        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-        color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier
-            .background(
-                if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                RoundedCornerShape(7.dp),
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 13.dp, vertical = 5.dp),
-    )
 }
 
 /** The switch that decides whether the preview shows chords at all. */

@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,6 +47,8 @@ import churchpresenter.composeapp.generated.resources.bible_catalog_search_place
 import churchpresenter.composeapp.generated.resources.bible_catalog_stale_notice
 import churchpresenter.composeapp.generated.resources.bible_catalog_subtitle
 import churchpresenter.composeapp.generated.resources.bible_catalog_title
+import org.churchpresenter.app.churchpresenter.composables.PaneTab
+import org.churchpresenter.app.churchpresenter.composables.PaneTabRow
 import org.churchpresenter.app.churchpresenter.composables.SearchableDropdownField
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleDownloadError
@@ -117,30 +118,19 @@ internal fun Header(installedCount: Int) {
     }
 }
 
+/**
+ * The catalogue source picker — the same recessed-track tab strip the song editor uses for its
+ * lyric panes, so the two read as one control rather than two dialogs' takes on the same idea.
+ */
 @Composable
 internal fun SourceSegmentedControl(
     tabLabels: List<String>,
     selectedTab: Int,
     onSelect: (Int) -> Unit
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    PaneTabRow {
         tabLabels.forEachIndexed { index, label ->
-            val selected = index == selectedTab
-            val container = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent
-            val content = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-            Surface(
-                onClick = { onSelect(index) },
-                shape = MaterialTheme.shapes.small,
-                color = container,
-                contentColor = content
-            ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                )
-            }
+            PaneTab(label = label, selected = index == selectedTab) { onSelect(index) }
         }
     }
 }
