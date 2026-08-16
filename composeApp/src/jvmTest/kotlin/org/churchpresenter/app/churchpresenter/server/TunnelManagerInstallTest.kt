@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.server
 
 import java.io.File
+import java.io.IOException
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -57,7 +58,7 @@ class TunnelManagerInstallTest {
         val missing = File(dir, "never-downloaded.tmp")
         val target = File(dir, "cloudflared")
 
-        assertFailsWith<RuntimeException> { moveBinaryIntoPlace(missing, target) }
+        assertFailsWith<IOException> { moveBinaryIntoPlace(missing, target) }
         assertFalse(target.exists())
     }
 
@@ -68,14 +69,14 @@ class TunnelManagerInstallTest {
 
     @Test
     fun `an extraction that failed is refused`() {
-        val error = assertFailsWith<RuntimeException> { checkExtracted(exitCode = 2, binaryExists = true) }
+        val error = assertFailsWith<IOException> { checkExtracted(exitCode = 2, binaryExists = true) }
 
         assertTrue(error.message.orEmpty().contains("2"), "the exit code has to reach the operator: ${error.message}")
     }
 
     @Test
     fun `an extraction that produced nothing is refused even when it claimed success`() {
-        assertFailsWith<RuntimeException> { checkExtracted(exitCode = 0, binaryExists = false) }
+        assertFailsWith<IOException> { checkExtracted(exitCode = 0, binaryExists = false) }
     }
 
     @Test

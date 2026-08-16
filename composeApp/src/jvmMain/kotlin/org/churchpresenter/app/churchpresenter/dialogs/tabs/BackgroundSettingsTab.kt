@@ -111,6 +111,7 @@ import org.jetbrains.compose.resources.stringResource
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import java.io.File
+import java.io.IOException
 import javax.imageio.ImageIO
 import kotlin.math.roundToInt
 
@@ -849,7 +850,7 @@ private suspend fun uploadBackgroundToAtem(atemSettings: AtemSettings, imagePath
     val file = File(imagePath)
     val name = file.nameWithoutExtension
     val argb = withContext(Dispatchers.IO) {
-        val img = ImageIO.read(file) ?: throw Exception("Could not read image file")
+        val img = ImageIO.read(file) ?: throw IOException("Could not read image file")
         val w = atemSettings.renderWidth
         val h = atemSettings.renderHeight
         val src = IntArray(img.width * img.height)

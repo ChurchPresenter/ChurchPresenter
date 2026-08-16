@@ -81,7 +81,7 @@ exceptions:
   SwallowedException:
     active: true
   TooGenericExceptionThrown:
-    active: false
+    active: true
 
 performance:
   SpreadOperator:
