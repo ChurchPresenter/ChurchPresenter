@@ -49,13 +49,13 @@ internal fun moveBinaryIntoPlace(downloaded: File, target: File) {
     if (downloaded.renameTo(target)) return
     target.delete()
     if (!downloaded.renameTo(target)) {
-        throw RuntimeException("Failed to move downloaded binary into place")
+        throw IOException("Failed to move downloaded binary into place")
     }
 }
 
 internal fun checkExtracted(exitCode: Int, binaryExists: Boolean) {
     if (exitCode != 0 || !binaryExists) {
-        throw RuntimeException("Failed to extract cloudflared from archive (exit $exitCode)")
+        throw IOException("Failed to extract cloudflared from archive (exit $exitCode)")
     }
 }
 
