@@ -12,7 +12,10 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.HttpHeaders
 import io.ktor.utils.io.readAvailable
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import io.ktor.utils.io.ByteReadChannel
 import java.io.File
 import java.io.FileOutputStream
@@ -151,6 +154,10 @@ internal object BibleInstallSupport {
      *
      * A non-2xx answer is never retried: a 404 or a 403 will say the same thing next time.
      *
+     * A connection the engine tears down reaches this as a `CancellationException` even though
+     * nothing here was cancelled, so cancellation is believed only while this coroutine is itself
+     * cancelled; anything else is a network failure and resumes like one.
+     *
      * @param retryFloorMs the first backoff delay; 0 in tests, so they wait for nothing.
      * @throws DownloadStalledException every attempt timed out mid-body.
      */
@@ -176,7 +183,7 @@ internal object BibleInstallSupport {
         while (attempts < MAX_DOWNLOAD_ATTEMPTS) {
             attempts++
             val resumeFrom = state.written
-            try {
+            val failure = try {
                 val status = http.prepareGet(url) {
                     if (resumeFrom > 0) header(HttpHeaders.Range, "bytes=$resumeFrom-")
                     timeout {
@@ -188,12 +195,20 @@ internal object BibleInstallSupport {
                 if (status !in HTTP_SUCCESS_RANGE) return DownloadResult(status, state.written)
                 // 206 is normalised away — callers only ever ask whether the bytes arrived.
                 return DownloadResult(HTTP_OK, state.written)
+            } catch (e: CancellationException) {
+                // Only our own cancellation — the user closing the dialog — may pass through as one.
+                currentCoroutineContext().ensureActive()
+                // Otherwise the engine cancelled the response job under us: a connection that died
+                // mid-body arrives here as `Job was cancelled`, and calling that a cancellation
+                // would abandon the install silently instead of resuming the bytes already on disk.
+                IOException("The connection closed mid-download", e)
             } catch (e: IOException) {
-                lastFailure = e
-                stalledAttempts = if (state.written > resumeFrom) 0 else stalledAttempts + 1
-                if (stalledAttempts >= MAX_STALLED_ATTEMPTS) break
-                delay(downloadRetryDelayMs(stalledAttempts - 1, retryFloorMs))
+                e
             }
+            lastFailure = failure
+            stalledAttempts = if (state.written > resumeFrom) 0 else stalledAttempts + 1
+            if (stalledAttempts >= MAX_STALLED_ATTEMPTS) break
+            delay(downloadRetryDelayMs(stalledAttempts - 1, retryFloorMs))
         }
 
         val failure = lastFailure ?: IOException("Download failed without a cause")

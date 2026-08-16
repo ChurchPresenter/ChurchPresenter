@@ -389,7 +389,7 @@ class SongsViewModel(
     }
 
     /**
-     * Keeps the section selection inside the song it now points at.
+     * Keeps the section and line selection inside the song they now point at.
      *
      * There is no stored section list — [getLyricSections] recomputes from the selected song on every
      * call — so the list changes under the index whenever the song does: a filter or sort change puts
@@ -397,13 +397,25 @@ class SongsViewModel(
      * Instance Link catalog arrives with no lyrics at all. An index left past the end presented the
      * wrong slide, and walking down from it crashed [navigatePreviousSection].
      *
-     * `-1` is a real value — the whole-song/title slide — and is preserved.
+     * The line index needs the same treatment for its own reason: a new song with as many sections
+     * as the old one leaves the section index untouched, so only the line index is left pointing at
+     * a line the section does not have — which shows a blank slide rather than the line the row is
+     * highlighting.
+     *
+     * `-1` is a real value for both — the whole-song/title slide, and "no line chosen" — and is
+     * preserved.
      */
     private fun clampSectionSelection() {
-        val last = getLyricSections().lastIndex
-        if (_selectedSectionIndex.value > last) {
-            _selectedSectionIndex.value = last // -1 when the song has no sections at all
+        val sections = getLyricSections()
+        if (_selectedSectionIndex.value > sections.lastIndex) {
+            _selectedSectionIndex.value = sections.lastIndex // -1 when the song has no sections
             _selectedLineIndex.value = 0
+        }
+        // Through [getSelectedLyricSection], because section -1 is the whole-song slide and its
+        // lines are the song's — a line index into that one is as real as any other.
+        val lineCount = getSelectedLyricSection()?.lines?.size ?: 0
+        if (_selectedLineIndex.value >= lineCount) {
+            _selectedLineIndex.value = (lineCount - 1).coerceAtLeast(0)
         }
     }
 
