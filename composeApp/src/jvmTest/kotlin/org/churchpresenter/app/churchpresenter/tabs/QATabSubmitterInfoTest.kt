@@ -21,19 +21,26 @@ class QATabSubmitterInfoTest {
     }
 
     @Test
-    fun `a question asked from an identified device shows that device on its row`() {
+    fun `a question asked from an identified device names it only on hover`() {
         qaTab(
             seed = {
                 toggleSession()
                 submitQuestion("Where is the nursery?", clientIp = "10.0.0.1", cooldownSeconds = 0, deviceId = "pew-tablet")
             },
         ) { _, _, _ ->
-            assertTrue(showsContainingText("pew-tablet"), renderedText().toString())
+            // The row shows the question and nothing else: a device id is reported by the phone
+            // rather than typed by whoever asked, so the queue does not put it in front of the
+            // moderator until they hover the row and ask.
+            assertFalse(showsContainingText("pew-tablet"), renderedText().toString())
+
+            hoverQuestionRow("Where is the nursery?")
+
+            assertTrue(showsContainingText("Device: pew-tablet"), renderedText().toString())
         }
     }
 
     @Test
-    fun `a question carrying both a name and a device shows both`() {
+    fun `a question carrying both a name and a device shows the name on the row and both on hover`() {
         qaTab(
             seed = {
                 toggleSession()
@@ -41,7 +48,12 @@ class QATabSubmitterInfoTest {
             },
         ) { _, _, _ ->
             assertTrue(showsContainingText("Sam"), renderedText().toString())
-            assertTrue(showsContainingText("pew-tablet"), renderedText().toString())
+            assertFalse(showsContainingText("pew-tablet"), renderedText().toString())
+
+            hoverQuestionRow("Where is the nursery?")
+
+            assertTrue(showsContainingText("Sam"), renderedText().toString())
+            assertTrue(showsContainingText("Device: pew-tablet"), renderedText().toString())
         }
     }
 
