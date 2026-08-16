@@ -150,7 +150,7 @@ class PresentationViewModelRenderErrorTest {
     @Test
     fun `a deck whose every slide fails to rasterize reports a render failure`() {
         val vm = viewModel()
-        vm.renderSlideFrame = { _, _ -> throw RuntimeException("no graphics pipeline") }
+        vm.renderSlideFrame = { _, _ -> throw IllegalStateException("no graphics pipeline") }
 
         vm.openExpectingError(onePagePdf())
 
@@ -167,7 +167,7 @@ class PresentationViewModelRenderErrorTest {
         // A loader that throws (rather than returning a Failure) lands in renderSlides' outer catch,
         // the backstop for anything the per-slide guard doesn't — a broken cache writer, say.
         val vm = viewModel()
-        vm.loadDeck = { throw RuntimeException("engine blew up mid-parse") }
+        vm.loadDeck = { throw IllegalStateException("engine blew up mid-parse") }
 
         vm.openExpectingError(presentationFile())
 
