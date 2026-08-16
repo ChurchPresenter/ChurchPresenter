@@ -860,15 +860,30 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     violationRules {
         // All six counters are gated as of 2026-08-08 (previously LINE alone at 0.75). Every floor is
         // the highest multiple of 5 the gated scope currently clears, so each sits within 5 points of
-        // the real number and the gate pins the current level against regression:
+        // the real number and the gate pins the current level against regression. Re-measured
+        // 2026-08-16:
         //
         //   counter      gate scope   floor   margin
-        //   INSTRUCTION     89.65%     85%     +4.6
-        //   BRANCH          78.18%     75%     +3.2
-        //   LINE            ~89.9%     85%     +4.9
-        //   COMPLEXITY      75.38%     75%     +0.4   <-- ~50 branches of headroom
-        //   METHOD          86.63%     85%     +1.6
-        //   CLASS           88.63%     85%     +3.6
+        //   INSTRUCTION     90.71%     85%     +5.7   <-- clears 90%; see the note below
+        //   BRANCH          80.82%     80%     +0.8
+        //   LINE            90.78%     85%     +5.8   <-- clears 90%; see the note below
+        //   COMPLEXITY      78.50%     75%     +3.5
+        //   METHOD          88.24%     85%     +3.2
+        //   CLASS           89.49%     85%     +4.5
+        //
+        // METHOD and CLASS were at 75% until 2026-08-16 and were raised two steps to 85%: they were
+        // the two counters furthest from their own floor, 8 and 9 points clear, which is enough
+        // slack that a real regression would pass them silently. Neither is a counter this project
+        // has to fight for -- what is left uncovered in both is overwhelmingly the per-composable
+        // lambda methods inside `tabs/` (91 in MainDesktop.kt, 56 in BibleSettingsTab.kt), the same
+        // structural drag the BRANCH note below describes, and no amount of ordinary testing moves
+        // them much. So the floors are set to hold the level rather than to push it.
+        //
+        // INSTRUCTION and LINE both clear 90% now and are deliberately NOT raised to it. LINE was
+        // 90% until 2026-08-10 and had to come down when main.kt was split (see below); putting it
+        // straight back would leave 0.8 points of margin on a counter that has already proved it
+        // moves by more than that for reasons unrelated to test quality. Raise them when the margin
+        // is a few points, not the moment they cross.
         //
         // LINE was 90% until 2026-08-10, when main.kt was split up. PresenterWindows.kt came out of
         // it: 535 lines of GraphicsEnvironment + AWT Window + DeckLink construction that throws
@@ -883,11 +898,12 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
         // kept the number at ~90% by hiding the same lines the old arrangement hid. 85% is what
         // every other counter that can be honestly measured already sits at.
         //
-        // COMPLEXITY is still set tight and WILL fail on a small regression -- that is the point,
-        // but it also means a PR that adds a chunk of legitimately hard-to-cover code trips it.
-        // When that happens the fix is to cover it or to argue the floor down, not to widen an
-        // exclusion above: exclusions decide what the number means, floors decide how much of it we
-        // insist on.
+        // BRANCH is now the tight one -- 0.8 points, a few dozen branches -- and WILL fail on a
+        // small regression. That is the point, but it also means a PR that adds a chunk of
+        // legitimately hard-to-cover code trips it. When that happens the fix is to cover it or to
+        // argue the floor down, not to widen an exclusion above: exclusions decide what the number
+        // means, floors decide how much of it we insist on. (COMPLEXITY used to be the tight one at
+        // +0.4; it is at +3.5 now.)
         //
         // BRANCH and COMPLEXITY sit lowest and cannot be pushed to where LINE is, for a structural
         // reason rather than a testing gap: 396 classes are at 100% LINE and 88.6% BRANCH -- 757
@@ -903,7 +919,7 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
-                minimum = "0.75".toBigDecimal()
+                minimum = "0.80".toBigDecimal()
             }
             limit {
                 counter = "LINE"
@@ -913,17 +929,17 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
             limit {
                 counter = "COMPLEXITY"
                 value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
+                minimum = "0.75".toBigDecimal()
             }
             limit {
                 counter = "METHOD"
                 value = "COVEREDRATIO"
-                minimum = "0.80".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
             limit {
                 counter = "CLASS"
                 value = "COVEREDRATIO"
-                minimum = "0.80".toBigDecimal()
+                minimum = "0.85".toBigDecimal()
             }
         }
     }
@@ -936,6 +952,20 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
 tasks.register("printCoverageLink") {
     val reportDir = layout.buildDirectory.dir("reports/jacoco/jacocoTestReport")
     val testResultsDir = layout.buildDirectory.dir("test-results/jvmTest")
+    // Where to append the run's summary block, resolved at CONFIGURATION time from a property the
+    // CI client passes in -- not from this process's environment. `System.getenv` here reads the
+    // Gradle DAEMON's environment, which is frozen when the daemon starts, and GITHUB_STEP_SUMMARY
+    // is a fresh temp file PER STEP that the runner reads and discards as soon as that step ends.
+    // In practice the daemon is started by the Detekt step and still serving 26 minutes later when
+    // this task runs, so the block was being appended to a file belonging to a step that finished
+    // long before -- written successfully, read by nobody. Observed on run 31944001329: daemon up
+    // at 11:19:45 (Detekt), printCoverageLink at 11:45:25, same daemon.
+    //
+    // A `-P` property travels with each individual invocation, so it is the live path every time.
+    // The environment stays as the fallback for anyone running the task by hand.
+    val stepSummaryPath = providers.gradleProperty("stepSummary")
+        .orElse(providers.environmentVariable("GITHUB_STEP_SUMMARY"))
+        .orNull
     doLast {
         val dir = reportDir.get().asFile
         val htmlIndex = dir.resolve("html/index.html")
@@ -1010,7 +1040,7 @@ tasks.register("printCoverageLink") {
         // Also put it on the run's summary page. The job log is ~14 minutes of Gradle output and
         // the numbers land in the middle of it; the step summary is the page a reviewer actually
         // opens from a pull request. Best-effort -- a coverage print must never fail a build.
-        System.getenv("GITHUB_STEP_SUMMARY")?.takeIf { it.isNotBlank() }?.let { path ->
+        stepSummaryPath?.takeIf { it.isNotBlank() }?.let { path ->
             runCatching {
                 File(path).appendText(
                     buildString {

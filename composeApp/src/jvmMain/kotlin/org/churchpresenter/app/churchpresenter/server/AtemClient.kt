@@ -715,7 +715,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
      * How much to put in the next chunk: never ending mid RLE block, so the length is shortened
      * when an RLE header starts 8 or 16 bytes before the chunk end (header+count+pattern = 24B unit).
      */
-    private fun chunkLengthAt(dataBuf: java.nio.ByteBuffer, dataSize: Int, bytesSent: Int, chunkSize: Int): Int {
+    internal fun chunkLengthAt(dataBuf: java.nio.ByteBuffer, dataSize: Int, bytesSent: Int, chunkSize: Int): Int {
         val len = minOf(chunkSize, dataSize - bytesSent)
         if (bytesSent + len >= dataSize) return len
         val endsOnHeader = { back: Int ->
@@ -732,7 +732,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
      * The failure for an FTDE the transfer cannot retry past. Clip frames after index 0 usually
      * fail because the device's clip pool ran out of capacity, which is worth saying outright.
      */
-    private fun transferRejected(code: Int, name: String?, frameIndex: Int, retries: Int): AtemProtocolException {
+    internal fun transferRejected(code: Int, name: String?, frameIndex: Int, retries: Int): AtemProtocolException {
         val what = if (name == null) "clip frame $frameIndex" else "still"
         val hint = if (name == null && frameIndex > 0) {
             " — the clip may exceed the ATEM's clip pool capacity; try a shorter duration or lower fps"

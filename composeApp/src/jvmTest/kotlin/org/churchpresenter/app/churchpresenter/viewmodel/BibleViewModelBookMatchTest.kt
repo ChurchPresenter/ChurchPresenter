@@ -9,6 +9,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -140,5 +141,39 @@ class BibleViewModelBookMatchTest {
             "both Corinthians rank as substring matches",
         )
         assertTrue(ranked.all { it.second == 60 }, "both are substring matches, scored 60")
+    }
+
+    @Test
+    fun `a name that differs only by its spaces is an exact match`() {
+        // "1corinthians" typed without the space is the same book, not a mere prefix of it.
+        assertEquals(100, vm.scoreNameMatch("1 corinthians", "1corinthians", "1corinthians"))
+    }
+
+    @Test
+    fun `a substring that spans a space still counts as a substring`() {
+        // "gofsol" only appears in the name once its spaces are taken out.
+        assertEquals(60, vm.scoreNameMatch("song of solomon", "gofsol", "gofsol"))
+    }
+
+    // ── isReferenceQuery ────────────────────────────────────────────────────────
+
+    @Test
+    fun `a book chapter and verse is recognised as a reference`() {
+        assertTrue(vm.isReferenceQuery("John 3:16"))
+    }
+
+    @Test
+    fun `a bare book name is recognised as a reference`() {
+        assertTrue(vm.isReferenceQuery("Genesis"))
+    }
+
+    @Test
+    fun `an ordinary word is not a reference`() {
+        assertFalse(vm.isReferenceQuery("beginning"))
+    }
+
+    @Test
+    fun `surrounding whitespace does not stop a reference being recognised`() {
+        assertTrue(vm.isReferenceQuery("  John 3:16  "))
     }
 }

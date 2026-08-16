@@ -119,10 +119,17 @@ jobs:
       # Advisory after a failure, like the floor: the exec data is then from a run that stopped
       # early, so the numbers are understated. Still worth printing -- it is the only place the
       # counters appear -- but they are not comparable with a green run's.
+      #
+      # The step-summary path is handed over as `-PstepSummary` rather than left to the build
+      # script to read out of the environment. `System.getenv` in build logic reads the Gradle
+      # DAEMON's environment, frozen when the daemon started -- here, during Detekt -- while
+      # GITHUB_STEP_SUMMARY names a fresh file per step that the runner consumes at that step's
+      # end. So the block landed in Detekt's already-read file and never appeared anywhere. A
+      # property travels with this invocation, so it is the live path.
       - name: Coverage summary
         if: always()
         timeout-minutes: 10
-        run: ./gradlew :composeApp:jacocoTestReport -x jvmTest
+        run: ./gradlew :composeApp:jacocoTestReport -x jvmTest "-PstepSummary=$GITHUB_STEP_SUMMARY"
 
       # The 75% line-coverage floor, off the execution data the tests above just produced. Its
       # denominator excludes the app-entry wiring that only runs under a real display -- see

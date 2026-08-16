@@ -311,4 +311,41 @@ class BibleSearchAndNumberingTest {
             "guessing at an unmapped chapter would put a plausible wrong verse on screen",
         )
     }
+
+    @Test
+    fun `requiring every word can be limited to one book without naming a chapter`() {
+        // The three-argument overload leaves the chapter filter open while the book filter is set,
+        // which is the combination the "search this book" toggle actually produces.
+        val bible = plainBible()
+        val either = Regex("\\b(heaven|earth)\\b", RegexOption.IGNORE_CASE)
+
+        val inGenesis = bible.searchBible(true, either, book = 1)
+
+        assertTrue(inGenesis.isNotEmpty(), "Genesis 1:1 carries both words")
+        assertTrue(inGenesis.all { it.book == "Genesis" }, "the book filter still applies: $inGenesis")
+    }
+
+    @Test
+    fun `a book filter with no verse carrying every word finds nothing`() {
+        // Psalms has "shepherd" but neither "heaven" nor "earth"; requiring both must not fall back
+        // to the any-word behaviour and return the whole book.
+        val bible = plainBible()
+        val both = Regex("\\b(heaven|earth)\\b", RegexOption.IGNORE_CASE)
+
+        assertTrue(bible.searchBible(true, both, book = 19).isEmpty())
+    }
+
+    @Test
+    fun `requiring every word skips a verse that carries only one of them`() {
+        // Genesis 1:3 has "light" twice but no "heaven"; it matches the any-word regex and has to
+        // be dropped by the all-words pass rather than by the regex.
+        val bible = plainBible()
+        val either = Regex("\\b(heaven|light)\\b", RegexOption.IGNORE_CASE)
+
+        val anyWord = bible.searchBible(false, either, book = 1)
+        val allWords = bible.searchBible(true, either, book = 1)
+
+        assertTrue(anyWord.size > allWords.size, "the all-words pass has to remove something: $anyWord")
+        assertTrue(allWords.none { it.verse == "3" }, "1:3 has light but not heaven: $allWords")
+    }
 }

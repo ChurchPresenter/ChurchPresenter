@@ -251,7 +251,7 @@ class PlanningCenterImportViewModel(
     /** Matches only a leading 4-digit song number (e.g. "1234 Amazing Grace") — 3 or 5+ digits don't count. */
     private val leadingSongNumberRegex = Regex("""^(\d{4})(?!\d)""")
 
-    private fun matchLocalSong(pco: PlanningCenterClient.PlanItem, catalog: List<SongItem>): SongItem? {
+    internal fun matchLocalSong(pco: PlanningCenterClient.PlanItem, catalog: List<SongItem>): SongItem? {
         if (pco.itemType != "song") return null
         val ccli = pco.songCcliNumber
         if (!ccli.isNullOrBlank()) {
