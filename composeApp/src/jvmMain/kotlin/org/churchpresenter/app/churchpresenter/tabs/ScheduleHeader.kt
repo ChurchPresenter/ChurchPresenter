@@ -24,7 +24,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
@@ -37,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,13 +72,19 @@ import churchpresenter.composeapp.generated.resources.ic_label
 import churchpresenter.composeapp.generated.resources.ic_redo
 import churchpresenter.composeapp.generated.resources.ic_remove
 import churchpresenter.composeapp.generated.resources.ic_save
+import churchpresenter.composeapp.generated.resources.ic_settings
 import churchpresenter.composeapp.generated.resources.ic_undo
+import churchpresenter.composeapp.generated.resources.ic_zoom_in
 import churchpresenter.composeapp.generated.resources.planning_center_import_title
 import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.schedule_density_compact
 import churchpresenter.composeapp.generated.resources.schedule_density_detailed
 import churchpresenter.composeapp.generated.resources.schedule_density_normal
 import churchpresenter.composeapp.generated.resources.schedule_item_count
+import churchpresenter.composeapp.generated.resources.schedule_option_item_count
+import churchpresenter.composeapp.generated.resources.schedule_option_zoom
+import churchpresenter.composeapp.generated.resources.schedule_show_buttons_under_title
+import churchpresenter.composeapp.generated.resources.tooltip_schedule_options
 import churchpresenter.composeapp.generated.resources.tooltip_redo
 import churchpresenter.composeapp.generated.resources.tooltip_redo_unbound
 import churchpresenter.composeapp.generated.resources.tooltip_undo
@@ -118,8 +130,13 @@ internal fun ScheduleHeader(
     onRedo: () -> Unit,
     onAddLabel: () -> Unit,
     onImportPlanningCenter: () -> Unit,
-    onClearSchedule: () -> Unit
+    onClearSchedule: () -> Unit,
+    legacyRowActions: Boolean = false,
+    onLegacyRowActionsChange: (Boolean) -> Unit = {},
+    hiddenButtons: Set<String> = emptySet(),
+    onToggleButton: (ScheduleToolbarButton) -> Unit = {}
 ) {
+    fun shown(button: ScheduleToolbarButton) = button.name !in hiddenButtons
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -140,6 +157,7 @@ internal fun ScheduleHeader(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
+            if (shown(ScheduleToolbarButton.ITEM_COUNT)) {
             PillGroup {
                 Text(
                     text = stringResource(Res.string.schedule_item_count, itemCount),
@@ -149,7 +167,9 @@ internal fun ScheduleHeader(
                     modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
                 )
             }
+            }
             Spacer(modifier = Modifier.weight(1f))
+            if (shown(ScheduleToolbarButton.ZOOM)) {
             PillGroup {
                 TooltipIconButton(
                     painter = painterResource(Res.drawable.ic_remove),
@@ -205,8 +225,16 @@ internal fun ScheduleHeader(
                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
                 )
             }
+            }
+            ScheduleOptionsButton(
+                legacyRowActions = legacyRowActions,
+                onLegacyRowActionsChange = onLegacyRowActionsChange,
+                hiddenButtons = hiddenButtons,
+                onToggleButton = onToggleButton
+            )
         }
 
+        if (scheduleToolbarVisible(hiddenButtons)) {
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -216,6 +244,7 @@ internal fun ScheduleHeader(
 
             PillGroup {
 
+                if (shown(ScheduleToolbarButton.NEW)) {
                 TooltipIconButton(
                     painter = painterResource(Res.drawable.ic_add),
                     text = stringResource(Res.string.tooltip_new_schedule),
@@ -224,6 +253,8 @@ internal fun ScheduleHeader(
                     iconSize = 14.dp,
                     iconTint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                }
+                if (shown(ScheduleToolbarButton.OPEN)) {
                 TooltipIconButton(
                     painter = painterResource(Res.drawable.ic_folder),
                     text = stringResource(Res.string.tooltip_open_schedule),
@@ -232,6 +263,8 @@ internal fun ScheduleHeader(
                     iconSize = 14.dp,
                     iconTint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                }
+                if (shown(ScheduleToolbarButton.SAVE)) {
                 TooltipIconButton(
                     painter = painterResource(Res.drawable.ic_save),
                     text = stringResource(Res.string.tooltip_save_schedule),
@@ -240,7 +273,9 @@ internal fun ScheduleHeader(
                     iconSize = 14.dp,
                     iconTint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                }
 
+                if (shown(ScheduleToolbarButton.CLEAR)) {
                 TooltipIconButton(
                     painter = painterResource(Res.drawable.ic_delete),
                     text = stringResource(Res.string.tooltip_clear_schedule),
@@ -249,13 +284,15 @@ internal fun ScheduleHeader(
                     iconSize = 14.dp,
                     iconTint = MaterialTheme.colorScheme.error
                 )
-                PillDivider()
+                }
+                if (scheduleToolbarDividerVisible(0, hiddenButtons)) PillDivider()
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
                 val shortcuts = LocalShortcuts.current
                 val undoKeys = shortcuts.label(ShortcutAction.UNDO)
                 val redoKeys = shortcuts.label(ShortcutAction.REDO)
+                if (shown(ScheduleToolbarButton.UNDO)) {
                 TooltipIconButton(
                     painter = painterResource(Res.drawable.ic_undo),
                     text = if (undoKeys.isEmpty()) stringResource(Res.string.tooltip_undo_unbound)
@@ -268,6 +305,8 @@ internal fun ScheduleHeader(
                     iconTint = if (canUndo) MaterialTheme.colorScheme.onSurfaceVariant
                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
                 )
+                }
+                if (shown(ScheduleToolbarButton.REDO)) {
                 TooltipIconButton(
                     painter = painterResource(Res.drawable.ic_redo),
                     text = if (redoKeys.isEmpty()) stringResource(Res.string.tooltip_redo_unbound)
@@ -281,7 +320,9 @@ internal fun ScheduleHeader(
                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
                 )
                 }
-                PillDivider()
+                }
+                if (scheduleToolbarDividerVisible(1, hiddenButtons)) PillDivider()
+                if (shown(ScheduleToolbarButton.ADD_LABEL)) {
                 TooltipIconButton(
                     painter = painterResource(Res.drawable.ic_label),
                     text = stringResource(Res.string.tooltip_add_label),
@@ -290,6 +331,8 @@ internal fun ScheduleHeader(
                     iconSize = 14.dp,
                     iconTint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                }
+                if (shown(ScheduleToolbarButton.PLANNING_CENTER)) {
                 TooltipIconButton(
                     painter = rememberVectorPainter(Icons.Default.CloudDownload),
                     text = stringResource(Res.string.planning_center_import_title),
@@ -298,9 +341,102 @@ internal fun ScheduleHeader(
                     iconSize = 14.dp,
                     iconTint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                }
+            }
+        }
+        }
+    }
+}
+
+/**
+ * The schedule sidebar's own options menu — the panel-local settings that have no place in the
+ * global settings dialog because they describe this panel's layout and are switched while looking
+ * at it. Follows the tab-visibility menu in `MainDesktop`: an icon button opening a
+ * [DropdownMenu] of checkbox items, each applied immediately.
+ */
+@Composable
+private fun ScheduleOptionsButton(
+    legacyRowActions: Boolean,
+    onLegacyRowActionsChange: (Boolean) -> Unit,
+    hiddenButtons: Set<String>,
+    onToggleButton: (ScheduleToolbarButton) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        PillGroup {
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_settings),
+                text = stringResource(Res.string.tooltip_schedule_options),
+                onClick = { expanded = true },
+                modifier = Modifier.testTag(ScheduleToolbarTags.OPTIONS),
+                buttonSize = 24.dp,
+                iconSize = 13.dp,
+                iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.schedule_show_buttons_under_title)) },
+                onClick = { onLegacyRowActionsChange(!legacyRowActions) },
+                modifier = Modifier.testTag(ScheduleToolbarTags.OPTIONS_LEGACY_ACTIONS),
+                leadingIcon = { Checkbox(checked = legacyRowActions, onCheckedChange = null) }
+            )
+            HorizontalDivider()
+            ScheduleToolbarButton.entries.forEach { button ->
+                val shown = button.name !in hiddenButtons
+                DropdownMenuItem(
+                    text = { Text(scheduleToolbarButtonLabel(button)) },
+                    onClick = { onToggleButton(button) },
+                    modifier = Modifier.testTag(button.menuTag),
+                    leadingIcon = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(checked = shown, onCheckedChange = null)
+                            Icon(
+                                painter = scheduleToolbarButtonPainter(button),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = if (button == ScheduleToolbarButton.CLEAR) MaterialTheme.colorScheme.error
+                                       else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                )
             }
         }
     }
+}
+
+/** The same icon the toolbar button itself draws, so the menu entry is recognisable as that button. */
+@Composable
+private fun scheduleToolbarButtonPainter(button: ScheduleToolbarButton): Painter = when (button) {
+    ScheduleToolbarButton.ITEM_COUNT -> rememberVectorPainter(Icons.AutoMirrored.Filled.List)
+    ScheduleToolbarButton.ZOOM -> painterResource(Res.drawable.ic_zoom_in)
+    ScheduleToolbarButton.NEW -> painterResource(Res.drawable.ic_add)
+    ScheduleToolbarButton.OPEN -> painterResource(Res.drawable.ic_folder)
+    ScheduleToolbarButton.SAVE -> painterResource(Res.drawable.ic_save)
+    ScheduleToolbarButton.CLEAR -> painterResource(Res.drawable.ic_delete)
+    ScheduleToolbarButton.UNDO -> painterResource(Res.drawable.ic_undo)
+    ScheduleToolbarButton.REDO -> painterResource(Res.drawable.ic_redo)
+    ScheduleToolbarButton.ADD_LABEL -> painterResource(Res.drawable.ic_label)
+    ScheduleToolbarButton.PLANNING_CENTER -> rememberVectorPainter(Icons.Default.CloudDownload)
+}
+
+/**
+ * The button's own name for the menu. Undo and Redo take the plain unbound wording rather than the
+ * toolbar's shortcut-carrying tooltip: the menu names the button, it does not teach the shortcut.
+ */
+@Composable
+private fun scheduleToolbarButtonLabel(button: ScheduleToolbarButton): String = when (button) {
+    ScheduleToolbarButton.ITEM_COUNT -> stringResource(Res.string.schedule_option_item_count)
+    ScheduleToolbarButton.ZOOM -> stringResource(Res.string.schedule_option_zoom)
+    ScheduleToolbarButton.NEW -> stringResource(Res.string.tooltip_new_schedule)
+    ScheduleToolbarButton.OPEN -> stringResource(Res.string.tooltip_open_schedule)
+    ScheduleToolbarButton.SAVE -> stringResource(Res.string.tooltip_save_schedule)
+    ScheduleToolbarButton.CLEAR -> stringResource(Res.string.tooltip_clear_schedule)
+    ScheduleToolbarButton.UNDO -> stringResource(Res.string.tooltip_undo_unbound)
+    ScheduleToolbarButton.REDO -> stringResource(Res.string.tooltip_redo_unbound)
+    ScheduleToolbarButton.ADD_LABEL -> stringResource(Res.string.tooltip_add_label)
+    ScheduleToolbarButton.PLANNING_CENTER -> stringResource(Res.string.planning_center_import_title)
 }
 
 @Composable

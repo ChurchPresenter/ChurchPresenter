@@ -5,6 +5,10 @@ package org.churchpresenter.app.churchpresenter.screenshot
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarButton
+import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarTags
 import org.churchpresenter.app.churchpresenter.tabs.scheduleTab
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
@@ -17,17 +21,22 @@ class ScheduleTabScreenshotTest {
         name: String,
         itemZoomPercent: Int = 100,
         width: Dp? = null,
+        legacyRowActions: Boolean = false,
+        hiddenToolbarButtons: Set<String> = emptySet(),
+        rootIndex: Int = 0,
         seed: ScheduleViewModel.() -> Unit = { everyItemType() },
         drive: ComposeUiTest.(ScheduleViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         scheduleTab(
             itemZoomPercent = itemZoomPercent,
             width = width,
+            legacyRowActions = legacyRowActions,
+            hiddenToolbarButtons = hiddenToolbarButtons,
             seed = seed,
             themeMode = mode,
         ) { vm, _ ->
             drive(vm)
-            captureTo(file)
+            captureTo(file, rootIndex)
         }
     }
 
@@ -177,6 +186,35 @@ class ScheduleTabScreenshotTest {
 
     @Test
     fun `a narrow panel wraps the toolbar`() = shoot("narrow_panel", width = 240.dp)
+
+    /**
+     * The legacy card layout: every row's buttons on their own line, none of them over the title.
+     *
+     * Shot at 320dp rather than the harness's full window, because this layout spreads its buttons
+     * across the row — remove at one end, the rest at the other — and at 1024dp that reads as a
+     * mistake rather than as the layout an operator sees in a real panel.
+     */
+    @Test
+    fun `legacy row actions`() = shoot("legacy_row_actions", legacyRowActions = true, width = 320.dp)
+
+    /** The header with toolbar buttons and the title-row readouts turned off from the options menu. */
+    @Test
+    fun `toolbar buttons hidden`() = shoot(
+        "toolbar_buttons_hidden",
+        hiddenToolbarButtons = setOf(
+            ScheduleToolbarButton.PLANNING_CENTER.name,
+            ScheduleToolbarButton.UNDO.name,
+            ScheduleToolbarButton.REDO.name,
+            ScheduleToolbarButton.ITEM_COUNT.name,
+        ),
+    )
+
+    /** The options menu itself — an open menu is its own compose root, hence [rootIndex] 1. */
+    @Test
+    fun `the options menu`() = shoot("options_menu", rootIndex = 1) {
+        onNodeWithTag(ScheduleToolbarTags.OPTIONS).performClick()
+        waitForIdle()
+    }
 
     /**
      * The schedule image the website's homepage uses, written straight into `previewApp/` — beside

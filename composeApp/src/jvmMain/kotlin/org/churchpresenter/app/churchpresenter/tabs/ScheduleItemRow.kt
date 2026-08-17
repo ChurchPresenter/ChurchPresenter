@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -117,12 +119,105 @@ internal const val SCHEDULE_ROW_CARD_TAG = "schedule_row_card"
 
 internal const val SCHEDULE_ROW_ACTIONS_TAG = "schedule_row_actions"
 
+/** The legacy layout's action line — its own tag so a test can tell the two layouts apart. */
+internal const val SCHEDULE_ROW_LEGACY_ACTIONS_TAG = "schedule_row_legacy_actions"
+
+/**
+ * The card's action buttons, in the one place both layouts take them from: the hover overlay
+ * pinned over the title's right-hand end, and the legacy line under the title.
+ *
+ * [removeFirst] is what the legacy line asks for — remove alone at the start, everything else
+ * pushed to the end, as it sat before the hover overlay replaced it.
+ */
+@Composable
+private fun RowScope.ScheduleRowActionButtons(
+    isSection: Boolean,
+    note: String,
+    noteExpanded: Boolean,
+    removeFirst: Boolean,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit,
+    onToggleNote: () -> Unit,
+    onRemove: () -> Unit,
+    onPresent: () -> Unit,
+    onEditLabel: () -> Unit
+) {
+    val actionSize = if (isSection) SECTION_ACTION_BUTTON_SIZE else ACTION_BUTTON_SIZE
+    val actionIcon = if (isSection) SECTION_ACTION_ICON_SIZE else ACTION_ICON_SIZE
+
+    @Composable
+    fun removeButton() {
+        ScheduleRowActionButton(
+            painter = painterResource(Res.drawable.ic_close),
+            text = stringResource(Res.string.tooltip_remove),
+            onClick = onRemove,
+            buttonSize = actionSize,
+            iconSize = actionIcon,
+            iconTint = MaterialTheme.colorScheme.error
+        )
+    }
+
+    if (removeFirst) {
+        removeButton()
+        Spacer(modifier = Modifier.weight(1f))
+    }
+    ScheduleRowActionButton(
+        painter = painterResource(Res.drawable.ic_arrow_up),
+        text = stringResource(Res.string.tooltip_move_up),
+        onClick = onMoveUp,
+        buttonSize = actionSize,
+        iconSize = actionIcon,
+        iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    ScheduleRowActionButton(
+        painter = painterResource(Res.drawable.ic_arrow_down),
+        text = stringResource(Res.string.tooltip_move_down),
+        onClick = onMoveDown,
+        buttonSize = actionSize,
+        iconSize = actionIcon,
+        iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    ScheduleRowActionButton(
+        painter = painterResource(Res.drawable.ic_note),
+        text = stringResource(Res.string.tooltip_note),
+        onClick = onToggleNote,
+        buttonSize = actionSize,
+        iconSize = actionIcon,
+        iconTint = if (note.isNotEmpty() || noteExpanded) MaterialTheme.colorScheme.primary
+                   else MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    if (!removeFirst) removeButton()
+
+    if (isSection) {
+        ScheduleRowActionButton(
+            painter = painterResource(Res.drawable.ic_edit),
+            text = stringResource(Res.string.tooltip_edit_label),
+            onClick = onEditLabel,
+            modifier = Modifier.padding(start = 2.dp),
+            buttonSize = actionSize,
+            iconSize = SECTION_ACTION_ICON_SIZE,
+            iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    } else {
+        ScheduleRowActionButton(
+            painter = painterResource(Res.drawable.ic_play),
+            text = stringResource(Res.string.tooltip_go_live),
+            onClick = onPresent,
+            modifier = Modifier.padding(start = 2.dp),
+            iconSize = 15.dp,
+            iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
 @Composable
 internal fun ScheduleItemRow(
     item: ScheduleItem,
 
     dragHandleModifier: Modifier = Modifier,
     density: ScheduleDensity,
+    /** Legacy layout: buttons on their own line under the title instead of the hover overlay. */
+    legacyRowActions: Boolean = false,
     isSelected: Boolean,
     note: String,
     onSelect: () -> Unit,
@@ -263,86 +358,71 @@ internal fun ScheduleItemRow(
 
                 }
 
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .testTag(SCHEDULE_ROW_ACTIONS_TAG)
+                if (!legacyRowActions) {
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .testTag(SCHEDULE_ROW_ACTIONS_TAG)
 
-                        .fillMaxHeight()
-                        .alpha(actionsAlpha)
-                        .background(
-                            Brush.horizontalGradient(
-                                0f to Color.Transparent,
-                                GRADIENT_MIDPOINT to cardBg.copy(alpha = 0.82f),
-                                1f to cardBg.copy(alpha = 0.82f)
+                            .fillMaxHeight()
+                            .alpha(actionsAlpha)
+                            .background(
+                                Brush.horizontalGradient(
+                                    0f to Color.Transparent,
+                                    GRADIENT_MIDPOINT to cardBg.copy(alpha = 0.82f),
+                                    1f to cardBg.copy(alpha = 0.82f)
+                                )
                             )
-                        )
-                        .padding(start = 20.dp)
-                        .finalPassCombinedClickable(
-                            onClick = { onSelect() },
-                            onDoubleClick = if (!isSection) { { onPresent() } } else null
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(1.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    val actionSize = if (isSection) SECTION_ACTION_BUTTON_SIZE else ACTION_BUTTON_SIZE
-                    val actionIcon = if (isSection) SECTION_ACTION_ICON_SIZE else ACTION_ICON_SIZE
-                    ScheduleRowActionButton(
-                        painter = painterResource(Res.drawable.ic_arrow_up),
-                        text = stringResource(Res.string.tooltip_move_up),
-                        onClick = onMoveUp,
-                        buttonSize = actionSize,
-                        iconSize = actionIcon,
-                        iconTint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    ScheduleRowActionButton(
-                        painter = painterResource(Res.drawable.ic_arrow_down),
-                        text = stringResource(Res.string.tooltip_move_down),
-                        onClick = onMoveDown,
-                        buttonSize = actionSize,
-                        iconSize = actionIcon,
-                        iconTint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    ScheduleRowActionButton(
-                        painter = painterResource(Res.drawable.ic_note),
-                        text = stringResource(Res.string.tooltip_note),
-                        onClick = { noteExpanded = !noteExpanded },
-                        buttonSize = actionSize,
-                        iconSize = actionIcon,
-                        iconTint = if (note.isNotEmpty() || noteExpanded) MaterialTheme.colorScheme.primary
-                                   else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    ScheduleRowActionButton(
-                        painter = painterResource(Res.drawable.ic_close),
-                        text = stringResource(Res.string.tooltip_remove),
-                        onClick = onRemove,
-                        buttonSize = actionSize,
-                        iconSize = actionIcon,
-                        iconTint = MaterialTheme.colorScheme.error
-                    )
-
-                    if (isSection) {
-                        ScheduleRowActionButton(
-                            painter = painterResource(Res.drawable.ic_edit),
-                            text = stringResource(Res.string.tooltip_edit_label),
-                            onClick = onEditLabel,
-                            modifier = Modifier.padding(start = 2.dp),
-                            buttonSize = actionSize,
-                            iconSize = SECTION_ACTION_ICON_SIZE,
-                            iconTint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
-                        ScheduleRowActionButton(
-                            painter = painterResource(Res.drawable.ic_play),
-                            text = stringResource(Res.string.tooltip_go_live),
-                            onClick = onPresent,
-                            modifier = Modifier.padding(start = 2.dp),
-                            iconSize = 15.dp,
-                            iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+                            .padding(start = 20.dp)
+                            .finalPassCombinedClickable(
+                                onClick = { onSelect() },
+                                onDoubleClick = if (!isSection) { { onPresent() } } else null
+                            ),
+                        horizontalArrangement = Arrangement.spacedBy(1.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ScheduleRowActionButtons(
+                            isSection = isSection,
+                            note = note,
+                            noteExpanded = noteExpanded,
+                            removeFirst = false,
+                            onMoveUp = onMoveUp,
+                            onMoveDown = onMoveDown,
+                            onToggleNote = { noteExpanded = !noteExpanded },
+                            onRemove = onRemove,
+                            onPresent = onPresent,
+                            onEditLabel = onEditLabel
                         )
                     }
                 }
+            }
+        }
+
+        if (legacyRowActions) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(SCHEDULE_ROW_LEGACY_ACTIONS_TAG)
+                    .padding(start = 12.dp, end = 6.dp, bottom = 2.dp)
+                    .finalPassCombinedClickable(
+                        onClick = { onSelect() },
+                        onDoubleClick = if (!isSection) { { onPresent() } } else null
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(1.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ScheduleRowActionButtons(
+                    isSection = isSection,
+                    note = note,
+                    noteExpanded = noteExpanded,
+                    removeFirst = true,
+                    onMoveUp = onMoveUp,
+                    onMoveDown = onMoveDown,
+                    onToggleNote = { noteExpanded = !noteExpanded },
+                    onRemove = onRemove,
+                    onPresent = onPresent,
+                    onEditLabel = onEditLabel
+                )
             }
         }
 

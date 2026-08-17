@@ -134,6 +134,8 @@ internal val CARD_SHAPE = RoundedCornerShape(9.dp)
 internal object ScheduleToolbarTags {
     const val UNDO = "schedule_undo"
     const val REDO = "schedule_redo"
+    const val OPTIONS = "schedule_options"
+    const val OPTIONS_LEGACY_ACTIONS = "schedule_options_legacy_actions"
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -162,6 +164,10 @@ fun ScheduleTab(
     theme: ThemeMode = ThemeMode.SYSTEM,
     itemZoomPercent: Int = ZOOM_DEFAULT,
     onItemZoomChange: (Int) -> Unit = {},
+    legacyRowActions: Boolean = false,
+    onLegacyRowActionsChange: (Boolean) -> Unit = {},
+    hiddenToolbarButtons: Set<String> = emptySet(),
+    onToggleToolbarButton: (ScheduleToolbarButton) -> Unit = {},
     planningCenterSettings: PlanningCenterSettings = PlanningCenterSettings(),
     onPlanningCenterTokensRefreshed: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long) -> Unit = { _, _, _ -> },
     onPlanningCenterConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit = { _, _, _, _ -> },
@@ -265,7 +271,11 @@ fun ScheduleTab(
             onRedo = { viewModel.redo() },
             onAddLabel = onAddLabel,
             onImportPlanningCenter = { showPlanningCenterImport = true },
-            onClearSchedule = { viewModel.clearSchedule() }
+            onClearSchedule = { viewModel.clearSchedule() },
+            legacyRowActions = legacyRowActions,
+            onLegacyRowActionsChange = onLegacyRowActionsChange,
+            hiddenButtons = hiddenToolbarButtons,
+            onToggleButton = onToggleToolbarButton
         )
 
         val viewModelState = rememberUpdatedState(viewModel)
@@ -438,6 +448,7 @@ fun ScheduleTab(
                             item = item,
                             dragHandleModifier = Modifier.reorderGesture(index, requireShift = false),
                             density = density,
+                            legacyRowActions = legacyRowActions,
                             isSelected = item.id == selectedItemId,
                             note = viewModel.getNote(item.id),
                             onSelect = {
