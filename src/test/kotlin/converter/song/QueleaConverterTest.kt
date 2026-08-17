@@ -108,6 +108,34 @@ class QueleaConverterTest {
     }
 
     @Test
+    fun `lyrics Quelea never escaped are repaired rather than skipped`() {
+        // Both of these are real: 40 of the 3,134 songs in Quelea's English pack are rejected by a
+        // strict parser, for a bare & between songwriters and a literal <<>> left in the lyrics.
+        val malformed = "<song><title>Crowns</title><author>M Fatkin & B Hastings</author><lyrics>" +
+            "<section title=\"Verse 1\"><lyrics>Words and Music\n<<>>\nBy Hillsong</lyrics></section>" +
+            "</lyrics></song>"
+        val file = pack("songs.qsp", mapOf("crowns.xml" to malformed))
+
+        val song = QueleaConverter.parse(file).single()
+
+        assertEquals("Crowns", song.title)
+        assertEquals("M Fatkin & B Hastings", song.author)
+        assertEquals(listOf("Words and Music", "<<>>", "By Hillsong"), song.sections.single().lines)
+    }
+
+    @Test
+    fun `a well-formed document is not touched by the repair`() {
+        val xml = "<song><title>Grace &amp; Peace</title><lyrics>" +
+            "<section title=\"Verse 1\"><lyrics>a &lt; b</lyrics></section></lyrics></song>"
+        val file = File(temp, "ok.xml").apply { writeText(xml, Charsets.UTF_8) }
+
+        val song = QueleaConverter.parse(file).single()
+
+        assertEquals("Grace & Peace", song.title)
+        assertEquals(listOf("a < b"), song.sections.single().lines)
+    }
+
+    @Test
     fun `a loose song file converts without being packed first`() {
         val file = File(temp, "grace.xml").apply {
             writeText(songXml("Amazing Grace", "Verse 1" to "Amazing grace"), Charsets.UTF_8)

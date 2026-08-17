@@ -33,6 +33,7 @@ data class OpenSongSong(
 object OpenSongConverter {
 
     private val underscoreRuns = Regex("_{2,}")
+    private val chordPadding = Regex(" {2,}")
     private val markerLine = Regex("""^\[([^]]*)]""")
 
     fun parse(file: File): OpenSongSong {
@@ -99,8 +100,19 @@ object OpenSongConverter {
         }
     }
 
-    private fun clean(text: String): String =
-        text.removePrefix(" ").replace(underscoreRuns, "").replace("|", "").trimEnd()
+    /**
+     * A lyric line with OpenSong's own markup taken off.
+     *
+     * The runs of `_` and the runs of spaces are both there to line syllables up under the chord
+     * line above them — real files read `A______ma________zing grace! How   sweet the  sound!` —
+     * so a line kept verbatim reaches the screen with the chord grid still in it.
+     */
+    private fun clean(text: String): String = text
+        .removePrefix(" ")
+        .replace(underscoreRuns, "")
+        .replace("|", "")
+        .replace(chordPadding, " ")
+        .trimEnd()
 
     private fun isNoise(trimmed: String): Boolean =
         trimmed.isEmpty() ||

@@ -60,6 +60,16 @@ class EasySlidesConverterTest {
     }
 
     @Test
+    fun `a marker that is only a number is the verse EasySlides means by it`() {
+        val contents = "[1]\nAmazing grace\n[2]\nTwas grace\n[chorus]\nPraise\n[chorus 2]\nPraise again"
+        val file = exportFile(item("Grace", contents))
+
+        val sections = EasySlidesConverter.parse(file).single().sections
+
+        assertEquals(listOf("Verse 1", "Verse 2", "Chorus", "Chorus 2"), sections.map { it.label })
+    }
+
+    @Test
     fun `sequence letters name sections, and t is the second chorus rather than a tag`() {
         assertEquals(
             listOf("Verse 1", "Chorus", "Verse 2", "Chorus 2"),

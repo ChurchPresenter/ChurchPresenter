@@ -34,6 +34,10 @@ internal object SectionLabel {
         if (cleaned.isEmpty()) return "Verse"
         val match = splitWordAndNumber.find(cleaned) ?: return cleaned
         val (word, number) = match.destructured
+        // A marker that is nothing but a number is a verse: EasySlides numbers its verses `[1]`,
+        // `[2]` and names only the other sections, so reading these as "1" and "2" would leave a
+        // whole library's verses labelled with bare digits.
+        if (word.isBlank()) return if (number.isEmpty()) cleaned else "Verse $number"
         val name = names[word.lowercase().replace(" ", "")] ?: return cleaned
         return if (number.isEmpty()) name else "$name $number"
     }
