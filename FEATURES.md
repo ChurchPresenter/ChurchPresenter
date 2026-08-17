@@ -236,7 +236,7 @@
 - `data/StatisticsPeriod.kt` — the period presets shared by its pills and its date pickers
 
 ## Personalization & Workflow
-- **14 languages** — full interface translation including English, Spanish, French, German, Portuguese, Dutch, Polish, Czech, Slovak, Romanian, Ukrainian, Russian, Belarusian and Kazakh.
+- **34 languages** — full interface translation: English, Spanish, French, German, Portuguese, Dutch, Swedish, Norwegian, Finnish, Estonian, Latvian, Polish, Czech, Slovak, Croatian, Romanian, Ukrainian, Russian, Belarusian, Kazakh, Uzbek, Turkish, Arabic, Persian, Hindi, Nepali, Thai, Lao, Japanese, Chinese, Indonesian, Malay, Tagalog and Swahili — with the interface laid out right-to-left for Arabic and Persian.
 - **9 themes** — light, dark, system and six accent themes to match your booth.
 - **Guided setup** — a friendly first-run wizard gets your Bibles, songs and media ready in minutes.
 - **Keyboard-driven** — comprehensive shortcuts for fast, mouse-free operation during a live service.

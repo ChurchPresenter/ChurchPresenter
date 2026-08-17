@@ -14,21 +14,40 @@ import churchpresenter.composeapp.generated.resources.studio_theme
 import churchpresenter.composeapp.generated.resources.ocean_theme
 import churchpresenter.composeapp.generated.resources.rose_theme
 import churchpresenter.composeapp.generated.resources.warm_theme
+import churchpresenter.composeapp.generated.resources.language_arabic
 import churchpresenter.composeapp.generated.resources.language_belarusian
+import churchpresenter.composeapp.generated.resources.language_chinese
+import churchpresenter.composeapp.generated.resources.language_croatian
 import churchpresenter.composeapp.generated.resources.language_czech
 import churchpresenter.composeapp.generated.resources.language_dutch
 import churchpresenter.composeapp.generated.resources.language_english
 import churchpresenter.composeapp.generated.resources.language_estonian
+import churchpresenter.composeapp.generated.resources.language_finnish
 import churchpresenter.composeapp.generated.resources.language_french
 import churchpresenter.composeapp.generated.resources.language_german
+import churchpresenter.composeapp.generated.resources.language_hindi
+import churchpresenter.composeapp.generated.resources.language_indonesian
+import churchpresenter.composeapp.generated.resources.language_japanese
 import churchpresenter.composeapp.generated.resources.language_kazakh
+import churchpresenter.composeapp.generated.resources.language_lao
+import churchpresenter.composeapp.generated.resources.language_latvian
+import churchpresenter.composeapp.generated.resources.language_malay
+import churchpresenter.composeapp.generated.resources.language_nepali
+import churchpresenter.composeapp.generated.resources.language_norwegian
+import churchpresenter.composeapp.generated.resources.language_persian
 import churchpresenter.composeapp.generated.resources.language_polish
 import churchpresenter.composeapp.generated.resources.language_portuguese
 import churchpresenter.composeapp.generated.resources.language_romanian
 import churchpresenter.composeapp.generated.resources.language_russian
 import churchpresenter.composeapp.generated.resources.language_slovak
 import churchpresenter.composeapp.generated.resources.language_spanish
+import churchpresenter.composeapp.generated.resources.language_swahili
+import churchpresenter.composeapp.generated.resources.language_swedish
+import churchpresenter.composeapp.generated.resources.language_tagalog
+import churchpresenter.composeapp.generated.resources.language_thai
+import churchpresenter.composeapp.generated.resources.language_turkish
 import churchpresenter.composeapp.generated.resources.language_ukrainian
+import churchpresenter.composeapp.generated.resources.language_uzbek
 import churchpresenter.composeapp.generated.resources.menu_about
 import churchpresenter.composeapp.generated.resources.menu_getting_started
 import churchpresenter.composeapp.generated.resources.menu_add_to_schedule
@@ -311,6 +330,82 @@ fun FrameWindowScope.NavigationTopBar(
             Item(
                 text = "🇪🇪 ${stringResource(Res.string.language_estonian)}",
                 onClick = { onLanguageChange(Language.ESTONIAN) }
+            )
+            Item(
+                text = "🇱🇻 ${stringResource(Res.string.language_latvian)}",
+                onClick = { onLanguageChange(Language.LATVIAN) }
+            )
+            Item(
+                text = "🇭🇷 ${stringResource(Res.string.language_croatian)}",
+                onClick = { onLanguageChange(Language.CROATIAN) }
+            )
+            Item(
+                text = "🇸🇪 ${stringResource(Res.string.language_swedish)}",
+                onClick = { onLanguageChange(Language.SWEDISH) }
+            )
+            Item(
+                text = "🇳🇴 ${stringResource(Res.string.language_norwegian)}",
+                onClick = { onLanguageChange(Language.NORWEGIAN) }
+            )
+            Item(
+                text = "🇫🇮 ${stringResource(Res.string.language_finnish)}",
+                onClick = { onLanguageChange(Language.FINNISH) }
+            )
+            Item(
+                text = "🇹🇷 ${stringResource(Res.string.language_turkish)}",
+                onClick = { onLanguageChange(Language.TURKISH) }
+            )
+            Item(
+                text = "🇺🇿 ${stringResource(Res.string.language_uzbek)}",
+                onClick = { onLanguageChange(Language.UZBEK) }
+            )
+            Item(
+                text = "🇸🇦 ${stringResource(Res.string.language_arabic)}",
+                onClick = { onLanguageChange(Language.ARABIC) }
+            )
+            Item(
+                text = "🇮🇷 ${stringResource(Res.string.language_persian)}",
+                onClick = { onLanguageChange(Language.PERSIAN) }
+            )
+            Item(
+                text = "🇮🇳 ${stringResource(Res.string.language_hindi)}",
+                onClick = { onLanguageChange(Language.HINDI) }
+            )
+            Item(
+                text = "🇳🇵 ${stringResource(Res.string.language_nepali)}",
+                onClick = { onLanguageChange(Language.NEPALI) }
+            )
+            Item(
+                text = "🇹🇭 ${stringResource(Res.string.language_thai)}",
+                onClick = { onLanguageChange(Language.THAI) }
+            )
+            Item(
+                text = "🇱🇦 ${stringResource(Res.string.language_lao)}",
+                onClick = { onLanguageChange(Language.LAO) }
+            )
+            Item(
+                text = "🇯🇵 ${stringResource(Res.string.language_japanese)}",
+                onClick = { onLanguageChange(Language.JAPANESE) }
+            )
+            Item(
+                text = "🇨🇳 ${stringResource(Res.string.language_chinese)}",
+                onClick = { onLanguageChange(Language.CHINESE) }
+            )
+            Item(
+                text = "🇮🇩 ${stringResource(Res.string.language_indonesian)}",
+                onClick = { onLanguageChange(Language.INDONESIAN) }
+            )
+            Item(
+                text = "🇲🇾 ${stringResource(Res.string.language_malay)}",
+                onClick = { onLanguageChange(Language.MALAY) }
+            )
+            Item(
+                text = "🇵🇭 ${stringResource(Res.string.language_tagalog)}",
+                onClick = { onLanguageChange(Language.TAGALOG) }
+            )
+            Item(
+                text = "🇹🇿 ${stringResource(Res.string.language_swahili)}",
+                onClick = { onLanguageChange(Language.SWAHILI) }
             )
         }
 
