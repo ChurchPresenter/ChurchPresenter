@@ -46,6 +46,7 @@ internal object PowerPointDeckSupport {
     /** Opens a slide show with format auto-detection (works for both .pptx and .ppt). */
     fun open(file: File): SlideShow<*, *> = SlideShowFactory.create(file, null, true)
         .also { registerEmbeddedFonts(it) }
+        .also { show -> (show as? XMLSlideShow)?.let { stripUnsupportedHighlights(it) } }
 
     /**
      * Registers fonts embedded in the document (the fntdata parts under ppt/fonts — plain TTF

@@ -37,6 +37,16 @@ data class AppSettings(
     val schedulePanelWidthDp: Int = 280,
     val schedulePanelCollapsed: Boolean = false,
     val scheduleItemZoomPercent: Int = 100,
+    /**
+     * Legacy schedule card layout: the item's buttons sit on their own line under the title and are
+     * always visible, instead of the hover overlay that paints over the title's right-hand end.
+     */
+    val scheduleLegacyRowActions: Boolean = false,
+    /**
+     * Schedule toolbar buttons the operator has turned off, by `ScheduleToolbarButton` name — the
+     * same shape as [hiddenTabs], so an unknown name from a newer build is simply ignored.
+     */
+    val hiddenScheduleButtons: Set<String> = emptySet(),
     val previewPanelWidthDp: Int = 280,
     val previewPanelCollapsed: Boolean = false,
     val maximizedLayout: WindowLayoutSettings = WindowLayoutSettings(),

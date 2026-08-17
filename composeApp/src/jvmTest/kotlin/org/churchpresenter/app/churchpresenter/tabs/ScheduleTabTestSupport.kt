@@ -66,6 +66,8 @@ internal class ScheduleReports {
     var addLabelRequests = 0
     var addWebsiteRequests = 0
     val zoomChanges = mutableListOf<Int>()
+    val legacyRowActionChanges = mutableListOf<Boolean>()
+    val toolbarButtonToggles = mutableListOf<ScheduleToolbarButton>()
 
     /**
      * The action set the tab hands its parent, so the menu and keyboard paths — which never touch a
@@ -85,6 +87,10 @@ internal class ScheduleReports {
 @OptIn(ExperimentalTestApi::class)
 internal fun scheduleTab(
     itemZoomPercent: Int = 100,
+    /** The legacy card layout — buttons on their own line under the title, always visible. */
+    legacyRowActions: Boolean = false,
+    /** Toolbar buttons turned off from the panel's options menu, by [ScheduleToolbarButton] name. */
+    hiddenToolbarButtons: Set<String> = emptySet(),
     /** Constrains the panel, for the layout tests that need it narrow enough to wrap. */
     width: Dp? = null,
     seed: ScheduleViewModel.() -> Unit = {},
@@ -118,6 +124,10 @@ internal fun scheduleTab(
                         scheduleViewModel = vm,
                         itemZoomPercent = itemZoomPercent,
                         onItemZoomChange = { reports.zoomChanges += it },
+                        legacyRowActions = legacyRowActions,
+                        onLegacyRowActionsChange = { reports.legacyRowActionChanges += it },
+                        hiddenToolbarButtons = hiddenToolbarButtons,
+                        onToggleToolbarButton = { reports.toolbarButtonToggles += it },
                         onPresenting = { reports.presenting += it },
                         onItemClick = { reports.clicked += it },
                         onEditLabel = { reports.editedLabels += it },

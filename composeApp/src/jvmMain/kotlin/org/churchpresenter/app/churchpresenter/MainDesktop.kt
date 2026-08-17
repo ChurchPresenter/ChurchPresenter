@@ -1247,6 +1247,19 @@ fun MainDesktop(
                         onItemZoomChange = { percent ->
                             onSettingsChange { settings -> settings.copy(scheduleItemZoomPercent = percent) }
                         },
+                        legacyRowActions = appSettings.scheduleLegacyRowActions,
+                        onLegacyRowActionsChange = { legacy ->
+                            onSettingsChange { settings -> settings.copy(scheduleLegacyRowActions = legacy) }
+                        },
+                        hiddenToolbarButtons = appSettings.hiddenScheduleButtons,
+                        onToggleToolbarButton = { button ->
+                            onSettingsChange { settings ->
+                                settings.copy(
+                                    hiddenScheduleButtons =
+                                        toggleHiddenScheduleButton(settings.hiddenScheduleButtons, button)
+                                )
+                            }
+                        },
                         planningCenterSettings = appSettings.planningCenterSettings,
                         onPlanningCenterTokensRefreshed = { accessToken, refreshToken, expiresAtEpochMs ->
                             onSettingsChange { settings ->

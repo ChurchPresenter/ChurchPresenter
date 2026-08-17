@@ -665,6 +665,10 @@
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Detailed</string>
     <string name="schedule_kind_lower_third">Lower Third</string>
+    <string name="tooltip_schedule_options">Schedule Options</string>
+    <string name="schedule_show_buttons_under_title">Show buttons under title</string>
+    <string name="schedule_option_item_count">Item Count</string>
+    <string name="schedule_option_zoom">Zoom Controls</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Add Label</string>

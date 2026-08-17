@@ -19,6 +19,7 @@ import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
+import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarButton
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File
@@ -331,6 +332,10 @@ internal fun isOnlyVisibleTab(tab: Tabs, hiddenTabs: Set<String>, visibleCount: 
 
 internal fun toggleHiddenTabs(hiddenTabs: Set<String>, tab: Tabs): Set<String> =
     if (tab.name !in hiddenTabs) hiddenTabs + tab.name else hiddenTabs - tab.name
+
+/** The schedule toolbar's own version of [toggleHiddenTabs]; unlike tabs, hiding them all is allowed. */
+internal fun toggleHiddenScheduleButton(hidden: Set<String>, button: ScheduleToolbarButton): Set<String> =
+    if (button.name !in hidden) hidden + button.name else hidden - button.name
 
 /**
  * Whether the hidden audio player should be hosted here rather than by the Media tab.
