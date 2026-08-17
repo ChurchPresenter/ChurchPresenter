@@ -375,7 +375,11 @@ class StockMediaViewModelTest {
     @Test
     fun `downloading hands back the saved file`() {
         val saved = File(dir, "sunrise.jpg").also { it.writeText("x") }
-        coEvery { StockMediaClient.download(any(), any(), any()) } returns StockMediaClient.DownloadOutcome.Success(saved)
+        coEvery { StockMediaClient.download(
+            any(),
+            any(),
+            any(),
+        ) } returns StockMediaClient.DownloadOutcome.Success(saved)
         val vm = vm()
         var handedBack: String? = null
 
@@ -432,7 +436,11 @@ class StockMediaViewModelTest {
         settle()
 
         val saved = File(dir, "sunrise.jpg").also { it.writeText("x") }
-        coEvery { StockMediaClient.download(any(), any(), any()) } returns StockMediaClient.DownloadOutcome.Success(saved)
+        coEvery { StockMediaClient.download(
+            any(),
+            any(),
+            any(),
+        ) } returns StockMediaClient.DownloadOutcome.Success(saved)
         var handedBack: String? = null
         vm.download(item("a")) { handedBack = it }
 

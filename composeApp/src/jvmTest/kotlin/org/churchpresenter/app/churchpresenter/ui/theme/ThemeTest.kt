@@ -91,7 +91,9 @@ class ThemeTest {
 
         assertTrue(
             failures.isEmpty(),
-            "unreadable colour pairings: " + failures.joinToString { "${it.first} ${it.second} = %.2f:1".format(it.third) },
+            "unreadable colour pairings: " + failures.joinToString { "${it.first} ${it.second} = %.2f:1".format(
+                it.third,
+            ) },
         )
     }
 

@@ -55,7 +55,13 @@ class InstanceLinkViewModelTest {
         every { anyConstructed<InstanceLinkClient>().sendAddToSchedule(any()) } returns Unit
         every { anyConstructed<InstanceLinkClient>().sendRemoveFromSchedule(any()) } returns Unit
         every { anyConstructed<InstanceLinkClient>().sendProject(any()) } returns Unit
-        every { anyConstructed<InstanceLinkClient>().sendSelectBibleVerse(any(), any(), any(), any(), any()) } returns Unit
+        every { anyConstructed<InstanceLinkClient>().sendSelectBibleVerse(
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+        ) } returns Unit
         every { anyConstructed<InstanceLinkClient>().sendSelectPicture(any(), any(), any()) } returns Unit
         every { anyConstructed<InstanceLinkClient>().sendSelectSongSection(any(), any(), any()) } returns Unit
         every { anyConstructed<InstanceLinkClient>().sendSelectSlide(any(), any()) } returns Unit
@@ -111,8 +117,21 @@ class InstanceLinkViewModelTest {
     private fun broadcastSongSection(vm: InstanceLinkViewModel, index: Int) =
         callback<(Int) -> Unit>(vm, "onSongSectionSelected")(index)
 
-    private fun broadcastSlide(vm: InstanceLinkViewModel, id: String, index: Int, total: Int, isPlaying: Boolean, isLive: Boolean) =
-        callback<(String, Int, Int, Boolean, Boolean) -> Unit>(vm, "onPresentationSlideChanged")(id, index, total, isPlaying, isLive)
+    private fun broadcastSlide(
+        vm: InstanceLinkViewModel,
+        id: String,
+        index: Int,
+        total: Int = 1,
+        isPlaying: Boolean = false,
+        isLive: Boolean = false,
+    ) =
+        callback<(String, Int, Int, Boolean, Boolean) -> Unit>(vm, "onPresentationSlideChanged")(
+            id,
+            index,
+            total,
+            isPlaying,
+            isLive,
+        )
 
     private fun signal(vm: InstanceLinkViewModel, name: String) = callback<() -> Unit>(vm, name)()
 
@@ -182,7 +201,11 @@ class InstanceLinkViewModelTest {
     @Test
     fun `any other status clears the pending retry deadline`() {
         val vm = vm()
-        listOf(InstanceLinkStatus.CONNECTING, InstanceLinkStatus.CONNECTED, InstanceLinkStatus.DISCONNECTED).forEach { status ->
+        listOf(
+            InstanceLinkStatus.CONNECTING,
+            InstanceLinkStatus.CONNECTED,
+            InstanceLinkStatus.DISCONNECTED,
+        ).forEach { status ->
             reportReconnectIn(vm, 5_000L)
             reportStatus(vm, status)
             assertNull(vm.nextRetryAtMs.value, "a stale countdown next to a $status link reads as still failing")
@@ -350,7 +373,10 @@ class InstanceLinkViewModelTest {
     // ── Command failures ────────────────────────────────────────────────────────
 
     /** Collects everything emitted while [block] runs. Unconfined so the collector subscribes before it does. */
-    private fun collectFailures(vm: InstanceLinkViewModel, block: () -> Unit): List<InstanceLinkCommandFailure> = runBlocking {
+    private fun collectFailures(
+        vm: InstanceLinkViewModel,
+        block: () -> Unit,
+    ): List<InstanceLinkCommandFailure> = runBlocking {
         val seen = mutableListOf<InstanceLinkCommandFailure>()
         val job = CoroutineScope(Dispatchers.Unconfined).launch { vm.commandFailures.collect { seen.add(it) } }
         block()
@@ -409,10 +435,22 @@ class InstanceLinkViewModelTest {
     fun `connecting and disconnecting reach the client`() {
         val vm = vm()
 
-        vm.connect(host = "10.0.0.9", port = 8765, apiKey = "secret", deviceId = "follower-1", reconnectDelayMs = 3_000L)
+        vm.connect(
+            host = "10.0.0.9",
+            port = 8765,
+            apiKey = "secret",
+            deviceId = "follower-1",
+            reconnectDelayMs = 3_000L,
+        )
         vm.disconnect()
 
-        verify(exactly = 1) { anyConstructed<InstanceLinkClient>().connect("10.0.0.9", 8765, "secret", "follower-1", 3_000L) }
+        verify(exactly = 1) { anyConstructed<InstanceLinkClient>().connect(
+            "10.0.0.9",
+            8765,
+            "secret",
+            "follower-1",
+            3_000L,
+        ) }
         verify(exactly = 1) { anyConstructed<InstanceLinkClient>().disconnect() }
     }
 
@@ -464,7 +502,13 @@ class InstanceLinkViewModelTest {
         vm.sendClear()
         vm.sendBibleHold(true)
 
-        verify(exactly = 1) { anyConstructed<InstanceLinkClient>().sendSelectBibleVerse("John", 3, 16, "For God so loved the world", "16-18") }
+        verify(exactly = 1) { anyConstructed<InstanceLinkClient>().sendSelectBibleVerse(
+            "John",
+            3,
+            16,
+            "For God so loved the world",
+            "16-18",
+        ) }
         verify(exactly = 1) { anyConstructed<InstanceLinkClient>().sendSelectPicture("folder-1", 4, "photo.jpg") }
         verify(exactly = 1) { anyConstructed<InstanceLinkClient>().sendSelectSlide("deck-1", 2) }
         verify(exactly = 1) { anyConstructed<InstanceLinkClient>().sendClear() }
@@ -490,7 +534,9 @@ class InstanceLinkViewModelTest {
     @Test
     fun `a media stream url comes straight from the client`() {
         val vm = vm()
-        every { anyConstructed<InstanceLinkClient>().mediaStreamUrl("media-1") } returns "http://10.0.0.9:8765/media/media-1"
+        every { anyConstructed<InstanceLinkClient>().mediaStreamUrl(
+            "media-1",
+        ) } returns "http://10.0.0.9:8765/media/media-1"
 
         assertEquals("http://10.0.0.9:8765/media/media-1", vm.mediaStreamUrl("media-1"))
     }

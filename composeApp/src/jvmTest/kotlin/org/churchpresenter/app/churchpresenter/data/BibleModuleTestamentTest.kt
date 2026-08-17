@@ -57,7 +57,10 @@ class BibleModuleTestamentTest {
     @Test
     fun `the counts beat the name when the two disagree`() {
         // The name says NT, the contents say otherwise; the contents are not a reading of a title.
-        assertEquals(Testament.FULL, module(displayName = "Some NT Edition", otBookCount = 39, ntBookCount = 27).testament)
+        assertEquals(
+            Testament.FULL,
+            module(displayName = "Some NT Edition", otBookCount = 39, ntBookCount = 27).testament,
+        )
     }
 
     @Test

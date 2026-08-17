@@ -74,6 +74,9 @@ class BibleBookNamesTest {
 
         assertEquals(66, mapping.size)
         assertEquals("Genesis", mapping["genesis"], "case is normalised away on the key side")
-        assertTrue("Genesis" !in mapping, "the un-lowercased form must not also work, or a caller could rely on it by accident")
+        assertTrue(
+            "Genesis" !in mapping,
+            "the un-lowercased form must not also work, or a caller could rely on it by accident",
+        )
     }
 }

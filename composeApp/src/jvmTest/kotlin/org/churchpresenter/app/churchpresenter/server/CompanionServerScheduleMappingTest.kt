@@ -383,6 +383,7 @@ class CompanionServerScheduleMappingTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `a verse posted in the companion format arrives as a verse`() {
         val (status, item) = addAndApprove(
             """{"item":{"type":"bible","bookName":"John","chapter":3,"verseNumber":16,"verseText":"For God so loved the world."}}"""
@@ -535,6 +536,7 @@ class CompanionServerScheduleMappingTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `a timer posted with its own values keeps them`() {
         val (_, item) = addAndApprove(
             """{"item":{"type":"announcement","announcementText":"Countdown","isTimer":true,"timerHours":1,"timerMinutes":2,"timerSeconds":3,"timerExpiredText":"Time","liveClockFormat":"HH:mm"}}"""
@@ -558,6 +560,7 @@ class CompanionServerScheduleMappingTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `a picture carrying an explicit path is taken as sent, not looked up`() {
         val folder = java.nio.file.Files.createTempDirectory("cp-remote-pictures-explicit").toFile()
         try {
@@ -606,6 +609,7 @@ class CompanionServerScheduleMappingTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `a body in the legacy sealed-class format is still accepted`() {
         // Older clients send the discriminated form; they must keep working.
         val (status, item) = addAndApprove(

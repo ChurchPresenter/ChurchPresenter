@@ -211,7 +211,8 @@ internal fun songsTab(
                             reports.settingsChanges++
                             reports.settingsAfterChange = transform(reports.settingsAfterChange ?: settings)
                         },
-                        onAddToSchedule = if (withOnAddToSchedule) { { _, title, _, _ -> reports.scheduled += title } } else null,
+                        onAddToSchedule =
+                            if (withOnAddToSchedule) { { _, title, _, _ -> reports.scheduled += title } } else null,
                         onSongItemSelected = { reports.selectedSection = it },
                         onAllSectionsChanged = { reports.allSections += it },
                         onSectionIndexChanged = { reports.sectionIndex = it },

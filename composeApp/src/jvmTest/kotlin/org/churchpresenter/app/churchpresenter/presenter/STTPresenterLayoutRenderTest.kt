@@ -50,7 +50,10 @@ class STTPresenterLayoutRenderTest {
     ) {
         val left = onNodeWithText("Grace and peace", substring = true).fetchSemanticsNode().boundsInRoot
         val right = onNodeWithText("Gnade und Frieden", substring = true).fetchSemanticsNode().boundsInRoot
-        assertTrue(left.left < right.left, "side-by-side must place transcription left of translation, was $left vs $right")
+        assertTrue(
+            left.left < right.left,
+            "side-by-side must place transcription left of translation, was $left vs $right",
+        )
     }
 
     @Test
@@ -61,7 +64,10 @@ class STTPresenterLayoutRenderTest {
     ) {
         val transcriptionBounds = onNodeWithText("Grace and peace", substring = true).fetchSemanticsNode().boundsInRoot
         val translationBounds = onNodeWithText("Gnade und Frieden", substring = true).fetchSemanticsNode().boundsInRoot
-        assertTrue(translationBounds.left < transcriptionBounds.left, "the inverse layout must place the translation first, was $translationBounds vs $transcriptionBounds")
+        assertTrue(
+            translationBounds.left < transcriptionBounds.left,
+            "the inverse layout must place the translation first, was $translationBounds vs $transcriptionBounds",
+        )
     }
 
     @Test
@@ -72,7 +78,11 @@ class STTPresenterLayoutRenderTest {
     ) {
         val transcriptionBounds = onNodeWithText("Grace and peace", substring = true).fetchSemanticsNode().boundsInRoot
         val translationBounds = onNodeWithText("Gnade und Frieden", substring = true).fetchSemanticsNode().boundsInRoot
-        assertTrue(translationBounds.top < transcriptionBounds.top, "the inverse layout must place the translation above the transcription, was $translationBounds vs $transcriptionBounds")
+        assertTrue(
+            translationBounds.top < transcriptionBounds.top,
+                "the inverse layout must place the translation above the transcription, was $translationBounds vs " +
+                    "$transcriptionBounds",
+        )
     }
 
     @Test
@@ -88,7 +98,10 @@ class STTPresenterLayoutRenderTest {
         STTSettings(displayMode = "translate", dripFeedEnabled = false),
         transcription = listOf(segment("Peace be with you", id = 1)),
     ) {
-        onNodeWithText("Peace be with you", substring = true).assertExists("translate mode with no translation yet must fall back to the transcription")
+        onNodeWithText(
+            "Peace be with you",
+            substring = true,
+        ).assertExists("translate mode with no translation yet must fall back to the transcription")
     }
 
     @Test
@@ -96,6 +109,9 @@ class STTPresenterLayoutRenderTest {
         STTSettings(displayMode = "transcribe", dripFeedEnabled = false),
         translation = listOf(segment("Und mit deinem Geiste", id = 2)),
     ) {
-        onNodeWithText("Und mit deinem Geiste", substring = true).assertExists("a translation arriving before the transcription must still be shown")
+        onNodeWithText(
+            "Und mit deinem Geiste",
+            substring = true,
+        ).assertExists("a translation arriving before the transcription must still be shown")
     }
 }

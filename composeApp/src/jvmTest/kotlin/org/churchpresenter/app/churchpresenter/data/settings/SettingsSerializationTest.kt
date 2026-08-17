@@ -197,11 +197,26 @@ class SettingsSerializationTest {
     @Test
     fun `every settings enum entry round-trips through json`() {
         for (v in BibleSyncMode.entries) assertEquals(v, json.decodeFromString<BibleSyncMode>(json.encodeToString(v)))
-        for (v in InstanceLinkRole.entries) assertEquals(v, json.decodeFromString<InstanceLinkRole>(json.encodeToString(v)))
-        for (v in StageMonitorContentType.entries) assertEquals(v, json.decodeFromString<StageMonitorContentType>(json.encodeToString(v)))
-        for (v in StageMonitorZone.entries) assertEquals(v, json.decodeFromString<StageMonitorZone>(json.encodeToString(v)))
-        for (v in StageMonitorStyleZone.entries) assertEquals(v, json.decodeFromString<StageMonitorStyleZone>(json.encodeToString(v)))
-        for (v in MetronomePosition.entries) assertEquals(v, json.decodeFromString<MetronomePosition>(json.encodeToString(v)))
+        for (v in InstanceLinkRole.entries) assertEquals(
+            v,
+            json.decodeFromString<InstanceLinkRole>(json.encodeToString(v)),
+        )
+        for (v in StageMonitorContentType.entries) assertEquals(
+            v,
+            json.decodeFromString<StageMonitorContentType>(json.encodeToString(v)),
+        )
+        for (v in StageMonitorZone.entries) assertEquals(
+            v,
+            json.decodeFromString<StageMonitorZone>(json.encodeToString(v)),
+        )
+        for (v in StageMonitorStyleZone.entries) assertEquals(
+            v,
+            json.decodeFromString<StageMonitorStyleZone>(json.encodeToString(v)),
+        )
+        for (v in MetronomePosition.entries) assertEquals(
+            v,
+            json.decodeFromString<MetronomePosition>(json.encodeToString(v)),
+        )
     }
 
     /** Invokes component1()..componentN() so the data class's generated destructuring accessors are

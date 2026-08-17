@@ -25,7 +25,12 @@ class QATabSubmitterInfoTest {
         qaTab(
             seed = {
                 toggleSession()
-                submitQuestion("Where is the nursery?", clientIp = "10.0.0.1", cooldownSeconds = 0, deviceId = "pew-tablet")
+                submitQuestion(
+                    "Where is the nursery?",
+                    clientIp = "10.0.0.1",
+                    cooldownSeconds = 0,
+                    deviceId = "pew-tablet",
+                )
             },
         ) { _, _, _ ->
             // The row shows the question and nothing else: a device id is reported by the phone
@@ -44,7 +49,13 @@ class QATabSubmitterInfoTest {
         qaTab(
             seed = {
                 toggleSession()
-                submitQuestion("Where is the nursery?", name = "Sam", clientIp = "10.0.0.1", cooldownSeconds = 0, deviceId = "pew-tablet")
+                submitQuestion(
+                    "Where is the nursery?",
+                    name = "Sam",
+                    clientIp = "10.0.0.1",
+                    cooldownSeconds = 0,
+                    deviceId = "pew-tablet",
+                )
             },
         ) { _, _, _ ->
             assertTrue(showsContainingText("Sam"), renderedText().toString())

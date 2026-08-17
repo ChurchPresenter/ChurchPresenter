@@ -34,7 +34,11 @@ class DictionaryViewModelTest {
         every { anyConstructed<InterlinearRepository>().getVersesForEntry(any()) } returns emptyList()
         every { anyConstructed<InterlinearRepository>().getBooksWithGreekData() } returns emptyList()
         every { anyConstructed<InterlinearRepository>().getBooksWithHebrewData() } returns emptyList()
-        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(any(), any(), any()) } returns emptySet()
+        every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(
+            any(),
+            any(),
+            any(),
+        ) } returns emptySet()
     }
 
     @AfterTest

@@ -63,7 +63,10 @@ class ScheduleTabRowLayoutTest {
 
     @Test
     fun `the title is vertically centred at Compact`() =
-        scheduleTab(itemZoomPercent = COMPACT, seed = { addSong(songNumber = 42, title = "Amazing Grace", songbook = "Hymnal") }) { _, _ ->
+        scheduleTab(
+            itemZoomPercent = COMPACT,
+            seed = { addSong(songNumber = 42, title = "Amazing Grace", songbook = "Hymnal") },
+        ) { _, _ ->
             // The regression: with the action buttons taller than the single title line, the
             // stretched content column left the title at the top of its own card.
             assertTitleOnCentreline("Compact")
@@ -72,7 +75,10 @@ class ScheduleTabRowLayoutTest {
     @Test
     fun `the type chip stays on the card's centreline at every density`() {
         listOf(COMPACT to "Compact", NORMAL to "Normal", DETAILED to "Detailed").forEach { (percent, name) ->
-            scheduleTab(itemZoomPercent = percent, seed = { addSong(songNumber = 42, title = "Amazing Grace", songbook = "Hymnal") }) { _, _ ->
+            scheduleTab(
+                itemZoomPercent = percent,
+                seed = { addSong(songNumber = 42, title = "Amazing Grace", songbook = "Hymnal") },
+            ) { _, _ ->
                 // The chip is the row's own alignment made visible: it is laid out
                 // `CenterVertically`, so if it drifts off the card's centre the row's height is
                 // coming from somewhere other than its content -- which is exactly what the
@@ -93,7 +99,10 @@ class ScheduleTabRowLayoutTest {
     @Test
     fun `the hover action strip covers the whole card at every density`() {
         listOf(COMPACT to "Compact", NORMAL to "Normal", DETAILED to "Detailed").forEach { (percent, name) ->
-            scheduleTab(itemZoomPercent = percent, seed = { addSong(songNumber = 42, title = "Amazing Grace", songbook = "Hymnal") }) { _, _ ->
+            scheduleTab(
+                itemZoomPercent = percent,
+                seed = { addSong(songNumber = 42, title = "Amazing Grace", songbook = "Hymnal") },
+            ) { _, _ ->
                 val card = onNodeWithTag(SCHEDULE_ROW_CARD_TAG).fetchSemanticsNode().boundsInRoot
                 val actions = onNodeWithTag(SCHEDULE_ROW_ACTIONS_TAG).fetchSemanticsNode().boundsInRoot
 
@@ -118,7 +127,10 @@ class ScheduleTabRowLayoutTest {
     @Test
     fun `every action button sits on the card's centreline`() {
         listOf(COMPACT to "Compact", NORMAL to "Normal", DETAILED to "Detailed").forEach { (percent, name) ->
-            scheduleTab(itemZoomPercent = percent, seed = { addSong(songNumber = 42, title = "Amazing Grace", songbook = "Hymnal") }) { _, _ ->
+            scheduleTab(
+                itemZoomPercent = percent,
+                seed = { addSong(songNumber = 42, title = "Amazing Grace", songbook = "Hymnal") },
+            ) { _, _ ->
                 // The play button used to be 30dp against the others' 27dp, and Row's
                 // CenterVertically did not rescue the mix: they came out sharing a bottom edge, so
                 // the four small ones sat ~1.5dp low. Visible as a wobble along the strip at
@@ -178,7 +190,10 @@ class ScheduleTabRowLayoutTest {
             val above = text.top - card.top
             val below = card.bottom - text.bottom
 
-            assertTrue(abs(above - below) <= 1f, "the band must sit evenly around its text ($above above, $below below)")
+            assertTrue(
+                abs(above - below) <= 1f,
+                "the band must sit evenly around its text ($above above, $below below)",
+            )
         }
 
     // ── One note per item ───────────────────────────────────────────────────────

@@ -76,7 +76,12 @@ class AtemClientProtocolTest {
 
     @Test
     fun `buildUploadRequestPayload lays out ids, a big-endian uint32 size, and write mode`() {
-        val p = atem.buildUploadRequestPayload(transferId = 0x1111, storeId = 0x2222, frameIndex = 0x0003, size = 0x00ABCDEF)
+        val p = atem.buildUploadRequestPayload(
+            transferId = 0x1111,
+            storeId = 0x2222,
+            frameIndex = 0x0003,
+            size = 0x00ABCDEF,
+        )
         assertEquals(16, p.size)
         assertEquals(0x1111, atem.u16(p, 0))
         assertEquals(0x2222, atem.u16(p, 2))

@@ -80,7 +80,11 @@ class PresenterOutputContentTest {
             setDisplayedVerses(listOf(verse))
             setDisplayedLyricSection(section)
         }
-        setContent(ComposeContent(Presenting.NONE, ScreenAssignment(bibleMode = Constants.SONG_LANG_BOTH, songMode = Constants.SONG_LANG_BOTH), manager))
+        setContent(ComposeContent(
+            Presenting.NONE,
+            ScreenAssignment(bibleMode = Constants.SONG_LANG_BOTH, songMode = Constants.SONG_LANG_BOTH),
+            manager,
+        ))
         onNodeWithText("For God so loved the world", substring = true).assertDoesNotExist()
         onNodeWithText("Amazing grace how sweet", substring = true).assertDoesNotExist()
     }

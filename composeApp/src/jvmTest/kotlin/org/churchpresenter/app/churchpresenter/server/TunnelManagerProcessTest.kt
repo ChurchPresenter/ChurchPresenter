@@ -77,7 +77,9 @@ class TunnelManagerProcessTest {
             if (condition()) return
             Thread.sleep(20)
         }
-        throw AssertionError("timed out after ${timeoutMs}ms waiting for $what (status was ${created.lastOrNull()?.status?.value})")
+        throw AssertionError(
+            "timed out after ${timeoutMs}ms waiting for $what (status was ${created.lastOrNull()?.status?.value})",
+        )
     }
 
     private fun skipOnWindows() {

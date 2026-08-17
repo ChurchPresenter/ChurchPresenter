@@ -221,7 +221,10 @@ class PresenterScreenTest {
             backgroundSettings = BackgroundSettings(defaultBackgroundType = Constants.BACKGROUND_TRANSPARENT),
         )
         val pixel = sample(settings, transparentBlanking = true, underneath = Color.Red)
-        assertTrue(pixel.red > 0.9f, "the transparent type must let the layer beneath show through in OBS scenes, got $pixel")
+        assertTrue(
+            pixel.red > 0.9f,
+            "the transparent type must let the layer beneath show through in OBS scenes, got $pixel",
+        )
     }
 
     // ── Image background ─────────────────────────────────────────────────────────

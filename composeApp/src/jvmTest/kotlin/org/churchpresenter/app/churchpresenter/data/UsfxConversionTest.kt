@@ -132,7 +132,8 @@ class UsfxConversionTest {
 
     @Test
     fun `line wrapping in the source does not survive into the verse`() {
-        val text = firstVerseText("<book id=\"GEN\"><c id=\"1\"/><v id=\"1\"/>In the\n  beginning\tGod\ncreated.<ve/></book>")
+        val text =
+            firstVerseText("<book id=\"GEN\"><c id=\"1\"/><v id=\"1\"/>In the\n  beginning\tGod\ncreated.<ve/></book>")
 
         assertEquals("In the beginning God created.", text)
     }

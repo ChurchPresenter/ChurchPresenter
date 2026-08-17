@@ -26,7 +26,13 @@ import kotlin.test.assertTrue
 class AddScheduleItemTest {
 
     private fun song(number: Int = 42) =
-        ScheduleItem.SongItem(id = "s", songNumber = number, title = "Amazing Grace", songbook = "Hymnal", songId = "sid")
+        ScheduleItem.SongItem(
+            id = "s",
+            songNumber = number,
+            title = "Amazing Grace",
+            songbook = "Hymnal",
+            songId = "sid",
+        )
 
     private fun bibleVerse() = ScheduleItem.BibleVerseItem(
         id = "b", bookName = "John", chapter = 3, verseNumber = 16,

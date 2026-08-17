@@ -79,7 +79,9 @@ class StageMonitorSettingsTabRoutingTest {
         }
         assertEquals(StageMonitorZone.BOTTOM_LEFT, saved, "the pick must have been stored to be re-rendered")
 
-        stageMonitorTab(initial = stageSettings { copy(contentZones = contentZones + (StageMonitorContentType.MEDIA to saved)) }) { _ ->
+        stageMonitorTab(
+            initial = stageSettings { copy(contentZones = contentZones + (StageMonitorContentType.MEDIA to saved)) },
+        ) { _ ->
             assertRoutingShows(ContentLabel.of(StageMonitorContentType.MEDIA), ZoneLabel.BOTTOM_LEFT)
         }
     }

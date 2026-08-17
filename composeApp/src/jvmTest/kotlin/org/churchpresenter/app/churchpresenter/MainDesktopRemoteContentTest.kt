@@ -18,23 +18,39 @@ class MainDesktopRemoteContentTest {
 
     @Test
     fun `an open deck with slides is published`() {
-        assertTrue(shouldPublishPresentation(remoteControlEnabled = true, hasSelectedPresentation = true, slideCount = 12))
+        assertTrue(shouldPublishPresentation(
+            remoteControlEnabled = true,
+            hasSelectedPresentation = true,
+            slideCount = 12,
+        ))
     }
 
     @Test
     fun `nothing is published while remote control is off`() {
-        assertFalse(shouldPublishPresentation(remoteControlEnabled = false, hasSelectedPresentation = true, slideCount = 12))
+        assertFalse(shouldPublishPresentation(
+            remoteControlEnabled = false,
+            hasSelectedPresentation = true,
+            slideCount = 12,
+        ))
     }
 
     @Test
     fun `nothing is published when no deck is open`() {
-        assertFalse(shouldPublishPresentation(remoteControlEnabled = true, hasSelectedPresentation = false, slideCount = 12))
+        assertFalse(shouldPublishPresentation(
+            remoteControlEnabled = true,
+            hasSelectedPresentation = false,
+            slideCount = 12,
+        ))
     }
 
     @Test
     fun `a deck with no slides is not published`() {
         // A phone handed an empty slide list has nothing it could navigate.
-        assertFalse(shouldPublishPresentation(remoteControlEnabled = true, hasSelectedPresentation = true, slideCount = 0))
+        assertFalse(shouldPublishPresentation(
+            remoteControlEnabled = true,
+            hasSelectedPresentation = true,
+            slideCount = 0,
+        ))
     }
 
     // ── Taking the output ───────────────────────────────────────────────────────

@@ -133,7 +133,11 @@ class SourcePropertiesImageTest {
             onNodeWithContentDescription("Browse").performClick()
             waitForIdle()
 
-            assertEquals("/tmp/logo.png", (get() as SceneSource.ImageSource).filePath, "canceling must not touch the stored path")
+            assertEquals(
+                "/tmp/logo.png",
+                (get() as SceneSource.ImageSource).filePath,
+                "canceling must not touch the stored path",
+            )
         }
     }
 

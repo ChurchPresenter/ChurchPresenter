@@ -93,7 +93,11 @@ class PictureDecoderTest {
         // The same container carrying video is not a picture and must not reach the HEIC decoder.
         assertTrue(!PictureDecoder.isHeif(ftyp("isom")))
         assertTrue(!PictureDecoder.isHeif(ByteArray(4)))
-        assertTrue(!PictureDecoder.isHeif(image().let { ImageIO.write(it, "png", File(folder, "p.png")); File(folder, "p.png").readBytes() }))
+        assertTrue(!PictureDecoder.isHeif(image().let { ImageIO.write(
+            it,
+            "png",
+            File(folder, "p.png"),
+        ); File(folder, "p.png").readBytes() }))
     }
 
     private fun ftyp(brand: String): ByteArray =

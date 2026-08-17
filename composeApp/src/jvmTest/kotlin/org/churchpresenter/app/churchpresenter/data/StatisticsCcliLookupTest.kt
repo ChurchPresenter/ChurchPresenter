@@ -69,7 +69,12 @@ class StatisticsCcliLookupTest {
         )
     }
 
-    private fun sung(title: String, number: Int = 1, songbook: String = "Hymnal", author: String = ""): StatisticsManager =
+    private fun sung(
+        title: String,
+        number: Int = 1,
+        songbook: String = "Hymnal",
+        author: String = "",
+    ): StatisticsManager =
         StatisticsManager().also { it.recordSongDisplay("$songbook::$number", number, title, songbook, author) }
 
     private fun ccliOf(stats: StatisticsManager, title: String): String =

@@ -64,7 +64,13 @@ class PresenterManagerContentTest {
     @Test
     fun `loading a lower third records its preset and pause settings`() {
         val pm = manager()
-        pm.setLottieContent(json = "", pauseAtFrame = true, pauseFrame = 30f, pauseDurationMs = 4_000, presetName = "Speaker Name")
+        pm.setLottieContent(
+            json = "",
+            pauseAtFrame = true,
+            pauseFrame = 30f,
+            pauseDurationMs = 4_000,
+            presetName = "Speaker Name",
+        )
 
         assertEquals("Speaker Name", pm.currentLowerThirdName.value)
         assertEquals(listOf(Presenting.LOWER_THIRD), reported)
@@ -97,7 +103,13 @@ class PresenterManagerContentTest {
         // them, so a value recorded but not exposed stops the hold happening at all.
         val pm = manager()
 
-        pm.setLottieContent(json = "{}", pauseAtFrame = true, pauseFrame = 42.5f, pauseDurationMs = 3_500, presetName = "Welcome")
+        pm.setLottieContent(
+            json = "{}",
+            pauseAtFrame = true,
+            pauseFrame = 42.5f,
+            pauseDurationMs = 3_500,
+            presetName = "Welcome",
+        )
 
         assertTrue(pm.lottiePauseAtFrame.value)
         assertEquals(42.5f, pm.lottiePauseFrame.value)
@@ -112,7 +124,13 @@ class PresenterManagerContentTest {
         // only, so it has to be blank rather than carry the previous preset's name into the
         // live-state broadcast.
         val pm = manager()
-        pm.setLottieContent(json = "{}", pauseAtFrame = true, pauseFrame = 1f, pauseDurationMs = 100, presetName = "Named")
+        pm.setLottieContent(
+            json = "{}",
+            pauseAtFrame = true,
+            pauseFrame = 1f,
+            pauseDurationMs = 100,
+            presetName = "Named",
+        )
 
         pm.setLottieContent(json = "{}", pauseAtFrame = false, pauseFrame = 0f, pauseDurationMs = 0)
 

@@ -23,6 +23,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.utils.Constants
 
 /**
  * What the server does when a presentation lands in the schedule: load the deck, rasterise every
@@ -168,7 +169,7 @@ class CompanionServerPresentationRenderTest {
      */
     private fun deck(scheduleItemId: String): Pair<HttpStatusCode, String> = runBlocking {
         val response = http().get(
-            "http://127.0.0.1:$PORT${org.churchpresenter.app.churchpresenter.utils.Constants.ENDPOINT_PRESENTATIONS}/$scheduleItemId"
+            "http://127.0.0.1:$PORT${Constants.ENDPOINT_PRESENTATIONS}/$scheduleItemId"
         )
         response.status to response.bodyAsText()
     }
@@ -206,7 +207,9 @@ class CompanionServerPresentationRenderTest {
 
         val id = file.absolutePath.hashCode().toUInt().toString(16)
         val response = runBlocking {
-            http().get("http://127.0.0.1:$PORT${org.churchpresenter.app.churchpresenter.utils.Constants.ENDPOINT_PRESENTATIONS}/$id/slides/0")
+            http().get(
+                "http://127.0.0.1:$PORT${Constants.ENDPOINT_PRESENTATIONS}/$id/slides/0",
+            )
         }
 
         assertEquals(HttpStatusCode.OK, response.status)

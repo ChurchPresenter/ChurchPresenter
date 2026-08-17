@@ -34,7 +34,11 @@ class PresentationPresenterDrawTest {
 
     @Test
     fun `a single full-frame layer fills the whole canvas when aspect ratios match`() {
-        val frame = presentationFrame(listOf(placedLayer(Color.Red, width = 100, height = 100)), frameWidthPx = 100, frameHeightPx = 100)
+        val frame = presentationFrame(
+            listOf(placedLayer(Color.Red, width = 100, height = 100)),
+            frameWidthPx = 100,
+            frameHeightPx = 100,
+        )
         val pixels = render(frame)
         assertColorAt(pixels, 20, 20, Color.Red)
         assertColorAt(pixels, 100, 100, Color.Red)
@@ -43,7 +47,11 @@ class PresentationPresenterDrawTest {
 
     @Test
     fun `a mismatched aspect ratio letterboxes with the black background`() {
-        val frame = presentationFrame(listOf(placedLayer(Color.Red, width = 100, height = 200)), frameWidthPx = 100, frameHeightPx = 200)
+        val frame = presentationFrame(
+            listOf(placedLayer(Color.Red, width = 100, height = 200)),
+            frameWidthPx = 100,
+            frameHeightPx = 200,
+        )
         val pixels = render(frame, boxSize = 200)
         assertColorAt(pixels, 25, 100, Color.Black)
         assertColorAt(pixels, 100, 100, Color.Red)

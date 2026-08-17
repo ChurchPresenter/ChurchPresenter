@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 
 /**
  * Drives the eight connection-level boxes on a card, plus the auto-connect switch.
@@ -96,9 +97,9 @@ class CompanionSatelliteSettingsTabFieldsTest {
     @Test
     fun `each device ID box stores into its own field`() {
         val cases = listOf(
-            SatLabel.TAB_DEVICE_ID to { c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.deviceId },
-            SatLabel.LEFT_DEVICE_ID to { c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.leftSidebarDeviceId },
-            SatLabel.RIGHT_DEVICE_ID to { c: org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings -> c.rightSidebarDeviceId },
+            SatLabel.TAB_DEVICE_ID to { c: CompanionSatelliteSettings -> c.deviceId },
+            SatLabel.LEFT_DEVICE_ID to { c: CompanionSatelliteSettings -> c.leftSidebarDeviceId },
+            SatLabel.RIGHT_DEVICE_ID to { c: CompanionSatelliteSettings -> c.rightSidebarDeviceId },
         )
         for ((caption, read) in cases) {
             satelliteTab(initial = satelliteSettings(distinct())) { get ->

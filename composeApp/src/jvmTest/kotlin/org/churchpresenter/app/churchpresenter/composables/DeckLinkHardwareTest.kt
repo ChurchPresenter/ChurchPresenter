@@ -215,7 +215,9 @@ class DeckLinkHardwareTest {
         try {
             val status = DeckLinkManager.getDeviceStatus(devices.first().index)
             if (status != null) {
-                println("[DeckLinkHardwareTest] Status: signalLocked=${status.signalLocked}, busy=${status.busy}, modeCode=${status.detectedModeCode}")
+                println(
+                    "[DeckLinkHardwareTest] Status: signalLocked=${status.signalLocked}, busy=${status.busy}, " +
+                        "modeCode=${status.detectedModeCode}")
             } else {
                 println("[DeckLinkHardwareTest] getDeviceStatus returned null")
             }

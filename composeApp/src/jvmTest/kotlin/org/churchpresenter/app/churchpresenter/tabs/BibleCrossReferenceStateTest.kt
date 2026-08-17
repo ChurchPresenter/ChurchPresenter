@@ -72,7 +72,10 @@ class BibleCrossReferenceStateTest {
 
             waitUntil("the column resolved") { state.rows.isNotEmpty() }
             assertEquals(listOf(45 to 5, 62 to 4), state.rows.map { it.bookId to it.chapter })
-            assertEquals(listOf(43, 3, 16), listOf(state.anchors.single().first, state.anchors.single().second, state.anchors.single().third))
+            assertEquals(
+                listOf(43, 3, 16),
+                listOf(state.anchors.single().first, state.anchors.single().second, state.anchors.single().third),
+            )
         }
     }
 

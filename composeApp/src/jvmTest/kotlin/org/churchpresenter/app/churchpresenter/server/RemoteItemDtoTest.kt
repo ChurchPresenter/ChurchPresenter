@@ -152,7 +152,8 @@ class RemoteItemDtoTest {
 
     @Test
     fun `a website is recognised by its url`() {
-        val item = assertIs<ScheduleItem.WebsiteItem>(parse("""{"url":"https://example.org","websiteTitle":"Giving"}"""))
+        val item =
+            assertIs<ScheduleItem.WebsiteItem>(parse("""{"url":"https://example.org","websiteTitle":"Giving"}"""))
 
         assertEquals("https://example.org", item.url)
         assertEquals("Giving", item.title)
@@ -170,20 +171,27 @@ class RemoteItemDtoTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `the routing order is fixed`() {
         // Each of these carries the fields of the type named AND of every type tested after it.
         val laterFields = """"folderPath":"/p","filePath":"/d","mediaUrl":"/m","strongsNumber":"G1",
                              "announcementText":"x","url":"https://example.org""""
 
         assertIs<ScheduleItem.SongItem>(parse("""{"songNumber":1,$laterFields}"""))
-        assertIs<ScheduleItem.BibleVerseItem>(parse("""{"bookName":"John","chapter":3,"verseNumber":16,$laterFields}"""))
+        assertIs<ScheduleItem.BibleVerseItem>(parse(
+            """{"bookName":"John","chapter":3,"verseNumber":16,$laterFields}""",
+        ))
         assertIs<ScheduleItem.PictureItem>(
-            parse("""{"folderPath":"/p","filePath":"/d","mediaUrl":"/m","strongsNumber":"G1","announcementText":"x","url":"u"}"""),
+            parse(
+                """{"folderPath":"/p","filePath":"/d","mediaUrl":"/m","strongsNumber":"G1","announcementText":"x","url":"u"}""",
+            ),
         )
         assertIs<ScheduleItem.PresentationItem>(
             parse("""{"filePath":"/d","mediaUrl":"/m","strongsNumber":"G1","announcementText":"x","url":"u"}"""),
         )
-        assertIs<ScheduleItem.MediaItem>(parse("""{"mediaUrl":"/m","strongsNumber":"G1","announcementText":"x","url":"u"}"""))
+        assertIs<ScheduleItem.MediaItem>(parse(
+            """{"mediaUrl":"/m","strongsNumber":"G1","announcementText":"x","url":"u"}""",
+        ))
         assertIs<ScheduleItem.DictionaryItem>(parse("""{"strongsNumber":"G1","announcementText":"x","url":"u"}"""))
         assertIs<ScheduleItem.AnnouncementItem>(parse("""{"announcementText":"x","url":"u"}"""))
         assertIs<ScheduleItem.WebsiteItem>(parse("""{"url":"https://example.org"}"""))
@@ -209,7 +217,10 @@ class RemoteItemDtoTest {
         // `type` is what the companion app *says* it is; the fields are what it actually sent.
         val item = parse("""{"type":"website","songNumber":42,"title":"Amazing Grace"}""")
 
-        assertIs<ScheduleItem.SongItem>(item, "routing on an unverified label would let one bad client corrupt a service")
+        assertIs<ScheduleItem.SongItem>(
+            item,
+            "routing on an unverified label would let one bad client corrupt a service",
+        )
     }
 
     // ── What is filled in when a field is left out ──────────────────────────────

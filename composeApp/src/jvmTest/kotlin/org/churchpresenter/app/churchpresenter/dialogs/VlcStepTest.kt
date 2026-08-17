@@ -31,7 +31,8 @@ class VlcStepTest {
         const val MISSING = "VLC was not found on this system"
         const val WRONG_ARCH = "Wrong VLC architecture installed"
         const val LOAD_FAILED = "VLC was found but failed to load"
-        const val WRONG_ARCH_DETAIL = "Your CPU architecture differs from the installed VLC. Download the correct build below."
+        const val WRONG_ARCH_DETAIL =
+            "Your CPU architecture differs from the installed VLC. Download the correct build below."
         const val LOAD_FAILED_DETAIL = "A VLC installation was detected, but it could not be loaded correctly."
         const val DOWNLOAD = "Download VLC"
         const val DOWNLOAD_SILICON = "Download VLC (Apple Silicon)"

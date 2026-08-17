@@ -30,7 +30,10 @@ class PlanningCenterAuthServerTest {
     /** True once something is actually accepting connections on 127.0.0.1:port. Used only to wait
      *  for a server to come *up*, where "a connection is accepted" is the signal we want. */
     private fun isListening(): Boolean =
-        runCatching { Socket().apply { connect(InetSocketAddress("127.0.0.1", Constants.PLANNING_CENTER_OAUTH_PORT), 200) }.close() }.isSuccess
+        runCatching { Socket().apply { connect(
+            InetSocketAddress("127.0.0.1", Constants.PLANNING_CENTER_OAUTH_PORT),
+            200,
+        ) }.close() }.isSuccess
 
     /**
      * Waits until the fixed port can actually be **bound**, and fails the test if it never can.
@@ -72,7 +75,9 @@ class PlanningCenterAuthServerTest {
         )
     }
 
-    private suspend fun awaitServerReady(resultDeferred: kotlinx.coroutines.Deferred<PlanningCenterAuthServer.CallbackResult>? = null) {
+    private suspend fun awaitServerReady(
+        resultDeferred: kotlinx.coroutines.Deferred<PlanningCenterAuthServer.CallbackResult>? = null,
+    ) {
         val deadline = System.currentTimeMillis() + 5_000
         while (System.currentTimeMillis() < deadline) {
             if (resultDeferred?.isCompleted == true) {

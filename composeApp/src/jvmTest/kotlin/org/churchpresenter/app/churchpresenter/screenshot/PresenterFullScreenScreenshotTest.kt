@@ -185,7 +185,10 @@ class PresenterFullScreenScreenshotTest {
 
     @Test
     fun `underlined lyrics`() =
-        shoot("song_underlined") { SongPresenter(lyricSection = song(), appSettings = songSettings(lyricsUnderline = true)) }
+        shoot("song_underlined") { SongPresenter(
+            lyricSection = song(),
+            appSettings = songSettings(lyricsUnderline = true),
+        ) }
 
     @Test
     fun `aligned left`() = shoot("song_align_left") {
@@ -331,7 +334,10 @@ class PresenterFullScreenScreenshotTest {
 
     @Test
     fun `on a colour`() = shoot("song_background_colour") {
-        SongPresenter(lyricSection = song(), appSettings = songBackground(BackgroundConfig(backgroundColor = "#1B2A5B")))
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = songBackground(BackgroundConfig(backgroundColor = "#1B2A5B")),
+        )
     }
 
     @Test
@@ -512,7 +518,10 @@ class PresenterFullScreenScreenshotTest {
 
     @Test
     fun `a long passage`() =
-        shoot("bible_long") { BiblePresenter(selectedVerses = listOf(verse(text = LONG_PASSAGE)), appSettings = bibleSettings()) }
+        shoot("bible_long") { BiblePresenter(
+            selectedVerses = listOf(verse(text = LONG_PASSAGE)),
+            appSettings = bibleSettings(),
+        ) }
 
     @Test
     fun `two translations`() = shoot("bible_two_translations") {

@@ -220,7 +220,11 @@ class PicturesTabScreenshotTest {
                 RecentPictureFolders.folders.clear()
                 RecentPictureFolders.pinned.clear()
                 RecentPictureFolders.folders.addAll(
-                    listOf(open.absolutePath, "/Volumes/Services/photos/Baptism", "/Volumes/Services/photos/Youth Camp"),
+                    listOf(
+                        open.absolutePath,
+                        "/Volumes/Services/photos/Baptism",
+                        "/Volumes/Services/photos/Youth Camp",
+                    ),
                 )
                 RecentPictureFolders.pinned.add("/Volumes/Services/photos/Every Week")
             }
