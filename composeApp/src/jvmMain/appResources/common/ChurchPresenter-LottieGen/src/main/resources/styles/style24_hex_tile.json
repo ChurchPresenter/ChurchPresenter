@@ -1,0 +1,520 @@
+{
+    "formatVersion": 1,
+    "id": "24",
+    "name": "Hex Tile",
+    "layout": {
+        "slots": [
+            {
+                "id": "logo",
+                "kind": "LOGO",
+                "gapAfterEm": 0.8,
+                "visibleWhen": [
+                    "LOGO_ENABLED"
+                ]
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.75
+            }
+        ],
+        "blockHeightEm": 3.5,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "logo",
+            "id": "logo",
+            "name": "Logo",
+            "visibleWhen": [
+                "LOGO_ENABLED"
+            ],
+            "placement": {
+                "slot": "logo",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": [
+                "NAME_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 56,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 84,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": [
+                "INFO_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 66,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 94,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "hexTop",
+            "name": "Hex Row Top",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": -0.3,
+                "offsetYEm": -1.28
+            },
+            "verticesEm": [
+                [
+                    0.44,
+                    0.0
+                ],
+                [
+                    0.22,
+                    0.381
+                ],
+                [
+                    -0.22,
+                    0.381
+                ],
+                [
+                    -0.44,
+                    0.0
+                ],
+                [
+                    -0.22,
+                    -0.381
+                ],
+                [
+                    0.22,
+                    -0.381
+                ]
+            ],
+            "closed": true,
+            "paint": {
+                "fill": {
+                    "role": "ACCENT",
+                    "alphaFactor": 0.28
+                },
+                "stroke": null
+            },
+            "repeat": {
+                "copies": 11,
+                "offsetXEm": 0.76,
+                "offsetYEm": 0.0,
+                "fadeOut": true,
+                "fitWidthTo": "TEXT_BLOCK"
+            },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 4,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 52,
+                            "values": [
+                                118
+                            ]
+                        },
+                        {
+                            "pct": 70,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "ROTATION",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                -70
+                            ]
+                        },
+                        {
+                            "pct": 4,
+                            "values": [
+                                -70
+                            ]
+                        },
+                        {
+                            "pct": 60,
+                            "values": [
+                                0
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "hexBottom",
+            "name": "Hex Row Bottom",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 0.08,
+                "offsetYEm": 1.28
+            },
+            "verticesEm": [
+                [
+                    0.44,
+                    0.0
+                ],
+                [
+                    0.22,
+                    0.381
+                ],
+                [
+                    -0.22,
+                    0.381
+                ],
+                [
+                    -0.44,
+                    0.0
+                ],
+                [
+                    -0.22,
+                    -0.381
+                ],
+                [
+                    0.22,
+                    -0.381
+                ]
+            ],
+            "closed": true,
+            "paint": {
+                "fill": {
+                    "role": "ACCENT",
+                    "alphaFactor": 0.18
+                },
+                "stroke": null
+            },
+            "repeat": {
+                "copies": 11,
+                "offsetXEm": 0.76,
+                "offsetYEm": 0.0,
+                "fadeOut": true,
+                "fitWidthTo": "TEXT_BLOCK"
+            },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 16,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 64,
+                            "values": [
+                                118
+                            ]
+                        },
+                        {
+                            "pct": 82,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "ROTATION",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                70
+                            ]
+                        },
+                        {
+                            "pct": 16,
+                            "values": [
+                                70
+                            ]
+                        },
+                        {
+                            "pct": 72,
+                            "values": [
+                                0
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "hexMark",
+            "name": "Hex Mark",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": -0.95
+            },
+            "verticesEm": [
+                [
+                    0.44,
+                    0.0
+                ],
+                [
+                    0.22,
+                    0.381
+                ],
+                [
+                    -0.22,
+                    0.381
+                ],
+                [
+                    -0.44,
+                    0.0
+                ],
+                [
+                    -0.22,
+                    -0.381
+                ],
+                [
+                    0.22,
+                    -0.381
+                ]
+            ],
+            "closed": true,
+            "paint": {
+                "fill": null,
+                "stroke": {
+                    "role": "ACCENT",
+                    "width": {
+                        "type": "em",
+                        "em": 0.07
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 24,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 72,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": [
+                "BG_ENABLED"
+            ],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": {
+                "type": "contentDerived",
+                "padXEm": 1.2,
+                "padYEm": 0.75
+            },
+            "corner": {
+                "type": "fromConfig",
+                "factor": 0.5
+            },
+            "borderFromConfig": true,
+            "growFrom": "ALIGN_EDGE",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        },
+                        {
+                            "pct": 46,
+                            "values": [
+                                1,
+                                1
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -13,24 +13,26 @@ This is a Kotlin Multiplatform project targeting Desktop (JVM).
 
 ## 🚀 Getting Started
 
-This project uses Git submodules. Clone with:
+Clone the repository — there are no submodules, so a plain clone is everything you need:
 ```shell
-git clone --recurse-submodules https://github.com/ChurchPresenter/ChurchPresenter
+git clone https://github.com/ChurchPresenter/ChurchPresenter
 ```
 
-If you already cloned without submodules, run:
-```shell
-git submodule update --init --recursive
-```
+The six sub-builds under `composeApp/src/jvmMain/appResources/common/` live in this repository as
+ordinary directories. Each keeps its own Gradle wrapper and test suite, and their sources are
+compiled into the main app via `kotlin.srcDir`:
 
-To pull the latest changes for all submodules:
-```shell
-git submodule update --remote --merge
-```
-
-> This will include [ChurchPresenter-LottieGen](https://github.com/ChurchPresenter/ChurchPresenter-LottieGen), a standalone Compose Desktop app for generating animated lower-third overlays as Lottie JSON files. Its source is compiled as part of the main app. Located at `composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen`.
+> **ChurchPresenter-LottieGen** — a standalone Compose Desktop app for generating animated lower-third overlays as Lottie JSON files, launched from the Lower Third settings.
 >
-> It also includes [ChurchPresenter-Converter](https://github.com/ChurchPresenter/ChurchPresenter-Converter), a song/bible format converter built with Compose Desktop. Its source is compiled as part of the main app and accessible from the Help menu. Located at `composeApp/src/jvmMain/appResources/common/ChurchPresenter-Converter`.
+> **ChurchPresenter-Converter** — a song/bible format converter built with Compose Desktop, accessible from the Help menu.
+>
+> **ChurchPresenter-PresentationEngine** — PPTX/PPT/Keynote/PDF parsing, timing and animation.
+>
+> **ChurchPresenter-BLE** — the Bible Lookup Engine, speech-to-reference detection.
+>
+> **ChurchPresenter-CompanionSatellite** — a pure-Kotlin Bitfocus Companion Satellite client.
+>
+> **ChurchPresenter-Cross** — the crossword puzzle authoring tool and its encoded puzzles.
 
 
 ---

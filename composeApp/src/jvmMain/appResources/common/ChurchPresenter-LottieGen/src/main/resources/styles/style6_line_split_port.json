@@ -1,0 +1,223 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Line Split (Style 6 port)",
+    "layout": {
+        "slots": [
+            {
+                "id": "logo",
+                "kind": "LOGO",
+                "gapAfterEm": 1.0,
+                "visibleWhen": ["LOGO_ENABLED"]
+            },
+            {
+                "id": "text",
+                "kind": "TEXT"
+            }
+        ],
+        "blockHeightEm": 3.5,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "text",
+            "id": "name_side",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": -0.75,
+                "alignOverrides": {
+                    "center": { "hidden": true }
+                }
+            },
+            "animator": {
+                "kind": "SEQUENTIAL_REVEAL",
+                "startPct": 20.0,
+                "endPct": 60.0,
+                "posOffsetEm": 0.96
+            }
+        },
+        {
+            "type": "text",
+            "id": "name_center",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": -0.75,
+                "alignOverrides": {
+                    "left": { "hidden": true },
+                    "right": { "hidden": true }
+                }
+            },
+            "animator": {
+                "kind": "SEQUENTIAL_REVEAL",
+                "startPct": 20.0,
+                "endPct": 60.0,
+                "posOffsetEm": 0.96
+            }
+        },
+        {
+            "type": "text",
+            "id": "info_side",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 1.2325,
+                "alignOverrides": {
+                    "center": { "hidden": true }
+                }
+            },
+            "animator": {
+                "kind": "SEQUENTIAL_REVEAL",
+                "startPct": 35.0,
+                "endPct": 75.0,
+                "posOffsetEm": -0.72
+            }
+        },
+        {
+            "type": "text",
+            "id": "info_center",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 1.2325,
+                "alignOverrides": {
+                    "left": { "hidden": true },
+                    "right": { "hidden": true }
+                }
+            },
+            "animator": {
+                "kind": "SEQUENTIAL_REVEAL",
+                "startPct": 35.0,
+                "endPct": 75.0,
+                "posOffsetEm": -0.72
+            }
+        },
+        {
+            "type": "logo",
+            "id": "logo_side",
+            "name": "Logo",
+            "visibleWhen": ["LOGO_ENABLED"],
+            "placement": {
+                "slot": "logo",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 0.05,
+                "alignOverrides": {
+                    "center": { "hidden": true }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 25.0, "values": [100.0] },
+                        { "pct": 100.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "logo",
+            "id": "logo_center",
+            "name": "Logo",
+            "visibleWhen": ["LOGO_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": -0.8916666666666667,
+                "offsetYEm": 0.05,
+                "alignOverrides": {
+                    "left": { "hidden": true },
+                    "right": { "hidden": true }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 25.0, "values": [100.0] },
+                        { "pct": 100.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "rect",
+            "id": "line_side",
+            "name": "Line",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 0.39166666666666666,
+                "offsetYEm": 0.05,
+                "alignOverrides": {
+                    "center": { "hidden": true }
+                }
+            },
+            "size": { "type": "textWrap", "field": "NAME", "padXEm": 0.6, "padYEm": -0.4 },
+            "paint": { "fill": { "role": "BORDER" } },
+            "corner": { "type": "none" },
+            "growFrom": "ALIGN_EDGE",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 40.0, "values": [1.0, 1.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "rect",
+            "id": "line_center",
+            "name": "Line",
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 0.05,
+                "alignOverrides": {
+                    "left": { "hidden": true },
+                    "right": { "hidden": true }
+                }
+            },
+            "size": { "type": "textWrap", "field": "NAME", "padXEm": 0.6, "padYEm": -0.4 },
+            "paint": { "fill": { "role": "BORDER" } },
+            "corner": { "type": "none" },
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 40.0, "values": [1.0, 1.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

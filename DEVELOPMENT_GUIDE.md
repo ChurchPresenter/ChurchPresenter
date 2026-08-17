@@ -235,7 +235,7 @@ object Constants {
 - Singular/plural verse API in PresenterManager — convenience accessors
 - `System.err.println` in VideoPlayer/WebsitePresenter/LowerThirdSettingsTab — error diagnostics for VLC/JCEF/WebView issues
 - Emoji strings — not translatable, no benefit to moving to resources
-- `println` in the PresentationEngine submodule's `DumpKeynote.kt`/`DumpTiming.kt`/`MakeSampleDeck.kt` — these are CLI diagnostic tools (`dumpKeynote`/`dumpTiming`/`makeSampleDeck` gradle tasks) whose entire purpose is printing to stdout, not stray debug output
+- `println` in the PresentationEngine module's `DumpKeynote.kt`/`DumpTiming.kt`/`MakeSampleDeck.kt` — these are CLI diagnostic tools (`dumpKeynote`/`dumpTiming`/`makeSampleDeck` gradle tasks) whose entire purpose is printing to stdout, not stray debug output
 - Hardcoded `"%"` suffix on dynamic values (~14 sites across `SourcePropertiesPanel.kt`,
   `BackgroundSettingsTab.kt`, `QARemoteDialog.kt`, `STTSettingsDialog.kt`, `DictionarySettingsTab.kt`,
   `MediaTab.kt`, `UpdateAvailableDialog.kt`) — **kept because the percent sign is identical across all
@@ -431,9 +431,9 @@ protection still stands, so that only buys you a commit you will have to move on
 
 ### Running the tests, per platform
 
-The app's own suite is `./gradlew :composeApp:check`. It needs **JDK 21** and the submodules
-checked out (`git clone --recurse-submodules`, or `git submodule update --init --recursive`) —
-`composeApp` mounts their sources via `kotlin.srcDir` and will not compile without them.
+The app's own suite is `./gradlew :composeApp:check`. It needs **JDK 21** and nothing else — the
+six sub-builds live in this repository as ordinary directories, so a plain `git clone` gives you
+everything `composeApp` mounts via `kotlin.srcDir`.
 
 Beyond that there is nothing platform-specific to install:
 

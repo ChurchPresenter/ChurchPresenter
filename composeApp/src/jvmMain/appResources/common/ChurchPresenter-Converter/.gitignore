@@ -1,0 +1,11 @@
+.gradle/
+build/
+.idea/
+*.iml
+.kotlin/
+local.properties
+sample-songs/
+sample-bible/
+CLAUDE.md
+.claude/settings.local.json
+*.log

@@ -61,8 +61,12 @@ main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
 ### Sub-builds
 Five module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
 have their own Gradle builds and test suites, under `src/jvmMain/appResources/common/`:
-`ChurchPresenter-PresentationEngine` (committed directly, NOT a git submodule), `-BLE`,
-`-LottieGen`, `-Converter`, `-CompanionSatellite`.
+`ChurchPresenter-PresentationEngine`, `-BLE`, `-LottieGen`, `-Converter`, `-CompanionSatellite`.
+A sixth, `-Cross`, is not mounted — `syncCrosswordFiles` copies its `encoded/*.xwp` into
+composeResources at build time.
+
+**None of these are git submodules.** All six are committed directly into this repository, so a
+plain `git clone` is enough and a change spanning the app and a module is one commit.
 
 - **When touching module code, compile BOTH builds**: `./gradlew compileKotlinJvm` at the repo root
   AND `sh gradlew build` inside the module. The main build is more permissive and will accept code
@@ -255,8 +259,8 @@ JAVA_TOOL_OPTIONS="-Dchurchpresenter.singleInstancePort=47633 -Duser.home=$HOME/
 ## Tests
 
 `composeApp/src/jvmTest/` — run with `./gradlew :composeApp:check`.
-CI is `.github/workflows/test.yml` (push/PR); it runs these plus the module suites and requires
-`submodules: true`, or the app won't compile.
+CI is `.github/workflows/test.yml` (push/PR); it runs these plus each module's own suite, invoked
+one at a time through the module's own wrapper.
 
 When writing tests here:
 - **Unreachable code is a refactor, not a dead end.** When a class is uncovered because it needs a

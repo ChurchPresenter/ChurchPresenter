@@ -1,0 +1,332 @@
+{
+    "formatVersion": 1,
+    "id": "41",
+    "name": "Rising Band",
+    "layout": {
+        "slots": [
+            {
+                "id": "padStart",
+                "kind": "FIXED",
+                "widthEm": 1.4
+            },
+            {
+                "id": "logo",
+                "kind": "LOGO",
+                "gapAfterEm": 0.9,
+                "visibleWhen": [
+                    "LOGO_ENABLED"
+                ]
+            },
+            {
+                "id": "text",
+                "kind": "TEXT"
+            },
+            {
+                "id": "padEnd",
+                "kind": "FIXED",
+                "widthEm": 1.4
+            }
+        ],
+        "blockHeightEm": 6.2,
+        "centerSingleLine": true
+    },
+    "elements": [
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": [
+                "NAME_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 44,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 76,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0.0,
+                                0.55
+                            ]
+                        },
+                        {
+                            "pct": 44,
+                            "values": [
+                                0.0,
+                                0.55
+                            ]
+                        },
+                        {
+                            "pct": 80,
+                            "values": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": [
+                "INFO_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 56,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 90,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0.0,
+                                0.55
+                            ]
+                        },
+                        {
+                            "pct": 56,
+                            "values": [
+                                0.0,
+                                0.55
+                            ]
+                        },
+                        {
+                            "pct": 92,
+                            "values": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "logo",
+            "id": "logo",
+            "name": "Logo",
+            "visibleWhen": [
+                "LOGO_ENABLED"
+            ],
+            "placement": {
+                "slot": "logo",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 38,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 74,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                1.5,
+                                0.0
+                            ]
+                        },
+                        {
+                            "pct": 38,
+                            "values": [
+                                1.5,
+                                0.0
+                            ]
+                        },
+                        {
+                            "pct": 78,
+                            "values": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "rect",
+            "id": "band",
+            "name": "Band",
+            "visibleWhen": [
+                "BG_ENABLED"
+            ],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": {
+                "type": "canvasWidth",
+                "hEm": 6.2
+            },
+            "paint": {
+                "fill": {
+                    "role": "BG"
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 8,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "pct": 6,
+                            "values": [
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        {
+                            "pct": 60,
+                            "values": [
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0.0,
+                                3.1
+                            ]
+                        },
+                        {
+                            "pct": 6,
+                            "values": [
+                                0.0,
+                                3.1
+                            ]
+                        },
+                        {
+                            "pct": 60,
+                            "values": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

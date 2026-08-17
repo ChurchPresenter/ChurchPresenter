@@ -1,7 +1,7 @@
 name: Tests
 
 # The three build workflows are all workflow_dispatch-only, so until this existed nothing ran
-# automatically on a push or a pull request -- including the submodule test suites, which were
+# automatically on a push or a pull request -- including the module test suites, which were
 # green but unenforced. This runs the whole suite on every PR, and on main after a merge.
 #
 # `push` is main-only again, and that is deliberate. Widening it to every branch meant a PR commit
@@ -53,10 +53,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          # Required: composeApp mounts the submodules' sources via kotlin.srcDir, so the app
-          # does not even compile without them checked out.
-          submodules: true
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -78,7 +74,7 @@ jobs:
       - name: App unit tests
         id: unit_tests
         # Tighter than the job's own deadline so a hang here is attributed to this step and the
-        # submodule suites below (`if: always()`) and the report upload still get to run. Runs land
+        # module suites below (`if: always()`) and the report upload still get to run. Runs land
         # around 11-14 minutes; one run was killed at a 25-minute budget with no diagnosis that
         # survived scrutiny, so the budget is set well clear of the observed band rather than
         # doubling as an alarm on a suite that is still growing.
@@ -154,7 +150,7 @@ jobs:
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest
 
-      # Each submodule is its own Gradle build with its own wrapper, so they cannot be reached
+      # Each module is its own Gradle build with its own wrapper, so they cannot be reached
       # from the root build and are invoked individually. `if: always()` keeps a failure in one
       # suite from hiding the results of the others.
       - name: Presentation Engine tests

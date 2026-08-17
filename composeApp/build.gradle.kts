@@ -637,20 +637,20 @@ kotlin {
     sourceSets {
         jvmMain {
             kotlin.srcDir(generateBuildConfig.map { layout.buildDirectory.dir("generated/buildconfig") })
-            // Include Converter submodule source (builds together, launches as separate window)
+            // Include Converter module source (builds together, launches as separate window)
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-Converter/src/main/kotlin")
-            // Include LottieGen submodule source (builds together, launches as separate window)
+            // Include LottieGen module source (builds together, launches as separate window)
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/kotlin")
-            // Include Bible Lookup Engine (BLE) submodule source — runs in-process as a WebSocket
+            // Include Bible Lookup Engine (BLE) module source — runs in-process as a WebSocket
             // service started when STT connects.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-BLE/src/main/kotlin")
-            // Include Companion Satellite client submodule source — pure-Kotlin client for
+            // Include Companion Satellite client module source — pure-Kotlin client for
             // Bitfocus Companion's Satellite protocol, wrapped by CompanionSatelliteViewModel.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite/src/main/kotlin")
-            // Include Presentation Engine submodule source — parses and renders PPTX/PPT/PDF/
+            // Include Presentation Engine module source — parses and renders PPTX/PPT/PDF/
             // Keynote decks (static + animated) for PresentationViewModel and CompanionServer.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/src/main/kotlin")
-            // Include submodule resources (.properties files for localization)
+            // Include module resources (.properties files for localization)
             resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-Converter/src/main/resources")
             resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/resources")
         }
@@ -747,8 +747,8 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     // CRITICAL: composeApp mounts all five sub-builds' sources through kotlin.srcDir (see the
     // sourceSets block above), so their classes land in the SAME output directory as the app's.
     // Reporting on everything would drown the app's real number in ~tens of thousands of lines of
-    // submodule code that has its own separate suites. Restrict to this app's package root; the
-    // submodules are measured by their own builds.
+    // module code that has its own separate suites. Restrict to this app's package root; the
+    // modules are measured by their own builds.
     classDirectories.setFrom(
         fileTree(layout.buildDirectory.dir("classes/kotlin/jvm/main")) {
             include("org/churchpresenter/**")
@@ -819,7 +819,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 // Wired into `check` (see the bottom of this file) as of 2026-07-30, when the gated scope first
 // cleared the floor. Run it on its own with:
 //   ./gradlew :composeApp:jacocoTestCoverageVerification
-// Same execution/class/source wiring as jacocoTestReport (app package only; submodules measured by
+// Same execution/class/source wiring as jacocoTestReport (app package only; modules measured by
 // their own builds), with ONE deliberate difference: the app-entry wiring is excluded here but NOT
 // from the report. The report stays all-inclusive so nothing is hidden -- its HTML still shows
 // main.kt at 0%, which is the truth. The gate excludes those files because they are 4,918 lines of
@@ -1080,7 +1080,7 @@ tasks.matching { it.name in problematicTasks }.configureEach {
     doNotTrackState("Temporary workaround: OneDrive placeholder snapshot errors")
 }
 
-// prepareAppResources scans the entire appResourcesRootDir — exclude submodule build
+// prepareAppResources scans the entire appResourcesRootDir — exclude module build
 // artefacts (.gradle dirs) that contain lock files Gradle can't hash on Windows.
 afterEvaluate {
     (tasks.findByName("prepareAppResources") as? org.gradle.api.tasks.AbstractCopyTask)
@@ -1181,9 +1181,9 @@ tasks.register("signLinuxDeb") {
 }
 
 // ── Crossword puzzle sync ─────────────────────────────────────────────────────
-// Copies encrypted .xwp files from the ChurchPresenter-Cross submodule into
-// composeResources so they are bundled with the app. Run `git submodule update`
-// in ChurchPresenter-Cross to pull the latest puzzles, then rebuild.
+// Copies encrypted .xwp files from the ChurchPresenter-Cross module into
+// composeResources so they are bundled with the app. Edit the puzzles in that
+// module's `encoded/` directory, then rebuild.
 val syncCrosswordFiles by tasks.registering(Copy::class) {
     from(rootProject.file("composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/encoded"))
     include("*.xwp")

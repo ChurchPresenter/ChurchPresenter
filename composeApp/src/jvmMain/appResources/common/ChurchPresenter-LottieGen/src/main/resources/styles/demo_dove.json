@@ -1,0 +1,202 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Descending Dove",
+    "layout": {
+        "slots": [
+            {
+                "id": "dove",
+                "kind": "FIXED",
+                "widthEm": 2.8,
+                "gapAfterEm": 0.8
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.2
+            }
+        ],
+        "blockHeightEm": 3.4,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "path",
+            "id": "body",
+            "name": "Dove Body",
+            "placement": {
+                "slot": "dove",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 0.2
+            },
+            "verticesEm": [
+                { "x": -1.25, "y": 0.75, "outX": 0.55, "outY": -0.05 },
+                { "x": 0.3, "y": 0.35, "inX": -0.5, "inY": 0.3, "outX": 0.35, "outY": -0.2 },
+                { "x": 1.0, "y": -0.25, "inX": -0.2, "inY": 0.2 },
+                { "x": 1.25, "y": -0.15, "inX": -0.05, "inY": -0.12 }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "width": { "type": "em", "em": 0.13 } }
+            },
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 10.0, "values": [0.0, 0.0] },
+                        { "pct": 55.0, "values": [0.0, 1.0] },
+                        { "pct": 100.0, "values": [0.0, 1.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.4, -0.9] },
+                        { "pct": 10.0, "values": [0.4, -0.9] },
+                        { "pct": 60.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "wing",
+            "name": "Dove Wing",
+            "placement": {
+                "slot": "dove",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 0.2
+            },
+            "verticesEm": [
+                { "x": 0.15, "y": 0.3, "outX": -0.25, "outY": -0.5 },
+                { "x": -0.55, "y": -0.85, "inX": 0.35, "inY": 0.2 }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "width": { "type": "em", "em": 0.13 } }
+            },
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 35.0, "values": [0.0, 0.0] },
+                        { "pct": 65.0, "values": [0.0, 1.0] },
+                        { "pct": 100.0, "values": [0.0, 1.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.4, -0.9] },
+                        { "pct": 10.0, "values": [0.4, -0.9] },
+                        { "pct": 60.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 25.0, "values": [0.0] },
+                        { "pct": 65.0, "values": [100.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, -0.5] },
+                        { "pct": 25.0, "values": [0.0, -0.5] },
+                        { "pct": 70.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 40.0, "values": [0.0] },
+                        { "pct": 80.0, "values": [100.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, -0.5] },
+                        { "pct": 40.0, "values": [0.0, -0.5] },
+                        { "pct": 85.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": { "type": "contentDerived", "padXEm": 1.2, "padYEm": 0.7 },
+            "corner": { "type": "fromConfig", "factor": 1.1 },
+            "borderFromConfig": true,
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 35.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

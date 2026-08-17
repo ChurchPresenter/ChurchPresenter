@@ -1,0 +1,185 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Candle",
+    "layout": {
+        "slots": [
+            {
+                "id": "candle",
+                "kind": "FIXED",
+                "widthEm": 2.2,
+                "gapAfterEm": 0.8
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.2
+            }
+        ],
+        "blockHeightEm": 3.4,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "ellipse",
+            "id": "flame",
+            "name": "Flame",
+            "placement": {
+                "slot": "candle",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": -0.55,
+                "pivotYEm": 0.31
+            },
+            "size": { "type": "em", "wEm": 0.42, "hEm": 0.62 },
+            "paint": { "fill": { "role": "ACCENT" } },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 45.0, "values": [0.0, 0.0] },
+                        { "pct": 58.0, "values": [115.0, 88.0] },
+                        { "pct": 68.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "rect",
+            "id": "body",
+            "name": "Candle Body",
+            "placement": {
+                "slot": "candle",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 0.6,
+                "pivotYEm": 0.8
+            },
+            "size": { "type": "em", "wEm": 0.75, "hEm": 1.6 },
+            "corner": { "type": "em", "em": 0.08 },
+            "paint": { "fill": { "role": "ACCENT", "alphaFactor": 0.85 } },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [100.0, 0.0] },
+                        { "pct": 10.0, "values": [100.0, 0.0] },
+                        { "pct": 45.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ellipse",
+            "id": "glow",
+            "name": "Glow",
+            "placement": {
+                "slot": "candle",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": -0.55
+            },
+            "size": { "type": "em", "wEm": 1.15, "hEm": 1.15 },
+            "paint": { "fill": { "role": "ACCENT", "alphaFactor": 0.25 } },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 60.0, "values": [0.0] },
+                        { "pct": 82.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-1.3, 0.0] },
+                        { "pct": 22.0, "values": [-1.3, 0.0] },
+                        { "pct": 68.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-1.3, 0.0] },
+                        { "pct": 35.0, "values": [-1.3, 0.0] },
+                        { "pct": 82.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": { "type": "contentDerived", "padXEm": 1.2, "padYEm": 0.7 },
+            "corner": { "type": "fromConfig", "factor": 1.0 },
+            "borderFromConfig": true,
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 30.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

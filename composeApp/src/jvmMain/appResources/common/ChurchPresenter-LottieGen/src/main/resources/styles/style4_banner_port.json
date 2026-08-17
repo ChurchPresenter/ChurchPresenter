@@ -1,0 +1,210 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Banner (Style 4 port)",
+    "layout": {
+        "slots": [
+            {
+                "id": "text",
+                "kind": "TEXT"
+            },
+            {
+                "id": "accent",
+                "kind": "FIXED",
+                "widthEm": 1.21,
+                "gapBeforeEm": 1.5833333333333333
+            }
+        ],
+        "blockHeightEm": 4.05,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 1.0,
+                "offsetYEm": -0.505
+            },
+            "maskReveal": {
+                "padEm": 2.0,
+                "heightEm": 2.2,
+                "yOffsetFactor": -0.35
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [1.14, 0.0] },
+                        { "pct": 15.0, "values": [1.14, 0.0] },
+                        { "pct": 55.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 1.0,
+                "offsetYEm": 1.515
+            },
+            "maskReveal": {
+                "padEm": 8.876666666666667,
+                "heightEm": 1.65,
+                "yOffsetFactor": -0.35,
+                "offsetXEm": 3.4383333333333335
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-2.04, 0.0] },
+                        { "pct": 40.0, "values": [-2.04, 0.0] },
+                        { "pct": 80.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "rect",
+            "id": "topline",
+            "name": "Top Line",
+            "visibleWhen": ["BORDER_SET"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": -2.1166666666666667
+            },
+            "size": { "type": "contentDerived", "padXEm": 0.0, "padYEm": -1.975 },
+            "paint": { "fill": { "role": "ACCENT" } },
+            "corner": { "type": "none" },
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 30.0, "values": [0.0, 1.0] },
+                        { "pct": 70.0, "values": [1.0, 1.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "rect",
+            "id": "accentblock",
+            "name": "Accent Block",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "accent",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": -0.925
+            },
+            "size": { "type": "em", "wEm": 1.21, "hEm": 2.2 },
+            "paint": { "fill": { "role": "ACCENT" } },
+            "corner": { "type": "none" },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 20.0, "values": [100.0, 100.0] },
+                        { "pct": 100.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "rect",
+            "id": "namebg",
+            "name": "Name BG",
+            "visibleWhen": ["NAME_VISIBLE", "BG_ENABLED"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 0.7916666666666666,
+                "offsetYEm": -0.925
+            },
+            "size": { "type": "textWrap", "field": "NAME", "padXEm": 1.0, "padYEm": 0.5 },
+            "paint": {
+                "fill": { "role": "BG" },
+                "stroke": { "role": "BORDER", "width": { "type": "fromConfig" } }
+            },
+            "corner": { "type": "none" },
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 15.0, "values": [0.0, 1.0] },
+                        { "pct": 55.0, "values": [1.0, 1.0] }
+                    ]
+                },
+                {
+                    "property": "STROKE_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 15.0, "values": [0.0] },
+                        { "pct": 55.0, "values": [1.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "rect",
+            "id": "infobar",
+            "name": "Info Bar",
+            "visibleWhen": ["INFO_VISIBLE", "BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 1.2
+            },
+            "size": { "type": "contentDerived", "padXEm": 0.0, "padYEm": -1.2 },
+            "paint": {
+                "fill": { "role": "ACCENT" },
+                "stroke": { "role": "BORDER", "width": { "type": "fromConfig" } }
+            },
+            "corner": { "type": "none" },
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 40.0, "values": [0.0, 1.0] },
+                        { "pct": 80.0, "values": [1.0, 1.0] }
+                    ]
+                },
+                {
+                    "property": "STROKE_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 40.0, "values": [0.0] },
+                        { "pct": 80.0, "values": [1.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,183 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Underline Flourish",
+    "layout": {
+        "slots": [
+            {
+                "id": "logo",
+                "kind": "LOGO",
+                "gapAfterEm": 0.8,
+                "visibleWhen": ["LOGO_ENABLED"]
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.2
+            }
+        ],
+        "blockHeightEm": 3.8,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "logo",
+            "id": "logo",
+            "name": "Logo",
+            "visibleWhen": ["LOGO_ENABLED"],
+            "placement": {
+                "slot": "logo",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 45.0, "values": [0.0] },
+                        { "pct": 80.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ellipse",
+            "id": "dot",
+            "name": "Flourish Dot",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "END",
+                "line": "NAME_LINE",
+                "offsetXEm": 0.15,
+                "offsetYEm": 0.5
+            },
+            "size": { "type": "em", "wEm": 0.35, "hEm": 0.35 },
+            "paint": { "fill": { "role": "ACCENT" } },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 70.0, "values": [0.0, 0.0] },
+                        { "pct": 85.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "underline",
+            "name": "Flourish Underline",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "offsetYEm": 0.5
+            },
+            "verticesEm": [
+                { "x": 0.0, "y": 0.0, "outX": 2.4, "outY": 0.5 },
+                { "x": 6.0, "y": 0.05, "inX": -2.0, "inY": 0.45, "outX": 2.0, "outY": -0.45 },
+                { "x": 11.6, "y": 0.0, "inX": -2.2, "inY": -0.4 }
+            ],
+            "closed": false,
+            "fitWidthTo": "TEXT_BLOCK",
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "width": { "type": "em", "em": 0.1 } }
+            },
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 15.0, "values": [0.0, 0.0] },
+                        { "pct": 70.0, "values": [0.0, 1.0] },
+                        { "pct": 100.0, "values": [0.0, 1.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "animator": {
+                "kind": "SEQUENTIAL_REVEAL",
+                "startPct": 10.0,
+                "endPct": 60.0,
+                "posOffsetEm": 0.5
+            }
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "offsetYEm": 0.85,
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 35.0, "values": [0.0] },
+                        { "pct": 80.0, "values": [100.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.6] },
+                        { "pct": 35.0, "values": [0.0, 0.6] },
+                        { "pct": 82.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": { "type": "contentDerived", "padXEm": 1.4, "padYEm": 0.7 },
+            "corner": { "type": "fromConfig", "factor": 1.2 },
+            "borderFromConfig": true,
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 45.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

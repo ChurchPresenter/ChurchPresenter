@@ -1,0 +1,734 @@
+{
+    "formatVersion": 1,
+    "id": "17",
+    "name": "Glitch Shift",
+    "layout": {
+        "slots": [
+            {
+                "id": "logo",
+                "kind": "LOGO",
+                "gapAfterEm": 0.8,
+                "visibleWhen": [
+                    "LOGO_ENABLED"
+                ]
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.7
+            }
+        ],
+        "blockHeightEm": 3.5,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "logo",
+            "id": "logo",
+            "name": "Logo",
+            "visibleWhen": [
+                "LOGO_ENABLED"
+            ],
+            "placement": {
+                "slot": "logo",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": [
+                "NAME_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 16.7,
+                            "values": [
+                                -0.35,
+                                0.21
+                            ]
+                        },
+                        {
+                            "pct": 33.3,
+                            "values": [
+                                0.28,
+                                -0.122
+                            ]
+                        },
+                        {
+                            "pct": 50.0,
+                            "values": [
+                                -0.193,
+                                0.087
+                            ]
+                        },
+                        {
+                            "pct": 66.7,
+                            "values": [
+                                0.14,
+                                -0.063
+                            ]
+                        },
+                        {
+                            "pct": 83.3,
+                            "values": [
+                                -0.077,
+                                0.035
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 5,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 9,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 15,
+                            "values": [
+                                25
+                            ]
+                        },
+                        {
+                            "pct": 21,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 29,
+                            "values": [
+                                55
+                            ]
+                        },
+                        {
+                            "pct": 37,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "nameGhostA",
+            "name": "Name Ghost A",
+            "field": "NAME",
+            "visibleWhen": [
+                "NAME_VISIBLE"
+            ],
+            "colorRole": "ACCENT",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 16.7,
+                            "values": [
+                                0.62,
+                                -0.372
+                            ]
+                        },
+                        {
+                            "pct": 33.3,
+                            "values": [
+                                -0.496,
+                                0.217
+                            ]
+                        },
+                        {
+                            "pct": 50.0,
+                            "values": [
+                                0.341,
+                                -0.155
+                            ]
+                        },
+                        {
+                            "pct": 66.7,
+                            "values": [
+                                -0.248,
+                                0.112
+                            ]
+                        },
+                        {
+                            "pct": 83.3,
+                            "values": [
+                                0.136,
+                                -0.062
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                -0.0,
+                                -0.0
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 8,
+                            "values": [
+                                70
+                            ]
+                        },
+                        {
+                            "pct": 70,
+                            "values": [
+                                55
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "nameGhostB",
+            "name": "Name Ghost B",
+            "field": "NAME",
+            "visibleWhen": [
+                "NAME_VISIBLE"
+            ],
+            "colorRole": "INFO",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 16.7,
+                            "values": [
+                                -0.9,
+                                0.54
+                            ]
+                        },
+                        {
+                            "pct": 33.3,
+                            "values": [
+                                0.72,
+                                -0.315
+                            ]
+                        },
+                        {
+                            "pct": 50.0,
+                            "values": [
+                                -0.495,
+                                0.225
+                            ]
+                        },
+                        {
+                            "pct": 66.7,
+                            "values": [
+                                0.36,
+                                -0.162
+                            ]
+                        },
+                        {
+                            "pct": 83.3,
+                            "values": [
+                                -0.198,
+                                0.09
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 8,
+                            "values": [
+                                55
+                            ]
+                        },
+                        {
+                            "pct": 70,
+                            "values": [
+                                40
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": [
+                "INFO_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 31.7,
+                            "values": [
+                                -0.3,
+                                0.18
+                            ]
+                        },
+                        {
+                            "pct": 45.3,
+                            "values": [
+                                0.24,
+                                -0.105
+                            ]
+                        },
+                        {
+                            "pct": 59.0,
+                            "values": [
+                                -0.165,
+                                0.075
+                            ]
+                        },
+                        {
+                            "pct": 72.7,
+                            "values": [
+                                0.12,
+                                -0.054
+                            ]
+                        },
+                        {
+                            "pct": 86.3,
+                            "values": [
+                                -0.066,
+                                0.03
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 20,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 25,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 32,
+                            "values": [
+                                30
+                            ]
+                        },
+                        {
+                            "pct": 40,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 50,
+                            "values": [
+                                65
+                            ]
+                        },
+                        {
+                            "pct": 58,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                }
+            ]
+        },
+        {
+            "type": "rect",
+            "id": "slices",
+            "name": "Glitch Slices",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": -1.0
+            },
+            "size": {
+                "type": "em",
+                "wEm": 2.6,
+                "hEm": 0.14
+            },
+            "paint": {
+                "fill": {
+                    "role": "ACCENT",
+                    "alphaFactor": 0.65
+                },
+                "stroke": null
+            },
+            "corner": {
+                "type": "none"
+            },
+            "repeat": {
+                "copies": 3,
+                "offsetXEm": 0.0,
+                "offsetYEm": 1.0
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 16.7,
+                            "values": [
+                                -1.4,
+                                0.84
+                            ]
+                        },
+                        {
+                            "pct": 33.3,
+                            "values": [
+                                1.12,
+                                -0.49
+                            ]
+                        },
+                        {
+                            "pct": 50.0,
+                            "values": [
+                                -0.77,
+                                0.35
+                            ]
+                        },
+                        {
+                            "pct": 66.7,
+                            "values": [
+                                0.56,
+                                -0.252
+                            ]
+                        },
+                        {
+                            "pct": 83.3,
+                            "values": [
+                                -0.308,
+                                0.14
+                            ]
+                        },
+                        {
+                            "pct": 100.0,
+                            "values": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 6,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 30,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 44,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 60,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 72,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 88,
+                            "values": [
+                                0
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": [
+                "BG_ENABLED"
+            ],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": {
+                "type": "contentDerived",
+                "padXEm": 1.15,
+                "padYEm": 0.7
+            },
+            "corner": {
+                "type": "fromConfig",
+                "factor": 0.3
+            },
+            "borderFromConfig": true,
+            "growFrom": "ALIGN_EDGE",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        },
+                        {
+                            "pct": 30,
+                            "values": [
+                                1,
+                                1
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                }
+            ]
+        }
+    ]
+}
