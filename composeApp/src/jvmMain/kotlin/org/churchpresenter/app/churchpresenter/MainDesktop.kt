@@ -1254,7 +1254,10 @@ fun MainDesktop(
                         hiddenToolbarButtons = appSettings.hiddenScheduleButtons,
                         onToggleToolbarButton = { button ->
                             onSettingsChange { settings ->
-                                settings.copy(hiddenScheduleButtons = toggleHiddenScheduleButton(settings.hiddenScheduleButtons, button))
+                                settings.copy(
+                                    hiddenScheduleButtons =
+                                        toggleHiddenScheduleButton(settings.hiddenScheduleButtons, button)
+                                )
                             }
                         },
                         planningCenterSettings = appSettings.planningCenterSettings,

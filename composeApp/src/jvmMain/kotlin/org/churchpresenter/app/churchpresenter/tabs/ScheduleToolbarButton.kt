@@ -16,7 +16,10 @@ enum class ScheduleToolbarButton {
 
 /** The file group, the history group, the extras group — what the two pill dividers separate. */
 private val TOOLBAR_GROUPS = listOf(
-    listOf(ScheduleToolbarButton.NEW, ScheduleToolbarButton.OPEN, ScheduleToolbarButton.SAVE, ScheduleToolbarButton.CLEAR),
+    listOf(
+        ScheduleToolbarButton.NEW, ScheduleToolbarButton.OPEN,
+        ScheduleToolbarButton.SAVE, ScheduleToolbarButton.CLEAR,
+    ),
     listOf(ScheduleToolbarButton.UNDO, ScheduleToolbarButton.REDO),
     listOf(ScheduleToolbarButton.ADD_LABEL, ScheduleToolbarButton.PLANNING_CENTER),
 )

@@ -3,6 +3,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.performClick
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -44,7 +45,7 @@ class ScheduleToolbarVisibilityTest {
             seed = { seedService() },
         ) { vm, _ ->
             assertEquals(0, buttonCount(ScheduleLabel.ZOOM_IN), "the zoom pill goes with them")
-            val nonLabelItems = vm.scheduleItems.count { it !is org.churchpresenter.app.churchpresenter.models.ScheduleItem.LabelItem }
+            val nonLabelItems = vm.scheduleItems.count { it !is ScheduleItem.LabelItem }
             assertFalse(
                 renderedText().any { it.contains("$nonLabelItems items") },
                 "and so does the item count",
