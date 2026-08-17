@@ -9,6 +9,7 @@ import java.io.StringReader
 import java.nio.charset.Charset
 import javax.xml.parsers.DocumentBuilderFactory
 import org.xml.sax.InputSource
+import org.xml.sax.SAXException
 
 /**
  * The XML plumbing every song-format reader here needs.
@@ -45,14 +46,25 @@ internal fun decodeXmlText(bytes: ByteArray): String {
 private fun startsWith(bytes: ByteArray, vararg mark: Int): Boolean =
     bytes.size >= mark.size && mark.withIndex().all { (index, value) -> bytes[index] == value.toByte() }
 
-/** Parses [text] and returns its root element, without resolving any external DTD. */
+/**
+ * Parses [text] and returns its root element, without resolving any external DTD.
+ *
+ * A document the parser rejects is retried through [repairXml] rather than given up on, because the
+ * apps these files come from do not reliably escape their own text. If the repaired document fails
+ * too, the *original* failure is what is thrown — that one describes the real file.
+ */
 internal fun parseXmlRoot(text: String): Element {
     val factory = DocumentBuilderFactory.newInstance().apply {
         isNamespaceAware = false
         runCatching { setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false) }
         runCatching { setFeature("http://xml.org/sax/features/external-general-entities", false) }
     }
-    val document = factory.newDocumentBuilder().parse(InputSource(StringReader(text)))
+    val document = try {
+        factory.newDocumentBuilder().parse(InputSource(StringReader(text)))
+    } catch (invalid: SAXException) {
+        runCatching { factory.newDocumentBuilder().parse(InputSource(StringReader(repairXml(text)))) }
+            .getOrElse { throw invalid }
+    }
     return document.documentElement ?: throw IllegalArgumentException("Not an XML document")
 }
 

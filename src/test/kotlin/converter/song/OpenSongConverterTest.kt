@@ -54,6 +54,15 @@ class OpenSongConverterTest {
     }
 
     @Test
+    fun `the padding that lines syllables up under the chords does not reach the screen`() {
+        val lyrics = "[V]\n.       D              D7\n1A______ma________zing grace! How   sweet the  sound!\n"
+
+        val sections = OpenSongConverter.parse(songFile("grace", "", lyrics)).sections
+
+        assertEquals(listOf("Amazing grace! How sweet the sound!"), sections.single().lines)
+    }
+
+    @Test
     fun `each marker opens a section, named the way ChurchPresenter names them`() {
         val lyrics = "[V1]\n One\n[C]\n Praise\n[V2]\n Two\n"
 
