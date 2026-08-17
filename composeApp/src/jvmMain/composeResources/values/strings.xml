@@ -598,6 +598,25 @@
     <string name="language_romanian">Romanian</string>
     <string name="language_slovak">Slovak</string>
     <string name="language_estonian">Estonian</string>
+    <string name="language_latvian">Latvian</string>
+    <string name="language_croatian">Croatian</string>
+    <string name="language_swedish">Swedish</string>
+    <string name="language_norwegian">Norwegian</string>
+    <string name="language_finnish">Finnish</string>
+    <string name="language_turkish">Turkish</string>
+    <string name="language_uzbek">Uzbek</string>
+    <string name="language_arabic">Arabic</string>
+    <string name="language_persian">Persian</string>
+    <string name="language_hindi">Hindi</string>
+    <string name="language_nepali">Nepali</string>
+    <string name="language_thai">Thai</string>
+    <string name="language_lao">Lao</string>
+    <string name="language_japanese">Japanese</string>
+    <string name="language_chinese">Chinese (Simplified)</string>
+    <string name="language_indonesian">Indonesian</string>
+    <string name="language_malay">Malay</string>
+    <string name="language_tagalog">Tagalog</string>
+    <string name="language_swahili">Swahili</string>
 
     <!-- Search Results -->
     <string name="no_results_found">No results found for "%1$s"</string>

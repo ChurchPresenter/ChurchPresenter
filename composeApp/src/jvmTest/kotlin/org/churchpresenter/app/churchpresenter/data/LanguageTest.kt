@@ -87,6 +87,18 @@ class LanguageTest {
         assertNotNull(Language.entries.firstOrNull { it.code == "en" }, "English is the fallback for every other one")
     }
 
+    @Test
+    fun `only the right-to-left scripts are marked right-to-left`() {
+        val rtl = Language.entries.filter { it.rightToLeft }.map { it.code }.toSet()
+
+        assertEquals(
+            setOf("ar", "fa"),
+            rtl,
+            "this flag mirrors the whole control surface, so a Latin or Cyrillic language carrying " +
+                "it would put every sidebar and alignment on the wrong side",
+        )
+    }
+
     // ── The enum against what ships ─────────────────────────────────────────────
 
     @Test
