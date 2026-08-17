@@ -324,7 +324,12 @@ class RemoteCommandEffectsTest {
     fun `a remote picture-folder selection opens the pictures tab`() = runComposeUiTest {
         val flows = Flows()
         effects(flows)
-        val item = ScheduleItem.PictureItem(id = "1", folderPath = dir.absolutePath, folderName = "Easter", imageCount = 0)
+        val item = ScheduleItem.PictureItem(
+            id = "1",
+            folderPath = dir.absolutePath,
+            folderName = "Easter",
+            imageCount = 0,
+        )
 
         emit(flows.selectPictureItem, item)
 

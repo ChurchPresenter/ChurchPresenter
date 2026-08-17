@@ -64,7 +64,11 @@ class AnnouncementsViewModelSteppingTest {
     fun `stepping seconds up snaps to the next multiple of five`() {
         val vm = vm()
         vm.setTimerSeconds(0); vm.stepTimerSeconds(1); assertEquals(5, vm.timerSeconds)
-        vm.setTimerSeconds(2); vm.stepTimerSeconds(1); assertEquals(5, vm.timerSeconds, "an off-grid value rounds up to 5")
+        vm.setTimerSeconds(2); vm.stepTimerSeconds(1); assertEquals(
+            5,
+            vm.timerSeconds,
+            "an off-grid value rounds up to 5",
+        )
         vm.setTimerSeconds(5); vm.stepTimerSeconds(1); assertEquals(10, vm.timerSeconds)
     }
 

@@ -66,7 +66,11 @@ class BibleViewModelClickSelectionTest {
 
         vm.ctrlClickVerse(2)
 
-        assertEquals(listOf(2), vm.selectedVerseIndices.sorted(), "the anchor is the same verse, so it is not added twice")
+        assertEquals(
+            listOf(2),
+            vm.selectedVerseIndices.sorted(),
+            "the anchor is the same verse, so it is not added twice",
+        )
         assertTrue(vm.multiVerseEnabled.value)
     }
 
@@ -139,7 +143,11 @@ class BibleViewModelClickSelectionTest {
         vm.shiftClickVerse(99)
         vm.shiftClickVerse(-1)
 
-        assertEquals(listOf(1, 2, 3), vm.selectedVerseIndices.sorted(), "the existing run survives an out-of-range click")
+        assertEquals(
+            listOf(1, 2, 3),
+            vm.selectedVerseIndices.sorted(),
+            "the existing run survives an out-of-range click",
+        )
     }
 
     // ── The book filter's English fallback ──────────────────────────────────────

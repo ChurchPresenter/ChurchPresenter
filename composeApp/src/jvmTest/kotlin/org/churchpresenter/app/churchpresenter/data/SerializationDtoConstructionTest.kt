@@ -27,7 +27,12 @@ class SerializationDtoConstructionTest {
         assertEquals(listOf(photo), photoResponse.photos)
         assertEquals("p2", photoResponse.nextPage)
 
-        val file = StockMediaClient.PexelsVideoFile(link = "https://v/hd.mp4", quality = "hd", fileType = "video/mp4", width = 1920)
+        val file = StockMediaClient.PexelsVideoFile(
+            link = "https://v/hd.mp4",
+            quality = "hd",
+            fileType = "video/mp4",
+            width = 1920,
+        )
         assertEquals("https://v/hd.mp4", file.link)
         assertEquals("hd", file.quality)
         assertEquals("video/mp4", file.fileType)
@@ -45,7 +50,11 @@ class SerializationDtoConstructionTest {
 
     @Test
     fun `pixabay dtos round-trip their fields`() {
-        val photo = StockMediaClient.PixabayPhoto(id = 999L, previewURL = "https://img/prev.jpg", largeImageURL = "https://img/large.jpg")
+        val photo = StockMediaClient.PixabayPhoto(
+            id = 999L,
+            previewURL = "https://img/prev.jpg",
+            largeImageURL = "https://img/large.jpg",
+        )
         assertEquals(999L, photo.id)
         assertEquals("https://img/prev.jpg", photo.previewURL)
         assertEquals("https://img/large.jpg", photo.largeImageURL)
@@ -103,7 +112,10 @@ class SerializationDtoConstructionTest {
 
         assertEquals(null, StockMediaClient.PixabayVideoFile(url = "u").thumbnail)
         assertEquals(null, StockMediaClient.PixabayVideoFiles().large)
-        assertEquals(null, StockMediaClient.PixabayVideo(id = 1L, videos = StockMediaClient.PixabayVideoFiles()).pictureId)
+        assertEquals(
+            null,
+            StockMediaClient.PixabayVideo(id = 1L, videos = StockMediaClient.PixabayVideoFiles()).pictureId,
+        )
         assertEquals(null, StockMediaClient.PexelsVideoFile(link = "l").quality)
         assertEquals(emptyList(), StockMediaClient.PexelsVideo(id = 1L, image = "i").videoFiles)
         assertEquals(emptyList(), StockMediaClient.PexelsPhotoResponse().photos)

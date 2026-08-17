@@ -129,7 +129,11 @@ class PresenterLowerThirdScreenshotTest {
 
     @Test
     fun `a larger band`() =
-        shootSong("song_large_type", song(), songSettings(lyricsLowerThirdFontSize = 72, lyricsLowerThirdFontSizeAutoFit = false))
+        shootSong(
+            "song_large_type",
+            song(),
+            songSettings(lyricsLowerThirdFontSize = 72, lyricsLowerThirdFontSizeAutoFit = false),
+        )
 
     @Test
     fun `the band on a colour`() =
@@ -307,7 +311,11 @@ class PresenterLowerThirdScreenshotTest {
 
     @Test
     fun `the scripture band on a colour`() =
-        shootBible("bible_background_colour", listOf(verse()), bibleBackground(BackgroundConfig(backgroundColor = "#1B2A5B")))
+        shootBible(
+            "bible_background_colour",
+            listOf(verse()),
+            bibleBackground(BackgroundConfig(backgroundColor = "#1B2A5B")),
+        )
 
     @Test
     fun `a transparent scripture band`() = shootBible(

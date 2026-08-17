@@ -317,7 +317,11 @@ class CrosswordDataTest {
 
         val built = assertNotNull(CrosswordLayoutEngine.build(1, "Clashing", clues, layout))
 
-        assertEquals("GRACH", built.rowText(0), "current behaviour: the down word overwrote the across word's last letter")
+        assertEquals(
+            "GRACH",
+            built.rowText(0),
+            "current behaviour: the down word overwrote the across word's last letter",
+        )
     }
 
     // ── Building the grid without a placement ──────────────────────────────────
@@ -519,7 +523,11 @@ class CrosswordDataTest {
         val pen = placed(3, "PEN", 0, 5, CrosswordDirection.DOWN)
         val tin = clue(2, "TIN", CrosswordDirection.DOWN)
 
-        val result = assertNotNull(CrosswordLayoutEngine.findPlacement(gridFor(cat, blocker, pen), listOf(cat, blocker, pen), tin))
+        val result = assertNotNull(CrosswordLayoutEngine.findPlacement(
+            gridFor(cat, blocker, pen),
+            listOf(cat, blocker, pen),
+            tin,
+        ))
 
         assertEquals(
             CrosswordDirection.ACROSS,
@@ -558,7 +566,13 @@ class CrosswordDataTest {
         val cat = placed(1, "CAT", 0, 0, CrosswordDirection.ACROSS)
         val orphan = placed(99, "AT", 0, 0, CrosswordDirection.DOWN) // number 99 has no clue below
 
-        val built = CrosswordLayoutEngine.renderGrid(1, "t", listOf(cat, orphan), gridFor(cat, orphan), listOf(clue(1, "CAT", CrosswordDirection.ACROSS)))
+        val built = CrosswordLayoutEngine.renderGrid(
+            1,
+            "t",
+            listOf(cat, orphan),
+            gridFor(cat, orphan),
+            listOf(clue(1, "CAT", CrosswordDirection.ACROSS)),
+        )
 
         assertTrue(built.downClues.isEmpty(), "the grid can still show the letters even with no clue text to list")
         assertEquals(listOf(1 to "Clue 1"), built.acrossClues)

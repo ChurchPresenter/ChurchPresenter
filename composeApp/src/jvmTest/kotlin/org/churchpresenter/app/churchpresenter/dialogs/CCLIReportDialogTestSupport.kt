@@ -182,7 +182,9 @@ private const val CHART_PANEL_WIDTH = 300f
 private fun ComposeUiTest.textNodes() =
     onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.Text))
         .fetchSemanticsNodes(atLeastOneRootRequired = false)
-        .map { it.boundsInRoot to (it.config.getOrNull(SemanticsProperties.Text)?.joinToString("") { t -> t.text } ?: "") }
+        .map {
+            it.boundsInRoot to (it.config.getOrNull(SemanticsProperties.Text)?.joinToString("") { t -> t.text } ?: "")
+        }
 
 /** Every string on screen, in traversal order. */
 internal fun ComposeUiTest.renderedText(): List<String> = textNodes().map { it.second }

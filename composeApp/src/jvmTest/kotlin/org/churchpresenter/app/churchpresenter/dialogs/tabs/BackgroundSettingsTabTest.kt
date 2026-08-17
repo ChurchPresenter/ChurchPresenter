@@ -176,7 +176,11 @@ class BackgroundSettingsTabTest {
 
     @Test
     fun `the default opacity slider stores a new opacity`() = backgroundTab { get ->
-        assertSliderShows("Background Opacity", get().backgroundSettings.defaultBackgroundOpacity, "the default opacity")
+        assertSliderShows(
+            "Background Opacity",
+            get().backgroundSettings.defaultBackgroundOpacity,
+            "the default opacity",
+        )
         val reading = dragSlider("Background Opacity", fraction = 0.4f)
         val stored = get().backgroundSettings.defaultBackgroundOpacity
         assertTrue(stored < 1f, "dragging left of the end must lower the opacity, was $stored")

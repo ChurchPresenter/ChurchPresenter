@@ -38,7 +38,13 @@ class ExecuteProjectItemTest {
     @Test
     fun `a song is added to the schedule and put on the lyrics renderer`() {
         val (recorder, presenter) = project(
-            ScheduleItem.SongItem(id = "1", songNumber = 42, title = "Amazing Grace", songbook = "Hymnal", songId = "Hymnal::42")
+            ScheduleItem.SongItem(
+                id = "1",
+                songNumber = 42,
+                title = "Amazing Grace",
+                songbook = "Hymnal",
+                songId = "Hymnal::42",
+            )
         )
 
         assertEquals(listOf("song:42:Amazing Grace:Hymnal:Hymnal::42"), recorder.added)
@@ -122,7 +128,12 @@ class ExecuteProjectItemTest {
     @Test
     fun `media is added with its url and type`() {
         val (recorder, _) = project(
-            ScheduleItem.MediaItem(id = "1", mediaUrl = "https://example.org/clip.mp4", mediaTitle = "Clip", mediaType = "video")
+            ScheduleItem.MediaItem(
+                id = "1",
+                mediaUrl = "https://example.org/clip.mp4",
+                mediaTitle = "Clip",
+                mediaType = "video",
+            )
         )
 
         assertEquals(listOf("media:https://example.org/clip.mp4:Clip:video"), recorder.added)
@@ -163,13 +174,23 @@ class ExecuteProjectItemTest {
         // previous renderer while the schedule says otherwise.
         val cases = listOf(
             ScheduleItem.SongItem(id = "1", songNumber = 1, title = "T", songbook = "B") to Presenting.LYRICS,
-            ScheduleItem.BibleVerseItem(id = "2", bookName = "John", chapter = 3, verseNumber = 16, verseText = "v") to Presenting.BIBLE,
+            ScheduleItem.BibleVerseItem(
+                id = "2",
+                bookName = "John",
+                chapter = 3,
+                verseNumber = 16,
+                verseText = "v",
+            ) to Presenting.BIBLE,
             ScheduleItem.WebsiteItem(id = "3", url = "u", title = "t") to Presenting.WEBSITE,
         )
 
         cases.forEach { (item, expected) ->
             val (_, presenter) = project(item)
-            assertEquals(expected, presenter.presentingMode.value, "${item::class.simpleName} must reach its own renderer")
+            assertEquals(
+                expected,
+                presenter.presentingMode.value,
+                "${item::class.simpleName} must reach its own renderer",
+            )
         }
     }
 
@@ -186,7 +207,10 @@ class ExecuteProjectItemTest {
             )
         )
 
-        assertTrue(recorder.added.isEmpty(), "a projected word must not be filed in the schedule, got ${recorder.added}")
+        assertTrue(
+            recorder.added.isEmpty(),
+            "a projected word must not be filed in the schedule, got ${recorder.added}",
+        )
         assertEquals(Presenting.DICTIONARY, presenter.presentingMode.value)
         assertTrue(presenter.showPresenterWindow.value)
 

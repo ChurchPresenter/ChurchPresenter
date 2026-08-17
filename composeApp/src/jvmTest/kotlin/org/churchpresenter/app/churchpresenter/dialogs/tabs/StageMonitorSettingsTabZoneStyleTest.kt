@@ -33,7 +33,9 @@ class StageMonitorSettingsTabZoneStyleTest {
     private val ordinal = ZoneOrdinal.of(zone)
 
     /** Asserts every zone but [zone] still holds the style it started with. */
-    private fun assertOtherZonesUntouched(get: () -> org.churchpresenter.app.churchpresenter.data.settings.AppSettings) {
+    private fun assertOtherZonesUntouched(
+        get: () -> org.churchpresenter.app.churchpresenter.data.settings.AppSettings,
+    ) {
         val defaults = org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSettings.defaultZoneStyles()
         for (other in StageMonitorStyleZone.entries.filter { it != zone }) {
             assertEquals(defaults.getValue(other), get().styleOf(other), "$other must be untouched")

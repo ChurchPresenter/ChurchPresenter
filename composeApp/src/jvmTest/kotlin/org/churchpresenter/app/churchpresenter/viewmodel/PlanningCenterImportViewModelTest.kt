@@ -489,7 +489,12 @@ class PlanningCenterImportViewModelTest {
     fun `a confirmed song is written into the song library`() {
         val vm = viewModel()
         val created = vm.createLocalSong(
-            SongItem(number = "0500", title = "Imported Song", songbook = "Hymnal", lyrics = listOf("[Verse 1]", "line")),
+            SongItem(
+                number = "0500",
+                title = "Imported Song",
+                songbook = "Hymnal",
+                lyrics = listOf("[Verse 1]", "line"),
+            ),
         )
         assertNotNull(created)
         assertTrue(File(File(songDir, "Hymnal"), "0500 - Imported Song.song").exists())

@@ -37,7 +37,9 @@ class STTManagerParsingTest {
     fun `a transcription segment carries all its fields`() {
         val stt = manager()
 
-        stt.transcription("""{"segments":[{"id":7,"timestamp":"00:01","text":"hello","start":0.5,"end":1.5,"completed":true}]}""")
+        stt.transcription(
+            """{"segments":[{"id":7,"timestamp":"00:01","text":"hello","start":0.5,"end":1.5,"completed":true}]}""",
+        )
 
         val seg = stt.segments.single()
         assertEquals(7, seg.id)
@@ -96,7 +98,9 @@ class STTManagerParsingTest {
     fun `a translation segment prefers translated_text`() {
         val stt = manager()
 
-        stt.translation("""{"segments":[{"id":1,"translated_text":"hola","text":"hello"}],"target_language_name":"Spanish"}""")
+        stt.translation(
+            """{"segments":[{"id":1,"translated_text":"hola","text":"hello"}],"target_language_name":"Spanish"}""",
+        )
 
         assertEquals("hola", stt.translationSegments.single().text)
         assertEquals("Spanish", stt.translationLanguage.value)
@@ -158,7 +162,9 @@ class STTManagerParsingTest {
     fun `a highlighted word carries its colour and flags`() {
         val stt = manager()
 
-        stt.highlighting("""{"enabled":true,"words":[{"word":"Jesus","color":"#ff0000","case_sensitive":true,"is_regex":true}]}""")
+        stt.highlighting(
+            """{"enabled":true,"words":[{"word":"Jesus","color":"#ff0000","case_sensitive":true,"is_regex":true}]}""",
+        )
 
         assertTrue(stt.wordHighlightingEnabled.value)
         val w = stt.highlightedWords.single()
@@ -176,6 +182,7 @@ class STTManagerParsingTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `words in a disabled colour group are dropped`() {
         val stt = manager()
 

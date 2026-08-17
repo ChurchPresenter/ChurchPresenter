@@ -29,7 +29,13 @@ class CompanionApiWireFormatTest {
                     bookName = "Hymns",
                     songTotal = 2,
                     songs = listOf(
-                        SongDto(id = 0, number = "42", title = "Amazing Grace", tune = "NEW BRITAIN", author = "John Newton"),
+                        SongDto(
+                            id = 0,
+                            number = "42",
+                            title = "Amazing Grace",
+                            tune = "NEW BRITAIN",
+                            author = "John Newton",
+                        ),
                         SongDto(id = 1, number = "43", title = "It Is Well"),
                     ),
                 ),

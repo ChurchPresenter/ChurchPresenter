@@ -67,7 +67,12 @@ class SongsViewModelLibraryTest {
     }
 
     private fun viewModel(): SongsViewModel {
-        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined, enableFolderWatcher = false)
+        val vm = SongsViewModel(
+            AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        )
         created.add(vm)
         awaitUntil("songs to load") { vm.filteredSongItems.value.isNotEmpty() }
         return vm
@@ -112,7 +117,12 @@ class SongsViewModelLibraryTest {
 
     @Test
     fun `an empty storage directory yields no songs`() {
-        val vm = SongsViewModel(AppSettings(), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined, enableFolderWatcher = false).also { created.add(it) }
+        val vm = SongsViewModel(
+            AppSettings(),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        ).also { created.add(it) }
         awaitUntil("the load to finish") { !vm.isLoading.value }
         assertTrue(vm.filteredSongItems.value.isEmpty())
     }
@@ -126,7 +136,12 @@ class SongsViewModelLibraryTest {
 
     @Test
     fun `nothing is selected in an empty library`() {
-        val vm = SongsViewModel(AppSettings(), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined, enableFolderWatcher = false).also { created.add(it) }
+        val vm = SongsViewModel(
+            AppSettings(),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        ).also { created.add(it) }
         awaitUntil("the load to finish") { !vm.isLoading.value }
 
         assertNull(vm.getSelectedSong(), "an empty library has no current song")
@@ -159,7 +174,12 @@ class SongsViewModelLibraryTest {
         // Numbers come from the file name and are free text — "42a" for a second setting of the
         // same hymn is a real convention. The slide carries an Int, so an unparseable number has to
         // fall to 0 rather than throw while the song is going live.
-        writeSong(songbook = "Hymnal", number = "42a", title = "Alternate Setting", lyrics = listOf("[Verse 1]", "A line"))
+        writeSong(
+            songbook = "Hymnal",
+            number = "42a",
+            title = "Alternate Setting",
+            lyrics = listOf("[Verse 1]", "A line"),
+        )
         val vm = viewModel()
         vm.selectByTitle("Alternate Setting")
 
@@ -301,7 +321,12 @@ class SongsViewModelLibraryTest {
     @Test
     fun `a song with no number is filed under its title alone`() {
         val vm = viewModel()
-        assertTrue(vm.createSong(SongItem(number = "", title = "Untitled Hymn", songbook = "Hymnal", lyrics = listOf("l"))))
+        assertTrue(vm.createSong(SongItem(
+            number = "",
+            title = "Untitled Hymn",
+            songbook = "Hymnal",
+            lyrics = listOf("l"),
+        )))
         assertTrue(File(File(dir, "Hymnal"), "Untitled Hymn.song").exists())
     }
 
@@ -317,8 +342,18 @@ class SongsViewModelLibraryTest {
         val vm = viewModel()
         assertFalse(vm.createSong(SongItem(number = "1", title = "No Book", songbook = "", lyrics = listOf("l"))))
 
-        val unconfigured = SongsViewModel(AppSettings(), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined, enableFolderWatcher = false).also { created.add(it) }
-        assertFalse(unconfigured.createSong(SongItem(number = "1", title = "T", songbook = "Hymnal", lyrics = listOf("l"))))
+        val unconfigured = SongsViewModel(
+            AppSettings(),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        ).also { created.add(it) }
+        assertFalse(unconfigured.createSong(SongItem(
+            number = "1",
+            title = "T",
+            songbook = "Hymnal",
+            lyrics = listOf("l"),
+        )))
     }
 
     // ── Editing ─────────────────────────────────────────────────────────────────
@@ -418,7 +453,12 @@ class SongsViewModelLibraryTest {
 
     @Test
     fun `adding to the schedule with nothing selected reports failure`() {
-        val vm = SongsViewModel(AppSettings(), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined, enableFolderWatcher = false).also { created.add(it) }
+        val vm = SongsViewModel(
+            AppSettings(),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        ).also { created.add(it) }
         var called = false
         assertFalse(vm.addCurrentSongToSchedule { _, _, _, _ -> called = true })
         assertFalse(called)

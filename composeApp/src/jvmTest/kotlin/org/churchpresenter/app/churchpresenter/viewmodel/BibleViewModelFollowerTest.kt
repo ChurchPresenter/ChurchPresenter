@@ -328,7 +328,10 @@ class BibleViewModelFollowerTest {
                 ),
             )
             val vm = BibleViewModel(
-                AppSettings(bibleSettings = BibleSettings(storageDirectory = rangeDir.absolutePath, primaryBible = "r.spb")),
+                AppSettings(bibleSettings = BibleSettings(
+                    storageDirectory = rangeDir.absolutePath,
+                    primaryBible = "r.spb",
+                )),
             )
             awaitUntil("load") { vm.books.value.isNotEmpty() && vm.isFullyLoaded }
 

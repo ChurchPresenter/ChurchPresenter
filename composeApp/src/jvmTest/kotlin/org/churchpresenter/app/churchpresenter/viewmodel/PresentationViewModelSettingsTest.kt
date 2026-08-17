@@ -68,7 +68,10 @@ class PresentationViewModelSettingsTest {
         val vm = viewModel(PresentationSettings(animateKeynote = false))
         val keynote = deck(DeckFormat.KEYNOTE)
 
-        assertNull(vm.exposableDeck(keynote), "the animated player must not start on a Keynote deck when the setting is off")
+        assertNull(
+            vm.exposableDeck(keynote),
+            "the animated player must not start on a Keynote deck when the setting is off",
+        )
     }
 
     @Test

@@ -310,7 +310,10 @@ class UpdateAvailableContentTest {
 
     @Test
     fun `msiexec installs on Windows`() {
-        assertEquals(listOf("msiexec", "/i", "C:\\temp\\update.msi"), installerLaunchCommand("Windows 11", "C:\\temp\\update.msi"))
+        assertEquals(
+            listOf("msiexec", "/i", "C:\\temp\\update.msi"),
+            installerLaunchCommand("Windows 11", "C:\\temp\\update.msi"),
+        )
     }
 
     @Test

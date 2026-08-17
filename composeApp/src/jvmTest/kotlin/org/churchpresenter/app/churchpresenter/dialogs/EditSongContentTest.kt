@@ -218,7 +218,11 @@ class EditSongContentTest {
     fun `typing a letter into the number field is rejected outright`() = editor { saved ->
         type(Field.NUMBER, "12a")
         save()
-        assertEquals("42", saved.song?.number, "a keystroke that would introduce a non-digit must leave the field untouched")
+        assertEquals(
+            "42",
+            saved.song?.number,
+            "a keystroke that would introduce a non-digit must leave the field untouched",
+        )
     }
 
     // ── Saving ──────────────────────────────────────────────────────────────────

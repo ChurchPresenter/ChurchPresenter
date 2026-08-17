@@ -71,7 +71,10 @@ class BibleLegacyModuleTest {
 
         assertEquals(2, b.getVerseCount())
         assertEquals(
-            listOf("1. In the beginning God created the heaven and the earth.", "2. And the earth was without form, and void."),
+            listOf(
+                "1. In the beginning God created the heaven and the earth.",
+                "2. And the earth was without form, and void.",
+            ),
             b.getChapter(1, 1).verses,
         )
     }

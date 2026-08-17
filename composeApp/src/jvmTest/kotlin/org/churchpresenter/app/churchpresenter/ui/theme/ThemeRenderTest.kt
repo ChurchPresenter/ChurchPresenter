@@ -259,7 +259,11 @@ class ThemeRenderTest {
             setContent { seen = LocalThemeManager.current }
         }
 
-        assertEquals(ThemeMode.SYSTEM, seen?.themeMode?.value, "an unprovided manager must not leave the UI blank or throw")
+        assertEquals(
+            ThemeMode.SYSTEM,
+            seen?.themeMode?.value,
+            "an unprovided manager must not leave the UI blank or throw",
+        )
     }
 
     @Test

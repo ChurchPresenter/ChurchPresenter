@@ -137,6 +137,7 @@ internal val SILENT_STT_URL: String
 // ── Feeding the manager what the STT server would send ──────────────────────────────────────────
 
 /** One completed transcription segment, as `transcription_update` delivers it. */
+@Suppress("MaxLineLength")
 internal fun STTManager.transcribe(vararg texts: String) {
     val segments = texts.mapIndexed { index, text ->
         """{"id":$index,"timestamp":"00:0$index","text":"$text","start":$index.0,"end":${index + 1}.0,"completed":true}"""
@@ -157,6 +158,7 @@ internal fun STTManager.transcribeInProgress(text: String) {
     handleTranscriptionUpdate(JSONObject("""{"in_progress":"$text"}"""))
 }
 
+@Suppress("MaxLineLength")
 internal fun STTManager.translate(vararg texts: String) {
     val segments = texts.mapIndexed { index, text ->
         """{"id":$index,"timestamp":"00:0$index","translated_text":"$text","start":$index.0,"end":${index + 1}.0,"completed":true}"""

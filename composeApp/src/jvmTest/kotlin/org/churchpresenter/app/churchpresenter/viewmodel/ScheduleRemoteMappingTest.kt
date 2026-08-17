@@ -37,7 +37,12 @@ class ScheduleRemoteMappingTest {
         return model.scheduleItems
     }
 
-    private fun dto(type: String, id: String = "1", displayText: String = "", build: ScheduleItemDto.() -> ScheduleItemDto = { this }) =
+    private fun dto(
+        type: String,
+        id: String = "1",
+        displayText: String = "",
+        build: ScheduleItemDto.() -> ScheduleItemDto = { this },
+    ) =
         ScheduleItemDto(id = id, type = type, displayText = displayText).build()
 
     @Test

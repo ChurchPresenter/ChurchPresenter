@@ -242,7 +242,11 @@ class ScheduleItemSerializationTest {
         assertEquals(1, back.timerHours)
         assertEquals(2, back.timerMinutes)
         assertEquals(3, back.timerSeconds)
-        assertEquals("We're starting!", back.timerExpiredText, "the end-of-countdown message is set up once, weeks earlier")
+        assertEquals(
+            "We're starting!",
+            back.timerExpiredText,
+            "the end-of-countdown message is set up once, weeks earlier",
+        )
         assertEquals("#00FF00", back.timerTextColor)
         assertEquals("Timer 1:02:03", back.displayText)
     }
@@ -398,7 +402,13 @@ class ScheduleItemSerializationTest {
         allKinds().filterIsInstance<T>().single()
 
     private fun allKinds(): List<ScheduleItem> = listOf(
-        ScheduleItem.SongItem(id = "1", songNumber = 42, title = "Amazing Grace", songbook = "Hymnal", songId = "Hymnal::42"),
+        ScheduleItem.SongItem(
+            id = "1",
+            songNumber = 42,
+            title = "Amazing Grace",
+            songbook = "Hymnal",
+            songId = "Hymnal::42",
+        ),
         ScheduleItem.BibleVerseItem(
             id = "2", bookName = "John", chapter = 3, verseNumber = 16, verseText = "For God so loved…",
             verseRange = "16-18", bookId = 43,
@@ -408,9 +418,18 @@ class ScheduleItemSerializationTest {
         ScheduleItem.PresentationItem(
             id = "5", filePath = "/decks/Sermon.pptx", fileName = "Sermon.pptx", slideCount = 12, fileType = "pptx",
         ),
-        ScheduleItem.MediaItem(id = "6", mediaUrl = "/media/clip.mp4", mediaTitle = "Baptism video", mediaType = "local"),
+        ScheduleItem.MediaItem(
+            id = "6",
+            mediaUrl = "/media/clip.mp4",
+            mediaTitle = "Baptism video",
+            mediaType = "local",
+        ),
         ScheduleItem.LowerThirdItem(
-            id = "7", presetId = "preset-9", presetLabel = "Guest speaker", pauseAtFrame = true, pauseDurationMs = 4500L,
+            id = "7",
+            presetId = "preset-9",
+            presetLabel = "Guest speaker",
+            pauseAtFrame = true,
+            pauseDurationMs = 4500L,
         ),
         ScheduleItem.AnnouncementItem(id = "8", text = "Welcome to the 10am service"),
         ScheduleItem.WebsiteItem(id = "9", url = "https://example.org/give", title = "Giving page"),

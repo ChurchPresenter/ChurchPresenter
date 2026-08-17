@@ -23,6 +23,7 @@ class UpdateCheckerSelectUpdateTest {
         {"browser_download_url":"https://example.org/app.deb"}
     ]"""
 
+    @Suppress("MaxLineLength")
     private fun release(
         tag: String,
         prerelease: Boolean = false,
@@ -124,8 +125,10 @@ class UpdateCheckerSelectUpdateTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `a release with no assets field at all is skipped`() {
-        val body = """[{"tag_name":"v26.2.0","draft":false,"prerelease":false,"html_url":"https://example.org/r","body":"n"}]"""
+        val body =
+            """[{"tag_name":"v26.2.0","draft":false,"prerelease":false,"html_url":"https://example.org/r","body":"n"}]"""
 
         assertIs<UpdateCheckResult.UpToDate>(select(body))
     }

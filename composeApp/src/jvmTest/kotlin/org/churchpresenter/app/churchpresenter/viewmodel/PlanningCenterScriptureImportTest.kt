@@ -326,7 +326,12 @@ class PlanningCenterScriptureImportTest {
     @Test
     fun `a song with no number is filed under its title`() {
         val created = assertNotNull(
-            viewModel().createLocalSong(SongItem(number = "", title = "No Number", songbook = "Hymnal", lyrics = listOf("l"))),
+            viewModel().createLocalSong(SongItem(
+                number = "",
+                title = "No Number",
+                songbook = "Hymnal",
+                lyrics = listOf("l"),
+            )),
         )
         assertTrue(created.sourceFile.endsWith("No Number.song"))
     }

@@ -98,7 +98,11 @@ class ScreenAssignmentReconcileTest {
     @Test
     fun `the device index is the one in the full device list, not the non-primary list`() {
         // Primary is device 0, so the two extra screens are devices 1 and 2 — never 0 and 1.
-        val result = assertNotNull(reconcileScreenAssignments(listOf(auto(), auto()), listOf(display(1), display(2)), 0))
+        val result = assertNotNull(reconcileScreenAssignments(
+            listOf(auto(), auto()),
+            listOf(display(1), display(2)),
+            0,
+        ))
 
         assertEquals(
             listOf(1, 2), result.map { it.targetDisplay },

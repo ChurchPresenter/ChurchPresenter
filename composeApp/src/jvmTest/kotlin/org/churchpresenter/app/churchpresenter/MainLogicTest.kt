@@ -29,6 +29,7 @@ import kotlin.test.assertTrue
 /**
  * The rules the entry point applies at startup, checked without starting one.
  */
+@Suppress("LargeClass")
 class MainLogicTest {
 
     // ── Renderer ────────────────────────────────────────────────────────────────
@@ -937,7 +938,10 @@ class MainLogicTest {
     @Test
     fun `the QA code points at the tunnel when there is one`() {
         // Only the tunnel URL is reachable from a phone that is not on the venue's WiFi.
-        assertEquals("https://abc.trycloudflare.com/qa", qaQrCodeUrl("https://abc.trycloudflare.com", "http://10.0.0.5:8080"))
+        assertEquals(
+            "https://abc.trycloudflare.com/qa",
+            qaQrCodeUrl("https://abc.trycloudflare.com", "http://10.0.0.5:8080"),
+        )
     }
 
     @Test

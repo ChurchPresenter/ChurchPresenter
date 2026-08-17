@@ -105,7 +105,13 @@ class InstanceLinkClientTest {
 
     private fun connectedClient(callbacks: Callbacks = Callbacks()): Pair<InstanceLinkClient, Callbacks> {
         val client = callbacks.client()
-        client.connect(host = "127.0.0.1", port = port, apiKey = "", deviceId = "test-device", reconnectDelayMs = 60_000)
+        client.connect(
+            host = "127.0.0.1",
+            port = port,
+            apiKey = "",
+            deviceId = "test-device",
+            reconnectDelayMs = 60_000,
+        )
         awaitUntil("CONNECTED") { callbacks.status == InstanceLinkStatus.CONNECTED }
         return client to callbacks
     }
@@ -164,9 +170,18 @@ class InstanceLinkClientTest {
         awaitUntil("DISCONNECTED") { callbacks.status == InstanceLinkStatus.DISCONNECTED }
 
         val scheduleUpdatesAtDisconnect = callbacks.scheduleUpdates
-        server.updateSchedule(listOf(ScheduleItem.LabelItem(id = "l1", text = "Offering", textColor = "#FFFFFF", backgroundColor = "#000000")))
+        server.updateSchedule(listOf(ScheduleItem.LabelItem(
+            id = "l1",
+            text = "Offering",
+            textColor = "#FFFFFF",
+            backgroundColor = "#000000",
+        )))
         Thread.sleep(200) // a bounded settle window to prove a *negative* — nothing more arrives
-        assertEquals(scheduleUpdatesAtDisconnect, callbacks.scheduleUpdates, "a disconnected client must not keep receiving broadcasts")
+        assertEquals(
+            scheduleUpdatesAtDisconnect,
+            callbacks.scheduleUpdates,
+            "a disconnected client must not keep receiving broadcasts",
+        )
         client.dispose()
     }
 
@@ -301,12 +316,20 @@ class InstanceLinkClientTest {
             val asked = mutableListOf<ScheduleItem>()
             collecting(server.onProject) { asked.add(it.item); it.decision.complete(true) }
 
-            val item = ScheduleItem.LabelItem(id = "proj-1", text = "Welcome", textColor = "#FFFFFF", backgroundColor = "#000000")
+            val item = ScheduleItem.LabelItem(
+                id = "proj-1",
+                text = "Welcome",
+                textColor = "#FFFFFF",
+                backgroundColor = "#000000",
+            )
             client.sendProject(item)
 
             awaitUntil("the operator to be asked") { asked.isNotEmpty() }
             assertEquals(item, asked.single())
-            assertTrue(callbacks.commandFailures.isEmpty(), "an approval-gated command acks pending_approval, not a failure")
+            assertTrue(
+                callbacks.commandFailures.isEmpty(),
+                "an approval-gated command acks pending_approval, not a failure",
+            )
         } finally {
             client.dispose()
         }
@@ -319,7 +342,12 @@ class InstanceLinkClientTest {
             val asked = mutableListOf<ScheduleItem>()
             collecting(server.onAddToSchedule) { asked.add(it.item); it.decision.complete(true) }
 
-            val item = ScheduleItem.LabelItem(id = "add-1", text = "Offering", textColor = "#FFFFFF", backgroundColor = "#000000")
+            val item = ScheduleItem.LabelItem(
+                id = "add-1",
+                text = "Offering",
+                textColor = "#FFFFFF",
+                backgroundColor = "#000000",
+            )
             client.sendAddToSchedule(item)
 
             awaitUntil("the operator to be asked") { asked.isNotEmpty() }
@@ -343,7 +371,13 @@ class InstanceLinkClientTest {
     @Test
     fun `fetchSongDetail returns the primary's song, sections included`() {
         server.updateSongs(listOf(
-            SongItem(number = "42", title = "Amazing Grace", songbook = "Hymnal", author = "Newton", lyrics = listOf("Amazing grace"))
+            SongItem(
+                number = "42",
+                title = "Amazing Grace",
+                songbook = "Hymnal",
+                author = "Newton",
+                lyrics = listOf("Amazing grace"),
+            )
         ))
         val (client, _) = connectedClient()
         try {
@@ -374,7 +408,10 @@ class InstanceLinkClientTest {
         try {
             val bytes = runBlocking { client.fetchBibleFile() }
             assertNotNull(bytes)
-            assertTrue(bytes.decodeToString().contains("Genesis"), "expected the fixture's own book name in the downloaded bytes")
+            assertTrue(
+                bytes.decodeToString().contains("Genesis"),
+                "expected the fixture's own book name in the downloaded bytes",
+            )
         } finally {
             client.dispose()
         }
@@ -389,7 +426,10 @@ class InstanceLinkClientTest {
         try {
             val bytes = runBlocking { client.fetchSecondaryBibleFile() }
             assertNotNull(bytes)
-            assertTrue(bytes.decodeToString().contains("Genesis"), "expected the fixture's own book name in the downloaded bytes")
+            assertTrue(
+                bytes.decodeToString().contains("Genesis"),
+                "expected the fixture's own book name in the downloaded bytes",
+            )
         } finally {
             client.dispose()
         }
@@ -440,7 +480,12 @@ class InstanceLinkClientTest {
         val dir = Files.createTempDirectory("cp-instance-link-pictures-test").toFile()
         val imageBytes = byteArrayOf(1, 2, 3, 4)
         val imageFile = java.io.File(dir, "photo.jpg").apply { writeBytes(imageBytes) }
-        server.updatePictures(folderId = "folder-1", folderName = "Folder", folderPath = dir.absolutePath, imageFiles = listOf(imageFile))
+        server.updatePictures(
+            folderId = "folder-1",
+            folderName = "Folder",
+            folderPath = dir.absolutePath,
+            imageFiles = listOf(imageFile),
+        )
         val (client, _) = connectedClient()
         try {
             val bytes = runBlocking { client.fetchPictureImageBytes("folder-1", 0) }
@@ -491,10 +536,19 @@ class InstanceLinkClientTest {
         val dir = Files.createTempDirectory("cp-instance-link-presentation-test").toFile()
         val slideBytes = byteArrayOf(5, 6, 7)
         val slideFile = java.io.File(dir, "slide0.jpg").apply { writeBytes(slideBytes) }
-        server.updatePresentation(id = "pres-1", filePath = "", fileName = "Test.pptx", fileType = "pptx", slideFiles = listOf(slideFile))
+        server.updatePresentation(
+            id = "pres-1",
+            filePath = "",
+            fileName = "Test.pptx",
+            fileType = "pptx",
+            slideFiles = listOf(slideFile),
+        )
         val (client, _) = connectedClient()
         try {
-            awaitUntil("presentation to be published") { runBlocking { client.fetchPresentationSlideBytes("pres-1", 0) } != null }
+            awaitUntil("presentation to be published") { runBlocking { client.fetchPresentationSlideBytes(
+                "pres-1",
+                0,
+            ) } != null }
             val bytes = runBlocking { client.fetchPresentationSlideBytes("pres-1", 0) }
             assertEquals(slideBytes.toList(), bytes?.toList())
         } finally {

@@ -174,6 +174,10 @@ class RecentPictureFoldersLogicTest {
 
         RecentPictureFolders.load()
 
-        assertEquals(listOf(path("Untouched")), RecentPictureFolders.folders, "a bad file must not wipe what was already there")
+        assertEquals(
+            listOf(path("Untouched")),
+            RecentPictureFolders.folders,
+            "a bad file must not wipe what was already there",
+        )
     }
 }

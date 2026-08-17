@@ -115,8 +115,14 @@ class StockMediaBrowserContentTest {
                 MaterialTheme {
                     var key by remember { mutableStateOf(pexelsApiKey) }
                     var tab by remember { mutableStateOf(0) }
-                    val pexelsVm = remember { StockMediaViewModel(StockMediaClient.StockMediaType.PHOTO, StockMediaClient.StockSource.PEXELS) }
-                    val pixabayVm = remember { StockMediaViewModel(StockMediaClient.StockMediaType.PHOTO, StockMediaClient.StockSource.PIXABAY) }
+                    val pexelsVm = remember { StockMediaViewModel(
+                        StockMediaClient.StockMediaType.PHOTO,
+                        StockMediaClient.StockSource.PEXELS,
+                    ) }
+                    val pixabayVm = remember { StockMediaViewModel(
+                        StockMediaClient.StockMediaType.PHOTO,
+                        StockMediaClient.StockSource.PIXABAY,
+                    ) }
                     StockMediaBrowserDialogContent(
                         titleRes = Res.string.stock_photo_browse_photos_title,
                         searchPlaceholderRes = Res.string.stock_photo_search_placeholder_photo,
@@ -250,7 +256,8 @@ class StockMediaBrowserContentTest {
     // ── Loading indicator ────────────────────────────────────────────────────────
 
     @Test
-    fun `a spinner shows while a search is in flight and clears once it resolves`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+    fun `a spinner shows while a search is in flight and clears once it resolves`() =
+        dialog(pexelsApiKey = "a-key") { _, _ ->
         coEvery { StockMediaClient.fetchThumbnailBytes(any(), any()) } returns tinyPngBytes()
         val gate = CompletableDeferred<StockMediaClient.SearchOutcome>()
         coEvery { StockMediaClient.search(any(), any(), any(), any(), any(), any()) } coAnswers { gate.await() }
@@ -350,9 +357,14 @@ class StockMediaBrowserContentTest {
     // ── Downloading ───────────────────────────────────────────────────────────────
 
     @Test
-    fun `downloading a result invokes the onMediaDownloaded callback with the saved file's path`() = dialog(pexelsApiKey = "a-key") { _, downloaded ->
+    fun `downloading a result invokes the onMediaDownloaded callback with the saved file's path`() =
+        dialog(pexelsApiKey = "a-key") { _, downloaded ->
         val saved = File.createTempFile("stock", ".jpg").also { it.deleteOnExit() }
-        coEvery { StockMediaClient.download(any(), any(), any()) } returns StockMediaClient.DownloadOutcome.Success(saved)
+        coEvery { StockMediaClient.download(
+            any(),
+            any(),
+            any(),
+        ) } returns StockMediaClient.DownloadOutcome.Success(saved)
         searchReturns(StockMediaClient.SearchOutcome.Success(listOf(item("1")), hasMore = false))
 
         onNodeWithText("Search for photos…").performTextInput("worship")
@@ -367,7 +379,8 @@ class StockMediaBrowserContentTest {
     }
 
     @Test
-    fun `a downloading tile shows a spinner on its own download button while it runs`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+    fun `a downloading tile shows a spinner on its own download button while it runs`() =
+        dialog(pexelsApiKey = "a-key") { _, _ ->
         coEvery { StockMediaClient.fetchThumbnailBytes(any(), any()) } returns tinyPngBytes()
         val gate = CompletableDeferred<StockMediaClient.DownloadOutcome>()
         coEvery { StockMediaClient.download(any(), any(), any()) } coAnswers { gate.await() }

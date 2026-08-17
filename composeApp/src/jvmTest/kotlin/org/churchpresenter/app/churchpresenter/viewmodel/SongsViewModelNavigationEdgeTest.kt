@@ -64,7 +64,12 @@ class SongsViewModelNavigationEdgeTest {
     }
 
     private fun viewModel(): SongsViewModel {
-        val vm = SongsViewModel(AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined, enableFolderWatcher = false)
+        val vm = SongsViewModel(
+            AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        )
         created.add(vm)
         // Immediate dispatchers, so the load is done by the time the constructor returns.
         if (vm.filteredSongItems.value.isEmpty()) throw AssertionError("songs did not load synchronously")

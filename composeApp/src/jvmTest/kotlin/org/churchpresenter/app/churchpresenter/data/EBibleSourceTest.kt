@@ -65,7 +65,11 @@ class EBibleSourceTest {
     private fun csv(vararg rows: String) = (listOf(header) + rows).joinToString("\n")
 
     private fun httpServing(body: String, status: HttpStatusCode = HttpStatusCode.OK) = HttpClient(
-        MockEngine { respond(content = body, status = status, headers = headersOf(HttpHeaders.ContentType, "text/csv")) },
+        MockEngine { respond(
+            content = body,
+            status = status,
+            headers = headersOf(HttpHeaders.ContentType, "text/csv"),
+        ) },
     )
 
     private fun httpServingBytes(body: ByteArray, status: HttpStatusCode = HttpStatusCode.OK) = HttpClient(
@@ -85,6 +89,7 @@ class EBibleSourceTest {
     // --- language names ---
 
     /** The real catalogue publishes both an English name and the language's own name for itself. */
+    @Suppress("MaxLineLength")
     private val namedHeader =
         "languageCode,translationId,languageName,languageNameInEnglish,shortTitle,title,Copyright,Redistributable,downloadable,UpdateDate"
 
@@ -131,7 +136,8 @@ class EBibleSourceTest {
 
     @Test
     fun `the published book counts are read so the testament need not be guessed`() {
-        val header = "languageCode,translationId,shortTitle,OTbooks,NTbooks,Copyright,Redistributable,downloadable,UpdateDate"
+        val header =
+            "languageCode,translationId,shortTitle,OTbooks,NTbooks,Copyright,Redistributable,downloadable,UpdateDate"
         val body = listOf(
             header,
             "ach,achNT,New Testament in Achi,0,27,PD,True,True,2020-01-01",
@@ -179,7 +185,10 @@ class EBibleSourceTest {
             if (value == null) System.clearProperty(stagingProperty) else System.setProperty(stagingProperty, value)
             block()
         } finally {
-            if (original == null) System.clearProperty(stagingProperty) else System.setProperty(stagingProperty, original)
+            if (original == null) System.clearProperty(stagingProperty) else System.setProperty(
+                stagingProperty,
+                original,
+            )
         }
     }
 
@@ -452,7 +461,11 @@ class EBibleSourceTest {
 
         val offline = fetch(httpFailing(), now = 1_000L)
 
-        assertEquals(BibleCatalogOutcome.NetworkError, offline, "an empty cache must not be reported as a stale success")
+        assertEquals(
+            BibleCatalogOutcome.NetworkError,
+            offline,
+            "an empty cache must not be reported as a stale success",
+        )
     }
 
     @Test
@@ -469,7 +482,11 @@ class EBibleSourceTest {
             fetch(httpServing(csv("eng,engnet,NET,,public domain,True,True,2024-01-01")), now = muchLater),
         )
 
-        assertEquals("engnet", outcome.modules.single().identifier, "a stale age must not serve the old cache unrefreshed")
+        assertEquals(
+            "engnet",
+            outcome.modules.single().identifier,
+            "a stale age must not serve the old cache unrefreshed",
+        )
     }
 
     @Test

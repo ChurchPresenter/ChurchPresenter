@@ -711,7 +711,10 @@ class XdgPortalRequestTest {
 
     @Test
     fun `a save takes the one path the portal named`() {
-        assertEquals(Path("/home/leader/sunday.cps"), XdgFileChooser.saveSelection(listOf(Path("/home/leader/sunday.cps"))))
+        assertEquals(
+            Path("/home/leader/sunday.cps"),
+            XdgFileChooser.saveSelection(listOf(Path("/home/leader/sunday.cps"))),
+        )
     }
 
     @Test
