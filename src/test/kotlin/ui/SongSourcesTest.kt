@@ -37,8 +37,24 @@ class SongSourcesTest {
 
     @Test
     fun `an empty query lists everything, in rail order`() {
-        assertEquals(SongSources.all, SongSources.matching(""))
-        assertEquals(SongSources.all, SongSources.matching("   "))
+        assertEquals(SongSources.visible, SongSources.matching(""))
+        assertEquals(SongSources.visible, SongSources.matching("   "))
+    }
+
+    @Test
+    fun `a hidden format is not reachable from the rail, by name or by extension`() {
+        for (source in SongSources.all.filter { it.hidden }) {
+            assertTrue(SongSources.matching(source.name).isEmpty(), source.id)
+            assertTrue(SongSources.matching(source.ext).isEmpty(), source.id)
+            assertTrue(source !in SongSources.visible, source.id)
+        }
+    }
+
+    @Test
+    fun `a hidden format keeps the converter behind it`() {
+        val hidden = SongSources.all.filter { it.hidden }.map { it.id }
+        assertEquals(listOf("easyworship", "mediashout", "propresenter"), hidden)
+        assertTrue(hidden.all { id -> SongFormatConverters.all.any { it.id == id } }, hidden.toString())
     }
 
     @Test
