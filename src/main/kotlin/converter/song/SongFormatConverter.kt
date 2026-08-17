@@ -61,10 +61,13 @@ object SongFormatConverters {
     val all: List<SongFormatConverter> =
         listOf(
             EasySlidesFormat,
+            EasyWorshipFormat,
             FreeShowFormat,
             FreeWorshipFormat,
+            MediaShoutFormat,
             OpenLpFormat,
             OpenSongFormat,
+            ProPresenterFormat,
             QueleaFormat,
             SoftProjectorFormat,
             SongBeamerFormat,
@@ -116,6 +119,72 @@ object FreeWorshipFormat : SongFormatConverter {
 }
 
 /** OpenLP libraries: either the `songs.sqlite` database itself or an OpenLyrics XML export. */
+/**
+ * ProPresenter documents, versions 4 through 7 — one song per file.
+ *
+ * `.pro` is version 7 and is protocol buffers; the numbered extensions are XML. One entry covers
+ * both because to the person importing they are the same program.
+ */
+object ProPresenterFormat : SongFormatConverter {
+    override val id = "propresenter"
+    override val extensions = listOf("pro", "pro4", "pro5", "pro6")
+    override val needsOutputFolder = false
+
+    override fun convert(input: File, outputDir: File?): SongConversionResult {
+        val outFile = File(outputDir ?: input.parentFile, outputNameFor(input))
+        ProPresenterConverter.convert(input, outFile)
+        return SongConversionResult(listOf(outFile))
+    }
+
+    override fun describe(input: File): SongPreviewInfo {
+        val song = ProPresenterConverter.parse(input)
+        return SongPreviewInfo(song.title, sectionCount = song.sections.size)
+    }
+
+    override fun outputNameFor(input: File) = input.nameWithoutExtension + ".song"
+}
+
+/**
+ * EasyWorship libraries and schedules — one input becomes a folder of songs.
+ *
+ * A library is a pair of files rather than one, so a directory is accepted as well: pointing at the
+ * EasyWorship data folder finds `Songs.db` and its `SongWords.db` together, which is what people
+ * have when they copy their library off the old machine.
+ */
+object EasyWorshipFormat : SongFormatConverter {
+    override val id = "easyworship"
+    override val extensions = listOf("db", "ews", "ewsx")
+    override val needsOutputFolder = true
+
+    override fun convert(input: File, outputDir: File?): SongConversionResult {
+        requireNotNull(outputDir) { "EasyWorship libraries need an output folder" }
+        return EasyWorshipConverter.convert(input, File(outputDir, outputNameFor(input)))
+    }
+
+    override fun describe(input: File): SongPreviewInfo =
+        SongPreviewInfo(input.nameWithoutExtension, songCount = EasyWorshipConverter.parse(input).size)
+
+    override fun outputNameFor(input: File): String =
+        if (input.isDirectory) input.name else input.nameWithoutExtension
+}
+
+/** MediaShout 7 scripts — one script becomes a folder holding each of its songs. */
+object MediaShoutFormat : SongFormatConverter {
+    override val id = "mediashout"
+    override val extensions = listOf("sc7x", "sc7")
+    override val needsOutputFolder = true
+
+    override fun convert(input: File, outputDir: File?): SongConversionResult {
+        requireNotNull(outputDir) { "MediaShout scripts need an output folder" }
+        return MediaShoutConverter.convert(input, File(outputDir, outputNameFor(input)))
+    }
+
+    override fun describe(input: File): SongPreviewInfo =
+        SongPreviewInfo(input.nameWithoutExtension, songCount = MediaShoutConverter.parse(input).size)
+
+    override fun outputNameFor(input: File): String = input.nameWithoutExtension
+}
+
 object OpenLpFormat : SongFormatConverter {
     override val id = "openlp"
     override val extensions = listOf("xml", "sqlite", "db")

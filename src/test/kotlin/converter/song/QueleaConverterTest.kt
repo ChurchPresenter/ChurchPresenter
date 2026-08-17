@@ -147,4 +147,132 @@ class QueleaConverterTest {
         assertTrue(text.contains("title: Amazing Grace"), text)
         assertTrue(text.contains("copyright: Public Domain 1779"), text)
     }
+
+    @Test
+    fun `the heading in the body names the section, not the file's own numbering`() {
+        val file = pack(
+            "songs.qsp",
+            mapOf(
+                "1.xml" to songXml(
+                    "Abba",
+                    "Verse 1" to "Verse 1\nYou're more real than the ground",
+                    "Verse 2" to "Pre-chorus\nYour thoughts define me",
+                    "Verse 3" to "Chorus\nAbba, I belong to You",
+                ),
+            ),
+        )
+
+        val sections = QueleaConverter.parse(file).single().sections
+
+        assertEquals(listOf("Verse 1", "Pre-Chorus", "Chorus"), sections.map { it.label })
+        assertEquals(listOf("You're more real than the ground"), sections.first().lines)
+    }
+
+    @Test
+    fun `a heading written with a colon and no space still names the section`() {
+        val file = pack(
+            "songs.qsp",
+            mapOf("1.xml" to songXml("Grace", "Verse 3" to "VERSE1:\nNO LONGER ASHAMED", "Verse 4" to "PRE-CHORUS:\nYOU SAVE")),
+        )
+
+        assertEquals(
+            listOf("Verse 1", "Pre-Chorus"),
+            QueleaConverter.parse(file).single().sections.map { it.label },
+        )
+    }
+
+    @Test
+    fun `a row of chords is kept as chords rather than sung as a line`() {
+        val file = pack(
+            "songs.qsp",
+            mapOf("1.xml" to songXml("Abba", "Verse 1" to "Chorus\nBb Bb/D Eb Bb/D Cm\nAbba, I belong to You")),
+        )
+
+        val section = QueleaConverter.parse(file).single().sections.single()
+
+        assertEquals("Chorus", section.label)
+        assertEquals(listOf("[Bb] [Bb/D] [Eb] [Bb/D] [Cm]", "Abba, I belong to You"), section.lines)
+    }
+
+    @Test
+    fun `a section that only points at another one is dropped`() {
+        val file = pack(
+            "songs.qsp",
+            mapOf(
+                "1.xml" to songXml(
+                    "Abba",
+                    "Verse 1" to "Chorus\nAbba, I belong to You",
+                    "Verse 2" to "[Chorus]",
+                    "Verse 3" to "Bridge 1\nYou came running",
+                ),
+            ),
+        )
+
+        val sections = QueleaConverter.parse(file).single().sections
+
+        // "Bridge 1" tidies to "Bridge": the song has only one.
+        assertEquals(listOf("Chorus", "Bridge"), sections.map { it.label })
+    }
+
+    @Test
+    fun `a lyric that ends in a colon is not mistaken for a heading`() {
+        val file = pack(
+            "songs.qsp",
+            mapOf(
+                "1.xml" to songXml(
+                    "This Is My Father's World",
+                    "Verse 1" to "This is my Father's world:\nand to my listening ears",
+                ),
+            ),
+        )
+
+        val section = QueleaConverter.parse(file).single().sections.single()
+
+        assertEquals("Verse 1", section.label)
+        assertEquals(listOf("This is my Father's world:", "and to my listening ears"), section.lines)
+    }
+
+    @Test
+    fun `a song that names no section keeps the titles the file gives`() {
+        val file = pack(
+            "songs.qsp",
+            mapOf("1.xml" to songXml("Grace", "Verse 1" to "Amazing grace", "Chorus" to "Praise the Lord")),
+        )
+
+        assertEquals(
+            listOf("Verse 1", "Chorus"),
+            QueleaConverter.parse(file).single().sections.map { it.label },
+        )
+    }
+
+    @Test
+    fun `an unnamed section carries on from the one above it`() {
+        val file = pack(
+            "songs.qsp",
+            mapOf(
+                "1.xml" to songXml(
+                    "Grace",
+                    "Verse 1" to "Chorus:\nAND YOU GIVE ME BEAUTY FOR ASHES",
+                    "Verse 2" to "AND YOU GIVE ME BEAUTY FOR ASHES",
+                ),
+            ),
+        )
+
+        assertEquals(
+            listOf("Chorus", "Chorus"),
+            QueleaConverter.parse(file).single().sections.map { it.label },
+        )
+    }
+
+    @Test
+    fun `an older pack storing the whole song as text is read by its headings`() {
+        val xml = "<song><title>Grace</title><lyrics>Verse 1\nAmazing grace\n\n" +
+            "Chorus\nPraise the Lord</lyrics></song>"
+        val file = File(temp, "old.xml").apply { writeText(xml, Charsets.UTF_8) }
+
+        val sections = QueleaConverter.parse(file).single().sections
+
+        assertEquals(listOf("Verse 1", "Chorus"), sections.map { it.label })
+        assertEquals(listOf("Amazing grace"), sections.first().lines)
+    }
 }
