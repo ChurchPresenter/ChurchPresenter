@@ -57,7 +57,10 @@ class DictionaryPresenterRenderTest {
 
     @Test
     fun `an entry shows its word and definition`() = runDict(elohim) {
-        onNodeWithText("ʼĕlôhîym", substring = true).assertExists("the original-language word is the point of the slide")
+        onNodeWithText(
+            "ʼĕlôhîym",
+            substring = true,
+        ).assertExists("the original-language word is the point of the slide")
         onNodeWithText("the supreme God", substring = true).assertExists("the definition must reach the screen")
     }
 
@@ -144,7 +147,14 @@ class DictionaryPresenterRenderTest {
 
     @Test
     fun `an entry with nothing but a number shows only the number`() = runDict(
-        StrongsEntry(number = "H9999", word = "", transliteration = "", pronunciation = "", definition = "", kjvUsage = ""),
+        StrongsEntry(
+            number = "H9999",
+            word = "",
+            transliteration = "",
+            pronunciation = "",
+            definition = "",
+            kjvUsage = "",
+        ),
     ) {
         // Every field of the entry is switched on, so what is missing is the entry's own content —
         // an empty field must draw nothing rather than an empty line pushing the layout around.
@@ -169,7 +179,10 @@ class DictionaryPresenterRenderTest {
     }
 
     @Test
-    fun `an italic word still reads the same`() = runDict(elohim, DictionarySettings(wordItalic = true, wordBold = true)) {
+    fun `an italic word still reads the same`() = runDict(
+        elohim,
+        DictionarySettings(wordItalic = true, wordBold = true),
+    ) {
         onNodeWithText("ʼĕlôhîym", substring = true).assertExists()
     }
 

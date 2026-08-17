@@ -78,7 +78,10 @@ class LowerThirdSettingsTabScreenshotTest {
     @Test
     fun `the window insets set`() = shoot(
         "window_insets",
-        settings = withPresets(PRESETS.size, StreamingSettings(windowTop = 40, windowLeft = 120, windowRight = 60, windowBottom = 24)),
+        settings = withPresets(
+            PRESETS.size,
+            StreamingSettings(windowTop = 40, windowLeft = 120, windowRight = 60, windowBottom = 24),
+        ),
     )
 
     /**
@@ -91,7 +94,8 @@ class LowerThirdSettingsTabScreenshotTest {
     @Test
     fun `a taller band`() = shoot(
         "band_60_percent",
-        settings = withPresets(PRESETS.size).copy(projectionSettings = ProjectionSettings(lowerThirdHeightPercent = 60)),
+        settings =
+            withPresets(PRESETS.size).copy(projectionSettings = ProjectionSettings(lowerThirdHeightPercent = 60)),
     )
 
     // ── Driving ─────────────────────────────────────────────────────────────────────────────────

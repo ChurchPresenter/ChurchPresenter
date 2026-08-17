@@ -52,7 +52,10 @@ class BibleTabControlsTest {
 
     @Test
     fun `the continuation-speed chip cycles from Balanced to Fast and back`() {
-        bibleTab(settings = { it.copy(bibleEngineSettings = BibleEngineSettings(enabled = true)) }, stt = connectedStt()) { vm, reports ->
+        bibleTab(
+            settings = { it.copy(bibleEngineSettings = BibleEngineSettings(enabled = true)) },
+            stt = connectedStt(),
+        ) { vm, reports ->
             assertEquals(ContinuationSpeed.BALANCED, vm.continuationSpeed.value)
 
             onNodeWithText("Next verse speed: Balanced").performClick()

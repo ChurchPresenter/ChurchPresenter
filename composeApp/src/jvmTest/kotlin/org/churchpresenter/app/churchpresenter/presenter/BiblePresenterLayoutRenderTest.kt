@@ -64,7 +64,10 @@ class BiblePresenterLayoutRenderTest {
                 )
             }
         }
-        onNodeWithText("For God so loved the world", substring = true).assertExists("the band must show the verse on air")
+        onNodeWithText(
+            "For God so loved the world",
+            substring = true,
+        ).assertExists("the band must show the verse on air")
         onNodeWithText("John 3:16", substring = true).assertExists("the lower third still needs its reference")
     }
 
@@ -83,7 +86,10 @@ class BiblePresenterLayoutRenderTest {
                 )
             }
         }
-        onNodeWithText("For God so loved the world", substring = true).assertExists("the band must carry the primary translation")
+        onNodeWithText(
+            "For God so loved the world",
+            substring = true,
+        ).assertExists("the band must carry the primary translation")
         onNodeWithText("Ибо так возлюбил Бог мир", substring = true)
             .assertExists("the lower-third secondary-translation style path must render the second language too")
     }
@@ -163,7 +169,8 @@ class BiblePresenterLayoutRenderTest {
     }
 
     @Test
-    fun `a full-screen translation asking for an abbreviation it does not have shows the reference alone`() = runComposeUiTest {
+    fun `a full-screen translation asking for an abbreviation it does not have shows the reference alone`() =
+        runComposeUiTest {
         // Same rule on the full-screen path, which builds its reference in a different place.
         val settings = AppSettings(
             bibleSettings = BibleSettings().withTranslations(
@@ -203,7 +210,13 @@ class BiblePresenterLayoutRenderTest {
                 BiblePresenter(
                     selectedVerses = listOf(
                         verse("For God so loved the world", 16, fileName = "kjv.spb"),
-                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "", fileName = "untitled.spb"),
+                        verse(
+                            "Ибо так возлюбил Бог мир",
+                            16,
+                            book = "Иоанна",
+                            abbreviation = "",
+                            fileName = "untitled.spb",
+                        ),
                     ),
                     appSettings = settings,
                     isLowerThird = true,
@@ -212,7 +225,10 @@ class BiblePresenterLayoutRenderTest {
         }
 
         onNodeWithText("KJV John 3:16", substring = true).assertExists("the side that has one still shows it")
-        onNodeWithText("Иоанна 3:16", substring = true).assertExists("and the side that does not still shows its reference")
+        onNodeWithText(
+            "Иоанна 3:16",
+            substring = true,
+        ).assertExists("and the side that does not still shows its reference")
     }
 
     @Test
@@ -233,7 +249,13 @@ class BiblePresenterLayoutRenderTest {
                 BiblePresenter(
                     selectedVerses = listOf(
                         verse("For God so loved the world", 16, fileName = "kjv.spb").copy(verseRange = "16-17"),
-                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb")
+                        verse(
+                            "Ибо так возлюбил Бог мир",
+                            16,
+                            book = "Иоанна",
+                            abbreviation = "RST",
+                            fileName = "rst.spb",
+                        )
                             .copy(verseRange = "16-17"),
                     ),
                     appSettings = settings,
@@ -263,8 +285,20 @@ class BiblePresenterLayoutRenderTest {
                 BiblePresenter(
                     selectedVerses = listOf(
                         verse("For God so loved the world", 16, fileName = "kjv.spb"),
-                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb"),
-                        verse("Also sehr liebte Gott", 16, book = "Johannes", abbreviation = "LUT", fileName = "lut.spb"),
+                        verse(
+                            "Ибо так возлюбил Бог мир",
+                            16,
+                            book = "Иоанна",
+                            abbreviation = "RST",
+                            fileName = "rst.spb",
+                        ),
+                        verse(
+                            "Also sehr liebte Gott",
+                            16,
+                            book = "Johannes",
+                            abbreviation = "LUT",
+                            fileName = "lut.spb",
+                        ),
                     ),
                     appSettings = settings,
                     isLowerThird = true,
@@ -522,7 +556,13 @@ class BiblePresenterLayoutRenderTest {
                 BiblePresenter(
                     selectedVerses = listOf(
                         verse("For God so loved the world", 16, fileName = "kjv.spb"),
-                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb"),
+                        verse(
+                            "Ибо так возлюбил Бог мир",
+                            16,
+                            book = "Иоанна",
+                            abbreviation = "RST",
+                            fileName = "rst.spb",
+                        ),
                     ),
                     appSettings = settings,
                     isLowerThird = true,
@@ -549,7 +589,13 @@ class BiblePresenterLayoutRenderTest {
                 BiblePresenter(
                     selectedVerses = listOf(
                         verse("For God so loved the world", 16, fileName = "kjv.spb"),
-                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb"),
+                        verse(
+                            "Ибо так возлюбил Бог мир",
+                            16,
+                            book = "Иоанна",
+                            abbreviation = "RST",
+                            fileName = "rst.spb",
+                        ),
                     ),
                     appSettings = settings,
                 )
@@ -575,7 +621,13 @@ class BiblePresenterLayoutRenderTest {
                 BiblePresenter(
                     selectedVerses = listOf(
                         verse("For God so loved the world", 16, fileName = "kjv.spb"),
-                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb"),
+                        verse(
+                            "Ибо так возлюбил Бог мир",
+                            16,
+                            book = "Иоанна",
+                            abbreviation = "RST",
+                            fileName = "rst.spb",
+                        ),
                     ),
                     appSettings = settings,
                     isLowerThird = true,
@@ -589,7 +641,8 @@ class BiblePresenterLayoutRenderTest {
     }
 
     @Test
-    fun `a verse arriving with a second translation this output never asked for shows only the first`() = runComposeUiTest {
+    fun `a verse arriving with a second translation this output never asked for shows only the first`() =
+        runComposeUiTest {
         val settings = AppSettings(
             bibleSettings = BibleSettings().withTranslations(
                 listOf(BibleTranslationSettings(fileName = "kjv.spb")),
@@ -600,7 +653,13 @@ class BiblePresenterLayoutRenderTest {
                 BiblePresenter(
                     selectedVerses = listOf(
                         verse("For God so loved the world", 16, fileName = "kjv.spb"),
-                        verse("Ибо так возлюбил Бог мир", 16, book = "Иоанна", abbreviation = "RST", fileName = "rst.spb"),
+                        verse(
+                            "Ибо так возлюбил Бог мир",
+                            16,
+                            book = "Иоанна",
+                            abbreviation = "RST",
+                            fileName = "rst.spb",
+                        ),
                     ),
                     appSettings = settings,
                 )

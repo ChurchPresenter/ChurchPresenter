@@ -191,6 +191,7 @@ class StockMediaClientTest {
     // ── Pixabay photos ──────────────────────────────────────────────────────────
 
     @Test
+    @Suppress("MaxLineLength")
     fun `a pixabay photo is listed with a preview and a large download`() {
         respondWith(
             """{"hits":[{"id":999,"previewURL":"https://img/prev.jpg","largeImageURL":"https://img/large.jpg"}],"totalHits":1}""",
@@ -264,7 +265,11 @@ class StockMediaClientTest {
         search(pexels, photo, key = "my-pexels-key", query = "autumn leaves", page = 3)
 
         val request = requests.single()
-        assertEquals("my-pexels-key", request.headers[HttpHeaders.Authorization], "Pexels rejects the request without it")
+        assertEquals(
+            "my-pexels-key",
+            request.headers[HttpHeaders.Authorization],
+            "Pexels rejects the request without it",
+        )
         assertEquals("autumn leaves", request.url.parameters["query"])
         assertEquals("3", request.url.parameters["page"])
         assertEquals("landscape", request.url.parameters["orientation"], "a portrait background does not fill a screen")
@@ -404,7 +409,11 @@ class StockMediaClientTest {
     fun `a downloaded video is named as one`() {
         respondWithBytes("mp4-bytes".toByteArray())
 
-        val outcome = runBlocking { StockMediaClient.download(item(id = "77", source = pixabay, isVideo = true, url = "https://v/hd.mp4"), http = http, downloadDir = downloadDir) }
+        val outcome = runBlocking { StockMediaClient.download(
+            item(id = "77", source = pixabay, isVideo = true, url = "https://v/hd.mp4"),
+            http = http,
+            downloadDir = downloadDir,
+        ) }
 
         assertEquals(
             "pixabay_77.mp4",
@@ -427,14 +436,20 @@ class StockMediaClientTest {
     fun `a refused download is reported as a failure`() {
         http = HttpClient(MockEngine { respondError(HttpStatusCode.NotFound) })
 
-        assertEquals(StockMediaClient.DownloadOutcome.Failure, runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) })
+        assertEquals(
+            StockMediaClient.DownloadOutcome.Failure,
+            runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) },
+        )
     }
 
     @Test
     fun `a download that never connects is told apart from one that was refused`() {
         failToConnect()
 
-        assertEquals(StockMediaClient.DownloadOutcome.NetworkError, runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) })
+        assertEquals(
+            StockMediaClient.DownloadOutcome.NetworkError,
+            runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) },
+        )
     }
 
     @Test

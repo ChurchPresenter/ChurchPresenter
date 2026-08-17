@@ -57,7 +57,12 @@ class PlanningCenterClientNetworkTest {
     fun `an authorization code is exchanged for a token set`() {
         respondWith("""{"access_token":"tok-abc","refresh_token":"ref-abc","expires_in":7200}""")
 
-        val outcome = runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "the-code", http = http) }
+        val outcome = runBlocking { PlanningCenterClient.exchangeCodeForToken(
+            "cid",
+            "csecret",
+            "the-code",
+            http = http,
+        ) }
 
         val tokens = assertIs<PlanningCenterClient.TokenOutcome.Success>(outcome, "got $outcome").tokens
         assertEquals("tok-abc", tokens.accessToken)
@@ -147,7 +152,9 @@ class PlanningCenterClientNetworkTest {
 
     @Test
     fun `the connected person's name comes from the name attribute when present`() {
-        respondWith("""{"data":{"id":"1","attributes":{"name":"Pat Ringer","first_name":"Pat","last_name":"Ringer"}}}""")
+        respondWith(
+            """{"data":{"id":"1","attributes":{"name":"Pat Ringer","first_name":"Pat","last_name":"Ringer"}}}""",
+        )
 
         val outcome = runBlocking { PlanningCenterClient.getCurrentPerson("tok", http = http) }
 
@@ -280,8 +287,11 @@ class PlanningCenterClientNetworkTest {
     // ── Upcoming plans ──────────────────────────────────────────────────────────
 
     @Test
+    @Suppress("MaxLineLength")
     fun `a plan's title comes from the title attribute when present`() {
-        respondWith("""{"data":[{"id":"9","attributes":{"title":"Easter Sunday","dates":"April 12, 2026","series_title":"Easter"}}]}""")
+        respondWith(
+            """{"data":[{"id":"9","attributes":{"title":"Easter Sunday","dates":"April 12, 2026","series_title":"Easter"}}]}""",
+        )
 
         val plans = assertIs<PlanningCenterClient.PlansOutcome.Success>(
             runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
@@ -455,6 +465,7 @@ class PlanningCenterClientNetworkTest {
     // ── Arrangement lyrics ──────────────────────────────────────────────────────
 
     @Test
+    @Suppress("MaxLineLength")
     fun `pco's own lyrics attribute is preferred over locally stripping the chord chart`() {
         respondWith(
             """{"data":{"attributes":{"chord_chart":"[G]Amazing [C]grace","lyrics":"Amazing grace (server stripped)"}}}""",
@@ -520,6 +531,7 @@ class PlanningCenterClientNetworkTest {
     // ── Item attachments ────────────────────────────────────────────────────────
 
     @Test
+    @Suppress("MaxLineLength")
     fun `an attachment is read with its thumbnail when one is present`() {
         respondWith(
             """{"data":[{"id":"att-1","attributes":{"filename":"slides.pdf","thumbnail_url":"https://s3/thumb.jpg"}}]}""",
@@ -731,7 +743,13 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{"meta":{"total_count":0}}""")
         assertTrue(
             assertIs<PlanningCenterClient.AttachmentsOutcome.Success>(
-                runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+                runBlocking { PlanningCenterClient.getItemAttachments(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    "item-1",
+                    http = http,
+                ) },
             ).attachments.isEmpty(),
         )
     }
@@ -816,7 +834,13 @@ class PlanningCenterClientNetworkTest {
 
         assertTrue(
             assertIs<PlanningCenterClient.AttachmentsOutcome.Success>(
-                runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+                runBlocking { PlanningCenterClient.getItemAttachments(
+                    "tok",
+                    "svc-1",
+                    "plan-1",
+                    "item-1",
+                    http = http,
+                ) },
             ).attachments.isEmpty(),
         )
     }

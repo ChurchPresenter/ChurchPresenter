@@ -221,7 +221,8 @@ class AppPreviewOutputScreenshotTest {
                 transliteration = "chêçêd",
                 pronunciation = "kheh'-sed",
                 definition = "kindness; by implication (towards God) piety; rarely (by opposition) reproof",
-                kjvUsage = "favour, good deed(-liness, -ness), kindly, (loving-) kindness, merciful (kindness), mercy, pity",
+                kjvUsage =
+                    "favour, good deed(-liness, -ness), kindly, (loving-) kindness, merciful (kindness), mercy, pity",
             ),
             dictionarySettings = settings().dictionarySettings,
         )

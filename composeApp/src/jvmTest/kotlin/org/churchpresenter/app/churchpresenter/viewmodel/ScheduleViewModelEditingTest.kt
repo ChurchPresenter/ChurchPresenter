@@ -277,13 +277,31 @@ class ScheduleViewModelEditingTest {
         ScheduleItem.SongItem(id = "song", songNumber = 1, title = "Song", songbook = "Hymnal"),
         ScheduleItem.BibleVerseItem(id = "bible", bookName = "John", chapter = 3, verseNumber = 16, verseText = "…"),
         ScheduleItem.PictureItem(id = "picture", folderPath = "/pics", folderName = "Pics", imageCount = 3),
-        ScheduleItem.PresentationItem(id = "deck", filePath = "/d.pptx", fileName = "d.pptx", slideCount = 5, fileType = "pptx"),
+        ScheduleItem.PresentationItem(
+            id = "deck",
+            filePath = "/d.pptx",
+            fileName = "d.pptx",
+            slideCount = 5,
+            fileType = "pptx",
+        ),
         ScheduleItem.MediaItem(id = "media", mediaUrl = "/clip.mp4", mediaTitle = "Clip", mediaType = "local"),
-        ScheduleItem.LowerThirdItem(id = "lt", presetId = "p", presetLabel = "Pastor", pauseAtFrame = false, pauseDurationMs = 2000L),
+        ScheduleItem.LowerThirdItem(
+            id = "lt",
+            presetId = "p",
+            presetLabel = "Pastor",
+            pauseAtFrame = false,
+            pauseDurationMs = 2000L,
+        ),
         ScheduleItem.AnnouncementItem(id = "announcement", text = "Welcome"),
         ScheduleItem.WebsiteItem(id = "website", url = "https://example.org"),
         ScheduleItem.SceneItem(id = "scene", sceneId = "s1", sceneName = "Scene"),
-        ScheduleItem.DictionaryItem(id = "dict", number = "G26", word = "agathos", transliteration = "agathos", definition = "good")
+        ScheduleItem.DictionaryItem(
+            id = "dict",
+            number = "G26",
+            word = "agathos",
+            transliteration = "agathos",
+            definition = "good",
+        )
     )
 
     @Test
@@ -328,7 +346,12 @@ class ScheduleViewModelEditingTest {
     @Test
     fun `a label is not presentable`() {
         val vm = newViewModel()
-        val label = ScheduleItem.LabelItem(id = "label", text = "Offering", textColor = "#FFF", backgroundColor = "#000")
+        val label = ScheduleItem.LabelItem(
+            id = "label",
+            text = "Offering",
+            textColor = "#FFF",
+            backgroundColor = "#000",
+        )
         val d = vm.presentWithAllCallbacks(label)
         assertTrue(d.items.isEmpty(), "a section divider has nothing to show")
         assertTrue(d.presenting.isEmpty(), "clicking a divider must not blank or switch the output")

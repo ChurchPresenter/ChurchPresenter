@@ -88,7 +88,11 @@ class BibleEngineClientMessageTest {
         c.receive(detection(type = "scripture.detected"))
         c.receive(detection(type = "scripture.continuation"))
         c.receive(detection(type = "scripture.some.future.variant"))
-        assertEquals(3, detections.size, "the engine may add event kinds; the app should not have to be taught each one")
+        assertEquals(
+            3,
+            detections.size,
+            "the engine may add event kinds; the app should not have to be taught each one",
+        )
     }
 
     // ── Frames that must be ignored ─────────────────────────────────────────────
@@ -205,16 +209,25 @@ class BibleEngineClientMessageTest {
     @Test
     fun `an empty canonical code is normalised to null`() {
         val c = client()
-        c.receive(detection(reference = """{"bookId":43,"chapter":3,"verseStart":16,"canonicalCodeStart":"","canonicalCodeEnd":""}"""))
+        c.receive(
+            detection(
+                reference =
+                    """{"bookId":43,"chapter":3,"verseStart":16,"canonicalCodeStart":"","canonicalCodeEnd":""}""",
+            ),
+        )
         assertNull(detections.single().canonicalCodeStart)
         assertNull(detections.single().canonicalCodeEnd)
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `an explicitly null canonical end code is null`() {
         val c = client()
         c.receive(
-            detection(reference = """{"bookId":43,"chapter":3,"verseStart":16,"canonicalCodeStart":"B043C003V016","canonicalCodeEnd":null}""")
+            detection(
+                reference =
+                    """{"bookId":43,"chapter":3,"verseStart":16,"canonicalCodeStart":"B043C003V016","canonicalCodeEnd":null}""",
+            )
         )
         assertEquals("B043C003V016", detections.single().canonicalCodeStart)
         assertNull(detections.single().canonicalCodeEnd)
@@ -265,7 +278,11 @@ class BibleEngineClientMessageTest {
     @Test
     fun `the version the speaker is reading is forwarded when the engine names one`() {
         val c = client()
-        c.receive(detection(extra = """"detectedVersion":"NASB","detectedVersionId":"ENG_NASB","detectedVersionConfidence":0.72"""))
+        c.receive(
+            detection(
+                extra = """"detectedVersion":"NASB","detectedVersionId":"ENG_NASB","detectedVersionConfidence":0.72""",
+            ),
+        )
         assertEquals("NASB", detections.single().detectedVersion)
     }
 
@@ -282,8 +299,13 @@ class BibleEngineClientMessageTest {
         // The engine reports nothing rather than guessing when the wording doesn't separate the
         // candidates — that must not surface as a blank tag on the row.
         val c = client()
-        c.receive(detection(extra = """"detectedVersion":null,"detectedVersionId":null,"detectedVersionConfidence":null"""))
-        c.receive(detection(type = "scripture.continuation", extra = "\"detectedVersion\":\"\",\"detectedVersionId\":\"\""))
+        c.receive(
+            detection(extra = """"detectedVersion":null,"detectedVersionId":null,"detectedVersionConfidence":null"""),
+        )
+        c.receive(detection(
+            type = "scripture.continuation",
+            extra = "\"detectedVersion\":\"\",\"detectedVersionId\":\"\"",
+        ))
         assertEquals(2, detections.size)
         assertTrue(detections.all { it.detectedVersion == null })
     }
@@ -381,7 +403,9 @@ class BibleEngineClientMessageTest {
     @Test
     fun `an engine status is never mistaken for a detection`() {
         val c = client()
-        c.receive("""{"type":"engine_status","sttConnected":true,"reference":{"bookId":43,"chapter":3,"verseStart":16}}""")
+        c.receive(
+            """{"type":"engine_status","sttConnected":true,"reference":{"bookId":43,"chapter":3,"verseStart":16}}""",
+        )
         assertTrue(detections.isEmpty())
     }
 

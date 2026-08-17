@@ -188,6 +188,7 @@ class SettingsProjectionMigrationTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `migrating the screens keeps the rest of the projection block`() {
         val decoded = SettingsManager().migrateAndDecode(
             """{"projectionSettings":{"vlcPath":"/opt/vlc","screenAssignments":[{"showBible":false}],"audioOutputDeviceId":"HDMI"}}"""

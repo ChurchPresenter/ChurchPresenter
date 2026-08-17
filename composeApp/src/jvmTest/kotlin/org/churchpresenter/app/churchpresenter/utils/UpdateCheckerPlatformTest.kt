@@ -105,7 +105,12 @@ class UpdateCheckerPlatformTest {
 
     @Test
     fun `an empty asset list yields null on every platform`() {
-        for ((os, arch) in listOf("Windows 11" to "amd64", "Mac OS X" to "aarch64", "Mac OS X" to "x86_64", "Linux" to "amd64")) {
+        for ((os, arch) in listOf(
+            "Windows 11" to "amd64",
+            "Mac OS X" to "aarch64",
+            "Mac OS X" to "x86_64",
+            "Linux" to "amd64",
+        )) {
             asPlatform(os, arch)
             assertNull(selectDownloadUrl(emptyList()), "$os/$arch")
         }

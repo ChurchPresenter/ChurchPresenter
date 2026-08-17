@@ -106,10 +106,21 @@ behind by a refactor is a warning to `compileKotlinJvm` and a **build failure** 
 "it compiles" and "the tests pass" are both green while CI is red. A clean run is the expected
 result and every finding it prints is yours to fix.
 
-`config/detekt/baseline.xml` holds the pre-existing findings from the day the size/length rules
+`config/detekt/baseline.xml` holds pre-existing findings from the day the size/length rules
 (`LongMethod`, `LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`,
-`TooGenericExceptionCaught`) were switched on — 2,388 of them, suppressed so those rules gate new
-code only.
+`TooGenericExceptionCaught`) were switched on — 1,623 of them, suppressed so those rules gate new
+code only. **Every entry is `jvmMain` code; `jvmTest` has none and must keep none.** The test suite
+was brought to zero findings instead: 616 lines were wrapped, and the 27 that cannot be wrapped
+carry `@Suppress` at the declaration — one-line raw-string JSON fixtures (wrapping changes the
+literal), one backtick test name too long to break (Kotlin identifiers cannot span lines), and two
+test classes over the `LargeClass` threshold. **Suppress at the site in tests; never add a test
+entry to the baseline.**
+
+Thresholds are deliberately not detekt's defaults: `LongMethod` 100 (60 flags 191 findings, most
+of them Compose UI; 100 is the knee of the curve and still catches `ChurchPresenterApp` at 1,418 lines
+and `MainDesktop` at 1,168), `LargeClass` 1000, and `LongParameterList` with
+`ignoreDefaultParameters: true` so the `*TestSupport.kt` DSL helpers — long lists of defaulted
+parameters, overridden by name per test — are not flagged.
 
 **NEVER run `./gradlew :composeApp:detektBaseline` again.** Not to refresh it, not to re-sort it,
 not "just to see". That task rewrites the file from the current tree, so it silently absorbs every

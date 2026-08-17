@@ -198,7 +198,8 @@ class SongPresenterLayoutRenderTest {
 
     @Test
     fun `look-ahead line mode on a lower third pairs lines for auto-fit`() {
-        val settings = AppSettings(songSettings = SongSettings(lowerThirdLookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE))
+        val settings =
+            AppSettings(songSettings = SongSettings(lowerThirdLookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE))
         val first = section(lines = listOf("first line", "second line"))
         val second = section(lines = listOf("third line"), header = "[Verse 2]")
         present(
@@ -247,7 +248,12 @@ class SongPresenterLayoutRenderTest {
             ),
         )
         val first = section(title = "Amazing Grace", number = 42)
-        val second = section(title = "How Great Thou Art", number = 7, lines = listOf("Then sings my soul"), header = "[Verse 2]")
+        val second = section(
+            title = "How Great Thou Art",
+            number = 7,
+            lines = listOf("Then sings my soul"),
+            header = "[Verse 2]",
+        )
 
         present(settings, lyricSection = first, allSections = listOf(first, second)) {
             onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()
@@ -264,7 +270,12 @@ class SongPresenterLayoutRenderTest {
             ),
         )
         val first = section(title = "Amazing Grace", number = 42)
-        val second = section(title = "How Great Thou Art", number = 7, lines = listOf("Then sings my soul"), header = "[Verse 2]")
+        val second = section(
+            title = "How Great Thou Art",
+            number = 7,
+            lines = listOf("Then sings my soul"),
+            header = "[Verse 2]",
+        )
 
         present(settings, lyricSection = first, allSections = listOf(first, second)) {
             onNodeWithText("Amazing grace how sweet the sound", substring = true).assertExists()

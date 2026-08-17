@@ -51,7 +51,10 @@ class LocalLibraryEntriesTest {
         )
 
         assertEquals(listOf("sunset.jpg", "mountains.jpg"), entries.map { it.name })
-        assertTrue(entries.first { it.name == "sunset.jpg" } is DownloadedEntry, "the downloaded copy wins over the bundled one")
+        assertTrue(
+            entries.first { it.name == "sunset.jpg" } is DownloadedEntry,
+            "the downloaded copy wins over the bundled one",
+        )
     }
 
     @Test
@@ -116,14 +119,20 @@ class LocalLibraryEntriesTest {
         val downloaded = DownloadedEntry(File("sunset.jpg"))
         val bundled = BundledEntry("sunset.jpg")
 
-        assertTrue(downloaded.key != bundled.key, "LazyVerticalGrid keys its items by this; a collision would confuse recomposition")
+        assertTrue(
+            downloaded.key != bundled.key,
+            "LazyVerticalGrid keys its items by this; a collision would confuse recomposition",
+        )
     }
 
     @Test
     fun `materializeBundledEntry copies the resource into the stock library folder`() = runBlocking {
         val file = materializeBundledEntry(REAL_BUNDLED_IMAGE)
 
-        assertEquals(File(tempHome, ".churchpresenter/stock-backgrounds/$REAL_BUNDLED_IMAGE").absolutePath, file.absolutePath)
+        assertEquals(
+            File(tempHome, ".churchpresenter/stock-backgrounds/$REAL_BUNDLED_IMAGE").absolutePath,
+            file.absolutePath,
+        )
         assertTrue(file.exists())
         assertTrue(file.readBytes().isNotEmpty())
     }

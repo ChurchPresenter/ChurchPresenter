@@ -107,14 +107,32 @@ class RemoteEventLabelTest {
             ScheduleItem.SongItem(id = "1", songNumber = 1, title = "T", songbook = "B"),
             ScheduleItem.BibleVerseItem(id = "2", bookName = "John", chapter = 3, verseNumber = 16, verseText = "v"),
             ScheduleItem.PictureItem(id = "3", folderPath = "/p", folderName = "Advent", imageCount = 12),
-            ScheduleItem.PresentationItem(id = "4", filePath = "/d.pptx", fileName = "d.pptx", slideCount = 3, fileType = "pptx"),
+            ScheduleItem.PresentationItem(
+                id = "4",
+                filePath = "/d.pptx",
+                fileName = "d.pptx",
+                slideCount = 3,
+                fileType = "pptx",
+            ),
             ScheduleItem.MediaItem(id = "5", mediaUrl = "u", mediaTitle = "Clip", mediaType = "video"),
             ScheduleItem.LabelItem(id = "6", text = "Welcome", textColor = "#FFF", backgroundColor = "#000"),
             ScheduleItem.AnnouncementItem(id = "7", text = "Notice"),
-            ScheduleItem.LowerThirdItem(id = "8", presetId = "p", presetLabel = "Speaker", pauseAtFrame = false, pauseDurationMs = 0L),
+            ScheduleItem.LowerThirdItem(
+                id = "8",
+                presetId = "p",
+                presetLabel = "Speaker",
+                pauseAtFrame = false,
+                pauseDurationMs = 0L,
+            ),
             ScheduleItem.WebsiteItem(id = "9", url = "https://example.org", title = "Notices"),
             ScheduleItem.SceneItem(id = "10", sceneId = "s", sceneName = "Opening"),
-            ScheduleItem.DictionaryItem(id = "11", number = "G5485", word = "χάρις", transliteration = "charis", definition = "grace"),
+            ScheduleItem.DictionaryItem(
+                id = "11",
+                number = "G5485",
+                word = "χάρις",
+                transliteration = "charis",
+                definition = "grace",
+            ),
         )
 
         // The `when` is exhaustive over a sealed class, so a new item type is a compile error rather

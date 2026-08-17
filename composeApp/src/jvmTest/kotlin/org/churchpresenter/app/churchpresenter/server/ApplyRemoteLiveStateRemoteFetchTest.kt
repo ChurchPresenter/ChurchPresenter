@@ -92,9 +92,18 @@ class ApplyRemoteLiveStateRemoteFetchTest {
         val dir = Files.createTempDirectory("cp-remote-fetch-pictures").toFile()
         val imageBytes = byteArrayOf(1, 2, 3, 4)
         val imageFile = File(dir, "photo.jpg").apply { writeBytes(imageBytes) }
-        server.updatePictures(folderId = "apply-remote-fetch-1", folderName = "Folder", folderPath = dir.absolutePath, imageFiles = listOf(imageFile))
+        server.updatePictures(
+            folderId = "apply-remote-fetch-1",
+            folderName = "Folder",
+            folderPath = dir.absolutePath,
+            imageFiles = listOf(imageFile),
+        )
 
-        val presenter = apply(LiveStateDto(contentType = "PICTURES", pictureFolderId = "apply-remote-fetch-1", pictureIndex = 0))
+        val presenter = apply(LiveStateDto(
+            contentType = "PICTURES",
+            pictureFolderId = "apply-remote-fetch-1",
+            pictureIndex = 0,
+        ))
 
         val cachedPath = presenter.selectedImagePath.value
         assertTrue(cachedPath != null && File(cachedPath).exists(), "expected a real cache file, got $cachedPath")
@@ -107,14 +116,32 @@ class ApplyRemoteLiveStateRemoteFetchTest {
         clearPictureCache("apply-remote-fetch-2", 0)
         val dir = Files.createTempDirectory("cp-remote-fetch-pictures-cache").toFile()
         val imageFile = File(dir, "photo.jpg").apply { writeBytes(byteArrayOf(9)) }
-        server.updatePictures(folderId = "apply-remote-fetch-2", folderName = "Folder", folderPath = dir.absolutePath, imageFiles = listOf(imageFile))
+        server.updatePictures(
+            folderId = "apply-remote-fetch-2",
+            folderName = "Folder",
+            folderPath = dir.absolutePath,
+            imageFiles = listOf(imageFile),
+        )
 
-        val first = apply(LiveStateDto(contentType = "PICTURES", pictureFolderId = "apply-remote-fetch-2", pictureIndex = 0))
+        val first = apply(LiveStateDto(
+            contentType = "PICTURES",
+            pictureFolderId = "apply-remote-fetch-2",
+            pictureIndex = 0,
+        ))
         val firstPath = first.selectedImagePath.value
 
         // Delete the folder server-side — if the second apply re-fetched, it would now fail.
-        server.updatePictures(folderId = "apply-remote-fetch-2", folderName = "Folder", folderPath = dir.absolutePath, imageFiles = emptyList())
-        val second = apply(LiveStateDto(contentType = "PICTURES", pictureFolderId = "apply-remote-fetch-2", pictureIndex = 0))
+        server.updatePictures(
+            folderId = "apply-remote-fetch-2",
+            folderName = "Folder",
+            folderPath = dir.absolutePath,
+            imageFiles = emptyList(),
+        )
+        val second = apply(LiveStateDto(
+            contentType = "PICTURES",
+            pictureFolderId = "apply-remote-fetch-2",
+            pictureIndex = 0,
+        ))
 
         assertEquals(firstPath, second.selectedImagePath.value, "the cache file path must be stable across applies")
     }
@@ -122,7 +149,11 @@ class ApplyRemoteLiveStateRemoteFetchTest {
     @Test
     fun `a picture the primary does not have leaves the mode unswitched`() {
         clearPictureCache("apply-remote-fetch-missing", 0)
-        val presenter = apply(LiveStateDto(contentType = "PICTURES", pictureFolderId = "apply-remote-fetch-missing", pictureIndex = 0))
+        val presenter = apply(LiveStateDto(
+            contentType = "PICTURES",
+            pictureFolderId = "apply-remote-fetch-missing",
+            pictureIndex = 0,
+        ))
 
         // Unlike every other branch in this function, a failed PICTURES fetch returns before
         // reaching the trailing setPresentingMode/setShowPresenterWindow calls — so, discovered
@@ -136,7 +167,11 @@ class ApplyRemoteLiveStateRemoteFetchTest {
     fun `a PICTURES state missing its folder-id or index still switches the mode`() {
         val presenter = apply(LiveStateDto(contentType = "PICTURES"))
         assertNull(presenter.selectedImagePath.value)
-        assertEquals(Presenting.PICTURES, presenter.presentingMode.value, "this guard falls through normally, unlike a failed fetch")
+        assertEquals(
+            Presenting.PICTURES,
+            presenter.presentingMode.value,
+            "this guard falls through normally, unlike a failed fetch",
+        )
     }
 
     // ── LOWER_THIRD ────────────────────────────────────────────────────────────

@@ -44,7 +44,11 @@ class AtemUploadStatusTest {
         AtemUploadStatus.progress(id, 1.5f)
         assertEquals(1f, AtemUploadStatus.state.value?.progress, "over-unity progress would overflow the bar")
         AtemUploadStatus.progress(id, -0.2f)
-        assertEquals(0f, AtemUploadStatus.state.value?.progress, "negative progress would render as a full or broken bar")
+        assertEquals(
+            0f,
+            AtemUploadStatus.state.value?.progress,
+            "negative progress would render as a full or broken bar",
+        )
     }
 
     @Test
@@ -87,7 +91,11 @@ class AtemUploadStatusTest {
     fun `fail without a message uses a default so the bar is never blank`() {
         val id = AtemUploadStatus.begin("boom", clip = false, slot = 1)
         AtemUploadStatus.fail(id, null)
-        assertEquals("Upload failed", AtemUploadStatus.state.value?.error, "a failure with no cause still needs a label")
+        assertEquals(
+            "Upload failed",
+            AtemUploadStatus.state.value?.error,
+            "a failure with no cause still needs a label",
+        )
     }
 
     @Test

@@ -36,7 +36,10 @@ class WebTabTest {
         webButton(WebLabel.BOOKMARK_ADD).performClick()
 
         assertEquals(1, reports.settingsChanges)
-        assertEquals(listOf(WebBookmark(url = "https://example.com", title = "https://example.com")), reports.settingsAfterChange?.webBookmarks)
+        assertEquals(
+            listOf(WebBookmark(url = "https://example.com", title = "https://example.com")),
+            reports.settingsAfterChange?.webBookmarks,
+        )
     }
 
     @Test
@@ -60,7 +63,8 @@ class WebTabTest {
     }
 
     @Test
-    fun `clicking Add to Schedule reports the normalised URL and a title falling back to the URL`() = webTab { _, reports ->
+    fun `clicking Add to Schedule reports the normalised URL and a title falling back to the URL`() =
+        webTab { _, reports ->
         onNodeWithText(WebLabel.URL_PLACEHOLDER_DEFAULT).performTextReplacement("example.com")
         webButton(WebLabel.ADD_TO_SCHEDULE).performClick()
 
@@ -68,7 +72,8 @@ class WebTabTest {
     }
 
     @Test
-    fun `Add to Schedule is absent when the tab is given no callback for it`() = webTab(includeAddToSchedule = false) { _, _ ->
+    fun `Add to Schedule is absent when the tab is given no callback for it`() =
+        webTab(includeAddToSchedule = false) { _, _ ->
         assertTrue(!hasWebButton(WebLabel.ADD_TO_SCHEDULE))
     }
 
@@ -84,7 +89,8 @@ class WebTabTest {
     }
 
     @Test
-    fun `Back Forward Refresh and Clear Cache are all present and clickable with no browser attached`() = webTab { _, _ ->
+    fun `Back Forward Refresh and Clear Cache are all present and clickable with no browser attached`() =
+        webTab { _, _ ->
         webButton(WebLabel.BACK).apply { assertIsEnabled(); performClick() }
         webButton(WebLabel.FORWARD).apply { assertIsEnabled(); performClick() }
         webButton(WebLabel.REFRESH).apply { assertIsEnabled(); performClick() }

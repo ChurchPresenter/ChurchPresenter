@@ -75,7 +75,10 @@ class LottieRenderCacheTest {
     @Test
     fun `a lottie whose end is not after its start has no duration`() {
         assertNull(LottieRenderCache.lottieDurationMs("""{"fr":30,"ip":40,"op":40}"""), "op<=ip is not a playable clip")
-        assertNull(LottieRenderCache.lottieDurationMs("""{"fr":0,"ip":0,"op":90}"""), "a zero frame-rate has no timeline")
+        assertNull(
+            LottieRenderCache.lottieDurationMs("""{"fr":0,"ip":0,"op":90}"""),
+            "a zero frame-rate has no timeline",
+        )
     }
 
     @Test
@@ -141,7 +144,10 @@ class LottieRenderCacheTest {
 
     @Test
     fun `the desktop variant is null when the lottie carries no timing`() {
-        assertNull(LottieRenderCache.desktopVariant("""{"w":1920,"h":1080}""", atem1080), "no timeline, nothing to stream")
+        assertNull(
+            LottieRenderCache.desktopVariant("""{"w":1920,"h":1080}""", atem1080),
+            "no timeline, nothing to stream",
+        )
     }
 
     // ── ARGB RLE codec ────────────────────────────────────────────────────────
@@ -270,7 +276,10 @@ class LottieRenderCacheTest {
         // The cache directory is under the user's home and named by content hash. Anything else
         // that lands there — a truncated download, an unrelated file renamed — must fail on open
         // rather than be read as frame offsets and seek wildly through it.
-        val file = File(tempHome.toFile(), "not-a-cache.lrcc").apply { writeBytes("XXXX".toByteArray() + ByteArray(32)) }
+        val file = File(
+            tempHome.toFile(),
+            "not-a-cache.lrcc",
+        ).apply { writeBytes("XXXX".toByteArray() + ByteArray(32)) }
 
         assertFailsWith<IOException> { LottieRenderCache.Reader(file) }
     }

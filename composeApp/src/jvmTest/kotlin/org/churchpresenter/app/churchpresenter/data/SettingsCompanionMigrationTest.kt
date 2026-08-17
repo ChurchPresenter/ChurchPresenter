@@ -144,6 +144,7 @@ class SettingsCompanionMigrationTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `each placement's range is converted separately`() {
         val migrated = connection(
             """{"tabStartRow":0,"tabEndRow":1,"tabStartColumn":0,"tabEndColumn":2,
@@ -215,7 +216,10 @@ class SettingsCompanionMigrationTest {
             """{"companionSatelliteConnections":[{"rows":2,"columns":6,"tabStartRow":0,"tabEndRow":1}]}""",
         )
 
-        val json = SettingsManager().let { it.saveSettings(once); File(home, ".churchpresenter/settings.json").readText() }
+        val json = SettingsManager().let { it.saveSettings(once); File(
+            home,
+            ".churchpresenter/settings.json",
+        ).readText() }
         val twice = manager.migrateAndDecode(json.replace(Regex(""""settingsVersion":\d+,?"""), ""))
 
         assertEquals(

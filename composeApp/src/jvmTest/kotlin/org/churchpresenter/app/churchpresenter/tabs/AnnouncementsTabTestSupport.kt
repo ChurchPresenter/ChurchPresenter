@@ -88,7 +88,10 @@ internal fun announcementsTab(
                             reports.settings = appSettings.announcementsSettings
                         },
                         presenterManager = presenter.takeIf { withPresenter },
-                        onAddToSchedule = if (withOnAddToSchedule) { { s: AnnouncementsSettings -> reports.scheduled += s } } else null,
+                        onAddToSchedule =
+                            if (withOnAddToSchedule) {
+                                { s: AnnouncementsSettings -> reports.scheduled += s }
+                            } else null,
                     )
                 }
             }

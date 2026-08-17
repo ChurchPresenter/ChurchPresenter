@@ -88,7 +88,11 @@ class BibleTabFlagPillTooltipTest {
     @Test
     fun `with nothing live the pill explains why it cannot be used`() {
         val presenter = PresenterManager()
-        bibleTab(settings = { it.copy(bibleEngineSettings = engine()) }, stt = connectedStt(), presenter = presenter) { _, _ ->
+        bibleTab(
+            settings = { it.copy(bibleEngineSettings = engine()) },
+            stt = connectedStt(),
+            presenter = presenter,
+        ) { _, _ ->
             assertTrue(countOf(WRONG_LABEL) > 0, "the pill is drawn in help/dev mode")
             val before = countOf(NEEDS_LIVE)
 
@@ -106,7 +110,11 @@ class BibleTabFlagPillTooltipTest {
         // The positive twin. Without it, a pill stuck on the disabled tooltip forever would still
         // pass the test above.
         val presenter = PresenterManager().apply { setDisplayedVerses(listOf(liveVerse())) }
-        bibleTab(settings = { it.copy(bibleEngineSettings = engine()) }, stt = connectedStt(), presenter = presenter) { _, _ ->
+        bibleTab(
+            settings = { it.copy(bibleEngineSettings = engine()) },
+            stt = connectedStt(),
+            presenter = presenter,
+        ) { _, _ ->
             val beforeHint = countOf(WRONG_HINT)
             val beforeNeedsLive = countOf(NEEDS_LIVE)
 
@@ -125,7 +133,11 @@ class BibleTabFlagPillTooltipTest {
         // Deliberately unlike its two neighbours: it reports that the engine found *nothing*, so it
         // needs nothing on screen — and it is given no `disabledTooltip` at all.
         val presenter = PresenterManager()
-        bibleTab(settings = { it.copy(bibleEngineSettings = engine()) }, stt = connectedStt(), presenter = presenter) { _, _ ->
+        bibleTab(
+            settings = { it.copy(bibleEngineSettings = engine()) },
+            stt = connectedStt(),
+            presenter = presenter,
+        ) { _, _ ->
             assertTrue(countOf(MISSED_LABEL) > 0)
             val beforeNeedsLive = countOf(NEEDS_LIVE)
             val beforeOwnHint = countOf(MISSED_HINT)

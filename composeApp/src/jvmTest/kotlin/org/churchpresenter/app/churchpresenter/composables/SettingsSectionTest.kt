@@ -27,7 +27,10 @@ class SettingsSectionTest {
             }
         }
         onNodeWithText("Display", substring = true).assertExists("the group must show its heading")
-        onNodeWithText("Auto-fit text", substring = true).assertExists("the slot content must be composed inside the section")
+        onNodeWithText(
+            "Auto-fit text",
+            substring = true,
+        ).assertExists("the slot content must be composed inside the section")
     }
 
     @Test

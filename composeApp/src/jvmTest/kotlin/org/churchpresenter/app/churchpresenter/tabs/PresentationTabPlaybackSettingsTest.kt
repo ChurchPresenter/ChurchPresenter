@@ -81,35 +81,44 @@ class PresentationTabPlaybackSettingsTest {
 
     @Test
     fun `Fade renders as the current animation label`() = presentationTab(
-        settings = { it.copy(presentationSettings = it.presentationSettings.copy(animationType = Constants.ANIMATION_FADE)) },
+        settings =
+            { it.copy(presentationSettings = it.presentationSettings.copy(animationType = Constants.ANIMATION_FADE)) },
     ) { _, _ ->
         onNodeWithText("Fade").assertExists()
     }
 
     @Test
     fun `Slide Left renders as the current animation label`() = presentationTab(
-        settings = { it.copy(presentationSettings = it.presentationSettings.copy(animationType = Constants.ANIMATION_SLIDE_LEFT)) },
+        settings =
+            { it.copy(
+                presentationSettings = it.presentationSettings.copy(animationType = Constants.ANIMATION_SLIDE_LEFT),
+            ) },
     ) { _, _ ->
         onNodeWithText("Slide Left").assertExists()
     }
 
     @Test
     fun `Slide Right renders as the current animation label`() = presentationTab(
-        settings = { it.copy(presentationSettings = it.presentationSettings.copy(animationType = Constants.ANIMATION_SLIDE_RIGHT)) },
+        settings =
+            { it.copy(
+                presentationSettings = it.presentationSettings.copy(animationType = Constants.ANIMATION_SLIDE_RIGHT),
+            ) },
     ) { _, _ ->
         onNodeWithText("Slide Right").assertExists()
     }
 
     @Test
     fun `None renders as the current animation label`() = presentationTab(
-        settings = { it.copy(presentationSettings = it.presentationSettings.copy(animationType = Constants.ANIMATION_NONE)) },
+        settings =
+            { it.copy(presentationSettings = it.presentationSettings.copy(animationType = Constants.ANIMATION_NONE)) },
     ) { _, _ ->
         onNodeWithText("None").assertExists()
     }
 
     @Test
     fun `selecting Crossfade after another type applies it now and asks for it to be remembered`() = presentationTab(
-        settings = { it.copy(presentationSettings = it.presentationSettings.copy(animationType = Constants.ANIMATION_FADE)) },
+        settings =
+            { it.copy(presentationSettings = it.presentationSettings.copy(animationType = Constants.ANIMATION_FADE)) },
     ) { vm, reports ->
         onNodeWithText("ANIMATION TYPE", substring = true).performClick()
         waitForIdle()
@@ -154,7 +163,11 @@ class PresentationTabPlaybackSettingsTest {
         onNodeWithText("OK").performClick()
         waitForIdle()
 
-        assertEquals(30f, vm.autoScrollInterval, "an operator mistyping a huge value must not leave the slideshow stalled")
+        assertEquals(
+            30f,
+            vm.autoScrollInterval,
+            "an operator mistyping a huge value must not leave the slideshow stalled",
+        )
     }
 
     @Test

@@ -90,7 +90,12 @@ class ScheduleItemDisplayTextTest {
 
     @Test
     fun `media and lower thirds are marked so they stand out in the list`() {
-        val media = ScheduleItem.MediaItem(id = "1", mediaUrl = "/clip.mp4", mediaTitle = "Baptism video", mediaType = "local")
+        val media = ScheduleItem.MediaItem(
+            id = "1",
+            mediaUrl = "/clip.mp4",
+            mediaTitle = "Baptism video",
+            mediaType = "local",
+        )
         val lowerThird = ScheduleItem.LowerThirdItem(
             id = "2", presetId = "p", presetLabel = "Guest speaker", pauseAtFrame = false, pauseDurationMs = 0,
         )
@@ -253,13 +258,31 @@ class ScheduleItemDisplayTextTest {
             ScheduleItem.BibleVerseItem(id = "2", bookName = "John", chapter = 3, verseNumber = 16, verseText = ""),
             ScheduleItem.LabelItem(id = "3", text = "Label", textColor = "#FFF", backgroundColor = "#000"),
             ScheduleItem.PictureItem(id = "4", folderPath = "/p", folderName = "Pics", imageCount = 0),
-            ScheduleItem.PresentationItem(id = "5", filePath = "/d", fileName = "d.pptx", slideCount = 0, fileType = "pptx"),
+            ScheduleItem.PresentationItem(
+                id = "5",
+                filePath = "/d",
+                fileName = "d.pptx",
+                slideCount = 0,
+                fileType = "pptx",
+            ),
             ScheduleItem.MediaItem(id = "6", mediaUrl = "/m", mediaTitle = "Clip", mediaType = "local"),
-            ScheduleItem.LowerThirdItem(id = "7", presetId = "p", presetLabel = "Preset", pauseAtFrame = false, pauseDurationMs = 0),
+            ScheduleItem.LowerThirdItem(
+                id = "7",
+                presetId = "p",
+                presetLabel = "Preset",
+                pauseAtFrame = false,
+                pauseDurationMs = 0,
+            ),
             announcement(text = "Announcement"),
             ScheduleItem.WebsiteItem(id = "9", url = "https://example.org"),
             ScheduleItem.SceneItem(id = "10", sceneId = "s", sceneName = "Scene"),
-            ScheduleItem.DictionaryItem(id = "11", number = "G26", word = "agape", transliteration = "", definition = ""),
+            ScheduleItem.DictionaryItem(
+                id = "11",
+                number = "G26",
+                word = "agape",
+                transliteration = "",
+                definition = "",
+            ),
         )
 
         items.forEach {

@@ -51,6 +51,7 @@ class StatisticsFileFormatTest {
     // ── The all-time tally on disk ──────────────────────────────────────────────
 
     @Test
+    @Suppress("MaxLineLength")
     fun `a tally written by an older build is read`() {
         statsFile.writeText(
             """{"songDisplayCounts":{"Hymnal::42":{"songNumber":42,"title":"Amazing Grace","songbook":"Hymnal","count":7}},
@@ -119,7 +120,11 @@ class StatisticsFileFormatTest {
 
         val keys = json.decodeFromString(DisplayStatistics.serializer(), statsFile.readText()).songDisplayCounts.keys
 
-        assertEquals(setOf("Hymnal::1", "Songs of Praise::1"), keys, "the key is the identity — merging them loses a song")
+        assertEquals(
+            setOf("Hymnal::1", "Songs of Praise::1"),
+            keys,
+            "the key is the identity — merging them loses a song",
+        )
     }
 
     // ── The event log on disk ───────────────────────────────────────────────────

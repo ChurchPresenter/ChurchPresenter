@@ -90,7 +90,10 @@ class QuestionWireFormatTest {
 
     @Test
     fun `the vote field names are what the phone sends`() {
-        val encoded = wireJson.encodeToString(VoteRequest.serializer(), VoteRequest(questionId = "q1", direction = "up"))
+        val encoded = wireJson.encodeToString(
+            VoteRequest.serializer(),
+            VoteRequest(questionId = "q1", direction = "up"),
+        )
 
         assertTrue(""""questionId":"q1"""" in encoded, encoded)
         assertTrue(""""direction":"up"""" in encoded, encoded)

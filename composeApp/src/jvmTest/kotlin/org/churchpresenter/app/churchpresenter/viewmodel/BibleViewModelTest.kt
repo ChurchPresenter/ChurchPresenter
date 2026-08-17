@@ -138,8 +138,12 @@ class BibleViewModelTest {
 
     @Test
     fun `auto-follow is seeded from persisted settings`() {
-        assertFalse(vm(AppSettings(bibleEngineSettings = BibleEngineSettings(autoFollow = false))).autoFollowEnabled.value)
-        assertTrue(vm(AppSettings(bibleEngineSettings = BibleEngineSettings(autoFollow = true))).autoFollowEnabled.value)
+        assertFalse(
+            vm(AppSettings(bibleEngineSettings = BibleEngineSettings(autoFollow = false))).autoFollowEnabled.value,
+        )
+        assertTrue(
+            vm(AppSettings(bibleEngineSettings = BibleEngineSettings(autoFollow = true))).autoFollowEnabled.value,
+        )
     }
 
     @Test

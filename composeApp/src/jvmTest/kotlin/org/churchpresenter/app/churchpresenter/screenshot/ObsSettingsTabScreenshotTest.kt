@@ -80,11 +80,19 @@ class ObsSettingsTabScreenshotTest {
      * moving on — Connect is disabled and the status reads Connecting.
      */
     @Test
-    fun `connecting`() = shootAgainst("status_connecting", Handshake.STALL, OBSWebSocketManager.ConnectionStatus.CONNECTING)
+    fun `connecting`() = shootAgainst(
+        "status_connecting",
+        Handshake.STALL,
+        OBSWebSocketManager.ConnectionStatus.CONNECTING,
+    )
 
     /** Connected: the button becomes Disconnect and the status goes green. */
     @Test
-    fun `connected`() = shootAgainst("status_connected", Handshake.COMPLETE, OBSWebSocketManager.ConnectionStatus.CONNECTED)
+    fun `connected`() = shootAgainst(
+        "status_connected",
+        Handshake.COMPLETE,
+        OBSWebSocketManager.ConnectionStatus.CONNECTED,
+    )
 
     /**
      * A handshake the app rejects.
@@ -94,7 +102,11 @@ class ObsSettingsTabScreenshotTest {
      * the same sentence on every platform.
      */
     @Test
-    fun `a failed handshake`() = shootAgainst("status_error", Handshake.REJECT, OBSWebSocketManager.ConnectionStatus.ERROR)
+    fun `a failed handshake`() = shootAgainst(
+        "status_error",
+        Handshake.REJECT,
+        OBSWebSocketManager.ConnectionStatus.ERROR,
+    )
 
     // ── Scene mappings ──────────────────────────────────────────────────────────────────────────
 

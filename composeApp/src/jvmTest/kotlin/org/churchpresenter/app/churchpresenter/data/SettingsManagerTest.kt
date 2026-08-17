@@ -327,7 +327,8 @@ class SettingsManagerTest {
         assertEquals(
             original,
             backup.readText(),
-            "the oldest snapshot for a version is the one taken before any lossy rewrite, so it is the one worth keeping",
+                "the oldest snapshot for a version is the one taken before any lossy rewrite, so it is the one " +
+                    "worth keeping",
         )
     }
 
@@ -348,6 +349,7 @@ class SettingsManagerTest {
     // ── Version 6: the bible translation stack ──────────────────────────────────
 
     @Test
+    @Suppress("MaxLineLength")
     fun `an older file's bible pair becomes the translation stack`() {
         val migrated = SettingsManager().migrateAndDecode(
             """{"settingsVersion":5,"bibleSettings":{"primaryBible":"kjv.spb","secondaryBible":"rst.spb","primaryBibleColor":"#ABCDEF"}}""",
@@ -377,7 +379,11 @@ class SettingsManagerTest {
 
         assertEquals(listOf(0), outputs[0].bibleTranslations)
         assertEquals(listOf(1), outputs[1].bibleTranslations)
-        assertEquals(emptyList(), outputs[2].bibleTranslations, "\"both\" is every translation, which is the empty list")
+        assertEquals(
+            emptyList(),
+            outputs[2].bibleTranslations,
+            "\"both\" is every translation, which is the empty list",
+        )
         assertEquals(emptyList(), outputs[3].bibleTranslations)
         assertTrue(outputs[0].showBible, "naming a bible does not switch the output off")
         assertTrue(!outputs[3].showBible, "and an output that was off stays off")
@@ -393,6 +399,7 @@ class SettingsManagerTest {
     // first stack edit rewrites the pair from a list that never held those bibles.
 
     @Test
+    @Suppress("MaxLineLength")
     fun `a current-version file whose stack never got filled is repaired on load`() {
         val current = AppSettings.CURRENT_SETTINGS_VERSION
         val loaded = SettingsManager().migrateAndDecode(
@@ -407,6 +414,7 @@ class SettingsManagerTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `a stack emptied on purpose is not refilled`() {
         // The other half of the repair, and what stops it being wrong: clearing the last translation
         // goes through `withTranslations`, which clears the legacy pair with it. An empty stack

@@ -187,7 +187,11 @@ class STTManagerTest {
         val s = stt()
         s.transcription("""{"segments":[{"id":1,"text":"first"},{"id":2,"text":"second"}]}""")
         s.transcription("""{"segments":[{"id":1,"text":"first (corrected)"}]}""")
-        assertEquals(listOf("first (corrected)"), s.segments.map { it.text }, "the server sends the whole transcript each time")
+        assertEquals(
+            listOf("first (corrected)"),
+            s.segments.map { it.text },
+            "the server sends the whole transcript each time",
+        )
     }
 
     @Test
@@ -203,7 +207,11 @@ class STTManagerTest {
         val s = stt()
         s.transcription("""{"segments":[{"id":1,"text":"first"}]}""")
         s.transcription("""{"in_progress":"still talking"}""")
-        assertEquals(listOf("first"), s.segments.map { it.text }, "an in-progress-only update must not wipe the transcript")
+        assertEquals(
+            listOf("first"),
+            s.segments.map { it.text },
+            "an in-progress-only update must not wipe the transcript",
+        )
         assertEquals("still talking", s.inProgressText.value)
     }
 
@@ -268,9 +276,12 @@ class STTManagerTest {
     }
 
     @Test
+    @Suppress("MaxLineLength")
     fun `translation segments carry their own timing and ids`() {
         val s = stt()
-        s.translation("""{"segments":[{"id":9,"timestamp":"10:31:02","translated_text":"привет","start":1.5,"end":2.5,"completed":false}]}""")
+        s.translation(
+            """{"segments":[{"id":9,"timestamp":"10:31:02","translated_text":"привет","start":1.5,"end":2.5,"completed":false}]}""",
+        )
         val seg = s.translationSegments.single()
         assertEquals(9, seg.id)
         assertEquals("10:31:02", seg.timestamp)
@@ -299,7 +310,11 @@ class STTManagerTest {
     fun `the in-progress translation arrives as an object`() {
         val s = stt()
         s.translation("""{"in_progress":{"text":"For God","translated_text":"Ибо"}}""")
-        assertEquals("Ибо", s.inProgressTranslation.value, "the object form carries both languages; only the translation is shown")
+        assertEquals(
+            "Ибо",
+            s.inProgressTranslation.value,
+            "the object form carries both languages; only the translation is shown",
+        )
     }
 
     @Test

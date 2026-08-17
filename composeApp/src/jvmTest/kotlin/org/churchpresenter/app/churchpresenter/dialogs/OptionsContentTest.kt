@@ -184,7 +184,8 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `toggling the title slide checkbox on the Song tab feeds back into saved settings`() = dialog(initialTab = 2) { result ->
+    fun `toggling the title slide checkbox on the Song tab feeds back into saved settings`() =
+        dialog(initialTab = 2) { result ->
         onNodeWithTag("song_titleSlideEnabled").performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
@@ -192,7 +193,8 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `changing the background type dropdown on the Background tab feeds back into saved settings`() = dialog(initialTab = 3) { result ->
+    fun `changing the background type dropdown on the Background tab feeds back into saved settings`() =
+        dialog(initialTab = 3) { result ->
         // Both the full-screen and lower-third cards default to "Color" — the full-screen one composes first.
         onAllNodes(hasText("Color") and hasClickAction())[0].performScrollTo().performClick()
         waitForIdle()
@@ -204,7 +206,8 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `editing the window-left field on the Lower Third tab feeds back into saved settings`() = dialog(initialTab = 5) { result ->
+    fun `editing the window-left field on the Lower Third tab feeds back into saved settings`() =
+        dialog(initialTab = 5) { result ->
         onAllNodes(hasSetTextAction())[0].performScrollTo().performTextReplacement("77")
         onNodeWithText("Apply").performClick()
 
@@ -212,7 +215,8 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `toggling API Key Protection on the Server tab feeds back into saved settings`() = dialog(initialTab = 6) { result ->
+    fun `toggling API Key Protection on the Server tab feeds back into saved settings`() =
+        dialog(initialTab = 6) { result ->
         // Ordinal 0 is Enable Server, which starts a real server on a real port — never touch it.
         onAllNodes(isToggleable())[1].performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
@@ -221,7 +225,8 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `picking the metronome position on the Stage Monitor tab feeds back into saved settings`() = dialog(initialTab = 7) { result ->
+    fun `picking the metronome position on the Stage Monitor tab feeds back into saved settings`() =
+        dialog(initialTab = 7) { result ->
         chooseRouting(ContentLabel.METRONOME, MetronomeLabel.CENTER)
         onNodeWithText("Apply").performClick()
 
@@ -245,7 +250,8 @@ class OptionsContentTest {
     }
 
     @Test
-    fun `adding a Companion Satellite connection without OBS feeds back into saved settings`() = dialog(initialTab = 10) { result ->
+    fun `adding a Companion Satellite connection without OBS feeds back into saved settings`() =
+        dialog(initialTab = 10) { result ->
         onNodeWithText("+ Add Connection").performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 

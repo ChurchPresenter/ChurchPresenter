@@ -97,7 +97,9 @@ class ProjectionSettingsTabStructureTest {
     @Test
     fun `each row's four controls are the ones the ordinals name`() = projectionTab { _ ->
         for (row in 0..1) {
-            gridButton(Grid.targetDisplay(row)).assertTextEquals("D${row + 1} ${if (row == 0) "(1280x720)" else "(3840x2160)"}")
+            gridButton(Grid.targetDisplay(row)).assertTextEquals(
+                "D${row + 1} ${if (row == 0) "(1280x720)" else "(3840x2160)"}",
+            )
             gridButton(Grid.keyOutput(row)).assertTextEquals("None")
             gridButton(Grid.displayMode(row)).assertTextEquals("Full Screen")
             gridButton(Grid.contentOutputs(row)).assertTextEquals("15 of 16 enabled")

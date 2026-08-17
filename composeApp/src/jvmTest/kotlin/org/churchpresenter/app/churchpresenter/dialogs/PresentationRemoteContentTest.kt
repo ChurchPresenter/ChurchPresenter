@@ -97,13 +97,19 @@ class PresentationRemoteContentTest {
     }
 
     @Test
-    fun `an enabled api key is appended to the copied url`() = dialog(apiKeyEnabled = true, apiKey = "secret123") { result ->
+    fun `an enabled api key is appended to the copied url`() = dialog(
+        apiKeyEnabled = true,
+        apiKey = "secret123",
+    ) { result ->
         onNodeWithText("Copy URL").performClick()
         assertEquals("http://192.168.1.5:8080/presentation-remote?password=secret123", result.copiedText)
     }
 
     @Test
-    fun `an enabled api key with a blank value is not appended to the copied url`() = dialog(apiKeyEnabled = true, apiKey = "") { result ->
+    fun `an enabled api key with a blank value is not appended to the copied url`() = dialog(
+        apiKeyEnabled = true,
+        apiKey = "",
+    ) { result ->
         onNodeWithText("Copy URL").performClick()
         assertEquals("http://192.168.1.5:8080/presentation-remote", result.copiedText)
     }

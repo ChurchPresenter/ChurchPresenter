@@ -107,6 +107,10 @@ class PresentationTabMultiFileTest {
         waitForIdle()
 
         assertEquals(1, vm.presentations.size)
-        assertEquals(second.absolutePath, vm.selectedPresentation?.absolutePath, "removing the other file must not disturb the live selection")
+        assertEquals(
+            second.absolutePath,
+            vm.selectedPresentation?.absolutePath,
+            "removing the other file must not disturb the live selection",
+        )
     }
 }

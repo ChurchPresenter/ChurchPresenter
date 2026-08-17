@@ -113,7 +113,10 @@ class CompanionServerBrowserSourceTest {
         ))
 
         assertEquals(HttpStatusCode.Unauthorized, get("${Constants.ENDPOINT_BROWSER_SOURCE}/1").status)
-        assertEquals(HttpStatusCode.Unauthorized, get("${Constants.ENDPOINT_BROWSER_SOURCE}/1", apiKey = "wrong").status)
+        assertEquals(
+            HttpStatusCode.Unauthorized,
+            get("${Constants.ENDPOINT_BROWSER_SOURCE}/1", apiKey = "wrong").status,
+        )
         assertEquals(HttpStatusCode.OK, get("${Constants.ENDPOINT_BROWSER_SOURCE}/1", apiKey = "secret123").status)
     }
 
@@ -130,7 +133,15 @@ class CompanionServerBrowserSourceTest {
 
     @Test
     fun `encodeBrowserSourceFrameMessage packs a 24-byte big-endian header followed by the raw PNG bytes`() {
-        val frame = BrowserSourceFrame(x = 10, y = 20, rectWidth = 30, rectHeight = 40, fullWidth = 1920, fullHeight = 1080, png = byteArrayOf(1, 2, 3))
+        val frame = BrowserSourceFrame(
+            x = 10,
+            y = 20,
+            rectWidth = 30,
+            rectHeight = 40,
+            fullWidth = 1920,
+            fullHeight = 1080,
+            png = byteArrayOf(1, 2, 3),
+        )
         val encoded = server.browserSource.encodeBrowserSourceFrameMessage(frame)
 
         assertEquals(24 + 3, encoded.size)
@@ -182,7 +193,10 @@ class CompanionServerBrowserSourceTest {
     @Test
     fun `connecting with a required api key missing closes with violated-policy`() {
         server.updateApiKey(enabled = false, key = "secret123")
-        server.updateBrowserSourceOutputs(listOf(ScreenAssignment(browserSourceEnabled = true, browserSourceApiKeyRequired = true)))
+        server.updateBrowserSourceOutputs(listOf(ScreenAssignment(
+            browserSourceEnabled = true,
+            browserSourceApiKeyRequired = true,
+        )))
         val reason = connectAndGetCloseReason(1)
         assertEquals(CloseReason.Codes.VIOLATED_POLICY.code, reason?.code)
     }
@@ -199,7 +213,15 @@ class CompanionServerBrowserSourceTest {
         server.updateBrowserSourceOutputs(listOf(ScreenAssignment(browserSourceEnabled = true)))
         val frames = MutableSharedFlow<BrowserSourceFrame>(extraBufferCapacity = 4)
         server.registerBrowserSourceFrames(0, frames)
-        val frame = BrowserSourceFrame(x = 1, y = 2, rectWidth = 3, rectHeight = 4, fullWidth = 5, fullHeight = 6, png = byteArrayOf(9, 8, 7))
+        val frame = BrowserSourceFrame(
+            x = 1,
+            y = 2,
+            rectWidth = 3,
+            rectHeight = 4,
+            fullWidth = 5,
+            fullHeight = 6,
+            png = byteArrayOf(9, 8, 7),
+        )
         val expected = server.browserSource.encodeBrowserSourceFrameMessage(frame)
 
         var received: Frame? = null
