@@ -18,6 +18,31 @@ Built with Kotlin Multiplatform and Compose Desktop.
   - SQLite `.sps` format (Mac SongPresenter)
   - Extracts songbook name, song metadata (author, composer, tune), and lyrics
   - Automatically structures chorus/verse sections
+  - Several song books in one run, or a whole folder of them
+
+- **OpenLP** — the `songs.sqlite` library read directly, or an OpenLyrics `.xml` export
+  - Authors resolved through the `authors_songs` bridging table, song numbers through `songs_songbooks`
+  - Reads libraries from before either table existed
+  - `verse_order` decides the order sections are written in
+
+- **OpenSong** — XML metadata around a plain-text lyrics body, usually with no file extension
+  - Chord lines (`.`) and comments (`;`) dropped rather than sung
+  - A leading digit inside an unnumbered `[V]` block groups the lines into their own verses
+  - `<presentation>` decides the order
+
+- **FreeShow** — `.show` files (JSON)
+  - Read in the order the active layout sings them, not the order the slides map lists
+  - Child slides continue their parent's section
+
+- **EasySlides** — one `.xml` export is a whole library of `<Item>` songs
+  - `[region N]` layout lines dropped
+  - Contents with no markers read as blank-line separated verses
+  - `<Sequence>` letters mapped properly (`t` is the second chorus, not a tag)
+
+- **Quelea** — `.qsp` song packs and loose song `.xml` files
+  - Every zip entry is parsed rather than filtered by name, since Quelea writes `.pdf` onto
+    repeated titles
+  - Entries that are not songs are reported, not dropped
 
 ### Bible Converter
 

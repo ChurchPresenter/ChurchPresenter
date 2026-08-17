@@ -55,17 +55,32 @@ class SongFormatRegistryTest {
     fun `the formats that fan one input out into many files demand an output folder`() {
         assertTrue(SoftProjectorFormat.needsOutputFolder)
         assertTrue(DocumentFormat.needsOutputFolder)
+        assertTrue(EasySlidesFormat.needsOutputFolder)
+        assertTrue(QueleaFormat.needsOutputFolder)
+        assertTrue(OpenLpFormat.needsOutputFolder)
         // These write one .song beside each input, so "same as input" is a valid destination.
         assertTrue(!SongBeamerFormat.needsOutputFolder)
         assertTrue(!FreeWorshipFormat.needsOutputFolder)
+        assertTrue(!OpenSongFormat.needsOutputFolder)
+        assertTrue(!FreeShowFormat.needsOutputFolder)
     }
 
     @Test
-    fun `a song book is a single selection, since one file is the whole library`() {
-        assertTrue(!SoftProjectorFormat.allowsMultipleFiles)
-        assertTrue(SongBeamerFormat.allowsMultipleFiles)
-        assertTrue(FreeWorshipFormat.allowsMultipleFiles)
-        assertTrue(DocumentFormat.allowsMultipleFiles)
+    fun `every format converts a whole selection in one run`() {
+        // A migration is never one file. A format that took a single input at a time — .sps did —
+        // turns a library move into the same click repeated once per song book.
+        for (format in SongFormatConverters.all) {
+            assertTrue(format.allowsMultipleFiles, format.id)
+        }
+    }
+
+    @Test
+    fun `only OpenSong claims files that carry no extension`() {
+        assertTrue(OpenSongFormat.acceptsExtensionlessFiles)
+        assertEquals(
+            listOf("opensong"),
+            SongFormatConverters.all.filter { it.acceptsExtensionlessFiles }.map { it.id },
+        )
     }
 
     @Test

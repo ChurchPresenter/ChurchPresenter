@@ -19,6 +19,10 @@ dependencies {
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)
     implementation("org.xerial:sqlite-jdbc:3.45.3.0")
+    // Kept at the version composeApp resolves (gradle/libs.versions.toml: kotlinx-serialization),
+    // since these sources compile into it as well. Only the runtime JsonElement API is used, so the
+    // serialization compiler plugin is deliberately not applied.
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
     implementation("org.apache.pdfbox:pdfbox:2.0.33")
     implementation("org.apache.poi:poi-ooxml:5.3.0")
 
