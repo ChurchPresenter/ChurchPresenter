@@ -31,7 +31,7 @@ class SongSourcesTest {
 
     @Test
     fun `an unknown id falls back to the default rather than throwing`() {
-        assertSame(SongSources.default, SongSources.byId("propresenter"))
+        assertSame(SongSources.default, SongSources.byId("songshowplus"))
         assertSame(SongSources.default, SongSources.byId(""))
     }
 
@@ -70,7 +70,7 @@ class SongSourcesTest {
 
     @Test
     fun `a query matching nothing returns empty, which is what drives the no-match message`() {
-        assertTrue(SongSources.matching("propresenter").isEmpty())
+        assertTrue(SongSources.matching("songshow plus").isEmpty())
     }
 
     @Test

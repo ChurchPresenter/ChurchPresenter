@@ -33,14 +33,20 @@ object SongSources {
     const val FREESHOW = "freeshow"
     const val EASYSLIDES = "easyslides"
     const val QUELEA = "quelea"
+    const val PROPRESENTER = "propresenter"
+    const val EASYWORSHIP = "easyworship"
+    const val MEDIASHOUT = "mediashout"
 
     /** Alphabetical, so the rail is scanned by name — the documents group stays last. */
     val all: List<SongSource> = listOf(
         SongSource(EASYSLIDES, SourceGroup.SONGS, "EasySlides", ".xml", "ES"),
+        SongSource(EASYWORSHIP, SourceGroup.SONGS, "EasyWorship", ".db/.ews", "EW"),
         SongSource(FREESHOW, SourceGroup.SONGS, "FreeShow", ".show", "FS"),
         SongSource(FREEWORSHIP, SourceGroup.SONGS, "Free Worship", ".xml", "FW"),
+        SongSource(MEDIASHOUT, SourceGroup.SONGS, "MediaShout", ".sc7x", "MS"),
         SongSource(OPENLP, SourceGroup.SONGS, "OpenLP", ".sqlite/.xml", "OL"),
         SongSource(OPENSONG, SourceGroup.SONGS, "OpenSong", ".xml", "OS"),
+        SongSource(PROPRESENTER, SourceGroup.SONGS, "ProPresenter", ".pro/.pro6", "PP"),
         SongSource(QUELEA, SourceGroup.SONGS, "Quelea", ".qsp/.xml", "QU"),
         SongSource(SOFTPROJECTOR, SourceGroup.SONGS, "SoftProjector", ".sps", "SP"),
         SongSource(SONGBEAMER, SourceGroup.SONGS, "SongBeamer", ".sng", "SB"),

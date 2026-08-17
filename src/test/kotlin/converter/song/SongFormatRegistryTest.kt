@@ -40,7 +40,7 @@ class SongFormatRegistryTest {
 
     @Test
     fun `an unknown id falls back rather than throwing at the UI`() {
-        assertSame(SongBeamerFormat, SongFormatConverters.byId("propresenter"))
+        assertSame(SongBeamerFormat, SongFormatConverters.byId("songshowplus"))
     }
 
     @Test
@@ -58,11 +58,14 @@ class SongFormatRegistryTest {
         assertTrue(EasySlidesFormat.needsOutputFolder)
         assertTrue(QueleaFormat.needsOutputFolder)
         assertTrue(OpenLpFormat.needsOutputFolder)
+        assertTrue(EasyWorshipFormat.needsOutputFolder)
+        assertTrue(MediaShoutFormat.needsOutputFolder)
         // These write one .song beside each input, so "same as input" is a valid destination.
         assertTrue(!SongBeamerFormat.needsOutputFolder)
         assertTrue(!FreeWorshipFormat.needsOutputFolder)
         assertTrue(!OpenSongFormat.needsOutputFolder)
         assertTrue(!FreeShowFormat.needsOutputFolder)
+        assertTrue(!ProPresenterFormat.needsOutputFolder)
     }
 
     @Test
