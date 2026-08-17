@@ -22,8 +22,8 @@ data class QueleaSong(
  * offered to the parser instead and the ones that are not songs are reported, not dropped silently.
  *
  * Inside, each section is `<section title="Verse 1"><lyrics>…</lyrics></section>` with its lines
- * newline-separated. Older packs store the whole song as plain text in one `<lyrics>` element, which
- * is read by blank-line blocks.
+ * newline-separated. The title is Quelea's own numbering rather than the section's name, and the
+ * body carries both the real heading and any chords — see [sectionsOf].
  */
 object QueleaConverter {
 
@@ -81,24 +81,42 @@ object QueleaConverter {
         sections = sectionsOf(root.childElement("lyrics")),
     )
 
+    /**
+     * The song's sections, named by what the lyrics say rather than by what the file claims.
+     *
+     * Quelea's `title=` attribute is not the section's name — it numbers the sections in order, so a
+     * chorus in third place is stored as `Verse 3`. The name the person who entered the song wrote
+     * is the first line of the body, and 570 of the 3,134 songs in Quelea's own English pack
+     * disagree with the attribute that way. So a heading found in the body wins, and once one
+     * section has one the attribute is dropped for the whole song — mixing the two renumbers the
+     * sections that have no heading against a scale the rest no longer use.
+     *
+     * Older packs store the whole song as plain text in one `<lyrics>` element, read by blank-line
+     * blocks.
+     */
     internal fun sectionsOf(lyrics: Element?): List<SongSection> {
         if (lyrics == null) return emptyList()
         val sections = lyrics.childElements("section")
-        return if (sections.isNotEmpty()) sections.mapIndexed { index, section ->
-            val body = (section.childElement("lyrics") ?: section).textWithBreaks()
-            SongSection(
-                section.getAttribute("title").trim().ifBlank { "Verse ${index + 1}" },
-                body.lines().map { it.trim() }.filter { it.isNotEmpty() },
-            )
-        } else {
-            blocksOf(lyrics.textWithBreaks())
+        if (sections.isEmpty()) return LyricBlocks.split(lyrics.textWithBreaks())
+
+        val read = sections.mapNotNull { section ->
+            val lines = (section.childElement("lyrics") ?: section).textWithBreaks()
+                .lines().map { it.trimEnd() }.filter { it.isNotBlank() }
+            val heading = lines.firstOrNull()?.let { LyricBlocks.headingOf(it) }
+            val body = (if (heading == null) lines else lines.drop(1)).map(::lyricLine)
+            // A section that is nothing but a heading points at one written out elsewhere — Quelea
+            // songs repeat a chorus as a bare `[Chorus]` — and has no lyrics of its own to show.
+            if (body.isEmpty()) null else Section(heading, section.getAttribute("title").trim(), body)
         }
+
+        val named = read.any { it.heading != null }
+        val names = read.map { section -> section.heading ?: section.title.takeIf { !named } }
+        return LyricBlocks.labels(names).mapIndexed { index, label -> SongSection(label, read[index].body) }
     }
 
-    private fun blocksOf(text: String): List<SongSection> {
-        val blocks = text.split(Regex("""\n\s*\n"""))
-            .map { block -> block.lines().map { it.trim() }.filter { it.isNotEmpty() } }
-            .filter { it.isNotEmpty() }
-        return blocks.mapIndexed { index, lines -> SongSection("Verse ${index + 1}", lines) }
-    }
+    private data class Section(val heading: String?, val title: String, val body: List<String>)
+
+    /** Chords are written above the words with nothing marking them as chords, so they are read. */
+    private fun lyricLine(line: String): String =
+        if (ChordLines.isChordLine(line)) ChordLines.bracket(line) else line.trim()
 }

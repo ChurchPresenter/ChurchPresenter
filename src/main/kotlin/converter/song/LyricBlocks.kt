@@ -11,7 +11,53 @@ package converter.song
 internal object LyricBlocks {
 
     private val blankLine = Regex("""\n[ \t]*\n\s*""")
+    private val whitespace = Regex("""\s+""")
     private val verseNumber = Regex("""^Verse (\d+)$""")
+
+    private const val NAMES = "verse|vers|strophe|chorus|refrain|bridge|pre[\\s-]?chorus|intro|" +
+        "outro|ending|end|tag|slide|coda|instrumental|interlude|куплет|припев|приспів|хор|мост|" +
+        "міст|вступление|вступ|окончание|конец"
+
+    // The number is part of the name to match: SongBeamer and Quelea both write `VERSE1` with no
+    // space, and a plain `\\b` after the word finds no boundary between `VERSE` and `1`.
+    private val labelWords = Regex("^($NAMES)(\\s*\\d+)?\\b", RegexOption.IGNORE_CASE)
+
+    /** A name and nothing else — `Chorus`, `Verse 2`, `PRE-CHORUS` — with no lyric alongside it. */
+    private val plainName = Regex("^($NAMES)\\s*\\d*$", RegexOption.IGNORE_CASE)
+
+    private const val MAX_HEADING_LENGTH = 30
+    private const val MAX_HEADING_WORDS = 3
+
+    /**
+     * Punctuation a heading does not carry but a sung line does. `This is my Father's world:` ends
+     * in a colon and is the first line of three of that hymn's verses, not a name for them.
+     */
+    private val sungPunctuation = Regex("""[,.;!?'’]""")
+    private const val MAX_LABEL_LENGTH = 24
+
+    /**
+     * The section name [line] states, or null when it is a line of the song.
+     *
+     * Stricter than [isLabel], because this decides whether to *remove* the line: a heading has to
+     * be the whole line, so a verse opening "End of the day" keeps its first line instead of losing
+     * it to the label. Three forms are headings and nothing else is — bracketed (`[Chorus]`), a
+     * name on its own (`Verse 2`), and a few words ending in a colon (`Head:`), which is how a song
+     * written by hand marks a section the vocabulary above does not cover. That last form is capped
+     * at [MAX_HEADING_WORDS] and rejects [sungPunctuation] because a lyric can end in a colon too.
+     */
+    fun headingOf(line: String): String? {
+        val trimmed = line.trim()
+        if (trimmed.isEmpty()) return null
+        val bracketed = (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+            (trimmed.startsWith("{") && trimmed.endsWith("}"))
+        val inner = trimmed.trim('[', ']', '{', '}').trim().removeSuffix(":").trim()
+        if (inner.isEmpty()) return null
+        if (bracketed) return inner
+        if (plainName.matches(inner)) return inner
+        if (!trimmed.endsWith(":") || trimmed.length > MAX_HEADING_LENGTH) return null
+        if (sungPunctuation.containsMatchIn(inner)) return null
+        return inner.takeIf { it.split(whitespace).size <= MAX_HEADING_WORDS }
+    }
 
     /**
      * Names a section rather than singing one.
@@ -21,14 +67,6 @@ internal object LyricBlocks {
      * leaving a section unlabelled. A bracketed line is taken as a label whatever its length,
      * since nothing sings brackets.
      */
-    private val labelWords = Regex(
-        "^(verse|vers|strophe|chorus|refrain|bridge|pre[\\s-]?chorus|intro|outro|ending|end|tag|" +
-            "slide|coda|куплет|припев|приспів|хор|мост|міст|вступление|вступ|окончание|конец)\\b",
-        RegexOption.IGNORE_CASE,
-    )
-
-    private const val MAX_LABEL_LENGTH = 24
-
     fun isLabel(line: String): Boolean {
         val trimmed = line.trim()
         if (trimmed.isEmpty()) return false
