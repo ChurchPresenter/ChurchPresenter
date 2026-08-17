@@ -111,6 +111,7 @@ import java.awt.Desktop
 import java.io.File
 import java.util.Locale
 import javax.swing.JFileChooser
+import javax.swing.filechooser.FileFilter
 import javax.swing.filechooser.FileNameExtensionFilter
 
 private val ButtonShape = RoundedCornerShape(6.dp)
@@ -338,7 +339,7 @@ private fun BatchFilePanel(source: SongSource, format: SongFormatConverter) {
                 if (files.isEmpty()) {
                     FileDropZone(Strings.dropFilesHere(source.ext), source.accepts) {
                         Button(shape = ButtonShape, onClick = {
-                            val picked = pickFiles(pickerLabel(source), *format.extensions.toTypedArray(), multiSelection = format.allowsMultipleFiles)
+                            val picked = pickSourceFiles(source, format)
                             choose(picked, Strings.filesSelected(picked.size))
                         }) {
                             Icon(Icons.Default.FileOpen, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
@@ -346,7 +347,7 @@ private fun BatchFilePanel(source: SongSource, format: SongFormatConverter) {
                         }
                         OutlinedButton(shape = ButtonShape, onClick = {
                             val dir = pickDirectory() ?: return@OutlinedButton
-                            val picked = findFilesRecursive(dir, format.extensions.first())
+                            val picked = findFilesRecursive(dir, format)
                             choose(picked, Strings.folderSelected(dir.absolutePath, picked.size))
                         }) {
                             Icon(Icons.Default.Folder, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
@@ -358,7 +359,7 @@ private fun BatchFilePanel(source: SongSource, format: SongFormatConverter) {
                         summary = summary,
                         entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(it.length())) },
                         onChange = {
-                            val picked = pickFiles(pickerLabel(source), *format.extensions.toTypedArray(), multiSelection = format.allowsMultipleFiles)
+                            val picked = pickSourceFiles(source, format)
                             choose(picked, Strings.filesSelected(picked.size))
                         },
                         onClear = { files = emptyList(); summary = ""; clearResults() }
@@ -422,35 +423,48 @@ private fun BatchFilePanel(source: SongSource, format: SongFormatConverter) {
     }
 }
 
-/** SoftProjector: one .sps song book explodes into a folder of .song files. */
+/**
+ * SoftProjector: every chosen `.sps` song book explodes into a folder of `.song` files.
+ *
+ * Kept apart from the generic panel because a song book previews as a list of the songs inside it
+ * rather than as one output file — but it takes several books at once, since a church migrating off
+ * SoftProjector has one file per songbook and converting them one at a time is the whole job done
+ * by hand.
+ */
 @Composable
 private fun SoftProjectorPanel() {
     val spsSource = SongSources.byId(SongSources.SOFTPROJECTOR)
-    var spsFile by remember { mutableStateOf<File?>(null) }
+    var files by remember { mutableStateOf<List<File>>(emptyList()) }
+    var summary by remember { mutableStateOf("") }
     var outputDir by remember { mutableStateOf<File?>(null) }
-    var preview by remember { mutableStateOf<SpsPreviewData?>(null) }
+    var previews by remember { mutableStateOf<List<SpsPreviewData>>(emptyList()) }
     var log by remember { mutableStateOf<List<String>>(emptyList()) }
     var state by remember { mutableStateOf(ConvertState.SELECT) }
+    var completed by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
+
+    fun clearResults() {
+        previews = emptyList(); log = emptyList(); state = ConvertState.SELECT; completed = 0
+    }
+
+    fun choose(picked: List<File>, describedAs: String) {
+        if (picked.isEmpty()) return
+        files = picked
+        summary = describedAs
+        clearResults()
+    }
 
     fun runConvert() {
         state = ConvertState.CONVERTING
+        completed = 0
+        val destination = outputDir ?: return
         scope.launch {
-            log = withContext(Dispatchers.IO) {
-                try {
-                    val result = SpsToSongConverter.convert(spsFile!!, outputDir!!)
-                    val msgs = mutableListOf(
-                        Strings.songbookPrefix(result.songbookFolder.substringAfterLast('/').substringAfterLast('\\')),
-                        Strings.songsConverted(result.songsConverted),
-                        Strings.outputPrefix(result.songbookFolder)
-                    )
-                    result.errors.forEach { msgs.add("ERROR: $it") }
-                    if (result.errors.isEmpty()) msgs.add("OK: ${Strings.allSongsConverted}")
-                    msgs
-                } catch (e: Exception) {
-                    listOf("ERROR: ${e.message}")
-                }
+            val messages = mutableListOf<String>()
+            for (file in files) {
+                messages += withContext(Dispatchers.IO) { convertSongBook(file, destination) }
+                completed++
             }
+            log = messages
             state = ConvertState.DONE
         }
     }
@@ -464,32 +478,37 @@ private fun SoftProjectorPanel() {
             Column {
                 StepHeader(
                     index = 1,
-                    complete = spsFile != null,
+                    complete = files.isNotEmpty(),
                     label = Strings.stepSourceFiles,
-                    hint = if (spsFile == null) ".sps" else ""
+                    hint = if (files.isEmpty()) spsSource.ext else ""
                 )
-                val chosen = spsFile
-                if (chosen == null) {
-                    FileDropZone(Strings.dropFilesHere(".sps"), SongSources.byId(SongSources.SOFTPROJECTOR).accepts) {
+                if (files.isEmpty()) {
+                    FileDropZone(Strings.dropFilesHere(spsSource.ext), spsSource.accepts) {
                         Button(shape = ButtonShape, onClick = {
-                            pickFiles(pickerLabel(spsSource), *SoftProjectorFormat.extensions.toTypedArray(), multiSelection = false).firstOrNull()?.let {
-                                spsFile = it; preview = null; log = emptyList(); state = ConvertState.SELECT
-                            }
+                            val picked = pickSourceFiles(spsSource, SoftProjectorFormat)
+                            choose(picked, Strings.filesSelected(picked.size))
                         }) {
                             Icon(Icons.Default.FileOpen, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
                             Text(Strings.selectFiles)
                         }
+                        OutlinedButton(shape = ButtonShape, onClick = {
+                            val dir = pickDirectory() ?: return@OutlinedButton
+                            val picked = findFilesRecursive(dir, SoftProjectorFormat)
+                            choose(picked, Strings.folderSelected(dir.absolutePath, picked.size))
+                        }) {
+                            Icon(Icons.Default.Folder, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
+                            Text(Strings.selectFolder)
+                        }
                     }
                 } else {
                     SelectedFilesCard(
-                        summary = chosen.name,
-                        entries = listOf(SelectedEntry(chosen.name, formatFileSize(chosen.length()))),
+                        summary = summary,
+                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(it.length())) },
                         onChange = {
-                            pickFiles(pickerLabel(spsSource), *SoftProjectorFormat.extensions.toTypedArray(), multiSelection = false).firstOrNull()?.let {
-                                spsFile = it; preview = null; log = emptyList(); state = ConvertState.SELECT
-                            }
+                            val picked = pickSourceFiles(spsSource, SoftProjectorFormat)
+                            choose(picked, Strings.filesSelected(picked.size))
                         },
-                        onClear = { spsFile = null; preview = null; log = emptyList(); state = ConvertState.SELECT }
+                        onClear = { files = emptyList(); summary = ""; clearResults() }
                     )
                 }
             }
@@ -508,60 +527,35 @@ private fun SoftProjectorPanel() {
         }
 
         item {
-            val ready = spsFile != null && outputDir != null
+            val ready = files.isNotEmpty() && outputDir != null
             ConversionActionBar(
                 state = state,
                 canPreview = ready,
-                canConvert = ready && preview?.error == null,
+                canConvert = ready && previews.none { it.error != null },
                 convertLabel = if (state == ConvertState.PREVIEW) {
-                    Strings.convertNSongs(preview?.songCount ?: 0)
+                    Strings.convertNSongs(previews.sumOf { it.songCount })
                 } else Strings.convert,
                 doneLabel = if (state == ConvertState.DONE && log.none { it.startsWith("ERROR") }) Strings.doneLabel else null,
-                onPreview = { preview = buildSpsPreview(spsFile!!, outputDir!!); state = ConvertState.PREVIEW },
+                onPreview = {
+                    previews = files.map { buildSpsPreview(it, outputDir!!) }
+                    state = ConvertState.PREVIEW
+                },
                 onConvert = { runConvert() },
-                onStartOver = { spsFile = null; preview = null; log = emptyList(); state = ConvertState.SELECT }
+                onStartOver = { files = emptyList(); summary = ""; clearResults() }
             )
         }
 
         if (state == ConvertState.CONVERTING) {
-            item { ConversionProgressRow(Strings.converting, null) }
+            item {
+                ConversionProgressRow(
+                    Strings.convertingFiles(files.size),
+                    if (files.isEmpty()) null else completed.toFloat() / files.size
+                )
+            }
         }
 
         if (state == ConvertState.PREVIEW) {
-            preview?.let { p ->
-                if (p.error != null) {
-                    item { Text(Strings.errorPrefix(p.error), color = MaterialTheme.colorScheme.error) }
-                } else {
-                    item {
-                        Column {
-                            Text(Strings.songbookPrefix(p.songbookName), style = MaterialTheme.typography.bodyMedium)
-                            Text(Strings.songsFound(p.songCount), style = MaterialTheme.typography.bodyMedium)
-                            Text(
-                                Strings.outputFolderPrefix(p.outputFolder),
-                                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            if (p.folderExists) {
-                                Text(
-                                    Strings.outputFolderOverwrite,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    }
-                    if (p.sampleTitles.isNotEmpty()) {
-                        item { Text(Strings.songsLabel, style = MaterialTheme.typography.titleSmall) }
-                        items(p.sampleTitles) { title ->
-                            Text(
-                                title,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
+            items(previews) { preview -> SpsPreviewCard(preview, showTitles = previews.size == 1) }
         }
         if (state == ConvertState.DONE && log.isNotEmpty()) {
             item {
@@ -576,6 +570,50 @@ private fun SoftProjectorPanel() {
         }
     }
 }
+
+/** One song book's preview: what it holds, where it lands, and whether that folder is already there. */
+@Composable
+private fun SpsPreviewCard(preview: SpsPreviewData, showTitles: Boolean) {
+    if (preview.error != null) {
+        Text(Strings.errorPrefix(preview.error), color = MaterialTheme.colorScheme.error)
+        return
+    }
+    Column {
+        Text(Strings.songbookPrefix(preview.songbookName), style = MaterialTheme.typography.bodyMedium)
+        Text(Strings.songsFound(preview.songCount), style = MaterialTheme.typography.bodyMedium)
+        Text(
+            Strings.outputFolderPrefix(preview.outputFolder),
+            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        if (preview.folderExists) {
+            Text(
+                Strings.outputFolderOverwrite,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+        if (showTitles && preview.sampleTitles.isNotEmpty()) {
+            Spacer(Modifier.height(4.dp))
+            Text(Strings.songsLabel, style = MaterialTheme.typography.titleSmall)
+            preview.sampleTitles.forEach { title ->
+                Text(
+                    title,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+/** One song book converted, reported in the same OK/ERROR lines every other format's log uses. */
+private fun convertSongBook(file: File, outputDir: File): List<String> = runCatching {
+    val result = SpsToSongConverter.convert(file, outputDir)
+    val folder = result.songbookFolder.substringAfterLast('/').substringAfterLast('\\')
+    listOf("OK: ${file.name} -> $folder, ${Strings.songsConverted(result.songsConverted)}") +
+        result.errors.map { "ERROR: ${file.name} - $it" }
+}.getOrElse { failure -> listOf("ERROR: ${file.name} - ${failure.message}") }
 
 /** PDF / PPTX / DOCX: text is extracted, split into songs, then written out. */
 @Composable
@@ -594,7 +632,7 @@ private fun DocumentsPanel(source: SongSource) {
         parsedSongs = emptyList(); markdown = ""; log = emptyList(); state = ConvertState.SELECT; completed = 0
     }
 
-    fun pick(): List<File> = pickFiles(pickerLabel(source), *DocumentFormat.extensions.toTypedArray(), multiSelection = true)
+    fun pick(): List<File> = pickSourceFiles(source, DocumentFormat)
 
     fun runConvert() {
         state = ConvertState.CONVERTING
@@ -644,6 +682,14 @@ private fun DocumentsPanel(source: SongSource) {
                         }) {
                             Icon(Icons.Default.FileOpen, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
                             Text(Strings.selectFiles)
+                        }
+                        OutlinedButton(shape = ButtonShape, onClick = {
+                            val dir = pickDirectory() ?: return@OutlinedButton
+                            val picked = findFilesRecursive(dir, DocumentFormat)
+                            if (picked.isNotEmpty()) { files = picked; clearResults() }
+                        }) {
+                            Icon(Icons.Default.Folder, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
+                            Text(Strings.selectFolder)
                         }
                     }
                 } else {
@@ -2640,6 +2686,45 @@ private fun findFilesRecursive(dir: File, extension: String): List<File> =
         .filter { it.isFile && it.extension.equals(extension, ignoreCase = true) }
         .sortedBy { it.absolutePath }
         .toList()
+
+/**
+ * Every file in [dir] and below that [format] can read.
+ *
+ * This is what makes "select folder" a bulk convert rather than a partial one: it matches **all** of
+ * a format's extensions instead of only its first, so pointing at a documents folder no longer
+ * quietly picks up the PDFs and leaves the .docx and .pptx files behind.
+ */
+private fun findFilesRecursive(dir: File, format: SongFormatConverter): List<File> =
+    dir.walkTopDown()
+        .filter { it.isFile && matchesFormat(it, format) }
+        .sortedBy { it.absolutePath }
+        .toList()
+
+private fun matchesFormat(file: File, format: SongFormatConverter): Boolean =
+    format.extensions.any { file.extension.equals(it, ignoreCase = true) } ||
+        (format.acceptsExtensionlessFiles && file.extension.isEmpty())
+
+/**
+ * The file picker for one song format.
+ *
+ * Formats whose files usually carry no extension — OpenSong writes a bare name — get a filter that
+ * accepts those too, because an extension filter hides every one of their songs and the panel then
+ * looks like it works while converting nothing.
+ */
+private fun pickSourceFiles(source: SongSource, format: SongFormatConverter): List<File> {
+    val label = pickerLabel(source)
+    val chooser = JFileChooser(defaultDir).apply {
+        fileFilter = object : FileFilter() {
+            override fun accept(file: File): Boolean = file.isDirectory || matchesFormat(file, format)
+            override fun getDescription(): String = label
+        }
+        isMultiSelectionEnabled = format.allowsMultipleFiles
+        dialogTitle = Strings.selectDialog(label)
+    }
+    return if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+        if (format.allowsMultipleFiles) chooser.selectedFiles.toList() else listOfNotNull(chooser.selectedFile)
+    } else emptyList()
+}
 
 /** How many of the chosen files the "source files" card lists before it stops. */
 private const val FILE_LIST_LIMIT = 200

@@ -57,7 +57,15 @@ class SongSourcesTest {
     fun `search matches the extension, which is how people look for a file they have`() {
         assertEquals(listOf("songbeamer"), SongSources.matching(".sng").map { it.id })
         assertEquals(listOf("softprojector"), SongSources.matching("sps").map { it.id })
-        assertEquals(listOf("freeworship"), SongSources.matching(".xml").map { it.id })
+        assertEquals(listOf("quelea"), SongSources.matching(".qsp").map { it.id })
+    }
+
+    @Test
+    fun `an extension several apps share lists all of them, in rail order`() {
+        assertEquals(
+            listOf("easyslides", "freeworship", "openlp", "opensong", "quelea"),
+            SongSources.matching(".xml").map { it.id }
+        )
     }
 
     @Test
@@ -71,6 +79,17 @@ class SongSourcesTest {
             assertTrue(source.description.isNotBlank(), source.id)
             assertTrue(source.accepts.isNotBlank(), source.id)
         }
+    }
+
+    @Test
+    fun `song formats are listed alphabetically, so the rail can be scanned by name`() {
+        val names = SongSources.all.filter { it.group == SourceGroup.SONGS }.map { it.name }
+        assertEquals(names.sortedBy { it.replace(" ", "").lowercase() }, names)
+    }
+
+    @Test
+    fun `the default is named rather than whichever entry happens to sort first`() {
+        assertEquals("songbeamer", SongSources.default.id)
     }
 
     @Test
