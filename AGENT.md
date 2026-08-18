@@ -58,11 +58,18 @@ main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
 - New user-facing strings go in `composeApp/src/jvmMain/composeResources/values/strings.xml`.
 - Per-feature source locations are listed in `FEATURES.md`.
 
+### The converter module
+`converter/` is a real Gradle module of this build — `include(":converter")`, and `:composeApp`
+takes it as `implementation(projects.converter)`. It is neither a submodule nor a mounted source
+directory: build it with `./gradlew :converter:build`, test it with `./gradlew :converter:test`.
+Its POI dependency excludes `poi-ooxml-lite` and adds `poi-ooxml-full` — its jar is on the app's
+classpath, and exactly ONE schema jar may be there.
+
 ### Sub-builds
-Five module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
+Four module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
 have their own Gradle builds and test suites, under `src/jvmMain/appResources/common/`:
 `ChurchPresenter-PresentationEngine` (committed directly, NOT a git submodule), `-BLE`,
-`-LottieGen`, `-Converter`, `-CompanionSatellite`.
+`-LottieGen`, `-CompanionSatellite`.
 
 - **When touching module code, compile BOTH builds**: `./gradlew compileKotlinJvm` at the repo root
   AND `sh gradlew build` inside the module. The main build is more permissive and will accept code

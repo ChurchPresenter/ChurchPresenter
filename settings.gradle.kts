@@ -33,3 +33,6 @@ plugins {
 }
 
 include(":composeApp")
+// The converter: its own module, compiled and packaged separately, and depended on by
+// :composeApp, which opens it in a window from the Help menu.
+include(":converter")

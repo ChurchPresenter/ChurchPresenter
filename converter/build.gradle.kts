@@ -1,30 +1,38 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    // Kept in step with the app (gradle/libs.versions.toml): this module's sources are also
-    // compiled INTO composeApp via kotlin.srcDir, so a version skew means code that builds in one
-    // build fails in the other — which is exactly how ui/App.kt came to be broken here while the
-    // app compiled it fine.
-    kotlin("jvm") version "2.3.10"
-    id("org.jetbrains.compose") version "1.10.2"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.3.10"
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
     jacoco
 }
 
 group = "org.churchpresenter"
 version = "1.0.0"
 
+kotlin {
+    jvmToolchain(21)
+}
+
 dependencies {
     implementation(compose.desktop.currentOs)
-    implementation(compose.material3)
-    implementation(compose.materialIconsExtended)
-    implementation("org.xerial:sqlite-jdbc:3.45.3.0")
-    // Kept at the version composeApp resolves (gradle/libs.versions.toml: kotlinx-serialization),
-    // since these sources compile into it as well. Only the runtime JsonElement API is used, so the
-    // serialization compiler plugin is deliberately not applied.
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
+    // Compose artefacts come from the version catalogue rather than the `compose.*` accessors, so
+    // this module and :composeApp resolve the SAME material3 and icon versions -- composeApp
+    // depends on this module, and a second version line here would silently upgrade the app's.
+    implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons.extended)
+    implementation(libs.sqlite.jdbc)
+    // FreeShow and MediaShout libraries are JSON. Declared here because this module compiles on
+    // its own now -- it used to borrow the app's copy through the kotlin.srcDir mount.
+    implementation(libs.kotlinx.serialization.json)
     implementation("org.apache.pdfbox:pdfbox:2.0.33")
-    implementation("org.apache.poi:poi-ooxml:5.3.0")
+    // poi-ooxml-lite is swapped for poi-ooxml-full, matching :composeApp and the Presentation
+    // Engine: exactly ONE schema jar may be on the classpath, and this module's jar is on the
+    // app's, so a lite that arrived here transitively would put both there.
+    implementation("org.apache.poi:poi-ooxml:5.3.0") {
+        exclude(group = "org.apache.poi", module = "poi-ooxml-lite")
+    }
+    implementation("org.apache.poi:poi-ooxml-full:5.3.0")
 
     testImplementation(kotlin("test"))
 }
@@ -46,6 +54,8 @@ tasks.jacocoTestReport {
     )
 }
 
+// The converter also ships as a standalone desktop app (.github/workflows/converter-installers.yml
+// packages it), separately from the copy the main app opens from its Help menu.
 compose.desktop {
     application {
         mainClass = "MainKt"

@@ -30,7 +30,7 @@ git submodule update --remote --merge
 
 > This will include [ChurchPresenter-LottieGen](https://github.com/ChurchPresenter/ChurchPresenter-LottieGen), a standalone Compose Desktop app for generating animated lower-third overlays as Lottie JSON files. Its source is compiled as part of the main app. Located at `composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen`.
 >
-> It also includes [ChurchPresenter-Converter](https://github.com/ChurchPresenter/ChurchPresenter-Converter), a song/bible format converter built with Compose Desktop. Its source is compiled as part of the main app and accessible from the Help menu. Located at `composeApp/src/jvmMain/appResources/common/ChurchPresenter-Converter`.
+> The song/bible format converter is **not** a submodule — it lives in this repo as the `:converter` Gradle module, at [`converter/`](./converter). `:composeApp` depends on it and opens it from the Help menu; it also still packages as a standalone desktop app (`./gradlew :converter:packageDmg`).
 
 
 ---

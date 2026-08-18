@@ -1,4 +1,4 @@
-name: Build Platforms
+name: Converter Installers
 
 on:
   workflow_dispatch:
@@ -49,6 +49,8 @@ jobs:
             VERSION="$INPUT_VERSION"
             [[ "$VERSION" != v* ]] && VERSION="v$VERSION"
           else
+            # Commit count of THIS repo since the converter moved into it, so the auto-generated
+            # numbers continue from the app's history rather than the old standalone repo's.
             YEAR=$(date +%y)
             COMMITS=$(git rev-list --count HEAD)
             MAJOR=$YEAR
@@ -67,6 +69,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # The build only needs :converter, but configuring the root build configures
+          # :composeApp too, and that mounts the submodules' sources.
+          submodules: true
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -79,12 +84,12 @@ jobs:
 
       - name: Build MSI installer
         shell: cmd
-        run: gradlew.bat packageMsi
+        run: gradlew.bat :converter:packageMsi
 
       - name: Rename MSI (add WINDOWS-x64 label)
         shell: powershell
         run: |
-          Get-ChildItem build\compose\binaries\main\msi\*.msi | ForEach-Object {
+          Get-ChildItem converter\build\compose\binaries\main\msi\*.msi | ForEach-Object {
             Rename-Item $_.FullName ($_.BaseName + "-WINDOWS-x64.msi")
           }
 
@@ -92,7 +97,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-msi
-          path: build/compose/binaries/main/msi
+          path: converter/build/compose/binaries/main/msi
           retention-days: 2
 
   build-macos:
@@ -103,6 +108,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # The build only needs :converter, but configuring the root build configures
+          # :composeApp too, and that mounts the submodules' sources.
+          submodules: true
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -117,11 +125,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build DMG
-        run: ./gradlew packageDmg
+        run: ./gradlew :converter:packageDmg
 
       - name: Rename DMG (add MACOS-arm64 label)
         run: |
-          for f in build/compose/binaries/main/dmg/*.dmg; do
+          for f in converter/build/compose/binaries/main/dmg/*.dmg; do
             mv "$f" "${f%.dmg}-MACOS-arm64.dmg"
           done
 
@@ -129,7 +137,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-dmg
-          path: build/compose/binaries/main/dmg
+          path: converter/build/compose/binaries/main/dmg
           retention-days: 2
 
   build-macos-x64:
@@ -140,6 +148,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # The build only needs :converter, but configuring the root build configures
+          # :composeApp too, and that mounts the submodules' sources.
+          submodules: true
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -154,11 +165,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build DMG
-        run: ./gradlew packageDmg
+        run: ./gradlew :converter:packageDmg
 
       - name: Rename DMG (add MACOS-x64 label)
         run: |
-          for f in build/compose/binaries/main/dmg/*.dmg; do
+          for f in converter/build/compose/binaries/main/dmg/*.dmg; do
             mv "$f" "${f%.dmg}-MACOS-x64.dmg"
           done
 
@@ -166,7 +177,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-dmg-x64
-          path: build/compose/binaries/main/dmg
+          path: converter/build/compose/binaries/main/dmg
           retention-days: 2
 
   build-linux:
@@ -177,6 +188,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # The build only needs :converter, but configuring the root build configures
+          # :composeApp too, and that mounts the submodules' sources.
+          submodules: true
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -191,20 +205,20 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build DEB installer
-        run: ./gradlew packageDeb
+        run: ./gradlew :converter:packageDeb
 
       - name: Rename DEB (add DEBIAN-x64 label)
         run: |
-          for f in build/compose/binaries/main/deb/*.deb; do
+          for f in converter/build/compose/binaries/main/deb/*.deb; do
             BASENAME=$(basename "$f" .deb)
-            mv "$f" "build/compose/binaries/main/deb/${BASENAME}-DEBIAN-x64.deb"
+            mv "$f" "converter/build/compose/binaries/main/deb/${BASENAME}-DEBIAN-x64.deb"
           done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-deb
-          path: build/compose/binaries/main/deb
+          path: converter/build/compose/binaries/main/deb
           retention-days: 2
 
   release:

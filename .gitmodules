@@ -1,7 +1,3 @@
-[submodule "composeApp/src/jvmMain/appResources/common/ChurchPresenter-Converter"]
-	path = composeApp/src/jvmMain/appResources/common/ChurchPresenter-Converter
-	url = https://github.com/ChurchPresenter/ChurchPresenter-Converter
-	branch = main
 [submodule "composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen"]
 	path = composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen
 	url = https://github.com/ChurchPresenter/ChurchPresenter-LottieGen

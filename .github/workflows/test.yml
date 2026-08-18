@@ -154,6 +154,13 @@ jobs:
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest
 
+      # The converter is a module of THIS build (`include(":converter")`), not one of the separate
+      # sub-builds below, so it is a task on the root wrapper. `if: always()` for the same reason
+      # they have it: one red suite must not hide the rest.
+      - name: Converter tests
+        if: always()
+        run: ./gradlew :converter:test
+
       # Each submodule is its own Gradle build with its own wrapper, so they cannot be reached
       # from the root build and are invoked individually. `if: always()` keeps a failure in one
       # suite from hiding the results of the others.
@@ -177,10 +184,6 @@ jobs:
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite
         run: chmod +x gradlew && ./gradlew test
 
-      - name: Converter tests
-        if: always()
-        working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-Converter
-        run: chmod +x gradlew && ./gradlew test
 
       # Kotlin Multiplatform, so the JVM suite is `jvmTest` rather than `test`.
       - name: Crossword tests
@@ -204,6 +207,7 @@ jobs:
         with:
           report_paths: |
             composeApp/build/test-results/**/TEST-*.xml
+            converter/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
           detailed_summary: true
           include_passed: false
@@ -221,5 +225,7 @@ jobs:
           path: |
             composeApp/build/reports/tests/
             composeApp/build/test-results/
+            converter/build/reports/tests/
+            converter/build/test-results/
             composeApp/src/jvmMain/appResources/common/*/build/reports/tests/
             composeApp/src/jvmMain/appResources/common/*/build/test-results/

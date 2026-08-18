@@ -22,7 +22,7 @@
 - `presenter/SongPresenter.kt`
 - `dialogs/EditSongDialog.kt`, `dialogs/tabs/SongSettingsTab.kt`
 - `models/LyricSection.kt`
-- `appResources/common/ChurchPresenter-Converter/` — format converter tool
+- `converter/` (the `:converter` Gradle module, at the repo root) — format converter tool
 
 ## Bible & Scripture
 - **Instant verse display** — browse any of the 66 books and put a verse on screen in seconds.
@@ -46,7 +46,7 @@
 - `data/BibleSource.kt`, `data/BibleInstallSupport.kt` — download sources: shared model and install machinery
 - `data/EBibleSource.kt` — eBible.org catalogue (USFX), `data/ZefaniaSource.kt` + `data/ZefaniaRepositoryIndex.kt` — Zefania archive
 - `viewmodel/BibleCatalogViewModel.kt`, `dialogs/BibleCatalogBrowserDialog.kt` — download browser UI
-- `appResources/common/ChurchPresenter-Converter/src/main/kotlin/converter/UsfxToSpbConverter.kt` — USFX conversion
+- `converter/src/main/kotlin/converter/bible/UsfxToSpbConverter.kt` — USFX conversion
 - `data/settings/BibleSettings.kt`, `data/settings/BibleEngineSettings.kt`
 - `presenter/BiblePresenter.kt`
 - `dialogs/tabs/BibleSettingsTab.kt`
