@@ -461,7 +461,16 @@ after it in that JVM. `TestSingletons.latchSkikoHostOs()` exists to prevent exac
 be called *before* any `os.name` swap — `withOsName` already does. Whether it bites depends on test
 execution order, so it can appear on one machine and not another.
 
-### The six sub-builds
+### The converter module
+
+`converter/` is part of this build, so it needs no wrapper of its own:
+
+```bash
+./gradlew :converter:test     # its suite
+./gradlew :converter:run      # the converter on its own, without the app
+```
+
+### The five sub-builds
 
 `:composeApp:check` does **not** reach them — each is its own Gradle build with its own wrapper,
 under `composeApp/src/jvmMain/appResources/common/`. CI runs them as separate steps. To run one

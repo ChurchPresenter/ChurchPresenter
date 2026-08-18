@@ -74,8 +74,6 @@ jobs:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen/**'
             satellite:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite/**'
-            converter:
-              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-Converter/**'
             cross:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/**'
 
@@ -175,6 +173,21 @@ jobs:
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest
 
+      # The converter is a module of THIS build (`include(":converter")`), not one of the separate
+      # builds below, so it is a task on the root wrapper and shares its daemon -- seconds rather
+      # than a fresh Gradle bootstrap. That is why it is not gated on `steps.modules` the way they
+      # are: there is nothing to save, and :composeApp depends on it, so an app change can break it.
+      - name: Converter tests
+        if: always()
+        run: ./gradlew :converter:test
+
+      # The module's own six-counter floor, off the execution data the step above just wrote.
+      # `-x test` for the same reason the app's floor step has it: the task `dependsOn` the suite,
+      # which is right for a developer running it directly and would re-run it here.
+      - name: Converter coverage floor
+        if: always()
+        run: ./gradlew :converter:jacocoTestCoverageVerification -x test
+
       # Each module is its own Gradle build with its own wrapper, so they cannot be reached
       # from the root build and are invoked individually. `if: always()` keeps a failure in one
       # suite from hiding the results of the others; the `steps.modules` half skips a module whose
@@ -199,10 +212,6 @@ jobs:
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite
         run: chmod +x gradlew && ./gradlew test
 
-      - name: Converter tests
-        if: always() && steps.modules.outputs.converter == 'true'
-        working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-Converter
-        run: chmod +x gradlew && ./gradlew test
 
       # Kotlin Multiplatform, so the JVM suite is `jvmTest` rather than `test`.
       - name: Crossword tests
@@ -226,6 +235,7 @@ jobs:
         with:
           report_paths: |
             composeApp/build/test-results/**/TEST-*.xml
+            converter/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
           detailed_summary: true
           include_passed: false
@@ -243,5 +253,7 @@ jobs:
           path: |
             composeApp/build/reports/tests/
             composeApp/build/test-results/
+            converter/build/reports/tests/
+            converter/build/test-results/
             composeApp/src/jvmMain/appResources/common/*/build/reports/tests/
             composeApp/src/jvmMain/appResources/common/*/build/test-results/

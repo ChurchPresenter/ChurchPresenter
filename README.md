@@ -24,7 +24,7 @@ compiled into the main app via `kotlin.srcDir`:
 
 > **ChurchPresenter-LottieGen** — a standalone Compose Desktop app for generating animated lower-third overlays as Lottie JSON files, launched from the Lower Third settings.
 >
-> **ChurchPresenter-Converter** — a song/bible format converter built with Compose Desktop, accessible from the Help menu.
+> **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop, accessible from the Help menu. Unlike the rest, it is a Gradle module of this build (`:converter`) rather than a mounted source directory, so it is built and tested on its own: `./gradlew :converter:test`, `./gradlew :converter:packageDmg`.
 >
 > **ChurchPresenter-PresentationEngine** — PPTX/PPT/Keynote/PDF parsing, timing and animation.
 >

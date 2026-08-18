@@ -8,7 +8,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -65,20 +64,10 @@ class UsfxConversionTest {
     // --- book codes ---
 
     @Test
-    fun `usfm book codes map onto the canonical order`() {
-        assertEquals(1, UsfxToSpbConverter.bookNumberFor("GEN"))
-        assertEquals(19, UsfxToSpbConverter.bookNumberFor("PSA"))
-        assertEquals(40, UsfxToSpbConverter.bookNumberFor("MAT"))
-        assertEquals(66, UsfxToSpbConverter.bookNumberFor("REV"))
-        assertEquals(1, UsfxToSpbConverter.bookNumberFor("gen"), "codes are matched case-insensitively")
-    }
-
-    @Test
     fun `books outside the canon are left out rather than mis-numbered`() {
-        // Deuterocanonical books have no slot in the 66-book numbering the app uses.
-        assertNull(UsfxToSpbConverter.bookNumberFor("TOB"))
-        assertNull(UsfxToSpbConverter.bookNumberFor("SIR"))
-
+        // Deuterocanonical books have no slot in the 66-book numbering the app uses. The mapping
+        // itself is `internal` to the :converter module and pinned by its own UsfxToSpbConverterTest;
+        // what this asserts is what comes out of the conversion the app actually runs.
         val bible = parse(
             """<book id="GEN"><c id="1"/><v id="1"/>In the beginning<ve/></book>""" +
                 """<book id="TOB"><c id="1"/><v id="1"/>Tobit text<ve/></book>"""

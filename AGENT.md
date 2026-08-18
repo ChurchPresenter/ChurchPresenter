@@ -58,14 +58,27 @@ main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
 - New user-facing strings go in `composeApp/src/jvmMain/composeResources/values/strings.xml`.
 - Per-feature source locations are listed in `FEATURES.md`.
 
-### Sub-builds
-Five module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
-have their own Gradle builds and test suites, under `src/jvmMain/appResources/common/`:
-`ChurchPresenter-PresentationEngine`, `-BLE`, `-LottieGen`, `-Converter`, `-CompanionSatellite`.
-A sixth, `-Cross`, is not mounted — `syncCrosswordFiles` copies its `encoded/*.xwp` into
-composeResources at build time.
+### The converter module
+`converter/` is a real Gradle module of this build — `include(":converter")`, and `:composeApp`
+takes it as `implementation(projects.converter)`. It is neither a submodule nor a mounted source
+directory: build it with `./gradlew :converter:build`, test it with `./gradlew :converter:test`.
+Its POI dependency excludes `poi-ooxml-lite` and adds `poi-ooxml-full` — its jar is on the app's
+classpath, and exactly ONE schema jar may be there.
 
-**None of these are git submodules.** All six are committed directly into this repository, so a
+- `./gradlew :converter:detekt` — same `config/detekt/detekt.yml` as the app, **no baseline**: the
+  app's baseline is a jvmMain snapshot and none of it applies here, so this module stays clean.
+- `./gradlew :converter:jacocoTestCoverageVerification` — the same six counters the app gates, with
+  this module's own floors (see the table in `converter/build.gradle.kts`). `ui/**` and `MainKt` are
+  excluded: they need a display. Both run in CI as their own steps.
+
+### Sub-builds
+Four module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
+have their own Gradle builds and test suites, under `src/jvmMain/appResources/common/`:
+`ChurchPresenter-PresentationEngine`, `-BLE`, `-LottieGen`, `-CompanionSatellite`. A fifth,
+`-Cross`, is not mounted — `syncCrosswordFiles` copies its `encoded/*.xwp` into composeResources at
+build time. The converter is not among them: it is the `:converter` Gradle module described above.
+
+**None of these are git submodules.** All of them are committed directly into this repository, so a
 plain `git clone` is enough and a change spanning the app and a module is one commit.
 
 - **When touching module code, compile BOTH builds**: `./gradlew compileKotlinJvm` at the repo root

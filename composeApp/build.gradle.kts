@@ -308,6 +308,9 @@ kotlin {
             implementation(libs.junit.platform.launcher)
         }
         jvmMain.dependencies {
+            // The converter: a real module rather than a mounted source directory, opened in its
+            // own window from the Help menu (AboutDialog) and used for Bible/song file conversion.
+            implementation(projects.converter)
             implementation(libs.kotlinx.coroutines.swing)
             // Sentry crash reporting
             implementation(libs.sentry)
@@ -653,8 +656,6 @@ kotlin {
     sourceSets {
         jvmMain {
             kotlin.srcDir(generateBuildConfig.map { layout.buildDirectory.dir("generated/buildconfig") })
-            // Include Converter module source (builds together, launches as separate window)
-            kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-Converter/src/main/kotlin")
             // Include LottieGen module source (builds together, launches as separate window)
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/kotlin")
             // Include Bible Lookup Engine (BLE) module source — runs in-process as a WebSocket
@@ -667,7 +668,6 @@ kotlin {
             // Keynote decks (static + animated) for PresentationViewModel and CompanionServer.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/src/main/kotlin")
             // Include module resources (.properties files for localization)
-            resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-Converter/src/main/resources")
             resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/resources")
         }
     }
@@ -899,7 +899,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         layout.buildDirectory.file("jacoco/jvmTestSerial.exec"),
     )
 
-    // CRITICAL: composeApp mounts all five sub-builds' sources through kotlin.srcDir (see the
+    // CRITICAL: composeApp mounts four sub-builds' sources through kotlin.srcDir (see the
     // sourceSets block above), so their classes land in the SAME output directory as the app's.
     // Reporting on everything would drown the app's real number in ~tens of thousands of lines of
     // module code that has its own separate suites. Restrict to this app's package root; the
