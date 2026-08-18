@@ -145,91 +145,104 @@ object XmlToSpbConverter {
     ): ParsedBible = BebliaParser.parse(xmlFile, language, name, rights, source, identifier, onProgress)
 
     private fun parseZefania(root: org.w3c.dom.Element, xmlFile: File): ParsedBible {
-        var description = ""
-        var language: String? = null
-        var title = ""
-        var identifier = ""
-        var rights = ""
-        var source = ""
-
-        val infoNodes = root.getElementsByTagName("INFORMATION")
-        if (infoNodes.length > 0) {
-            val info = infoNodes.item(0)
-            for (i in 0 until info.childNodes.length) {
-                val child = info.childNodes.item(i)
-                when (child.nodeName) {
-                    "description" -> description = child.textContent ?: ""
-                    "title" -> title = child.textContent?.trim() ?: ""
-                    "identifier" -> identifier = child.textContent?.trim() ?: ""
-                    "rights" -> rights = child.textContent?.trim() ?: ""
-                    "source" -> source = child.textContent?.trim() ?: ""
-                    "language" -> {
-                        val xmlLang = (child.textContent ?: "").trim().uppercase()
-                        val pathLower = xmlFile.absolutePath.lowercase()
-                        language = if (xmlLang == "RUS" && ("ukrainian" in pathLower || "українська" in pathLower)) {
-                            "UKR"
-                        } else {
-                            xmlLang
-                        }
-                    }
-                }
-            }
-        }
-
-        if (language.isNullOrBlank()) {
-            val parts = xmlFile.absolutePath.replace("\\", "/").split("/")
-            val parentFolder = parts.getOrNull(parts.size - 4)?.uppercase()
-            language = when {
-                parentFolder == "RUS" -> {
-                    val pathLower = xmlFile.absolutePath.lowercase()
-                    if ("ukrainian" in pathLower || "українська" in pathLower) "UKR" else "RUS"
-                }
-                parentFolder != null &&
-                    (parentFolder in BookNames.LANGUAGE_LOOKUPS || parentFolder == "ENG") -> parentFolder
-                else -> null
-            }
-        }
+        val info = readInformation(root, xmlFile)
+        val language = info.language?.takeIf { it.isNotBlank() } ?: languageFromPath(xmlFile)
 
         // Some modules leave `biblename` empty but fill `<title>`; without this they end up
         // literally called "Unknown".
-        val bibleName = root.getAttribute("biblename").ifBlank { title }.ifBlank { "Unknown" }
+        val bibleName = root.getAttribute("biblename").ifBlank { info.title }.ifBlank { "Unknown" }
 
-        val books = mutableListOf<BibleBook>()
         val bookNodes = root.getElementsByTagName("BIBLEBOOK")
+        val books = (0 until bookNodes.length).map { readBook(bookNodes.item(it), language) }
 
-        for (b in 0 until bookNodes.length) {
-            val bookElem = bookNodes.item(b)
-            val bookNum = bookElem.attributes.getNamedItem("bnumber")?.nodeValue?.toIntOrNull() ?: 0
-            val bookName = getBookName(bookElem, bookNum, language)
+        return ParsedBible(
+            bibleName, info.description, language, books,
+            info.title, info.identifier, info.rights, info.source,
+        )
+    }
 
-            val chapters = mutableListOf<BibleChapter>()
-            val chapterNodes = bookElem.childNodes
+    /** What a module's `<INFORMATION>` block states about itself. */
+    private data class ZefaniaInformation(
+        val description: String = "",
+        val title: String = "",
+        val identifier: String = "",
+        val rights: String = "",
+        val source: String = "",
+        val language: String? = null,
+    )
 
-            for (c in 0 until chapterNodes.length) {
-                val chapElem = chapterNodes.item(c)
-                if (chapElem.nodeName != "CHAPTER") continue
-
-                val chapNum = chapElem.attributes.getNamedItem("cnumber")?.nodeValue?.toIntOrNull() ?: 0
-                val verses = mutableListOf<BibleVerse>()
-                val verseNodes = chapElem.childNodes
-
-                for (v in 0 until verseNodes.length) {
-                    val versElem = verseNodes.item(v)
-                    if (versElem.nodeName != "VERS") continue
-
-                    val versNum = versElem.attributes.getNamedItem("vnumber")?.nodeValue?.toIntOrNull() ?: 0
-                    val rawText = versElem.textContent ?: ""
-                    val versText = applyPatch(rawText, language, bookNum, chapNum, versNum)
-                    verses.add(BibleVerse(versNum, versText))
-                }
-
-                chapters.add(BibleChapter(chapNum, verses))
+    private fun readInformation(root: org.w3c.dom.Element, xmlFile: File): ZefaniaInformation {
+        val infoNodes = root.getElementsByTagName("INFORMATION")
+        val info = infoNodes.item(0) ?: return ZefaniaInformation()
+        var read = ZefaniaInformation()
+        for (child in info.childNodes.elements()) {
+            val text = child.textContent.orEmpty()
+            read = when (child.nodeName) {
+                "description" -> read.copy(description = text)
+                "title" -> read.copy(title = text.trim())
+                "identifier" -> read.copy(identifier = text.trim())
+                "rights" -> read.copy(rights = text.trim())
+                "source" -> read.copy(source = text.trim())
+                "language" -> read.copy(language = declaredLanguage(text, xmlFile))
+                else -> read
             }
-
-            books.add(BibleBook(bookNum, bookName, chapters))
         }
+        return read
+    }
 
-        return ParsedBible(bibleName, description, language, books, title, identifier, rights, source)
+    /**
+     * The language the file declares, corrected against its own path.
+     *
+     * Real archive entries declare `RUS` on a module that is Ukrainian; left alone, one installs
+     * with Russian book names over Ukrainian text.
+     */
+    private fun declaredLanguage(text: String, xmlFile: File): String {
+        val declared = text.trim().uppercase()
+        return if (declared == "RUS" && isUkrainianPath(xmlFile)) "UKR" else declared
+    }
+
+    private fun isUkrainianPath(xmlFile: File): Boolean {
+        val path = xmlFile.absolutePath.lowercase()
+        return "ukrainian" in path || "українська" in path
+    }
+
+    /**
+     * The language a module that declares none is filed under.
+     *
+     * The archive lays modules out as `<LANG>/<something>/<something>/file.xml`, so the code is
+     * four path components up — and only a code the app has book names for is taken.
+     */
+    private fun languageFromPath(xmlFile: File): String? {
+        val parts = xmlFile.absolutePath.replace("\\", "/").split("/")
+        val parentFolder = parts.getOrNull(parts.size - 4)?.uppercase()
+        return when {
+            parentFolder == "RUS" -> if (isUkrainianPath(xmlFile)) "UKR" else "RUS"
+            parentFolder != null &&
+                (parentFolder in BookNames.LANGUAGE_LOOKUPS || parentFolder == "ENG") -> parentFolder
+            else -> null
+        }
+    }
+
+    private fun readBook(bookElem: org.w3c.dom.Node, language: String?): BibleBook {
+        val bookNum = bookElem.attributes.getNamedItem("bnumber")?.nodeValue?.toIntOrNull() ?: 0
+        val chapters = bookElem.childNodes.elements()
+            .filter { it.nodeName == "CHAPTER" }
+            .map { readChapter(it, language, bookNum) }
+            .toList()
+        return BibleBook(bookNum, getBookName(bookElem, bookNum, language), chapters)
+    }
+
+    private fun readChapter(chapElem: org.w3c.dom.Node, language: String?, bookNum: Int): BibleChapter {
+        val chapNum = chapElem.attributes.getNamedItem("cnumber")?.nodeValue?.toIntOrNull() ?: 0
+        val verses = chapElem.childNodes.elements()
+            .filter { it.nodeName == "VERS" }
+            .map { versElem ->
+                val versNum = versElem.attributes.getNamedItem("vnumber")?.nodeValue?.toIntOrNull() ?: 0
+                val text = applyPatch(versElem.textContent.orEmpty(), language, bookNum, chapNum, versNum)
+                BibleVerse(versNum, text)
+            }
+            .toList()
+        return BibleChapter(chapNum, verses)
     }
 
     fun convert(xmlFile: File, outputFile: File) = write(parse(xmlFile), outputFile)
