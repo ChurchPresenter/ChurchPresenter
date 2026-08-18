@@ -1,0 +1,583 @@
+package songlibrary.ui
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ViewColumn
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import core.models.songs.SongField
+import core.models.songs.SongItem
+import core.models.songs.SortColumn
+import java.io.File
+
+/**
+ * One song asked to be edited, and everything an editor needs to do it.
+ *
+ * [allSongs] and [songbooks] are what the library holds right now, so a host that checks for a
+ * clashing number or offers a list of books does not have to scan the folder a second time.
+ */
+data class SongEditorRequest(
+    val song: SongItem,
+    val songbooks: List<String>,
+    val allSongs: List<SongItem>,
+    val onSave: (SongItem) -> Unit,
+    val onDismiss: () -> Unit,
+)
+
+/**
+ * The Song Library: every song in the library folder in one grid, editable in place.
+ *
+ * The library is a folder of `.song` files and a person's only view of it is otherwise one song at
+ * a time, so anything that spans songs — renumbering a book, filling in a missing composer, moving
+ * a set into a new song book — means opening each of them. This is that work in one screen: type in
+ * a cell, tick a row, and nothing touches the disk until Save.
+ */
+@Composable
+fun SongLibraryApp(
+    libraryFolder: File,
+    onClose: (() -> Unit)? = null,
+    /**
+     * The editor a row's Edit button opens, supplied by whoever hosts this window.
+     *
+     * Inside ChurchPresenter that is the app's own Edit Song dialog, the same one the Songs tab
+     * opens — one editor for a song, wherever it is opened from. Standalone there is no app to ask,
+     * so the plain one below stands in.
+     */
+    songEditor: (@Composable (editing: SongEditorRequest) -> Unit)? = null,
+) = LibraryTheme {
+    val state = remember(libraryFolder) { SongLibraryState(libraryFolder) }
+    LaunchedEffect(libraryFolder) { state.reload() }
+
+    var newBookOpen by remember { mutableStateOf(false) }
+    var batchOpen by remember { mutableStateOf(false) }
+    var pendingDelete by remember { mutableStateOf<List<SongItem>>(emptyList()) }
+
+    Column(Modifier.fillMaxSize().background(colors.background)) {
+        LibraryHeader(state, onNewBook = { newBookOpen = true })
+        if (state.selected.isNotEmpty()) {
+            BulkBar(
+                state = state,
+                onBatchEdit = { batchOpen = true },
+                onDelete = { pendingDelete = state.selectedSongs() },
+            )
+        }
+        SongTable(
+            state = state,
+            modifier = Modifier.weight(1f),
+            onEditRow = { state.editing = it.sourceFile },
+            onDeleteRow = { pendingDelete = listOf(it) },
+            onNewBook = { newBookOpen = true },
+        )
+        LibraryFooter(state, onClose)
+    }
+
+    if (newBookOpen) {
+        NewSongBookDialog(
+            existing = state.songbooks,
+            selectedCount = state.selected.size,
+            onDismiss = { newBookOpen = false },
+            onCreate = { name, assign ->
+                state.createSongbook(name, assign)
+                newBookOpen = false
+            },
+        )
+    }
+
+    if (batchOpen) {
+        BatchEditDialog(
+            count = state.selected.size,
+            songbooks = state.songbooks,
+            onDismiss = { batchOpen = false },
+            onApply = { fields ->
+                state.editAll(fields)
+                batchOpen = false
+            },
+        )
+    }
+
+    if (pendingDelete.isNotEmpty()) {
+        DeleteConfirmDialog(
+            songs = pendingDelete,
+            onDismiss = { pendingDelete = emptyList() },
+            onConfirm = {
+                state.delete(pendingDelete)
+                pendingDelete = emptyList()
+            },
+        )
+    }
+
+    state.editing?.let { sourceFile ->
+        state.songOf(sourceFile)?.let { song ->
+            val request = SongEditorRequest(
+                song = song,
+                songbooks = state.songbooks,
+                allSongs = state.songs,
+                onSave = {
+                    state.replace(it)
+                    state.editing = null
+                },
+                onDismiss = { state.editing = null },
+            )
+            if (songEditor != null) songEditor(request) else SongEditorDialog(request)
+        }
+    }
+}
+
+@Composable
+private fun LibraryHeader(state: SongLibraryState, onNewBook: () -> Unit) {
+    val c = colors
+    Column {
+        Row(
+            Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 14.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(Strings["window_title"], style = LibraryType.title, color = c.text)
+                Text(subhead(state), style = LibraryType.small, color = c.textMuted)
+            }
+
+            SearchField(state.view.query) { state.view = state.view.copy(query = it) }
+            SongBookFilter(state, onNewBook)
+            ColumnsMenu(state)
+            PrimaryButton(
+                label = Strings["new_song"],
+                onClick = { state.newSong(Strings["new_song"]) },
+                icon = { Icon(Icons.Default.Add, null, Modifier.size(13.dp), tint = c.onPrimary) },
+            )
+        }
+        Hairline()
+    }
+}
+
+private fun subhead(state: SongLibraryState): String =
+    if (state.view.isFiltered) Strings.format("subhead_filtered", state.rows.size, state.songs.size)
+    else Strings.format("subhead_counts", state.songs.size, state.songbooks.size)
+
+@Composable
+private fun BulkBar(state: SongLibraryState, onBatchEdit: () -> Unit, onDelete: () -> Unit) {
+    val c = colors
+    Column {
+        Row(
+            Modifier.fillMaxWidth().background(c.accentSurface).padding(horizontal = 18.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                Strings.format("selected_count", state.selected.size),
+                style = LibraryType.bodyStrong,
+                color = c.accentText,
+            )
+            Box(Modifier.width(1.dp).height(16.dp).background(c.accentBorder))
+            PrimaryButton(
+                label = Strings["batch_edit_menu"],
+                onClick = onBatchEdit,
+                icon = { Icon(Icons.Default.Edit, null, Modifier.size(12.dp), tint = c.onPrimary) },
+            )
+            QuietButton(Strings["duplicate"], onClick = { state.duplicateSelected(Strings["copy_suffix"]) })
+            Spacer(Modifier.weight(1f))
+            QuietButton(Strings["delete"], onClick = onDelete, danger = true)
+            Text(
+                Strings["clear"],
+                style = LibraryType.button,
+                color = c.textMuted,
+                modifier = Modifier.clip(RoundedCornerShape(8.dp))
+                    .clickable { state.clearSelection() }
+                    .padding(horizontal = 9.dp, vertical = 7.dp),
+            )
+        }
+        Box(Modifier.fillMaxWidth().height(1.dp).background(c.accentBorder))
+    }
+}
+
+@Composable
+private fun SongTable(
+    state: SongLibraryState,
+    modifier: Modifier = Modifier,
+    onEditRow: (SongItem) -> Unit,
+    onDeleteRow: (SongItem) -> Unit,
+    onNewBook: () -> Unit,
+) {
+    val scroll = rememberScrollState()
+    val rows = state.rows
+    val columnWidth = state.visibleColumns.fold(0.dp) { total, field -> total + field.width() + 1.dp }
+    val width = TICK_WIDTH + columnWidth + ACTIONS_WIDTH
+
+    Column(modifier.fillMaxSize().horizontalScroll(scroll)) {
+        TableHeader(state, width)
+        if (rows.isEmpty()) {
+            EmptyState(state, width)
+        } else {
+            LazyColumn(Modifier.width(width).fillMaxHeight()) {
+                items(rows, key = { it.sourceFile }) { song ->
+                    SongRow(
+                        song = song,
+                        state = state,
+                        width = width,
+                        onEdit = { onEditRow(song) },
+                        onDelete = { onDeleteRow(song) },
+                        onNewBook = onNewBook,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TableHeader(state: SongLibraryState, width: Dp) {
+    val c = colors
+    val visible = state.rows.map { it.sourceFile }
+    val all = visible.isNotEmpty() && visible.all { it in state.selected }
+    val some = !all && visible.any { it in state.selected }
+
+    Column(Modifier.width(width)) {
+        Row(
+            Modifier.fillMaxWidth().height(LibraryMetrics.headerHeight).background(c.surface),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(Modifier.width(TICK_WIDTH), contentAlignment = Alignment.Center) {
+                LibraryCheckbox(checked = all, indeterminate = some, onToggle = { state.toggleAll() })
+            }
+            state.visibleColumns.forEach { field ->
+                val sort = field.sortColumn()
+                val sorted = state.view.sortBy == sort
+                Row(
+                    Modifier.width(field.width())
+                        .fillMaxHeight()
+                        .clickable { state.sortBy(sort) }
+                        .padding(horizontal = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        columnLabel(field).uppercase(),
+                        style = LibraryType.columnHead,
+                        color = if (sorted) c.accent else c.textFaint,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (sorted) {
+                        Icon(
+                            if (state.view.ascending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                            contentDescription = null,
+                            tint = c.accent,
+                            modifier = Modifier.size(14.dp),
+                        )
+                    }
+                }
+                Box(Modifier.width(1.dp).fillMaxHeight().background(c.hairline))
+            }
+            Spacer(Modifier.width(ACTIONS_WIDTH))
+        }
+        Hairline()
+    }
+}
+
+@Composable
+private fun SongRow(
+    song: SongItem,
+    state: SongLibraryState,
+    width: Dp,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    onNewBook: () -> Unit,
+) {
+    val c = colors
+    val checked = song.sourceFile in state.selected
+    Column(Modifier.width(width)) {
+        Row(
+            Modifier.fillMaxWidth()
+                .heightIn(min = LibraryMetrics.rowHeight)
+                .background(if (checked) c.accentSurface else c.rowSurface),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // The stripe down the left is what makes a ticked row readable at a glance in a
+            // hundred-row table, where the tick alone disappears.
+            Box(
+                Modifier.width(2.dp)
+                    .height(LibraryMetrics.rowHeight)
+                    .background(if (checked) c.accent else Color.Transparent)
+            )
+            Box(Modifier.width(TICK_WIDTH - 2.dp), contentAlignment = Alignment.Center) {
+                LibraryCheckbox(checked = checked, onToggle = { state.toggle(song.sourceFile) })
+            }
+            state.visibleColumns.forEach { field ->
+                Box(Modifier.width(field.width())) {
+                    if (field == SongField.SONGBOOK) {
+                        SongbookCell(
+                            value = field.of(song),
+                            songbooks = state.songbooks,
+                            onPick = { state.edit(song.sourceFile, field, it) },
+                            onNewBook = onNewBook,
+                        )
+                    } else {
+                        EditableCell(
+                            value = field.of(song),
+                            strong = field == SongField.TITLE,
+                            onCommit = { state.edit(song.sourceFile, field, it) },
+                        )
+                    }
+                }
+                Box(Modifier.width(1.dp).height(LibraryMetrics.rowHeight).background(c.hairline))
+            }
+            Row(
+                Modifier.width(ACTIONS_WIDTH).padding(end = 8.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RowAction(Icons.Default.Edit, Strings["edit_song"], c.accentText, onEdit)
+                RowAction(Icons.Default.Delete, Strings["delete_song"], c.danger, onDelete)
+            }
+        }
+        Hairline()
+    }
+}
+
+@Composable
+private fun RowAction(icon: ImageVector, description: String, tint: Color, onClick: () -> Unit) {
+    Box(
+        Modifier.size(26.dp).clip(RoundedCornerShape(7.dp)).clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = description, tint = tint, modifier = Modifier.size(14.dp))
+    }
+}
+
+@Composable
+private fun EmptyState(state: SongLibraryState, width: Dp) {
+    val c = colors
+    Column(
+        Modifier.width(width).padding(vertical = 70.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+    ) {
+        Box(
+            Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(c.surface),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Default.Search, null, tint = c.textFaint, modifier = Modifier.size(19.dp))
+        }
+        Text(
+            if (state.view.isFiltered) Strings["empty_title"] else Strings["library_empty"],
+            style = LibraryType.bodyStrong,
+            color = c.textMuted,
+        )
+        if (state.view.isFiltered) {
+            QuietButton(Strings["reset_filters"], onClick = {
+                state.view = state.view.copy(query = "", songbook = null)
+            })
+        }
+    }
+}
+
+@Composable
+private fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
+    val c = colors
+    Column {
+        Hairline()
+        Row(
+            Modifier.fillMaxWidth().height(52.dp).background(c.surface).padding(horizontal = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(Strings.format("footer_songs", state.songs.size), style = LibraryType.small, color = c.textMuted)
+            if (state.isDirty) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
+                ) {
+                    Box(Modifier.size(6.dp).clip(CircleShape).background(c.warning))
+                    Text(
+                        Strings.format("unsaved_changes", state.changedCount),
+                        style = LibraryType.button,
+                        color = c.warning,
+                    )
+                }
+            }
+            state.lastOutcome?.errors?.firstOrNull()?.let {
+                Text(
+                    Strings.format("save_failed", it),
+                    style = LibraryType.small,
+                    color = c.danger,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Spacer(Modifier.weight(1f))
+            QuietButton(Strings["revert"], onClick = { state.revert() }, enabled = state.isDirty)
+            PrimaryButton(Strings["save_changes"], onClick = { state.save() }, enabled = state.isDirty)
+            if (onClose != null) {
+                Box(Modifier.width(1.dp).height(20.dp).background(c.border))
+                QuietButton(Strings["done"], onClick = onClose)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchField(value: String, onChange: (String) -> Unit) {
+    val c = colors
+    Row(
+        Modifier.width(236.dp)
+            .height(LibraryMetrics.control)
+            .clip(RoundedCornerShape(LibraryMetrics.radius))
+            .background(c.inputSurface)
+            .border(1.dp, c.border, RoundedCornerShape(LibraryMetrics.radius))
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Default.Search, null, tint = c.textFaint, modifier = Modifier.size(13.dp))
+        Spacer(Modifier.width(7.dp))
+        PlainTextField(
+            value = value,
+            onValueChange = onChange,
+            placeholder = Strings["search_placeholder"],
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun SongBookFilter(state: SongLibraryState, onNewBook: () -> Unit) {
+    val c = colors
+    val label = when (val book = state.view.songbook) {
+        null -> Strings["all_song_books"]
+        "" -> Strings["no_song_book"]
+        else -> book
+    }
+    LibraryDropdown(label = label, highlighted = state.view.songbook != null, menuWidth = 250.dp) { close ->
+        MenuRow(Strings["all_song_books"], selected = state.view.songbook == null, count = state.songs.size) {
+            state.view = state.view.copy(songbook = null)
+            close()
+        }
+        MenuRow(Strings["no_song_book"], selected = state.view.songbook == "", count = state.counts[""] ?: 0) {
+            state.view = state.view.copy(songbook = "")
+            close()
+        }
+        MenuDivider()
+        state.songbooks.forEach { book ->
+            MenuRow(book, selected = state.view.songbook == book, count = state.counts[book] ?: 0) {
+                state.view = state.view.copy(songbook = book)
+                close()
+            }
+        }
+        MenuDivider()
+        MenuRow(
+            label = Strings["new_song_book_menu"],
+            accent = true,
+            leading = { Icon(Icons.Default.Add, null, tint = c.accent, modifier = Modifier.size(11.dp)) },
+        ) {
+            close()
+            onNewBook()
+        }
+    }
+}
+
+@Composable
+private fun ColumnsMenu(state: SongLibraryState) {
+    val c = colors
+    LibraryDropdown(
+        label = Strings["columns"],
+        highlighted = state.hiddenColumns.isNotEmpty(),
+        menuWidth = 224.dp,
+        leading = { Icon(Icons.Default.ViewColumn, null, tint = c.textMuted, modifier = Modifier.size(13.dp)) },
+    ) { _ ->
+        MenuRow(Strings["columns_show_all"], accent = true) { state.showAllColumns() }
+        MenuDivider()
+        // The title is always shown: a row identified only by its number is unreadable.
+        MenuRow(
+            label = columnLabel(SongField.TITLE),
+            leading = { LibraryCheckbox(checked = true) },
+            trailing = { Text(Strings["columns_always"], style = LibraryType.columnHead, color = c.textFaint) },
+            onClick = null,
+        )
+        OPTIONAL_COLUMNS.forEach { field ->
+            MenuRow(
+                label = columnLabel(field),
+                leading = { LibraryCheckbox(checked = field !in state.hiddenColumns) },
+            ) { state.toggleColumn(field) }
+        }
+    }
+}
+
+@Composable
+private fun Hairline() {
+    Box(Modifier.fillMaxWidth().height(1.dp).background(colors.hairline))
+}
+
+private fun columnLabel(field: SongField): String = when (field) {
+    SongField.NUMBER -> Strings["column_number"]
+    SongField.TITLE -> Strings["column_title"]
+    SongField.SECONDARY_TITLE -> Strings["column_secondary_title"]
+    SongField.SONGBOOK -> Strings["column_song_book"]
+    SongField.AUTHOR -> Strings["column_author"]
+    SongField.COMPOSER -> Strings["column_composer"]
+    SongField.TUNE -> Strings["column_tune"]
+    SongField.CCLI -> Strings["column_ccli"]
+}
+
+private fun SongField.sortColumn(): SortColumn = when (this) {
+    SongField.NUMBER -> SortColumn.NUMBER
+    SongField.TITLE -> SortColumn.TITLE
+    SongField.SECONDARY_TITLE -> SortColumn.SECONDARY_TITLE
+    SongField.SONGBOOK -> SortColumn.SONGBOOK
+    SongField.AUTHOR -> SortColumn.AUTHOR
+    SongField.COMPOSER -> SortColumn.COMPOSER
+    SongField.TUNE -> SortColumn.TUNE
+    SongField.CCLI -> SortColumn.CCLI
+}
+
+/** Wide enough for what the column holds: a title is a sentence, a number is four digits. */
+private fun SongField.width(): Dp = when (this) {
+    SongField.NUMBER -> 84.dp
+    SongField.TITLE, SongField.SECONDARY_TITLE -> 280.dp
+    SongField.SONGBOOK -> 190.dp
+    SongField.AUTHOR, SongField.COMPOSER -> 180.dp
+    SongField.TUNE -> 150.dp
+    SongField.CCLI -> 110.dp
+}
+
+private val TICK_WIDTH = 36.dp
+private val ACTIONS_WIDTH = 68.dp

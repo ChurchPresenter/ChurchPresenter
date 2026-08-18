@@ -42,6 +42,7 @@ private fun navigationTopBar(
     onHowToBlog: () -> Unit = {},
     onGettingStarted: () -> Unit = {},
     onConverter: () -> Unit = {},
+    onSongLibrary: () -> Unit = {},
     onKeyboardShortcuts: () -> Unit = {},
     onCheckForUpdates: () -> Unit = {},
     onContactUs: () -> Unit = {},
@@ -87,6 +88,7 @@ private fun navigationTopBar(
                 onHowToBlog = onHowToBlog,
                 onGettingStarted = onGettingStarted,
                 onConverter = onConverter,
+                onSongLibrary = onSongLibrary,
                 onKeyboardShortcuts = onKeyboardShortcuts,
                 onCheckForUpdates = onCheckForUpdates,
                 onContactUs = onContactUs,
@@ -404,6 +406,7 @@ class NavigationTopBarTest {
         var keyboardShortcuts = 0
         var howToBlog = 0
         var converter = 0
+        var songLibrary = 0
         var about = 0
         var help = 0
         var contactUs = 0
@@ -413,6 +416,7 @@ class NavigationTopBarTest {
             onKeyboardShortcuts = { keyboardShortcuts++ },
             onHowToBlog = { howToBlog++ },
             onConverter = { converter++ },
+            onSongLibrary = { songLibrary++ },
             onAbout = { about++ },
             onHelp = { help++ },
             onContactUs = { contactUs++ },
@@ -420,21 +424,23 @@ class NavigationTopBarTest {
         ) {
             val helpMenu = getMenu(6)
             assertEquals("Help", helpMenu.text)
-            assertEquals(8, helpMenu.itemCount)
+            assertEquals(9, helpMenu.itemCount)
             assertEquals("Getting Started…", helpMenu.getItem(0).text)
             assertEquals("Keyboard Shortcuts", helpMenu.getItem(1).text)
             assertEquals("How To Blog", helpMenu.getItem(2).text)
             assertEquals("Converter", helpMenu.getItem(3).text)
-            assertEquals("About", helpMenu.getItem(4).text)
-            assertEquals("Help", helpMenu.getItem(5).text)
-            assertEquals("Contact", helpMenu.getItem(6).text)
-            assertEquals("Check for Updates…", helpMenu.getItem(7).text)
+            assertEquals("Song Library", helpMenu.getItem(4).text)
+            assertEquals("About", helpMenu.getItem(5).text)
+            assertEquals("Help", helpMenu.getItem(6).text)
+            assertEquals("Contact", helpMenu.getItem(7).text)
+            assertEquals("Check for Updates…", helpMenu.getItem(8).text)
             for (i in 0 until helpMenu.itemCount) helpMenu.getItem(i).doClick()
         }
         assertEquals(1, gettingStarted)
         assertEquals(1, keyboardShortcuts)
         assertEquals(1, howToBlog)
         assertEquals(1, converter)
+        assertEquals(1, songLibrary)
         assertEquals(1, about)
         assertEquals(1, help)
         assertEquals(1, contactUs)

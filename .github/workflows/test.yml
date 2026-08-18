@@ -171,6 +171,16 @@ jobs:
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest
 
+      # Both are modules of this build, so they are tasks on the root wrapper: seconds each, and
+      # :composeApp depends on them, so an app change can break them.
+      - name: Core model tests
+        if: always()
+        run: ./gradlew :core-models:test
+
+      - name: Song library tests
+        if: always()
+        run: ./gradlew :songlibrary:test
+
       # The converter is a module of THIS build (`include(":converter")`), not one of the separate
       # builds below, so it is a task on the root wrapper and shares its daemon -- seconds rather
       # than a fresh Gradle bootstrap. That is why it is not gated on `steps.modules` the way they
@@ -235,6 +245,8 @@ jobs:
           report_paths: |
             composeApp/build/test-results/**/TEST-*.xml
             converter/build/test-results/**/TEST-*.xml
+            core-models/build/test-results/**/TEST-*.xml
+            songlibrary/build/test-results/**/TEST-*.xml
             companion-satellite/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
           detailed_summary: true

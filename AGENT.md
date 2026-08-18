@@ -58,6 +58,19 @@ main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
 - New user-facing strings go in `composeApp/src/jvmMain/composeResources/values/strings.xml`.
 - Per-feature source locations are listed in `FEATURES.md`.
 
+### The modules of this build
+`:composeApp` is the app. Beside it:
+
+| module | holds |
+|--------|-------|
+| `:core-models` | the models the app and its screens share — `core.models.songs` is what a song is, the `.song` format, and the library folder it lives in. A package per area; more than songs will live here. |
+| `:converter` | the format converter, opened from the Help menu |
+| `:songlibrary` | the Song Library grid, opened from the Help menu beside it |
+| `:companion-satellite` | the Bitfocus Companion Satellite protocol client |
+
+A screen pulled out into a module of its own imports its models from `:core-models` rather than
+copying them — one definition of a song, not one per module.
+
 ### The converter module
 `converter/` is a real Gradle module of this build — `include(":converter")`, and `:composeApp`
 takes it as `implementation(projects.converter)`. It is neither a submodule nor a mounted source
@@ -72,6 +85,18 @@ classpath, and exactly ONE schema jar may be there.
 - `./gradlew :converter:jacocoTestCoverageVerification` — the same six counters the app gates, with
   this module's own floors (see the table in `converter/build.gradle.kts`). `ui/**` and `MainKt` are
   excluded: they need a display. Both run in CI as their own steps.
+
+### The song library module
+`songlibrary/` is the Song Library window: every song in the library folder in one editable grid.
+It owns no model — the song, the `.song` format and the library are `:core-models`' — so what it
+writes is what the app reads on its next scan.
+
+- `./gradlew :songlibrary:run` opens it on `~/ChurchPresenter/Songs`, or on a folder given as the
+  first argument, without starting the app.
+- `./gradlew :songlibrary:test`, `:songlibrary:detekt` — detekt covers `data/`; `ui/**` is Compose
+  desktop, the same carve-out the converter makes.
+- The logic it runs on — filtering, sorting, pending edits, moving files — is in `:core-models` and
+  tested there, so the window itself stays thin.
 
 ### Sub-builds
 Three module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but

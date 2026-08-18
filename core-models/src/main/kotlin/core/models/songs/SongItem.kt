@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package core.models.songs
 
 import kotlinx.serialization.Serializable
 

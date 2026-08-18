@@ -14,8 +14,8 @@ import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterLyricsFormatter
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterScriptureDetector
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
-import org.churchpresenter.app.churchpresenter.data.SongFileParser
-import org.churchpresenter.app.churchpresenter.data.SongItem
+import core.models.songs.SongFileParser
+import core.models.songs.SongItem
 import presentation.engine.LoadResult
 import presentation.engine.PresentationLoader
 import java.io.File

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.models
 
+import core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals

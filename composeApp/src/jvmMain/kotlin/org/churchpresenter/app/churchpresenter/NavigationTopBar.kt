@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
+import androidx.compose.ui.window.MenuBarScope
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.dark_theme
 import churchpresenter.composeapp.generated.resources.forest_theme
@@ -71,6 +72,7 @@ import churchpresenter.composeapp.generated.resources.menu_help
 import churchpresenter.composeapp.generated.resources.menu_help_item
 import churchpresenter.composeapp.generated.resources.menu_how_to_blog
 import churchpresenter.composeapp.generated.resources.open_converter
+import churchpresenter.composeapp.generated.resources.open_song_library
 import churchpresenter.composeapp.generated.resources.menu_check_for_updates
 import churchpresenter.composeapp.generated.resources.menu_contact_us
 import churchpresenter.composeapp.generated.resources.menu_language
@@ -88,6 +90,7 @@ import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -114,6 +117,7 @@ fun FrameWindowScope.NavigationTopBar(
     onHowToBlog: () -> Unit = {},
     onGettingStarted: () -> Unit = {},
     onConverter: () -> Unit = {},
+    onSongLibrary: () -> Unit = {},
     onKeyboardShortcuts: () -> Unit = {},
     onCheckForUpdates: () -> Unit = {},
     onContactUs: () -> Unit = {},
@@ -143,301 +147,311 @@ fun FrameWindowScope.NavigationTopBar(
     // the menu item too. Only the first chord can be an accelerator — Compose's `Item` takes one —
     // and null means the user unbound the action, which simply drops the accelerator label.
     val shortcuts = LocalShortcuts.current
-    fun accel(action: ShortcutAction): KeyShortcut? = shortcuts.chordsFor(action).firstOrNull()?.toKeyShortcut()
+    fun accelerator(action: ShortcutAction): KeyShortcut? =
+        shortcuts.chordsFor(action).firstOrNull()?.toKeyShortcut()
 
     MenuBar {
-        Menu(fileLabel, mnemonic = fileMnemonic) {
-            Item(
-                stringResource(Res.string.menu_new_schedule),
-                onClick = onNewSchedule,
-                shortcut = accel(ShortcutAction.NEW_SCHEDULE)
-            )
-            Item(
-                stringResource(Res.string.menu_open_schedule),
-                onClick = onOpenSchedule,
-                shortcut = accel(ShortcutAction.OPEN_SCHEDULE)
-            )
-            Item(
-                stringResource(Res.string.menu_save_schedule),
-                onClick = onSaveSchedule,
-                shortcut = accel(ShortcutAction.SAVE_SCHEDULE)
-            )
-            Item(
-                stringResource(Res.string.menu_save_schedule_as),
-                onClick = onSaveScheduleAs,
-                shortcut = accel(ShortcutAction.SAVE_SCHEDULE_AS)
-            )
-            Item(
-                stringResource(Res.string.menu_close_schedule),
-                onClick = onCloseSchedule,
-                shortcut = accel(ShortcutAction.CLOSE_SCHEDULE)
-            )
-            Item(
-                stringResource(Res.string.menu_exit),
-                onClick = onExit,
-                shortcut = accel(ShortcutAction.EXIT)
-            )
-        }
-
-        Menu(scheduleLabel, mnemonic = scheduleMnemonic) {
-            Item(
-                stringResource(Res.string.menu_add_to_schedule),
-                onClick = onAddToSchedule,
-                shortcut = accel(ShortcutAction.ADD_TO_SCHEDULE)
-            )
-            Item(
-                stringResource(Res.string.menu_remove_from_schedule),
-                onClick = onRemoveFromSchedule,
-                shortcut = accel(ShortcutAction.REMOVE_FROM_SCHEDULE)
-            )
-            Item(stringResource(Res.string.menu_clear_schedule), onClick = onClearSchedule)
-        }
-
-        Menu(editLabel, mnemonic = editMnemonic) {
-            Item(
-                stringResource(Res.string.menu_settings),
-                onClick = onSettings,
-                shortcut = accel(ShortcutAction.OPEN_SETTINGS)
-            )
-            Item(
-                stringResource(Res.string.menu_statistics),
-                onClick = onStatistics
-            )
-        }
-
-        Menu(stringResource(Res.string.menu_connect), mnemonic = 'C') {
-            Item(
-                stringResource(Res.string.menu_connect_to_instance),
-                onClick = onConnectToInstance
-            )
-            Item(
-                stringResource(Res.string.menu_disconnect),
-                onClick = onDisconnectInstance,
-                enabled = isInstanceLinkConnected
-            )
-        }
-
-        Menu(stringResource(Res.string.menu_view), mnemonic = 'V') {
-            RadioButtonItem(
-                text = stringResource(Res.string.light_theme),
-                selected = currentTheme == ThemeMode.LIGHT,
-                onClick = { theme.invoke(ThemeMode.LIGHT) }
-            )
-            RadioButtonItem(
-                text = stringResource(Res.string.dark_theme),
-                selected = currentTheme == ThemeMode.DARK,
-                onClick = { theme.invoke(ThemeMode.DARK) }
-            )
-            RadioButtonItem(
-                text = stringResource(Res.string.system_theme),
-                selected = currentTheme == ThemeMode.SYSTEM,
-                onClick = { theme.invoke(ThemeMode.SYSTEM) }
-            )
-            RadioButtonItem(
-                text = stringResource(Res.string.warm_theme),
-                selected = currentTheme == ThemeMode.WARM,
-                onClick = { theme.invoke(ThemeMode.WARM) }
-            )
-            RadioButtonItem(
-                text = stringResource(Res.string.ocean_theme),
-                selected = currentTheme == ThemeMode.OCEAN,
-                onClick = { theme.invoke(ThemeMode.OCEAN) }
-            )
-            RadioButtonItem(
-                text = stringResource(Res.string.rose_theme),
-                selected = currentTheme == ThemeMode.ROSE,
-                onClick = { theme.invoke(ThemeMode.ROSE) }
-            )
-            RadioButtonItem(
-                text = stringResource(Res.string.midnight_theme),
-                selected = currentTheme == ThemeMode.MIDNIGHT,
-                onClick = { theme.invoke(ThemeMode.MIDNIGHT) }
-            )
-            RadioButtonItem(
-                text = stringResource(Res.string.forest_theme),
-                selected = currentTheme == ThemeMode.FOREST,
-                onClick = { theme.invoke(ThemeMode.FOREST) }
-            )
-            RadioButtonItem(
-                text = stringResource(Res.string.mocha_theme),
-                selected = currentTheme == ThemeMode.MOCHA,
-                onClick = { theme.invoke(ThemeMode.MOCHA) }
-            )
-            RadioButtonItem(
-                text = stringResource(Res.string.studio_theme),
-                selected = currentTheme == ThemeMode.STUDIO,
-                onClick = { theme.invoke(ThemeMode.STUDIO) }
-            )
-        }
-
-        Menu(stringResource(Res.string.menu_language), mnemonic = 'L') {
-            Item(
-                text = "🇷🇺 ${stringResource(Res.string.language_russian)}",
-                onClick = { onLanguageChange(Language.RUSSIAN) }
-            )
-            Item(
-                text = "🇺🇸 ${stringResource(Res.string.language_english)}",
-                onClick = { onLanguageChange(Language.ENGLISH) }
-            )
-            Item(
-                text = "🇺🇦 ${stringResource(Res.string.language_ukrainian)}",
-                onClick = { onLanguageChange(Language.UKRAINIAN) }
-            )
-            Item(
-                text = "🇰🇿 ${stringResource(Res.string.language_kazakh)}",
-                onClick = { onLanguageChange(Language.KAZAKH) }
-            )
-            Item(
-                text = "🇩🇪 ${stringResource(Res.string.language_german)}",
-                onClick = { onLanguageChange(Language.GERMAN) }
-            )
-            Item(
-                text = "🇵🇱 ${stringResource(Res.string.language_polish)}",
-                onClick = { onLanguageChange(Language.POLISH) }
-            )
-            Item(
-                text = "🇧🇾 ${stringResource(Res.string.language_belarusian)}",
-                onClick = { onLanguageChange(Language.BELARUSIAN) }
-            )
-            Item(
-                text = "🇨🇿 ${stringResource(Res.string.language_czech)}",
-                onClick = { onLanguageChange(Language.CZECH) }
-            )
-            Item(
-                text = "🇪🇸 ${stringResource(Res.string.language_spanish)}",
-                onClick = { onLanguageChange(Language.SPANISH) }
-            )
-            Item(
-                text = "🇫🇷 ${stringResource(Res.string.language_french)}",
-                onClick = { onLanguageChange(Language.FRENCH) }
-            )
-            Item(
-                text = "🇳🇱 ${stringResource(Res.string.language_dutch)}",
-                onClick = { onLanguageChange(Language.DUTCH) }
-            )
-            Item(
-                text = "🇵🇹 ${stringResource(Res.string.language_portuguese)}",
-                onClick = { onLanguageChange(Language.PORTUGUESE) }
-            )
-            Item(
-                text = "🇷🇴 ${stringResource(Res.string.language_romanian)}",
-                onClick = { onLanguageChange(Language.ROMANIAN) }
-            )
-            Item(
-                text = "🇸🇰 ${stringResource(Res.string.language_slovak)}",
-                onClick = { onLanguageChange(Language.SLOVAK) }
-            )
-            Item(
-                text = "🇪🇪 ${stringResource(Res.string.language_estonian)}",
-                onClick = { onLanguageChange(Language.ESTONIAN) }
-            )
-            Item(
-                text = "🇱🇻 ${stringResource(Res.string.language_latvian)}",
-                onClick = { onLanguageChange(Language.LATVIAN) }
-            )
-            Item(
-                text = "🇭🇷 ${stringResource(Res.string.language_croatian)}",
-                onClick = { onLanguageChange(Language.CROATIAN) }
-            )
-            Item(
-                text = "🇸🇪 ${stringResource(Res.string.language_swedish)}",
-                onClick = { onLanguageChange(Language.SWEDISH) }
-            )
-            Item(
-                text = "🇳🇴 ${stringResource(Res.string.language_norwegian)}",
-                onClick = { onLanguageChange(Language.NORWEGIAN) }
-            )
-            Item(
-                text = "🇫🇮 ${stringResource(Res.string.language_finnish)}",
-                onClick = { onLanguageChange(Language.FINNISH) }
-            )
-            Item(
-                text = "🇹🇷 ${stringResource(Res.string.language_turkish)}",
-                onClick = { onLanguageChange(Language.TURKISH) }
-            )
-            Item(
-                text = "🇺🇿 ${stringResource(Res.string.language_uzbek)}",
-                onClick = { onLanguageChange(Language.UZBEK) }
-            )
-            Item(
-                text = "🇸🇦 ${stringResource(Res.string.language_arabic)}",
-                onClick = { onLanguageChange(Language.ARABIC) }
-            )
-            Item(
-                text = "🇮🇷 ${stringResource(Res.string.language_persian)}",
-                onClick = { onLanguageChange(Language.PERSIAN) }
-            )
-            Item(
-                text = "🇮🇳 ${stringResource(Res.string.language_hindi)}",
-                onClick = { onLanguageChange(Language.HINDI) }
-            )
-            Item(
-                text = "🇳🇵 ${stringResource(Res.string.language_nepali)}",
-                onClick = { onLanguageChange(Language.NEPALI) }
-            )
-            Item(
-                text = "🇹🇭 ${stringResource(Res.string.language_thai)}",
-                onClick = { onLanguageChange(Language.THAI) }
-            )
-            Item(
-                text = "🇱🇦 ${stringResource(Res.string.language_lao)}",
-                onClick = { onLanguageChange(Language.LAO) }
-            )
-            Item(
-                text = "🇯🇵 ${stringResource(Res.string.language_japanese)}",
-                onClick = { onLanguageChange(Language.JAPANESE) }
-            )
-            Item(
-                text = "🇨🇳 ${stringResource(Res.string.language_chinese)}",
-                onClick = { onLanguageChange(Language.CHINESE) }
-            )
-            Item(
-                text = "🇮🇩 ${stringResource(Res.string.language_indonesian)}",
-                onClick = { onLanguageChange(Language.INDONESIAN) }
-            )
-            Item(
-                text = "🇲🇾 ${stringResource(Res.string.language_malay)}",
-                onClick = { onLanguageChange(Language.MALAY) }
-            )
-            Item(
-                text = "🇵🇭 ${stringResource(Res.string.language_tagalog)}",
-                onClick = { onLanguageChange(Language.TAGALOG) }
-            )
-            Item(
-                text = "🇹🇿 ${stringResource(Res.string.language_swahili)}",
-                onClick = { onLanguageChange(Language.SWAHILI) }
-            )
-        }
-
-        Menu(helpLabel, mnemonic = helpMnemonic) {
-            Item(stringResource(Res.string.menu_getting_started), onClick = onGettingStarted)
-            Item(stringResource(Res.string.menu_keyboard_shortcuts), onClick = onKeyboardShortcuts, shortcut = accel(ShortcutAction.KEYBOARD_SHORTCUTS))
-            Item(stringResource(Res.string.menu_how_to_blog), onClick = onHowToBlog)
-            Item(stringResource(Res.string.open_converter), onClick = onConverter)
-            Item(stringResource(Res.string.menu_about), onClick = onAbout)
-            Item(stringResource(Res.string.menu_help_item), onClick = onHelp)
-            Item(stringResource(Res.string.menu_contact_us), onClick = onContactUs)
-            Item(stringResource(Res.string.menu_check_for_updates), onClick = onCheckForUpdates)
-        }
-
+        FileMenu(fileLabel, fileMnemonic, ::accelerator, onNewSchedule, onOpenSchedule, onSaveSchedule,
+            onSaveScheduleAs, onCloseSchedule, onExit)
+        ScheduleMenu(scheduleLabel, scheduleMnemonic, ::accelerator, onAddToSchedule, onRemoveFromSchedule,
+            onClearSchedule)
+        EditMenu(editLabel, editMnemonic, ::accelerator, onSettings, onStatistics)
+        ConnectMenu(onConnectToInstance, onDisconnectInstance, isInstanceLinkConnected)
+        ViewMenu(theme, currentTheme)
+        LanguageMenu(onLanguageChange)
+        HelpMenu(helpLabel, helpMnemonic, ::accelerator, onGettingStarted, onKeyboardShortcuts, onHowToBlog,
+            onConverter, onSongLibrary, onAbout, onHelp, onContactUs, onCheckForUpdates)
         if (showDeveloperMenu) {
-            Menu(stringResource(Res.string.menu_developer), mnemonic = 'D') {
-                Menu(stringResource(Res.string.menu_developer_display), mnemonic = 'S') {
-                    CheckboxItem(
-                        text = stringResource(Res.string.menu_developer_show_window),
-                        checked = isPresenterWindowVisible,
-                        onCheckedChange = onSetPresenterWindowVisible
-                    )
-                    CheckboxItem(
-                        text = stringResource(Res.string.menu_developer_always_on_top),
-                        checked = isDevWindowAlwaysOnTop,
-                        onCheckedChange = onSetDevWindowAlwaysOnTop
-                    )
-                }
-                Item(stringResource(Res.string.menu_developer_style_editor), onClick = onOpenStyleEditor)
-                Item(stringResource(Res.string.menu_developer_memory_monitor), onClick = onOpenMemoryMonitor)
-                Item(stringResource(Res.string.menu_developer_story_prompt), onClick = onOpenStoryPrompt)
-            }
+            DeveloperMenu(isPresenterWindowVisible, onSetPresenterWindowVisible, isDevWindowAlwaysOnTop,
+                onSetDevWindowAlwaysOnTop, onOpenStyleEditor, onOpenMemoryMonitor, onOpenStoryPrompt)
         }
+    }
+}
+
+/**
+ * The menus, one composable each.
+ *
+ * They were the body of [NavigationTopBar] until the bar outgrew what anyone can read at once: the
+ * language menu alone lists 34 entries. Each takes the actions it fires and the accelerator lookup,
+ * which comes from the same registry the key handlers use so a rebind shows on the item too.
+ */
+@Composable
+private fun MenuBarScope.FileMenu(
+    label: String,
+    mnemonic: Char,
+    accel: (ShortcutAction) -> KeyShortcut?,
+    onNewSchedule: () -> Unit,
+    onOpenSchedule: () -> Unit,
+    onSaveSchedule: () -> Unit,
+    onSaveScheduleAs: () -> Unit,
+    onCloseSchedule: () -> Unit,
+    onExit: () -> Unit,
+) {
+    Menu(label, mnemonic = mnemonic) {
+        Item(
+            stringResource(Res.string.menu_new_schedule),
+            onClick = onNewSchedule,
+            shortcut = accel(ShortcutAction.NEW_SCHEDULE)
+        )
+        Item(
+            stringResource(Res.string.menu_open_schedule),
+            onClick = onOpenSchedule,
+            shortcut = accel(ShortcutAction.OPEN_SCHEDULE)
+        )
+        Item(
+            stringResource(Res.string.menu_save_schedule),
+            onClick = onSaveSchedule,
+            shortcut = accel(ShortcutAction.SAVE_SCHEDULE)
+        )
+        Item(
+            stringResource(Res.string.menu_save_schedule_as),
+            onClick = onSaveScheduleAs,
+            shortcut = accel(ShortcutAction.SAVE_SCHEDULE_AS)
+        )
+        Item(
+            stringResource(Res.string.menu_close_schedule),
+            onClick = onCloseSchedule,
+            shortcut = accel(ShortcutAction.CLOSE_SCHEDULE)
+        )
+        Item(
+            stringResource(Res.string.menu_exit),
+            onClick = onExit,
+            shortcut = accel(ShortcutAction.EXIT)
+        )
+    }
+}
+
+@Composable
+private fun MenuBarScope.ScheduleMenu(
+    label: String,
+    mnemonic: Char,
+    accel: (ShortcutAction) -> KeyShortcut?,
+    onAddToSchedule: () -> Unit,
+    onRemoveFromSchedule: () -> Unit,
+    onClearSchedule: () -> Unit,
+) {
+    Menu(label, mnemonic = mnemonic) {
+        Item(
+            stringResource(Res.string.menu_add_to_schedule),
+            onClick = onAddToSchedule,
+            shortcut = accel(ShortcutAction.ADD_TO_SCHEDULE)
+        )
+        Item(
+            stringResource(Res.string.menu_remove_from_schedule),
+            onClick = onRemoveFromSchedule,
+            shortcut = accel(ShortcutAction.REMOVE_FROM_SCHEDULE)
+        )
+        Item(stringResource(Res.string.menu_clear_schedule), onClick = onClearSchedule)
+    }
+}
+
+@Composable
+private fun MenuBarScope.EditMenu(
+    label: String,
+    mnemonic: Char,
+    accel: (ShortcutAction) -> KeyShortcut?,
+    onSettings: () -> Unit,
+    onStatistics: () -> Unit,
+) {
+    Menu(label, mnemonic = mnemonic) {
+        Item(
+            stringResource(Res.string.menu_settings),
+            onClick = onSettings,
+            shortcut = accel(ShortcutAction.OPEN_SETTINGS)
+        )
+        Item(
+            stringResource(Res.string.menu_statistics),
+            onClick = onStatistics
+        )
+    }
+}
+
+@Composable
+private fun MenuBarScope.ConnectMenu(
+    onConnectToInstance: () -> Unit,
+    onDisconnectInstance: () -> Unit,
+    isInstanceLinkConnected: Boolean,
+) {
+    Menu(stringResource(Res.string.menu_connect), mnemonic = 'C') {
+        Item(
+            stringResource(Res.string.menu_connect_to_instance),
+            onClick = onConnectToInstance
+        )
+        Item(
+            stringResource(Res.string.menu_disconnect),
+            onClick = onDisconnectInstance,
+            enabled = isInstanceLinkConnected
+        )
+    }
+}
+
+@Composable
+private fun MenuBarScope.ViewMenu(theme: (ThemeMode) -> Unit, currentTheme: ThemeMode) {
+    Menu(stringResource(Res.string.menu_view), mnemonic = 'V') {
+        RadioButtonItem(
+            text = stringResource(Res.string.light_theme),
+            selected = currentTheme == ThemeMode.LIGHT,
+            onClick = { theme.invoke(ThemeMode.LIGHT) }
+        )
+        RadioButtonItem(
+            text = stringResource(Res.string.dark_theme),
+            selected = currentTheme == ThemeMode.DARK,
+            onClick = { theme.invoke(ThemeMode.DARK) }
+        )
+        RadioButtonItem(
+            text = stringResource(Res.string.system_theme),
+            selected = currentTheme == ThemeMode.SYSTEM,
+            onClick = { theme.invoke(ThemeMode.SYSTEM) }
+        )
+        RadioButtonItem(
+            text = stringResource(Res.string.warm_theme),
+            selected = currentTheme == ThemeMode.WARM,
+            onClick = { theme.invoke(ThemeMode.WARM) }
+        )
+        RadioButtonItem(
+            text = stringResource(Res.string.ocean_theme),
+            selected = currentTheme == ThemeMode.OCEAN,
+            onClick = { theme.invoke(ThemeMode.OCEAN) }
+        )
+        RadioButtonItem(
+            text = stringResource(Res.string.rose_theme),
+            selected = currentTheme == ThemeMode.ROSE,
+            onClick = { theme.invoke(ThemeMode.ROSE) }
+        )
+        RadioButtonItem(
+            text = stringResource(Res.string.midnight_theme),
+            selected = currentTheme == ThemeMode.MIDNIGHT,
+            onClick = { theme.invoke(ThemeMode.MIDNIGHT) }
+        )
+        RadioButtonItem(
+            text = stringResource(Res.string.forest_theme),
+            selected = currentTheme == ThemeMode.FOREST,
+            onClick = { theme.invoke(ThemeMode.FOREST) }
+        )
+        RadioButtonItem(
+            text = stringResource(Res.string.mocha_theme),
+            selected = currentTheme == ThemeMode.MOCHA,
+            onClick = { theme.invoke(ThemeMode.MOCHA) }
+        )
+        RadioButtonItem(
+            text = stringResource(Res.string.studio_theme),
+            selected = currentTheme == ThemeMode.STUDIO,
+            onClick = { theme.invoke(ThemeMode.STUDIO) }
+        )
+    }
+}
+
+@Composable
+private fun MenuBarScope.LanguageMenu(onLanguageChange: (Language) -> Unit) {
+    Menu(stringResource(Res.string.menu_language), mnemonic = 'L') {
+        LANGUAGES.forEach { entry ->
+            Item(
+                text = "${entry.flag} ${stringResource(entry.label)}",
+                onClick = { onLanguageChange(entry.language) }
+            )
+        }
+    }
+}
+
+/** One entry of the language menu: the flag shown beside the name, and what picking it selects. */
+private data class LanguageEntry(val flag: String, val label: StringResource, val language: Language)
+
+/**
+ * The languages the app offers, in the order the menu lists them.
+ *
+ * A table rather than 34 near-identical `Item` blocks: adding a language is a line here, and the
+ * menu cannot drift out of step with itself.
+ */
+private val LANGUAGES = listOf(
+    LanguageEntry("🇷🇺", Res.string.language_russian, Language.RUSSIAN),
+    LanguageEntry("🇺🇸", Res.string.language_english, Language.ENGLISH),
+    LanguageEntry("🇺🇦", Res.string.language_ukrainian, Language.UKRAINIAN),
+    LanguageEntry("🇰🇿", Res.string.language_kazakh, Language.KAZAKH),
+    LanguageEntry("🇩🇪", Res.string.language_german, Language.GERMAN),
+    LanguageEntry("🇵🇱", Res.string.language_polish, Language.POLISH),
+    LanguageEntry("🇧🇾", Res.string.language_belarusian, Language.BELARUSIAN),
+    LanguageEntry("🇨🇿", Res.string.language_czech, Language.CZECH),
+    LanguageEntry("🇪🇸", Res.string.language_spanish, Language.SPANISH),
+    LanguageEntry("🇫🇷", Res.string.language_french, Language.FRENCH),
+    LanguageEntry("🇳🇱", Res.string.language_dutch, Language.DUTCH),
+    LanguageEntry("🇵🇹", Res.string.language_portuguese, Language.PORTUGUESE),
+    LanguageEntry("🇷🇴", Res.string.language_romanian, Language.ROMANIAN),
+    LanguageEntry("🇸🇰", Res.string.language_slovak, Language.SLOVAK),
+    LanguageEntry("🇪🇪", Res.string.language_estonian, Language.ESTONIAN),
+    LanguageEntry("🇱🇻", Res.string.language_latvian, Language.LATVIAN),
+    LanguageEntry("🇭🇷", Res.string.language_croatian, Language.CROATIAN),
+    LanguageEntry("🇸🇪", Res.string.language_swedish, Language.SWEDISH),
+    LanguageEntry("🇳🇴", Res.string.language_norwegian, Language.NORWEGIAN),
+    LanguageEntry("🇫🇮", Res.string.language_finnish, Language.FINNISH),
+    LanguageEntry("🇹🇷", Res.string.language_turkish, Language.TURKISH),
+    LanguageEntry("🇺🇿", Res.string.language_uzbek, Language.UZBEK),
+    LanguageEntry("🇸🇦", Res.string.language_arabic, Language.ARABIC),
+    LanguageEntry("🇮🇷", Res.string.language_persian, Language.PERSIAN),
+    LanguageEntry("🇮🇳", Res.string.language_hindi, Language.HINDI),
+    LanguageEntry("🇳🇵", Res.string.language_nepali, Language.NEPALI),
+    LanguageEntry("🇹🇭", Res.string.language_thai, Language.THAI),
+    LanguageEntry("🇱🇦", Res.string.language_lao, Language.LAO),
+    LanguageEntry("🇯🇵", Res.string.language_japanese, Language.JAPANESE),
+    LanguageEntry("🇨🇳", Res.string.language_chinese, Language.CHINESE),
+    LanguageEntry("🇮🇩", Res.string.language_indonesian, Language.INDONESIAN),
+    LanguageEntry("🇲🇾", Res.string.language_malay, Language.MALAY),
+    LanguageEntry("🇵🇭", Res.string.language_tagalog, Language.TAGALOG),
+    LanguageEntry("🇹🇿", Res.string.language_swahili, Language.SWAHILI),
+)
+
+@Composable
+private fun MenuBarScope.HelpMenu(
+    label: String,
+    mnemonic: Char,
+    accel: (ShortcutAction) -> KeyShortcut?,
+    onGettingStarted: () -> Unit,
+    onKeyboardShortcuts: () -> Unit,
+    onHowToBlog: () -> Unit,
+    onConverter: () -> Unit,
+    onSongLibrary: () -> Unit,
+    onAbout: () -> Unit,
+    onHelp: () -> Unit,
+    onContactUs: () -> Unit,
+    onCheckForUpdates: () -> Unit,
+) {
+    Menu(label, mnemonic = mnemonic) {
+        Item(stringResource(Res.string.menu_getting_started), onClick = onGettingStarted)
+        Item(stringResource(Res.string.menu_keyboard_shortcuts), onClick = onKeyboardShortcuts, shortcut = accel(ShortcutAction.KEYBOARD_SHORTCUTS))
+        Item(stringResource(Res.string.menu_how_to_blog), onClick = onHowToBlog)
+        Item(stringResource(Res.string.open_converter), onClick = onConverter)
+        Item(stringResource(Res.string.open_song_library), onClick = onSongLibrary)
+        Item(stringResource(Res.string.menu_about), onClick = onAbout)
+        Item(stringResource(Res.string.menu_help_item), onClick = onHelp)
+        Item(stringResource(Res.string.menu_contact_us), onClick = onContactUs)
+        Item(stringResource(Res.string.menu_check_for_updates), onClick = onCheckForUpdates)
+    }
+}
+
+@Composable
+private fun MenuBarScope.DeveloperMenu(
+    isPresenterWindowVisible: Boolean,
+    onSetPresenterWindowVisible: (Boolean) -> Unit,
+    isDevWindowAlwaysOnTop: Boolean,
+    onSetDevWindowAlwaysOnTop: (Boolean) -> Unit,
+    onOpenStyleEditor: () -> Unit,
+    onOpenMemoryMonitor: () -> Unit,
+    onOpenStoryPrompt: () -> Unit,
+) {
+    Menu(stringResource(Res.string.menu_developer), mnemonic = 'D') {
+        Menu(stringResource(Res.string.menu_developer_display), mnemonic = 'S') {
+            CheckboxItem(
+                text = stringResource(Res.string.menu_developer_show_window),
+                checked = isPresenterWindowVisible,
+                onCheckedChange = onSetPresenterWindowVisible
+            )
+            CheckboxItem(
+                text = stringResource(Res.string.menu_developer_always_on_top),
+                checked = isDevWindowAlwaysOnTop,
+                onCheckedChange = onSetDevWindowAlwaysOnTop
+            )
+        }
+        Item(stringResource(Res.string.menu_developer_style_editor), onClick = onOpenStyleEditor)
+        Item(stringResource(Res.string.menu_developer_memory_monitor), onClick = onOpenMemoryMonitor)
+        Item(stringResource(Res.string.menu_developer_story_prompt), onClick = onOpenStoryPrompt)
     }
 }

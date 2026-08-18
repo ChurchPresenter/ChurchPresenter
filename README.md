@@ -22,6 +22,8 @@ The app is built from several modules that all live in this repository — there
 nothing to fetch separately. Two of them are **Gradle modules of this build**, with no wrapper of
 their own:
 
+> **[`songlibrary/`](./songlibrary)** — the Song Library: every song in the library folder in one editable grid, opened from the Help menu. It reads and writes through **[`core-models/`](./core-models)**, which holds the song model and the `.song` file format the app itself uses.
+>
 > **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop,
 > accessible from the Help menu. `./gradlew :converter:test`, `./gradlew :converter:packageDmg`.
 >

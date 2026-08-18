@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import core.models.songs.SongItem
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest

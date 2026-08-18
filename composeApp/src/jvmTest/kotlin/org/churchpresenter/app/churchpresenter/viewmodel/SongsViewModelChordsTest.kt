@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import kotlinx.coroutines.Dispatchers
-import org.churchpresenter.app.churchpresenter.data.SongFileParser
-import org.churchpresenter.app.churchpresenter.data.SongItem
+import core.models.songs.SongFileParser
+import core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
 import java.io.File

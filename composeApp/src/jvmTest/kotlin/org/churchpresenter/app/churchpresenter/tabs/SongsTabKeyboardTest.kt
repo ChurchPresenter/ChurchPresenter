@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import core.models.songs.SongItem
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
