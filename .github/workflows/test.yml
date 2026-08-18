@@ -72,8 +72,6 @@ jobs:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE/**'
             lottiegen:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen/**'
-            satellite:
-              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite/**'
             cross:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/**'
 
@@ -188,6 +186,12 @@ jobs:
         if: always()
         run: ./gradlew :converter:jacocoTestCoverageVerification -x test
 
+      # Same reasoning as the converter above: a module of this build, so a root-wrapper task rather
+      # than a separate Gradle bootstrap, and ungated because :composeApp depends on it.
+      - name: Companion Satellite tests
+        if: always()
+        run: ./gradlew :companion-satellite:test
+
       # Each module is its own Gradle build with its own wrapper, so they cannot be reached
       # from the root build and are invoked individually. `if: always()` keeps a failure in one
       # suite from hiding the results of the others; the `steps.modules` half skips a module whose
@@ -205,11 +209,6 @@ jobs:
       - name: LottieGen tests
         if: always() && steps.modules.outputs.lottiegen == 'true'
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen
-        run: chmod +x gradlew && ./gradlew test
-
-      - name: Companion Satellite tests
-        if: always() && steps.modules.outputs.satellite == 'true'
-        working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite
         run: chmod +x gradlew && ./gradlew test
 
 
@@ -236,6 +235,7 @@ jobs:
           report_paths: |
             composeApp/build/test-results/**/TEST-*.xml
             converter/build/test-results/**/TEST-*.xml
+            companion-satellite/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
           detailed_summary: true
           include_passed: false

@@ -220,7 +220,7 @@
 - `server/AtemClient.kt`, `server/AtemConnectionManager.kt`, `server/AtemFrameEncoder.kt`, `server/AtemRenderCache.kt`, `server/AtemUploadStatus.kt`
 - `viewmodel/OBSWebSocketManager.kt`
 - `tabs/CompanionSurfaceTab.kt`, `viewmodel/CompanionSatelliteViewModel.kt`, `composables/CompanionSurfacePanel.kt`, `composables/CompanionConnectionChipRow.kt`
-- `appResources/common/ChurchPresenter-CompanionSatellite/` — native Companion Satellite protocol client
+- `companion-satellite/` (repository root) — native Companion Satellite protocol client
 - `data/settings/AtemSettings.kt`, `data/settings/OBSSettings.kt`, `data/settings/CompanionSatelliteSettings.kt`
 - `dialogs/tabs/AtemSettingsTab.kt`, `dialogs/tabs/OBSSettingsTab.kt`, `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
 
