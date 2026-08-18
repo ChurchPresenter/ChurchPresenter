@@ -31,6 +31,10 @@ data class ParsedBible(
     val source: String = ""
 )
 
+// Split into one small function per step, which is what keeps the readers below within the
+// complexity and nesting limits. Splitting the object itself would scatter one file format across
+// several files instead.
+@Suppress("TooManyFunctions")
 object XmlToSpbConverter {
 
     /** Longer than this and a psalm's first verse is content, whatever it opens with. */

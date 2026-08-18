@@ -24,6 +24,10 @@ import java.nio.charset.Charset
  *    type-2 block holds one large memo starting at a fixed offset; a type-3 block packs up to 64
  *    small ones, and the sub-block index selects an entry in its table of 16-byte-aligned starts.
  */
+// Split into one small function per step, which is what keeps the readers below within the
+// complexity and nesting limits. Splitting the object itself would scatter one file format across
+// several files instead.
+@Suppress("TooManyFunctions")
 internal object ParadoxTable {
 
     private const val HEADER_SIZE = 0x800

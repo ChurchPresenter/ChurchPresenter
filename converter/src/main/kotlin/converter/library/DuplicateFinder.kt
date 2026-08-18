@@ -20,6 +20,10 @@ data class DuplicateGroup(
     val similarities: List<Double> = emptyList()
 )
 
+// Split into one small function per step, which is what keeps the readers below within the
+// complexity and nesting limits. Splitting the object itself would scatter one file format across
+// several files instead.
+@Suppress("TooManyFunctions")
 object DuplicateFinder {
 
     /** A line in more than this many songs says nothing about any pair of them. */

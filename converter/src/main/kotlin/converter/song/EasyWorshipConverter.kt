@@ -37,6 +37,10 @@ data class EasyWorshipSong(
  * In every one of them the lyrics are RTF and the sections are separated by a blank line, with the
  * section's name as the first line of its block.
  */
+// Split into one small function per step, which is what keeps the readers below within the
+// complexity and nesting limits. Splitting the object itself would scatter one file format across
+// several files instead.
+@Suppress("TooManyFunctions")
 object EasyWorshipConverter {
 
     private const val SQLITE_HEADER = "SQLite format 3"

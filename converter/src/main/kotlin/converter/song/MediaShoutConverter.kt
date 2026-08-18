@@ -37,6 +37,10 @@ data class MediaShoutSong(
  * lyric import wants four. Modelling the rest would be a large surface that breaks whenever
  * MediaShout adds a field.
  */
+// Split into one small function per step, which is what keeps the readers below within the
+// complexity and nesting limits. Splitting the object itself would scatter one file format across
+// several files instead.
+@Suppress("TooManyFunctions")
 object MediaShoutConverter {
 
     private const val HEADER_SIZE = 20
@@ -116,9 +120,11 @@ object MediaShoutConverter {
     private fun pageSection(page: JsonObject): Pair<String?, List<String>>? {
         val properties = page["Properties"] as? JsonObject
         if ((properties?.get("IsSkipped") as? JsonPrimitive)?.contentOrNull == "true") return null
-        val rtf = pageText(page["Items"] as? JsonArray) ?: return null
-        val lines = RtfText.toPlainText(rtf).lines().map { it.trim() }.filter { it.isNotEmpty() }
-        if (lines.isEmpty()) return null
+
+        val lines = pageText(page["Items"] as? JsonArray)
+            ?.let { rtf -> RtfText.toPlainText(rtf).lines().map { it.trim() }.filter { it.isNotEmpty() } }
+            ?.takeIf { it.isNotEmpty() }
+            ?: return null
 
         val name = text(properties, "CustomName").ifBlank { text(properties, "Name") }
         return name.takeIf { it.isNotBlank() && LyricBlocks.isLabel(it) } to lines

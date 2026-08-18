@@ -61,6 +61,9 @@ object SpsToSongConverter {
         return parseText(spsFile)
     }
 
+    // As in the document converter: one song that will not write is reported and the rest of the
+    // songbook still converts.
+    @Suppress("TooGenericExceptionCaught")
     fun convert(spsFile: File, outputDirectory: File): SpsConversionResult {
         val errors = mutableListOf<String>()
         var songsConverted = 0

@@ -6,7 +6,6 @@ object SpbVersePatcher {
 
     /** A verse row is `id, book, chapter, verse, text` -- five tab-separated columns. */
     private const val VERSE_COLUMNS = 5
-    private const val COLUMN_ID = 0
     private const val COLUMN_BOOK = 1
     private const val COLUMN_CHAPTER = 2
     private const val COLUMN_VERSE = 3
