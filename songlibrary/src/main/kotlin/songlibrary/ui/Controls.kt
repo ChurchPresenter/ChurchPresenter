@@ -1,5 +1,6 @@
 package songlibrary.ui
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
@@ -164,21 +167,29 @@ fun MenuAnchorBox(modifier: Modifier = Modifier, content: @Composable (menuMaxHe
 @Composable
 fun LibraryPopup(width: Dp, maxHeight: Dp, onDismiss: () -> Unit, content: @Composable () -> Unit) {
     val c = colors
+    val scroll = rememberScrollState()
     Popup(
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
     ) {
-        Column(
-            Modifier.padding(top = 5.dp)
-                .width(width)
-                .heightIn(max = maxHeight)
-                .clip(RoundedCornerShape(10.dp))
-                .background(c.popupSurface)
-                .border(1.dp, c.border, RoundedCornerShape(10.dp))
-                .padding(4.dp)
-                .verticalScroll(rememberScrollState()),
-        ) {
-            content()
+        Box(Modifier.padding(top = 5.dp).width(width).heightIn(max = maxHeight)) {
+            Column(
+                Modifier.clip(RoundedCornerShape(10.dp))
+                    .background(c.popupSurface)
+                    .border(1.dp, c.border, RoundedCornerShape(10.dp))
+                    .padding(4.dp)
+                    .verticalScroll(scroll),
+            ) {
+                content()
+            }
+            // Only once there is something to scroll to: a bar standing in an eight-row menu reads
+            // as a list that has been cut off, which is the thing this is here to disprove.
+            if (scroll.maxValue > 0) {
+                VerticalScrollbar(
+                    adapter = rememberScrollbarAdapter(scroll),
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(vertical = 5.dp),
+                )
+            }
         }
     }
 }

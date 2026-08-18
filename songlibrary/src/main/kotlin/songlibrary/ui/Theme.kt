@@ -73,6 +73,9 @@ data class LibraryColors(
     val onDangerSurface: Color,
     val dangerBorder: Color,
     val warning: Color,
+    /** The bars a skeleton row is drawn from, and the highlight that sweeps along them. */
+    val skeleton: Color,
+    val skeletonHighlight: Color,
 )
 
 /** The alphas the recessive chrome is built from, over whatever the scheme's own text colour is. */
@@ -80,6 +83,8 @@ private const val HAIRLINE_ALPHA = 0.07f
 private const val FAINT_TEXT_ALPHA = 0.55f
 private const val ACCENT_SURFACE_ALPHA = 0.10f
 private const val ACCENT_BORDER_ALPHA = 0.28f
+private const val SKELETON_ALPHA = 0.09f
+private const val SKELETON_HIGHLIGHT_ALPHA = 0.20f
 
 /**
  * The table's roles, read off [scheme] and [semantic].
@@ -114,6 +119,8 @@ internal fun libraryColorsFor(scheme: ColorScheme, semantic: SemanticColors) = L
     onDangerSurface = scheme.onErrorContainer,
     dangerBorder = scheme.error,
     warning = semantic.warning,
+    skeleton = scheme.onSurface.copy(alpha = SKELETON_ALPHA),
+    skeletonHighlight = scheme.onSurface.copy(alpha = SKELETON_HIGHLIGHT_ALPHA),
 )
 
 /**

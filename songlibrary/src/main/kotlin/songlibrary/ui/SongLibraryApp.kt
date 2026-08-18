@@ -1,5 +1,10 @@
 package songlibrary.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
@@ -34,11 +39,11 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ViewColumn
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +51,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
@@ -258,7 +266,7 @@ private fun SongTable(
         Column(Modifier.fillMaxSize().horizontalScroll(scroll)) {
             TableHeader(state, width)
             when {
-                state.isLoading -> LoadingState(width)
+                state.isLoading -> SkeletonTable(state, width)
                 rows.isEmpty() -> EmptyState(state, width)
                 else -> LazyColumn(Modifier.width(width).fillMaxHeight(), state = listState) {
                     items(rows, key = { it.sourceFile }) { song ->
@@ -288,19 +296,95 @@ private fun SongTable(
 /** The width the two scrollbars keep clear of each other in the table's bottom-right corner. */
 private val SCROLLBAR_THICKNESS = 12.dp
 
-/** What the table shows while the folder is still being read, which on a real library is seconds. */
+/**
+ * What the table shows while the folder is still being read.
+ *
+ * The rows the real table will have, in the columns it will have them in, with a highlight sweeping
+ * across — so the window arrives already the right shape and the grid fills in, rather than the
+ * layout jumping when the load lands. A spinner in the middle of an empty table says only that
+ * something is happening; this says what is coming.
+ */
 @Composable
-private fun LoadingState(width: Dp) {
-    val c = colors
-    Column(
-        Modifier.width(width).padding(vertical = 70.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        CircularProgressIndicator(Modifier.size(26.dp), color = c.accent, strokeWidth = 2.5.dp)
-        Text(Strings["loading"], style = LibraryType.bodyStrong, color = c.textMuted)
+private fun SkeletonTable(state: SongLibraryState, width: Dp) {
+    val sweep = rememberInfiniteTransition(label = "skeleton").animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(SKELETON_SWEEP_MS, easing = LinearEasing)),
+        label = "sweep",
+    )
+    Column(Modifier.width(width)) {
+        repeat(SKELETON_ROWS) { row -> SkeletonRow(state, width, sweep, row) }
     }
 }
+
+@Composable
+private fun SkeletonRow(state: SongLibraryState, width: Dp, sweep: State<Float>, row: Int) {
+    val c = colors
+    Column(Modifier.width(width)) {
+        Row(
+            Modifier.fillMaxWidth().height(LibraryMetrics.rowHeight).background(c.rowSurface),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Every bar is told where it sits across the table, so the highlight crosses the whole
+            // row as one sweep rather than restarting inside each cell.
+            var offset = 0.dp
+            Box(Modifier.width(TICK_WIDTH), contentAlignment = Alignment.Center) {
+                SkeletonBar(15.dp, sweep, offset + 10.dp, width)
+            }
+            offset += TICK_WIDTH
+            state.visibleColumns.forEach { field ->
+                val cell = field.width()
+                Box(Modifier.width(cell).padding(horizontal = 9.dp), contentAlignment = Alignment.CenterStart) {
+                    SkeletonBar((cell - 18.dp) * barFraction(row, field.ordinal), sweep, offset + 9.dp, width)
+                }
+                Box(Modifier.width(1.dp).height(LibraryMetrics.rowHeight).background(c.hairline))
+                offset += cell + 1.dp
+            }
+            Spacer(Modifier.width(ACTIONS_WIDTH))
+        }
+        Hairline()
+    }
+}
+
+/** One bar, filled with the moving gradient. [xOffset] is where it starts across [tableWidth]. */
+@Composable
+private fun SkeletonBar(barWidth: Dp, sweep: State<Float>, xOffset: Dp, tableWidth: Dp) {
+    val c = colors
+    Box(
+        Modifier.width(barWidth)
+            .height(SKELETON_BAR_HEIGHT)
+            .clip(RoundedCornerShape(3.dp))
+            // Read in the draw phase, not composition: `sweep.value` changes every frame, and read
+            // up in the composable it would recompose eighty cells sixty times a second.
+            .drawBehind {
+                val total = tableWidth.toPx()
+                val band = total * SKELETON_BAND
+                val head = -band + sweep.value * (total + band * 2) - xOffset.toPx()
+                drawRect(
+                    Brush.linearGradient(
+                        colorStops = arrayOf(0f to c.skeleton, 0.5f to c.skeletonHighlight, 1f to c.skeleton),
+                        start = Offset(head, 0f),
+                        end = Offset(head + band, 0f),
+                    )
+                )
+            }
+    )
+}
+
+/**
+ * How much of its cell a bar fills, so the rows read as text of different lengths rather than a
+ * block. Derived from the row and column rather than random, so it does not change under a redraw.
+ */
+private fun barFraction(row: Int, column: Int): Float =
+    SKELETON_MIN_FILL + ((row * 7 + column * 13) % SKELETON_FILL_STEPS) * SKELETON_FILL_STEP
+
+private const val SKELETON_ROWS = 10
+private const val SKELETON_SWEEP_MS = 1400
+private const val SKELETON_BAND = 0.35f
+private const val SKELETON_MIN_FILL = 0.42f
+private const val SKELETON_FILL_STEPS = 5
+private const val SKELETON_FILL_STEP = 0.12f
+private val SKELETON_BAR_HEIGHT = 9.dp
 
 @Composable
 private fun TableHeader(state: SongLibraryState, width: Dp) {

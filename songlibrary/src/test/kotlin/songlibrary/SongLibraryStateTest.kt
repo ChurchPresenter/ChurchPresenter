@@ -2,6 +2,8 @@ package songlibrary
 
 import core.models.songs.SongField
 import core.models.songs.SortColumn
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -31,7 +33,9 @@ class SongLibraryStateTest {
         write("Kids/AM/0001 - Clap.song", "Clap")
         write("Loose.song", "Loose")
         state = SongLibraryState(root)
-        state.reload()
+        // The path the window itself takes. Unconfined rather than IO so the load has finished by
+        // the time this returns and every test below can assert without waiting on anything.
+        runBlocking { state.reloadAsync(Dispatchers.Unconfined) }
     }
 
     @AfterTest
@@ -55,6 +59,7 @@ class SongLibraryStateTest {
     fun `reload reads every song under the folder`() {
         assertEquals(listOf("Loose", "Rise", "Ten", "Clap"), state.songs.map { it.title })
         assertFalse(state.isDirty)
+        assertFalse(state.isLoading)
     }
 
     @Test
