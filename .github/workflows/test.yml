@@ -90,7 +90,7 @@ jobs:
       # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
       # Pre-existing findings are in config/detekt/baseline.xml; this gates only new ones.
       - name: Detekt
-        run: ./gradlew :composeApp:detekt :core-models:detekt
+        run: ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -192,6 +192,14 @@ jobs:
         if: always()
         run: ./gradlew :companion-satellite:test
 
+      - name: Theme tests
+        if: always()
+        run: ./gradlew :theme:test
+
+      - name: Theme coverage floor
+        if: always()
+        run: ./gradlew :theme:jacocoTestCoverageVerification -x test
+
       - name: Core models tests
         if: always()
         run: ./gradlew :core-models:test
@@ -244,13 +252,41 @@ jobs:
             composeApp/build/test-results/**/TEST-*.xml
             converter/build/test-results/**/TEST-*.xml
             companion-satellite/build/test-results/**/TEST-*.xml
+            theme/build/test-results/**/TEST-*.xml
             core-models/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
+          # Paired with report_paths BY INDEX -- keep the two lists in the same order.
+          check_name: |
+            App
+            Converter
+            Companion Satellite
+            Theme
+            Core models
+            Sub-builds (skipped unless their own directory changed)
           detailed_summary: true
           include_passed: false
           fail_on_failure: false
           comment: true
           updateComment: true
+
+      # Never gates -- the gradle verification steps above are the real floors; min-coverage only
+      # picks the emoji.
+      - name: Coverage on the pull request
+        if: always() && github.event_name == 'pull_request'
+        uses: madrapps/jacoco-report@v1.8.0
+        with:
+          paths: |
+            composeApp/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml,
+            converter/build/reports/jacoco/test/jacocoTestReport.xml,
+            companion-satellite/build/reports/jacoco/test/jacocoTestReport.xml,
+            theme/build/reports/jacoco/test/jacocoTestReport.xml,
+            core-models/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: Coverage
+          update-comment: true
+          skip-if-no-changes: true
+          min-coverage-overall: 75
+          min-coverage-changed-lines: 75
 
       - name: Upload test reports
         if: failure()
@@ -264,6 +300,8 @@ jobs:
             composeApp/build/test-results/
             converter/build/reports/tests/
             converter/build/test-results/
+            theme/build/reports/tests/
+            theme/build/test-results/
             core-models/build/reports/tests/
             core-models/build/test-results/
             composeApp/src/jvmMain/appResources/common/*/build/reports/tests/

@@ -19,7 +19,7 @@ git clone https://github.com/ChurchPresenter/ChurchPresenter
 ```
 
 The app is built from several modules that all live in this repository — there are no submodules and
-nothing to fetch separately. Three of them are **Gradle modules of this build**, with no wrapper of
+nothing to fetch separately. Four of them are **Gradle modules of this build**, with no wrapper of
 their own:
 
 > **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop,
@@ -27,6 +27,9 @@ their own:
 >
 > **[`companion-satellite/`](./companion-satellite)** — a pure-Kotlin Bitfocus Companion Satellite
 > protocol client. `./gradlew :companion-satellite:test`.
+>
+> **[`theme/`](./theme)** — the app's look: the nine color schemes, the semantic color roles, the
+> typography and shape scales. `./gradlew :theme:test`.
 >
 > **[`core-models/`](./core-models)** — the shared data models (schedule items, scenes, questions,
 > lyrics). `./gradlew :core-models:test`.

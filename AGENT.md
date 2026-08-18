@@ -47,7 +47,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `composables/`   | Reusable UI components (VideoPlayer, SceneCanvas, etc.)             |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
 | `utils/`         | Stateless helpers (AutoFit, UpdateChecker, CrashReporter, etc.)     |
-| `ui/theme/`      | Theme, language provider, Material 3 wrappers                       |
+| `ui/theme/`      | `LanguageProvider` only — the theme itself is the `:theme` module   |
 
 ```
 main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
@@ -69,9 +69,47 @@ classpath, and exactly ONE schema jar may be there.
   everything it analyses is clean. `ui/**` is out of scope (see the comment on `source` in the build
   file): it is the pre-existing Compose desktop GUI, which is what :composeApp keeps in its own
   baseline rather than gating. Everything that parses a file is analysed.
-- `./gradlew :converter:jacocoTestCoverageVerification` — the same six counters the app gates, with
-  this module's own floors (see the table in `converter/build.gradle.kts`). `ui/**` and `MainKt` are
-  excluded: they need a display. Both run in CI as their own steps.
+- `./gradlew :converter:jacocoTestCoverageVerification` — the root build's six counters at 85%, with
+  BRANCH and COMPLEXITY lowered in `converter/build.gradle.kts` because they cannot reach it.
+  `ui/**` and `MainKt` are excluded: they need a display. Both run in CI as their own steps.
+
+### The theme module
+`theme/` is a real Gradle module of this build — `include(":theme")`, `implementation(projects.theme)`.
+It holds the nine color schemes, `SemanticColors`, the typography and shape scales and
+`ThemeManager`, in the package they always had (`…ui.theme`), so no import in the app changed.
+
+- **A color literal belongs in this module or nowhere.** It depends on Compose and on nothing of
+  the app's own, so nothing here can start reading a setting.
+- `LanguageProvider` stays in `:composeApp` — it is i18n, and it resolves layout direction from the
+  app's `Language` catalogue.
+- `./gradlew :theme:test`, `:theme:detekt` (no baseline, must be clean),
+  `:theme:jacocoTestCoverageVerification` (the root build's default six counters at 85%). All three
+  run in CI.
+- Anything `:composeApp` calls has to be public here — `colorSchemeFor` was `internal` and is not
+  any more.
+
+### JaCoCo lives in the root build
+`:converter`, `:companion-satellite` and `:theme` share one shape — a `test` task, `src/main/kotlin`,
+`classes/kotlin/main` — so the JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor are
+written **once** in the root `build.gradle.kts`, in the `subprojects { plugins.withId(...) }` block.
+The default floor is 85% on all six counters.
+
+A module's build file carries only what differs, and both are read when the task is realized, so
+they must be set **above everything else** in the file:
+- `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults, so name only the
+  counters that need a different number (usually the one or two that cannot reach 85%), never all
+  six. `:converter` and `:companion-satellite` name two each; `:theme` names none.
+- `extra["coverageExcludes"]` — class-directory excludes, replacing the default
+  `**/ComposableSingletons*` outright.
+
+**Do not re-declare `jacocoTestReport`/`jacocoTestCoverageVerification` in a module.** Configuring
+the task there realizes it during evaluation, before the `extra` above is set, and a second
+`violationRules` block adds rules rather than replacing them — so a floor can only ever be raised,
+never lowered, and silently.
+
+`:composeApp` is deliberately out of scope: it is Kotlin Multiplatform, with two exec files, a
+`jvmMain` source set and a long exclude list, and registers its own task. The `kotlin("jvm")` plugin
+id is what separates the two.
 
 ### The core-models module
 `core-models/` holds the shared data models — `ScheduleItem`, `SceneModels`, `Question`,
@@ -95,11 +133,11 @@ have their own Gradle builds and test suites, under `src/jvmMain/appResources/co
 `ChurchPresenter-PresentationEngine`, `-BLE`, `-LottieGen`. A fourth, `-Cross`, is not mounted —
 `syncCrosswordFiles` copies its `encoded/*.xwp` into composeResources at build time.
 
-Two are no longer among them, and are the direction the rest are headed: `converter/` (above) and
-`companion-satellite/` are **real Gradle modules of this build** —
+Three are no longer among them, and are the direction the rest are headed: `converter/` (above),
+`companion-satellite/` and `theme/` are **real Gradle modules of this build** —
 `implementation(projects.companionSatellite)`, tested with `./gradlew :companion-satellite:test` on
 the root wrapper, with dependency versions from `gradle/libs.versions.toml` rather than hand-copied
-literals.
+literals. Their `version` comes from the `subprojects` block in the root build; don't re-declare it.
 
 **None of these are git submodules.** All of them are committed directly into this repository, so a
 plain `git clone` is enough and a change spanning the app and a module is one commit.
@@ -107,7 +145,7 @@ plain `git clone` is enough and a change spanning the app and a module is one co
 - **When touching a MOUNTED module's code, compile BOTH builds**: `./gradlew compileKotlinJvm` at
   the repo root AND `sh gradlew build` inside the module. The main build is more permissive and will
   accept code the module's own build rejects. This does not apply to `companion-satellite/` — there
-  is only one build to satisfy there, which is the point of promoting it.
+  is only one build to satisfy there, which is the point of promoting it. Nor to `theme/`.
 - The Presentation Engine has **zero Compose dependency by construction** — accidental Compose
   imports fail its standalone build.
 - The Presentation Engine runs **entirely in-JVM**: never shell out to `osascript`, AppleScript,
@@ -130,6 +168,7 @@ Presentation deps in `composeApp/build.gradle.kts` are mirrored in
 ./gradlew :composeApp:run              # run the app
 ./gradlew compileKotlinJvm             # fast compile check
 ./gradlew :composeApp:detekt           # static analysis — CI's first gate, run it LAST before you stop
+./gradlew :theme:test :theme:detekt    # the theme module's own suite and gate
 # NEVER run :composeApp:detektBaseline — it rewrites baseline.xml and absorbs your own new findings
 ./gradlew :composeApp:check            # compile + all unit tests
 ./gradlew :composeApp:jacocoTestReport # coverage → build/reports/jacoco/jacocoTestReport/html/
