@@ -84,6 +84,9 @@ Download the latest release from the [Releases](../../releases) page.
 
 ## Build from Source
 
+The converter is the `:converter` module of the [ChurchPresenter](https://github.com/ChurchPresenter/ChurchPresenter)
+build, so every command below is run from the repository root with that repo's wrapper.
+
 ### Requirements
 
 - JDK 21+
@@ -91,20 +94,21 @@ Download the latest release from the [Releases](../../releases) page.
 ### Run
 
 ```bash
-./gradlew run
+./gradlew :converter:run     # the converter on its own; the app opens it from its Help menu
+./gradlew :converter:test
 ```
 
 ### Package
 
 ```bash
 # Windows installer
-./gradlew packageMsi
+./gradlew :converter:packageMsi
 
 # macOS
-./gradlew packageDmg
+./gradlew :converter:packageDmg
 
 # Linux
-./gradlew packageDeb
+./gradlew :converter:packageDeb
 ```
 
 ## File Formats

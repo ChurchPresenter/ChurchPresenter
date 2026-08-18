@@ -161,6 +161,13 @@ jobs:
         if: always()
         run: ./gradlew :converter:test
 
+      # The module's own six-counter floor, off the execution data the step above just wrote.
+      # `-x test` for the same reason the app's floor step has it: the task `dependsOn` the suite,
+      # which is right for a developer running it directly and would re-run it here.
+      - name: Converter coverage floor
+        if: always()
+        run: ./gradlew :converter:jacocoTestCoverageVerification -x test
+
       # Each submodule is its own Gradle build with its own wrapper, so they cannot be reached
       # from the root build and are invoked individually. `if: always()` keeps a failure in one
       # suite from hiding the results of the others.
