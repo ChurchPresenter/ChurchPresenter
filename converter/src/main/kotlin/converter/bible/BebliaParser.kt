@@ -153,8 +153,7 @@ internal object BebliaParser {
             // "content not allowed in prolog".
             val reader = inputFactory().createXMLStreamReader(counting)
             try {
-                while (reader.hasNext()) {
-                    builder.consume(reader, reader.next())
+                readAll(reader, builder) {
                     val fraction = (counting.count.toFloat() / totalBytes).coerceIn(0f, 1f)
                     if (fraction - reported >= PROGRESS_STEP) {
                         reported = fraction
@@ -177,6 +176,14 @@ internal object BebliaParser {
             rights = rights.ifBlank { builder.rootRights },
             source = source.ifBlank { builder.rootSource },
         )
+    }
+
+    /** Hands every event to [builder], calling [afterEvent] between them so progress is reported. */
+    private fun readAll(reader: XMLStreamReader, builder: BibleBuilder, afterEvent: () -> Unit) {
+        while (reader.hasNext()) {
+            builder.consume(reader, reader.next())
+            afterEvent()
+        }
     }
 
     /**

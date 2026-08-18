@@ -1,6 +1,7 @@
 package converter.bible
 
 import java.io.File
+import java.io.Writer
 import javax.xml.parsers.DocumentBuilderFactory
 
 data class BibleBook(
@@ -42,6 +43,9 @@ object XmlToSpbConverter {
 
     /** How much text may follow a bracketed title before the verse counts as content. */
     private const val MAX_TITLE_REMAINDER = 40
+
+    /** Psalms, the one book the two numbering traditions disagree about. */
+    private const val PSALMS_BOOK_NUMBER = 19
 
     /** Longer than this and a chapter caption is a sentence about the book, not its name. */
     private const val MAX_CAPTION_NAME_LENGTH = 30
@@ -255,48 +259,53 @@ object XmlToSpbConverter {
      * a full 66-book Bible is seconds rather than instant.
      */
     fun write(bible: ParsedBible, outputFile: File, onProgress: (Float) -> Unit = {}) {
-        // Shared with the app's install-time naming rule so the header and the file name agree.
-        val abbreviation = BibleCatalogNaming.abbreviation(bible.name)
-
-        val rtl = if (BookNames.isRightToLeft(bible.language)) "1" else ""
-
         outputFile.bufferedWriter(Charsets.UTF_8).use { w ->
-            w.write("##spDataVersion:\t1\n")
-            w.write("##Title:\t${bible.name}\n")
-            w.write("##Abbreviation:\t$abbreviation\n")
-            w.write("##Information:\t${bible.description.oneLine()}\n")
-            w.write("##RightToLeft:\t$rtl\n")
-            // Attribution travels with the file, so it survives the user copying it elsewhere.
-            if (bible.rights.isNotBlank()) w.write("##Copyright:\t${bible.rights.oneLine()}\n")
-            if (bible.source.isNotBlank()) w.write("##Source:\t${bible.source.oneLine()}\n")
-
-            for (book in bible.books) {
-                w.write("${book.number}\t${book.name}\t${book.chapters.size}\n")
-            }
-
+            writeHeader(w, bible)
             w.write("-----\n")
-
-            val useLxxMapping = bible.language?.uppercase() in LXX_PSALM_LANGUAGES
-            val psalmsBookNum = 19
-
             for ((index, book) in bible.books.withIndex()) {
-                for (chapter in book.chapters) {
-                    // For LXX Psalms, detect if verse 1 is a standalone superscription.
-                    // If so, code it as V000 and offset subsequent verse numbers by -1.
-                    val isLxxPsalm = useLxxMapping && book.number == psalmsBookNum
-                    val hasStandaloneTitle = isLxxPsalm && chapter.verses.isNotEmpty()
-                            && isPsalmSuperscription(chapter.verses.first().text)
-                    val codeChapter = if (isLxxPsalm)
-                        lxxToHebrewPsalm(chapter.number) else chapter.number
-
-                    for (verse in chapter.verses) {
-                        val codeVerse = if (hasStandaloneTitle) verse.number - 1 else verse.number
-                        val verseId = "B%03dC%03dV%03d".format(book.number, codeChapter, codeVerse)
-                        w.write("$verseId\t${book.number}\t${chapter.number}\t${verse.number}\t${verse.text}\n")
-                    }
-                }
+                book.chapters.forEach { chapter -> writeChapter(w, bible, book, chapter) }
                 onProgress((index + 1).toFloat() / bible.books.size)
             }
+        }
+    }
+
+    /** The `##` block and the book list, which together tell the app what the module holds. */
+    private fun writeHeader(w: Writer, bible: ParsedBible) {
+        // Shared with the app's install-time naming rule so the header and the file name agree.
+        val abbreviation = BibleCatalogNaming.abbreviation(bible.name)
+        val rtl = if (BookNames.isRightToLeft(bible.language)) "1" else ""
+
+        w.write("##spDataVersion:\t1\n")
+        w.write("##Title:\t${bible.name}\n")
+        w.write("##Abbreviation:\t$abbreviation\n")
+        w.write("##Information:\t${bible.description.oneLine()}\n")
+        w.write("##RightToLeft:\t$rtl\n")
+        // Attribution travels with the file, so it survives the user copying it elsewhere.
+        if (bible.rights.isNotBlank()) w.write("##Copyright:\t${bible.rights.oneLine()}\n")
+        if (bible.source.isNotBlank()) w.write("##Source:\t${bible.source.oneLine()}\n")
+
+        for (book in bible.books) {
+            w.write("${book.number}\t${book.name}\t${book.chapters.size}\n")
+        }
+    }
+
+    /**
+     * One chapter's verses, each with the `BxxxCxxxVxxx` code two translations are aligned on.
+     *
+     * For a Septuagint Psalter the code is written in Hebrew numbering, and a psalm whose first
+     * verse is nothing but its title codes that title as verse 0 so the verses under it line up
+     * with the same psalm in a Hebrew-numbered translation.
+     */
+    private fun writeChapter(w: Writer, bible: ParsedBible, book: BibleBook, chapter: BibleChapter) {
+        val isLxxPsalm = bible.language?.uppercase() in LXX_PSALM_LANGUAGES && book.number == PSALMS_BOOK_NUMBER
+        val hasStandaloneTitle = isLxxPsalm && chapter.verses.isNotEmpty() &&
+            isPsalmSuperscription(chapter.verses.first().text)
+        val codeChapter = if (isLxxPsalm) lxxToHebrewPsalm(chapter.number) else chapter.number
+
+        for (verse in chapter.verses) {
+            val codeVerse = if (hasStandaloneTitle) verse.number - 1 else verse.number
+            val verseId = "B%03dC%03dV%03d".format(book.number, codeChapter, codeVerse)
+            w.write("$verseId\t${book.number}\t${chapter.number}\t${verse.number}\t${verse.text}\n")
         }
     }
 
@@ -317,7 +326,13 @@ object XmlToSpbConverter {
     }
 
     /** Shared with [BebliaParser], which reads its verses without ever building a DOM node. */
-    internal fun applyPatch(text: String, language: String?, bookNum: Int, chapNum: Int, versNum: Int): String {
+    internal fun applyPatch(
+        text: String,
+        language: String?,
+        bookNum: Int,
+        chapNum: Int,
+        versNum: Int,
+    ): String {
         val patch = VersePatches.PATCHES[Triple(bookNum, chapNum, versNum)] ?: return text
         if (patch.language != null && patch.language != language?.uppercase()) return text
         if (patch.matchText != null) return if (text == patch.matchText) patch.correctedText else text

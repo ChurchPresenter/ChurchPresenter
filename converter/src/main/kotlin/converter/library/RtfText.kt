@@ -67,126 +67,41 @@ object RtfText {
      */
     fun toPlainText(rtf: String, defaultCodePage: Int = DEFAULT_CODE_PAGE): String {
         if (!rtf.trimStart().startsWith("{\\rtf")) return TextUtils.sanitizeLyricText(rtf)
+        return TextUtils.sanitizeLyricText(Reader(rtf, defaultCodePage).read())
+    }
 
-        val out = StringBuilder()
-        val bytes = ArrayList<Byte>()          // consecutive \'hh escapes, decoded together
-        val stack = ArrayDeque<Group>()
-        var group = Group(codePage = defaultCodePage)
-        val fontCodePages = HashMap<Int, Int>()
-        var fontTableDepth = -1                // nesting depth of \fonttbl, -1 when outside it
-        var pendingFont = -1                   // font being declared inside \fonttbl
-        var index = 0
+    /**
+     * One pass over a document: a cursor, the group stack, and the text read so far.
+     *
+     * Written as an object rather than as one function because the reader is a state machine —
+     * what a control word means depends on the group it is in and on the font selected before it —
+     * and every step below moves the cursor as its last act.
+     */
+    private class Reader(private val rtf: String, private val defaultCodePage: Int) {
+        private val out = StringBuilder()
 
-        fun flushBytes() {
-            if (bytes.isEmpty()) return
-            if (!group.ignore) out.append(String(bytes.toByteArray(), charsetFor(group.codePage)))
-            bytes.clear()
+        /** Consecutive `\'hh` escapes, decoded together: one byte alone is not a character. */
+        private val bytes = ArrayList<Byte>()
+        private val stack = ArrayDeque<Group>()
+        private var group = Group(codePage = defaultCodePage)
+        private val fontCodePages = HashMap<Int, Int>()
+
+        /** Nesting depth of `\fonttbl`, -1 when outside it, and the font being declared inside it. */
+        private var fontTableDepth = -1
+        private var pendingFont = -1
+        private var index = 0
+
+        fun read(): String {
+            while (index < rtf.length) step()
+            flushBytes()
+            return out.toString()
         }
 
-        while (index < rtf.length) {
+        private fun step() {
             when (val c = rtf[index]) {
-                '{' -> {
-                    flushBytes()
-                    stack.addLast(group)
-                    group = group.copy()
-                    index++
-                }
-
-                '}' -> {
-                    flushBytes()
-                    if (fontTableDepth >= 0 && stack.size <= fontTableDepth) fontTableDepth = -1
-                    group = stack.removeLastOrNull() ?: Group(codePage = defaultCodePage)
-                    index++
-                }
-
-                '\\' -> {
-                    val next = rtf.getOrNull(index + 1)
-                    when {
-                        next == null -> index++
-
-                        // \'hh — one raw byte in the current code page.
-                        next == '\'' -> {
-                            val hex = rtf.substring(
-                                (index + 2).coerceAtMost(rtf.length),
-                                (index + 4).coerceAtMost(rtf.length),
-                            )
-                            val value = hex.toIntOrNull(radix = 16)
-                            if (value != null) bytes.add(value.toByte())
-                            index += HEX_ESCAPE_LENGTH
-                        }
-
-                        // \\ \{ \} are the literal characters.
-                        next == '\\' || next == '{' || next == '}' -> {
-                            flushBytes()
-                            if (!group.ignore) out.append(next)
-                            index += 2
-                        }
-
-                        // A line break inside the source is a paragraph break in the text.
-                        next == '\n' || next == '\r' -> {
-                            flushBytes()
-                            if (!group.ignore) out.append('\n')
-                            index += 2
-                        }
-
-                        next == '~' -> {
-                            flushBytes()
-                            if (!group.ignore) out.append(' ')
-                            index += 2
-                        }
-
-                        // \- is an optional hyphen and \_ a non-breaking one; neither is printed.
-                        next == '-' || next == '_' -> index += 2
-
-                        // \* marks a destination the reader is allowed not to understand.
-                        next == '*' -> {
-                            group.ignore = true
-                            index += 2
-                        }
-
-                        next.isLetter() -> {
-                            flushBytes()
-                            val word = readControlWord(rtf, index + 1)
-                            index = word.end
-                            when {
-                                word.name == "fonttbl" -> {
-                                    fontTableDepth = stack.size
-                                    group.ignore = true      // font names are not lyrics
-                                }
-                                word.name == "ansicpg" && word.parameter != null -> {
-                                    group.codePage = word.parameter
-                                }
-                                word.name == "uc" && word.parameter != null -> {
-                                    group.unicodeSkip = word.parameter.coerceAtLeast(0)
-                                }
-                                word.name == "f" && word.parameter != null -> {
-                                    if (fontTableDepth >= 0) {
-                                        pendingFont = word.parameter
-                                    } else {
-                                        fontCodePages[word.parameter]?.let { group.codePage = it }
-                                    }
-                                }
-                                word.name == "fcharset" && word.parameter != null && pendingFont >= 0 -> {
-                                    CHARSET_CODE_PAGES[word.parameter]?.let { fontCodePages[pendingFont] = it }
-                                }
-                                word.name == "u" && word.parameter != null -> {
-                                    if (!group.ignore) out.append(codePointOf(word.parameter))
-                                    index = skipUnicodeFallback(rtf, index, group.unicodeSkip)
-                                }
-                                // \binN is followed by N raw bytes that are not text.
-                                word.name == "bin" && word.parameter != null -> {
-                                    index = (index + word.parameter.coerceAtLeast(0)).coerceAtMost(rtf.length)
-                                }
-                                word.name == "tab" -> if (!group.ignore) out.append('\t')
-                                word.name in LINE_BREAKS -> if (!group.ignore) out.append('\n')
-                                word.name in SKIPPED_DESTINATIONS -> group.ignore = true
-                            }
-                        }
-
-                        else -> index += 2
-                    }
-                }
-
+                '{' -> openGroup()
+                '}' -> closeGroup()
+                '\\' -> escape()
                 /*
                  * A literal newline is ignorable whitespace — `\par` is what ends a paragraph — and
                  * it must stay ignorable, because RTF writers hard-wrap long paragraphs with one
@@ -198,13 +113,9 @@ object RtfText {
                  * line instead of being a line of its own that can be recognised and dropped.
                  */
                 '\n', '\r' -> {
-                    if (startsRun(rtf, index)) {
-                        flushBytes()
-                        if (!group.ignore) out.append('\n')
-                    }
+                    if (startsRun(rtf, index)) append('\n')
                     index++
                 }
-
                 else -> {
                     flushBytes()
                     if (!group.ignore) out.append(c)
@@ -212,8 +123,105 @@ object RtfText {
                 }
             }
         }
-        flushBytes()
-        return TextUtils.sanitizeLyricText(out.toString())
+
+        private fun openGroup() {
+            flushBytes()
+            stack.addLast(group)
+            group = group.copy()
+            index++
+        }
+
+        private fun closeGroup() {
+            flushBytes()
+            if (fontTableDepth >= 0 && stack.size <= fontTableDepth) fontTableDepth = -1
+            group = stack.removeLastOrNull() ?: Group(codePage = defaultCodePage)
+            index++
+        }
+
+        /** What follows a backslash: a byte escape, a literal character, or a control word. */
+        private fun escape() {
+            val next = rtf.getOrNull(index + 1)
+            when {
+                next == null -> index++
+                // \'hh — one raw byte in the current code page.
+                next == '\'' -> hexEscape()
+                // \\ \{ \} are the literal characters.
+                next == '\\' || next == '{' || next == '}' -> { append(next); index += 2 }
+                // A line break inside the source is a paragraph break in the text.
+                next == '\n' || next == '\r' -> { append('\n'); index += 2 }
+                next == '~' -> { append(' '); index += 2 }
+                // \- is an optional hyphen and \_ a non-breaking one; neither is printed.
+                next == '-' || next == '_' -> index += 2
+                // \* marks a destination the reader is allowed not to understand.
+                next == '*' -> { group.ignore = true; index += 2 }
+                next.isLetter() -> controlWord()
+                else -> index += 2
+            }
+        }
+
+        private fun hexEscape() {
+            val hex = rtf.substring(
+                (index + 2).coerceAtMost(rtf.length),
+                (index + 4).coerceAtMost(rtf.length),
+            )
+            hex.toIntOrNull(radix = 16)?.let { bytes.add(it.toByte()) }
+            index += HEX_ESCAPE_LENGTH
+        }
+
+        private fun controlWord() {
+            flushBytes()
+            val word = readControlWord(rtf, index + 1)
+            index = word.end
+            val parameter = word.parameter
+            when {
+                word.name == "fonttbl" -> {
+                    fontTableDepth = stack.size
+                    group.ignore = true      // font names are not lyrics
+                }
+                parameter == null -> unparameterised(word.name)
+                word.name == "ansicpg" -> group.codePage = parameter
+                word.name == "uc" -> group.unicodeSkip = parameter.coerceAtLeast(0)
+                word.name == "f" -> selectFont(parameter)
+                word.name == "fcharset" && pendingFont >= 0 ->
+                    CHARSET_CODE_PAGES[parameter]?.let { fontCodePages[pendingFont] = it }
+                word.name == "u" -> {
+                    if (!group.ignore) out.append(codePointOf(parameter))
+                    index = skipUnicodeFallback(rtf, index, group.unicodeSkip)
+                }
+                // \binN is followed by N raw bytes that are not text.
+                word.name == "bin" -> index = (index + parameter.coerceAtLeast(0)).coerceAtMost(rtf.length)
+                else -> unparameterised(word.name)
+            }
+        }
+
+        /** The control words that carry no number: line breaks, tabs, and whole destinations. */
+        private fun unparameterised(name: String) {
+            when {
+                name == "tab" -> append('\t')
+                name in LINE_BREAKS -> append('\n')
+                name in SKIPPED_DESTINATIONS -> group.ignore = true
+            }
+        }
+
+        /** Inside the font table this declares a font; outside it, it selects one's code page. */
+        private fun selectFont(font: Int) {
+            if (fontTableDepth >= 0) {
+                pendingFont = font
+            } else {
+                fontCodePages[font]?.let { group.codePage = it }
+            }
+        }
+
+        private fun append(c: Char) {
+            flushBytes()
+            if (!group.ignore) out.append(c)
+        }
+
+        private fun flushBytes() {
+            if (bytes.isEmpty()) return
+            if (!group.ignore) out.append(String(bytes.toByteArray(), charsetFor(group.codePage)))
+            bytes.clear()
+        }
     }
 
     /**
