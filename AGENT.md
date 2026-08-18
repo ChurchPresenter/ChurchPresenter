@@ -147,12 +147,22 @@ keyboard tests still reach it.
 ### The song library module
 `songlibrary/` is the Song Library window: every song in the library folder in one editable grid.
 It owns no model — the song, the `.song` format and the library are `:core-models`' — so what it
-writes is what the app reads on its next scan.
+writes is what the app reads on its next scan. It takes `:core-models` and `:theme` and nothing else
+of the app's.
 
+- **It has no palette of its own.** `ui/Theme.kt` holds the window's metrics and *roles*, resolved
+  from `MaterialTheme.colorScheme` and `:theme`'s `MaterialTheme.semantic`; the recessive chrome the
+  dense table wants is alpha over that scheme, never a darker literal. A colour literal belongs in
+  `:theme` or nowhere, and this window opens inside the app's `AppThemeWrapper` — including
+  standalone, which is what `Main.kt` wraps it in — so it follows all nine themes.
+- **`SongLibraryState` sits outside `ui/` on purpose.** It is what detekt analyses and what JaCoCo
+  measures, and `songlibrary/ui/**` is excluded from both as Compose desktop needing a display — an
+  exclusion that is only honest while nothing with decisions in it is under `ui/`.
 - `./gradlew :songlibrary:run` opens it on `~/ChurchPresenter/Songs`, or on a folder given as the
   first argument, without starting the app.
-- `./gradlew :songlibrary:test`, `:songlibrary:detekt` — detekt covers `data/`; `ui/**` is Compose
-  desktop, the same carve-out the converter makes.
+- `./gradlew :songlibrary:test`, `:songlibrary:detekt`, `:songlibrary:jacocoTestCoverageVerification`
+  — the root build's six counters at 85%, no floor lowered. All three run in CI, gated on the
+  module's own directory.
 - The logic it runs on — filtering, sorting, pending edits, moving files — is in `:core-models` and
   tested there, so the window itself stays thin.
 
@@ -162,8 +172,9 @@ have their own Gradle builds and test suites, under `src/jvmMain/appResources/co
 `ChurchPresenter-PresentationEngine`, `-BLE`, `-LottieGen`. A fourth, `-Cross`, is not mounted —
 `syncCrosswordFiles` copies its `encoded/*.xwp` into composeResources at build time.
 
-Three are no longer among them, and are the direction the rest are headed: `converter/` (above),
-`companion-satellite/` and `theme/` are **real Gradle modules of this build** —
+Five are no longer among them, and are the direction the rest are headed: `converter/` (above),
+`companion-satellite/`, `theme/`, `core-models/` and `songlibrary/` are **real Gradle modules of
+this build** —
 `implementation(projects.companionSatellite)`, tested with `./gradlew :companion-satellite:test` on
 the root wrapper, with dependency versions from `gradle/libs.versions.toml` rather than hand-copied
 literals. Their `version` comes from the `subprojects` block in the root build; don't re-declare it.

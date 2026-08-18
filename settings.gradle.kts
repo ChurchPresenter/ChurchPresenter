@@ -47,4 +47,3 @@ include(":core-models")
 // :composeApp, which wraps it in CompanionSatelliteViewModel.
 include(":companion-satellite")
 include(":theme")
-include(":core-models")

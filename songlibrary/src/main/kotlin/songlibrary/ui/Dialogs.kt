@@ -289,7 +289,7 @@ private fun BatchSongbookField(
 ) {
     val c = colors
     var open by remember { mutableStateOf(false) }
-    Box(Modifier.fillMaxWidth()) {
+    MenuAnchorBox(Modifier.fillMaxWidth()) { menuMaxHeight ->
         Row(
             Modifier.fillMaxWidth()
                 .height(32.dp)
@@ -312,7 +312,7 @@ private fun BatchSongbookField(
             Icon(Icons.Default.ArrowDropDown, null, tint = c.textFaint, modifier = Modifier.size(13.dp))
         }
         if (open) {
-            LibraryPopup(width = 260.dp, onDismiss = { open = false }) {
+            LibraryPopup(width = 260.dp, maxHeight = menuMaxHeight, onDismiss = { open = false }) {
                 MenuRow(Strings["no_song_book"], selected = value.isBlank()) {
                     onPick("")
                     open = false
@@ -374,7 +374,7 @@ private fun DangerButton(label: String, onClick: () -> Unit) {
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, style = LibraryType.button, color = c.danger)
+        Text(label, style = LibraryType.button, color = c.onDangerSurface)
     }
 }
 

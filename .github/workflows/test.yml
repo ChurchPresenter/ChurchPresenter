@@ -97,6 +97,9 @@ jobs:
             coremodels:
               - *shared
               - 'core-models/**'
+            songlibrary:
+              - *shared
+              - 'songlibrary/**'
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -113,7 +116,7 @@ jobs:
       # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
       # Pre-existing findings are in config/detekt/baseline.xml; this gates only new ones.
       - name: Detekt
-        run: ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt
+        run: ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :songlibrary:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -151,10 +154,18 @@ jobs:
       # floor below only speaks up when it is breached, so a run could move coverage several points
       # in either direction and say nothing.
       #
-      # `-x jvmTest` for the same reason it is on the floor step: jacocoTestReport `dependsOn`
-      # jvmTest, and after a FAILED suite that dependency is not up to date, so without this the
-      # step would relaunch the whole 14-minute suite inside its own budget. The report is built
+      # `-x jvmTest -x jvmTestSerial` for the same reason it is on the floor step: jacocoTestReport
+      # `dependsOn` BOTH of them, and after a FAILED suite that dependency is not up to date, so
+      # without this the step would relaunch the suite inside its own budget. The report is built
       # from the exec data the step above already wrote.
+      #
+      # Excluding only `jvmTest` was not enough, and hid a whole missing suite. When Detekt fails,
+      # `App unit tests` is skipped -- but this step still ran, and with the serial task NOT excluded
+      # it quietly executed the thirteen serial classes on its own. That wrote a jvmTestSerial exec
+      # file and jvmTestSerial XML, so both pull-request comments then described a run in which the
+      # suite had never started: "App 159 ran, 159 passed" from the junit reporter, and composeApp at
+      # 33% instruction in the coverage table. One looked like a small green suite and the other like
+      # a coverage collapse; neither had happened.
       #
       # Advisory after a failure, like the floor: the exec data is then from a run that stopped
       # early, so the numbers are understated. Still worth printing -- it is the only place the
@@ -169,15 +180,16 @@ jobs:
       - name: Coverage summary
         if: always()
         timeout-minutes: 10
-        run: ./gradlew :composeApp:jacocoTestReport -x jvmTest "-PstepSummary=$GITHUB_STEP_SUMMARY"
+        run: ./gradlew :composeApp:jacocoTestReport -x jvmTest -x jvmTestSerial "-PstepSummary=$GITHUB_STEP_SUMMARY"
 
       # The 75% line-coverage floor, off the execution data the tests above just produced. Its
       # denominator excludes the app-entry wiring that only runs under a real display -- see
       # jacocoTestCoverageVerification in composeApp/build.gradle.kts. `if: always()` so a coverage
       # regression is reported alongside test failures rather than hidden behind them.
       #
-      # `-x jvmTest` is load-bearing. The Gradle task `dependsOn("jvmTest")`, which is right for a
-      # developer running it directly, but here the suite has already run in the step above. When it
+      # `-x jvmTest -x jvmTestSerial` is load-bearing. The Gradle task `dependsOn` both, which is
+      # right for a developer running it directly, but here the suite has already run in the step
+      # above -- see the Coverage summary step for what excluding only half of it did. When it
       # PASSED that task is up to date and the dependency costs nothing -- which is why this looked
       # fine for as long as the suite was green. When it FAILED it is not up to date, so this step
       # started the whole 21-minute suite again inside a 10-minute budget: a guaranteed timeout.
@@ -185,24 +197,16 @@ jobs:
       # relaunched it at 01:41:20, killed at 01:50:57. Every red run paid an extra ten minutes and
       # reported a second failure that said "Coverage floor timed out" and meant nothing.
       #
-      # Advisory when the suite failed: the exec data is then from a run that did not finish, so the
-      # number is understated and a floor breach would be an artefact. The build is already red for a
-      # better reason. When the suite passed this gates exactly as before, in seconds.
+      # Advisory whenever the suite did not pass: the exec data is then from a run that did not
+      # finish -- or, when Detekt failed and the suite step was SKIPPED, is not there at all -- so
+      # the number is understated and a floor breach would be an artefact. The build is already red
+      # for a better reason, and `outcome != 'success'` covers the skipped case as well as the failed
+      # one. When the suite passed this gates exactly as before, in seconds.
       - name: Coverage floor
         if: always()
-        continue-on-error: ${{ steps.unit_tests.outcome == 'failure' }}
+        continue-on-error: ${{ steps.unit_tests.outcome != 'success' }}
         timeout-minutes: 10
-        run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest
-
-      # Both are modules of this build, so they are tasks on the root wrapper: seconds each, and
-      # :composeApp depends on them, so an app change can break them.
-      - name: Core model tests
-        if: always()
-        run: ./gradlew :core-models:test
-
-      - name: Song library tests
-        if: always()
-        run: ./gradlew :songlibrary:test
+        run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest -x jvmTestSerial
 
       # The converter is a module of THIS build (`include(":converter")`), not one of the separate
       # builds below, so it is a task on the root wrapper and shares its daemon -- seconds rather
@@ -240,6 +244,14 @@ jobs:
       - name: Core models coverage floor
         if: always() && steps.modules.outputs.coremodels == 'true'
         run: ./gradlew :core-models:jacocoTestCoverageVerification -x test
+
+      - name: Song library tests
+        if: always() && steps.modules.outputs.songlibrary == 'true'
+        run: ./gradlew :songlibrary:test
+
+      - name: Song library coverage floor
+        if: always() && steps.modules.outputs.songlibrary == 'true'
+        run: ./gradlew :songlibrary:jacocoTestCoverageVerification -x test
 
       # Each module is its own Gradle build with its own wrapper, so they cannot be reached
       # from the root build and are invoked individually. `if: always()` keeps a failure in one
@@ -284,22 +296,29 @@ jobs:
           report_paths: |
             composeApp/build/test-results/**/TEST-*.xml
             converter/build/test-results/**/TEST-*.xml
-            core-models/build/test-results/**/TEST-*.xml
-            songlibrary/build/test-results/**/TEST-*.xml
             companion-satellite/build/test-results/**/TEST-*.xml
             theme/build/test-results/**/TEST-*.xml
             core-models/build/test-results/**/TEST-*.xml
+            songlibrary/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
-          # Paired with report_paths BY INDEX -- keep the two lists in the same order.
+          # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
+          # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
+          # every row after the insertion, so core-models was reported under "Companion Satellite"
+          # and the song library under "Theme", each with the other's numbers.
           check_name: |
             App
             Converter
             Companion Satellite
             Theme
             Core models
+            Song library
             Sub-builds (skipped unless their own directory changed)
           detailed_summary: true
           include_passed: false
+          # Without this the second table is one row of "No test annotations available" per
+          # check_name on every green run -- `include_passed: false` leaves it nothing to list when
+          # nothing failed. Off, that table appears only when there is a failure to put in it.
+          verbose_summary: false
           fail_on_failure: false
           comment: true
           updateComment: true
@@ -400,5 +419,7 @@ jobs:
             theme/build/test-results/
             core-models/build/reports/tests/
             core-models/build/test-results/
+            songlibrary/build/reports/tests/
+            songlibrary/build/test-results/
             composeApp/src/jvmMain/appResources/common/*/build/reports/tests/
             composeApp/src/jvmMain/appResources/common/*/build/test-results/

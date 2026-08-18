@@ -10,29 +10,46 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.app.churchpresenter.ui.theme.SemanticColors
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 
 /**
- * The window's own palette and metrics.
+ * The window's metrics, and the roles it reads the app's theme through.
  *
  * A song library is a dense table — a hundred rows of eight columns — and Material's default
  * controls are built for a form: 56dp fields, 40dp buttons, generous padding. At that size a
- * screenful is a dozen songs. These are the sizes and colours of the design instead: 38dp rows,
- * 12.5sp text, and a chrome that recedes so the songs are what is read.
+ * screenful is a dozen songs. These are the sizes of the design instead: 38dp rows, 12.5sp text,
+ * and a chrome that recedes so the songs are what is read.
+ *
+ * The **colours are not the design's own**. They were, once — two hand-written palettes of forty
+ * literals each, picked by how light `MaterialTheme.colorScheme.background` came out. That made the
+ * window blue in all nine of the app's themes, and it is not this module's call to make: the
+ * operator picked Forest or Mocha in the app, and this window opens inside the app's
+ * `AppThemeWrapper`. So every colour below is a role of the scheme in force, and the recessive
+ * chrome the design wants comes from **alpha over that scheme** rather than from a darker literal —
+ * a hairline is the theme's own text at 7%, not `#16181B`. A colour literal belongs in `:theme` or
+ * nowhere.
  */
+@Immutable
 data class LibraryColors(
     val background: Color,
     val surface: Color,
@@ -52,64 +69,68 @@ data class LibraryColors(
     val popupSurface: Color,
     val danger: Color,
     val dangerSurface: Color,
+    /** What is legible ON [dangerSurface] — which [danger] is not, in every dark theme. */
+    val onDangerSurface: Color,
     val dangerBorder: Color,
     val warning: Color,
 )
 
-private val DARK = LibraryColors(
-    background = Color(0xFF0E1013),
-    surface = Color(0xFF131518),
-    rowSurface = Color(0xFF0E1013),
-    hairline = Color(0xFF16181B),
-    border = Color(0xFF24272C),
-    text = Color(0xFFE6E9EE),
-    textMuted = Color(0xFF8B9099),
-    textFaint = Color(0xFF585D64),
-    accent = Color(0xFF5B9DF5),
-    accentText = Color(0xFF8AB8F8),
-    accentSurface = Color(0xFF121A26),
-    accentBorder = Color(0xFF1E2B3D),
-    primary = Color(0xFF2F6FD0),
-    onPrimary = Color.White,
-    inputSurface = Color(0xFF16181B),
-    popupSurface = Color(0xFF17191D),
-    danger = Color(0xFFF08A92),
-    dangerSurface = Color(0xFF2C1518),
-    dangerBorder = Color(0xFF47222A),
-    warning = Color(0xFFE8A33D),
+/** The alphas the recessive chrome is built from, over whatever the scheme's own text colour is. */
+private const val HAIRLINE_ALPHA = 0.07f
+private const val FAINT_TEXT_ALPHA = 0.55f
+private const val ACCENT_SURFACE_ALPHA = 0.10f
+private const val ACCENT_BORDER_ALPHA = 0.28f
+
+/**
+ * The table's roles, read off [scheme] and [semantic].
+ *
+ * `surfaceContainerHigh` is the theme's declared role for an input field and is what the search box,
+ * the quiet buttons and the menus sit on; `warning` has no M3 role at all, which is why `:theme`
+ * defines it.
+ */
+internal fun libraryColorsFor(scheme: ColorScheme, semantic: SemanticColors) = LibraryColors(
+    background = scheme.background,
+    surface = scheme.surfaceContainer,
+    rowSurface = scheme.background,
+    hairline = scheme.onSurface.copy(alpha = HAIRLINE_ALPHA),
+    border = scheme.outlineVariant,
+    text = scheme.onSurface,
+    textMuted = scheme.onSurfaceVariant,
+    textFaint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+    accent = scheme.primary,
+    accentText = scheme.primary,
+    accentSurface = scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA),
+    accentBorder = scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA),
+    primary = scheme.primary,
+    onPrimary = scheme.onPrimary,
+    inputSurface = scheme.surfaceContainerHigh,
+    popupSurface = scheme.surfaceContainerHigh,
+    danger = scheme.error,
+    dangerSurface = scheme.errorContainer,
+    // `error` on `errorContainer` is not a pairing M3 promises anything about, and in this app's
+    // dark themes they are #F44336 on #D32F2F -- two reds a shade apart, which is what a delete
+    // button drawn in them looked like. `onErrorContainer` is the role that is meant to be read on
+    // it, and it is white there and near-black in the light themes.
+    onDangerSurface = scheme.onErrorContainer,
+    dangerBorder = scheme.error,
+    warning = semantic.warning,
 )
 
-/** The same design in the app's light theme, which the window follows rather than fighting. */
-private val LIGHT = LibraryColors(
-    background = Color(0xFFF6F7F9),
-    surface = Color(0xFFFFFFFF),
-    rowSurface = Color(0xFFFFFFFF),
-    hairline = Color(0xFFECEEF1),
-    border = Color(0xFFD8DCE2),
-    text = Color(0xFF1A1D21),
-    textMuted = Color(0xFF5C636D),
-    textFaint = Color(0xFF8B9099),
-    accent = Color(0xFF2F6FD0),
-    accentText = Color(0xFF1F5BB5),
-    accentSurface = Color(0xFFE9F0FB),
-    accentBorder = Color(0xFFC6D9F5),
-    primary = Color(0xFF2F6FD0),
-    onPrimary = Color.White,
-    inputSurface = Color(0xFFFFFFFF),
-    popupSurface = Color(0xFFFFFFFF),
-    danger = Color(0xFFB3261E),
-    dangerSurface = Color(0xFFFBEAEA),
-    dangerBorder = Color(0xFFF0C4C4),
-    warning = Color(0xFFB26A00),
-)
+/**
+ * Errors rather than defaulting: there is no palette that is right for an unknown theme, and a
+ * silent fallback is how the window came to paint its own blue over eight of the app's nine.
+ */
+val LocalLibraryColors = staticCompositionLocalOf<LibraryColors> {
+    error("LibraryColors read outside LibraryTheme")
+}
 
-val LocalLibraryColors = staticCompositionLocalOf { DARK }
-
-/** Provides the palette that matches the theme the app is in. */
+/** Provides the table's roles, resolved from the theme this window was opened inside. */
 @Composable
 fun LibraryTheme(content: @Composable () -> Unit) {
-    val light = MaterialTheme.colorScheme.background.luminance() > 0.5f
-    CompositionLocalProvider(LocalLibraryColors provides if (light) LIGHT else DARK, content = content)
+    val scheme = MaterialTheme.colorScheme
+    val semantic = MaterialTheme.semantic
+    val resolved = remember(scheme, semantic) { libraryColorsFor(scheme, semantic) }
+    CompositionLocalProvider(LocalLibraryColors provides resolved, content = content)
 }
 
 val colors: LibraryColors
@@ -171,7 +192,8 @@ fun QuietButton(
     }
     val text = when {
         !enabled -> c.textFaint
-        danger -> c.danger
+        // Drawn on `dangerSurface` below, so it is that surface's own foreground, not `danger`.
+        danger -> c.onDangerSurface
         else -> c.text
     }
     Row(
@@ -204,7 +226,7 @@ fun LibraryCheckbox(checked: Boolean, indeterminate: Boolean = false, onToggle: 
         contentAlignment = Alignment.Center,
     ) {
         when {
-            checked -> Text("✓", style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold), color = c.onPrimary)
+            checked -> Icon(Icons.Default.Check, contentDescription = null, tint = c.onPrimary, modifier = Modifier.size(11.dp))
             indeterminate -> Box(Modifier.width(7.dp).height(2.dp).background(c.onPrimary))
         }
     }

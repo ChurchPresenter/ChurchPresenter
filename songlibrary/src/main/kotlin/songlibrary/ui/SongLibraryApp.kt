@@ -1,5 +1,7 @@
 package songlibrary.ui
 
+import androidx.compose.foundation.HorizontalScrollbar
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,7 +21,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -30,6 +34,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ViewColumn
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,6 +55,8 @@ import core.models.songs.SongField
 import core.models.songs.SongItem
 import core.models.songs.SortColumn
 import java.io.File
+import songlibrary.OPTIONAL_COLUMNS
+import songlibrary.SongLibraryState
 
 /**
  * One song asked to be edited, and everything an editor needs to do it.
@@ -87,7 +94,7 @@ fun SongLibraryApp(
     songEditor: (@Composable (editing: SongEditorRequest) -> Unit)? = null,
 ) = LibraryTheme {
     val state = remember(libraryFolder) { SongLibraryState(libraryFolder) }
-    LaunchedEffect(libraryFolder) { state.reload() }
+    LaunchedEffect(libraryFolder) { state.reloadAsync() }
 
     var newBookOpen by remember { mutableStateOf(false) }
     var batchOpen by remember { mutableStateOf(false) }
@@ -192,7 +199,8 @@ private fun LibraryHeader(state: SongLibraryState, onNewBook: () -> Unit) {
 }
 
 private fun subhead(state: SongLibraryState): String =
-    if (state.view.isFiltered) Strings.format("subhead_filtered", state.rows.size, state.songs.size)
+    if (state.isLoading) Strings["loading"]
+    else if (state.view.isFiltered) Strings.format("subhead_filtered", state.rows.size, state.songs.size)
     else Strings.format("subhead_counts", state.songs.size, state.songbooks.size)
 
 @Composable
@@ -215,7 +223,6 @@ private fun BulkBar(state: SongLibraryState, onBatchEdit: () -> Unit, onDelete: 
                 onClick = onBatchEdit,
                 icon = { Icon(Icons.Default.Edit, null, Modifier.size(12.dp), tint = c.onPrimary) },
             )
-            QuietButton(Strings["duplicate"], onClick = { state.duplicateSelected(Strings["copy_suffix"]) })
             Spacer(Modifier.weight(1f))
             QuietButton(Strings["delete"], onClick = onDelete, danger = true)
             Text(
@@ -240,28 +247,58 @@ private fun SongTable(
     onNewBook: () -> Unit,
 ) {
     val scroll = rememberScrollState()
+    val listState = rememberLazyListState()
     val rows = state.rows
     val columnWidth = state.visibleColumns.fold(0.dp) { total, field -> total + field.width() + 1.dp }
     val width = TICK_WIDTH + columnWidth + ACTIONS_WIDTH
 
-    Column(modifier.fillMaxSize().horizontalScroll(scroll)) {
-        TableHeader(state, width)
-        if (rows.isEmpty()) {
-            EmptyState(state, width)
-        } else {
-            LazyColumn(Modifier.width(width).fillMaxHeight()) {
-                items(rows, key = { it.sourceFile }) { song ->
-                    SongRow(
-                        song = song,
-                        state = state,
-                        width = width,
-                        onEdit = { onEditRow(song) },
-                        onDelete = { onDeleteRow(song) },
-                        onNewBook = onNewBook,
-                    )
+    // The scrollbars sit OUTSIDE the horizontally scrolled column, so they stay pinned to the edges
+    // of the table rather than sliding away with the columns they are there to move.
+    Box(modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().horizontalScroll(scroll)) {
+            TableHeader(state, width)
+            when {
+                state.isLoading -> LoadingState(width)
+                rows.isEmpty() -> EmptyState(state, width)
+                else -> LazyColumn(Modifier.width(width).fillMaxHeight(), state = listState) {
+                    items(rows, key = { it.sourceFile }) { song ->
+                        SongRow(
+                            song = song,
+                            state = state,
+                            width = width,
+                            onEdit = { onEditRow(song) },
+                            onDelete = { onDeleteRow(song) },
+                            onNewBook = onNewBook,
+                        )
+                    }
                 }
             }
         }
+        VerticalScrollbar(
+            adapter = rememberScrollbarAdapter(listState),
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(bottom = SCROLLBAR_THICKNESS),
+        )
+        HorizontalScrollbar(
+            adapter = rememberScrollbarAdapter(scroll),
+            modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(end = SCROLLBAR_THICKNESS),
+        )
+    }
+}
+
+/** The width the two scrollbars keep clear of each other in the table's bottom-right corner. */
+private val SCROLLBAR_THICKNESS = 12.dp
+
+/** What the table shows while the folder is still being read, which on a real library is seconds. */
+@Composable
+private fun LoadingState(width: Dp) {
+    val c = colors
+    Column(
+        Modifier.width(width).padding(vertical = 70.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        CircularProgressIndicator(Modifier.size(26.dp), color = c.accent, strokeWidth = 2.5.dp)
+        Text(Strings["loading"], style = LibraryType.bodyStrong, color = c.textMuted)
     }
 }
 

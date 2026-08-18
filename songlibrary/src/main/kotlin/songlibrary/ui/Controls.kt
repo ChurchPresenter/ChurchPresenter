@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
@@ -29,12 +32,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import songlibrary.menuMaxHeight
 
 /**
  * A text field with nothing around it: the frame is drawn by whatever holds it.
@@ -85,7 +93,7 @@ fun LibraryDropdown(
 ) {
     val c = colors
     var open by remember { mutableStateOf(false) }
-    Box {
+    MenuAnchorBox { menuMaxHeight ->
         Row(
             Modifier.height(LibraryMetrics.control)
                 .widthIn(max = 210.dp)
@@ -116,14 +124,45 @@ fun LibraryDropdown(
             Icon(Icons.Default.ArrowDropDown, null, tint = c.textFaint, modifier = Modifier.size(14.dp))
         }
         if (open) {
-            LibraryPopup(width = menuWidth, onDismiss = { open = false }) { content { open = false } }
+            LibraryPopup(width = menuWidth, maxHeight = menuMaxHeight, onDismiss = { open = false }) {
+                content { open = false }
+            }
         }
     }
 }
 
-/** The panel every menu in this window drops down: one surface, one border, one radius. */
+/**
+ * A box that works out how tall a menu opened under it may be, and hands that to [content].
+ *
+ * Both halves of the sum are read **here and not inside the `Popup`**. A popup is its own
+ * composition layer, so `LocalWindowInfo` read from within it is not dependably the app's window —
+ * and a cap computed from the wrong number does not bind at all, which leaves the menu cut off in
+ * exactly the way the cap exists to prevent. Out here the window is the window and the box's own
+ * bounds are the button's, so the only thing the popup is told is a height.
+ */
 @Composable
-fun LibraryPopup(width: Dp, onDismiss: () -> Unit, content: @Composable () -> Unit) {
+fun MenuAnchorBox(modifier: Modifier = Modifier, content: @Composable (menuMaxHeight: Dp) -> Unit) {
+    val density = LocalDensity.current
+    val windowHeight = with(density) { LocalWindowInfo.current.containerSize.height.toDp() }
+    var anchorBottom by remember { mutableStateOf(0.dp) }
+    Box(
+        modifier.onGloballyPositioned { coordinates ->
+            anchorBottom = with(density) { (coordinates.positionInWindow().y + coordinates.size.height).toDp() }
+        }
+    ) {
+        content(menuMaxHeight(windowHeight, anchorBottom))
+    }
+}
+
+/**
+ * The panel every menu in this window drops down: one surface, one border, one radius.
+ *
+ * [maxHeight] comes from [MenuAnchorBox], which measures it outside this popup; past it the panel
+ * scrolls. Without that, a library with more song books than fit on screen dropped a list whose
+ * bottom rows were never drawn, and nothing said they were there.
+ */
+@Composable
+fun LibraryPopup(width: Dp, maxHeight: Dp, onDismiss: () -> Unit, content: @Composable () -> Unit) {
     val c = colors
     Popup(
         onDismissRequest = onDismiss,
@@ -132,10 +171,12 @@ fun LibraryPopup(width: Dp, onDismiss: () -> Unit, content: @Composable () -> Un
         Column(
             Modifier.padding(top = 5.dp)
                 .width(width)
+                .heightIn(max = maxHeight)
                 .clip(RoundedCornerShape(10.dp))
                 .background(c.popupSurface)
                 .border(1.dp, c.border, RoundedCornerShape(10.dp))
-                .padding(4.dp),
+                .padding(4.dp)
+                .verticalScroll(rememberScrollState()),
         ) {
             content()
         }
@@ -167,15 +208,19 @@ fun MenuRow(
                 selected -> Icon(Icons.Default.Check, null, tint = c.accent, modifier = Modifier.size(11.dp))
             }
         }
+        // `weight(1f)`, and the trailing count measured before it rather than given a weight of its
+        // own: two weighted children split the row in half, which capped every label at half the
+        // panel and ellipsised it there however much room was free. Two different song books both
+        // came out as "Песнь Возрож...".
         Text(
             label,
             style = LibraryType.body,
             color = if (accent) c.accentText else if (onClick == null) c.textMuted else c.text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false),
+            modifier = Modifier.weight(1f),
         )
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.width(8.dp))
         when {
             trailing != null -> trailing()
             count != null -> Text(count.toString(), style = LibraryType.small, color = c.textFaint)

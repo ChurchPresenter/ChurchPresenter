@@ -47,6 +47,7 @@ fun EditableCell(value: String, strong: Boolean = false, onCommit: (String) -> U
     val c = colors
     var editing by remember(value) { mutableStateOf(false) }
     var draft by remember(value) { mutableStateOf(value) }
+    var everFocused by remember(value) { mutableStateOf(false) }
     val focus = remember { FocusRequester() }
 
     if (!editing) {
@@ -90,7 +91,13 @@ fun EditableCell(value: String, strong: Boolean = false, onCommit: (String) -> U
                 .border(1.5.dp, c.accent, RoundedCornerShape(6.dp))
                 .padding(horizontal = 6.dp, vertical = 5.dp),
             textModifier = Modifier.focusRequester(focus)
-                .onFocusChanged { if (!it.isFocused && editing) commit() }
+                // Only once it HAS been focused. `onFocusChanged` also fires as the modifier
+                // attaches, unfocused, before the LaunchedEffect below has asked for focus --
+                // committing on that one closed the field on the frame it opened, so clicking a
+                // cell flashed a box and put the text straight back.
+                .onFocusChanged { state ->
+                    if (state.isFocused) everFocused = true else if (everFocused && editing) commit()
+                }
                 .onPreviewKeyEvent { event ->
                     if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                     when (event.key) {
@@ -128,7 +135,7 @@ fun SongbookCell(
 ) {
     val c = colors
     var open by remember { mutableStateOf(false) }
-    Box {
+    MenuAnchorBox { menuMaxHeight ->
         Row(
             Modifier.fillMaxWidth()
                 .height(LibraryMetrics.rowHeight)
@@ -148,7 +155,7 @@ fun SongbookCell(
             Icon(Icons.Default.ArrowDropDown, null, tint = c.textFaint, modifier = Modifier.size(13.dp))
         }
         if (open) {
-            LibraryPopup(width = 250.dp, onDismiss = { open = false }) {
+            LibraryPopup(width = 250.dp, maxHeight = menuMaxHeight, onDismiss = { open = false }) {
                 MenuRow(Strings["no_song_book"], selected = value.isBlank()) {
                     onPick("")
                     open = false

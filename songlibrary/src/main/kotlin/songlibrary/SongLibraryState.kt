@@ -1,4 +1,4 @@
-package songlibrary.ui
+package songlibrary
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -12,6 +12,9 @@ import core.models.songs.SongGrid
 import core.models.songs.SongItem
 import core.models.songs.SongLibrary
 import core.models.songs.SortColumn
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /** Which columns the grid shows. The title is not among them: a row without it is unreadable. */
@@ -47,6 +50,15 @@ class SongLibraryState(private val root: File) {
     var hiddenColumns = mutableStateListOf<SongField>()
         private set
 
+    /**
+     * True until the folder has been read once.
+     *
+     * Starts true so the first frame says "reading" rather than "this library is empty", which is
+     * what an unread library and an empty one otherwise look like.
+     */
+    var isLoading by mutableStateOf(true)
+        private set
+
     /** The song whose editor is open, by source file, or null when none is. */
     var editing by mutableStateOf<String?>(null)
     var isDirty by mutableStateOf(false)
@@ -58,10 +70,31 @@ class SongLibraryState(private val root: File) {
     val counts: Map<String, Int> get() = SongGrid.countsBySongbook(songs)
     val changedCount: Int get() = edits.changed.size
 
-    fun reload() {
-        edits = SongEdits(library.load())
+    fun reload() = adopt(library.load())
+
+    /**
+     * The same, with the disk work off the caller's thread.
+     *
+     * [SongLibrary.load] walks the folder and parses every file in it, which on a real library is
+     * seconds. Run from a `LaunchedEffect` that is the composition's own dispatcher, so the window
+     * did not appear until it had finished: clicking Song Library did nothing for five seconds and
+     * then showed a full grid. Now the window opens immediately and shows that it is reading.
+     */
+    suspend fun reloadAsync(io: CoroutineDispatcher = Dispatchers.IO) {
+        isLoading = true
+        try {
+            val loaded = withContext(io) { library.load() }
+            adopt(loaded)
+        } finally {
+            isLoading = false
+        }
+    }
+
+    private fun adopt(loaded: List<SongItem>) {
+        edits = SongEdits(loaded)
         refresh()
         selected.clear()
+        isLoading = false
     }
 
     fun edit(sourceFile: String, field: SongField, value: String) {
@@ -135,12 +168,6 @@ class SongLibraryState(private val root: File) {
     fun newSong(titleForNew: String) {
         val blank = edits.blank(root, view.songbook.orEmpty(), titleForNew)
         edits.add(library.writeNew(blank))
-        refresh()
-    }
-
-    fun duplicateSelected(titleSuffix: String) {
-        selectedSongs().forEach { edits.add(library.writeNew(edits.copyOf(it, titleSuffix))) }
-        selected.clear()
         refresh()
     }
 

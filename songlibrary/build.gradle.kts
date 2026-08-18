@@ -9,7 +9,12 @@ plugins {
 }
 
 group = "org.churchpresenter"
-version = "1.0.0"
+
+// Read when the root build realizes the JaCoCo tasks, so both have to be set before anything else
+// in this file -- see "JaCoCo lives in the root build" in AGENT.md. `songlibrary/ui/**` is Compose
+// desktop that needs a display, the same carve-out :converter makes; `SongLibraryState` is the part
+// with the decisions in it and is deliberately NOT under `ui/` so that this exclude can be honest.
+extra["coverageExcludes"] = listOf("songlibrary/ui/**", "songlibrary/MainKt*", "**/ComposableSingletons*")
 
 kotlin {
     jvmToolchain(21)
@@ -18,6 +23,11 @@ kotlin {
 dependencies {
     // The song, the `.song` format and the library folder -- the same ones the app uses.
     implementation(projects.coreModels)
+    // The app's nine colour schemes and semantic roles. The window is opened inside the app's
+    // AppThemeWrapper, so it follows the theme the operator chose rather than painting its own.
+    implementation(projects.theme)
+
+    implementation(libs.kotlinx.coroutines.core)
 
     implementation(compose.desktop.currentOs)
     // Compose artefacts come from the version catalogue rather than the `compose.*` accessors, so
@@ -30,12 +40,12 @@ dependencies {
 }
 
 // Same rules as the app's gate, on this module's own sources, and no baseline: what is analysed
-// here has to come out clean. `ui/**` is Compose desktop that needs a display; the library it edits
+// here has to come out clean. `ui/**` is Compose desktop that needs a display; the state it draws
 // is the part with the logic, and that is analysed and covered.
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin/songlibrary/ui/SongLibraryState.kt", "src/test/kotlin")
+    source.setFrom("src/main/kotlin/songlibrary/SongLibraryState.kt", "src/test/kotlin")
     parallel = true
 }
 
@@ -48,23 +58,6 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
         txt.required.set(false)
         md.required.set(false)
     }
-}
-
-tasks.test {
-    useJUnitPlatform()
-    finalizedBy(tasks.jacocoTestReport)
-}
-
-// Coverage for the library layer. `ui/**` is excluded: it is Compose desktop composables that need
-// a real display, the same carve-out :converter and the app's own report make.
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-    reports { xml.required.set(true); html.required.set(true) }
-    classDirectories.setFrom(
-        fileTree(layout.buildDirectory.dir("classes/kotlin/main")) {
-            exclude("songlibrary/ui/**", "songlibrary/MainKt*", "ComposableSingletons*")
-        }
-    )
 }
 
 compose.desktop {
