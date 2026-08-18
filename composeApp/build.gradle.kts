@@ -802,6 +802,16 @@ val serialTestClasses = listOf(
     "*CompanionServerAtemUploadTest",
     "*LowerThirdAtemUploadTest",
     "*LowerThirdSequencerKeyTest",
+    // The other three suites that open the ATEM upload dialog. Doing so renders a Lottie frame and
+    // encodes it for the switcher behind three 5s deadlines -- the upload button enabling, the
+    // dialog's rows composing, and `waitForAtemPrepared` (LowerThirdTabTestSupport.kt:263). That is
+    // real work against a wall clock, so on a runner with four forks competing for the CPU it is the
+    // machine being measured, not the code: LowerThirdAtemDialogExtraTest timed out at exactly that
+    // wait on main. LowerThirdAtemUploadTest above was in this list from the start and never failed,
+    // which is the tell -- these three simply had not drawn the short straw yet.
+    "*LowerThirdAtemDialogTest",
+    "*LowerThirdAtemDialogExtraTest",
+    "*LowerThirdTabScreenshotTest",
     // Here for a different reason: it binds a fixed port AND draws that port into the image (the
     // Server URL row, the connection QR). Shifting the port per fork would rewrite every one of its
     // committed screenshots on every run, so it keeps the literal and runs where nothing competes
