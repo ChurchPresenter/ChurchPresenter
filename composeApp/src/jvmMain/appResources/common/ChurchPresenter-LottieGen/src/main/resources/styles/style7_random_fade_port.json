@@ -1,0 +1,143 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Random Fade (Style 7 port)",
+    "layout": {
+        "slots": [
+            {
+                "id": "logo",
+                "kind": "LOGO",
+                "gapAfterEm": 1.0,
+                "visibleWhen": ["LOGO_ENABLED"]
+            },
+            {
+                "id": "text",
+                "kind": "TEXT"
+            }
+        ],
+        "blockHeightEm": 2.15,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "text",
+            "id": "name_edge",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "offsetYEm": 0.015,
+                "alignOverrides": {
+                    "center": { "hidden": true }
+                }
+            },
+            "animator": { "kind": "RANDOM_FADE", "startPct": 0.0, "endPct": 55.0 }
+        },
+        {
+            "type": "text",
+            "id": "name_center",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "NAME_LINE",
+                "offsetYEm": 0.015,
+                "alignOverrides": {
+                    "left": { "hidden": true },
+                    "right": { "hidden": true }
+                }
+            },
+            "animator": { "kind": "RANDOM_FADE", "startPct": 0.0, "endPct": 55.0 }
+        },
+        {
+            "type": "text",
+            "id": "info_edge",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "offsetYEm": 0.03,
+                "alignOverrides": {
+                    "center": { "hidden": true }
+                }
+            },
+            "animator": { "kind": "RANDOM_FADE", "startPct": 25.0, "endPct": 70.0 }
+        },
+        {
+            "type": "text",
+            "id": "info_center",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "INFO_LINE",
+                "offsetYEm": 0.03,
+                "alignOverrides": {
+                    "left": { "hidden": true },
+                    "right": { "hidden": true }
+                }
+            },
+            "animator": { "kind": "RANDOM_FADE", "startPct": 25.0, "endPct": 70.0 }
+        },
+        {
+            "type": "logo",
+            "id": "logo_edge",
+            "name": "Logo",
+            "visibleWhen": ["LOGO_ENABLED"],
+            "placement": {
+                "slot": "logo",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "alignOverrides": {
+                    "center": { "hidden": true }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 25.0, "values": [150.0] },
+                        { "pct": 100.0, "values": [150.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "logo",
+            "id": "logo_center",
+            "name": "Logo",
+            "visibleWhen": ["LOGO_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": -0.2916666666666667,
+                "alignOverrides": {
+                    "left": { "hidden": true },
+                    "right": { "hidden": true }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 25.0, "values": [150.0] },
+                        { "pct": 100.0, "values": [150.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

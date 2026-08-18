@@ -290,6 +290,22 @@ kotlin {
             implementation(libs.ktor.client.mock)
             @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
             implementation(compose.uiTest)
+
+            // The suite runs through the JUnit Platform launcher (useJUnitPlatform() below) but the
+            // tests themselves are still JUnit 4 -- the launcher is there for the per-fork hook in
+            // PerForkTestHome, not for JUnit 5 syntax.
+            //
+            // `kotlin-test` is resolved variant-aware and, the moment the Kotlin plugin sees
+            // useJUnitPlatform(), it swaps in the JUnit 5 flavour on its own. That would remap
+            // @BeforeTest to @BeforeEach and silently stop running the 22 classes that use
+            // org.junit.BeforeClass and the two that use @get:Rule TemporaryFolder -- silently,
+            // because the annotations still compile and every other test still passes. The
+            // capabilitiesResolution block below pins it back to the JUnit 4 flavour; declaring
+            // kotlin-test-junit here instead does NOT work, it just fails resolution with a
+            // capability conflict against the junit5 variant kotlin-test drags in.
+            implementation(libs.kotlin.testJunit)
+            runtimeOnly(libs.junit.vintage.engine)
+            implementation(libs.junit.platform.launcher)
         }
         jvmMain.dependencies {
             // The converter: a real module rather than a mounted source directory, opened in its
@@ -640,20 +656,37 @@ kotlin {
     sourceSets {
         jvmMain {
             kotlin.srcDir(generateBuildConfig.map { layout.buildDirectory.dir("generated/buildconfig") })
-            // Include LottieGen submodule source (builds together, launches as separate window)
+            // Include LottieGen module source (builds together, launches as separate window)
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/kotlin")
-            // Include Bible Lookup Engine (BLE) submodule source — runs in-process as a WebSocket
+            // Include Bible Lookup Engine (BLE) module source — runs in-process as a WebSocket
             // service started when STT connects.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-BLE/src/main/kotlin")
-            // Include Companion Satellite client submodule source — pure-Kotlin client for
+            // Include Companion Satellite client module source — pure-Kotlin client for
             // Bitfocus Companion's Satellite protocol, wrapped by CompanionSatelliteViewModel.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite/src/main/kotlin")
-            // Include Presentation Engine submodule source — parses and renders PPTX/PPT/PDF/
+            // Include Presentation Engine module source — parses and renders PPTX/PPT/PDF/
             // Keynote decks (static + animated) for PresentationViewModel and CompanionServer.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/src/main/kotlin")
-            // Include submodule resources (.properties files for localization)
+            // Include module resources (.properties files for localization)
             resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/resources")
         }
+    }
+}
+
+// Keeps `kotlin-test` on its JUnit 4 flavour. Both flavours offer the same
+// `kotlin-test-framework-impl` capability, so exactly one may be on the classpath, and with
+// useJUnitPlatform() present the Kotlin plugin picks junit5 unless told otherwise. The tests are
+// JUnit 4 and run on junit-vintage -- see the note in jvmTest.dependencies for what silently breaks
+// if this is removed.
+configurations.configureEach {
+    resolutionStrategy.capabilitiesResolution.withCapability(
+        "org.jetbrains.kotlin:kotlin-test-framework-impl"
+    ) {
+        val junit4 = candidates.firstOrNull {
+            (it.id as? org.gradle.api.artifacts.component.ModuleComponentIdentifier)
+                ?.module == "kotlin-test-junit"
+        }
+        if (junit4 != null) select(junit4)
     }
 }
 
@@ -679,9 +712,16 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
     // without this a test could permanently latch onto (and write into, or delete from) the
     // developer's real settings, autosave, QA state or STT training logs. Individual tests may
     // still override user.home per-test; they restore to this fake one, not the real one.
+    //
+    // This is the FLOOR, not the whole story: with maxParallelForks below, PerForkTestHome (jvmTest)
+    // repoints user.home at <this>/worker-N before discovery, so no two forks share the directory.
+    // The task-level value still has to be set, because it is what a fork sees if that listener does
+    // not run -- and the one thing that must never happen is a test reaching the developer's real
+    // ~/.churchpresenter.
     val testHome = layout.buildDirectory.dir("test-home").get().asFile
     doFirst { testHome.mkdirs() }
     systemProperty("user.home", testHome.absolutePath)
+    systemProperty("churchpresenter.test.homeBase", testHome.absolutePath)
 
     // Keep tests OUT of the production Sentry project. `sentry.properties` is on the runtime
     // classpath with a real DSN, and the Sentry SDK auto-initialises from it as soon as any
@@ -705,6 +745,89 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
         events("failed")
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
+
+    // The tests are JUnit 4 and stay JUnit 4 -- junit-vintage runs them verbatim, rules and
+    // @BeforeClass included. The platform launcher is here for one reason: it is the only hook that
+    // runs BEFORE test discovery, which is what PerForkTestHome needs to give each fork its own
+    // user.home before any `by lazy` in the app can latch the wrong one. The bare JUnit 4 runner has
+    // no equivalent, so parallel forks are not reachable without this.
+    useJUnitPlatform()
+
+    // 623s of test time in ONE JVM was the whole cost of this suite. Forks are the fix; the two
+    // things that had to be solved first were the shared fake home (PerForkTestHome) and the fixed
+    // ports the server suites bind (TestPorts).
+    //
+    // Half the cores, capped at 4: each fork is largely single-threaded (Skia rasterises per test),
+    // and at ~2.1 GB RSS apiece four of them plus the 4 GB daemon already sit at ~12 GB. Override
+    // for a one-off with -PtestForks=N.
+    maxParallelForks = (
+        providers.gradleProperty("testForks").orNull?.toIntOrNull()
+            ?: (Runtime.getRuntime().availableProcessors() / 2)
+        ).coerceIn(1, 4)
+
+    // NOT forkEvery. Every fork pays skiko's native-library unpack and a Compose warm-up, so
+    // restarting JVMs re-buys that cost per batch; it would also renumber org.gradle.test.worker
+    // mid-run, and PerForkTestHome's port banding depends on those ids being stable.
+
+    // Gradle's default is 512 MB, which is not enough for a Compose/Skia suite and shows up as GC
+    // thrash rather than as an OOM.
+    maxHeapSize = "1g"
+    jvmArgs("-XX:MaxMetaspaceSize=512m")
+
+    // JaCoCo instrumentation costs ~15-25% and is only wanted on `check`. `-PfastTest` drops it for
+    // the inner loop; ./test-changed.sh passes it.
+    if (project.hasProperty("fastTest")) {
+        extensions.getByType<JacocoTaskExtension>().isEnabled = false
+    }
+}
+
+// ── The suites that cannot share a machine ────────────────────────────────────
+// Everything driving FakeAtemSwitcher talks real UDP over loopback and asserts that a command
+// arrives within a deadline. That is a correct test of a protocol client -- the wait ends on the
+// packet, not on the timeout -- but it measures the machine as well as the code, and with four forks
+// saturating the CPU the switcher's receive thread is not scheduled in time. Observed: five
+// CompanionServerAtemUploadTest tests failing with "got 0" commands, and AtemClientSocketTest with
+// "No response from ATEM", on a run where everything else was green.
+//
+// So they run on their own, one JVM, after the parallel pass. Widening their deadlines would have
+// been the wrong fix twice over: it hides a race rather than removing it, and the number being
+// widened would be a claim about a busy machine rather than about the protocol.
+//
+// ~72s for the six of them. Named individually rather than by a `*Atem*` glob so that adding a suite
+// to this list is a deliberate act with a reason, not something a class name does by accident.
+val serialTestClasses = listOf(
+    "*AtemClientSocketTest",
+    "*AtemUploadTracedTest",
+    "*CompanionServerAtemKeyTest",
+    "*CompanionServerAtemUploadTest",
+    "*LowerThirdAtemUploadTest",
+    "*LowerThirdSequencerKeyTest",
+)
+
+val jvmTestSerial by tasks.registering(org.gradle.api.tasks.testing.Test::class) {
+    group = "verification"
+    description = "The loopback-UDP suites, run in one JVM because they cannot share a busy machine."
+    val parallel = tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest").get()
+    testClassesDirs = parallel.testClassesDirs
+    classpath = parallel.classpath
+    // The point of the task. Everything else comes from the configureEach block above.
+    maxParallelForks = 1
+    filter { serialTestClasses.forEach { includeTestsMatching(it) } }
+}
+
+tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
+    // Excluded from the parallel pass -- but only when the whole suite is being run. An explicit
+    // `--tests '*AtemUploadTracedTest*'` has to keep working, and against a standing exclude it would
+    // match nothing and fail with "No tests found for given includes". A task's own `--tests`
+    // arguments are visible on the start parameter, so the exclusion can simply stand down whenever
+    // the developer has named what they want.
+    val filteredFromCommandLine = gradle.startParameter.taskRequests.any { request ->
+        request.args.any { it == "--tests" }
+    }
+    if (!filteredFromCommandLine) {
+        filter { serialTestClasses.forEach { excludeTestsMatching(it) } }
+    }
+    finalizedBy(jvmTestSerial)
 }
 
 // ── Screenshots (Roborazzi) ───────────────────────────────────────────────────
@@ -738,17 +861,22 @@ jacoco {
 tasks.register<JacocoReport>("jacocoTestReport") {
     group = "verification"
     description = "Generates a coverage report for the app's own code from the jvmTest suite."
-    dependsOn("jvmTest")
+    dependsOn("jvmTest", "jvmTestSerial")
     // Point at the agent's .exec output explicitly. The `executionData(task)` overload resolves
     // to the task's own binary-results directory here, not the JacocoTaskExtension destination,
     // and fails with "Unable to read execution data file .../test-results/jvmTest/binary".
-    executionData.setFrom(layout.buildDirectory.file("jacoco/jvmTest.exec"))
+    // BOTH exec files: the loopback-UDP suites run in the separate serial task, and leaving their
+    // data out would drop real coverage from the number and from the floor below.
+    executionData.setFrom(
+        layout.buildDirectory.file("jacoco/jvmTest.exec"),
+        layout.buildDirectory.file("jacoco/jvmTestSerial.exec"),
+    )
 
     // CRITICAL: composeApp mounts four sub-builds' sources through kotlin.srcDir (see the
     // sourceSets block above), so their classes land in the SAME output directory as the app's.
     // Reporting on everything would drown the app's real number in ~tens of thousands of lines of
-    // submodule code that has its own separate suites. Restrict to this app's package root; the
-    // submodules are measured by their own builds.
+    // module code that has its own separate suites. Restrict to this app's package root; the
+    // modules are measured by their own builds.
     classDirectories.setFrom(
         fileTree(layout.buildDirectory.dir("classes/kotlin/jvm/main")) {
             include("org/churchpresenter/**")
@@ -819,7 +947,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 // Wired into `check` (see the bottom of this file) as of 2026-07-30, when the gated scope first
 // cleared the floor. Run it on its own with:
 //   ./gradlew :composeApp:jacocoTestCoverageVerification
-// Same execution/class/source wiring as jacocoTestReport (app package only; submodules measured by
+// Same execution/class/source wiring as jacocoTestReport (app package only; modules measured by
 // their own builds), with ONE deliberate difference: the app-entry wiring is excluded here but NOT
 // from the report. The report stays all-inclusive so nothing is hidden -- its HTML still shows
 // main.kt at 0%, which is the truth. The gate excludes those files because they are 4,918 lines of
@@ -830,8 +958,13 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     group = "verification"
     description = "Fails the build if coverage of the coverable code is below the line/branch targets."
-    dependsOn("jvmTest")
-    executionData.setFrom(layout.buildDirectory.file("jacoco/jvmTest.exec"))
+    dependsOn("jvmTest", "jvmTestSerial")
+    // BOTH exec files: the loopback-UDP suites run in the separate serial task, and leaving their
+    // data out would drop real coverage from the number and from the floor below.
+    executionData.setFrom(
+        layout.buildDirectory.file("jacoco/jvmTest.exec"),
+        layout.buildDirectory.file("jacoco/jvmTestSerial.exec"),
+    )
     classDirectories.setFrom(
         fileTree(layout.buildDirectory.dir("classes/kotlin/jvm/main")) {
             include("org/churchpresenter/**")
@@ -1080,7 +1213,7 @@ tasks.matching { it.name in problematicTasks }.configureEach {
     doNotTrackState("Temporary workaround: OneDrive placeholder snapshot errors")
 }
 
-// prepareAppResources scans the entire appResourcesRootDir — exclude submodule build
+// prepareAppResources scans the entire appResourcesRootDir — exclude module build
 // artefacts (.gradle dirs) that contain lock files Gradle can't hash on Windows.
 afterEvaluate {
     (tasks.findByName("prepareAppResources") as? org.gradle.api.tasks.AbstractCopyTask)
@@ -1181,9 +1314,9 @@ tasks.register("signLinuxDeb") {
 }
 
 // ── Crossword puzzle sync ─────────────────────────────────────────────────────
-// Copies encrypted .xwp files from the ChurchPresenter-Cross submodule into
-// composeResources so they are bundled with the app. Run `git submodule update`
-// in ChurchPresenter-Cross to pull the latest puzzles, then rebuild.
+// Copies encrypted .xwp files from the ChurchPresenter-Cross module into
+// composeResources so they are bundled with the app. Edit the puzzles in that
+// module's `encoded/` directory, then rebuild.
 val syncCrosswordFiles by tasks.registering(Copy::class) {
     from(rootProject.file("composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/encoded"))
     include("*.xwp")

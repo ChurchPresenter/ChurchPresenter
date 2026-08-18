@@ -26,6 +26,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * Sending a video, a song file or a deck from a phone to the desktop.
@@ -68,7 +69,7 @@ class CompanionServerMediaUploadTest {
             tempHome = Files.createTempDirectory("cp-media-upload").toFile()
             System.setProperty("user.home", tempHome.absolutePath)
             server = CompanionServer()
-            server.start(port = 39_727)
+            server.start(port = testPort(39_727))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

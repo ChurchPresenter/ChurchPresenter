@@ -46,6 +46,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The remote-control half of the companion API: the song catalogue, the schedule, and the two
@@ -81,7 +82,7 @@ class CompanionServerRemoteControlTest {
         @BeforeClass
         fun startServer() {
             server = CompanionServer()
-            server.start(port = 39_640)
+            server.start(port = testPort(39_640))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {
@@ -931,7 +932,7 @@ class CompanionServerRemoteControlTest {
         // own instance instead of depending on which test in the class ran first.
         val fresh = CompanionServer()
         try {
-            fresh.start(port = 39_660)
+            fresh.start(port = testPort(39_660))
             val freshPort = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!fresh.isRunning.value || fresh.serverUrl.value.isBlank()) {

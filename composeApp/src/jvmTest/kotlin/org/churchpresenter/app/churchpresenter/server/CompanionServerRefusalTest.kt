@@ -19,6 +19,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * What the companion server **refuses**, and with which status.
@@ -57,7 +58,7 @@ class CompanionServerRefusalTest {
         @BeforeClass
         fun startServer() {
             server = CompanionServer()
-            server.start(port = 39_711)
+            server.start(port = testPort(39_711))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

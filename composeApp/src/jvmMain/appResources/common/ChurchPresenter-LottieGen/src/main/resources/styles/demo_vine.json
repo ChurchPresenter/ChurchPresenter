@@ -1,0 +1,230 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Vine demo",
+    "layout": {
+        "slots": [
+            {
+                "id": "vine",
+                "kind": "FIXED",
+                "widthEm": 2.0,
+                "gapAfterEm": 0.8
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.4
+            }
+        ],
+        "blockHeightEm": 3.5,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "ellipse",
+            "id": "leaf1",
+            "name": "Leaf 1",
+            "placement": {
+                "slot": "vine",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 0.45,
+                "offsetYEm": 1.1,
+                "pivotXEm": -0.35
+            },
+            "size": { "type": "em", "wEm": 0.7, "hEm": 0.4 },
+            "paint": { "fill": { "role": "ACCENT" } },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 38.0, "values": [0.0, 0.0] },
+                        { "pct": 52.0, "values": [100.0, 100.0] },
+                        { "pct": 100.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ellipse",
+            "id": "leaf2",
+            "name": "Leaf 2",
+            "placement": {
+                "slot": "vine",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": -0.5,
+                "offsetYEm": 0.0,
+                "pivotXEm": 0.35
+            },
+            "size": { "type": "em", "wEm": 0.7, "hEm": 0.4 },
+            "paint": { "fill": { "role": "ACCENT" } },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 55.0, "values": [0.0, 0.0] },
+                        { "pct": 69.0, "values": [100.0, 100.0] },
+                        { "pct": 100.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ellipse",
+            "id": "leaf3",
+            "name": "Leaf 3",
+            "placement": {
+                "slot": "vine",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 0.5,
+                "offsetYEm": -1.1,
+                "pivotXEm": -0.35
+            },
+            "size": { "type": "em", "wEm": 0.7, "hEm": 0.4 },
+            "paint": { "fill": { "role": "ACCENT" } },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 72.0, "values": [0.0, 0.0] },
+                        { "pct": 86.0, "values": [100.0, 100.0] },
+                        { "pct": 100.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "vine",
+            "name": "Vine",
+            "placement": {
+                "slot": "vine",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                { "x": 0.15, "y": 2.2, "outX": -0.5, "outY": -0.8 },
+                { "x": -0.3, "y": 0.0, "inX": 0.4, "inY": 0.9, "outX": -0.4, "outY": -0.9 },
+                { "x": 0.3, "y": -2.2, "inX": -0.5, "inY": 0.8 }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "width": { "type": "em", "em": 0.12 } }
+            },
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 10.0, "values": [0.0, 0.0] },
+                        { "pct": 85.0, "values": [0.0, 1.0] },
+                        { "pct": 100.0, "values": [0.0, 1.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-1.3, 0.0] },
+                        { "pct": 35.0, "values": [-1.3, 0.0] },
+                        { "pct": 80.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-1.3, 0.0] },
+                        { "pct": 45.0, "values": [-1.3, 0.0] },
+                        { "pct": 90.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": { "type": "contentDerived", "padXEm": 1.0, "padYEm": 1.0 },
+            "corner": { "type": "fromConfig", "factor": 1.1 },
+            "borderFromConfig": true,
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 30.0, "values": [0.0, 1.0] },
+                        { "pct": 100.0, "values": [1.0, 1.0] }
+                    ]
+                },
+                {
+                    "property": "STROKE_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 30.0, "values": [0.0] },
+                        { "pct": 100.0, "values": [1.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

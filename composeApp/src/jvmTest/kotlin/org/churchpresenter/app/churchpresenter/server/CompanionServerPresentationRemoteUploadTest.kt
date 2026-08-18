@@ -34,6 +34,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * `POST /api/presentation-remote/upload` — the speaker's own phone dropping a deck onto the
@@ -79,7 +80,7 @@ class CompanionServerPresentationRemoteUploadTest {
             System.setProperty("user.home", tempHome.absolutePath)
 
             server = CompanionServer()
-            server.start(port = 39_850)
+            server.start(port = testPort(39_850))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

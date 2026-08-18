@@ -1,0 +1,245 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Diagonal (Style 8 port)",
+    "layout": {
+        "slots": [
+            {
+                "id": "text",
+                "kind": "TEXT"
+            }
+        ],
+        "blockHeightEm": 3.5,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 1.0,
+                "offsetYEm": 0.2,
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER", "offsetXEm": 0.0 }
+                }
+            },
+            "animator": {
+                "kind": "SEQUENTIAL_REVEAL",
+                "startPct": 30.0,
+                "endPct": 65.0,
+                "posOffsetEm": -0.54
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 11.415] },
+                        { "pct": 0.0, "values": [0.0, 11.415] },
+                        { "pct": 40.0, "values": [0.0, 0.0] }
+                    ],
+                    "alignOverrides": {
+                        "center": [
+                            { "pct": 0.0, "values": [0.0, 7.665] },
+                            { "pct": 0.0, "values": [0.0, 7.665] },
+                            { "pct": 40.0, "values": [0.0, 0.0] }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 1.0,
+                "offsetYEm": 1.95,
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER", "offsetXEm": 0.0 }
+                }
+            },
+            "animator": {
+                "kind": "SEQUENTIAL_REVEAL",
+                "startPct": 35.0,
+                "endPct": 70.0,
+                "posOffsetEm": -0.72
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 11.415] },
+                        { "pct": 0.0, "values": [0.0, 11.415] },
+                        { "pct": 40.0, "values": [0.0, 0.0] }
+                    ],
+                    "alignOverrides": {
+                        "center": [
+                            { "pct": 0.0, "values": [0.0, 7.665] },
+                            { "pct": 0.0, "values": [0.0, 7.665] },
+                            { "pct": 40.0, "values": [0.0, 0.0] }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "line_slant",
+            "name": "Diagonal Line",
+            "visibleWhen": ["BORDER_SET"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 38.0,
+                "offsetYEm": -0.055,
+                "alignOverrides": {
+                    "center": { "hidden": true }
+                }
+            },
+            "verticesEm": [
+                [-42.0, -2.305],
+                [42.0, 0.195]
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "BORDER", "width": { "type": "fromConfig" } }
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 11.415] },
+                        { "pct": 0.0, "values": [0.0, 11.415] },
+                        { "pct": 40.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "line_center",
+            "name": "Diagonal Line",
+            "visibleWhen": ["BORDER_SET"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 1.195,
+                "alignOverrides": {
+                    "left": { "hidden": true },
+                    "right": { "hidden": true }
+                }
+            },
+            "verticesEm": [
+                [-42.0, -2.855],
+                [42.0, -2.855]
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "BORDER", "width": { "type": "fromConfig" } }
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 7.665] },
+                        { "pct": 0.0, "values": [0.0, 7.665] },
+                        { "pct": 40.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "bg_slant",
+            "name": "Diagonal BG",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "START",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 38.0,
+                "offsetYEm": -0.055,
+                "alignOverrides": {
+                    "center": { "hidden": true }
+                }
+            },
+            "verticesEm": [
+                [-42.0, -2.305],
+                [42.0, 0.195],
+                [42.0, 3.805],
+                [-42.0, 3.805]
+            ],
+            "closed": true,
+            "paint": {
+                "fill": { "role": "BG" }
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 11.415] },
+                        { "pct": 0.0, "values": [0.0, 11.415] },
+                        { "pct": 40.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "bg_center",
+            "name": "Diagonal BG",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 1.195,
+                "alignOverrides": {
+                    "left": { "hidden": true },
+                    "right": { "hidden": true }
+                }
+            },
+            "verticesEm": [
+                [-42.0, -2.855],
+                [42.0, -2.855],
+                [42.0, 2.555],
+                [-42.0, 2.555]
+            ],
+            "closed": true,
+            "paint": {
+                "fill": { "role": "BG" }
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 7.665] },
+                        { "pct": 0.0, "values": [0.0, 7.665] },
+                        { "pct": 40.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

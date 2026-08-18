@@ -8,6 +8,10 @@ roborazzi = "1.70.0"
 detekt = "1.23.8"
 composeMultiplatform = "1.10.2"
 junit = "4.13.2"
+# The platform launcher + the vintage engine that runs the JUnit 4 suite unchanged. See the
+# useJUnitPlatform() note in composeApp/build.gradle.kts.
+junitPlatform = "1.11.4"
+junitVintage = "5.11.4"
 mockk = "1.14.2"
 kotlin = "2.3.10"
 kotlinx-coroutines = "1.10.2"
@@ -26,6 +30,8 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { module = "junit:junit", version.ref = "junit" }
+junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junitVintage" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatform" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }

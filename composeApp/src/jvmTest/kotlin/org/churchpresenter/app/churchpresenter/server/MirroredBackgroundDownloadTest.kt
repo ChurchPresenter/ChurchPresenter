@@ -14,6 +14,7 @@ import org.junit.BeforeClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * [downloadMirroredBackgroundSettings] — what a follower does when the operator has asked it to
@@ -52,7 +53,7 @@ class MirroredBackgroundDownloadTest {
             primaryAssets = Files.createTempDirectory("cp-mirrored-backgrounds").toFile()
 
             server = CompanionServer()
-            server.start(port = 39_860)
+            server.start(port = testPort(39_860))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

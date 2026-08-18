@@ -14,6 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 class InstanceLinkClientFetchGuardTest {
 
@@ -48,7 +49,7 @@ class InstanceLinkClientFetchGuardTest {
     private fun startPrimary(apiKey: String): Int {
         val started = CompanionServer()
         started.updateApiKey(enabled = apiKey.isNotEmpty(), key = apiKey)
-        started.start(port = 39_840)
+        started.start(port = testPort(39_840))
         server = started
         return runBlocking {
             withTimeoutOrNull(10_000) {

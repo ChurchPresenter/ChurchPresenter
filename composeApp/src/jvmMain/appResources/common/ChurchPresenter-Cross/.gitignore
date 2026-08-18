@@ -1,0 +1,13 @@
+# Plaintext puzzle files — stored locally only, never committed (except level 0)
+puzzles/*
+!puzzles/level0.txt
+
+# Gradle build artifacts
+build/
+.gradle/
+
+# IDE
+.idea/
+*.iml
+/.kotlin
+/.claude

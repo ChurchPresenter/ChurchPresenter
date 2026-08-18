@@ -30,6 +30,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * `GET /api/pictures` — the folder the desktop currently has open, which is what a phone asks for
@@ -59,7 +60,7 @@ class CompanionServerPictureCatalogTest {
         private var port: Int = 0
 
         /** Distinct port each time, so a just-stopped listener cannot refuse the next bind. */
-        private val nextPort = AtomicInteger(39_861)
+        private val nextPort = AtomicInteger(testPort(39_861))
 
         /** Starts a server and waits until it is actually listening, returning its port. */
         private fun startServer(target: CompanionServer): Int {

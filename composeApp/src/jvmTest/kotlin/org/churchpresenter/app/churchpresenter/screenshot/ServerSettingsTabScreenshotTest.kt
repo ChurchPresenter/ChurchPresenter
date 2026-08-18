@@ -34,6 +34,7 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The Server tab of the settings dialog, in both themes.
@@ -91,7 +92,7 @@ class ServerSettingsTabScreenshotTest {
         const val SECTION = "serverSettingsTab"
 
         /** Fixed, so the Server URL row reads the same on every machine that records this. */
-        const val PORT = 39_641
+        val PORT = testPort(39_641)
         const val HOST = "studio-pc"
 
         /** Fixed rather than generated: the Generate button makes a random UUID. */

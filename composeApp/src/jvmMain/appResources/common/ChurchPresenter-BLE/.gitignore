@@ -1,0 +1,11 @@
+.gradle/
+build/
+*.class
+.kotlin/
+__pycache__/
+*.pyc
+Bibles/
+.DS_Store
+src/test/resources/replay/
+# Per-pass training history: quotes real session transcripts, stays local (see TRAINING_PLAN.md)
+SESSIONS.md

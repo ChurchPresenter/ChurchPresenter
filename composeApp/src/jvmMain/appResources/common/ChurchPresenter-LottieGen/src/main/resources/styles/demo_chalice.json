@@ -1,0 +1,191 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Communion Chalice",
+    "layout": {
+        "slots": [
+            {
+                "id": "chalice",
+                "kind": "FIXED",
+                "widthEm": 2.2,
+                "gapAfterEm": 0.8
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.2
+            }
+        ],
+        "blockHeightEm": 3.6,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "ellipse",
+            "id": "host",
+            "name": "Host",
+            "placement": {
+                "slot": "chalice",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": -1.05
+            },
+            "size": { "type": "em", "wEm": 0.55, "hEm": 0.55 },
+            "paint": { "fill": { "role": "NAME", "alphaFactor": 0.95 } },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 52.0, "values": [0.0, 0.0] },
+                        { "pct": 68.0, "values": [100.0, 100.0] },
+                        { "pct": 100.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "chalice",
+            "name": "Chalice",
+            "placement": {
+                "slot": "chalice",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 0.15
+            },
+            "verticesEm": [
+                [-0.7, -0.55],
+                [0.7, -0.55],
+                [0.62, -0.25],
+                [0.3, 0.1],
+                [0.09, 0.18],
+                [0.09, 0.7],
+                [0.5, 0.92],
+                [0.5, 1.05],
+                [-0.5, 1.05],
+                [-0.5, 0.92],
+                [-0.09, 0.7],
+                [-0.09, 0.18],
+                [-0.3, 0.1],
+                [-0.62, -0.25]
+            ],
+            "closed": true,
+            "paint": { "fill": { "role": "ACCENT" } },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 10.0, "values": [0.0] },
+                        { "pct": 40.0, "values": [100.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.55] },
+                        { "pct": 10.0, "values": [0.0, 0.55] },
+                        { "pct": 50.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 25.0, "values": [0.0] },
+                        { "pct": 65.0, "values": [100.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.5] },
+                        { "pct": 25.0, "values": [0.0, 0.5] },
+                        { "pct": 70.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 40.0, "values": [0.0] },
+                        { "pct": 80.0, "values": [100.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.5] },
+                        { "pct": 40.0, "values": [0.0, 0.5] },
+                        { "pct": 85.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": { "type": "contentDerived", "padXEm": 1.2, "padYEm": 0.6 },
+            "corner": { "type": "fromConfig", "factor": 1.0 },
+            "borderFromConfig": true,
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 30.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

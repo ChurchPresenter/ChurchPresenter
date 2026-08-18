@@ -235,7 +235,7 @@ object Constants {
 - Singular/plural verse API in PresenterManager — convenience accessors
 - `System.err.println` in VideoPlayer/WebsitePresenter/LowerThirdSettingsTab — error diagnostics for VLC/JCEF/WebView issues
 - Emoji strings — not translatable, no benefit to moving to resources
-- `println` in the PresentationEngine submodule's `DumpKeynote.kt`/`DumpTiming.kt`/`MakeSampleDeck.kt` — these are CLI diagnostic tools (`dumpKeynote`/`dumpTiming`/`makeSampleDeck` gradle tasks) whose entire purpose is printing to stdout, not stray debug output
+- `println` in the PresentationEngine module's `DumpKeynote.kt`/`DumpTiming.kt`/`MakeSampleDeck.kt` — these are CLI diagnostic tools (`dumpKeynote`/`dumpTiming`/`makeSampleDeck` gradle tasks) whose entire purpose is printing to stdout, not stray debug output
 - Hardcoded `"%"` suffix on dynamic values (~14 sites across `SourcePropertiesPanel.kt`,
   `BackgroundSettingsTab.kt`, `QARemoteDialog.kt`, `STTSettingsDialog.kt`, `DictionarySettingsTab.kt`,
   `MediaTab.kt`, `UpdateAvailableDialog.kt`) — **kept because the percent sign is identical across all
@@ -431,9 +431,19 @@ protection still stands, so that only buys you a commit you will have to move on
 
 ### Running the tests, per platform
 
-The app's own suite is `./gradlew :composeApp:check`. It needs **JDK 21** and the submodules
-checked out (`git clone --recurse-submodules`, or `git submodule update --init --recursive`) —
-`composeApp` mounts their sources via `kotlin.srcDir` and will not compile without them.
+The app's own suite is `./gradlew :composeApp:check`. It needs **JDK 21** and nothing else — the
+six sub-builds live in this repository as ordinary directories, so a plain `git clone` gives you
+everything `composeApp` mounts via `kotlin.srcDir`.
+
+**In the inner loop, don't run the whole thing.** `bash test-changed.sh` maps what you have changed
+onto the suites that name it and runs only those — seconds instead of minutes. It is a heuristic and
+says so in its own header: it cannot see through a symbol three layers down, and it cannot know that
+a composable change moves pixels in a screenshot suite that never mentions the composable. Run the
+full `check` before you commit; the script is for the thirty times before that.
+
+The full suite runs on **4 parallel JVMs** (~5 min, down from ~12). If you write a test that binds a
+port, go through `testPort()`; if you write one that uses the shared fake home, know that it is per
+fork now. Both are explained in `AGENT.md` under "The suite runs in parallel forks".
 
 Beyond that there is nothing platform-specific to install:
 

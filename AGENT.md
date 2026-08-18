@@ -74,8 +74,12 @@ classpath, and exactly ONE schema jar may be there.
 ### Sub-builds
 Four module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
 have their own Gradle builds and test suites, under `src/jvmMain/appResources/common/`:
-`ChurchPresenter-PresentationEngine` (committed directly, NOT a git submodule), `-BLE`,
-`-LottieGen`, `-CompanionSatellite`.
+`ChurchPresenter-PresentationEngine`, `-BLE`, `-LottieGen`, `-CompanionSatellite`. A fifth,
+`-Cross`, is not mounted — `syncCrosswordFiles` copies its `encoded/*.xwp` into composeResources at
+build time. The converter is not among them: it is the `:converter` Gradle module described above.
+
+**None of these are git submodules.** All of them are committed directly into this repository, so a
+plain `git clone` is enough and a change spanning the app and a module is one commit.
 
 - **When touching module code, compile BOTH builds**: `./gradlew compileKotlinJvm` at the repo root
   AND `sh gradlew build` inside the module. The main build is more permissive and will accept code
@@ -106,6 +110,9 @@ Presentation deps in `composeApp/build.gradle.kts` are mirrored in
 ./gradlew :composeApp:check            # compile + all unit tests
 ./gradlew :composeApp:jacocoTestReport # coverage → build/reports/jacoco/jacocoTestReport/html/
 bash cleanup_check.sh                  # repo code-quality report
+
+bash test-changed.sh                   # ONLY the suites your change touches — seconds, not minutes
+bash test-changed.sh --dry-run         # print the selection and the gradle command, run nothing
 
 # Screenshots → composeApp/screenshots/<section>/ (COMMITTED; one folder per test class)
 ./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
@@ -268,8 +275,35 @@ JAVA_TOOL_OPTIONS="-Dchurchpresenter.singleInstancePort=47633 -Duser.home=$HOME/
 ## Tests
 
 `composeApp/src/jvmTest/` — run with `./gradlew :composeApp:check`.
-CI is `.github/workflows/test.yml` (push/PR); it runs these plus the module suites and requires
-`submodules: true`, or the app won't compile.
+CI is `.github/workflows/test.yml` (push/PR); it runs these plus each module's own suite, invoked
+one at a time through the module's own wrapper — and only for the modules whose own directory the
+change touched (the `Which sub-builds changed` paths-filter step).
+
+### The suite runs in parallel forks — what that costs you
+
+`jvmTest` runs on **4 parallel JVMs** (`maxParallelForks`, half the cores, capped at 4; override with
+`-PtestForks=N`). It went from ~12 minutes to ~5. Two rules follow from it, and breaking either one
+produces a failure that only appears under load and only sometimes:
+
+- **Never bind a fixed port directly.** Go through `testPort(39_xxx)` (`TestPorts.kt`), which shifts
+  the whole range by this fork's band. A bare literal is a `BindException` against another fork. If
+  a class stores its port and reuses it for the client URL, the *stored* value must be the
+  `testPort` one too — `CompanionServerAtemKeyTest` bound the offset port and then talked to the
+  literal, and every one of its tests failed with "connection refused".
+- **`user.home` is per fork, not shared.** `PerForkTestHome` (a `LauncherSessionListener`, which is
+  the only hook that runs before discovery) points each fork at `build/test-home/worker-N`. Suites
+  that deliberately use the shared fake home rather than swapping in a temp dir — and there are a
+  couple of dozen, several of which *delete* a directory in `@BeforeTest` — are isolated by that and
+  by nothing else.
+
+The tests themselves are still **JUnit 4**, running on junit-vintage under the JUnit Platform
+launcher. `useJUnitPlatform()` is there for `PerForkTestHome`, not for JUnit 5 syntax: keep writing
+`kotlin.test` annotations, and `@get:Rule`/`@BeforeClass` keep working. The
+`capabilitiesResolution` block in `composeApp/build.gradle.kts` is what pins `kotlin-test` to its
+JUnit 4 flavour — remove it and the JUnit 5 flavour resolves instead, which quietly stops running
+every `@BeforeClass` in the suite.
+
+**`-PfastTest`** turns off JaCoCo instrumentation (~15-25%) for the inner loop; `check` keeps it on.
 
 When writing tests here:
 - **Unreachable code is a refactor, not a dead end.** When a class is uncovered because it needs a
