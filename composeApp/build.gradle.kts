@@ -314,6 +314,10 @@ kotlin {
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.
             implementation(projects.companionSatellite)
+            // The theme: the nine colour schemes, the semantic colour roles, the typography and
+            // shape scales, and the ThemeManager. It keeps the package it always had
+            // (`...ui.theme`), so nothing in the app changed an import to reach it.
+            implementation(projects.theme)
             implementation(libs.kotlinx.coroutines.swing)
             // Sentry crash reporting
             implementation(libs.sentry)

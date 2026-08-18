@@ -90,7 +90,7 @@ jobs:
       # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
       # Pre-existing findings are in config/detekt/baseline.xml; this gates only new ones.
       - name: Detekt
-        run: ./gradlew :composeApp:detekt
+        run: ./gradlew :composeApp:detekt :theme:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -192,6 +192,15 @@ jobs:
         if: always()
         run: ./gradlew :companion-satellite:test
 
+      # The theme, likewise a module of this build that :composeApp depends on.
+      - name: Theme tests
+        if: always()
+        run: ./gradlew :theme:test
+
+      - name: Theme coverage floor
+        if: always()
+        run: ./gradlew :theme:jacocoTestCoverageVerification -x test
+
       # Each module is its own Gradle build with its own wrapper, so they cannot be reached
       # from the root build and are invoked individually. `if: always()` keeps a failure in one
       # suite from hiding the results of the others; the `steps.modules` half skips a module whose
@@ -236,12 +245,46 @@ jobs:
             composeApp/build/test-results/**/TEST-*.xml
             converter/build/test-results/**/TEST-*.xml
             companion-satellite/build/test-results/**/TEST-*.xml
+            theme/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
+          # `check_name` is a multiline input paired with `report_paths` BY INDEX -- keep the two
+          # lists in the same order. Without it every row in the comment is called "JUnit Test
+          # Report", so five modules report five indistinguishable lines and a "0 ran" row names
+          # neither the module it belongs to nor the reason it is empty.
+          check_name: |
+            App
+            Converter
+            Companion Satellite
+            Theme
+            Sub-builds (skipped unless their own directory changed)
           detailed_summary: true
           include_passed: false
           fail_on_failure: false
           comment: true
           updateComment: true
+
+      # Coverage in the pull request itself. The step summary above prints the six counters onto
+      # the run's own page, which nobody opens from a review -- so the number that decides whether a
+      # change carried its tests was never where the review happens.
+      #
+      # Never gates: `continue-on-error` is this action's default, and the real floors are the
+      # gradle verification steps above. The min-coverage values only pick the emoji, and are set to
+      # the app's own line floor so a red apple here means the same thing as a red step there.
+      - name: Coverage on the pull request
+        if: always() && github.event_name == 'pull_request'
+        uses: madrapps/jacoco-report@v1.8.0
+        with:
+          paths: |
+            composeApp/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml,
+            converter/build/reports/jacoco/test/jacocoTestReport.xml,
+            companion-satellite/build/reports/jacoco/test/jacocoTestReport.xml,
+            theme/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: Coverage
+          update-comment: true
+          skip-if-no-changes: true
+          min-coverage-overall: 75
+          min-coverage-changed-lines: 75
 
       - name: Upload test reports
         if: failure()
@@ -255,5 +298,7 @@ jobs:
             composeApp/build/test-results/
             converter/build/reports/tests/
             converter/build/test-results/
+            theme/build/reports/tests/
+            theme/build/test-results/
             composeApp/src/jvmMain/appResources/common/*/build/reports/tests/
             composeApp/src/jvmMain/appResources/common/*/build/test-results/

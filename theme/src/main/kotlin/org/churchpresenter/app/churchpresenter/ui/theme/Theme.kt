@@ -428,7 +428,7 @@ private val MochaColorScheme = darkColorScheme(
  * [ThemeMode.SYSTEM] is not a palette of its own; it resolves to Light or Dark, so callers listing
  * palettes skip it.
  */
-internal fun colorSchemeFor(themeMode: ThemeMode, systemDark: Boolean = true): ColorScheme = when (themeMode) {
+fun colorSchemeFor(themeMode: ThemeMode, systemDark: Boolean = true): ColorScheme = when (themeMode) {
     ThemeMode.LIGHT -> LightColorScheme
     ThemeMode.DARK -> DarkColorScheme
     ThemeMode.SYSTEM -> if (systemDark) DarkColorScheme else LightColorScheme

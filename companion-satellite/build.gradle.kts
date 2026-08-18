@@ -4,12 +4,16 @@ plugins {
 }
 
 group = "companionsatellite"
-version = "1.0.0"
 
-// A module of this build rather than a standalone one, so the Kotlin and coroutines versions come
-// from gradle/libs.versions.toml. They used to be a literal `kotlin("jvm") version "2.3.10"` and a
-// `val coroutinesVersion = "1.10.2"` carrying a comment asking whoever bumped the catalog to
-// remember this file too. Nobody has to remember anything now.
+extra["coverageFloors"] = mapOf(
+    "INSTRUCTION" to "0.90",
+    "BRANCH" to "0.75",
+    "LINE" to "0.90",
+    "COMPLEXITY" to "0.70",
+    "METHOD" to "0.90",
+    "CLASS" to "1.00",
+)
+
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
@@ -23,12 +27,3 @@ java {
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
-    finalizedBy(tasks.jacocoTestReport)
-}
-
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-    reports { xml.required.set(true); html.required.set(true) }
-}

@@ -27,3 +27,74 @@ if (layout.projectDirectory.file(".git").asFile.exists()) {
         logger.lifecycle("Configured git core.hooksPath = $gitHooksPath")
     }
 }
+
+// One version for the modules of this build, instead of a "1.0.0" copied into each build file.
+// :composeApp is packaged from its own commit-count version and never reads this.
+subprojects {
+    version = "1.0.0"
+}
+
+// ── JaCoCo for the plain-JVM modules ──────────────────────────────────────────
+// :converter, :companion-satellite and :theme all have the same shape — one `test` task, sources in
+// src/main/kotlin, classes in classes/kotlin/main — so the wiring is written once here instead of
+// three times. A module's build file then carries only what differs from it, set BEFORE the task is
+// realized: `coverageFloors` and `coverageExcludes`.
+//
+// :composeApp is deliberately out of scope. It is Kotlin Multiplatform, with two exec files, a
+// jvmMain source set and a long exclude list, and registers its own task; the kotlin("jvm") plugin
+// id is the discriminator, since only the three modules above apply it.
+val defaultCoverageFloors = mapOf(
+    "INSTRUCTION" to "0.85",
+    "BRANCH" to "0.85",
+    "LINE" to "0.85",
+    "COMPLEXITY" to "0.85",
+    "METHOD" to "0.85",
+    "CLASS" to "0.85",
+)
+
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+        plugins.withId("jacoco") {
+            @Suppress("UNCHECKED_CAST")
+            fun excludes(): List<String> =
+                (findProperty("coverageExcludes") as? List<String>) ?: listOf("**/ComposableSingletons*")
+
+            @Suppress("UNCHECKED_CAST")
+            fun floors(): Map<String, String> =
+                defaultCoverageFloors + (findProperty("coverageFloors") as? Map<String, String>).orEmpty()
+
+            fun coveredClasses() = fileTree(layout.buildDirectory.dir("classes/kotlin/main")) {
+                exclude(excludes())
+            }
+
+            tasks.withType<Test>().configureEach {
+                useJUnitPlatform()
+                finalizedBy("jacocoTestReport")
+            }
+
+            tasks.withType<JacocoReport>().configureEach {
+                dependsOn("test")
+                reports { xml.required.set(true); html.required.set(true) }
+                classDirectories.setFrom(coveredClasses())
+            }
+
+            tasks.withType<JacocoCoverageVerification>().configureEach {
+                dependsOn("test")
+                executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"))
+                sourceDirectories.setFrom(files("src/main/kotlin"))
+                classDirectories.setFrom(coveredClasses())
+                violationRules {
+                    rule {
+                        floors().forEach { (counterName, floor) ->
+                            limit {
+                                counter = counterName
+                                value = "COVEREDRATIO"
+                                minimum = floor.toBigDecimal()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

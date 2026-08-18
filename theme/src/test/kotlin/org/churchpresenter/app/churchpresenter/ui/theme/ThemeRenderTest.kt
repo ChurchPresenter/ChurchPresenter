@@ -15,7 +15,6 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.data.Language
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -32,9 +31,8 @@ import kotlin.test.assertTrue
  * The mapping from mode to scheme is a ten-branch `when` written once and never seen again — two
  * branches pointing at the same scheme, or a dark scheme wired to a light mode, compiles perfectly
  * and is only visible when somebody selects that theme mid-service. The wrappers around it are just
- * as easy to get wrong quietly: `AppThemeWrapper` has to supply a `ThemeManager` (without one, a
- * `ThemeSwitcher` inside it edits a throwaway) and `LanguageProvider` has to actually provide, not
- * shadow, the language.
+ * as easy to get wrong quietly: `AppThemeWrapper` has to supply a `ThemeManager`, because without
+ * one a `ThemeSwitcher` inside it edits a throwaway.
  *
  * SYSTEM is deliberately asserted loosely — it follows the host OS, so a test that pinned it to
  * light would pass on one machine and fail on the next.
@@ -276,43 +274,5 @@ class ThemeRenderTest {
         }
 
         assertEquals(ThemeMode.SYSTEM, seen!!.themeMode.value)
-    }
-
-    @Test
-    fun `the language provider hands its language down`() {
-        var seen: Language? = null
-        runComposeUiTest {
-            setContent { LanguageProvider(Language.RUSSIAN) { seen = LocalLanguage.current } }
-        }
-
-        assertEquals(Language.RUSSIAN, seen)
-    }
-
-    @Test
-    fun `the language provider can be nested for one part of the screen`() {
-        // A presenter window can run in a different language from the operator's own UI.
-        var outer: Language? = null
-        var inner: Language? = null
-        runComposeUiTest {
-            setContent {
-                LanguageProvider(Language.ENGLISH) {
-                    outer = LocalLanguage.current
-                    LanguageProvider(Language.RUSSIAN) { inner = LocalLanguage.current }
-                }
-            }
-        }
-
-        assertEquals(Language.ENGLISH, outer)
-        assertEquals(Language.RUSSIAN, inner, "the inner scope must win inside itself")
-    }
-
-    @Test
-    fun `english is what is read when nothing has provided a language`() {
-        var seen: Language? = null
-        runComposeUiTest {
-            setContent { seen = LocalLanguage.current }
-        }
-
-        assertEquals(Language.ENGLISH, seen, "a missing provider must not leave the UI blank or throw")
     }
 }
