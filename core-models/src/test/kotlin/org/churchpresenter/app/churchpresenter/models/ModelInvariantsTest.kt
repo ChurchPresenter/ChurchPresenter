@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.models
 
 import java.io.File
+import java.util.zip.ZipFile
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -38,26 +39,38 @@ class ModelInvariantsTest {
      */
     private fun modelClasses(): List<KClass<*>> {
         val pkgPath = KeyChord::class.java.packageName.replace('.', '/')
-        val names = mutableSetOf<String>()
-        System.getProperty("java.class.path").split(File.pathSeparator).forEach { entry ->
-            val root = File(entry)
-            when {
-                root.isDirectory -> File(root, pkgPath).takeIf { it.isDirectory }?.walkTopDown()
-                    ?.filter { it.isFile && it.extension == "class" }
-                    ?.forEach {
-                        names += it.relativeTo(root).path.removeSuffix(".class").replace(File.separatorChar, '.')
-                    }
-                root.isFile && root.extension == "jar" -> java.util.zip.ZipFile(root).use { jar ->
-                    jar.entries().asSequence()
-                        .filter { it.name.startsWith("$pkgPath/") && it.name.endsWith(".class") }
-                        .forEach { names += it.name.removeSuffix(".class").replace('/', '.') }
-                }
-            }
-        }
+        val names = System.getProperty("java.class.path")
+            .split(File.pathSeparator)
+            .flatMapTo(mutableSetOf()) { entry -> classNamesIn(File(entry), pkgPath) }
         return names.mapNotNull { runCatching { Class.forName(it).kotlin }.getOrNull() }
             .filter { it.isData || it.java.isEnum }
             .filterNot { it.isAbstract || it.isSealed }
             .sortedBy { it.qualifiedName }
+    }
+
+    /**
+     * The names of the classes [root] holds under [pkgPath] — a directory of `.class` files under
+     * `build/classes`, or a jar on the test runtime classpath.
+     *
+     * Its own function so the walk stays one block deep: inline, the entry loop, the two-way [when]
+     * and the sequence lambdas nested five deep and detekt rejected it.
+     */
+    private fun classNamesIn(root: File, pkgPath: String): List<String> = when {
+        root.isDirectory -> File(root, pkgPath).takeIf { it.isDirectory }
+            ?.walkTopDown()
+            ?.filter { it.isFile && it.extension == "class" }
+            ?.map { it.relativeTo(root).path.removeSuffix(".class").replace(File.separatorChar, '.') }
+            ?.toList()
+            .orEmpty()
+
+        root.isFile && root.extension == "jar" -> ZipFile(root).use { jar ->
+            jar.entries().asSequence()
+                .filter { it.name.startsWith("$pkgPath/") && it.name.endsWith(".class") }
+                .map { it.name.removeSuffix(".class").replace('/', '.') }
+                .toList()
+        }
+
+        else -> emptyList()
     }
 
     /**

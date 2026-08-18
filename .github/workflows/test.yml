@@ -151,10 +151,18 @@ jobs:
       # floor below only speaks up when it is breached, so a run could move coverage several points
       # in either direction and say nothing.
       #
-      # `-x jvmTest` for the same reason it is on the floor step: jacocoTestReport `dependsOn`
-      # jvmTest, and after a FAILED suite that dependency is not up to date, so without this the
-      # step would relaunch the whole 14-minute suite inside its own budget. The report is built
+      # `-x jvmTest -x jvmTestSerial` for the same reason it is on the floor step: jacocoTestReport
+      # `dependsOn` BOTH of them, and after a FAILED suite that dependency is not up to date, so
+      # without this the step would relaunch the suite inside its own budget. The report is built
       # from the exec data the step above already wrote.
+      #
+      # Excluding only `jvmTest` was not enough, and hid a whole missing suite. When Detekt fails,
+      # `App unit tests` is skipped -- but this step still ran, and with the serial task NOT excluded
+      # it quietly executed the thirteen serial classes on its own. That wrote a jvmTestSerial exec
+      # file and jvmTestSerial XML, so both PR comments then reported a run in which the suite had
+      # never started: "App 159 ran, 159 passed" from the junit reporter, and composeApp at 33%
+      # instruction in the coverage table. Both looked like a green partial run and a coverage
+      # collapse; neither had happened.
       #
       # Advisory after a failure, like the floor: the exec data is then from a run that stopped
       # early, so the numbers are understated. Still worth printing -- it is the only place the
@@ -169,15 +177,16 @@ jobs:
       - name: Coverage summary
         if: always()
         timeout-minutes: 10
-        run: ./gradlew :composeApp:jacocoTestReport -x jvmTest "-PstepSummary=$GITHUB_STEP_SUMMARY"
+        run: ./gradlew :composeApp:jacocoTestReport -x jvmTest -x jvmTestSerial "-PstepSummary=$GITHUB_STEP_SUMMARY"
 
       # The 75% line-coverage floor, off the execution data the tests above just produced. Its
       # denominator excludes the app-entry wiring that only runs under a real display -- see
       # jacocoTestCoverageVerification in composeApp/build.gradle.kts. `if: always()` so a coverage
       # regression is reported alongside test failures rather than hidden behind them.
       #
-      # `-x jvmTest` is load-bearing. The Gradle task `dependsOn("jvmTest")`, which is right for a
-      # developer running it directly, but here the suite has already run in the step above. When it
+      # `-x jvmTest -x jvmTestSerial` is load-bearing. The Gradle task `dependsOn` both, which is
+      # right for a developer running it directly, but here the suite has already run in the step
+      # above -- see the Coverage summary step for what excluding only half of it did. When it
       # PASSED that task is up to date and the dependency costs nothing -- which is why this looked
       # fine for as long as the suite was green. When it FAILED it is not up to date, so this step
       # started the whole 21-minute suite again inside a 10-minute budget: a guaranteed timeout.
@@ -185,14 +194,16 @@ jobs:
       # relaunched it at 01:41:20, killed at 01:50:57. Every red run paid an extra ten minutes and
       # reported a second failure that said "Coverage floor timed out" and meant nothing.
       #
-      # Advisory when the suite failed: the exec data is then from a run that did not finish, so the
-      # number is understated and a floor breach would be an artefact. The build is already red for a
-      # better reason. When the suite passed this gates exactly as before, in seconds.
+      # Advisory whenever the suite did not pass: the exec data is then from a run that did not
+      # finish -- or, when Detekt failed and the suite step was SKIPPED, is not there at all -- so
+      # the number is understated and a floor breach would be an artefact. The build is already red
+      # for a better reason, and `outcome != 'success'` covers the skipped case as well as the
+      # failed one. When the suite passed this gates exactly as before, in seconds.
       - name: Coverage floor
         if: always()
-        continue-on-error: ${{ steps.unit_tests.outcome == 'failure' }}
+        continue-on-error: ${{ steps.unit_tests.outcome != 'success' }}
         timeout-minutes: 10
-        run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest
+        run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest -x jvmTestSerial
 
       # The converter is a module of THIS build (`include(":converter")`), not one of the separate
       # builds below, so it is a task on the root wrapper and shares its daemon -- seconds rather
@@ -288,6 +299,10 @@ jobs:
             Sub-builds (skipped unless their own directory changed)
           detailed_summary: true
           include_passed: false
+          # Without this the second table is six rows of "No test annotations available" on every
+          # green run -- one per check_name, because `include_passed: false` leaves it nothing to
+          # list when nothing failed. Off, the table appears only when there is a failure in it.
+          verbose_summary: false
           fail_on_failure: false
           comment: true
           updateComment: true
