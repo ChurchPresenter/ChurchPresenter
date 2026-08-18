@@ -22,6 +22,7 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The server loading songs and a Bible off disk for itself.
@@ -53,7 +54,7 @@ class CompanionServerPreloadTest {
         fun startServer() {
             workDir = Files.createTempDirectory("cp-preload").toFile()
             server = CompanionServer()
-            server.start(port = 39_725)
+            server.start(port = testPort(39_725))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

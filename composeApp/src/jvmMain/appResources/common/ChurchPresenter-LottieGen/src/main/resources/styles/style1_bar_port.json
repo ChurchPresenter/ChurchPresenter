@@ -1,0 +1,212 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Bar (Style 1 port)",
+    "layout": {
+        "slots": [
+            {
+                "id": "logo",
+                "kind": "LOGO",
+                "gapAfterEm": 0.8,
+                "visibleWhen": ["LOGO_ENABLED"]
+            },
+            {
+                "id": "accent",
+                "kind": "FIXED",
+                "widthEm": 0.3
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 1.2
+            }
+        ],
+        "blockHeightEm": 3.5,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "logo",
+            "id": "logo",
+            "name": "Logo",
+            "visibleWhen": ["LOGO_ENABLED"],
+            "placement": {
+                "slot": "logo",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [2.7, 0.0] },
+                        { "pct": 55.0, "values": [2.7, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 55.0, "values": [0.0] },
+                        { "pct": 100.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER", "offsetXEm": -0.6 },
+                    "right": { "offsetXEm": -0.15 }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-1.3, 0.0] },
+                        { "pct": 45.0, "values": [-1.3, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ],
+                    "alignOverrides": {
+                        "center": [
+                            { "pct": 0.0, "values": [-1.3, 0.0] },
+                            { "pct": 50.0, "values": [-1.3, 0.0] },
+                            { "pct": 100.0, "values": [0.0, 0.0] }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER", "offsetXEm": -0.6 },
+                    "right": { "offsetXEm": -0.15 }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-1.3, 0.0] },
+                        { "pct": 50.0, "values": [-1.3, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ],
+                    "alignOverrides": {
+                        "center": [
+                            { "pct": 0.0, "values": [1.3, 0.0] },
+                            { "pct": 50.0, "values": [1.3, 0.0] },
+                            { "pct": 100.0, "values": [0.0, 0.0] }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "rect",
+            "id": "accent",
+            "name": "Accent Bar",
+            "placement": {
+                "slot": "accent",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": { "type": "em", "wEm": 0.3, "hEm": 3.5 },
+            "paint": { "fill": { "role": "ACCENT" } },
+            "corner": { "type": "none" },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [10.0, 0.0] },
+                        { "pct": 23.0, "values": [10.0, 0.0] },
+                        { "pct": 75.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ],
+                    "alignOverrides": {
+                        "right": [
+                            { "pct": 0.0, "values": [6.0, 0.0] },
+                            { "pct": 23.0, "values": [6.0, 0.0] },
+                            { "pct": 75.0, "values": [0.0, 0.0] },
+                            { "pct": 100.0, "values": [0.0, 0.0] }
+                        ]
+                    }
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 23.0, "values": [0.0] },
+                        { "pct": 50.0, "values": [100.0] },
+                        { "pct": 100.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": { "type": "contentDerived", "padXEm": 1.0, "padYEm": 1.0 },
+            "corner": { "type": "fromConfig", "factor": 1.1 },
+            "borderFromConfig": true,
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 30.0, "values": [0.0, 1.0] },
+                        { "pct": 100.0, "values": [1.0, 1.0] }
+                    ]
+                },
+                {
+                    "property": "STROKE_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 30.0, "values": [0.0] },
+                        { "pct": 100.0, "values": [1.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

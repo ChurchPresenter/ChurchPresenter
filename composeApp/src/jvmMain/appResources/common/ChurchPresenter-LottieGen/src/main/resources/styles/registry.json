@@ -1,0 +1,244 @@
+{
+    "entries": [
+        {
+            "id": "13",
+            "name": "Ribbon Fold",
+            "resource": "/styles/style13_ribbon_fold.json"
+        },
+        {
+            "id": "14",
+            "name": "Split Shutter",
+            "resource": "/styles/style14_split_shutter.json"
+        },
+        {
+            "id": "15",
+            "name": "Typewriter",
+            "resource": "/styles/style15_typewriter.json"
+        },
+        {
+            "id": "16",
+            "name": "Neon Outline",
+            "resource": "/styles/style16_neon_outline.json"
+        },
+        {
+            "id": "17",
+            "name": "Glitch Shift",
+            "resource": "/styles/style17_glitch_shift.json"
+        },
+        {
+            "id": "18",
+            "name": "Origami",
+            "resource": "/styles/style18_origami.json"
+        },
+        {
+            "id": "19",
+            "name": "Radar Sweep",
+            "resource": "/styles/style19_radar_sweep.json"
+        },
+        {
+            "id": "20",
+            "name": "Liquid Wave",
+            "resource": "/styles/style20_liquid_wave.json"
+        },
+        {
+            "id": "21",
+            "name": "Stack Cards",
+            "resource": "/styles/style21_stack_cards.json"
+        },
+        {
+            "id": "22",
+            "name": "Circuit Trace",
+            "resource": "/styles/style22_circuit_trace.json"
+        },
+        {
+            "id": "23",
+            "name": "Curtain Drop",
+            "resource": "/styles/style23_curtain_drop.json"
+        },
+        {
+            "id": "24",
+            "name": "Hex Tile",
+            "resource": "/styles/style24_hex_tile.json"
+        },
+        {
+            "id": "25",
+            "name": "Trapezoid Slide",
+            "resource": "/styles/style25_trapezoid_slide.json"
+        },
+        {
+            "id": "26",
+            "name": "Parallelogram Split",
+            "resource": "/styles/style26_parallelogram_split.json"
+        },
+        {
+            "id": "27",
+            "name": "Chevron Tag",
+            "resource": "/styles/style27_chevron_tag.json"
+        },
+        {
+            "id": "28",
+            "name": "Angled Blade",
+            "resource": "/styles/style28_angled_blade.json"
+        },
+        {
+            "id": "29",
+            "name": "Hex Badge",
+            "resource": "/styles/style29_hex_badge.json"
+        },
+        {
+            "id": "30",
+            "name": "Notched Panel",
+            "resource": "/styles/style30_notched_panel.json"
+        },
+        {
+            "id": "31",
+            "name": "Wedge Pair",
+            "resource": "/styles/style31_wedge_pair.json"
+        },
+        {
+            "id": "32",
+            "name": "Diamond Bar",
+            "resource": "/styles/style32_diamond_bar.json"
+        },
+        {
+            "id": "33",
+            "name": "Stepped Panel",
+            "resource": "/styles/style33_stepped_panel.json"
+        },
+        {
+            "id": "34",
+            "name": "Flag Ribbon",
+            "resource": "/styles/style34_flag_ribbon.json"
+        },
+        {
+            "id": "35",
+            "name": "Slant Stack",
+            "resource": "/styles/style35_slant_stack.json"
+        },
+        {
+            "id": "36",
+            "name": "Bevel Tablet",
+            "resource": "/styles/style36_bevel_tablet.json"
+        },
+        {
+            "id": "37",
+            "name": "Wide Band",
+            "resource": "/styles/style37_wide_band.json"
+        },
+        {
+            "id": "38",
+            "name": "Deep Slab",
+            "resource": "/styles/style38_deep_slab.json"
+        },
+        {
+            "id": "39",
+            "name": "Curtain Band",
+            "resource": "/styles/style39_curtain_band.json"
+        },
+        {
+            "id": "40",
+            "name": "Gradient Banner",
+            "resource": "/styles/style40_gradient_banner.json"
+        },
+        {
+            "id": "41",
+            "name": "Rising Band",
+            "resource": "/styles/style41_rising_band.json"
+        },
+        {
+            "id": "42",
+            "name": "Framed Banner",
+            "resource": "/styles/style42_framed_banner.json"
+        },
+        {
+            "id": "43",
+            "name": "Tilted Banner",
+            "resource": "/styles/style43_tilted_banner.json"
+        },
+        {
+            "id": "44",
+            "name": "Dashed Rail",
+            "resource": "/styles/style44_dashed_rail.json"
+        },
+        {
+            "id": "45",
+            "name": "Veil Band",
+            "resource": "/styles/style45_veil_band.json"
+        },
+        {
+            "id": "46",
+            "name": "Slide Banner",
+            "resource": "/styles/style46_slide_banner.json"
+        },
+        {
+            "id": "47",
+            "name": "Center Open",
+            "resource": "/styles/style47_center_open.json"
+        },
+        {
+            "id": "48",
+            "name": "Echo Band",
+            "resource": "/styles/style48_echo_band.json"
+        },
+        {
+            "id": "49",
+            "name": "Twin Rails",
+            "resource": "/styles/style49_twin_rails.json"
+        },
+        {
+            "id": "50",
+            "name": "Deck Banner",
+            "resource": "/styles/style50_deck_banner.json"
+        },
+        {
+            "id": "51",
+            "name": "Header Cap",
+            "resource": "/styles/style51_header_cap.json"
+        },
+        {
+            "id": "52",
+            "name": "Blade Banner",
+            "resource": "/styles/style52_blade_banner.json"
+        },
+        {
+            "id": "53",
+            "name": "Marker Bar",
+            "resource": "/styles/style53_marker_bar.json"
+        },
+        {
+            "id": "54",
+            "name": "Ghost Layer",
+            "resource": "/styles/style54_ghost_layer.json"
+        },
+        {
+            "id": "55",
+            "name": "Under Rule",
+            "resource": "/styles/style55_under_rule.json"
+        },
+        {
+            "id": "56",
+            "name": "Spotlight Band",
+            "resource": "/styles/style56_spotlight_band.json"
+        },
+        {
+            "id": "57",
+            "name": "Chevron Rail",
+            "resource": "/styles/style57_chevron_rail.json"
+        },
+        {
+            "id": "58",
+            "name": "Ribbon Banner",
+            "resource": "/styles/style58_ribbon_banner.json"
+        },
+        {
+            "id": "59",
+            "name": "Frame Band",
+            "resource": "/styles/style59_frame_band.json"
+        },
+        {
+            "id": "60",
+            "name": "Notch Deck",
+            "resource": "/styles/style60_notch_deck.json"
+        }
+    ]
+}

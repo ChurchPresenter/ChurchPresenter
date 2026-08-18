@@ -1,0 +1,512 @@
+{
+    "formatVersion": 1,
+    "id": "20",
+    "name": "Liquid Wave",
+    "layout": {
+        "slots": [
+            {
+                "id": "logo",
+                "kind": "LOGO",
+                "gapAfterEm": 0.8,
+                "visibleWhen": [
+                    "LOGO_ENABLED"
+                ]
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.7
+            }
+        ],
+        "blockHeightEm": 3.5,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "logo",
+            "id": "logo",
+            "name": "Logo",
+            "visibleWhen": [
+                "LOGO_ENABLED"
+            ],
+            "placement": {
+                "slot": "logo",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": [
+                "NAME_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 2.2,
+                "yOffsetFactor": -0.15,
+                "tracks": [
+                    {
+                        "property": "POSITION_OFFSET",
+                        "keyframes": [
+                            {
+                                "pct": 0,
+                                "values": [
+                                    0,
+                                    1.9
+                                ]
+                            },
+                            {
+                                "pct": 12,
+                                "values": [
+                                    0,
+                                    1.9
+                                ]
+                            },
+                            {
+                                "pct": 66,
+                                "values": [
+                                    0,
+                                    0
+                                ]
+                            },
+                            {
+                                "pct": 100,
+                                "values": [
+                                    0,
+                                    0
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 10,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 30,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": [
+                "INFO_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 2.2,
+                "yOffsetFactor": -0.15,
+                "tracks": [
+                    {
+                        "property": "POSITION_OFFSET",
+                        "keyframes": [
+                            {
+                                "pct": 0,
+                                "values": [
+                                    0,
+                                    1.9
+                                ]
+                            },
+                            {
+                                "pct": 28,
+                                "values": [
+                                    0,
+                                    1.9
+                                ]
+                            },
+                            {
+                                "pct": 84,
+                                "values": [
+                                    0,
+                                    0
+                                ]
+                            },
+                            {
+                                "pct": 100,
+                                "values": [
+                                    0,
+                                    0
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 26,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 46,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "waveLine",
+            "name": "Wave Crest",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                {
+                    "x": -1.0,
+                    "y": 0.0,
+                    "outX": 0.34,
+                    "outY": -0.42
+                },
+                {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "inX": -0.34,
+                    "inY": 0.42,
+                    "outX": 0.34,
+                    "outY": -0.42
+                },
+                {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "inX": -0.34,
+                    "inY": 0.42
+                }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": {
+                    "role": "ACCENT",
+                    "width": {
+                        "type": "em",
+                        "em": 0.09
+                    }
+                }
+            },
+            "fitWidthTo": "TEXT_BLOCK",
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                2.0
+                            ]
+                        },
+                        {
+                            "pct": 10,
+                            "values": [
+                                0,
+                                2.0
+                            ]
+                        },
+                        {
+                            "pct": 70,
+                            "values": [
+                                0,
+                                -1.7
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                -1.7
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 8,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 26,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "waveBody",
+            "name": "Wave Body",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                {
+                    "x": -1.0,
+                    "y": 0.0,
+                    "outX": 0.34,
+                    "outY": -0.42
+                },
+                {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "inX": -0.34,
+                    "inY": 0.42,
+                    "outX": 0.34,
+                    "outY": -0.42
+                },
+                {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "inX": -0.34,
+                    "inY": 0.42
+                },
+                {
+                    "x": 1.0,
+                    "y": 2.2
+                },
+                {
+                    "x": -1.0,
+                    "y": 2.2
+                }
+            ],
+            "closed": true,
+            "paint": {
+                "fill": {
+                    "role": "ACCENT",
+                    "alphaFactor": 0.3
+                },
+                "stroke": null
+            },
+            "fitWidthTo": "TEXT_BLOCK",
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                2.0
+                            ]
+                        },
+                        {
+                            "pct": 10,
+                            "values": [
+                                0,
+                                2.0
+                            ]
+                        },
+                        {
+                            "pct": 70,
+                            "values": [
+                                0,
+                                -1.7
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                -1.7
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 8,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 26,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": [
+                "BG_ENABLED"
+            ],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": {
+                "type": "contentDerived",
+                "padXEm": 1.15,
+                "padYEm": 0.72
+            },
+            "corner": {
+                "type": "fromConfig",
+                "factor": 1.2
+            },
+            "borderFromConfig": true,
+            "growFrom": "ALIGN_EDGE",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        },
+                        {
+                            "pct": 48,
+                            "values": [
+                                1,
+                                1
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

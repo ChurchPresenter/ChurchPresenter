@@ -15,6 +15,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The CA download endpoints, including the "no certificate yet" replies.
@@ -33,7 +34,7 @@ class CertificateRoutesTest {
     @BeforeTest
     fun startServer() {
         server = CompanionServer()
-        server.start(port = 39_733)
+        server.start(port = testPort(39_733))
         port = runBlocking {
             withTimeoutOrNull(10_000) {
                 while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

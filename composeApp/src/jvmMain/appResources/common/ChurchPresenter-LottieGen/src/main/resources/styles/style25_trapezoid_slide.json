@@ -1,0 +1,328 @@
+{
+    "formatVersion": 1,
+    "id": "25",
+    "name": "Trapezoid Slide",
+    "layout": {
+        "slots": [
+            {
+                "id": "logo",
+                "kind": "LOGO",
+                "gapAfterEm": 0.8,
+                "visibleWhen": [
+                    "LOGO_ENABLED"
+                ]
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.9
+            }
+        ],
+        "blockHeightEm": 3.5,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "logo",
+            "id": "logo",
+            "name": "Logo",
+            "visibleWhen": [
+                "LOGO_ENABLED"
+            ],
+            "placement": {
+                "slot": "logo",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": [
+                "NAME_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 46,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 74,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": [
+                "INFO_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 58,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 88,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "accent",
+            "name": "Accent",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                [
+                    -1.0,
+                    2.36
+                ],
+                [
+                    1.0,
+                    2.36
+                ],
+                [
+                    1.0,
+                    1.9069
+                ],
+                [
+                    -0.9923,
+                    1.9069
+                ]
+            ],
+            "closed": true,
+            "paint": {
+                "fill": {
+                    "role": "ACCENT"
+                },
+                "stroke": null
+            },
+            "fitWidthTo": "TEXT_BLOCK",
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                124.7,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 30,
+                            "values": [
+                                124.7,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 68,
+                            "values": [
+                                124.7,
+                                110
+                            ]
+                        },
+                        {
+                            "pct": 84,
+                            "values": [
+                                124.7,
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "body",
+            "name": "Body",
+            "visibleWhen": [
+                "BG_ENABLED"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                [
+                    -0.92,
+                    -2.36
+                ],
+                [
+                    1.0,
+                    -2.36
+                ],
+                [
+                    1.0,
+                    2.36
+                ],
+                [
+                    -1.0,
+                    2.36
+                ]
+            ],
+            "closed": true,
+            "paint": {
+                "fill": {
+                    "role": "BG"
+                },
+                "stroke": {
+                    "role": "BORDER",
+                    "width": {
+                        "type": "fromConfig"
+                    }
+                }
+            },
+            "fitWidthTo": "TEXT_BLOCK",
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 4,
+                            "values": [
+                                0,
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 52,
+                            "values": [
+                                129.7,
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 68,
+                            "values": [
+                                124.7,
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

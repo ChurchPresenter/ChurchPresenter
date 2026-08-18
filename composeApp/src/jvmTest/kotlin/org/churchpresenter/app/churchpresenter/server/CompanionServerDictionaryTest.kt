@@ -20,6 +20,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The Strong's dictionary REST endpoints (`GET /api/dictionary`, `/{number}`, `/{number}/verses`) —
@@ -52,7 +53,7 @@ class CompanionServerDictionaryTest {
         // Its own port: every CompanionServer suite claims a distinct one, and 39_721 is
         // CompanionServerQaModerationTest's. Sharing it means a bind failure whenever the previous
         // suite's socket has not finished closing.
-        server.start(port = 39_731)
+        server.start(port = testPort(39_731))
         port = runBlocking {
             withTimeoutOrNull(10_000) {
                 while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

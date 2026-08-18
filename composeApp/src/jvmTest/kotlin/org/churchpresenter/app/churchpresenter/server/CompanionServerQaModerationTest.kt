@@ -35,6 +35,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * Moderating a Q&A session from a phone.
@@ -93,7 +94,7 @@ class CompanionServerQaModerationTest {
             tempHome = Files.createTempDirectory("cp-qa-moderation").toFile()
             System.setProperty("user.home", tempHome.absolutePath)
             server = CompanionServer()
-            server.start(port = 39_721)
+            server.start(port = testPort(39_721))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

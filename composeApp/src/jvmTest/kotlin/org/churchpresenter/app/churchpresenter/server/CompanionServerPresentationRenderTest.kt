@@ -24,6 +24,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * What the server does when a presentation lands in the schedule: load the deck, rasterise every
@@ -53,7 +54,7 @@ class CompanionServerPresentationRenderTest {
         private lateinit var tempHome: File
         private lateinit var deckDir: File
         private var realHome: String? = null
-        private const val PORT = 39_890
+        private val PORT = testPort(39_890)
 
         @JvmStatic
         @BeforeClass

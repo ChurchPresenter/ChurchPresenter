@@ -1,0 +1,435 @@
+{
+    "formatVersion": 1,
+    "id": "13",
+    "name": "Ribbon Fold",
+    "layout": {
+        "slots": [
+            {
+                "id": "logo",
+                "kind": "LOGO",
+                "gapAfterEm": 0.8,
+                "visibleWhen": [
+                    "LOGO_ENABLED"
+                ]
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.7
+            }
+        ],
+        "blockHeightEm": 3.5,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "logo",
+            "id": "logo",
+            "name": "Logo",
+            "visibleWhen": [
+                "LOGO_ENABLED"
+            ],
+            "placement": {
+                "slot": "logo",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": [
+                "NAME_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                -1.3,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 28,
+                            "values": [
+                                -1.3,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 72,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        }
+                    ],
+                    "offsetUnit": "ELEMENT_WIDTH"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 28,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 50,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": [
+                "INFO_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                -1.3,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 42,
+                            "values": [
+                                -1.3,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 88,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        }
+                    ],
+                    "offsetUnit": "ELEMENT_WIDTH"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 42,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 64,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "notch",
+            "name": "Fold Notch",
+            "placement": {
+                "slot": "text",
+                "anchorIn": "END",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 1.05
+            },
+            "verticesEm": [
+                [
+                    0.0,
+                    -1.5
+                ],
+                [
+                    0.62,
+                    0.0
+                ],
+                [
+                    0.0,
+                    1.5
+                ]
+            ],
+            "closed": true,
+            "paint": {
+                "fill": {
+                    "role": "ACCENT"
+                },
+                "stroke": null
+            },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 30,
+                            "values": [
+                                0,
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 62,
+                            "values": [
+                                112,
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 78,
+                            "values": [
+                                100,
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "rect",
+            "id": "ribbon",
+            "name": "Ribbon Fold",
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": {
+                "type": "contentDerived",
+                "padXEm": 1.15,
+                "padYEm": 0.62
+            },
+            "paint": {
+                "fill": {
+                    "role": "ACCENT",
+                    "alphaFactor": 0.22
+                },
+                "stroke": null
+            },
+            "corner": {
+                "type": "none"
+            },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                100,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 10,
+                            "values": [
+                                100,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 55,
+                            "values": [
+                                100,
+                                114
+                            ]
+                        },
+                        {
+                            "pct": 74,
+                            "values": [
+                                100,
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": [
+                "BG_ENABLED"
+            ],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": {
+                "type": "contentDerived",
+                "padXEm": 1.15,
+                "padYEm": 0.62
+            },
+            "corner": {
+                "type": "fromConfig",
+                "factor": 1.0
+            },
+            "borderFromConfig": true,
+            "growFrom": "ALIGN_EDGE",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        },
+                        {
+                            "pct": 8,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        },
+                        {
+                            "pct": 58,
+                            "values": [
+                                1,
+                                1
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

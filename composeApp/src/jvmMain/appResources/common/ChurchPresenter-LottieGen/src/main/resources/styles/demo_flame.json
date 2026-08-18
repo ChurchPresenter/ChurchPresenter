@@ -1,0 +1,204 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Flame",
+    "layout": {
+        "slots": [
+            {
+                "id": "flame",
+                "kind": "FIXED",
+                "widthEm": 2.2,
+                "gapAfterEm": 0.8
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.2
+            }
+        ],
+        "blockHeightEm": 3.4,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "path",
+            "id": "innerFlame",
+            "name": "Inner Flame",
+            "placement": {
+                "slot": "flame",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetYEm": 0.35,
+                "pivotYEm": 0.5
+            },
+            "verticesEm": [
+                { "x": 0.04, "y": -0.6, "inX": -0.1, "inY": 0.18, "outX": 0.12, "outY": 0.2 },
+                { "x": 0.3, "y": 0.25, "inX": 0.02, "inY": -0.25, "outX": -0.02, "outY": 0.18 },
+                { "x": 0.0, "y": 0.55, "inX": 0.2, "inY": 0.0, "outX": -0.2, "outY": 0.0 },
+                { "x": -0.3, "y": 0.25, "inX": 0.02, "inY": 0.18, "outX": 0.02, "outY": -0.25 }
+            ],
+            "closed": true,
+            "paint": {
+                "fill": { "role": "NAME", "alphaFactor": 0.85 },
+                "stroke": null
+            },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 35.0, "values": [0.0, 0.0] },
+                        { "pct": 55.0, "values": [108.0, 88.0] },
+                        { "pct": 68.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "outerFlame",
+            "name": "Flame",
+            "placement": {
+                "slot": "flame",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "pivotYEm": 0.9
+            },
+            "verticesEm": [
+                { "x": 0.08, "y": -1.25, "inX": -0.18, "inY": 0.3, "outX": 0.22, "outY": 0.38 },
+                { "x": 0.58, "y": 0.2, "inX": 0.05, "inY": -0.48, "outX": -0.02, "outY": 0.35 },
+                { "x": 0.0, "y": 0.9, "inX": 0.42, "inY": 0.0, "outX": -0.42, "outY": 0.0 },
+                { "x": -0.58, "y": 0.2, "inX": 0.02, "inY": 0.35, "outX": -0.05, "outY": -0.48 },
+                { "x": -0.12, "y": -0.55, "inX": -0.12, "inY": 0.22, "outX": 0.08, "outY": -0.25 }
+            ],
+            "closed": true,
+            "paint": {
+                "fill": { "role": "ACCENT" },
+                "stroke": null
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 10.0, "values": [0.0] },
+                        { "pct": 30.0, "values": [100.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.7] },
+                        { "pct": 10.0, "values": [0.0, 0.7] },
+                        { "pct": 50.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                },
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 10.0, "values": [0.0, 0.0] },
+                        { "pct": 45.0, "values": [106.0, 90.0] },
+                        { "pct": 58.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 25.0, "values": [0.0] },
+                        { "pct": 65.0, "values": [100.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.5] },
+                        { "pct": 25.0, "values": [0.0, 0.5] },
+                        { "pct": 70.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 40.0, "values": [0.0] },
+                        { "pct": 80.0, "values": [100.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.5] },
+                        { "pct": 40.0, "values": [0.0, 0.5] },
+                        { "pct": 85.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": { "type": "contentDerived", "padXEm": 1.2, "padYEm": 0.7 },
+            "corner": { "type": "fromConfig", "factor": 1.1 },
+            "borderFromConfig": true,
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 30.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

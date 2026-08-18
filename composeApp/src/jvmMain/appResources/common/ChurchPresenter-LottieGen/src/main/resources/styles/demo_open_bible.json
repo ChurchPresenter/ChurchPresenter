@@ -1,0 +1,323 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Open Bible",
+    "layout": {
+        "slots": [
+            {
+                "id": "book",
+                "kind": "FIXED",
+                "widthEm": 3.0,
+                "gapAfterEm": 0.8
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.2
+            }
+        ],
+        "blockHeightEm": 3.4,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "path",
+            "id": "leftPage",
+            "name": "Left Page",
+            "placement": {
+                "slot": "book",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                { "x": 0.0, "y": -0.45, "outX": -0.6, "outY": -0.35 },
+                { "x": -1.3, "y": -0.6, "inX": 0.35, "inY": 0.1 },
+                { "x": -1.3, "y": 0.65 },
+                { "x": 0.0, "y": 0.9, "inX": -0.6, "inY": -0.32 }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "width": { "type": "em", "em": 0.12 } }
+            },
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 8.0, "values": [0.0, 0.0] },
+                        { "pct": 55.0, "values": [0.0, 1.0] },
+                        { "pct": 100.0, "values": [0.0, 1.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "rightPage",
+            "name": "Right Page",
+            "placement": {
+                "slot": "book",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                { "x": 0.0, "y": -0.45, "outX": 0.6, "outY": -0.35 },
+                { "x": 1.3, "y": -0.6, "inX": -0.35, "inY": 0.1 },
+                { "x": 1.3, "y": 0.65 },
+                { "x": 0.0, "y": 0.9, "inX": 0.6, "inY": -0.32 }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "width": { "type": "em", "em": 0.12 } }
+            },
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 16.0, "values": [0.0, 0.0] },
+                        { "pct": 62.0, "values": [0.0, 1.0] },
+                        { "pct": 100.0, "values": [0.0, 1.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "spine",
+            "name": "Spine",
+            "placement": {
+                "slot": "book",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                { "x": 0.0, "y": -0.45 },
+                { "x": 0.0, "y": 0.9 }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "width": { "type": "em", "em": 0.08 } }
+            },
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 30.0, "values": [0.0, 0.0] },
+                        { "pct": 60.0, "values": [0.0, 1.0] },
+                        { "pct": 100.0, "values": [0.0, 1.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "verseLeft1",
+            "name": "Verse Line L1",
+            "placement": {
+                "slot": "book",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                { "x": -1.05, "y": -0.1 },
+                { "x": -0.3, "y": 0.02 }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "alphaFactor": 0.6, "width": { "type": "em", "em": 0.06 } }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 55.0, "values": [0.0] },
+                        { "pct": 70.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "verseLeft2",
+            "name": "Verse Line L2",
+            "placement": {
+                "slot": "book",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                { "x": -1.05, "y": 0.22 },
+                { "x": -0.3, "y": 0.34 }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "alphaFactor": 0.6, "width": { "type": "em", "em": 0.06 } }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 62.0, "values": [0.0] },
+                        { "pct": 77.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "verseRight1",
+            "name": "Verse Line R1",
+            "placement": {
+                "slot": "book",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                { "x": 0.3, "y": 0.02 },
+                { "x": 1.05, "y": -0.1 }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "alphaFactor": 0.6, "width": { "type": "em", "em": 0.06 } }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 58.0, "values": [0.0] },
+                        { "pct": 73.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "verseRight2",
+            "name": "Verse Line R2",
+            "placement": {
+                "slot": "book",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                { "x": 0.3, "y": 0.34 },
+                { "x": 1.05, "y": 0.22 }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "alphaFactor": 0.6, "width": { "type": "em", "em": 0.06 } }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 66.0, "values": [0.0] },
+                        { "pct": 81.0, "values": [100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-1.3, 0.0] },
+                        { "pct": 25.0, "values": [-1.3, 0.0] },
+                        { "pct": 70.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-1.3, 0.0] },
+                        { "pct": 38.0, "values": [-1.3, 0.0] },
+                        { "pct": 85.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": { "type": "contentDerived", "padXEm": 1.2, "padYEm": 0.7 },
+            "corner": { "type": "fromConfig", "factor": 1.0 },
+            "borderFromConfig": true,
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 12.0, "values": [0.0, 1.0] },
+                        { "pct": 60.0, "values": [1.0, 1.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

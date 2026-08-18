@@ -1,0 +1,145 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Shepherd's Staff",
+    "layout": {
+        "slots": [
+            {
+                "id": "staff",
+                "kind": "FIXED",
+                "widthEm": 2.0,
+                "gapAfterEm": 0.7
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.2
+            }
+        ],
+        "blockHeightEm": 3.6,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "path",
+            "id": "crook",
+            "name": "Shepherd's Crook",
+            "placement": {
+                "slot": "staff",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                { "x": 0.3, "y": 1.55, "outX": -0.06, "outY": -0.9 },
+                { "x": 0.2, "y": -0.7, "inX": 0.02, "inY": 0.55, "outX": -0.02, "outY": -0.45 },
+                { "x": -0.15, "y": -1.35, "inX": 0.35, "inY": 0.02, "outX": -0.3, "outY": -0.02 },
+                { "x": -0.55, "y": -0.95, "inX": -0.02, "inY": -0.25 }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": { "role": "ACCENT", "width": { "type": "em", "em": 0.15 } }
+            },
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 10.0, "values": [0.0, 0.0] },
+                        { "pct": 68.0, "values": [0.0, 1.0] },
+                        { "pct": 100.0, "values": [0.0, 1.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-1.3, 0.0] },
+                        { "pct": 25.0, "values": [-1.3, 0.0] },
+                        { "pct": 70.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "ELEMENT_WIDTH",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-1.3, 0.0] },
+                        { "pct": 38.0, "values": [-1.3, 0.0] },
+                        { "pct": 85.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": { "type": "contentDerived", "padXEm": 1.2, "padYEm": 0.6 },
+            "corner": { "type": "fromConfig", "factor": 1.0 },
+            "borderFromConfig": true,
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 12.0, "values": [0.0, 1.0] },
+                        { "pct": 60.0, "values": [1.0, 1.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

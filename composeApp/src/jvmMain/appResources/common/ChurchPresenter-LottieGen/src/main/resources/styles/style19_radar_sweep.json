@@ -1,0 +1,561 @@
+{
+    "formatVersion": 1,
+    "id": "19",
+    "name": "Radar Sweep",
+    "layout": {
+        "slots": [
+            {
+                "id": "logo",
+                "kind": "LOGO",
+                "gapAfterEm": 0.8,
+                "visibleWhen": [
+                    "LOGO_ENABLED"
+                ]
+            },
+            {
+                "id": "accent",
+                "kind": "FIXED",
+                "widthEm": 2.7,
+                "gapAfterEm": 0.8
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.2
+            }
+        ],
+        "blockHeightEm": 3.5,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "logo",
+            "id": "logo",
+            "name": "Logo",
+            "visibleWhen": [
+                "LOGO_ENABLED"
+            ],
+            "placement": {
+                "slot": "logo",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                2.2,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 45,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": [
+                "NAME_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                -1.3,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 30,
+                            "values": [
+                                -1.3,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 74,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        }
+                    ],
+                    "offsetUnit": "ELEMENT_WIDTH"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 30,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 52,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": [
+                "INFO_VISIBLE"
+            ],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": {
+                        "anchorIn": "CENTER"
+                    }
+                }
+            },
+            "maskReveal": {
+                "padPx": 20.0,
+                "heightFactor": 1.5,
+                "yOffsetFactor": -0.15
+            },
+            "tracks": [
+                {
+                    "property": "POSITION_OFFSET",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                -1.3,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 44,
+                            "values": [
+                                -1.3,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 88,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        }
+                    ],
+                    "offsetUnit": "ELEMENT_WIDTH"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 44,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 66,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "path",
+            "id": "sweepArm",
+            "name": "Sweep Arm",
+            "placement": {
+                "slot": "accent",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                {
+                    "x": 0.0,
+                    "y": 0.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -1.25
+                }
+            ],
+            "closed": false,
+            "paint": {
+                "fill": null,
+                "stroke": {
+                    "role": "ACCENT",
+                    "width": {
+                        "type": "em",
+                        "em": 0.11
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "ROTATION",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                720
+                            ]
+                        }
+                    ],
+                    "easing": "LINEAR"
+                },
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 6,
+                            "values": [
+                                100
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ellipse",
+            "id": "centerDot",
+            "name": "Center Dot",
+            "placement": {
+                "slot": "accent",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": {
+                "type": "em",
+                "wEm": 0.24,
+                "hEm": 0.24
+            },
+            "paint": {
+                "fill": {
+                    "role": "ACCENT"
+                },
+                "stroke": null
+            },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 10,
+                            "values": [
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 46,
+                            "values": [
+                                132
+                            ]
+                        },
+                        {
+                            "pct": 62,
+                            "values": [
+                                100
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ellipse",
+            "id": "ringInner",
+            "name": "Ring Inner",
+            "placement": {
+                "slot": "accent",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": {
+                "type": "em",
+                "wEm": 1.4,
+                "hEm": 1.4
+            },
+            "paint": {
+                "fill": null,
+                "stroke": {
+                    "role": "ACCENT",
+                    "width": {
+                        "type": "em",
+                        "em": 0.07
+                    },
+                    "alphaFactor": 0.6
+                }
+            },
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 18,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 62,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ellipse",
+            "id": "ringOuter",
+            "name": "Ring Outer",
+            "placement": {
+                "slot": "accent",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": {
+                "type": "em",
+                "wEm": 2.5,
+                "hEm": 2.5
+            },
+            "paint": {
+                "fill": null,
+                "stroke": {
+                    "role": "ACCENT",
+                    "width": {
+                        "type": "em",
+                        "em": 0.09
+                    }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "TRIM",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 4,
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "pct": 52,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        },
+                        {
+                            "pct": 100,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": [
+                "BG_ENABLED"
+            ],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": {
+                "type": "contentDerived",
+                "padXEm": 1.15,
+                "padYEm": 0.7
+            },
+            "corner": {
+                "type": "fromConfig",
+                "factor": 1.0
+            },
+            "borderFromConfig": true,
+            "growFrom": "ALIGN_EDGE",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        {
+                            "pct": 0,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        },
+                        {
+                            "pct": 6,
+                            "values": [
+                                0,
+                                1
+                            ]
+                        },
+                        {
+                            "pct": 56,
+                            "values": [
+                                1,
+                                1
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

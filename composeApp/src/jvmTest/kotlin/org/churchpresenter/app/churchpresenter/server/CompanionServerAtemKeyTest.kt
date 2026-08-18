@@ -15,6 +15,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * `/api/atem/key/on` and `/api/atem/key/off` all the way through to a switcher — the Stream Deck
@@ -54,13 +55,13 @@ class CompanionServerAtemKeyTest {
         @BeforeClass
         fun startServer() {
             server = CompanionServer()
-            server.start(port = 39_870)
+            server.start(port = testPort(39_870))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {
                         kotlinx.coroutines.delay(25)
                     }
-                    39_870
+                    testPort(39_870)
                 }
             } ?: error("companion server did not start")
         }

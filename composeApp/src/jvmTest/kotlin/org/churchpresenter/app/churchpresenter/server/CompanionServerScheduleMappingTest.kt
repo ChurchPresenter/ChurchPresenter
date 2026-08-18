@@ -35,6 +35,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * How a schedule crosses the wire, in both directions.
@@ -67,7 +68,7 @@ class CompanionServerScheduleMappingTest {
         @BeforeClass
         fun startServer() {
             server = CompanionServer()
-            server.start(port = 39_717)
+            server.start(port = testPort(39_717))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

@@ -1,0 +1,222 @@
+{
+    "formatVersion": 1,
+    "id": "",
+    "name": "Christmas Star",
+    "layout": {
+        "slots": [
+            {
+                "id": "symbol",
+                "kind": "FIXED",
+                "widthEm": 2.4,
+                "gapAfterEm": 0.8
+            },
+            {
+                "id": "text",
+                "kind": "TEXT",
+                "gapBeforeEm": 0.2
+            }
+        ],
+        "blockHeightEm": 3.4,
+        "centerSingleLine": false
+    },
+    "elements": [
+        {
+            "type": "polygon",
+            "id": "star",
+            "name": "Star",
+            "placement": {
+                "slot": "symbol",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "verticesEm": [
+                [0.0, -1.3],
+                [0.25, -0.25],
+                [0.95, 0.0],
+                [0.25, 0.25],
+                [0.0, 1.3],
+                [-0.25, 0.25],
+                [-0.95, 0.0],
+                [-0.25, -0.25]
+            ],
+            "closed": true,
+            "paint": { "fill": { "role": "ACCENT" } },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 12.0, "values": [0.0, 0.0] },
+                        { "pct": 50.0, "values": [100.0, 100.0] }
+                    ]
+                },
+                {
+                    "property": "ROTATION",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [-120.0] },
+                        { "pct": 12.0, "values": [-120.0] },
+                        { "pct": 55.0, "values": [0.0] },
+                        { "pct": 100.0, "values": [0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "twinkle1",
+            "name": "Twinkle 1",
+            "placement": {
+                "slot": "symbol",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": 0.85,
+                "offsetYEm": -0.9
+            },
+            "verticesEm": [
+                [0.0, -0.18],
+                [0.13, 0.0],
+                [0.0, 0.18],
+                [-0.13, 0.0]
+            ],
+            "closed": true,
+            "paint": { "fill": { "role": "ACCENT", "alphaFactor": 0.8 } },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 55.0, "values": [0.0, 0.0] },
+                        { "pct": 70.0, "values": [100.0, 100.0] },
+                        { "pct": 100.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "polygon",
+            "id": "twinkle2",
+            "name": "Twinkle 2",
+            "placement": {
+                "slot": "symbol",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER",
+                "offsetXEm": -0.8,
+                "offsetYEm": 0.75
+            },
+            "verticesEm": [
+                [0.0, -0.14],
+                [0.1, 0.0],
+                [0.0, 0.14],
+                [-0.1, 0.0]
+            ],
+            "closed": true,
+            "paint": { "fill": { "role": "ACCENT", "alphaFactor": 0.7 } },
+            "tracks": [
+                {
+                    "property": "SCALE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.0] },
+                        { "pct": 70.0, "values": [0.0, 0.0] },
+                        { "pct": 85.0, "values": [100.0, 100.0] },
+                        { "pct": 100.0, "values": [100.0, 100.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "name": "Name",
+            "field": "NAME",
+            "visibleWhen": ["NAME_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "NAME_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 25.0, "values": [0.0] },
+                        { "pct": 65.0, "values": [100.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.5] },
+                        { "pct": 25.0, "values": [0.0, 0.5] },
+                        { "pct": 70.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "id": "info",
+            "name": "Info",
+            "field": "INFO",
+            "visibleWhen": ["INFO_VISIBLE"],
+            "placement": {
+                "slot": "text",
+                "anchorIn": "START",
+                "line": "INFO_LINE",
+                "alignOverrides": {
+                    "center": { "anchorIn": "CENTER" }
+                }
+            },
+            "tracks": [
+                {
+                    "property": "OPACITY",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0] },
+                        { "pct": 40.0, "values": [0.0] },
+                        { "pct": 80.0, "values": [100.0] }
+                    ]
+                },
+                {
+                    "property": "POSITION_OFFSET",
+                    "offsetUnit": "EM",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 0.5] },
+                        { "pct": 40.0, "values": [0.0, 0.5] },
+                        { "pct": 85.0, "values": [0.0, 0.0] },
+                        { "pct": 100.0, "values": [0.0, 0.0] }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "background",
+            "id": "background",
+            "name": "Background",
+            "visibleWhen": ["BG_ENABLED"],
+            "placement": {
+                "slot": "block",
+                "anchorIn": "CENTER",
+                "line": "BLOCK_CENTER"
+            },
+            "size": { "type": "contentDerived", "padXEm": 1.2, "padYEm": 0.7 },
+            "corner": { "type": "fromConfig", "factor": 1.0 },
+            "borderFromConfig": true,
+            "growFrom": "CENTER",
+            "tracks": [
+                {
+                    "property": "RECT_SIZE",
+                    "keyframes": [
+                        { "pct": 0.0, "values": [0.0, 1.0] },
+                        { "pct": 10.0, "values": [0.0, 1.0] },
+                        { "pct": 55.0, "values": [1.0, 1.0] }
+                    ]
+                }
+            ]
+        }
+    ]
+}

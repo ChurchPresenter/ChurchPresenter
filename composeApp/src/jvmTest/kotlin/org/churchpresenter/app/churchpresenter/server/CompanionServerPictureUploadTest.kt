@@ -32,6 +32,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * A photo taken on a phone and sent to the desktop, and picking one to show.
@@ -74,7 +75,7 @@ class CompanionServerPictureUploadTest {
             tempHome = Files.createTempDirectory("cp-picture-upload").toFile()
             System.setProperty("user.home", tempHome.absolutePath)
             server = CompanionServer()
-            server.start(port = 39_723)
+            server.start(port = testPort(39_723))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {
