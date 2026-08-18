@@ -46,3 +46,4 @@ include(":core-models")
 // The Bitfocus Companion Satellite protocol client: a plain Kotlin library, depended on by
 // :composeApp, which wraps it in CompanionSatelliteViewModel.
 include(":companion-satellite")
+include(":theme")

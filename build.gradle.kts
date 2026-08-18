@@ -8,10 +8,6 @@ plugins {
     alias(libs.plugins.kotlinJvm) apply false
 }
 
-// Point Git at the repo's own hooks directory so every checkout gets the pre-commit branch
-// guard in .githooks/. `core.hooksPath` lives in .git/config, which is never cloned or pushed
-// — Git deliberately refuses to let a clone activate hooks by itself — so it has to be set
-// once per working copy. Doing it here means the first `./gradlew` run wires it up.
 val gitHooksPath = ".githooks"
 if (layout.projectDirectory.file(".git").asFile.exists()) {
     val current = providers.exec {
@@ -25,5 +21,65 @@ if (layout.projectDirectory.file(".git").asFile.exists()) {
             isIgnoreExitValue = true      // a missing/!working git must never fail the build
         }.result.get()
         logger.lifecycle("Configured git core.hooksPath = $gitHooksPath")
+    }
+}
+
+subprojects {
+    version = "1.0.0"
+}
+
+val defaultCoverageFloors = mapOf(
+    "INSTRUCTION" to "0.85",
+    "BRANCH" to "0.85",
+    "LINE" to "0.85",
+    "COMPLEXITY" to "0.85",
+    "METHOD" to "0.85",
+    "CLASS" to "0.85",
+)
+
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+        plugins.withId("jacoco") {
+            @Suppress("UNCHECKED_CAST")
+            fun excludes(): List<String> =
+                (findProperty("coverageExcludes") as? List<String>) ?: listOf("**/ComposableSingletons*")
+
+            @Suppress("UNCHECKED_CAST")
+            fun floors(): Map<String, String> =
+                defaultCoverageFloors + (findProperty("coverageFloors") as? Map<String, String>).orEmpty()
+
+            fun coveredClasses() = fileTree(layout.buildDirectory.dir("classes/kotlin/main")) {
+                exclude(excludes())
+            }
+
+            tasks.withType<Test>().configureEach {
+                useJUnitPlatform()
+                finalizedBy("jacocoTestReport")
+            }
+
+            tasks.withType<JacocoReport>().configureEach {
+                dependsOn("test")
+                reports { xml.required.set(true); html.required.set(true) }
+                classDirectories.setFrom(coveredClasses())
+            }
+
+            tasks.withType<JacocoCoverageVerification>().configureEach {
+                dependsOn("test")
+                executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"))
+                sourceDirectories.setFrom(files("src/main/kotlin"))
+                classDirectories.setFrom(coveredClasses())
+                violationRules {
+                    rule {
+                        floors().forEach { (counterName, floor) ->
+                            limit {
+                                counter = counterName
+                                value = "COVEREDRATIO"
+                                minimum = floor.toBigDecimal()
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

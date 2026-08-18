@@ -463,13 +463,14 @@ execution order, so it can appear on one machine and not another.
 
 ### The modules of this build
 
-`converter/` and `companion-satellite/` are part of this build, so neither needs a wrapper of its
-own:
+`converter/`, `companion-satellite/` and `theme/` are part of this build, so none of them needs a
+wrapper of its own:
 
 ```bash
 ./gradlew :converter:test              # its suite
 ./gradlew :converter:run               # the converter on its own, without the app
 ./gradlew :companion-satellite:test    # the Satellite protocol client's suite
+./gradlew :theme:test                  # the theme module's suite
 ```
 
 ### The four separate sub-builds
