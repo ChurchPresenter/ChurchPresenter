@@ -31,15 +31,20 @@ internal object SectionLabel {
     /** `V1` becomes `Verse 1`, `C` becomes `Chorus`, `Antiphon 2` stays as it is. */
     fun of(marker: String): String {
         val cleaned = marker.trim().removeSurrounding("[", "]").trim()
-        if (cleaned.isEmpty()) return "Verse"
-        val match = splitWordAndNumber.find(cleaned) ?: return cleaned
+        val match = splitWordAndNumber.find(cleaned)
+        if (cleaned.isEmpty() || match == null) return cleaned.ifEmpty { "Verse" }
+
         val (word, number) = match.destructured
         // A marker that is nothing but a number is a verse: EasySlides numbers its verses `[1]`,
         // `[2]` and names only the other sections, so reading these as "1" and "2" would leave a
         // whole library's verses labelled with bare digits.
-        if (word.isBlank()) return if (number.isEmpty()) cleaned else "Verse $number"
-        val name = names[word.lowercase().replace(" ", "")] ?: return cleaned
-        return if (number.isEmpty()) name else "$name $number"
+        val name = if (word.isBlank()) "Verse" else names[word.lowercase().replace(" ", "")]
+        return when {
+            name == null -> cleaned
+            word.isBlank() && number.isEmpty() -> cleaned
+            number.isEmpty() -> name
+            else -> "$name $number"
+        }
     }
 
     /**

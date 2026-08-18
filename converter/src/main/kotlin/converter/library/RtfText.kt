@@ -43,6 +43,12 @@ object RtfText {
 
     private const val DEFAULT_CODE_PAGE = 1252
 
+    /** `\'hh` is four source characters standing for one byte. */
+    private const val HEX_ESCAPE_LENGTH = 4
+
+    /** `\uN` is signed 16-bit, so a code point above 32767 arrives negative. */
+    private const val UNSIGNED_16_BIT = 0x10000
+
     /** One nesting level of `{...}`, inherited by value from its parent on `{`. */
     private data class Group(
         var ignore: Boolean = false,
@@ -106,7 +112,7 @@ object RtfText {
                             )
                             val value = hex.toIntOrNull(radix = 16)
                             if (value != null) bytes.add(value.toByte())
-                            index += 4
+                            index += HEX_ESCAPE_LENGTH
                         }
 
                         // \\ \{ \} are the literal characters.
@@ -242,7 +248,7 @@ object RtfText {
      * `\uN` is signed 16-bit, so anything above 32767 is written negative and wraps.
      */
     private fun codePointOf(parameter: Int): Char =
-        (if (parameter < 0) parameter + 0x10000 else parameter).toChar()
+        (if (parameter < 0) parameter + UNSIGNED_16_BIT else parameter).toChar()
 
     /**
      * Steps over the [skip] fallback characters that follow a `\uN`, counting a `\'hh` escape as
@@ -252,7 +258,7 @@ object RtfText {
         var i = start
         var remaining = skip
         while (remaining > 0 && i < rtf.length) {
-            if (rtf[i] == '\\' && rtf.getOrNull(i + 1) == '\'') i += 4 else i++
+            if (rtf[i] == '\\' && rtf.getOrNull(i + 1) == '\'') i += HEX_ESCAPE_LENGTH else i++
             remaining--
         }
         return i

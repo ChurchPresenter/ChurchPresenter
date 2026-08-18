@@ -161,7 +161,12 @@ class MediaShoutEdgeCasesTest {
 
     // ── The container ─────────────────────────────────────────────────────────
 
-    private fun container(zip: ByteArray, magic: String = "sc7x", zipOffset: Int? = null, zipLength: Int? = null): ByteArray {
+    private fun container(
+        zip: ByteArray,
+        magic: String = "sc7x",
+        zipOffset: Int? = null,
+        zipLength: Int? = null,
+    ): ByteArray {
         val thumbnail = ByteArray(8) { 0x7f }
         val header = ByteBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN)
         header.put(magic.toByteArray(Charsets.US_ASCII))

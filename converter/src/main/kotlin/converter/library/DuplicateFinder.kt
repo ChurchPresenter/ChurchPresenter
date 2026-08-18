@@ -1,7 +1,5 @@
 package converter.library
 
-import converter.song.MarkdownToSongConverter
-
 import java.io.File
 import java.nio.charset.Charset
 
@@ -24,7 +22,25 @@ data class DuplicateGroup(
 
 object DuplicateFinder {
 
-    fun findDuplicates(directory: File, threshold: Double = 0.9, matchByNumber: Boolean = false, matchByTitle: Boolean = true): List<DuplicateGroup> {
+    /** A line in more than this many songs says nothing about any pair of them. */
+    private const val MAX_SONGS_SHARING_A_LINE = 50
+
+    /** Shorter than this and a line is "Oh" or "Amen" rather than something to match on. */
+    private const val MIN_COMPARABLE_LINE_LENGTH = 3
+
+    /** How alike two lines must be to count as the same one typed differently. */
+    private const val FUZZY_LINE_MATCH = 0.75
+
+    /** Two song indices packed into one Long, so a pair can key a map without allocating. */
+    private const val PAIR_SHIFT = 32
+    private const val PAIR_LOW_MASK = 0xFFFFFFFFL
+
+    fun findDuplicates(
+        directory: File,
+        threshold: Double = 0.9,
+        matchByNumber: Boolean = false,
+        matchByTitle: Boolean = true,
+    ): List<DuplicateGroup> {
         val songs = scanSongs(directory)
         if (songs.size < 2) return emptyList()
 
@@ -109,7 +125,7 @@ object DuplicateFinder {
             // Find candidate pairs: songs sharing >= 2 lines
             val candidatePairs = mutableMapOf<Long, Int>() // packed pair key → shared line count
             for ((_, songIndices) in invertedIndex) {
-                if (songIndices.size < 2 || songIndices.size > 50) continue // skip very common lines
+                if (songIndices.size < 2 || songIndices.size > MAX_SONGS_SHARING_A_LINE) continue
                 val list = songIndices.toList()
                 for (a in list.indices) {
                     for (b in a + 1 until list.size) {
@@ -215,7 +231,7 @@ object DuplicateFinder {
     private fun normalizeLines(song: SongInfo): Set<String> {
         return song.lyricsText.lines()
             .map { normalizeText(it) }
-            .filter { it.length >= 3 } // skip very short lines
+            .filter { it.length >= MIN_COMPARABLE_LINE_LENGTH }
             .toSet()
     }
 
@@ -250,15 +266,15 @@ object DuplicateFinder {
             val unmatchedLong = longer - exactMatches
             if (unmatchedLong.isNotEmpty()) {
                 // Pre-compute bigrams for unmatched longer lines
-                val longBigrams = unmatchedLong.map { Triple(it, it, bigrams(it)) }
+                val longBigrams = unmatchedLong.map { bigrams(it) }
                 for (sLine in unmatchedShort) {
                     val sBi = bigrams(sLine)
                     var bestSim = 0.0
-                    for ((_, lNorm, lBi) in longBigrams) {
+                    for (lBi in longBigrams) {
                         val sim = diceFromBigrams(sBi, lBi)
                         if (sim > bestSim) bestSim = sim
                     }
-                    if (bestSim >= 0.75) matched++
+                    if (bestSim >= FUZZY_LINE_MATCH) matched++
                 }
             }
         }
@@ -346,7 +362,8 @@ object DuplicateFinder {
         """^\{.*\}[.:]?$"""
     )
     private val bareLabelRegex = Regex(
-        """^(припев|куплет|хор|вступление|окончание|бридж|кода|chorus|verse|bridge|intro|outro|refrain|coda)\s*\d*\s*[.:]?\s*$""",
+        """^(припев|куплет|хор|вступление|окончание|бридж|кода|""" +
+            """chorus|verse|bridge|intro|outro|refrain|coda)\s*\d*\s*[.:]?\s*${'$'}""",
         RegexOption.IGNORE_CASE
     )
 
@@ -381,14 +398,23 @@ object DuplicateFinder {
         return cyrillic > 0 && cyrillic > latin
     }
 
+    /** The line prefixes that mark structure or metadata rather than something sung. */
+    private val NOT_LYRIC_PREFIXES = listOf("[", "{", "---", "title:", "author:", "composer:", "tune:")
+
+    /**
+     * Whether [trimmed] carries structure or metadata rather than a lyric.
+     *
+     * Repairing one of these would rewrite a field the rest of the app matches songs on, so they
+     * are left exactly as they are even when they hold the same lookalike characters.
+     */
+    private fun isNotLyric(trimmed: String): Boolean = NOT_LYRIC_PREFIXES.any { trimmed.startsWith(it) }
+
     /** Check if a file contains mixed Latin/Cyrillic homoglyphs in Cyrillic lines. */
     fun hasHomoglyphs(file: File): Boolean {
         val content = readFileWithFallback(file)
         for (line in content.lines()) {
             val trimmed = line.trim()
-            if (trimmed.startsWith("[") || trimmed.startsWith("{") || trimmed.startsWith("---") ||
-                trimmed.startsWith("title:") || trimmed.startsWith("author:") ||
-                trimmed.startsWith("composer:") || trimmed.startsWith("tune:")) continue
+            if (isNotLyric(trimmed)) continue
             if (isCyrillicLine(trimmed) && trimmed.any { it in homoglyphFixMap }) return true
         }
         return false
@@ -403,10 +429,7 @@ object DuplicateFinder {
         var totalFixed = 0
         val fixedLines = lines.map { line ->
             val trimmed = line.trim()
-            // Skip structural/metadata lines
-            if (trimmed.startsWith("[") || trimmed.startsWith("{") || trimmed.startsWith("---") ||
-                trimmed.startsWith("title:") || trimmed.startsWith("author:") ||
-                trimmed.startsWith("composer:") || trimmed.startsWith("tune:")) {
+            if (isNotLyric(trimmed)) {
                 line
             } else if (!isCyrillicLine(trimmed)) {
                 // Not a Cyrillic line — leave it alone
@@ -482,28 +505,18 @@ object DuplicateFinder {
     private fun packPair(a: Int, b: Int): Long {
         val lo = minOf(a, b)
         val hi = maxOf(a, b)
-        return lo.toLong() shl 32 or hi.toLong()
+        return lo.toLong() shl PAIR_SHIFT or hi.toLong()
     }
 
     private fun unpackPair(key: Long): Pair<Int, Int> {
-        return Pair((key shr 32).toInt(), (key and 0xFFFFFFFFL).toInt())
+        return Pair((key shr PAIR_SHIFT).toInt(), (key and PAIR_LOW_MASK).toInt())
     }
 
     // =========================================================================
     // File I/O
     // =========================================================================
 
-    internal fun readFileWithFallback(file: File): String {
-        return try {
-            val bytes = file.readBytes()
-            val content = if (bytes.size >= 3 && bytes[0] == 0xEF.toByte() && bytes[1] == 0xBB.toByte() && bytes[2] == 0xBF.toByte()) {
-                String(bytes, 3, bytes.size - 3, Charsets.UTF_8)
-            } else {
-                String(bytes, Charsets.UTF_8)
-            }
-            if (content.contains('\uFFFD')) String(bytes, Charset.forName("windows-1251")) else content
-        } catch (_: Exception) {
-            file.readText(Charset.forName("windows-1251"))
-        }
-    }
+    internal fun readFileWithFallback(file: File): String =
+        runCatching { decodeUtf8OrCyrillic(file.readBytes()) }
+            .getOrElse { file.readText(Charset.forName("windows-1251")) }
 }

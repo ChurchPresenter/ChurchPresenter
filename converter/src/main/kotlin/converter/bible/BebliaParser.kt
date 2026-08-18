@@ -104,7 +104,8 @@ internal object BebliaParser {
                 var result = false
                 while (reader.hasNext()) {
                     if (reader.next() == XMLStreamConstants.START_ELEMENT) {
-                        result = reader.localName == "bible" && TITLE_ATTRIBUTES.any { !reader.attribute(it).isNullOrBlank() }
+                        result = reader.localName == "bible" &&
+                            TITLE_ATTRIBUTES.any { !reader.attribute(it).isNullOrBlank() }
                         break
                     }
                 }

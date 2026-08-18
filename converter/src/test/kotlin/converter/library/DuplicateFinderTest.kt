@@ -96,7 +96,10 @@ class DuplicateFinderTest {
         val file = File(temp, "no-frontmatter.song")
         file.writeText(
             MarkdownToSongConverter.buildSongContent(
-                ParsedSong(title = "Amazing Grace", sections = listOf(SongSection("Verse 1", listOf("Amazing grace how sweet"))))
+                ParsedSong(
+                    title = "Amazing Grace",
+                    sections = listOf(SongSection("Verse 1", listOf("Amazing grace how sweet"))),
+                )
             ),
             Charsets.UTF_8,
         )

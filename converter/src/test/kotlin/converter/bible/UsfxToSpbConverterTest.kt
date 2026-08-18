@@ -80,7 +80,10 @@ class UsfxToSpbConverterTest {
     @Test
     fun `a footnote inside a verse is dropped rather than spliced into it`() {
         val bible = parse(
-            usfx("""<book id="GEN"><c id="1"/><v id="1"/>In the beginning<f caller="+">A note</f> God created<ve/></book>""")
+            usfx(
+                """<book id="GEN"><c id="1"/><v id="1"/>In the beginning""" +
+                    """<f caller="+">A note</f> God created<ve/></book>"""
+            )
         )
         val text = verseText(bible)!!
         assertTrue(!text.contains("A note"), "the note is gone: '$text'")
@@ -112,7 +115,10 @@ class UsfxToSpbConverterTest {
         // `d` is deliberately absent from the skip list — some translations even wrap the verse
         // marker itself in it, so dropping `d` would lose the verse.
         val bible = parse(
-            usfx("""<book id="PSA"><c id="3"/><d>A Psalm of David</d><v id="1"/>Lord, how many are my foes<ve/></book>""")
+            usfx(
+                """<book id="PSA"><c id="3"/><d>A Psalm of David</d>""" +
+                    """<v id="1"/>Lord, how many are my foes<ve/></book>"""
+            )
         )
         val texts = bible.books.single().chapters.single().verses.map { it.text }
         assertTrue(

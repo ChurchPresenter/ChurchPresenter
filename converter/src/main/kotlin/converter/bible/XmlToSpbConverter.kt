@@ -33,6 +33,15 @@ data class ParsedBible(
 
 object XmlToSpbConverter {
 
+    /** Longer than this and a psalm's first verse is content, whatever it opens with. */
+    private const val MAX_SUPERSCRIPTION_LENGTH = 200
+
+    /** How much text may follow a bracketed title before the verse counts as content. */
+    private const val MAX_TITLE_REMAINDER = 40
+
+    /** Longer than this and a chapter caption is a sentence about the book, not its name. */
+    private const val MAX_CAPTION_NAME_LENGTH = 30
+
     // Languages that use LXX/Septuagint Psalm numbering (Orthodox traditions)
     private val LXX_PSALM_LANGUAGES = setOf(
         "RUS", "UKR", "BEL",           // East Slavic
@@ -46,20 +55,27 @@ object XmlToSpbConverter {
     )
 
     /**
+     * The psalms the two traditions number differently, LXX chapter to Hebrew chapter.
+     *
+     * Two are merged in the Septuagint and split in the Hebrew text (9 = 9+10, 113 = 114+115), and
+     * two Hebrew psalms are split in the Septuagint (114 and 115 are both 116; 146 and 147 are both
+     * 147). Each keeps the number of the Hebrew psalm it opens.
+     */
+    private val LXX_PSALM_EXCEPTIONS = mapOf(
+        9 to 9, 113 to 114, 114 to 116, 115 to 116, 146 to 147, 147 to 147,
+    )
+
+    /** The runs where the Septuagint is exactly one behind the Hebrew numbering. */
+    private val LXX_PSALMS_ONE_BEHIND = listOf(10..112, 116..145)
+
+    /**
      * Maps LXX Psalm chapter number to Hebrew Psalm chapter number.
      * Used for the BXXXCXXXVXXX code so cross-referencing with Hebrew-numbered Bibles works.
+     * Psalms 1-8 and 148 onwards are numbered alike and fall through unchanged.
      */
     private fun lxxToHebrewPsalm(lxxChapter: Int): Int = when {
-        lxxChapter <= 8 -> lxxChapter                   // Psalms 1-8: same
-        lxxChapter == 9 -> 9                             // LXX 9 = Hebrew 9+10 (merged)
-        lxxChapter in 10..112 -> lxxChapter + 1          // LXX 10-112 = Hebrew 11-113
-        lxxChapter == 113 -> 114                         // LXX 113 = Hebrew 114+115 (merged)
-        lxxChapter == 114 -> 116                         // LXX 114 = Hebrew 116:1-9
-        lxxChapter == 115 -> 116                         // LXX 115 = Hebrew 116:10-19
-        lxxChapter in 116..145 -> lxxChapter + 1         // LXX 116-145 = Hebrew 117-146
-        lxxChapter == 146 -> 147                         // LXX 146 = Hebrew 147:1-11
-        lxxChapter == 147 -> 147                         // LXX 147 = Hebrew 147:12-20
-        lxxChapter >= 148 -> lxxChapter                  // Psalms 148-150(151): same
+        lxxChapter in LXX_PSALM_EXCEPTIONS -> LXX_PSALM_EXCEPTIONS.getValue(lxxChapter)
+        LXX_PSALMS_ONE_BEHIND.any { lxxChapter in it } -> lxxChapter + 1
         else -> lxxChapter
     }
 
@@ -72,11 +88,11 @@ object XmlToSpbConverter {
     private fun isPsalmSuperscription(text: String): Boolean {
         val trimmed = text.trim()
         // Too long to be just a title
-        if (trimmed.length > 200) return false
+        if (trimmed.length > MAX_SUPERSCRIPTION_LENGTH) return false
         // Remove text inside «» brackets (title markers)
         val withoutBrackets = trimmed.replace(Regex("«[^»]*»\\.?"), "").trim()
         // If after removing bracketed title there's substantial content, it's embedded
-        if (withoutBrackets.length > 40) return false
+        if (withoutBrackets.length > MAX_TITLE_REMAINDER) return false
         // Check for known superscription patterns
         val titlePatterns = listOf(
             "Псалом", "Молитва", "Начальнику", "Песнь", "Аллилуия",
@@ -164,7 +180,8 @@ object XmlToSpbConverter {
                     val pathLower = xmlFile.absolutePath.lowercase()
                     if ("ukrainian" in pathLower || "українська" in pathLower) "UKR" else "RUS"
                 }
-                parentFolder != null && (parentFolder in BookNames.LANGUAGE_LOOKUPS || parentFolder == "ENG") -> parentFolder
+                parentFolder != null &&
+                    (parentFolder in BookNames.LANGUAGE_LOOKUPS || parentFolder == "ENG") -> parentFolder
                 else -> null
             }
         }
@@ -292,41 +309,39 @@ object XmlToSpbConverter {
     }
 
     private fun getBookName(bookElem: org.w3c.dom.Node, bookNum: Int, language: String?): String {
-        if (language == "ENG") {
-            val bname = bookElem.attributes.getNamedItem("bname")?.nodeValue
-            if (!bname.isNullOrBlank()) return bname
-            val bsname = bookElem.attributes.getNamedItem("bsname")?.nodeValue
-            if (!bsname.isNullOrBlank()) return bsname
-        }
-
+        val canonical = BookNames.ENGLISH[bookNum] ?: "Book $bookNum"
+        if (language == "ENG") declaredName(bookElem)?.let { return it }
         if (language != null && language in BookNames.LANGUAGE_LOOKUPS) {
-            return BookNames.LANGUAGE_LOOKUPS[language]?.get(bookNum)
-                ?: BookNames.ENGLISH[bookNum]
-                ?: "Book $bookNum"
+            return BookNames.LANGUAGE_LOOKUPS[language]?.get(bookNum) ?: canonical
         }
-
-        // Fallback: try caption from first chapter
-        val children = bookElem.childNodes
-        for (i in 0 until children.length) {
-            val child = children.item(i)
-            if (child.nodeName == "CHAPTER") {
-                val chapChildren = child.childNodes
-                for (j in 0 until chapChildren.length) {
-                    val cc = chapChildren.item(j)
-                    if (cc.nodeName == "CAPTION") {
-                        val captionText = cc.textContent?.trim() ?: ""
-                        if ("." in captionText) {
-                            val shortName = captionText.substringAfterLast(".").trim()
-                            if (shortName.isNotBlank() && shortName.length < 30) {
-                                return shortName
-                            }
-                        }
-                    }
-                }
-                break
-            }
-        }
-
-        return BookNames.ENGLISH[bookNum] ?: "Book $bookNum"
+        return captionName(bookElem) ?: canonical
     }
+
+    /** The name an English module writes on the book itself, long form before short. */
+    private fun declaredName(bookElem: org.w3c.dom.Node): String? =
+        listOf("bname", "bsname")
+            .firstNotNullOfOrNull { bookElem.attributes.getNamedItem(it)?.nodeValue?.takeIf { name -> name.isNotBlank() } }
+
+    /**
+     * The book's name as its first chapter's caption states it, for a module in a language with no
+     * table of its own.
+     *
+     * A caption reads "1. Genesis", so what is wanted is what follows the number -- and only when
+     * what follows is short enough to be a name rather than a sentence about the book.
+     */
+    private fun captionName(bookElem: org.w3c.dom.Node): String? {
+        val firstChapter = bookElem.childNodes.elements().firstOrNull { it.nodeName == "CHAPTER" } ?: return null
+        return firstChapter.childNodes.elements()
+            .filter { it.nodeName == "CAPTION" }
+            .mapNotNull { caption ->
+                val text = caption.textContent?.trim().orEmpty()
+                text.substringAfterLast(".").trim()
+                    .takeIf { "." in text && it.isNotBlank() && it.length < MAX_CAPTION_NAME_LENGTH }
+            }
+            .firstOrNull()
+    }
+
+    /** A [org.w3c.dom.NodeList] as a sequence, which it is not by itself. */
+    private fun org.w3c.dom.NodeList.elements(): Sequence<org.w3c.dom.Node> =
+        (0 until length).asSequence().map { item(it) }
 }

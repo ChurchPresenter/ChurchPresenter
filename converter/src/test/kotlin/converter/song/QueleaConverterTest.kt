@@ -172,7 +172,13 @@ class QueleaConverterTest {
     fun `a heading written with a colon and no space still names the section`() {
         val file = pack(
             "songs.qsp",
-            mapOf("1.xml" to songXml("Grace", "Verse 3" to "VERSE1:\nNO LONGER ASHAMED", "Verse 4" to "PRE-CHORUS:\nYOU SAVE")),
+            mapOf(
+                "1.xml" to songXml(
+                    "Grace",
+                    "Verse 3" to "VERSE1:\nNO LONGER ASHAMED",
+                    "Verse 4" to "PRE-CHORUS:\nYOU SAVE",
+                )
+            ),
         )
 
         assertEquals(

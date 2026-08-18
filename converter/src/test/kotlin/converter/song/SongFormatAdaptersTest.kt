@@ -228,7 +228,8 @@ class SongFormatAdaptersTest {
 
     private fun sps(name: String) = file(
         name,
-        "##SoftProjector\n##Hymns of Grace\n1#\$#Amazing Grace#\$#x#\$#tune#\$#John Newton#\$#composer#\$#Amazing grace\n",
+        "##SoftProjector\n##Hymns of Grace\n" +
+            "1#\$#Amazing Grace#\$#x#\$#tune#\$#John Newton#\$#composer#\$#Amazing grace\n",
     )
 
     @Test

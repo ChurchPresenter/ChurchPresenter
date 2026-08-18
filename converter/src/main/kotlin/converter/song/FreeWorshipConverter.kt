@@ -47,8 +47,8 @@ object FreeWorshipConverter {
 
         val root = doc.documentElement
             ?: throw IllegalArgumentException("Not an XML document")
-        if (!root.tagName.equals("song", ignoreCase = true)) {
-            throw IllegalArgumentException("Not an OpenLyrics song file (root element is <${root.tagName}>)")
+        require(root.tagName.equals("song", ignoreCase = true)) {
+            "Not an OpenLyrics song file (root element is <${root.tagName}>)"
         }
 
         val properties = root.childElement("properties")

@@ -68,7 +68,11 @@ class ProPresenterEdgeCasesTest {
         val older = pro5("b.pro5", attributes = """artist="Chris Tomlin"""", groups = group("V", slide(rtf("line"))))
         assertEquals("Chris Tomlin", ProPresenterConverter.parse(older).author)
 
-        val blank = pro5("c.pro5", attributes = """CCLIAuthor="  " author="Fallback"""", groups = group("V", slide(rtf("l"))))
+        val blank = pro5(
+            "c.pro5",
+            attributes = """CCLIAuthor="  " author="Fallback"""",
+            groups = group("V", slide(rtf("l"))),
+        )
         assertEquals("Fallback", ProPresenterConverter.parse(blank).author)
     }
 

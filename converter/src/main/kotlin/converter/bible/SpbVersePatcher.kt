@@ -3,6 +3,14 @@ package converter.bible
 import java.io.File
 
 object SpbVersePatcher {
+
+    /** A verse row is `id, book, chapter, verse, text` -- five tab-separated columns. */
+    private const val VERSE_COLUMNS = 5
+    private const val COLUMN_ID = 0
+    private const val COLUMN_BOOK = 1
+    private const val COLUMN_CHAPTER = 2
+    private const val COLUMN_VERSE = 3
+    private const val COLUMN_TEXT = 4
     /**
      * Applies all known corrections to an SPB file in-place:
      *   1. Merges consecutive verse lines that share the same ID (split superscriptions).
@@ -31,10 +39,11 @@ object SpbVersePatcher {
             val prevId = deduped.lastOrNull { it.isNotBlank() }?.substringBefore('\t')
             if (prevId == id) {
                 val parts = line.split("\t", limit = 5)
-                if (parts.size < 5) { deduped.add(line); continue }
+                if (parts.size < VERSE_COLUMNS) { deduped.add(line); continue }
                 val prevIdx = deduped.indexOfLast { it.isNotBlank() }
                 val prevParts = deduped[prevIdx].split("\t", limit = 5)
-                deduped[prevIdx] = "${prevParts[0]}\t${prevParts[1]}\t${prevParts[2]}\t${prevParts[3]}\t${prevParts[4].trimEnd()} ${parts[4]}"
+                deduped[prevIdx] = prevParts.take(COLUMN_TEXT).joinToString("\t") +
+                    "\t${prevParts[COLUMN_TEXT].trimEnd()} ${parts[COLUMN_TEXT]}"
                 patchCount++
             } else {
                 deduped.add(line)
@@ -53,34 +62,34 @@ object SpbVersePatcher {
         // --- Pass 3: fix truncated verse texts ---
         val textFixed = idFixed.map { line ->
             if (line.isBlank()) return@map line
-            val parts = line.split("\t", limit = 5)
-            if (parts.size < 5) return@map line
-            val bookNum = parts[1].toIntOrNull() ?: return@map line
-            val chapNum = parts[2].toIntOrNull() ?: return@map line
-            val versNum = parts[3].toIntOrNull() ?: return@map line
-            val currentText = parts[4].trimEnd('\r')
+            val parts = line.split("\t", limit = VERSE_COLUMNS)
+            if (parts.size < VERSE_COLUMNS) return@map line
+            val bookNum = parts[COLUMN_BOOK].toIntOrNull() ?: return@map line
+            val chapNum = parts[COLUMN_CHAPTER].toIntOrNull() ?: return@map line
+            val versNum = parts[COLUMN_VERSE].toIntOrNull() ?: return@map line
+            val currentText = parts[COLUMN_TEXT].trimEnd('\r')
             val patch = VersePatches.PATCHES[Triple(bookNum, chapNum, versNum)] ?: return@map line
             if (patch.matchText != null) {
                 if (currentText != patch.matchText) return@map line
                 patchCount++
-                return@map "${parts[0]}\t${parts[1]}\t${parts[2]}\t${parts[3]}\t${patch.correctedText}"
+                return@map parts.take(COLUMN_TEXT).joinToString("\t") + "\t${patch.correctedText}"
             }
             if (patch.minimumPrefixLength > 0 && currentText.length < patch.minimumPrefixLength) return@map line
             if (currentText == patch.correctedText) return@map line
             if (!patch.correctedText.startsWith(currentText)) return@map line
             patchCount++
-            "${parts[0]}\t${parts[1]}\t${parts[2]}\t${parts[3]}\t${patch.correctedText}"
+            parts.take(COLUMN_TEXT).joinToString("\t") + "\t${patch.correctedText}"
         }.toMutableList()
 
         // --- Pass 4: insert missing verses ---
         for (missing in VersePatches.MISSING_VERSES) {
             val insertAfterIdx = textFixed.indexOfLast { line ->
                 if (line.isBlank()) return@indexOfLast false
-                val parts = line.split("\t", limit = 5)
-                if (parts.size < 4) return@indexOfLast false
-                parts[1].toIntOrNull() == missing.bookNum &&
-                parts[2].toIntOrNull() == missing.displayChap &&
-                parts[3].toIntOrNull() == missing.insertAfterDisplayVers
+                val parts = line.split("\t", limit = VERSE_COLUMNS)
+                if (parts.size < COLUMN_TEXT) return@indexOfLast false
+                parts[COLUMN_BOOK].toIntOrNull() == missing.bookNum &&
+                parts[COLUMN_CHAPTER].toIntOrNull() == missing.displayChap &&
+                parts[COLUMN_VERSE].toIntOrNull() == missing.insertAfterDisplayVers
             }
             if (insertAfterIdx < 0) continue
             // Check it's not already present
@@ -88,7 +97,9 @@ object SpbVersePatcher {
                 line.substringBefore('\t') == missing.verseId
             }
             if (alreadyPresent) continue
-            val newLine = "${missing.verseId}\t${missing.bookNum}\t${missing.displayChap}\t${missing.displayVers}\t${missing.verseText}"
+            val newLine = listOf(
+                missing.verseId, missing.bookNum, missing.displayChap, missing.displayVers, missing.verseText,
+            ).joinToString("\t")
             textFixed.add(insertAfterIdx + 1, newLine)
             patchCount++
         }

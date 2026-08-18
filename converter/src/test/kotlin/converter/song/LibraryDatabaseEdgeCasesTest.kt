@@ -51,7 +51,8 @@ class LibraryDatabaseEdgeCasesTest {
     private fun verse(type: String, label: String, body: String) =
         "<verse type=\"$type\" label=\"$label\"><![CDATA[$body]]></verse>"
 
-    private fun lyricsXml(vararg verses: String) = "<song version=\"1.0\"><lyrics>" + verses.joinToString("") + "</lyrics></song>"
+    private fun lyricsXml(vararg verses: String) =
+        "<song version=\"1.0\"><lyrics>" + verses.joinToString("") + "</lyrics></song>"
 
     // ── Is it even an OpenLP database ─────────────────────────────────────────
 
@@ -218,7 +219,14 @@ class LibraryDatabaseEdgeCasesTest {
             )
         }
 
-    private fun row(number: String, title: String, lyrics: String, author: String = "", composer: String = "", tune: String = "") =
+    private fun row(
+        number: String,
+        title: String,
+        lyrics: String,
+        author: String = "",
+        composer: String = "",
+        tune: String = "",
+    ) =
         "$number#\$#$title#\$#x#\$#$tune#\$#$author#\$#$composer#\$#$lyrics"
 
     @Test
@@ -254,7 +262,10 @@ class LibraryDatabaseEdgeCasesTest {
     @Test
     fun `frontmatter is written only for the credits the song carries`() {
         val bare = sps("bare.sps", row("1", "Bare", "[V1]\nA line"))
-        val credited = sps("credited.sps", row("1", "Credited", "[V1]\nA line", author = "John Newton", tune = "ST ANNE"))
+        val credited = sps(
+            "credited.sps",
+            row("1", "Credited", "[V1]\nA line", author = "John Newton", tune = "ST ANNE"),
+        )
 
         val out = File(temp, "credits-out").apply { mkdirs() }
         SpsToSongConverter.convert(bare, out)
@@ -271,6 +282,7 @@ class LibraryDatabaseEdgeCasesTest {
 
     @Test
     fun `the songbook folder name is available before anything is converted`() {
-        assertEquals("Hymns of Grace", SpsToSongConverter.getTargetFolderName(sps("named.sps", row("1", "A", "[V1]\nline"))))
+        val book = sps("named.sps", row("1", "A", "[V1]\nline"))
+        assertEquals("Hymns of Grace", SpsToSongConverter.getTargetFolderName(book))
     }
 }

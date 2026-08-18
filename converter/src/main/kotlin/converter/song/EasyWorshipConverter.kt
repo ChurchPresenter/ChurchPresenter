@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.Files
 import java.sql.Connection
+import java.sql.ResultSet
 import java.sql.DriverManager
 import java.util.zip.ZipException
 import java.util.zip.ZipInputStream
@@ -39,6 +40,25 @@ data class EasyWorshipSong(
 object EasyWorshipConverter {
 
     private const val SQLITE_HEADER = "SQLite format 3"
+
+    /**
+     * Column positions in the two song queries below, which select the same five values in the same
+     * order out of tables that name them differently.
+     */
+    private const val COLUMN_ID = 1
+    private const val COLUMN_TITLE = 2
+    private const val COLUMN_AUTHOR = 3
+    private const val COLUMN_COPYRIGHT = 4
+    private const val COLUMN_NUMBER = 5
+
+    /** One row of [SERVICE_SONG_QUERY], read before its slides are fetched by [id]. */
+    private data class ServiceSong(
+        val id: String,
+        val title: String,
+        val author: String,
+        val copyright: String,
+        val number: String,
+    )
     private const val SONGS_DATABASE = "Songs.db"
     private const val WORDS_DATABASE = "SongWords.db"
     private const val SERVICE_DATABASE = "main.db"
@@ -87,6 +107,16 @@ object EasyWorshipConverter {
         directory.walkTopDown().firstOrNull { it.isFile && it.name.equals(SONGS_DATABASE, ignoreCase = true) }
             ?: throw IllegalArgumentException("No $SONGS_DATABASE in ${directory.name}")
 
+    /** Runs [sql] on [database] and hands each row to [read], closing everything on the way out. */
+    private fun <T> readRows(database: File, sql: String, read: (ResultSet) -> T): List<T> =
+        connect(database).use { connection ->
+            connection.createStatement().use { statement ->
+                statement.executeQuery(sql).use { rows ->
+                    buildList { while (rows.next()) add(read(rows)) }
+                }
+            }
+        }
+
     // --- EasyWorship 6/7 library ---
 
     private fun parseLibrary(songsDatabase: File): List<EasyWorshipSong> {
@@ -95,35 +125,20 @@ object EasyWorshipConverter {
                 ?.firstOrNull { it.name.equals(WORDS_DATABASE, ignoreCase = true) }
             ?: throw IllegalArgumentException("$WORDS_DATABASE must sit beside ${songsDatabase.name}")
 
-        val words = HashMap<Int, String>()
-        connect(wordsDatabase).use { connection ->
-            connection.createStatement().use { statement ->
-                statement.executeQuery("SELECT song_id, words FROM word").use { rows ->
-                    while (rows.next()) words[rows.getInt(1)] = rows.getString(2).orEmpty()
-                }
-            }
-        }
+        val words = readRows(wordsDatabase, "SELECT song_id, words FROM word") {
+            it.getInt(COLUMN_ID) to it.getString(COLUMN_TITLE).orEmpty()
+        }.toMap()
 
-        val songs = mutableListOf<EasyWorshipSong>()
-        connect(songsDatabase).use { connection ->
-            connection.createStatement().use { statement ->
-                val query = "SELECT rowid, title, author, copyright, vendor_id FROM song ORDER BY rowid"
-                statement.executeQuery(query).use { rows ->
-                    while (rows.next()) {
-                        songs.add(
-                            songOf(
-                                title = rows.getString(2).orEmpty(),
-                                author = rows.getString(3).orEmpty(),
-                                copyright = rows.getString(4).orEmpty(),
-                                ccli = rows.getString(5).orEmpty(),
-                                rtf = words[rows.getInt(1)].orEmpty(),
-                            )
-                        )
-                    }
-                }
-            }
+        val query = "SELECT rowid, title, author, copyright, vendor_id FROM song ORDER BY rowid"
+        return readRows(songsDatabase, query) { rows ->
+            songOf(
+                title = rows.getString(COLUMN_TITLE).orEmpty(),
+                author = rows.getString(COLUMN_AUTHOR).orEmpty(),
+                copyright = rows.getString(COLUMN_COPYRIGHT).orEmpty(),
+                ccli = rows.getString(COLUMN_NUMBER).orEmpty(),
+                rtf = words[rows.getInt(COLUMN_ID)].orEmpty(),
+            )
         }
-        return songs
     }
 
     // --- .ewsx schedule ---
@@ -134,43 +149,49 @@ object EasyWorshipConverter {
         val temporary = Files.createTempFile("easyworship-service", ".db").toFile()
         try {
             temporary.writeBytes(database)
-            val songs = mutableListOf<EasyWorshipSong>()
-            connect(temporary).use { connection ->
-                val rows = mutableListOf<Array<String>>()
-                connection.createStatement().use { statement ->
-                    statement.executeQuery(SERVICE_SONG_QUERY).use { result ->
-                        while (result.next()) {
-                            rows.add(
-                                arrayOf(
-                                    result.getString(1).orEmpty(), result.getString(2).orEmpty(),
-                                    result.getString(3).orEmpty(), result.getString(4).orEmpty(),
-                                    result.getString(5).orEmpty(),
-                                )
-                            )
-                        }
-                    }
-                }
-                for (row in rows) {
-                    val slides = StringBuilder()
-                    connection.prepareStatement(SERVICE_SLIDE_QUERY).use { statement ->
-                        statement.setString(1, row[0])
-                        statement.executeQuery().use { result ->
-                            while (result.next()) {
-                                if (slides.isNotEmpty()) slides.append("\n\n")
-                                slides.append(RtfText.toPlainText(result.getString(1).orEmpty()))
-                            }
-                        }
-                    }
-                    // Already one block per slide, so the RTF is stitched with blank lines above
+            return connect(temporary).use { connection ->
+                serviceSongs(connection).map { row ->
+                    // Already one block per slide, so the RTF is stitched with blank lines here
                     // and split back apart the same way the other flavours are.
-                    songs.add(songOf(row[1], row[2], row[3], row[4], slides.toString(), alreadyPlainText = true))
+                    songOf(
+                        row.title, row.author, row.copyright, row.number,
+                        slidesOf(connection, row.id), alreadyPlainText = true,
+                    )
                 }
             }
-            return songs
         } finally {
             temporary.delete()
         }
     }
+
+    /** Every song cue in the service, in the order it runs. */
+    private fun serviceSongs(connection: Connection): List<ServiceSong> =
+        connection.createStatement().use { statement ->
+            statement.executeQuery(SERVICE_SONG_QUERY).use { result ->
+                buildList {
+                    while (result.next()) {
+                        add(
+                            ServiceSong(
+                                id = result.getString(COLUMN_ID).orEmpty(),
+                                title = result.getString(COLUMN_TITLE).orEmpty(),
+                                author = result.getString(COLUMN_AUTHOR).orEmpty(),
+                                copyright = result.getString(COLUMN_COPYRIGHT).orEmpty(),
+                                number = result.getString(COLUMN_NUMBER).orEmpty(),
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+    /** One song's slides as plain text, blank-line separated. */
+    private fun slidesOf(connection: Connection, songId: String): String =
+        connection.prepareStatement(SERVICE_SLIDE_QUERY).use { statement ->
+            statement.setString(1, songId)
+            statement.executeQuery().use { result ->
+                buildList { while (result.next()) add(RtfText.toPlainText(result.getString(1).orEmpty())) }
+            }
+        }.joinToString("\n\n")
 
     /**
      * The bytes of [name] from [file], accepting a wrong CRC.
@@ -184,25 +205,35 @@ object EasyWorshipConverter {
         ZipInputStream(file.inputStream().buffered()).use { zip ->
             while (true) {
                 val entry = zip.nextEntry ?: return null
-                if (!entry.name.equals(name, ignoreCase = true) &&
-                    !entry.name.substringAfterLast('/').equals(name, ignoreCase = true)
-                ) {
-                    continue
-                }
-                val out = ByteArrayOutputStream()
-                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                try {
-                    while (true) {
-                        val read = zip.read(buffer)
-                        if (read < 0) break
-                        out.write(buffer, 0, read)
-                    }
-                } catch (_: ZipException) {
-                    // The checksum mismatch, raised at the end of an entry already fully read.
-                }
-                return out.toByteArray()
+                if (namesEntry(entry.name, name)) return drain(zip)
             }
         }
+    }
+
+    /** Whether a zip entry's path names [wanted], in a folder or at the root. */
+    private fun namesEntry(path: String, wanted: String): Boolean =
+        path.equals(wanted, ignoreCase = true) ||
+            path.substringAfterLast('/').equals(wanted, ignoreCase = true)
+
+    /**
+     * Everything left in [zip]'s current entry.
+     *
+     * The CRC is verified when the entry ends, which is after the last byte has been handed over —
+     * so a checksum failure at that point is ignored and what was read is kept.
+     */
+    private fun drain(zip: ZipInputStream): ByteArray {
+        val out = ByteArrayOutputStream()
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        try {
+            while (true) {
+                val read = zip.read(buffer)
+                if (read < 0) break
+                out.write(buffer, 0, read)
+            }
+        } catch (_: ZipException) {
+            // The mismatched checksum EasyWorship writes; the bytes above are already read.
+        }
+        return out.toByteArray()
     }
 
     // --- Shared ---

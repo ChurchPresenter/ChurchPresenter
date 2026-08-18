@@ -71,8 +71,8 @@ internal fun parseXmlRoot(text: String): Element {
 /** The root element of [file], required to be named [expectedRoot]. */
 internal fun xmlRootOf(file: File, expectedRoot: String): Element {
     val root = parseXmlRoot(readXmlText(file))
-    if (!root.tagName.substringAfter(':').equals(expectedRoot, ignoreCase = true)) {
-        throw IllegalArgumentException("Expected a <$expectedRoot> document, found <${root.tagName}>")
+    require(root.tagName.substringAfter(':').equals(expectedRoot, ignoreCase = true)) {
+        "Expected a <$expectedRoot> document, found <${root.tagName}>"
     }
     return root
 }

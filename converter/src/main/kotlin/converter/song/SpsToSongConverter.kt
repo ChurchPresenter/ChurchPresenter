@@ -5,7 +5,6 @@ import converter.library.TextUtils
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.sql.Connection
 import java.sql.DriverManager
 
@@ -32,10 +31,28 @@ data class SpsConversionResult(
 
 object SpsToSongConverter {
 
+    /** Enough bytes to hold the SQLite magic, which is how the two `.sps` flavours are told apart. */
+    private const val SQLITE_MAGIC_LENGTH = 16
+
+    /** Columns of a text-flavour row: `number#$#title#$#category#$#tune#$#words#$#music#$#lyrics`. */
+    private const val TEXT_COLUMNS_BEFORE_LYRICS = 6
+    private const val TEXT_COLUMN_TUNE = 3
+    private const val TEXT_COLUMN_AUTHOR = 4
+    private const val TEXT_COLUMN_COMPOSER = 5
+    private const val TEXT_COLUMN_LYRICS = 6
+
+    /** The same columns in the SQLite flavour, where JDBC counts from one. */
+    private const val COLUMN_NUMBER = 1
+    private const val COLUMN_TITLE = 2
+    private const val COLUMN_TUNE = 4
+    private const val COLUMN_AUTHOR = 5
+    private const val COLUMN_COMPOSER = 6
+    private const val COLUMN_SONG_TEXT = 7
+
     fun parse(spsFile: File): SpsParseResult {
         // Detect SQLite vs text format
-        if (spsFile.length() >= 16) {
-            val header = ByteArray(16)
+        if (spsFile.length() >= SQLITE_MAGIC_LENGTH) {
+            val header = ByteArray(SQLITE_MAGIC_LENGTH)
             spsFile.inputStream().use { it.read(header) }
             if (String(header, Charsets.US_ASCII).startsWith("SQLite format 3")) {
                 return parseSqlite(spsFile)
@@ -107,8 +124,8 @@ object SpsToSongConverter {
                 if (line.isBlank()) return@forEachLine
 
                 val parts = line.split("#\$#")
-                if (parts.size >= 6) {
-                    val lyricsText = if (parts.size > 6) parts[6] else ""
+                if (parts.size >= TEXT_COLUMNS_BEFORE_LYRICS) {
+                    val lyricsText = parts.getOrElse(TEXT_COLUMN_LYRICS) { "" }
                     val lyrics = parseLyrics(lyricsText)
 
                     songs.add(
@@ -116,9 +133,9 @@ object SpsToSongConverter {
                             number = parts[0],
                             title = parts[1],
                             songbook = songbookName,
-                            tune = parts[3],
-                            author = parts[4],
-                            composer = parts[5],
+                            tune = parts[TEXT_COLUMN_TUNE],
+                            author = parts[TEXT_COLUMN_AUTHOR],
+                            composer = parts[TEXT_COLUMN_COMPOSER],
                             lyrics = lyrics
                         )
                     )
@@ -153,16 +170,16 @@ object SpsToSongConverter {
                 "SELECT number, title, category, tune, words, music, song_text FROM Songs ORDER BY number"
             )
             while (rs.next()) {
-                val songText = rs.getString(7) ?: ""
+                val songText = rs.getString(COLUMN_SONG_TEXT) ?: ""
                 val lyrics = parseSqliteLyrics(songText)
                 songs.add(
                     SpsSong(
-                        number = (rs.getString(1) ?: "").trim(),
-                        title = (rs.getString(2) ?: "").trim(),
+                        number = (rs.getString(COLUMN_NUMBER) ?: "").trim(),
+                        title = (rs.getString(COLUMN_TITLE) ?: "").trim(),
                         songbook = songbookName,
-                        tune = (rs.getString(4) ?: "").trim(),
-                        author = (rs.getString(5) ?: "").trim(),
-                        composer = (rs.getString(6) ?: "").trim(),
+                        tune = (rs.getString(COLUMN_TUNE) ?: "").trim(),
+                        author = (rs.getString(COLUMN_AUTHOR) ?: "").trim(),
+                        composer = (rs.getString(COLUMN_COMPOSER) ?: "").trim(),
                         lyrics = lyrics
                     )
                 )

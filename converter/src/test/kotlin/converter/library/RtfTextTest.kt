@@ -43,7 +43,8 @@ class RtfTextTest {
     @Test
     fun `a font declared Cyrillic overrides the document code page`() {
         // What a Russian song library actually looks like: cp1252 document, cp1251 font.
-        val source = "{\\rtf1\\ansi\\ansicpg1252{\\fonttbl{\\f0\\fnil\\fcharset204 Arial;}}\\f0\\'cf\\'e5\\'f1\\'ed\\'ff}"
+        val source = "{\\rtf1\\ansi\\ansicpg1252{\\fonttbl{\\f0\\fnil\\fcharset204 Arial;}}" +
+            "\\f0\\'cf\\'e5\\'f1\\'ed\\'ff}"
         assertEquals("Песня", RtfText.toPlainText(source))
     }
 

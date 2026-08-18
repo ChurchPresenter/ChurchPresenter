@@ -62,22 +62,22 @@ internal class ProtoMessage private constructor(private val entries: Map<Int, Li
                 val (key, afterKey) = varint(bytes, index)
                 index = afterKey
                 val field = (key ushr FIELD_NUMBER_SHIFT).toInt()
-                if (field == 0) throw IllegalArgumentException("Field number 0 is not valid")
+                require(field != 0) { "Field number 0 is not valid" }
                 when ((key and WIRE_TYPE_MASK.toLong()).toInt()) {
                     VARINT -> {
                         val (value, next) = varint(bytes, index)
                         index = next
                         entries.getOrPut(field) { mutableListOf() }.add(Entry.Number(value))
                     }
-                    FIXED_64 -> index = require(index + Long.SIZE_BYTES, bytes.size)
+                    FIXED_64 -> index = within(index + Long.SIZE_BYTES, bytes.size)
                     LENGTH_DELIMITED -> {
                         val (length, afterLength) = varint(bytes, index)
-                        val end = require(afterLength + length.toInt(), bytes.size)
+                        val end = within(afterLength + length.toInt(), bytes.size)
                         entries.getOrPut(field) { mutableListOf() }
                             .add(Entry.Bytes(bytes.copyOfRange(afterLength, end)))
                         index = end
                     }
-                    FIXED_32 -> index = require(index + Int.SIZE_BYTES, bytes.size)
+                    FIXED_32 -> index = within(index + Int.SIZE_BYTES, bytes.size)
                     // Groups were removed in proto3 and ProPresenter does not emit them.
                     START_GROUP, END_GROUP -> throw IllegalArgumentException("Groups are not supported")
                     else -> throw IllegalArgumentException("Unknown wire type")
@@ -86,8 +86,11 @@ internal class ProtoMessage private constructor(private val entries: Map<Int, Li
             return ProtoMessage(entries)
         }
 
-        private fun require(end: Int, size: Int): Int =
-            if (end in 0..size) end else throw IllegalArgumentException("Truncated message")
+        /** [end], once it is known to be inside a message of [size] bytes. */
+        private fun within(end: Int, size: Int): Int {
+            require(end in 0..size) { "Truncated message" }
+            return end
+        }
 
         /** A base-128 varint and the index just past it. */
         private fun varint(bytes: ByteArray, start: Int): Pair<Long, Int> {
@@ -100,7 +103,7 @@ internal class ProtoMessage private constructor(private val entries: Map<Int, Li
                 result = result or ((byte and PAYLOAD_MASK).toLong() shl shift)
                 if (byte and CONTINUATION_BIT == 0) return result to index
                 shift += PAYLOAD_BITS
-                if (shift >= Long.SIZE_BITS) throw IllegalArgumentException("Varint too long")
+                require(shift < Long.SIZE_BITS) { "Varint too long" }
             }
             throw IllegalArgumentException("Truncated varint")
         }

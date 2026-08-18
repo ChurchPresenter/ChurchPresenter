@@ -75,7 +75,10 @@ class BebliaParsingTest {
     @Test
     fun `the source url is read from link or site, whichever the file uses`() {
         for (attribute in listOf("link", "site")) {
-            val file = write("s-$attribute.xml", genesis("""<bible translation="X" $attribute="https://example.org">"""))
+            val file = write(
+                "s-$attribute.xml",
+                genesis("""<bible translation="X" $attribute="https://example.org">"""),
+            )
             assertEquals("https://example.org", XmlToSpbConverter.parse(file).source, "source from $attribute=")
         }
     }
@@ -220,7 +223,10 @@ class BebliaParsingTest {
 
     @Test
     fun `caller metadata wins over the file and blanks fall back to it`() {
-        val file = write("meta.xml", genesis("""<bible translation="File Title" status="File Rights" link="file://x">"""))
+        val file = write(
+            "meta.xml",
+            genesis("""<bible translation="File Title" status="File Rights" link="file://x">"""),
+        )
         val parsed = XmlToSpbConverter.parseBeblia(
             file,
             language = "ENG",

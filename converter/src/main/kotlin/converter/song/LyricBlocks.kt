@@ -47,17 +47,21 @@ internal object LyricBlocks {
      */
     fun headingOf(line: String): String? {
         val trimmed = line.trim()
-        if (trimmed.isEmpty()) return null
-        val bracketed = (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
-            (trimmed.startsWith("{") && trimmed.endsWith("}"))
         val inner = trimmed.trim('[', ']', '{', '}').trim().removeSuffix(":").trim()
-        if (inner.isEmpty()) return null
-        if (bracketed) return inner
-        if (plainName.matches(inner)) return inner
-        if (!trimmed.endsWith(":") || trimmed.length > MAX_HEADING_LENGTH) return null
-        if (sungPunctuation.containsMatchIn(inner)) return null
-        return inner.takeIf { it.split(whitespace).size <= MAX_HEADING_WORDS }
+        return when {
+            trimmed.isEmpty() || inner.isEmpty() -> null
+            isBracketed(trimmed) -> inner
+            plainName.matches(inner) -> inner
+            !trimmed.endsWith(":") || trimmed.length > MAX_HEADING_LENGTH -> null
+            sungPunctuation.containsMatchIn(inner) -> null
+            else -> inner.takeIf { it.split(whitespace).size <= MAX_HEADING_WORDS }
+        }
     }
+
+    /** A whole line inside `[...]` or `{...}`, which is how every format writes a section name. */
+    private fun isBracketed(trimmed: String): Boolean =
+        (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+            (trimmed.startsWith("{") && trimmed.endsWith("}"))
 
     /**
      * Names a section rather than singing one.
@@ -69,13 +73,12 @@ internal object LyricBlocks {
      */
     fun isLabel(line: String): Boolean {
         val trimmed = line.trim()
-        if (trimmed.isEmpty()) return false
-        val bracketed = (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
-            (trimmed.startsWith("{") && trimmed.endsWith("}"))
         val inner = trimmed.trim('[', ']', '{', '}').trim()
-        if (inner.isEmpty()) return false
-        if (bracketed) return true
-        return inner.length <= MAX_LABEL_LENGTH && labelWords.containsMatchIn(inner)
+        return when {
+            trimmed.isEmpty() || inner.isEmpty() -> false
+            isBracketed(trimmed) -> true
+            else -> inner.length <= MAX_LABEL_LENGTH && labelWords.containsMatchIn(inner)
+        }
     }
 
     /**
@@ -117,20 +120,25 @@ internal object LyricBlocks {
 
     /** [text] as sections, blank-line separated, with leading names lifted into the label. */
     fun split(text: String): List<SongSection> {
-        val names = mutableListOf<String?>()
-        val bodies = mutableListOf<List<String>>()
-
-        for (block in text.trim().split(blankLine)) {
-            val lines = block.lines().map { it.trim() }.filter { it.isNotEmpty() }
-            if (lines.isEmpty()) continue
-            val named = isLabel(lines.first())
-            val body = if (named) lines.drop(1) else lines
-            // A name with nothing under it labels the block that follows, not one of its own.
-            if (body.isEmpty()) continue
-            names.add(if (named) lines.first().trim('[', ']', '{', '}').trim() else null)
-            bodies.add(body)
-        }
-
-        return labels(names).mapIndexed { index, label -> SongSection(label, bodies[index]) }
+        val blocks = text.trim().split(blankLine).mapNotNull { namedBlock(it) }
+        return labels(blocks.map { it.first })
+            .mapIndexed { index, label -> SongSection(label, blocks[index].second) }
     }
+
+    /**
+     * One blank-line-separated block as the name it opens with and the lines under it, or null
+     * when it holds no lyrics.
+     *
+     * A name with nothing under it labels the block that follows rather than one of its own, so it
+     * comes back as null too.
+     */
+    private fun namedBlock(block: String): Pair<String?, List<String>>? {
+        val lines = block.lines().map { it.trim() }.filter { it.isNotEmpty() }
+        if (lines.isEmpty()) return null
+        val named = isLabel(lines.first())
+        val body = if (named) lines.drop(1) else lines
+        if (body.isEmpty()) return null
+        return (if (named) lines.first().trim('[', ']', '{', '}').trim() else null) to body
+    }
+
 }

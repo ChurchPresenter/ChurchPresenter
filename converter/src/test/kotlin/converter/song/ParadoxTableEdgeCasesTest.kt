@@ -168,6 +168,16 @@ class ParadoxTableEdgeCasesTest {
     private val words = Column("Words", TYPE_MEMO, MEMO_WIDTH)
     private val title = Column("Title", TYPE_STRING, 40)
 
+    /** The one-song fixture most of these start from: a title, and its lyrics in a large memo. */
+    private fun hymn(folderName: String, firstBlock: Int = 1, writeMemoFile: Boolean = true): File =
+        library(
+            listOf(title, words),
+            listOf(listOf("Hymn", Memo("Verse 1\n\nline"))),
+            firstBlock = firstBlock,
+            folderName = folderName,
+            writeMemoFile = writeMemoFile,
+        )
+
     // ── Headers this reader must refuse ───────────────────────────────────────
 
     @Test
@@ -180,11 +190,13 @@ class ParadoxTableEdgeCasesTest {
 
     @Test
     fun `a header describing an impossible table is refused`() {
+        val columns = listOf(title, words)
+        val record = listOf(listOf("A", Memo("l")))
         val cases = mapOf(
-            "wrong header size" to library(listOf(title, words), listOf(listOf("A", Memo("l"))), headerSizeField = 0x400, folderName = "h1"),
-            "no fields" to library(listOf(title, words), listOf(listOf("A", Memo("l"))), fieldCountField = 0, folderName = "h2"),
-            "no record length" to library(listOf(title, words), listOf(listOf("A", Memo("l"))), recordSizeField = 0, folderName = "h3"),
-            "block size out of range" to library(listOf(title, words), listOf(listOf("A", Memo("l"))), blockSizeKb = 5, folderName = "h4"),
+            "wrong header size" to library(columns, record, headerSizeField = 0x400, folderName = "h1"),
+            "no fields" to library(columns, record, fieldCountField = 0, folderName = "h2"),
+            "no record length" to library(columns, record, recordSizeField = 0, folderName = "h3"),
+            "block size out of range" to library(columns, record, blockSizeKb = 5, folderName = "h4"),
         )
         cases.forEach { (why, folder) ->
             assertFailsWith<IllegalArgumentException>(why) { ParadoxTable.parseSongs(File(folder, "Songs.DB")) }
@@ -193,13 +205,13 @@ class ParadoxTableEdgeCasesTest {
 
     @Test
     fun `a block number pointing past the end of the file ends the walk`() {
-        val folder = library(listOf(title, words), listOf(listOf("Hymn", Memo("Verse 1\n\nline"))), firstBlock = 99, folderName = "far")
+        val folder = hymn("far", firstBlock = 99)
         assertTrue(ParadoxTable.parseSongs(File(folder, "Songs.DB")).isEmpty())
     }
 
     @Test
     fun `a record running past the end of the file is dropped rather than read`() {
-        val folder = library(listOf(title, words), listOf(listOf("Hymn", Memo("Verse 1\n\nline"))), folderName = "short")
+        val folder = hymn("short")
         val file = File(folder, "Songs.DB")
         // Cut the block so the record the header still claims is only half present.
         file.writeBytes(file.readBytes().copyOf(HEADER_SIZE + BLOCK_HEADER + 10))
@@ -240,7 +252,11 @@ class ParadoxTableEdgeCasesTest {
             title,
             words,
         )
-        val folder = library(columns, listOf(listOf(null, null, "Hymn", Memo("Verse 1\n\nline"))), folderName = "othertypes")
+        val folder = library(
+            columns,
+            listOf(listOf(null, null, "Hymn", Memo("Verse 1\n\nline"))),
+            folderName = "othertypes",
+        )
 
         assertEquals("Hymn", ParadoxTable.parseSongs(File(folder, "Songs.DB")).single().title)
     }
@@ -248,7 +264,12 @@ class ParadoxTableEdgeCasesTest {
     // ── Copyright and administrator ───────────────────────────────────────────
 
     private fun copyrightOf(copyright: String, administrator: String, folderName: String): String {
-        val columns = listOf(title, Column("Copyright", TYPE_STRING, 40), Column("Administrator", TYPE_STRING, 40), words)
+        val columns = listOf(
+            title,
+            Column("Copyright", TYPE_STRING, 40),
+            Column("Administrator", TYPE_STRING, 40),
+            words,
+        )
         val folder = library(
             columns,
             listOf(listOf("Hymn", copyright, administrator, Memo("Verse 1\n\nline"))),
@@ -274,7 +295,8 @@ class ParadoxTableEdgeCasesTest {
             listOf(listOf("Hymn", Memo("Verse 1\n\npacked lyric", packed = true, subBlock = 3))),
             folderName = "packed",
         )
-        assertEquals(listOf("packed lyric"), ParadoxTable.parseSongs(File(folder, "Songs.DB")).single().sections.single().lines)
+        val song = ParadoxTable.parseSongs(File(folder, "Songs.DB")).single()
+        assertEquals(listOf("packed lyric"), song.sections.single().lines)
     }
 
     @Test
@@ -285,7 +307,7 @@ class ParadoxTableEdgeCasesTest {
 
     @Test
     fun `a memo pointer into a block of an unknown kind reads as no lyrics`() {
-        val folder = library(listOf(title, words), listOf(listOf("Hymn", Memo("Verse 1\n\nline"))), folderName = "badblock")
+        val folder = hymn("badblock")
         val memoFile = File(folder, "Songs.MB")
         val bytes = memoFile.readBytes()
         bytes[0] = 9                                   // neither a large nor a packed block
@@ -296,7 +318,7 @@ class ParadoxTableEdgeCasesTest {
 
     @Test
     fun `a memo pointer past the end of the memo file reads as no lyrics`() {
-        val folder = library(listOf(title, words), listOf(listOf("Hymn", Memo("Verse 1\n\nline"))), folderName = "farmemo")
+        val folder = hymn("farmemo")
         val memoFile = File(folder, "Songs.MB")
         memoFile.writeBytes(memoFile.readBytes().copyOf(4))
 
@@ -315,12 +337,7 @@ class ParadoxTableEdgeCasesTest {
 
     @Test
     fun `a table with no memo file beside it is reported rather than read empty`() {
-        val folder = library(
-            listOf(title, words),
-            listOf(listOf("Hymn", Memo("Verse 1\n\nline"))),
-            folderName = "nomemo",
-            writeMemoFile = false,
-        )
+        val folder = hymn("nomemo", writeMemoFile = false)
         val error = assertFailsWith<IllegalArgumentException> { ParadoxTable.parseSongs(File(folder, "Songs.DB")) }
         assertTrue(error.message!!.contains("Songs.MB"), error.message!!)
     }
@@ -357,7 +374,7 @@ class ParadoxTableEdgeCasesTest {
 
     @Test
     fun `the memo file is matched however it is capitalised`() {
-        val folder = library(listOf(title, words), listOf(listOf("Hymn", Memo("Verse 1\n\nline"))), folderName = "case")
+        val folder = hymn("case")
         File(folder, "Songs.MB").renameTo(File(folder, "songs.mb"))
 
         assertEquals("Hymn", ParadoxTable.parseSongs(File(folder, "Songs.DB")).single().title)
@@ -365,7 +382,7 @@ class ParadoxTableEdgeCasesTest {
 
     @Test
     fun `a memo file belonging to another table is not used`() {
-        val folder = library(listOf(title, words), listOf(listOf("Hymn", Memo("Verse 1\n\nline"))), folderName = "othertable")
+        val folder = hymn("othertable")
         File(folder, "Songs.MB").renameTo(File(folder, "Media.MB"))
 
         assertFailsWith<IllegalArgumentException> { ParadoxTable.parseSongs(File(folder, "Songs.DB")) }

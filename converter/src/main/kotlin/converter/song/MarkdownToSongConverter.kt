@@ -23,6 +23,12 @@ data class DocConversionResult(
 
 object MarkdownToSongConverter {
 
+    /** Longer than this and a line is a lyric, not the song's title. */
+    private const val MAX_TITLE_LENGTH = 120
+
+    /** Fewer lines than this either side of a rule and the rule is decoration, not a boundary. */
+    private const val MIN_LINES_PER_SONG = 2
+
     // `(?iu)`, not `(?i)`: a bare inline `(?i)` is ASCII-only case folding, so `Куплет`/`Припев`
     // as anyone actually writes them did not match while lower-case `куплет` did — a Russian
     // document then imported as one section holding every lyric AND every label line. The
@@ -139,37 +145,26 @@ object MarkdownToSongConverter {
 
         // Strategy 1: Split on level-1 headings (# Title)
         val h1Indices = lines.indices.filter { lines[it].matches(Regex("""^#\s+.+""")) }
-        if (h1Indices.size > 1) {
-            return splitAtIndices(lines, h1Indices)
-        }
+        if (h1Indices.size > 1) return splitAtIndices(lines, h1Indices)
 
-        // Strategy 2: Split on horizontal rules (---) that separate substantial blocks
+        // Strategy 2: Split on horizontal rules (---) that separate substantial blocks. A rule
+        // with nothing substantial either side of it is decoration, not a boundary.
+        //
+        // There is no strategy 3: a document of PPTX slide markers is one song whose slides are
+        // its sections, which is what the single-song path below already produces.
+        return splitAtRules(lines) ?: listOf(markdown)
+    }
+
+    /** [lines] split at its horizontal rules, or null when they do not separate whole songs. */
+    private fun splitAtRules(lines: List<String>): List<String>? {
         val hrIndices = lines.indices.filter {
-            lines[it].matches(Regex("""^-{3,}\s*$""")) || lines[it].matches(Regex("""^\*{3,}\s*$"""))
+            lines[it].matches(Regex("""^-{3,}\s*${'$'}""")) || lines[it].matches(Regex("""^\*{3,}\s*${'$'}"""))
         }
-        if (hrIndices.isNotEmpty()) {
-            val blocks = splitAtSeparators(lines, hrIndices)
-            // Only treat as multi-song if blocks have enough content
-            val substantialBlocks = blocks.filter { block ->
-                block.lines().count { it.isNotBlank() } >= 2
-            }
-            if (substantialBlocks.size > 1) {
-                return substantialBlocks
-            }
+        if (hrIndices.isEmpty()) return null
+        val substantialBlocks = splitAtSeparators(lines, hrIndices).filter { block ->
+            block.lines().count { it.isNotBlank() } >= MIN_LINES_PER_SONG
         }
-
-        // Strategy 3: PPTX slide markers
-        val slideIndices = lines.indices.filter {
-            lines[it].trim().matches(Regex("""^<!--\s*slide\s*-->$""", RegexOption.IGNORE_CASE))
-        }
-        if (slideIndices.size > 1) {
-            // Group slides into songs (each slide = a section, but they might belong to the same song)
-            // For now, treat the whole document as one song — slides become sections
-            return listOf(markdown)
-        }
-
-        // Single song
-        return listOf(markdown)
+        return substantialBlocks.takeIf { it.size > 1 }
     }
 
     private fun splitAtIndices(lines: List<String>, indices: List<Int>): List<String> {
@@ -236,7 +231,7 @@ object MarkdownToSongConverter {
                 // Check if this line looks like a title (short, not a section label)
                 val trimmed = line.trim()
                     .replace(Regex("""^\*\*(.+)\*\*$"""), "$1") // strip bold
-                if (sectionLabelRegex.matches(trimmed).not() && trimmed.length < 120) {
+                if (sectionLabelRegex.matches(trimmed).not() && trimmed.length < MAX_TITLE_LENGTH) {
                     title = trimmed
                     metaLineIndices.add(i)
                     break

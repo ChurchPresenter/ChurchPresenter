@@ -90,18 +90,20 @@ object UsfxToSpbConverter {
         factory.isNamespaceAware = false
         val doc = factory.newDocumentBuilder().parse(file)
         val nodes = doc.getElementsByTagName("book")
-        val result = mutableMapOf<String, String>()
-        for (i in 0 until nodes.length) {
-            val element = nodes.item(i) as? Element ?: continue
-            val code = element.getAttribute("code").trim().uppercase()
-            if (code.isEmpty()) continue
-            // `short` is what a book list wants; `abbr` and `long` are the fallbacks.
-            val label = listOf("short", "abbr", "long")
-                .map { element.getAttribute(it).trim() }
-                .firstOrNull { it.isNotEmpty() }
-            if (!label.isNullOrEmpty()) result[code] = label
-        }
-        return result
+        return (0 until nodes.length)
+            .mapNotNull { nodes.item(it) as? Element }
+            .mapNotNull { bookName(it) }
+            .toMap()
+    }
+
+    /** One `<book>` entry as its code and the name to show, or null when it names nothing. */
+    private fun bookName(element: Element): Pair<String, String>? {
+        val code = element.getAttribute("code").trim().uppercase()
+        // `short` is what a book list wants; `abbr` and `long` are the fallbacks.
+        val label = listOf("short", "abbr", "long")
+            .map { element.getAttribute(it).trim() }
+            .firstOrNull { it.isNotEmpty() }
+        return if (code.isEmpty() || label.isNullOrEmpty()) null else code to label
     }
 
     internal fun bookNumberFor(code: String): Int? = BOOK_NUMBERS[code.trim().uppercase()]

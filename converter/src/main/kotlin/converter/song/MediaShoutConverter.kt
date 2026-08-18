@@ -102,23 +102,26 @@ object MediaShoutConverter {
 
     /** One section per page, named by whatever the operator called it in the sidebar. */
     private fun sectionsOf(pages: JsonArray?): List<SongSection> {
-        val names = mutableListOf<String?>()
-        val bodies = mutableListOf<List<String>>()
+        val sections = pages.orEmpty().filterIsInstance<JsonObject>().mapNotNull { pageSection(it) }
+        return LyricBlocks.labels(sections.map { it.first })
+            .mapIndexed { index, label -> SongSection(label, sections[index].second) }
+    }
 
-        for (page in pages.orEmpty().filterIsInstance<JsonObject>()) {
-            val properties = page["Properties"] as? JsonObject
-            // A page marked skipped is not part of the song as it is presented.
-            if ((properties?.get("IsSkipped") as? JsonPrimitive)?.contentOrNull == "true") continue
-            val rtf = pageText(page["Items"] as? JsonArray) ?: continue
-            val lines = RtfText.toPlainText(rtf).lines().map { it.trim() }.filter { it.isNotEmpty() }
-            if (lines.isEmpty()) continue
+    /**
+     * One page as the name it offers and the lines on it, or null when it is not part of the song.
+     *
+     * A page the operator marked skipped, or one holding a picture rather than words, is not
+     * presented and so is not a section.
+     */
+    private fun pageSection(page: JsonObject): Pair<String?, List<String>>? {
+        val properties = page["Properties"] as? JsonObject
+        if ((properties?.get("IsSkipped") as? JsonPrimitive)?.contentOrNull == "true") return null
+        val rtf = pageText(page["Items"] as? JsonArray) ?: return null
+        val lines = RtfText.toPlainText(rtf).lines().map { it.trim() }.filter { it.isNotEmpty() }
+        if (lines.isEmpty()) return null
 
-            val name = text(properties, "CustomName").ifBlank { text(properties, "Name") }
-            names.add(name.takeIf { it.isNotBlank() && LyricBlocks.isLabel(it) })
-            bodies.add(lines)
-        }
-
-        return LyricBlocks.labels(names).mapIndexed { index, label -> SongSection(label, bodies[index]) }
+        val name = text(properties, "CustomName").ifBlank { text(properties, "Name") }
+        return name.takeIf { it.isNotBlank() && LyricBlocks.isLabel(it) } to lines
     }
 
     /** The RTF of a page's first text item that actually carries any. */

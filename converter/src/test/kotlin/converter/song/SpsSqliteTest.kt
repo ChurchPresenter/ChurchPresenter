@@ -104,7 +104,9 @@ class SpsSqliteTest {
     @Test
     fun `surrounding whitespace is trimmed off every field`() {
         val song = SpsToSongConverter.parse(
-            sqliteSps(songs = listOf(arrayOf("  7  ", "  Padded  ", "c", "  tune  ", "  author  ", "  music  ", "Lyric")))
+            sqliteSps(
+                songs = listOf(arrayOf("  7  ", "  Padded  ", "c", "  tune  ", "  author  ", "  music  ", "Lyric"))
+            )
         ).songs.single()
         assertEquals("7", song.number)
         assertEquals("Padded", song.title)
