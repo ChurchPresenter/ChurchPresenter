@@ -746,6 +746,29 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
 
+    // Name every test class as it finishes, with its duration. Gradle prints nothing while a suite
+    // runs, so when the screenshots job hit its 20-minute step timeout twice there was no way to say
+    // WHICH class was on screen when the clock ran out -- the log simply stopped after
+    // "> Task :composeApp:jvmTest" and a killed step uploads no XML to read afterwards. One line per
+    // class (772 in the screenshot run, ~2500 for the whole suite) is a cheap price for the next
+    // occurrence naming itself. `-Pquiet` turns it off.
+    if (!project.hasProperty("quietTests")) {
+        addTestListener(object : TestListener {
+            override fun beforeSuite(suite: TestDescriptor) = Unit
+            override fun beforeTest(testDescriptor: TestDescriptor) = Unit
+            override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) = Unit
+            override fun afterSuite(suite: TestDescriptor, result: TestResult) {
+                // Only class-level suites have a parent; the root and the JVM-level ones do not.
+                if (suite.parent != null && suite.className != null) {
+                    val seconds = (result.endTime - result.startTime) / 1000.0
+                    logger.lifecycle(
+                        "  %6.1fs  %-5s %s".format(seconds, result.resultType, suite.displayName)
+                    )
+                }
+            }
+        })
+    }
+
     // The tests are JUnit 4 and stay JUnit 4 -- junit-vintage runs them verbatim, rules and
     // @BeforeClass included. The platform launcher is here for one reason: it is the only hook that
     // runs BEFORE test discovery, which is what PerForkTestHome needs to give each fork its own

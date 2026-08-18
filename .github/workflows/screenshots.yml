@@ -55,7 +55,7 @@ concurrency:
 jobs:
   screenshots:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,8 +74,14 @@ jobs:
 
       # Only the screenshot class: the rest of the suite is the `test` workflow's job and would
       # add ~14 minutes here for nothing.
+      #
+      # 35, not 20. A green run of this step lands at 13-14.5 minutes, so the old ceiling left barely
+      # five minutes of slack and killed the step twice -- once on a pull request, once on main --
+      # without either being a real failure. The budget is not an alarm on how long the suite takes;
+      # the job's own `timeout-minutes` below is the backstop for a genuine hang, and the per-class
+      # log lines the build now prints will name the offender if that is what it turns out to be.
       - name: Render screenshots
-        timeout-minutes: 20
+        timeout-minutes: 35
         run: ./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
