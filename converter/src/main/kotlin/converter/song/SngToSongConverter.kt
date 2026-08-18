@@ -1,6 +1,7 @@
 package converter.song
 
 import converter.library.TextUtils
+import converter.library.decodeUtf8OrCyrillic
 
 import java.io.File
 import java.nio.charset.Charset
@@ -23,78 +24,61 @@ data class SngSection(
 object SngToSongConverter {
 
     fun parse(file: File): SngSong {
-        val content = readFileWithFallback(file)
-        val lines = content.lines()
+        val lines = readFileWithFallback(file).lines()
+        val headerEnd = lines.indexOfFirst { it.trim() == "---" }
+        // Without the `---` that ends the header block there is no section boundary to find, so
+        // the file yields its metadata and no lyrics.
+        val headers = readHeaders(if (headerEnd < 0) lines else lines.subList(0, headerEnd))
+        val sections = readSections(if (headerEnd < 0) emptyList() else lines.subList(headerEnd + 1, lines.size))
 
-        val headers = mutableMapOf<String, String>()
-        var lineIdx = 0
+        val verseOrder = headers["VerseOrder"].orEmpty()
+            .split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        return SngSong(
+            title = headers["Title"].orEmpty(),
+            author = headers["Author"].orEmpty(),
+            copyright = headers["(c)"].orEmpty(),
+            verseOrder = verseOrder,
+            sections = sections,
+            headers = headers,
+        )
+    }
 
-        // Parse headers (lines starting with #)
-        while (lineIdx < lines.size) {
-            val line = lines[lineIdx].trim()
-            if (line.startsWith("#")) {
-                val eqIdx = line.indexOf('=')
-                if (eqIdx > 0) {
-                    val key = line.substring(1, eqIdx).trim()
-                    val value = line.substring(eqIdx + 1).trim()
-                    headers[key] = value
-                }
-                lineIdx++
-            } else if (line == "---") {
-                lineIdx++
-                break
-            } else {
-                lineIdx++
+    /** The `#Key=Value` block a `.sng` opens with. Anything else in it is ignored. */
+    private fun readHeaders(lines: List<String>): Map<String, String> =
+        lines.map { it.trim() }
+            .filter { it.startsWith("#") && it.indexOf('=') > 0 }
+            .associate { line ->
+                val equals = line.indexOf('=')
+                line.substring(1, equals).trim() to line.substring(equals + 1).trim()
             }
-        }
 
-        // Parse sections (separated by ---)
+    /**
+     * The sections after the header block, separated by `---`.
+     *
+     * The first non-empty line of a section names it; everything under that is sung. A section with
+     * no name is one the file left empty, and is dropped rather than written blank.
+     */
+    private fun readSections(lines: List<String>): List<SngSection> {
         val sections = mutableListOf<SngSection>()
-        var currentType = ""
-        var currentName = ""
-        val currentLines = mutableListOf<String>()
+        var label: Pair<String, String>? = null
+        val body = mutableListOf<String>()
 
-        while (lineIdx < lines.size) {
-            val line = lines[lineIdx]
-            if (line.trim() == "---" || line.trim().startsWith("---")) {
-                if (currentType.isNotEmpty()) {
-                    sections.add(SngSection(currentType, currentName, currentLines.joinToString("\n").trim()))
-                }
-                currentType = ""
-                currentName = ""
-                currentLines.clear()
-                lineIdx++
-                continue
+        fun flush() {
+            label?.let { (type, name) -> sections.add(SngSection(type, name, body.joinToString("\n").trim())) }
+            label = null
+            body.clear()
+        }
+
+        for (line in lines) {
+            val trimmed = line.trim()
+            when {
+                trimmed.startsWith("---") -> flush()
+                label == null && trimmed.isNotEmpty() -> label = parseSectionLabel(trimmed)
+                else -> body.add(line)
             }
-
-            if (currentType.isEmpty() && line.trim().isNotEmpty()) {
-                val parsed = parseSectionLabel(line.trim())
-                currentType = parsed.first
-                currentName = parsed.second
-                lineIdx++
-                continue
-            }
-
-            currentLines.add(line)
-            lineIdx++
         }
-
-        // Add last section
-        if (currentType.isNotEmpty()) {
-            sections.add(SngSection(currentType, currentName, currentLines.joinToString("\n").trim()))
-        }
-
-        val title = headers["Title"] ?: ""
-        val author = headers["Author"] ?: ""
-        val copyright = headers["(c)"] ?: ""
-        val verseOrderStr = headers["VerseOrder"] ?: ""
-        val verseOrder = if (verseOrderStr.isNotBlank()) {
-            verseOrderStr.split(",").map { it.trim() }
-        } else {
-            emptyList()
-        }
-
-        return SngSong(title, author, copyright, verseOrder, sections, headers)
+        flush()
+        return sections
     }
 
     fun convert(sngFile: File, outputFile: File) {
@@ -173,61 +157,33 @@ object SngToSongConverter {
         }
     }
 
+    /**
+     * The section names SongBeamer writes, in both languages, longest prefix first.
+     *
+     * `pre-chorus` has to be tried before `chorus` would be reached, which is why this is an
+     * ordered list rather than a map: the first prefix that matches names the section.
+     */
+    private val SECTION_PREFIXES = listOf(
+        listOf("pre-chorus", "prechorus") to "Pre-Chorus",
+        listOf("chorus", "refrain", "припев", "хор") to "Chorus",
+        listOf("bridge", "мост") to "Bridge",
+        listOf("ending", "outro", "окончание", "конец") to "Ending",
+        listOf("intro", "вступление") to "Intro",
+    )
+
+    private val VERSE_LABEL = Regex("""(?i)(verse|vers|strophe|куплет|строфа)\s*(\d+)""")
+
     private fun parseSectionLabel(label: String): Pair<String, String> {
         val lower = label.lowercase().trim()
+        val verseMatch = VERSE_LABEL.find(lower)
+        if (verseMatch != null) return "Verse" to verseMatch.groupValues[2]
 
-        // Match patterns like "verse 1", "chorus", "bridge", "pre-chorus", "ending", etc.
-        val verseMatch = Regex("""(?i)(verse|vers|strophe|куплет|строфа)\s*(\d+)""").find(lower)
-        if (verseMatch != null) {
-            return "Verse" to verseMatch.groupValues[2]
-        }
-
-        if (lower.startsWith("chorus") || lower.startsWith("refrain") ||
-            lower.startsWith("припев") || lower.startsWith("хор")
-        ) {
-            return "Chorus" to ""
-        }
-
-        if (lower.startsWith("bridge") || lower.startsWith("мост")) {
-            return "Bridge" to ""
-        }
-
-        if (lower.startsWith("pre-chorus") || lower.startsWith("prechorus")) {
-            return "Pre-Chorus" to ""
-        }
-
-        if (lower.startsWith("ending") || lower.startsWith("outro") ||
-            lower.startsWith("окончание") || lower.startsWith("конец")
-        ) {
-            return "Ending" to ""
-        }
-
-        if (lower.startsWith("intro") || lower.startsWith("вступление")) {
-            return "Intro" to ""
-        }
-
-        // Generic: use the label as-is
-        return label.trim() to ""
+        val named = SECTION_PREFIXES.firstOrNull { (prefixes, _) -> prefixes.any { lower.startsWith(it) } }
+        // A name this vocabulary does not cover is kept as it stands rather than guessed at.
+        return (named?.second ?: label.trim()) to ""
     }
 
-    private fun readFileWithFallback(file: File): String {
-        // Try UTF-8 first, then Windows-1251 (common for Russian SongBeamer files)
-        return try {
-            val bytes = file.readBytes()
-            // Strip BOM if present
-            val content = if (bytes.size >= 3 && bytes[0] == 0xEF.toByte() && bytes[1] == 0xBB.toByte() && bytes[2] == 0xBF.toByte()) {
-                String(bytes, 3, bytes.size - 3, Charsets.UTF_8)
-            } else {
-                String(bytes, Charsets.UTF_8)
-            }
-            // Verify it decoded properly
-            if (content.contains('\uFFFD')) {
-                TextUtils.sanitizeLyricText(String(bytes, Charset.forName("windows-1251")))
-            } else {
-                TextUtils.sanitizeLyricText(content)
-            }
-        } catch (e: Exception) {
-            TextUtils.sanitizeLyricText(file.readText(Charset.forName("windows-1251")))
-        }
-    }
+    private fun readFileWithFallback(file: File): String =
+        runCatching { TextUtils.sanitizeLyricText(decodeUtf8OrCyrillic(file.readBytes())) }
+            .getOrElse { TextUtils.sanitizeLyricText(file.readText(Charset.forName("windows-1251"))) }
 }

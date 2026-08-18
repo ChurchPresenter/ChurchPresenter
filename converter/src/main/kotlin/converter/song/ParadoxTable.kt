@@ -24,6 +24,10 @@ import java.nio.charset.Charset
  *    type-2 block holds one large memo starting at a fixed offset; a type-3 block packs up to 64
  *    small ones, and the sub-block index selects an entry in its table of 16-byte-aligned starts.
  */
+// Split into one small function per step, which is what keeps the readers below within the
+// complexity and nesting limits. Splitting the object itself would scatter one file format across
+// several files instead.
+@Suppress("TooManyFunctions")
 internal object ParadoxTable {
 
     private const val HEADER_SIZE = 0x800
@@ -53,6 +57,10 @@ internal object ParadoxTable {
     private const val MEMO_PACKED_ENTRY = 5
     private const val MEMO_PACKED_MAX = 63
     private const val MEMO_ALIGNMENT = 16
+
+    /** Paradox's numbers are unsigned; the masks that keep them that way in a signed JVM type. */
+    private const val UNSIGNED_SHORT_MASK = 0xffff
+    private const val UNSIGNED_INT_MASK = 0xffffffffL
 
     /**
      * Code pages EasyWorship wrote non-English libraries in. The mapping for everything but 852 was
@@ -192,24 +200,34 @@ internal object ParadoxTable {
         // file, so reading the pointer the way the numbers are read sends it to a random offset.
         val reference = readIntLittleEndian(table, pointerAt)
         val length = readIntLittleEndian(table, pointerAt + Int.SIZE_BYTES).toInt()
-        if (length <= 0) return ""
-
         val subBlock = (reference and MEMO_SUB_BLOCK_MASK.toLong()).toInt()
         val blockStart = (reference and MEMO_SUB_BLOCK_MASK.toLong().inv()).toInt()
-        if (blockStart < 0 || blockStart >= memo.size) return ""
 
+        val start = if (length > 0) memoStart(memo, blockStart, subBlock) else null
+        return if (start == null) "" else String(memo, start, length.coerceAtMost(memo.size - start), charset)
+    }
+
+    /**
+     * Where the memo's text begins, or null when the pointer does not address one.
+     *
+     * A type-2 block holds one large memo at a fixed offset; a type-3 block packs up to 64 small
+     * ones and the pointer's low byte picks an entry from its table of starts.
+     */
+    private fun memoStart(memo: ByteArray, blockStart: Int, subBlock: Int): Int? {
+        if (blockStart < 0 || blockStart >= memo.size) return null
         val start = when (memo[blockStart].toInt()) {
             MEMO_LARGE_BLOCK -> blockStart + 1 + MEMO_LARGE_HEADER
-            MEMO_PACKED_BLOCK -> {
-                if (subBlock > MEMO_PACKED_MAX) return ""
-                val entry = blockStart + 1 + MEMO_PACKED_TABLE - 1 + MEMO_PACKED_ENTRY * subBlock
-                if (entry >= memo.size) return ""
-                blockStart + (memo[entry].toInt() and 0xff) * MEMO_ALIGNMENT
-            }
-            else -> return ""
+            MEMO_PACKED_BLOCK -> packedMemoStart(memo, blockStart, subBlock)
+            else -> null
         }
-        if (start < 0 || start >= memo.size) return ""
-        return String(memo, start, length.coerceAtMost(memo.size - start), charset)
+        return start?.takeIf { it >= 0 && it < memo.size }
+    }
+
+    private fun packedMemoStart(memo: ByteArray, blockStart: Int, subBlock: Int): Int? {
+        if (subBlock > MEMO_PACKED_MAX) return null
+        val entry = blockStart + MEMO_PACKED_TABLE + MEMO_PACKED_ENTRY * subBlock
+        if (entry >= memo.size) return null
+        return blockStart + (memo[entry].toInt() and MEMO_SUB_BLOCK_MASK) * MEMO_ALIGNMENT
     }
 
     private fun string(table: ByteArray, offset: Int, size: Int, charset: Charset): String {
@@ -221,15 +239,18 @@ internal object ParadoxTable {
     /** Paradox stores its numbers big-endian, unlike its header fields. */
     private fun readShort(table: ByteArray, offset: Int): Int =
         if (offset + Short.SIZE_BYTES > table.size) 0
-        else ByteBuffer.wrap(table, offset, Short.SIZE_BYTES).order(ByteOrder.BIG_ENDIAN).short.toInt() and 0xffff
+        else ByteBuffer.wrap(table, offset, Short.SIZE_BYTES)
+            .order(ByteOrder.BIG_ENDIAN).short.toInt() and UNSIGNED_SHORT_MASK
 
     private fun readInt(table: ByteArray, offset: Int): Long =
         if (offset + Int.SIZE_BYTES > table.size) 0
-        else ByteBuffer.wrap(table, offset, Int.SIZE_BYTES).order(ByteOrder.BIG_ENDIAN).int.toLong() and 0xffffffffL
+        else ByteBuffer.wrap(table, offset, Int.SIZE_BYTES)
+            .order(ByteOrder.BIG_ENDIAN).int.toLong() and UNSIGNED_INT_MASK
 
     private fun readIntLittleEndian(table: ByteArray, offset: Int): Long =
         if (offset + Int.SIZE_BYTES > table.size) 0
-        else ByteBuffer.wrap(table, offset, Int.SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN).int.toLong() and 0xffffffffL
+        else ByteBuffer.wrap(table, offset, Int.SIZE_BYTES)
+            .order(ByteOrder.LITTLE_ENDIAN).int.toLong() and UNSIGNED_INT_MASK
 
     private fun charsetFor(codePage: Int): Charset {
         val name = CODE_PAGES[codePage] ?: "windows-1252"

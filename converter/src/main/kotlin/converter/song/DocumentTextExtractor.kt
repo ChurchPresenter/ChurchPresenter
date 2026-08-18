@@ -3,6 +3,7 @@ package converter.song
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
 import org.apache.poi.xslf.usermodel.XMLSlideShow
+import org.apache.poi.xslf.usermodel.XSLFSlide
 import org.apache.poi.xslf.usermodel.XSLFTextShape
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import java.io.File
@@ -21,6 +22,10 @@ object DocumentTextExtractor {
         return file.extension.lowercase() in supportedExtensions
     }
 
+    // POI and PDFBox raise unchecked exceptions of their own for a file that is damaged, the
+    // wrong format, or password-protected, and the panel's job is to say so rather than to fail.
+    // Narrowing this would mean naming every type two libraries might raise.
+    @Suppress("TooGenericExceptionCaught")
     fun extract(file: File): ExtractionResult {
         return try {
             val text = when (file.extension.lowercase()) {
@@ -46,40 +51,24 @@ object DocumentTextExtractor {
         }
     }
 
-    private fun extractDocx(file: File): String {
+    private fun extractDocx(file: File): String =
         file.inputStream().use { stream ->
             XWPFDocument(stream).use { document ->
-                val sb = StringBuilder()
-                for (paragraph in document.paragraphs) {
-                    val text = paragraph.text.trim()
-                    if (text.isNotEmpty()) {
-                        sb.appendLine(text)
-                    } else {
-                        sb.appendLine()
-                    }
-                }
-                return sb.toString().trim()
+                document.paragraphs.joinToString("\n") { it.text.trim() }.trim()
             }
         }
-    }
 
-    private fun extractPptx(file: File): String {
+    private fun extractPptx(file: File): String =
         file.inputStream().use { stream ->
             XMLSlideShow(stream).use { pptx ->
-                val sb = StringBuilder()
-                for ((idx, slide) in pptx.slides.withIndex()) {
-                    if (idx > 0) sb.appendLine()
-                    for (shape in slide.shapes) {
-                        if (shape is XSLFTextShape) {
-                            val text = shape.text.trim()
-                            if (text.isNotEmpty()) {
-                                sb.appendLine(text)
-                            }
-                        }
-                    }
-                }
-                return sb.toString().trim()
+                pptx.slides.joinToString("\n\n") { slide -> slideText(slide) }.trim()
             }
         }
-    }
+
+    /** Every text shape on one slide, in the order the deck lays them out. */
+    private fun slideText(slide: XSLFSlide): String =
+        slide.shapes.filterIsInstance<XSLFTextShape>()
+            .map { it.text.trim() }
+            .filter { it.isNotEmpty() }
+            .joinToString("\n")
 }

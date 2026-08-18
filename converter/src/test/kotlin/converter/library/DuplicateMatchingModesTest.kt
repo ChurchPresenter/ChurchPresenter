@@ -142,7 +142,10 @@ class DuplicateMatchingModesTest {
     fun `the threshold decides how close is close enough`() {
         // One line differs out of four.
         song("bookA", "0001 - Grace", "Grace", *verse)
-        song("bookB", "0002 - Grace Variant", "Grace Variant", verse[0], verse[1], verse[2], "A different closing line entirely")
+        song(
+            "bookB", "0002 - Grace Variant", "Grace Variant",
+            verse[0], verse[1], verse[2], "A different closing line entirely",
+        )
 
         val strict = DuplicateFinder.findDuplicates(temp, threshold = 0.99, matchByTitle = false)
         val lenient = DuplicateFinder.findDuplicates(temp, threshold = 0.5, matchByTitle = false)

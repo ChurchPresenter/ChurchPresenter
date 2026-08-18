@@ -21,7 +21,27 @@ data class DocConversionResult(
     val errors: List<String>
 )
 
+// Split into one small function per step, which is what keeps the readers below within the
+// complexity and nesting limits. Splitting the object itself would scatter one file format across
+// several files instead.
+@Suppress("TooManyFunctions")
 object MarkdownToSongConverter {
+
+    /** Longer than this and a line is a lyric, not the song's title. */
+    private const val MAX_TITLE_LENGTH = 120
+
+    /** Fewer lines than this either side of a rule and the rule is decoration, not a boundary. */
+    private const val MIN_LINES_PER_SONG = 2
+
+    /** A line that is nothing but "1." — how an unlabelled document opens its next verse. */
+    private val VERSE_MARKER = Regex("""^\d+\.\s*${'$'}""")
+
+    /** A markdown sub-heading, and the bold markers a label written as one carries. */
+    private val SUB_HEADING = Regex("""^#{2,4}\s+(.+)""")
+
+    /** A level-one or level-two heading, which is what a document titles a song with. */
+    private val HEADING = Regex("""^#{1,2}\s+(.+)""")
+    private val BOLD = Regex("""^\*\*(.+)\*\*${'$'}""")
 
     // `(?iu)`, not `(?i)`: a bare inline `(?i)` is ASCII-only case folding, so `Куплет`/`Припев`
     // as anyone actually writes them did not match while lower-case `куплет` did — a Russian
@@ -93,6 +113,10 @@ object MarkdownToSongConverter {
         return sb.toString()
     }
 
+    // One song that cannot be written -- a name the filesystem refuses, a full disk -- is reported
+    // and the rest of the document still converts. Which exception says so is the filesystem's
+    // business, not this loop's.
+    @Suppress("TooGenericExceptionCaught")
     fun convert(markdownText: String, sourceFileName: String, outputDir: File): DocConversionResult {
         val songs = parseMarkdown(markdownText, sourceFileName)
         if (songs.isEmpty()) {
@@ -139,37 +163,26 @@ object MarkdownToSongConverter {
 
         // Strategy 1: Split on level-1 headings (# Title)
         val h1Indices = lines.indices.filter { lines[it].matches(Regex("""^#\s+.+""")) }
-        if (h1Indices.size > 1) {
-            return splitAtIndices(lines, h1Indices)
-        }
+        if (h1Indices.size > 1) return splitAtIndices(lines, h1Indices)
 
-        // Strategy 2: Split on horizontal rules (---) that separate substantial blocks
+        // Strategy 2: Split on horizontal rules (---) that separate substantial blocks. A rule
+        // with nothing substantial either side of it is decoration, not a boundary.
+        //
+        // There is no strategy 3: a document of PPTX slide markers is one song whose slides are
+        // its sections, which is what the single-song path below already produces.
+        return splitAtRules(lines) ?: listOf(markdown)
+    }
+
+    /** [lines] split at its horizontal rules, or null when they do not separate whole songs. */
+    private fun splitAtRules(lines: List<String>): List<String>? {
         val hrIndices = lines.indices.filter {
-            lines[it].matches(Regex("""^-{3,}\s*$""")) || lines[it].matches(Regex("""^\*{3,}\s*$"""))
+            lines[it].matches(Regex("""^-{3,}\s*${'$'}""")) || lines[it].matches(Regex("""^\*{3,}\s*${'$'}"""))
         }
-        if (hrIndices.isNotEmpty()) {
-            val blocks = splitAtSeparators(lines, hrIndices)
-            // Only treat as multi-song if blocks have enough content
-            val substantialBlocks = blocks.filter { block ->
-                block.lines().count { it.isNotBlank() } >= 2
-            }
-            if (substantialBlocks.size > 1) {
-                return substantialBlocks
-            }
+        if (hrIndices.isEmpty()) return null
+        val substantialBlocks = splitAtSeparators(lines, hrIndices).filter { block ->
+            block.lines().count { it.isNotBlank() } >= MIN_LINES_PER_SONG
         }
-
-        // Strategy 3: PPTX slide markers
-        val slideIndices = lines.indices.filter {
-            lines[it].trim().matches(Regex("""^<!--\s*slide\s*-->$""", RegexOption.IGNORE_CASE))
-        }
-        if (slideIndices.size > 1) {
-            // Group slides into songs (each slide = a section, but they might belong to the same song)
-            // For now, treat the whole document as one song — slides become sections
-            return listOf(markdown)
-        }
-
-        // Single song
-        return listOf(markdown)
+        return substantialBlocks.takeIf { it.size > 1 }
     }
 
     private fun splitAtIndices(lines: List<String>, indices: List<Int>): List<String> {
@@ -223,25 +236,10 @@ object MarkdownToSongConverter {
         }
 
         // Extract title from first heading or first non-empty line
-        for ((i, line) in lines.withIndex()) {
-            if (i in metaLineIndices) continue
-            val headingMatch = Regex("""^#{1,2}\s+(.+)""").find(line.trim())
-            if (headingMatch != null) {
-                title = headingMatch.groupValues[1].trim()
-                    .replace(Regex("""^\*\*(.+)\*\*$"""), "$1") // strip bold
-                metaLineIndices.add(i)
-                break
-            }
-            if (line.trim().isNotBlank() && title.isBlank()) {
-                // Check if this line looks like a title (short, not a section label)
-                val trimmed = line.trim()
-                    .replace(Regex("""^\*\*(.+)\*\*$"""), "$1") // strip bold
-                if (sectionLabelRegex.matches(trimmed).not() && trimmed.length < 120) {
-                    title = trimmed
-                    metaLineIndices.add(i)
-                    break
-                }
-            }
+        val titled = titleOf(lines, metaLineIndices)
+        if (titled != null) {
+            title = titled.second
+            metaLineIndices.add(titled.first)
         }
 
         if (title.isBlank()) title = fallbackTitle
@@ -251,6 +249,28 @@ object MarkdownToSongConverter {
         val sections = parseSections(contentLines)
 
         return ParsedSong(title, author, copyright, composer, sections)
+    }
+
+    /**
+     * Which line of [lines] is the song's title, and what it says.
+     *
+     * A heading is taken outright. Failing that the first line that could be one is used — which
+     * rules out a section label, and anything too long to be a title — and if nothing qualifies the
+     * caller falls back to the file's own name.
+     */
+    private fun titleOf(lines: List<String>, metaLineIndices: Set<Int>): Pair<Int, String>? {
+        for ((index, line) in lines.withIndex()) {
+            if (index in metaLineIndices) continue
+            val trimmed = line.trim().replace(BOLD, "$1")
+            val heading = HEADING.find(line.trim())?.groupValues?.get(1)?.trim()?.replace(BOLD, "$1")
+            when {
+                heading != null -> return index to heading
+                trimmed.isBlank() -> Unit
+                sectionLabelRegex.matches(trimmed) || trimmed.length >= MAX_TITLE_LENGTH -> Unit
+                else -> return index to trimmed
+            }
+        }
+        return null
     }
 
     private fun parseSections(lines: List<String>): List<SongSection> {
@@ -277,60 +297,33 @@ object MarkdownToSongConverter {
             }
         }
 
+        /** Ends the section in progress and opens one called [label], or an unnamed one. */
+        fun open(label: String?) {
+            flush()
+            currentLabel = label
+            labelIsExplicit = label != null
+            currentLines = mutableListOf()
+        }
+
         for (line in lines) {
             val trimmed = line.trim()
-
-            // Check for section label
-            val labelMatch = sectionLabelRegex.find(trimmed)
-            if (labelMatch != null) {
-                flush()
-                currentLabel = formatLabel(labelMatch.groupValues[1], labelMatch.groupValues[2])
-                labelIsExplicit = true
-                currentLines = mutableListOf()
-                continue
-            }
-
-            // A bare "1." / "2." marker starts the next verse of an unlabelled document.
-            if (!labelIsExplicit && trimmed.matches(Regex("""^\d+\.\s*$"""))) {
-                flush()
-                currentLabel = null
-                currentLines = mutableListOf()
-                continue
-            }
-
-            // Check for sub-headings that might be section labels (## or ### or bold)
-            val subHeadingMatch = Regex("""^#{2,4}\s+(.+)""").find(trimmed)
-            if (subHeadingMatch != null) {
-                val headingText = subHeadingMatch.groupValues[1].trim()
-                    .replace(Regex("""^\*\*(.+)\*\*$"""), "$1")
-                val innerLabelMatch = sectionLabelRegex.find(headingText)
-                if (innerLabelMatch != null) {
-                    flush()
-                    currentLabel = formatLabel(innerLabelMatch.groupValues[1], innerLabelMatch.groupValues[2])
-                    labelIsExplicit = true
-                    currentLines = mutableListOf()
-                    continue
+            val label = labelOf(trimmed)
+            when {
+                label != null -> open(label)
+                // A bare "1." / "2." marker starts the next verse of an unlabelled document, and
+                // so does a blank line: each paragraph is a verse. Under an explicit label a blank
+                // line is part of that section instead.
+                !labelIsExplicit && trimmed.matches(VERSE_MARKER) -> open(null)
+                !labelIsExplicit && trimmed.isBlank() && currentLines.any { it.isNotBlank() } -> open(null)
+                trimmed.isNotBlank() -> {
+                    if (currentLabel == null) {
+                        currentLabel = "Verse $verseCounter"
+                        labelIsExplicit = false
+                    }
+                    currentLines.add(stripMarkdown(trimmed))
                 }
-            }
-
-            // In an unlabelled document a blank line ends the paragraph, and each paragraph is a
-            // verse. Under an explicit label a blank line is kept as part of that section instead.
-            if (trimmed.isBlank() && !labelIsExplicit && currentLines.any { it.isNotBlank() }) {
-                flush()
-                currentLabel = null
-                currentLines = mutableListOf()
-                continue
-            }
-
-            if (trimmed.isNotBlank()) {
-                if (currentLabel == null) {
-                    currentLabel = "Verse $verseCounter"
-                    labelIsExplicit = false
-                }
-                // Strip markdown formatting from lyrics
-                currentLines.add(stripMarkdown(trimmed))
-            } else if (currentLabel != null) {
-                currentLines.add("") // preserve blank lines within sections
+                // A blank line inside a section is kept, so its slides break where they were typed.
+                currentLabel != null -> currentLines.add("")
             }
         }
 
@@ -338,6 +331,22 @@ object MarkdownToSongConverter {
 
         // Post-process: detect repeated sections as Chorus
         return detectChorus(sections)
+    }
+
+    /**
+     * The section [trimmed] names, or null when it is not a section marker.
+     *
+     * A marker is either the label on its own ("Chorus", "Куплет 1") or one written as a
+     * sub-heading (`## Chorus`, `### **Verse 2**`), which is how a document exported from Word
+     * usually carries it.
+     */
+    private fun labelOf(trimmed: String): String? {
+        val direct = sectionLabelRegex.find(trimmed)
+        if (direct != null) return formatLabel(direct.groupValues[1], direct.groupValues[2])
+
+        val heading = SUB_HEADING.find(trimmed)?.groupValues?.get(1)?.trim()?.replace(BOLD, "$1")
+        val inHeading = heading?.let { sectionLabelRegex.find(it) } ?: return null
+        return formatLabel(inHeading.groupValues[1], inHeading.groupValues[2])
     }
 
     private fun detectChorus(sections: List<SongSection>): List<SongSection> {

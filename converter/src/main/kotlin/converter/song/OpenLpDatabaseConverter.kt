@@ -29,6 +29,17 @@ data class OpenLpSong(
  */
 object OpenLpDatabaseConverter {
 
+    /** Columns of the song query below, and of the author query that follows it. */
+    private const val COLUMN_ID = 1
+    private const val COLUMN_TITLE = 2
+    private const val COLUMN_LYRICS = 3
+    private const val COLUMN_VERSE_ORDER = 4
+    private const val COLUMN_COPYRIGHT = 5
+    private const val COLUMN_CCLI = 6
+    private const val AUTHOR_DISPLAY_NAME = 2
+    private const val AUTHOR_FIRST_NAME = 3
+    private const val AUTHOR_LAST_NAME = 4
+
     private const val SQLITE_HEADER = "SQLite format 3"
     private val verseOrderSeparator = Regex("""\s+""")
 
@@ -43,7 +54,7 @@ object OpenLpDatabaseConverter {
         Class.forName("org.sqlite.JDBC")
         DriverManager.getConnection("jdbc:sqlite:${file.absolutePath}").use { connection ->
             val tables = tableNames(connection)
-            if ("songs" !in tables) throw IllegalArgumentException("Not an OpenLP song database")
+            require("songs" in tables) { "Not an OpenLP song database" }
             val authors = if ("authors_songs" in tables) authorsBySong(connection) else emptyMap()
             val numbers = if ("songs_songbooks" in tables) numbersBySong(connection) else emptyMap()
             return readSongs(connection, authors, numbers)
@@ -92,17 +103,17 @@ object OpenLpDatabaseConverter {
     ): List<OpenLpSong> {
         val songs = mutableListOf<OpenLpSong>()
         query(connection, "SELECT id, title, lyrics, verse_order, copyright, ccli_number FROM songs ORDER BY id") {
-            val id = it.getInt(1)
-            val verseOrder = it.getString(4).orEmpty()
+            val id = it.getInt(COLUMN_ID)
+            val verseOrder = it.getString(COLUMN_VERSE_ORDER).orEmpty()
             songs.add(
                 OpenLpSong(
-                    title = it.getString(2).orEmpty().trim(),
+                    title = it.getString(COLUMN_TITLE).orEmpty().trim(),
                     author = authors[id].orEmpty(),
-                    copyright = it.getString(5).orEmpty().trim(),
-                    ccli = it.getString(6).orEmpty().trim(),
+                    copyright = it.getString(COLUMN_COPYRIGHT).orEmpty().trim(),
+                    ccli = it.getString(COLUMN_CCLI).orEmpty().trim(),
                     number = numbers[id].orEmpty(),
                     verseOrder = verseOrder.split(verseOrderSeparator).filter { token -> token.isNotBlank() },
-                    sections = sectionsOf(it.getString(3).orEmpty(), verseOrder),
+                    sections = sectionsOf(it.getString(COLUMN_LYRICS).orEmpty(), verseOrder),
                 )
             )
         }
@@ -114,11 +125,11 @@ object OpenLpDatabaseConverter {
         val sql = "SELECT authors_songs.song_id, authors.display_name, authors.first_name, authors.last_name " +
             "FROM authors_songs JOIN authors ON authors.id = authors_songs.author_id"
         query(connection, sql) {
-            val display = it.getString(2).orEmpty().ifBlank {
-                listOf(it.getString(3).orEmpty(), it.getString(4).orEmpty())
+            val display = it.getString(AUTHOR_DISPLAY_NAME).orEmpty().ifBlank {
+                listOf(it.getString(AUTHOR_FIRST_NAME).orEmpty(), it.getString(AUTHOR_LAST_NAME).orEmpty())
                     .filter(String::isNotBlank).joinToString(" ")
             }
-            if (display.isNotBlank()) names.getOrPut(it.getInt(1)) { mutableListOf() }.add(display)
+            if (display.isNotBlank()) names.getOrPut(it.getInt(COLUMN_ID)) { mutableListOf() }.add(display)
         }
         return names.mapValues { (_, list) -> list.joinToString(", ") }
     }
@@ -126,8 +137,8 @@ object OpenLpDatabaseConverter {
     private fun numbersBySong(connection: Connection): Map<Int, String> {
         val numbers = LinkedHashMap<Int, String>()
         query(connection, "SELECT song_id, entry FROM songs_songbooks") {
-            val entry = it.getString(2).orEmpty().trim()
-            if (entry.isNotBlank()) numbers.putIfAbsent(it.getInt(1), entry)
+            val entry = it.getString(COLUMN_TITLE).orEmpty().trim()
+            if (entry.isNotBlank()) numbers.putIfAbsent(it.getInt(COLUMN_ID), entry)
         }
         return numbers
     }

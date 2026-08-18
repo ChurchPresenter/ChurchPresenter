@@ -148,7 +148,8 @@ class FreeWorshipConverterTest {
         val withCredits = utf16(
             "credited.xml",
             song(
-                "<titles><title>T</title></titles><authors><author>A Writer</author></authors><copyright>2026 Someone</copyright>",
+                "<titles><title>T</title></titles><authors><author>A Writer</author></authors>" +
+                    "<copyright>2026 Someone</copyright>",
                 verse("v1", "x")
             )
         )
@@ -176,7 +177,8 @@ class FreeWorshipConverterTest {
 
     @Test
     fun `the empty parens Free Worship appends to a blank songbook are stripped from the output name`() {
-        assertEquals("YOUR LOVE NEVER FAILS.song", FreeWorshipConverter.outputNameFor(File("YOUR LOVE NEVER FAILS ().xml")))
+        val exported = File("YOUR LOVE NEVER FAILS ().xml")
+        assertEquals("YOUR LOVE NEVER FAILS.song", FreeWorshipConverter.outputNameFor(exported))
         assertEquals("Plain Name.song", FreeWorshipConverter.outputNameFor(File("Plain Name.xml")))
     }
 

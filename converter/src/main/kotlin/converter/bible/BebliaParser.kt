@@ -101,20 +101,23 @@ internal object BebliaParser {
         xmlFile.inputStream().buffered().use { input ->
             val reader = inputFactory().createXMLStreamReader(input)
             try {
-                var result = false
-                while (reader.hasNext()) {
-                    if (reader.next() == XMLStreamConstants.START_ELEMENT) {
-                        result = reader.localName == "bible" && TITLE_ATTRIBUTES.any { !reader.attribute(it).isNullOrBlank() }
-                        break
-                    }
-                }
-                result
+                isBebliaRoot(reader)
             } finally {
                 reader.close()
             }
         }
     } catch (_: Exception) {
         false
+    }
+
+    /** Whether the document's first element is a `<bible>` that names its translation. */
+    private fun isBebliaRoot(reader: XMLStreamReader): Boolean {
+        while (reader.hasNext()) {
+            if (reader.next() != XMLStreamConstants.START_ELEMENT) continue
+            return reader.localName == "bible" &&
+                TITLE_ATTRIBUTES.any { !reader.attribute(it).isNullOrBlank() }
+        }
+        return false
     }
 
     /**
@@ -141,23 +144,7 @@ internal object BebliaParser {
     ): ParsedBible {
         val totalBytes = xmlFile.length().coerceAtLeast(1)
         var reported = 0f
-
-        var rootTitle = ""
-        var rootRights = ""
-        var rootSource = ""
-        val books = mutableListOf<BibleBook>()
-
-        // Resolved once the root has been read, because the title is what names the language when the
-        // caller supplies none — and the language decides every book name below it.
-        var resolvedLanguage: String? = null
-
-        var bookNumber = 0
-        var chapterNumber = 0
-        var verseNumber = 0
-        var chapters = mutableListOf<BibleChapter>()
-        var verses = mutableListOf<BibleVerse>()
-        val verseText = StringBuilder()
-        var inVerse = false
+        val builder = BibleBuilder(language, name)
 
         xmlFile.inputStream().buffered().use { raw ->
             val counting = CountingInputStream(raw)
@@ -166,56 +153,7 @@ internal object BebliaParser {
             // "content not allowed in prolog".
             val reader = inputFactory().createXMLStreamReader(counting)
             try {
-                while (reader.hasNext()) {
-                    when (reader.next()) {
-                        XMLStreamConstants.START_ELEMENT -> when (reader.localName) {
-                            "bible" -> {
-                                rootTitle = reader.firstAttribute(TITLE_ATTRIBUTES)
-                                rootRights = reader.firstAttribute(RIGHTS_ATTRIBUTES)
-                                rootSource = reader.firstAttribute(SOURCE_ATTRIBUTES)
-                                resolvedLanguage = language?.trim()?.uppercase()?.ifBlank { null }
-                                    ?: languageFromTitle(name.ifBlank { rootTitle })
-                            }
-                            "book" -> {
-                                bookNumber = reader.attribute("number")?.trim()?.toIntOrNull() ?: 0
-                                chapters = mutableListOf()
-                            }
-                            "chapter" -> {
-                                chapterNumber = reader.attribute("number")?.trim()?.toIntOrNull() ?: 0
-                                verses = mutableListOf()
-                            }
-                            "verse" -> {
-                                verseNumber = reader.attribute("number")?.trim()?.toIntOrNull() ?: 0
-                                verseText.setLength(0)
-                                inVerse = true
-                            }
-                        }
-
-                        XMLStreamConstants.CHARACTERS, XMLStreamConstants.CDATA ->
-                            if (inVerse) verseText.append(reader.text)
-
-                        XMLStreamConstants.END_ELEMENT -> when (reader.localName) {
-                            "verse" -> {
-                                inVerse = false
-                                verses.add(
-                                    BibleVerse(
-                                        verseNumber,
-                                        XmlToSpbConverter.applyPatch(
-                                            verseText.toString(), resolvedLanguage,
-                                            bookNumber, chapterNumber, verseNumber
-                                        )
-                                    )
-                                )
-                            }
-                            "chapter" -> chapters.add(BibleChapter(chapterNumber, verses))
-                            // A book numbered outside the canon is dropped rather than failing the
-                            // file, matching how a book with no number has always been treated.
-                            "book" -> if (bookNumber in MIN_BOOK..MAX_BOOK) {
-                                books.add(BibleBook(bookNumber, bookName(bookNumber, resolvedLanguage), chapters))
-                            }
-                        }
-                    }
-
+                readAll(reader, builder) {
                     val fraction = (counting.count.toFloat() / totalBytes).coerceIn(0f, 1f)
                     if (fraction - reported >= PROGRESS_STEP) {
                         reported = fraction
@@ -229,15 +167,109 @@ internal object BebliaParser {
         onProgress(1f)
 
         return ParsedBible(
-            name = name.ifBlank { rootTitle }.ifBlank { "Unknown" },
+            name = name.ifBlank { builder.rootTitle }.ifBlank { "Unknown" },
             description = "",
-            language = resolvedLanguage,
-            books = books,
-            title = name.ifBlank { rootTitle },
+            language = builder.resolvedLanguage,
+            books = builder.books,
+            title = name.ifBlank { builder.rootTitle },
             identifier = identifier,
-            rights = rights.ifBlank { rootRights },
-            source = source.ifBlank { rootSource },
+            rights = rights.ifBlank { builder.rootRights },
+            source = source.ifBlank { builder.rootSource },
         )
+    }
+
+    /** Hands every event to [builder], calling [afterEvent] between them so progress is reported. */
+    private fun readAll(reader: XMLStreamReader, builder: BibleBuilder, afterEvent: () -> Unit) {
+        while (reader.hasNext()) {
+            builder.consume(reader, reader.next())
+            afterEvent()
+        }
+    }
+
+    /**
+     * The state of one parse: five elements deep, and nothing that is not one of them.
+     *
+     * Kept as an object rather than as locals in the loop because the dialect is flat — a book
+     * holds chapters and a chapter holds verses, with no nesting beyond that — so each event is a
+     * single step, and reading them as one function each is what keeps the walk legible.
+     */
+    private class BibleBuilder(private val language: String?, private val name: String) {
+        var rootTitle = ""
+            private set
+        var rootRights = ""
+            private set
+        var rootSource = ""
+            private set
+
+        // Resolved once the root has been read, because the title is what names the language when
+        // the caller supplies none — and the language decides every book name below it.
+        var resolvedLanguage: String? = null
+            private set
+
+        val books = mutableListOf<BibleBook>()
+
+        private var bookNumber = 0
+        private var chapterNumber = 0
+        private var verseNumber = 0
+        private var chapters = mutableListOf<BibleChapter>()
+        private var verses = mutableListOf<BibleVerse>()
+        private val verseText = StringBuilder()
+        private var inVerse = false
+
+        fun consume(reader: XMLStreamReader, event: Int) {
+            when (event) {
+                XMLStreamConstants.START_ELEMENT -> start(reader)
+                XMLStreamConstants.CHARACTERS, XMLStreamConstants.CDATA ->
+                    if (inVerse) verseText.append(reader.text)
+                XMLStreamConstants.END_ELEMENT -> end(reader.localName)
+            }
+        }
+
+        private fun start(reader: XMLStreamReader) {
+            when (reader.localName) {
+                "bible" -> {
+                    rootTitle = reader.firstAttribute(TITLE_ATTRIBUTES)
+                    rootRights = reader.firstAttribute(RIGHTS_ATTRIBUTES)
+                    rootSource = reader.firstAttribute(SOURCE_ATTRIBUTES)
+                    resolvedLanguage = language?.trim()?.uppercase()?.ifBlank { null }
+                        ?: languageFromTitle(name.ifBlank { rootTitle })
+                }
+                "book" -> {
+                    bookNumber = reader.number()
+                    chapters = mutableListOf()
+                }
+                "chapter" -> {
+                    chapterNumber = reader.number()
+                    verses = mutableListOf()
+                }
+                "verse" -> {
+                    verseNumber = reader.number()
+                    verseText.setLength(0)
+                    inVerse = true
+                }
+            }
+        }
+
+        private fun end(localName: String) {
+            when (localName) {
+                "verse" -> {
+                    inVerse = false
+                    val patched = XmlToSpbConverter.applyPatch(
+                        verseText.toString(), resolvedLanguage, bookNumber, chapterNumber, verseNumber,
+                    )
+                    verses.add(BibleVerse(verseNumber, patched))
+                }
+                "chapter" -> chapters.add(BibleChapter(chapterNumber, verses))
+                // A book numbered outside the canon is dropped rather than failing the file,
+                // matching how a book with no number has always been treated.
+                "book" -> if (bookNumber in MIN_BOOK..MAX_BOOK) {
+                    books.add(BibleBook(bookNumber, bookName(bookNumber, resolvedLanguage), chapters))
+                }
+            }
+        }
+
+        /** The element's `number` attribute, or 0 — a file numbers a book, chapter or verse alike. */
+        private fun XMLStreamReader.number(): Int = attribute("number")?.trim()?.toIntOrNull() ?: 0
     }
 
     private fun bookName(number: Int, language: String?): String =

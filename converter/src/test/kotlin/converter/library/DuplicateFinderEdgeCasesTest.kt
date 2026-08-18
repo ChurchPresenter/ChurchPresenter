@@ -318,7 +318,8 @@ class DuplicateFinderEdgeCasesTest {
     @Test
     fun `a UTF-8 file with a byte order mark loses the mark, not its first word`() {
         val file = File(temp, "bom.song")
-        file.writeBytes(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()) + "title: Слава".toByteArray(Charsets.UTF_8))
+        val mark = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
+        file.writeBytes(mark + "title: Слава".toByteArray(Charsets.UTF_8))
         assertEquals("title: Слава", DuplicateFinder.readFileWithFallback(file))
     }
 

@@ -41,6 +41,10 @@ data class ProPresenterSong(
  * UUID and then walked in group order. A song whose cues were read in file order would come out
  * with its verses shuffled.
  */
+// Split into one small function per step, which is what keeps the readers below within the
+// complexity and nesting limits. Splitting the object itself would scatter one file format across
+// several files instead.
+@Suppress("TooManyFunctions")
 object ProPresenterConverter {
 
     // Presentation

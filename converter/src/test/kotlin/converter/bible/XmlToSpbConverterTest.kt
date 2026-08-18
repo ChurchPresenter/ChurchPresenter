@@ -85,7 +85,13 @@ class XmlToSpbConverterTest {
         val lines = writeAndRead(
             bible(
                 books = listOf(
-                    BibleBook(1, "Genesis", listOf(BibleChapter(1, listOf(BibleVerse(1, "a"))), BibleChapter(2, listOf(BibleVerse(1, "b"))))),
+                    BibleBook(
+                        1, "Genesis",
+                        listOf(
+                            BibleChapter(1, listOf(BibleVerse(1, "a"))),
+                            BibleChapter(2, listOf(BibleVerse(1, "b"))),
+                        ),
+                    ),
                     BibleBook(40, "Matthew", listOf(BibleChapter(1, listOf(BibleVerse(1, "c"))))),
                 )
             )
@@ -109,7 +115,10 @@ class XmlToSpbConverterTest {
     fun `the code pads every component to three digits`() {
         val rows = verseRows(
             writeAndRead(
-                bible(books = listOf(BibleBook(19, "Psalms", listOf(BibleChapter(119, listOf(BibleVerse(176, "x")))))), language = "ENG")
+                bible(
+                    books = listOf(BibleBook(19, "Psalms", listOf(BibleChapter(119, listOf(BibleVerse(176, "x")))))),
+                    language = "ENG",
+                )
             )
         )
         assertTrue(rows.single().startsWith("B019C119V176"), "was ${rows.single()}")
@@ -122,7 +131,9 @@ class XmlToSpbConverterTest {
             writeAndRead(
                 bible(
                     language = language,
-                    books = listOf(BibleBook(19, "Psalms", listOf(BibleChapter(chapter, listOf(BibleVerse(verse, text)))))),
+                    books = listOf(
+                        BibleBook(19, "Psalms", listOf(BibleChapter(chapter, listOf(BibleVerse(verse, text))))),
+                    ),
                 )
             )
         )
@@ -147,7 +158,10 @@ class XmlToSpbConverterTest {
     fun `the display columns keep the translation's own numbering`() {
         val rows = verseRows(
             writeAndRead(
-                bible(language = "RUS", books = listOf(BibleBook(19, "Psalms", listOf(BibleChapter(22, listOf(BibleVerse(1, "text")))))))
+                bible(
+                    language = "RUS",
+                    books = listOf(BibleBook(19, "Psalms", listOf(BibleChapter(22, listOf(BibleVerse(1, "text")))))),
+                )
             )
         )
         val columns = rows.single().split('\t')
@@ -159,7 +173,10 @@ class XmlToSpbConverterTest {
     fun `only Psalms are renumbered, not the rest of the book list`() {
         val rows = verseRows(
             writeAndRead(
-                bible(language = "RUS", books = listOf(BibleBook(1, "Бытие", listOf(BibleChapter(22, listOf(BibleVerse(1, "text")))))))
+                bible(
+                    language = "RUS",
+                    books = listOf(BibleBook(1, "Бытие", listOf(BibleChapter(22, listOf(BibleVerse(1, "text")))))),
+                )
             )
         )
         assertTrue(rows.single().startsWith("B001C022V001"), "Genesis 22 stays Genesis 22")
