@@ -131,6 +131,12 @@ class LowerThirdSequencerTest {
 
         withTimeout(1_000) { cleared.receive() }
         collector.cancel()
+        // Wait for the status itself rather than assuming the emission that woke us was this run's.
+        // `onClear` is a shared flow on a JVM-wide object, so a late emission from an earlier test's
+        // job can satisfy `cleared.receive()` while this sequence is still running -- which is how
+        // this read `running:AutoEnd` on a loaded CI runner. Ends on the positive signal; the
+        // timeout only fails.
+        withTimeout(1_000) { LowerThirdSequencer.status.first { it == "idle" } }
         assertEquals("idle", LowerThirdSequencer.status.value)
     }
 
