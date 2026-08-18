@@ -39,6 +39,4 @@ include(":converter")
 // The Bitfocus Companion Satellite protocol client: a plain Kotlin library, depended on by
 // :composeApp, which wraps it in CompanionSatelliteViewModel.
 include(":companion-satellite")
-// The app's look: the nine color schemes, the semantic color roles, the typography and shape
-// scales, the ThemeManager. Depends on Compose and on nothing of the app's own.
 include(":theme")

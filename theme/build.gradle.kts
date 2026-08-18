@@ -24,7 +24,6 @@ dependencies {
     testImplementation(compose.uiTest)
 }
 
-// Same rules as the app's gate, no baseline: none of its entries were ever these files.
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))

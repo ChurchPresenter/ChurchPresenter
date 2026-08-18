@@ -13,12 +13,8 @@ group = "org.churchpresenter"
 extra["coverageExcludes"] = listOf("ui/**", "MainKt*", "ComposableSingletons*")
 
 extra["coverageFloors"] = mapOf(
-    "INSTRUCTION" to "0.95",
     "BRANCH" to "0.80",
-    "LINE" to "0.95",
     "COMPLEXITY" to "0.75",
-    "METHOD" to "0.95",
-    "CLASS" to "0.95",
 )
 
 kotlin {

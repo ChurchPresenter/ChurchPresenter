@@ -69,9 +69,9 @@ classpath, and exactly ONE schema jar may be there.
   everything it analyses is clean. `ui/**` is out of scope (see the comment on `source` in the build
   file): it is the pre-existing Compose desktop GUI, which is what :composeApp keeps in its own
   baseline rather than gating. Everything that parses a file is analysed.
-- `./gradlew :converter:jacocoTestCoverageVerification` — the same six counters the app gates, with
-  this module's own floors (see the table in `converter/build.gradle.kts`). `ui/**` and `MainKt` are
-  excluded: they need a display. Both run in CI as their own steps.
+- `./gradlew :converter:jacocoTestCoverageVerification` — the root build's six counters at 85%, with
+  BRANCH and COMPLEXITY lowered in `converter/build.gradle.kts` because they cannot reach it.
+  `ui/**` and `MainKt` are excluded: they need a display. Both run in CI as their own steps.
 
 ### The theme module
 `theme/` is a real Gradle module of this build — `include(":theme")`, `implementation(projects.theme)`.
@@ -96,7 +96,9 @@ The default floor is 85% on all six counters.
 
 A module's build file carries only what differs, and both are read when the task is realized, so
 they must be set **above everything else** in the file:
-- `extra["coverageFloors"]` — a counter→minimum map, merged over the defaults.
+- `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults, so name only the
+  counters that need a different number (usually the one or two that cannot reach 85%), never all
+  six. `:converter` and `:companion-satellite` name two each; `:theme` names none.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright.
 

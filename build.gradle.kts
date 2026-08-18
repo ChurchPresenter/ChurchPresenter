@@ -8,10 +8,6 @@ plugins {
     alias(libs.plugins.kotlinJvm) apply false
 }
 
-// Point Git at the repo's own hooks directory so every checkout gets the pre-commit branch
-// guard in .githooks/. `core.hooksPath` lives in .git/config, which is never cloned or pushed
-// — Git deliberately refuses to let a clone activate hooks by itself — so it has to be set
-// once per working copy. Doing it here means the first `./gradlew` run wires it up.
 val gitHooksPath = ".githooks"
 if (layout.projectDirectory.file(".git").asFile.exists()) {
     val current = providers.exec {
@@ -28,21 +24,10 @@ if (layout.projectDirectory.file(".git").asFile.exists()) {
     }
 }
 
-// One version for the modules of this build, instead of a "1.0.0" copied into each build file.
-// :composeApp is packaged from its own commit-count version and never reads this.
 subprojects {
     version = "1.0.0"
 }
 
-// ── JaCoCo for the plain-JVM modules ──────────────────────────────────────────
-// :converter, :companion-satellite and :theme all have the same shape — one `test` task, sources in
-// src/main/kotlin, classes in classes/kotlin/main — so the wiring is written once here instead of
-// three times. A module's build file then carries only what differs from it, set BEFORE the task is
-// realized: `coverageFloors` and `coverageExcludes`.
-//
-// :composeApp is deliberately out of scope. It is Kotlin Multiplatform, with two exec files, a
-// jvmMain source set and a long exclude list, and registers its own task; the kotlin("jvm") plugin
-// id is the discriminator, since only the three modules above apply it.
 val defaultCoverageFloors = mapOf(
     "INSTRUCTION" to "0.85",
     "BRANCH" to "0.85",
