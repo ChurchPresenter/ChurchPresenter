@@ -36,11 +36,14 @@ client.disconnect()
 client.dispose() // when done with the client entirely
 ```
 
-## Building standalone
+## Building
+
+A module of the ChurchPresenter build, so it has no wrapper of its own — run it from the repository
+root:
 
 ```shell
-./gradlew build
-./gradlew test
+./gradlew :companion-satellite:build
+./gradlew :companion-satellite:test
 ```
 
 ## License

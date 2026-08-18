@@ -36,3 +36,6 @@ include(":composeApp")
 // The converter: its own module, compiled and packaged separately, and depended on by
 // :composeApp, which opens it in a window from the Help menu.
 include(":converter")
+// The Bitfocus Companion Satellite protocol client: a plain Kotlin library, depended on by
+// :composeApp, which wraps it in CompanionSatelliteViewModel.
+include(":companion-satellite")

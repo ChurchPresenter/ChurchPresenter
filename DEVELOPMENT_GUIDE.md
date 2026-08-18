@@ -432,7 +432,7 @@ protection still stands, so that only buys you a commit you will have to move on
 ### Running the tests, per platform
 
 The app's own suite is `./gradlew :composeApp:check`. It needs **JDK 21** and nothing else — the
-six sub-builds live in this repository as ordinary directories, so a plain `git clone` gives you
+sub-builds live in this repository as ordinary directories, so a plain `git clone` gives you
 everything `composeApp` mounts via `kotlin.srcDir`.
 
 **In the inner loop, don't run the whole thing.** `bash test-changed.sh` maps what you have changed
@@ -461,16 +461,18 @@ after it in that JVM. `TestSingletons.latchSkikoHostOs()` exists to prevent exac
 be called *before* any `os.name` swap — `withOsName` already does. Whether it bites depends on test
 execution order, so it can appear on one machine and not another.
 
-### The converter module
+### The modules of this build
 
-`converter/` is part of this build, so it needs no wrapper of its own:
+`converter/` and `companion-satellite/` are part of this build, so neither needs a wrapper of its
+own:
 
 ```bash
-./gradlew :converter:test     # its suite
-./gradlew :converter:run      # the converter on its own, without the app
+./gradlew :converter:test              # its suite
+./gradlew :converter:run               # the converter on its own, without the app
+./gradlew :companion-satellite:test    # the Satellite protocol client's suite
 ```
 
-### The five sub-builds
+### The four separate sub-builds
 
 `:composeApp:check` does **not** reach them — each is its own Gradle build with its own wrapper,
 under `composeApp/src/jvmMain/appResources/common/`. CI runs them as separate steps. To run one
@@ -482,6 +484,11 @@ yourself, from its directory:
 ```shell
 .\gradlew.bat test    # Windows — .\gradlew.bat jvmTest for ChurchPresenter-Cross
 ```
+
+Neither `converter/` nor `companion-satellite/` is in that list any more — both are modules of the
+main build, invoked as `./gradlew :<module>:test`, with `:composeApp` depending on them like any
+other project. Promoting the remaining three the same way is the plan; the Satellite client went
+first because it is the smallest.
 
 ### DeckLink hardware tests
 

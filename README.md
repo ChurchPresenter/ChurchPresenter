@@ -30,7 +30,7 @@ compiled into the main app via `kotlin.srcDir`:
 >
 > **ChurchPresenter-BLE** — the Bible Lookup Engine, speech-to-reference detection.
 >
-> **ChurchPresenter-CompanionSatellite** — a pure-Kotlin Bitfocus Companion Satellite client.
+> **companion-satellite** — a pure-Kotlin Bitfocus Companion Satellite client. Unlike the others it is a full Gradle module of this build, at the repository root rather than under `appResources/common/`.
 >
 > **ChurchPresenter-Cross** — the crossword puzzle authoring tool and its encoded puzzles.
 
