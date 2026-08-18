@@ -72,18 +72,24 @@ classpath, and exactly ONE schema jar may be there.
   excluded: they need a display. Both run in CI as their own steps.
 
 ### Sub-builds
-Four module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
+Three module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
 have their own Gradle builds and test suites, under `src/jvmMain/appResources/common/`:
-`ChurchPresenter-PresentationEngine`, `-BLE`, `-LottieGen`, `-CompanionSatellite`. A fifth,
-`-Cross`, is not mounted — `syncCrosswordFiles` copies its `encoded/*.xwp` into composeResources at
-build time. The converter is not among them: it is the `:converter` Gradle module described above.
+`ChurchPresenter-PresentationEngine`, `-BLE`, `-LottieGen`. A fourth, `-Cross`, is not mounted —
+`syncCrosswordFiles` copies its `encoded/*.xwp` into composeResources at build time.
+
+Two are no longer among them, and are the direction the rest are headed: `converter/` (above) and
+`companion-satellite/` are **real Gradle modules of this build** —
+`implementation(projects.companionSatellite)`, tested with `./gradlew :companion-satellite:test` on
+the root wrapper, with dependency versions from `gradle/libs.versions.toml` rather than hand-copied
+literals.
 
 **None of these are git submodules.** All of them are committed directly into this repository, so a
 plain `git clone` is enough and a change spanning the app and a module is one commit.
 
-- **When touching module code, compile BOTH builds**: `./gradlew compileKotlinJvm` at the repo root
-  AND `sh gradlew build` inside the module. The main build is more permissive and will accept code
-  the module's own build rejects.
+- **When touching a MOUNTED module's code, compile BOTH builds**: `./gradlew compileKotlinJvm` at
+  the repo root AND `sh gradlew build` inside the module. The main build is more permissive and will
+  accept code the module's own build rejects. This does not apply to `companion-satellite/` — there
+  is only one build to satisfy there, which is the point of promoting it.
 - The Presentation Engine has **zero Compose dependency by construction** — accidental Compose
   imports fail its standalone build.
 - The Presentation Engine runs **entirely in-JVM**: never shell out to `osascript`, AppleScript,

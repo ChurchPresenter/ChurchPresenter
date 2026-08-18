@@ -311,6 +311,9 @@ kotlin {
             // The converter: a real module rather than a mounted source directory, opened in its
             // own window from the Help menu (AboutDialog) and used for Bible/song file conversion.
             implementation(projects.converter)
+            // The Companion Satellite protocol client: a real module rather than a mounted source
+            // directory, wrapped by CompanionSatelliteViewModel.
+            implementation(projects.companionSatellite)
             implementation(libs.kotlinx.coroutines.swing)
             // Sentry crash reporting
             implementation(libs.sentry)
@@ -661,9 +664,6 @@ kotlin {
             // Include Bible Lookup Engine (BLE) module source — runs in-process as a WebSocket
             // service started when STT connects.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-BLE/src/main/kotlin")
-            // Include Companion Satellite client module source — pure-Kotlin client for
-            // Bitfocus Companion's Satellite protocol, wrapped by CompanionSatelliteViewModel.
-            kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite/src/main/kotlin")
             // Include Presentation Engine module source — parses and renders PPTX/PPT/PDF/
             // Keynote decks (static + animated) for PresentationViewModel and CompanionServer.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/src/main/kotlin")
