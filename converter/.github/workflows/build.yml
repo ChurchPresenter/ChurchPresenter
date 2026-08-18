@@ -1,0 +1,292 @@
+name: Build Platforms
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        type: choice
+        default: 'All'
+        options:
+          - Windows
+          - macOS (ARM64)
+          - macOS (x64)
+          - Linux
+          - All
+      version:
+        description: 'Release version (e.g. v1.2.3) — leave empty to auto-generate from commit count'
+        required: false
+        type: string
+        default: ''
+      release:
+        description: 'Create a GitHub release'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    if: ${{ inputs.release }}
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
+            [[ "$VERSION" != v* ]] && VERSION="v$VERSION"
+          else
+            YEAR=$(date +%y)
+            COMMITS=$(git rev-list --count HEAD)
+            MAJOR=$YEAR
+            MINOR=$((COMMITS / 256))
+            PATCH=$((COMMITS % 256))
+            VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION"
+
+  build-windows:
+    if: ${{ inputs.platform == 'Windows' || inputs.platform == 'All' }}
+    runs-on: [self-hosted, X64, Windows]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build MSI installer
+        shell: cmd
+        run: gradlew.bat packageMsi
+
+      - name: Rename MSI (add WINDOWS-x64 label)
+        shell: powershell
+        run: |
+          Get-ChildItem build\compose\binaries\main\msi\*.msi | ForEach-Object {
+            Rename-Item $_.FullName ($_.BaseName + "-WINDOWS-x64.msi")
+          }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-msi
+          path: build/compose/binaries/main/msi
+          retention-days: 2
+
+  build-macos:
+    if: ${{ inputs.platform == 'macOS (ARM64)' || inputs.platform == 'All' }}
+    runs-on: [self-hosted, macOS, ARM64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build DMG
+        run: ./gradlew packageDmg
+
+      - name: Rename DMG (add MACOS-arm64 label)
+        run: |
+          for f in build/compose/binaries/main/dmg/*.dmg; do
+            mv "$f" "${f%.dmg}-MACOS-arm64.dmg"
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: build/compose/binaries/main/dmg
+          retention-days: 2
+
+  build-macos-x64:
+    if: ${{ inputs.platform == 'macOS (x64)' || inputs.platform == 'All' }}
+    runs-on: [self-hosted, macOS, X64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build DMG
+        run: ./gradlew packageDmg
+
+      - name: Rename DMG (add MACOS-x64 label)
+        run: |
+          for f in build/compose/binaries/main/dmg/*.dmg; do
+            mv "$f" "${f%.dmg}-MACOS-x64.dmg"
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg-x64
+          path: build/compose/binaries/main/dmg
+          retention-days: 2
+
+  build-linux:
+    if: ${{ inputs.platform == 'Linux' || inputs.platform == 'All' }}
+    runs-on: [self-hosted, X64, Linux]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build DEB installer
+        run: ./gradlew packageDeb
+
+      - name: Rename DEB (add DEBIAN-x64 label)
+        run: |
+          for f in build/compose/binaries/main/deb/*.deb; do
+            BASENAME=$(basename "$f" .deb)
+            mv "$f" "build/compose/binaries/main/deb/${BASENAME}-DEBIAN-x64.deb"
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb
+          path: build/compose/binaries/main/deb
+          retention-days: 2
+
+  release:
+    if: ${{ always() && inputs.release && needs.version.result == 'success' }}
+    needs: [version, build-windows, build-macos, build-macos-x64, build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Windows artifact
+        if: ${{ (inputs.platform == 'Windows' || inputs.platform == 'All') && needs.build-windows.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-msi
+          path: release/windows
+
+      - name: Download macOS artifact
+        if: ${{ (inputs.platform == 'macOS (ARM64)' || inputs.platform == 'All') && needs.build-macos.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-dmg
+          path: release/macos
+
+      - name: Download macOS x64 artifact
+        if: ${{ (inputs.platform == 'macOS (x64)' || inputs.platform == 'All') && needs.build-macos-x64.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-dmg-x64
+          path: release/macos
+
+      - name: Download Linux artifact
+        if: ${{ (inputs.platform == 'Linux' || inputs.platform == 'All') && needs.build-linux.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-deb
+          path: release/linux
+
+      - name: List release files
+        run: |
+          mkdir -p release
+          find release -type f
+
+      - name: Fail if no artifacts
+        run: |
+          if [ -z "$(find release -type f)" ]; then
+            echo "No artifacts to release"
+            exit 1
+          fi
+
+      - name: Build release body
+        id: body
+        run: |
+          BODY="Download the installer for your platform below."
+          BODY="$BODY"$'\n'
+          if ls release/windows/*.msi 1>/dev/null 2>&1; then
+            for f in release/windows/*.msi; do
+              BODY="$BODY"$'\n'"- **Windows:** $(basename "$f")"
+            done
+          fi
+          if ls release/macos/*.dmg 1>/dev/null 2>&1; then
+            for f in release/macos/*.dmg; do
+              BODY="$BODY"$'\n'"- **macOS:** $(basename "$f")"
+            done
+          fi
+          if ls release/linux/*.deb 1>/dev/null 2>&1; then
+            for f in release/linux/*.deb; do
+              BODY="$BODY"$'\n'"- **Linux:** $(basename "$f")"
+            done
+          fi
+          echo "BODY<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.version }}
+          name: ChurchPresenter Converter ${{ needs.version.outputs.version }}
+          body: ${{ steps.body.outputs.BODY }}
+          files: |
+            release/windows/*
+            release/macos/*
+            release/linux/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
