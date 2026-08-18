@@ -90,7 +90,7 @@ jobs:
       # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
       # Pre-existing findings are in config/detekt/baseline.xml; this gates only new ones.
       - name: Detekt
-        run: ./gradlew :composeApp:detekt
+        run: ./gradlew :composeApp:detekt :core-models:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -192,6 +192,14 @@ jobs:
         if: always()
         run: ./gradlew :companion-satellite:test
 
+      - name: Core models tests
+        if: always()
+        run: ./gradlew :core-models:test
+
+      - name: Core models coverage floor
+        if: always()
+        run: ./gradlew :core-models:jacocoTestCoverageVerification -x test
+
       # Each module is its own Gradle build with its own wrapper, so they cannot be reached
       # from the root build and are invoked individually. `if: always()` keeps a failure in one
       # suite from hiding the results of the others; the `steps.modules` half skips a module whose
@@ -236,6 +244,7 @@ jobs:
             composeApp/build/test-results/**/TEST-*.xml
             converter/build/test-results/**/TEST-*.xml
             companion-satellite/build/test-results/**/TEST-*.xml
+            core-models/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
           detailed_summary: true
           include_passed: false
@@ -255,5 +264,7 @@ jobs:
             composeApp/build/test-results/
             converter/build/reports/tests/
             converter/build/test-results/
+            core-models/build/reports/tests/
+            core-models/build/test-results/
             composeApp/src/jvmMain/appResources/common/*/build/reports/tests/
             composeApp/src/jvmMain/appResources/common/*/build/test-results/

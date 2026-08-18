@@ -43,7 +43,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `server/`        | Ktor REST/WebSocket server, ATEM client, tunnel, SSL                |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
 | `data/settings/` | Data classes for all persisted settings                             |
-| `models/`        | Shared data models (ScheduleItem, SceneModels, etc.)                |
+| `models/`        | Only what needs the app: ShortcutAction, the two Companion UI states |
 | `composables/`   | Reusable UI components (VideoPlayer, SceneCanvas, etc.)             |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
 | `utils/`         | Stateless helpers (AutoFit, UpdateChecker, CrashReporter, etc.)     |
@@ -72,6 +72,22 @@ classpath, and exactly ONE schema jar may be there.
 - `./gradlew :converter:jacocoTestCoverageVerification` — the same six counters the app gates, with
   this module's own floors (see the table in `converter/build.gradle.kts`). `ui/**` and `MainKt` are
   excluded: they need a display. Both run in CI as their own steps.
+
+### The core-models module
+`core-models/` holds the shared data models — `ScheduleItem`, `SceneModels`, `Question`,
+`LyricSection`, `SelectedVerse`, `KeyChord` and friends — in the package they always had
+(`…models`), so no import in the app changed. `./gradlew :core-models:test`, `:core-models:detekt`.
+
+It depends on Compose's `Key`/`KeyEvent` and kotlinx-serialization and on nothing of the app's own.
+Three models stayed in `:composeApp` because they cannot: `ShortcutAction` (60+ generated
+`StringResource` refs and `tabs.Tabs`), `CompanionButtonState` (`ImageBitmap`) and
+`CompanionConnectionUiState`.
+
+`TimerModes` lives here because `ScheduleItem` needs it; `utils.Constants.TIMER_MODE_*` are aliases
+of it so existing call sites are unchanged. `Constants` itself cannot move — it also holds
+composables and AWT screen-device helpers.
+
+Anything `:composeApp` calls has to be public here — `websiteDisplayText` was `internal`.
 
 ### Sub-builds
 Three module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but

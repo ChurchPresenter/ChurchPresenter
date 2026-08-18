@@ -21,7 +21,7 @@
 - `data/settings/SongSettings.kt`
 - `presenter/SongPresenter.kt`
 - `dialogs/EditSongDialog.kt`, `dialogs/tabs/SongSettingsTab.kt`
-- `models/LyricSection.kt`
+- `core-models/src/main/kotlin/.../models/LyricSection.kt` (the `:core-models` module)
 - `converter/` (the `:converter` Gradle module, at the repo root) — format converter tool
 
 ## Bible & Scripture
@@ -50,7 +50,7 @@
 - `data/settings/BibleSettings.kt`, `data/settings/BibleEngineSettings.kt`
 - `presenter/BiblePresenter.kt`
 - `dialogs/tabs/BibleSettingsTab.kt`
-- `models/SelectedVerse.kt`
+- `core-models/src/main/kotlin/.../models/SelectedVerse.kt` (the `:core-models` module)
 - `appResources/common/ChurchPresenter-BLE/` — Bible Lookup Engine (speech-to-reference detection)
 
 ## Slides & Presentations
@@ -116,7 +116,7 @@
 - `tabs/WebTab.kt` — web browser UI
 - `tabs/CanvasTab.kt` — scene compositor UI
 - `viewmodel/SceneViewModel.kt`
-- `models/SceneModels.kt`
+- `core-models/src/main/kotlin/.../models/SceneModels.kt` (the `:core-models` module)
 - `composables/SceneCanvas.kt`, `composables/SceneSourceRenderer.kt`, `composables/SourcePropertiesPanel.kt`
 - `composables/SharedBrowserFrameCache.kt`, `composables/SharedCameraFrameCache.kt`
 - `presenter/ScenePresenter.kt`, `presenter/WebsitePresenter.kt`
@@ -143,7 +143,7 @@
 - `viewmodel/QAManager.kt`
 - `data/settings/QASettings.kt`
 - `presenter/QAPresenter.kt`
-- `models/Question.kt`
+- `core-models/src/main/kotlin/.../models/Question.kt` (the `:core-models` module)
 
 ## Service Planning
 - **Drag-and-drop schedules** — build your whole service from songs, scripture, slides, media, lower thirds, announcements and websites.
@@ -153,7 +153,7 @@
 **Source locations:**
 - `tabs/ScheduleTab.kt` — main UI
 - `viewmodel/ScheduleViewModel.kt`
-- `models/ScheduleItem.kt`
+- `core-models/src/main/kotlin/.../models/ScheduleItem.kt` (the `:core-models` module)
 - `viewmodel/FileManager.kt`
 - `dialogs/AddLabelDialog.kt`
 
