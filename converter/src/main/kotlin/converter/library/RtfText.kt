@@ -77,6 +77,9 @@ object RtfText {
      * what a control word means depends on the group it is in and on the font selected before it —
      * and every step below moves the cursor as its last act.
      */
+    // One function per step of the state machine, which is what keeps each of them readable and
+    // the whole within the complexity limit; collapsing any of them back would trade this for that.
+    @Suppress("TooManyFunctions")
     private class Reader(private val rtf: String, private val defaultCodePage: Int) {
         private val out = StringBuilder()
 

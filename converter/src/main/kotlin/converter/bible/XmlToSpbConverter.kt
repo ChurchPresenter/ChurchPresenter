@@ -351,8 +351,9 @@ object XmlToSpbConverter {
 
     /** The name an English module writes on the book itself, long form before short. */
     private fun declaredName(bookElem: org.w3c.dom.Node): String? =
-        listOf("bname", "bsname")
-            .firstNotNullOfOrNull { bookElem.attributes.getNamedItem(it)?.nodeValue?.takeIf { name -> name.isNotBlank() } }
+        listOf("bname", "bsname").firstNotNullOfOrNull { attribute ->
+            bookElem.attributes.getNamedItem(attribute)?.nodeValue?.takeIf { it.isNotBlank() }
+        }
 
     /**
      * The book's name as its first chapter's caption states it, for a module in a language with no

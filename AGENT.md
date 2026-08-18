@@ -65,8 +65,10 @@ directory: build it with `./gradlew :converter:build`, test it with `./gradlew :
 Its POI dependency excludes `poi-ooxml-lite` and adds `poi-ooxml-full` — its jar is on the app's
 classpath, and exactly ONE schema jar may be there.
 
-- `./gradlew :converter:detekt` — same `config/detekt/detekt.yml` as the app, **no baseline**: the
-  app's baseline is a jvmMain snapshot and none of it applies here, so this module stays clean.
+- `./gradlew :converter:detekt` — same `config/detekt/detekt.yml` as the app, **no baseline**, and
+  everything it analyses is clean. `ui/**` is out of scope (see the comment on `source` in the build
+  file): it is the pre-existing Compose desktop GUI, which is what :composeApp keeps in its own
+  baseline rather than gating. Everything that parses a file is analysed.
 - `./gradlew :converter:jacocoTestCoverageVerification` — the same six counters the app gates, with
   this module's own floors (see the table in `converter/build.gradle.kts`). `ui/**` and `MainKt` are
   excluded: they need a display. Both run in CI as their own steps.
