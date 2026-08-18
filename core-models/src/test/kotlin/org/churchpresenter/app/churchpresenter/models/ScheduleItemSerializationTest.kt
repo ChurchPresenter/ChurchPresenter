@@ -4,7 +4,6 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.churchpresenter.app.churchpresenter.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -230,7 +229,7 @@ class ScheduleItemSerializationTest {
     @Test
     fun `a countdown keeps its duration and its expiry message`() {
         val timer = ScheduleItem.AnnouncementItem(
-            id = "8", text = "", isTimer = true, timerMode = Constants.TIMER_MODE_DURATION,
+            id = "8", text = "", isTimer = true, timerMode = TimerModes.DURATION,
             timerHours = 1, timerMinutes = 2, timerSeconds = 3,
             timerTextColor = "#00FF00", timerExpiredText = "We're starting!",
         )
@@ -254,14 +253,14 @@ class ScheduleItemSerializationTest {
     @Test
     fun `a countdown to a clock time keeps its target`() {
         val until = ScheduleItem.AnnouncementItem(
-            id = "8", text = "", isTimer = true, timerMode = Constants.TIMER_MODE_CLOCK,
+            id = "8", text = "", isTimer = true, timerMode = TimerModes.CLOCK,
             targetHour = 10, targetMinute = 30, targetSecond = 5,
         )
 
         val back = roundTrip(until)
 
         assertEquals(until, back)
-        assertEquals(Constants.TIMER_MODE_CLOCK, back.timerMode)
+        assertEquals(TimerModes.CLOCK, back.timerMode)
         assertEquals(10, back.targetHour)
         assertEquals(30, back.targetMinute)
         assertEquals(5, back.targetSecond)
@@ -271,7 +270,7 @@ class ScheduleItemSerializationTest {
     @Test
     fun `a live clock keeps its format string`() {
         val clock = ScheduleItem.AnnouncementItem(
-            id = "8", text = "", isTimer = true, timerMode = Constants.TIMER_MODE_CLOCK_DISPLAY,
+            id = "8", text = "", isTimer = true, timerMode = TimerModes.CLOCK_DISPLAY,
             liveClockFormat = "h:mm a",
         )
 
@@ -300,7 +299,7 @@ class ScheduleItemSerializationTest {
         assertEquals(500, announcement.animationDuration)
         assertEquals(0, announcement.loopCount, "0 means loop forever, and is what an old notice must keep doing")
         assertEquals(false, announcement.isTimer)
-        assertEquals(Constants.TIMER_MODE_DURATION, announcement.timerMode)
+        assertEquals(TimerModes.DURATION, announcement.timerMode)
         assertEquals("HH:mm:ss", announcement.liveClockFormat)
     }
 

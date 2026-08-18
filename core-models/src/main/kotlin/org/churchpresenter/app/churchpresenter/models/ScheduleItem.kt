@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.models
 
 import kotlinx.serialization.Serializable
-import org.churchpresenter.app.churchpresenter.utils.Constants
 
 private const val TEXT_PREVIEW_CHARS = 50
 private const val TITLE_PREVIEW_CHARS = 60
@@ -120,16 +119,16 @@ sealed class ScheduleItem {
         val timerSeconds: Int = 0,
         val timerTextColor: String = "#FFFFFF",
         val timerExpiredText: String = "",
-        val timerMode: String = Constants.TIMER_MODE_DURATION,
+        val timerMode: String = TimerModes.DURATION,
         val targetHour: Int = 0,
         val targetMinute: Int = 0,
         val targetSecond: Int = 0,
         val liveClockFormat: String = "HH:mm:ss",
         override val displayText: String = if (isTimer) {
             when (timerMode) {
-                Constants.TIMER_MODE_CLOCK -> "Until %02d:%02d:%02d".format(targetHour, targetMinute, targetSecond)
-                Constants.TIMER_MODE_COUNT_UP -> "Duration Timer"
-                Constants.TIMER_MODE_CLOCK_DISPLAY -> "Clock"
+                TimerModes.CLOCK -> "Until %02d:%02d:%02d".format(targetHour, targetMinute, targetSecond)
+                TimerModes.COUNT_UP -> "Duration Timer"
+                TimerModes.CLOCK_DISPLAY -> "Clock"
                 else -> if (timerHours > 0) {
                     "Timer %d:%02d:%02d".format(timerHours, timerMinutes, timerSeconds)
                 } else {
@@ -177,6 +176,6 @@ sealed class ScheduleItem {
  * not given. Anything that changes the title therefore has to pass the new label explicitly, and
  * both sides have to derive it the same way or the row and the title drift apart.
  */
-internal fun websiteDisplayText(title: String): String =
+fun websiteDisplayText(title: String): String =
     "${title.take(TITLE_PREVIEW_CHARS)}${if (title.length > TITLE_PREVIEW_CHARS) "…" else ""}"
 
