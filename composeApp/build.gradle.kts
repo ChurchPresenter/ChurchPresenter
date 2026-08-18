@@ -802,6 +802,20 @@ val serialTestClasses = listOf(
     "*CompanionServerAtemUploadTest",
     "*LowerThirdAtemUploadTest",
     "*LowerThirdSequencerKeyTest",
+    // Here for a different reason: it binds a fixed port AND draws that port into the image (the
+    // Server URL row, the connection QR). Shifting the port per fork would rewrite every one of its
+    // committed screenshots on every run, so it keeps the literal and runs where nothing competes
+    // for the port.
+    "*ServerSettingsTabScreenshotTest",
+    // And these for a third: all thirteen seed one fixed directory on disk -- AppPreviewSupport's
+    // `library()` writes songs, bibles, a Gallery of PNGs and a deck into LIBRARY
+    // (/Users/Shared/ChurchPresenter, else /tmp/ChurchPresenter) with copyTo(overwrite = true).
+    // That was safe while nothing ran at the same time; across forks it is one process reading a
+    // file another is rewriting, which surfaced on CI as `AppPreviewPicturesScreenshotTest` failing
+    // to find the "04 Church" thumbnail it had just been shown. LIBRARY cannot move per fork the way
+    // user.home does -- these previews draw those paths into the images (the schedule rows read
+    // "/Users/Shared/ChurchPresenter/..."), so a per-fork root would rewrite every screenshot.
+    "*AppPreview*ScreenshotTest",
 )
 
 val jvmTestSerial by tasks.registering(org.gradle.api.tasks.testing.Test::class) {
@@ -826,8 +840,21 @@ tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
     }
     if (!filteredFromCommandLine) {
         filter { serialTestClasses.forEach { excludeTestsMatching(it) } }
+        // Only worth running when this task excluded them. A command-line `--tests` applies to EVERY
+        // Test task in the invocation, so finalizing unconditionally meant
+        // `recordRoborazziJvm --tests '*ScreenshotTest*'` -- what screenshots.yml runs -- started the
+        // serial task with a filter matching none of its six classes, and Gradle failed the build
+        // with "No tests found for given includes". Nothing was excluded from that run in the first
+        // place, so there is nothing for the serial pass to pick up.
+        finalizedBy(jvmTestSerial)
+    } else {
+        // The other half of standing the exclusion down: those classes now run HERE, in this task,
+        // and several of them are in that list precisely because they cannot run beside anything.
+        // `recordRoborazziJvm --tests '*ScreenshotTest*'` -- what screenshots.yml runs on every push
+        // and pull request -- is exactly that case, and it raced the shared AppPreview library.
+        // A named subset is small enough that one JVM costs little, and correctness is not optional.
+        maxParallelForks = 1
     }
-    finalizedBy(jvmTestSerial)
 }
 
 // ── Screenshots (Roborazzi) ───────────────────────────────────────────────────
