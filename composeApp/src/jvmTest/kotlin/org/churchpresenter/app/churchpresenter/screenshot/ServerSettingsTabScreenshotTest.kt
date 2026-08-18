@@ -34,7 +34,6 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import java.io.File
 import kotlin.test.Test
-import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The Server tab of the settings dialog, in both themes.
@@ -91,8 +90,13 @@ class ServerSettingsTabScreenshotTest {
 
         const val SECTION = "serverSettingsTab"
 
-        /** Fixed, so the Server URL row reads the same on every machine that records this. */
-        val PORT = testPort(39_641)
+        /**
+         * Fixed, so the Server URL row reads the same on every machine that records this -- and
+         * NOT `testPort()`. This suite draws the port into the image (the Server URL row and the
+         * connection QR encode it), so a per-fork offset would change every one of these files on
+         * every run. It is in `serialTestClasses` instead, which is what keeps the bind safe.
+         */
+        const val PORT = 39_641
         const val HOST = "studio-pc"
 
         /** Fixed rather than generated: the Generate button makes a random UUID. */

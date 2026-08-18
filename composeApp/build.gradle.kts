@@ -802,6 +802,11 @@ val serialTestClasses = listOf(
     "*CompanionServerAtemUploadTest",
     "*LowerThirdAtemUploadTest",
     "*LowerThirdSequencerKeyTest",
+    // Here for a different reason: it binds a fixed port AND draws that port into the image (the
+    // Server URL row, the connection QR). Shifting the port per fork would rewrite every one of its
+    // committed screenshots on every run, so it keeps the literal and runs where nothing competes
+    // for the port.
+    "*ServerSettingsTabScreenshotTest",
 )
 
 val jvmTestSerial by tasks.registering(org.gradle.api.tasks.testing.Test::class) {
@@ -826,8 +831,14 @@ tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
     }
     if (!filteredFromCommandLine) {
         filter { serialTestClasses.forEach { excludeTestsMatching(it) } }
+        // Only worth running when this task excluded them. A command-line `--tests` applies to EVERY
+        // Test task in the invocation, so finalizing unconditionally meant
+        // `recordRoborazziJvm --tests '*ScreenshotTest*'` -- what screenshots.yml runs -- started the
+        // serial task with a filter matching none of its six classes, and Gradle failed the build
+        // with "No tests found for given includes". Nothing was excluded from that run in the first
+        // place, so there is nothing for the serial pass to pick up.
+        finalizedBy(jvmTestSerial)
     }
-    finalizedBy(jvmTestSerial)
 }
 
 // ── Screenshots (Roborazzi) ───────────────────────────────────────────────────
