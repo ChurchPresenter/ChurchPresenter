@@ -83,3 +83,21 @@ subprojects {
         }
     }
 }
+
+// The configured floor of every module, read off the verification tasks themselves so the number
+// reported is the number enforced. CSV: FLOOR,<module>,<counter>,<minimum>
+tasks.register("coverageFloors") {
+    group = "verification"
+    description = "Prints each module's configured JaCoCo floors."
+    doLast {
+        allprojects.forEach { project ->
+            project.tasks.withType(JacocoCoverageVerification::class.java).forEach { task ->
+                task.violationRules.rules.forEach { rule ->
+                    rule.limits.forEach { limit ->
+                        println("FLOOR,${project.name},${limit.counter},${limit.minimum}")
+                    }
+                }
+            }
+        }
+    }
+}

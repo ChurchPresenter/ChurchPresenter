@@ -269,24 +269,85 @@ jobs:
           comment: true
           updateComment: true
 
-      # Never gates -- the gradle verification steps above are the real floors; min-coverage only
-      # picks the emoji.
-      - name: Coverage on the pull request
+      # Every module, every counter, current value. madrapps/jacoco-report was here first and only
+      # reported modules containing changed files -- one row, and a red mark on a module at 99%.
+      # Never gates: the jacocoTestCoverageVerification steps above are the real floors.
+      - name: Coverage table
         if: always() && github.event_name == 'pull_request'
-        uses: madrapps/jacoco-report@v1.8.0
-        with:
-          paths: |
-            composeApp/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml,
-            converter/build/reports/jacoco/test/jacocoTestReport.xml,
-            companion-satellite/build/reports/jacoco/test/jacocoTestReport.xml,
-            theme/build/reports/jacoco/test/jacocoTestReport.xml,
-            core-models/build/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: Coverage
-          update-comment: true
-          skip-if-no-changes: true
-          min-coverage-overall: 75
-          min-coverage-changed-lines: 75
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          ./gradlew coverageFloors -q > floors.csv || true
+          python3 - <<'PY' > coverage.md
+          import glob, os, xml.etree.ElementTree as ET
+
+          COUNTERS = ["INSTRUCTION", "BRANCH", "LINE", "COMPLEXITY", "METHOD", "CLASS"]
+          PATTERNS = [
+              "*/build/reports/jacoco/*/*.xml",
+              "composeApp/src/jvmMain/appResources/common/*/build/reports/jacoco/*/*.xml",
+          ]
+
+          # The floor as the verification task itself has it, so the cap reported is the cap enforced.
+          floors = {}
+          if os.path.exists("floors.csv"):
+              for line in open("floors.csv"):
+                  parts = line.strip().split(",")
+                  if len(parts) == 4 and parts[0] == "FLOOR":
+                      floors.setdefault(parts[1], {})[parts[2]] = float(parts[3]) * 100
+
+          # Only modules that actually produced a report in THIS run. The sub-builds are gated on
+          # their own directories, so a run that skipped them simply has no section for them.
+          found = {}
+          for pattern in PATTERNS:
+              for path in glob.glob(pattern):
+                  module = os.path.basename(path.split("/build/reports/jacoco/")[0])
+                  try:
+                      root = ET.parse(path).getroot()
+                  except ET.ParseError:
+                      continue
+                  ratios = {}
+                  for c in root.findall("counter"):
+                      missed, covered = int(c.get("missed")), int(c.get("covered"))
+                      total = missed + covered
+                      if total:
+                          ratios[c.get("type")] = 100 * covered / total
+                  if ratios:
+                      found[module] = ratios
+
+          print("<!-- coverage-table -->")
+          print("## Coverage")
+          if not found:
+              print()
+              print("No JaCoCo reports were produced in this run.")
+          for module in sorted(found, key=lambda m: (m != "composeApp", m)):
+              ratios = found[module]
+              print()
+              print(f"### {module}")
+              print()
+              print("| Counter | Floor | Actual |")
+              print("|---|---|---|")
+              for counter in COUNTERS:
+                  if counter not in ratios:
+                      continue
+                  floor = floors.get(module, {}).get(counter)
+                  cap = "" if floor is None else f"{floor:.0f}%"
+                  print(f"| {counter.title()} | {cap} | {ratios[counter]:.2f}% |")
+          if found:
+              print()
+              print("Modules whose tests did not run in this build are not listed. The floors are")
+              print("enforced by the `jacocoTestCoverageVerification` steps, not by this table.")
+          PY
+
+          # Upsert: one comment per pull request, found by the marker on its first line.
+          id=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" --paginate \
+                 --jq '.[] | select(.body | startswith("<!-- coverage-table -->")) | .id' | head -1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/$id" -F body=@coverage.md >/dev/null
+          else
+            gh api -X POST "repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" -F body=@coverage.md >/dev/null
+          fi
+          cat coverage.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload test reports
         if: failure()
