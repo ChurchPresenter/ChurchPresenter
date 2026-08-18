@@ -18,21 +18,29 @@ Clone the repository — there are no submodules, so a plain clone is everything
 git clone https://github.com/ChurchPresenter/ChurchPresenter
 ```
 
-The six sub-builds under `composeApp/src/jvmMain/appResources/common/` live in this repository as
-ordinary directories. Each keeps its own Gradle wrapper and test suite, and their sources are
-compiled into the main app via `kotlin.srcDir`:
+The app is built from several modules that all live in this repository — there are no submodules and
+nothing to fetch separately. Two of them are **Gradle modules of this build**, with no wrapper of
+their own:
 
-> **ChurchPresenter-LottieGen** — a standalone Compose Desktop app for generating animated lower-third overlays as Lottie JSON files, launched from the Lower Third settings.
+> **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop,
+> accessible from the Help menu. `./gradlew :converter:test`, `./gradlew :converter:packageDmg`.
 >
-> **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop, accessible from the Help menu. Unlike the rest, it is a Gradle module of this build (`:converter`) rather than a mounted source directory, so it is built and tested on its own: `./gradlew :converter:test`, `./gradlew :converter:packageDmg`.
+> **[`companion-satellite/`](./companion-satellite)** — a pure-Kotlin Bitfocus Companion Satellite
+> protocol client. `./gradlew :companion-satellite:test`.
+
+The other four sit under `composeApp/src/jvmMain/appResources/common/`. Each still keeps its own
+Gradle wrapper and test suite, and the first three have their sources compiled into the main app via
+`kotlin.srcDir`:
+
+> **ChurchPresenter-LottieGen** — a standalone Compose Desktop app for generating animated
+> lower-third overlays as Lottie JSON files, launched from the Lower Third settings.
 >
 > **ChurchPresenter-PresentationEngine** — PPTX/PPT/Keynote/PDF parsing, timing and animation.
 >
 > **ChurchPresenter-BLE** — the Bible Lookup Engine, speech-to-reference detection.
 >
-> **companion-satellite** — a pure-Kotlin Bitfocus Companion Satellite client. Unlike the others it is a full Gradle module of this build, at the repository root rather than under `appResources/common/`.
->
-> **ChurchPresenter-Cross** — the crossword puzzle authoring tool and its encoded puzzles.
+> **ChurchPresenter-Cross** — the crossword puzzle authoring tool. Not compiled into the app; a
+> build-time task copies its encoded puzzles into the app's resources.
 
 
 ---
