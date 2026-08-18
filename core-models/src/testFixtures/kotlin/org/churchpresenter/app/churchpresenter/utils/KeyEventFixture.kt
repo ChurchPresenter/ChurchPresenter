@@ -18,7 +18,7 @@ import androidx.compose.ui.input.key.KeyEventType
  * the signature breaks one file rather than every keyboard test.
  */
 @OptIn(InternalComposeUiApi::class)
-internal fun keyDown(
+fun keyDown(
     key: Key,
     ctrl: Boolean = false,
     shift: Boolean = false,

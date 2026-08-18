@@ -319,6 +319,7 @@ kotlin {
             // directory, wrapped by CompanionSatelliteViewModel.
             implementation(projects.companionSatellite)
             implementation(projects.theme)
+            implementation(projects.coreModels)
             implementation(libs.kotlinx.coroutines.swing)
             // Sentry crash reporting
             implementation(libs.sentry)
@@ -421,6 +422,13 @@ val resolvedJdk21Home: String? = run {
         "/Library/Java/JavaVirtualMachines/temurin-21.0.6.jdk/Contents/Home"
     )
     jdk21Paths.firstOrNull { path -> File("$path/bin/java").exists() }
+}
+
+// The KMP source-set DSL has no testFixtures() helper, so the fixture dependency is added to the
+// jvmTest configuration directly. Gives the app's keyboard tests the shared keyDown() builder that
+// now lives in :core-models.
+dependencies {
+    add("jvmTestImplementation", testFixtures(projects.coreModels))
 }
 
 compose.desktop {

@@ -1,32 +1,31 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
+    `java-test-fixtures`
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.detekt)
     jacoco
 }
 
 group = "org.churchpresenter"
-version = "1.0.0"
 
-// The models the app shares with its screens: what a song is, the `.song` file format, and the
-// library folder it lives in. One definition rather than one per module -- and the place a screen
-// pulled out into its own module imports from.
+kotlin {
+    jvmToolchain(21)
+}
+
 dependencies {
+    // KeyChord is a keyboard binding, so it speaks Compose's Key/KeyEvent/KeyShortcut. No runtime,
+    // no composables: this module has no Compose compiler plugin and must not need one.
+    implementation(libs.compose.ui)
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(kotlin("test"))
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
+    testImplementation(kotlin("reflect"))
+    testFixturesImplementation(libs.compose.ui)
 }
 
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    baseline = rootProject.file("config/detekt/core-models-baseline.xml")
     source.setFrom("src/main/kotlin", "src/test/kotlin")
     parallel = true
 }
@@ -40,14 +39,4 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
         txt.required.set(false)
         md.required.set(false)
     }
-}
-
-tasks.test {
-    useJUnitPlatform()
-    finalizedBy(tasks.jacocoTestReport)
-}
-
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-    reports { xml.required.set(true); html.required.set(true) }
 }
