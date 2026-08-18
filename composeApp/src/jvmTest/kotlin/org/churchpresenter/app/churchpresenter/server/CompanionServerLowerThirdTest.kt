@@ -17,6 +17,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The lower-third and ATEM-key endpoints — the routes a Stream Deck presses.
@@ -78,7 +79,7 @@ class CompanionServerLowerThirdTest {
             java.io.File(lottieFolder, "readme.txt").writeText("not json")
 
             server = CompanionServer()
-            server.start(port = 39_713)
+            server.start(port = testPort(39_713))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

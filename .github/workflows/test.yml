@@ -54,6 +54,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Which sub-builds a change actually touched. Each is its own Gradle build with its own
+      # wrapper, so a pull request that only edits app code has no reason to run five other suites --
+      # that was ~2 minutes of every run spent proving that untouched code still compiles.
+      #
+      # This only became possible when the sub-builds stopped being git submodules. A submodule bump
+      # is a one-line pointer change in the parent repo, so the module's real file paths never
+      # appeared in the diff and nothing could be filtered on them.
+      - name: Which sub-builds changed
+        id: modules
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            engine:
+              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/**'
+            ble:
+              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE/**'
+            lottiegen:
+              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen/**'
+            satellite:
+              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite/**'
+            converter:
+              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-Converter/**'
+            cross:
+              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/**'
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -152,35 +177,36 @@ jobs:
 
       # Each module is its own Gradle build with its own wrapper, so they cannot be reached
       # from the root build and are invoked individually. `if: always()` keeps a failure in one
-      # suite from hiding the results of the others.
+      # suite from hiding the results of the others; the `steps.modules` half skips a module whose
+      # own directory this change did not touch.
       - name: Presentation Engine tests
-        if: always()
+        if: always() && steps.modules.outputs.engine == 'true'
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine
         run: chmod +x gradlew && ./gradlew test
 
       - name: Bible Lookup Engine tests
-        if: always()
+        if: always() && steps.modules.outputs.ble == 'true'
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE
         run: chmod +x gradlew && ./gradlew test
 
       - name: LottieGen tests
-        if: always()
+        if: always() && steps.modules.outputs.lottiegen == 'true'
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen
         run: chmod +x gradlew && ./gradlew test
 
       - name: Companion Satellite tests
-        if: always()
+        if: always() && steps.modules.outputs.satellite == 'true'
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-CompanionSatellite
         run: chmod +x gradlew && ./gradlew test
 
       - name: Converter tests
-        if: always()
+        if: always() && steps.modules.outputs.converter == 'true'
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-Converter
         run: chmod +x gradlew && ./gradlew test
 
       # Kotlin Multiplatform, so the JVM suite is `jvmTest` rather than `test`.
       - name: Crossword tests
-        if: always()
+        if: always() && steps.modules.outputs.cross == 'true'
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross
         run: chmod +x gradlew && ./gradlew jvmTest
 

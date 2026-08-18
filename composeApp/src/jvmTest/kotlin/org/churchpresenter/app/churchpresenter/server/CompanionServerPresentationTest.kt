@@ -31,6 +31,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * `/api/presentations*` — untouched by every other `CompanionServer*Test`. None of it needs
@@ -59,7 +60,7 @@ class CompanionServerPresentationTest {
         System.setProperty("user.home", tempHome.absolutePath)
 
         server = CompanionServer()
-        server.start(port = 39_800)
+        server.start(port = testPort(39_800))
         port = runBlocking {
             withTimeoutOrNull(10_000) {
                 while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

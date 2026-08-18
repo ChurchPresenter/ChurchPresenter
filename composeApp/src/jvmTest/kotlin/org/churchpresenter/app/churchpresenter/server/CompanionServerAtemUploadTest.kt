@@ -18,6 +18,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * `POST /api/atem/still/{name}` all the way to a switcher: render the named lower third, then push
@@ -95,7 +96,7 @@ class CompanionServerAtemUploadTest {
         private var clipFrames: Int = 0
         private var clipFrameBytes: Int = 0
 
-        private const val port = 39_880
+        private val port = testPort(39_880)
 
         @JvmStatic
         @BeforeClass

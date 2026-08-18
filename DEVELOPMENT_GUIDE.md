@@ -435,6 +435,16 @@ The app's own suite is `./gradlew :composeApp:check`. It needs **JDK 21** and no
 six sub-builds live in this repository as ordinary directories, so a plain `git clone` gives you
 everything `composeApp` mounts via `kotlin.srcDir`.
 
+**In the inner loop, don't run the whole thing.** `bash test-changed.sh` maps what you have changed
+onto the suites that name it and runs only those — seconds instead of minutes. It is a heuristic and
+says so in its own header: it cannot see through a symbol three layers down, and it cannot know that
+a composable change moves pixels in a screenshot suite that never mentions the composable. Run the
+full `check` before you commit; the script is for the thirty times before that.
+
+The full suite runs on **4 parallel JVMs** (~5 min, down from ~12). If you write a test that binds a
+port, go through `testPort()`; if you write one that uses the shared fake home, know that it is per
+fork now. Both are explained in `AGENT.md` under "The suite runs in parallel forks".
+
 Beyond that there is nothing platform-specific to install:
 
 | Platform | Status |

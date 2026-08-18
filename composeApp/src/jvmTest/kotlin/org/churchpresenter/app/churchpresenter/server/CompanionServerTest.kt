@@ -23,6 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The mobile-companion / Instance Link server, exercised against a REAL running instance.
@@ -54,7 +55,7 @@ class CompanionServerTest {
         server = CompanionServer()
         // Well outside the default 8765 so a running dev instance can't be hit by accident;
         // findFreePort walks upward from here if it is taken.
-        server.start(port = 39_517)
+        server.start(port = testPort(39_517))
         port = runBlocking {
             withTimeoutOrNull(10_000) {
                 while (!server.isRunning.value || server.serverUrl.value.isBlank()) {
@@ -113,7 +114,7 @@ class CompanionServerTest {
     @Test
     fun `starting an already-running server is a no-op`() {
         val urlBefore = server.serverUrl.value
-        server.start(port = 39_600)
+        server.start(port = testPort(39_600))
         assertEquals(urlBefore, server.serverUrl.value, "a second start must not rebind or move the port")
     }
 

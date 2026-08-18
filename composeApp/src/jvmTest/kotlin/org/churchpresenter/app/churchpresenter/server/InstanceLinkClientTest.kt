@@ -21,6 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * [InstanceLinkClient] against a REAL [CompanionServer] — it is, byte for byte, the same `/ws`
@@ -72,7 +73,7 @@ class InstanceLinkClientTest {
     @BeforeTest
     fun startServer() {
         server = CompanionServer()
-        server.start(port = 39_780)
+        server.start(port = testPort(39_780))
         port = runBlocking {
             withTimeoutOrNull(10_000) {
                 while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

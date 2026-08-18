@@ -21,6 +21,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * Handing a background image or video to a follower instance.
@@ -62,7 +63,7 @@ class CompanionServerBackgroundAssetTest {
         fun startServer() {
             assetDir = Files.createTempDirectory("cp-backgrounds").toFile()
             server = CompanionServer()
-            server.start(port = 39_729)
+            server.start(port = testPort(39_729))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {

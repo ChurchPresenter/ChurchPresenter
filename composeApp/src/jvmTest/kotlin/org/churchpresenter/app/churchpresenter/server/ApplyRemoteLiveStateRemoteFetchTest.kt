@@ -15,6 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The two [applyRemoteLiveState] branches [ApplyRemoteLiveStateTest] deliberately leaves out:
@@ -42,7 +43,7 @@ class ApplyRemoteLiveStateRemoteFetchTest {
         TestSingletons.latchToTestHome()
 
         server = CompanionServer()
-        server.start(port = 39_820)
+        server.start(port = testPort(39_820))
         port = runBlocking {
             withTimeoutOrNull(10_000) {
                 while (!server.isRunning.value || server.serverUrl.value.isBlank()) {
