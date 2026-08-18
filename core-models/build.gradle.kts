@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
+    `java-test-fixtures`
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.detekt)
     jacoco
@@ -18,6 +19,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(kotlin("test"))
+    testImplementation(kotlin("reflect"))
+    testFixturesImplementation(libs.compose.ui)
 }
 
 detekt {

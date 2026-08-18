@@ -419,6 +419,13 @@ val resolvedJdk21Home: String? = run {
     jdk21Paths.firstOrNull { path -> File("$path/bin/java").exists() }
 }
 
+// The KMP source-set DSL has no testFixtures() helper, so the fixture dependency is added to the
+// jvmTest configuration directly. Gives the app's keyboard tests the shared keyDown() builder that
+// now lives in :core-models.
+dependencies {
+    add("jvmTestImplementation", testFixtures(projects.coreModels))
+}
+
 compose.desktop {
     application {
         mainClass = "org.churchpresenter.app.churchpresenter.MainKt"
