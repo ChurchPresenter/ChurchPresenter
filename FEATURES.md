@@ -244,7 +244,8 @@
 - **Stays running** — automatic update checks, crash recovery and launch-at-login keep things reliable.
 
 **Source locations:**
-- `ui/theme/Theme.kt`, `ui/theme/ThemeManager.kt`, `ui/theme/LanguageProvider.kt`, `ui/theme/AppThemeWrapper.kt`
+- `ui/theme/LanguageProvider.kt`
+- `theme/` (the `:theme` Gradle module, at the repo root) — `Theme.kt`, `ThemeManager.kt`, `SemanticColors.kt`, `AppThemeWrapper.kt`
 - `dialogs/SetupWizardDialog.kt`
 - `dialogs/KeyboardShortcutsDialog.kt`
 - `dialogs/OptionsDialog.kt`
