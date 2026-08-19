@@ -279,7 +279,7 @@ fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
 }
 
 /**
- * The Song Library, in a window of its own beside the converter.
+ * The Song Library Manager, in a window of its own beside the converter.
  *
  * Its own module, like the converter: it is given the folder the app keeps songs in and edits the
  * files there directly, so what it writes is what the app reads on its next scan. [onClosed] fires

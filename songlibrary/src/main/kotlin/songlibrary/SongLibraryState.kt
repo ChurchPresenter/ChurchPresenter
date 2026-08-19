@@ -77,7 +77,7 @@ class SongLibraryState(private val root: File) {
      *
      * [SongLibrary.load] walks the folder and parses every file in it, which on a real library is
      * seconds. Run from a `LaunchedEffect` that is the composition's own dispatcher, so the window
-     * did not appear until it had finished: clicking Song Library did nothing for five seconds and
+     * did not appear until it had finished: clicking Song Library Manager did nothing for five seconds and
      * then showed a full grid. Now the window opens immediately and shows that it is reading.
      */
     suspend fun reloadAsync(io: CoroutineDispatcher = Dispatchers.IO) {

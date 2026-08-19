@@ -429,7 +429,7 @@ class NavigationTopBarTest {
             assertEquals("Keyboard Shortcuts", helpMenu.getItem(1).text)
             assertEquals("How To Blog", helpMenu.getItem(2).text)
             assertEquals("Converter", helpMenu.getItem(3).text)
-            assertEquals("Song Library", helpMenu.getItem(4).text)
+            assertEquals("Song Library Manager", helpMenu.getItem(4).text)
             assertEquals("About", helpMenu.getItem(5).text)
             assertEquals("Help", helpMenu.getItem(6).text)
             assertEquals("Contact", helpMenu.getItem(7).text)

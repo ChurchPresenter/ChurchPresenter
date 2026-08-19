@@ -8,7 +8,7 @@
 - **Unlimited song library** — organize thousands of songs across as many songbooks as you like, indexed straight from a folder.
 - **Powerful search** — find songs by title or number with contains, starts-with, exact-match and phrase filters, plus category and songbook filters.
 - **Built-in song editor** — add and edit songs with simple verse/chorus formatting; no external tools needed.
-- **Song Library** — every song in one editable grid: search, filter by song book, show the columns you care about, type straight into a cell, and change a field on a whole selection at once. Renumbering a book, filling in missing composers or moving a set into a new song book is one screen rather than one song at a time.
+- **Song Library Manager** — every song in one editable grid: search, filter by song book, show the columns you care about, type straight into a cell, and change a field on a whole selection at once. Renumbering a book, filling in missing composers or moving a set into a new song book is one screen rather than one song at a time.
 - **Bilingual worship** — show two languages at once, side-by-side or stacked, or switch between primary and secondary on the fly.
 - **Look-ahead for the band** — see the current and next section in advance so transitions stay smooth.
 - **Favorites & play counts** — star the songs you use most and see how often each has been sung.
@@ -24,7 +24,7 @@
 - `dialogs/EditSongDialog.kt`, `dialogs/tabs/SongSettingsTab.kt`
 - `core-models/src/main/kotlin/.../models/LyricSection.kt` (the `:core-models` module)
 - `converter/` (the `:converter` Gradle module, at the repo root) — format converter tool
-- `songlibrary/` (the `:songlibrary` Gradle module) — the Song Library grid
+- `songlibrary/` (the `:songlibrary` Gradle module) — the Song Library Manager grid
 - `core-models/` (the `:core-models` Gradle module) — `core.models.songs`: the song, the `.song` file format and the library folder, shared by the app and the library window
 
 ## Bible & Scripture

@@ -65,7 +65,7 @@ main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
 |--------|-------|
 | `:core-models` | the models the app and its screens share — `core.models.songs` is what a song is, the `.song` format, and the library folder it lives in. A package per area; more than songs will live here. |
 | `:converter` | the format converter, opened from the Help menu |
-| `:songlibrary` | the Song Library grid, opened from the Help menu beside it |
+| `:songlibrary` | the Song Library Manager grid, opened from the Help menu beside it |
 | `:companion-satellite` | the Bitfocus Companion Satellite protocol client |
 
 A screen pulled out into a module of its own imports its models from `:core-models` rather than
@@ -145,7 +145,8 @@ Anything `:composeApp` calls has to be public here — `websiteDisplayText` was 
 keyboard tests still reach it.
 
 ### The song library module
-`songlibrary/` is the Song Library window: every song in the library folder in one editable grid.
+`songlibrary/` is the Song Library Manager window: every song in the library folder in one editable
+grid.
 It owns no model — the song, the `.song` format and the library are `:core-models`' — so what it
 writes is what the app reads on its next scan. It takes `:core-models` and `:theme` and nothing else
 of the app's.

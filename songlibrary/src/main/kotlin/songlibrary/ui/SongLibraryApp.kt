@@ -81,7 +81,7 @@ data class SongEditorRequest(
 )
 
 /**
- * The Song Library: every song in the library folder in one grid, editable in place.
+ * The Song Library Manager: every song in the library folder in one grid, editable in place.
  *
  * The library is a folder of `.song` files and a person's only view of it is otherwise one song at
  * a time, so anything that spans songs — renumbering a book, filling in a missing composer, moving
