@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.models
 
-import org.churchpresenter.app.churchpresenter.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -153,7 +152,7 @@ class ScheduleItemDisplayTextTest {
     private fun announcement(
         text: String = "",
         isTimer: Boolean = false,
-        timerMode: String = Constants.TIMER_MODE_DURATION,
+        timerMode: String = TimerModes.DURATION,
         hours: Int = 0,
         minutes: Int = 0,
         seconds: Int = 0,
@@ -210,7 +209,7 @@ class ScheduleItemDisplayTextTest {
     fun `a countdown to a clock time says when`() {
         val timer = announcement(
             isTimer = true,
-            timerMode = Constants.TIMER_MODE_CLOCK,
+            timerMode = TimerModes.CLOCK,
             targetHour = 9, targetMinute = 5, targetSecond = 0,
         )
 
@@ -221,11 +220,11 @@ class ScheduleItemDisplayTextTest {
     fun `a stopwatch and a clock name themselves`() {
         assertEquals(
             "Duration Timer",
-            announcement(isTimer = true, timerMode = Constants.TIMER_MODE_COUNT_UP).displayText,
+            announcement(isTimer = true, timerMode = TimerModes.COUNT_UP).displayText,
         )
         assertEquals(
             "Clock",
-            announcement(isTimer = true, timerMode = Constants.TIMER_MODE_CLOCK_DISPLAY).displayText,
+            announcement(isTimer = true, timerMode = TimerModes.CLOCK_DISPLAY).displayText,
         )
     }
 

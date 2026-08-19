@@ -58,6 +58,17 @@ class KeyChordTest {
     }
 
     @Test
+    fun `a meta chord does not fire on the bare key`() {
+        // The only comparison in matches() that every other case short-circuits before reaching:
+        // key, ctrl, shift and alt all agree here, and meta alone decides it. On macOS that is
+        // Cmd+S having to not fire on a plain S.
+        val metaS = KeyChord.of(Key.S, meta = true)
+
+        assertTrue(metaS.matches(keyDown(Key.S, meta = true)))
+        assertFalse(metaS.matches(keyDown(Key.S)))
+    }
+
+    @Test
     fun `of reads every modifier off the event`() {
         val chord = KeyChord.of(keyDown(Key.K, ctrl = true, shift = true, alt = true, meta = true))
 

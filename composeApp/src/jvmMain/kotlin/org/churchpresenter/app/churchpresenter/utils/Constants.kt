@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.app.churchpresenter.models.TimerModes
 import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
 import java.awt.HeadlessException
@@ -150,12 +151,12 @@ object Constants {
      */
     const val PLANNING_CENTER_OAUTH_PORT = 47850
 
-    const val TIMER_MODE_DURATION = "duration"
-    const val TIMER_MODE_CLOCK    = "clock"
-    /** Open-ended stopwatch: counts up from zero, no h:m:s configuration. */
-    const val TIMER_MODE_COUNT_UP = "count_up"
-    /** Just displays the current wall-clock time, continuously, in a user-selectable format. */
-    const val TIMER_MODE_CLOCK_DISPLAY = "clock_display"
+    // Defined in :core, where ScheduleItem reads them; aliased here so every call site keeps
+    // spelling them Constants.TIMER_MODE_*.
+    const val TIMER_MODE_DURATION = TimerModes.DURATION
+    const val TIMER_MODE_CLOCK = TimerModes.CLOCK
+    const val TIMER_MODE_COUNT_UP = TimerModes.COUNT_UP
+    const val TIMER_MODE_CLOCK_DISPLAY = TimerModes.CLOCK_DISPLAY
 
     const val NONE = "None"
     const val FIRST_PAGE = "First Page"

@@ -66,6 +66,17 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           filters: |
+            # A module's own directory is NOT enough to decide it is untouched. These files
+            # configure every module -- the version catalogue it resolves from, the root build that
+            # owns its JaCoCo floors, the detekt rules it is judged by -- so a change to any of them
+            # has to run everything. Without this, a catalog bump silently skips the module it broke.
+            shared: &shared
+              - 'build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle/libs.versions.toml'
+              - 'gradle/wrapper/**'
+              - 'config/detekt/**'
+              - '.github/workflows/test.yml'
             engine:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/**'
             ble:
@@ -74,6 +85,18 @@ jobs:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen/**'
             cross:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/**'
+            converter:
+              - *shared
+              - 'converter/**'
+            satellite:
+              - *shared
+              - 'companion-satellite/**'
+            theme:
+              - *shared
+              - 'theme/**'
+            coremodels:
+              - *shared
+              - 'core-models/**'
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -90,7 +113,7 @@ jobs:
       # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
       # Pre-existing findings are in config/detekt/baseline.xml; this gates only new ones.
       - name: Detekt
-        run: ./gradlew :composeApp:detekt :theme:detekt
+        run: ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -128,10 +151,18 @@ jobs:
       # floor below only speaks up when it is breached, so a run could move coverage several points
       # in either direction and say nothing.
       #
-      # `-x jvmTest` for the same reason it is on the floor step: jacocoTestReport `dependsOn`
-      # jvmTest, and after a FAILED suite that dependency is not up to date, so without this the
-      # step would relaunch the whole 14-minute suite inside its own budget. The report is built
+      # `-x jvmTest -x jvmTestSerial` for the same reason it is on the floor step: jacocoTestReport
+      # `dependsOn` BOTH of them, and after a FAILED suite that dependency is not up to date, so
+      # without this the step would relaunch the suite inside its own budget. The report is built
       # from the exec data the step above already wrote.
+      #
+      # Excluding only `jvmTest` was not enough, and hid a whole missing suite. When Detekt fails,
+      # `App unit tests` is skipped -- but this step still ran, and with the serial task NOT excluded
+      # it quietly executed the thirteen serial classes on its own. That wrote a jvmTestSerial exec
+      # file and jvmTestSerial XML, so both PR comments then reported a run in which the suite had
+      # never started: "App 159 ran, 159 passed" from the junit reporter, and composeApp at 33%
+      # instruction in the coverage table. Both looked like a green partial run and a coverage
+      # collapse; neither had happened.
       #
       # Advisory after a failure, like the floor: the exec data is then from a run that stopped
       # early, so the numbers are understated. Still worth printing -- it is the only place the
@@ -146,15 +177,16 @@ jobs:
       - name: Coverage summary
         if: always()
         timeout-minutes: 10
-        run: ./gradlew :composeApp:jacocoTestReport -x jvmTest "-PstepSummary=$GITHUB_STEP_SUMMARY"
+        run: ./gradlew :composeApp:jacocoTestReport -x jvmTest -x jvmTestSerial "-PstepSummary=$GITHUB_STEP_SUMMARY"
 
       # The 75% line-coverage floor, off the execution data the tests above just produced. Its
       # denominator excludes the app-entry wiring that only runs under a real display -- see
       # jacocoTestCoverageVerification in composeApp/build.gradle.kts. `if: always()` so a coverage
       # regression is reported alongside test failures rather than hidden behind them.
       #
-      # `-x jvmTest` is load-bearing. The Gradle task `dependsOn("jvmTest")`, which is right for a
-      # developer running it directly, but here the suite has already run in the step above. When it
+      # `-x jvmTest -x jvmTestSerial` is load-bearing. The Gradle task `dependsOn` both, which is
+      # right for a developer running it directly, but here the suite has already run in the step
+      # above -- see the Coverage summary step for what excluding only half of it did. When it
       # PASSED that task is up to date and the dependency costs nothing -- which is why this looked
       # fine for as long as the suite was green. When it FAILED it is not up to date, so this step
       # started the whole 21-minute suite again inside a 10-minute budget: a guaranteed timeout.
@@ -162,43 +194,53 @@ jobs:
       # relaunched it at 01:41:20, killed at 01:50:57. Every red run paid an extra ten minutes and
       # reported a second failure that said "Coverage floor timed out" and meant nothing.
       #
-      # Advisory when the suite failed: the exec data is then from a run that did not finish, so the
-      # number is understated and a floor breach would be an artefact. The build is already red for a
-      # better reason. When the suite passed this gates exactly as before, in seconds.
+      # Advisory whenever the suite did not pass: the exec data is then from a run that did not
+      # finish -- or, when Detekt failed and the suite step was SKIPPED, is not there at all -- so
+      # the number is understated and a floor breach would be an artefact. The build is already red
+      # for a better reason, and `outcome != 'success'` covers the skipped case as well as the
+      # failed one. When the suite passed this gates exactly as before, in seconds.
       - name: Coverage floor
         if: always()
-        continue-on-error: ${{ steps.unit_tests.outcome == 'failure' }}
+        continue-on-error: ${{ steps.unit_tests.outcome != 'success' }}
         timeout-minutes: 10
-        run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest
+        run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest -x jvmTestSerial
 
       # The converter is a module of THIS build (`include(":converter")`), not one of the separate
       # builds below, so it is a task on the root wrapper and shares its daemon -- seconds rather
       # than a fresh Gradle bootstrap. That is why it is not gated on `steps.modules` the way they
       # are: there is nothing to save, and :composeApp depends on it, so an app change can break it.
       - name: Converter tests
-        if: always()
+        if: always() && steps.modules.outputs.converter == 'true'
         run: ./gradlew :converter:test
 
       # The module's own six-counter floor, off the execution data the step above just wrote.
       # `-x test` for the same reason the app's floor step has it: the task `dependsOn` the suite,
       # which is right for a developer running it directly and would re-run it here.
       - name: Converter coverage floor
-        if: always()
+        if: always() && steps.modules.outputs.converter == 'true'
         run: ./gradlew :converter:jacocoTestCoverageVerification -x test
 
       # Same reasoning as the converter above: a module of this build, so a root-wrapper task rather
       # than a separate Gradle bootstrap, and ungated because :composeApp depends on it.
       - name: Companion Satellite tests
-        if: always()
+        if: always() && steps.modules.outputs.satellite == 'true'
         run: ./gradlew :companion-satellite:test
 
       - name: Theme tests
-        if: always()
+        if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:test
 
       - name: Theme coverage floor
-        if: always()
+        if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:jacocoTestCoverageVerification -x test
+
+      - name: Core models tests
+        if: always() && steps.modules.outputs.coremodels == 'true'
+        run: ./gradlew :core-models:test
+
+      - name: Core models coverage floor
+        if: always() && steps.modules.outputs.coremodels == 'true'
+        run: ./gradlew :core-models:jacocoTestCoverageVerification -x test
 
       # Each module is its own Gradle build with its own wrapper, so they cannot be reached
       # from the root build and are invoked individually. `if: always()` keeps a failure in one
@@ -245,6 +287,7 @@ jobs:
             converter/build/test-results/**/TEST-*.xml
             companion-satellite/build/test-results/**/TEST-*.xml
             theme/build/test-results/**/TEST-*.xml
+            core-models/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order.
           check_name: |
@@ -252,30 +295,97 @@ jobs:
             Converter
             Companion Satellite
             Theme
+            Core models
             Sub-builds (skipped unless their own directory changed)
           detailed_summary: true
           include_passed: false
+          # Without this the second table is six rows of "No test annotations available" on every
+          # green run -- one per check_name, because `include_passed: false` leaves it nothing to
+          # list when nothing failed. Off, the table appears only when there is a failure in it.
+          verbose_summary: false
           fail_on_failure: false
           comment: true
           updateComment: true
 
-      # Never gates -- the gradle verification steps above are the real floors; min-coverage only
-      # picks the emoji.
-      - name: Coverage on the pull request
+      # Every module, every counter, current value. madrapps/jacoco-report was here first and only
+      # reported modules containing changed files -- one row, and a red mark on a module at 99%.
+      # Never gates: the jacocoTestCoverageVerification steps above are the real floors.
+      - name: Coverage table
         if: always() && github.event_name == 'pull_request'
-        uses: madrapps/jacoco-report@v1.8.0
-        with:
-          paths: |
-            composeApp/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml,
-            converter/build/reports/jacoco/test/jacocoTestReport.xml,
-            companion-satellite/build/reports/jacoco/test/jacocoTestReport.xml,
-            theme/build/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: Coverage
-          update-comment: true
-          skip-if-no-changes: true
-          min-coverage-overall: 75
-          min-coverage-changed-lines: 75
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          ./gradlew coverageFloors -q > floors.csv || true
+          python3 - <<'PY' > coverage.md
+          import glob, os, xml.etree.ElementTree as ET
+
+          COUNTERS = ["INSTRUCTION", "BRANCH", "LINE", "COMPLEXITY", "METHOD", "CLASS"]
+          PATTERNS = [
+              "*/build/reports/jacoco/*/*.xml",
+              "composeApp/src/jvmMain/appResources/common/*/build/reports/jacoco/*/*.xml",
+          ]
+
+          # The floor as the verification task itself has it, so the cap reported is the cap enforced.
+          floors = {}
+          if os.path.exists("floors.csv"):
+              for line in open("floors.csv"):
+                  parts = line.strip().split(",")
+                  if len(parts) == 4 and parts[0] == "FLOOR":
+                      floors.setdefault(parts[1], {})[parts[2]] = float(parts[3]) * 100
+
+          # Only modules that actually produced a report in THIS run. The sub-builds are gated on
+          # their own directories, so a run that skipped them simply has no section for them.
+          found = {}
+          for pattern in PATTERNS:
+              for path in glob.glob(pattern):
+                  module = os.path.basename(path.split("/build/reports/jacoco/")[0])
+                  try:
+                      root = ET.parse(path).getroot()
+                  except ET.ParseError:
+                      continue
+                  ratios = {}
+                  for c in root.findall("counter"):
+                      missed, covered = int(c.get("missed")), int(c.get("covered"))
+                      total = missed + covered
+                      if total:
+                          ratios[c.get("type")] = 100 * covered / total
+                  if ratios:
+                      found[module] = ratios
+
+          print("<!-- coverage-table -->")
+          print("## Coverage")
+          if not found:
+              print()
+              print("No JaCoCo reports were produced in this run.")
+          for module in sorted(found, key=lambda m: (m != "composeApp", m)):
+              ratios = found[module]
+              print()
+              print(f"### {module}")
+              print()
+              print("| Counter | Floor | Actual |")
+              print("|---|---|---|")
+              for counter in COUNTERS:
+                  if counter not in ratios:
+                      continue
+                  floor = floors.get(module, {}).get(counter)
+                  cap = "" if floor is None else f"{floor:.0f}%"
+                  print(f"| {counter.title()} | {cap} | {ratios[counter]:.2f}% |")
+          if found:
+              print()
+              print("Modules whose tests did not run in this build are not listed. The floors are")
+              print("enforced by the `jacocoTestCoverageVerification` steps, not by this table.")
+          PY
+
+          # Upsert: one comment per pull request, found by the marker on its first line.
+          id=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" --paginate \
+                 --jq '.[] | select(.body | startswith("<!-- coverage-table -->")) | .id' | head -1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/$id" -F body=@coverage.md >/dev/null
+          else
+            gh api -X POST "repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" -F body=@coverage.md >/dev/null
+          fi
+          cat coverage.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload test reports
         if: failure()
@@ -291,5 +401,7 @@ jobs:
             converter/build/test-results/
             theme/build/reports/tests/
             theme/build/test-results/
+            core-models/build/reports/tests/
+            core-models/build/test-results/
             composeApp/src/jvmMain/appResources/common/*/build/reports/tests/
             composeApp/src/jvmMain/appResources/common/*/build/test-results/
