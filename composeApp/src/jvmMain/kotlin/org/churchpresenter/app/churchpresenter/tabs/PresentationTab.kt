@@ -684,7 +684,7 @@ fun PresentationTab(
                 .fillMaxWidth()
                 .heightIn(min = 52.dp)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 5.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -788,15 +788,35 @@ fun PresentationTab(
             Column(
                 modifier = Modifier
                     .height(42.dp)
-                    .width(120.dp)
+                    .width(170.dp)
                     .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
                     .clickable { editingInterval = true }
-                    .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
+                    .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(stringResource(Res.string.auto_scroll_interval).uppercase(), fontSize = 8.sp, lineHeight = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
-                Text("${appSettings.presentationSettings.autoScrollInterval.toInt()} ${stringResource(Res.string.unit_s)}", style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                Text(
+                    stringResource(Res.string.auto_scroll_interval).uppercase(),
+                    fontSize = 10.sp,
+                    lineHeight = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(1.dp))
+                Text(
+                    "${appSettings.presentationSettings.autoScrollInterval.toInt()} " +
+                        stringResource(Res.string.unit_s),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
             }
             if (editingInterval) {
                 AlertDialog(
@@ -811,15 +831,35 @@ fun PresentationTab(
             Column(
                 modifier = Modifier
                     .height(42.dp)
-                    .width(120.dp)
+                    .width(170.dp)
                     .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
                     .clickable { editingTransition = true }
-                    .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
+                    .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(stringResource(Res.string.transition_duration).uppercase(), fontSize = 8.sp, lineHeight = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), maxLines = 1)
-                Text("${appSettings.presentationSettings.transitionDuration.toInt()} ${stringResource(Res.string.unit_ms)}", style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                Text(
+                    stringResource(Res.string.transition_duration).uppercase(),
+                    fontSize = 10.sp,
+                    lineHeight = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(1.dp))
+                Text(
+                    "${appSettings.presentationSettings.transitionDuration.toInt()} " +
+                        stringResource(Res.string.unit_ms),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
             }
             if (editingTransition) {
                 AlertDialog(

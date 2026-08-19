@@ -69,7 +69,7 @@ fun NumberSettingsTextField(
         Column(
             // Weighted so the arrow column below keeps its 20dp: the text field fills this column's
             // width, which without a weight is the whole row's, collapsing the arrows to zero.
-            modifier = Modifier.weight(1f).padding(start = 11.dp, top = 2.dp, bottom = 0.dp),
+            modifier = Modifier.weight(1f).padding(start = 11.dp, top = 2.dp, bottom = 2.dp),
             verticalArrangement = Arrangement.Center
         ) {
             if (label.isNotEmpty()) {

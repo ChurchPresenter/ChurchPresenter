@@ -55,7 +55,7 @@ fun StyledTextField(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 11.dp, top = 2.dp, bottom = if (singleLine) 0.dp else 6.dp),
+                .padding(start = 11.dp, top = 2.dp, bottom = if (singleLine) 2.dp else 6.dp),
             verticalArrangement = Arrangement.Center
         ) {
             if (label.isNotEmpty()) {
