@@ -68,7 +68,7 @@ import songlibrary.generated.resources.reset_filters
 internal fun SongTable(
     state: SongLibraryState,
     modifier: Modifier = Modifier,
-    onEditRow: (SongItem) -> Unit,
+    onEditRow: ((SongItem) -> Unit)?,
     onDeleteRow: (SongItem) -> Unit,
     onNewBook: () -> Unit,
 ) {
@@ -96,7 +96,7 @@ internal fun SongTable(
                             state = state,
                             songbooks = songbooks,
                             width = width,
-                            onEdit = { onEditRow(song) },
+                            onEdit = onEditRow?.let { { it(song) } },
                             onDelete = { onDeleteRow(song) },
                             onNewBook = onNewBook,
                         )
@@ -174,7 +174,7 @@ private fun SongRow(
     state: SongLibraryState,
     songbooks: List<String>,
     width: Dp,
-    onEdit: () -> Unit,
+    onEdit: (() -> Unit)?,
     onDelete: () -> Unit,
     onNewBook: () -> Unit,
 ) {
@@ -225,7 +225,9 @@ private fun SongRow(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                RowAction(Icons.Default.Edit, stringResource(Res.string.edit_song), scheme.primary, onEdit)
+                if (onEdit != null) {
+                    RowAction(Icons.Default.Edit, stringResource(Res.string.edit_song), scheme.primary, onEdit)
+                }
                 RowAction(Icons.Default.Delete, stringResource(Res.string.delete_song), scheme.error, onDelete)
             }
         }

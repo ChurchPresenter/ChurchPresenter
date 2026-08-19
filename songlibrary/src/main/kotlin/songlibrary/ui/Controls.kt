@@ -4,6 +4,7 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -370,7 +372,18 @@ fun LibraryCheckbox(checked: Boolean, indeterminate: Boolean = false, onToggle: 
                 if (checked || indeterminate) scheme.primary else scheme.outlineVariant,
                 RoundedCornerShape(4.dp),
             )
-            .then(if (onToggle != null) Modifier.clickable(onClick = onToggle) else Modifier),
+            .then(
+                if (onToggle == null) Modifier
+                // Toggleable rather than clickable: this *is* a checkbox, and only the toggleable
+                // form publishes that role and its on/off value. As a bare `clickable` it had no
+                // semantics beyond "something you can press" — nothing that reads the tree, from a
+                // screen reader to a test, could tell it apart from a cell or find its state.
+                else Modifier.toggleable(
+                    value = checked,
+                    role = Role.Checkbox,
+                    onValueChange = { onToggle() },
+                )
+            ),
         contentAlignment = Alignment.Center,
     ) {
         when {

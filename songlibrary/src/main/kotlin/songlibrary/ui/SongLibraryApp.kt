@@ -13,6 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import core.models.songs.SongItem
 import java.io.File
@@ -39,9 +41,17 @@ fun SongLibraryApp(
      * so the plain one below stands in.
      */
     songEditor: (@Composable (editing: SongEditorRequest) -> Unit)? = null,
+    /**
+     * The dispatcher every read and write of the folder runs on.
+     *
+     * Defaulted, and the app never passes it. It is here so the window can be driven on a
+     * dispatcher a caller controls — which is what makes the state *while the folder is being
+     * read* reachable at all: the grid is only in it for as long as the disk takes.
+     */
+    io: CoroutineDispatcher = Dispatchers.IO,
 ) {
     val state = remember(libraryFolder) { SongLibraryState(libraryFolder) }
-    LaunchedEffect(libraryFolder) { state.reloadAsync() }
+    LaunchedEffect(libraryFolder) { state.reloadAsync(io) }
     // Writing a song, a songbook or a deletion goes to disk, which is why those calls suspend. They
     // are started from here rather than awaited: the dialog closes at once and the grid keeps
     // drawing while the folder is written.
@@ -52,7 +62,7 @@ fun SongLibraryApp(
     var pendingDelete by remember { mutableStateOf<List<SongItem>>(emptyList()) }
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        LibraryHeader(state, onNewBook = { newBookOpen = true })
+        LibraryHeader(state, io = io, onNewBook = { newBookOpen = true })
         if (state.selected.isNotEmpty()) {
             BulkBar(
                 state = state,
@@ -63,11 +73,14 @@ fun SongLibraryApp(
         SongTable(
             state = state,
             modifier = Modifier.weight(1f),
-            onEditRow = { state.editing = it.sourceFile },
+            // Null when the host supplied no editor: the row then has nothing to open, so it
+            // shows no Edit button rather than one that does nothing. The cells are still typed in
+            // directly, which is what the grid is for.
+            onEditRow = songEditor?.let { { song: SongItem -> state.editing = song.sourceFile } },
             onDeleteRow = { pendingDelete = listOf(it) },
             onNewBook = { newBookOpen = true },
         )
-        LibraryFooter(state, onClose)
+        LibraryFooter(state, io = io, onClose = onClose)
     }
 
     if (newBookOpen) {
@@ -76,7 +89,7 @@ fun SongLibraryApp(
             selectedCount = state.selected.size,
             onDismiss = { newBookOpen = false },
             onCreate = { name, assign ->
-                scope.launch { state.createSongbook(name, assign) }
+                scope.launch { state.createSongbook(name, assign, io) }
                 newBookOpen = false
             },
         )
@@ -100,7 +113,7 @@ fun SongLibraryApp(
             onDismiss = { pendingDelete = emptyList() },
             onConfirm = {
                 val songs = pendingDelete
-                scope.launch { state.delete(songs) }
+                scope.launch { state.delete(songs, io) }
                 pendingDelete = emptyList()
             },
         )
@@ -108,6 +121,7 @@ fun SongLibraryApp(
 
     state.editing?.let { sourceFile ->
         state.songOf(sourceFile)?.let { song ->
+            if (songEditor == null) return@let
             val request = SongEditorRequest(
                 song = song,
                 songbooks = state.songbooks,
@@ -118,7 +132,7 @@ fun SongLibraryApp(
                 },
                 onDismiss = { state.editing = null },
             )
-            if (songEditor != null) songEditor(request) else SongEditorDialog(request)
+            songEditor(request)
         }
     }
 }

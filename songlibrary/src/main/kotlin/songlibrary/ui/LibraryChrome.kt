@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,7 +64,7 @@ import songlibrary.generated.resources.window_title
 // The frame around the table: the header and its filters, the selection bar, the footer.
 
 @Composable
-internal fun LibraryHeader(state: SongLibraryState, onNewBook: () -> Unit) {
+internal fun LibraryHeader(state: SongLibraryState, io: CoroutineDispatcher, onNewBook: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     Column {
         Row(
@@ -84,7 +85,7 @@ internal fun LibraryHeader(state: SongLibraryState, onNewBook: () -> Unit) {
             PrimaryButton(
                 label = newSongTitle,
                 enabled = !state.isWriting,
-                onClick = { scope.launch { state.newSong(newSongTitle) } },
+                onClick = { scope.launch { state.newSong(newSongTitle, io) } },
                 icon = { Icon(Icons.Default.Add, null, Modifier.size(13.dp), tint = scheme.onPrimary) },
             )
         }
@@ -136,7 +137,7 @@ internal fun BulkBar(state: SongLibraryState, onBatchEdit: () -> Unit, onDelete:
 }
 
 @Composable
-internal fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
+internal fun LibraryFooter(state: SongLibraryState, io: CoroutineDispatcher, onClose: (() -> Unit)?) {
     val scheme = MaterialTheme.colorScheme
     Column {
         Hairline()
@@ -181,7 +182,7 @@ internal fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
             )
             PrimaryButton(
                 stringResource(Res.string.save_changes),
-                onClick = { scope.launch { state.save() } },
+                onClick = { scope.launch { state.save(io) } },
                 enabled = state.isDirty && !state.isWriting,
             )
             if (onClose != null) {
