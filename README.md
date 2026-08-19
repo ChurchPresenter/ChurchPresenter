@@ -33,17 +33,18 @@ their own:
 >
 > **[`core-models/`](./core-models)** — the shared data models (schedule items, scenes, questions,
 > lyrics). `./gradlew :core-models:test`.
+>
+> **[`bible-engine/`](./bible-engine)** — the Bible Lookup Engine: speech-to-reference detection.
+> `./gradlew :bible-engine:test`.
 
-The other four sit under `composeApp/src/jvmMain/appResources/common/`. Each still keeps its own
-Gradle wrapper and test suite, and the first three have their sources compiled into the main app via
+The other three sit under `composeApp/src/jvmMain/appResources/common/`. Each still keeps its own
+Gradle wrapper and test suite, and the first two have their sources compiled into the main app via
 `kotlin.srcDir`:
 
 > **ChurchPresenter-LottieGen** — a standalone Compose Desktop app for generating animated
 > lower-third overlays as Lottie JSON files, launched from the Lower Third settings.
 >
 > **ChurchPresenter-PresentationEngine** — PPTX/PPT/Keynote/PDF parsing, timing and animation.
->
-> **ChurchPresenter-BLE** — the Bible Lookup Engine, speech-to-reference detection.
 >
 > **ChurchPresenter-Cross** — the crossword puzzle authoring tool. Not compiled into the app; a
 > build-time task copies its encoded puzzles into the app's resources.

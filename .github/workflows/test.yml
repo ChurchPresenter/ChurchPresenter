@@ -79,8 +79,6 @@ jobs:
               - '.github/workflows/test.yml'
             engine:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/**'
-            ble:
-              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE/**'
             lottiegen:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen/**'
             cross:
@@ -97,6 +95,9 @@ jobs:
             coremodels:
               - *shared
               - 'core-models/**'
+            ble:
+              - *shared
+              - 'bible-engine/**'
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -234,6 +235,10 @@ jobs:
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:jacocoTestCoverageVerification -x test
 
+      - name: Bible Lookup Engine tests
+        if: always() && steps.modules.outputs.ble == 'true'
+        run: ./gradlew :bible-engine:test
+
       - name: Core models tests
         if: always() && steps.modules.outputs.coremodels == 'true'
         run: ./gradlew :core-models:test
@@ -249,11 +254,6 @@ jobs:
       - name: Presentation Engine tests
         if: always() && steps.modules.outputs.engine == 'true'
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine
-        run: chmod +x gradlew && ./gradlew test
-
-      - name: Bible Lookup Engine tests
-        if: always() && steps.modules.outputs.ble == 'true'
-        working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE
         run: chmod +x gradlew && ./gradlew test
 
       - name: LottieGen tests
@@ -288,6 +288,7 @@ jobs:
             companion-satellite/build/test-results/**/TEST-*.xml
             theme/build/test-results/**/TEST-*.xml
             core-models/build/test-results/**/TEST-*.xml
+            bible-engine/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order.
           check_name: |
@@ -403,5 +404,7 @@ jobs:
             theme/build/test-results/
             core-models/build/reports/tests/
             core-models/build/test-results/
+            bible-engine/build/reports/tests/
+            bible-engine/build/test-results/
             composeApp/src/jvmMain/appResources/common/*/build/reports/tests/
             composeApp/src/jvmMain/appResources/common/*/build/test-results/
