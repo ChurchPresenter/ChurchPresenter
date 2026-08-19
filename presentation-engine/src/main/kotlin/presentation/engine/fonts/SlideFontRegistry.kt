@@ -29,6 +29,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 object SlideFontRegistry {
 
+    /** Font folders nest a couple of levels (family/style); deeper is someone else's data. */
+    private const val FONT_SCAN_DEPTH = 3
+
     private val initialized = AtomicBoolean(false)
 
     /** Lower-cased family name → exact-cased family name, for every family the JVM can resolve. */
@@ -119,7 +122,7 @@ object SlideFontRegistry {
         if (!scanSystemDirs) return
         for (dir in systemFontDirs) {
             if (!dir.isDirectory) continue
-            dir.walkTopDown().maxDepth(3)
+            dir.walkTopDown().maxDepth(FONT_SCAN_DEPTH)
                 .filter { it.isFile && it.extension.lowercase() in setOf("ttf", "otf", "ttc") }
                 .forEach { fontFile ->
                     systemFontFileIndex.putIfAbsent(normalizeName(fontFile.nameWithoutExtension), fontFile)
@@ -159,7 +162,7 @@ object SlideFontRegistry {
             // Build just the filename index without registering anything (cheap).
             for (dir in systemFontDirs) {
                 if (!dir.isDirectory) continue
-                dir.walkTopDown().maxDepth(3)
+                dir.walkTopDown().maxDepth(FONT_SCAN_DEPTH)
                     .filter { it.isFile && it.extension.lowercase() in setOf("ttf", "otf", "ttc") }
                     .forEach { systemFontFileIndex.putIfAbsent(normalizeName(it.nameWithoutExtension), it) }
             }

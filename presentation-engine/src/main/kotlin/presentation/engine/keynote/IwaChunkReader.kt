@@ -18,6 +18,9 @@ import java.io.ByteArrayOutputStream
  */
 internal object IwaChunkReader {
 
+    /** Every IWA chunk starts with a 4-byte header: one type byte and a 3-byte length. */
+    private const val CHUNK_HEADER_BYTES = 4
+
     /** One archived object: [type] from the app's type registry, [payload] = first message bytes. */
     data class IwaObject(
         val identifier: Long,
@@ -64,13 +67,13 @@ internal object IwaChunkReader {
         return try {
             val out = ByteArrayOutputStream(iwaBytes.size * 4)
             var pos = 0
-            while (pos + 4 <= iwaBytes.size) {
+            while (pos + CHUNK_HEADER_BYTES <= iwaBytes.size) {
                 // Header: type byte (0x00 for snappy) + 3-byte LE length.
                 val chunkType = iwaBytes[pos].toInt() and 0xFF
                 val length = (iwaBytes[pos + 1].toInt() and 0xFF) or
                     ((iwaBytes[pos + 2].toInt() and 0xFF) shl 8) or
                     ((iwaBytes[pos + 3].toInt() and 0xFF) shl 16)
-                pos += 4
+                pos += CHUNK_HEADER_BYTES
                 if (pos + length > iwaBytes.size) return null
                 when (chunkType) {
                     0 -> {

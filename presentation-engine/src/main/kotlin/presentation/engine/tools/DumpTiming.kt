@@ -35,8 +35,10 @@ object DumpTiming {
             "${deck.slideWidthPt}x${deck.slideHeightPt}pt ===")
         for (slide in deck.slides) {
             println()
-            println("Slide ${slide.index + 1}  fidelity=${slide.fidelity}" +
-                (slide.transition?.let { "  transition=${it.type}/${it.direction} ${it.durationMs}ms advTm=${it.advanceAfterMs}" } ?: ""))
+            val transition = slide.transition?.let {
+                "  transition=${it.type}/${it.direction} ${it.durationMs}ms advTm=${it.advanceAfterMs}"
+            } ?: ""
+            println("Slide ${slide.index + 1}  fidelity=${slide.fidelity}$transition")
             for (layer in slide.layers) {
                 val detail = when (layer) {
                     is LayerSpec.Background -> "shapes=${layer.shapeIndexes}"
@@ -56,7 +58,8 @@ object DumpTiming {
                     println("  step ${stepIndex + 1}:")
                     for (interval in step.intervals) {
                         println("    ${interval.layerId}  ${describe(interval.effect)}  " +
-                            "begin=${interval.beginMs} dur=${interval.durMs} repeat=${interval.repeat} fill=${interval.fill}")
+                            "begin=${interval.beginMs} dur=${interval.durMs} " +
+                            "repeat=${interval.repeat} fill=${interval.fill}")
                     }
                 }
             }

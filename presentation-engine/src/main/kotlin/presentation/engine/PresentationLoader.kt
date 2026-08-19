@@ -32,6 +32,10 @@ sealed interface LoadResult {
  */
 object PresentationLoader {
 
+    /** 16:9 at 72dpi — the slide size assumed when a Keynote document does not state its own. */
+    private const val FALLBACK_SLIDE_W_PT = 720.0
+    private const val FALLBACK_SLIDE_H_PT = 405.0
+
     val SUPPORTED_EXTENSIONS = setOf("pdf", "pptx", "ppt", "key")
 
     fun load(file: File): LoadResult {
@@ -81,7 +85,9 @@ object PresentationLoader {
                         notes = slideMeta.notes,
                         transition = slideMeta.transition,
                         layers = slideMeta.layers?.takeIf { it.isNotEmpty() }
-                            ?: listOf(LayerSpec.StaticComposite(id = "slide-$index", zIndex = 0, boundsPt = fullBounds)),
+                            ?: listOf(
+                                LayerSpec.StaticComposite(id = "slide-$index", zIndex = 0, boundsPt = fullBounds)
+                            ),
                         timeline = slideMeta.timeline,
                         fidelity = Fidelity.NATIVE
                     )
@@ -247,7 +253,7 @@ object PresentationLoader {
                 slideWidthPt = 720.0,
                 slideHeightPt = 405.0,
                 slides = staticSlides(
-                    analysis.orderedThumbnailEntries.size, 720.0, 405.0,
+                    analysis.orderedThumbnailEntries.size, FALLBACK_SLIDE_W_PT, FALLBACK_SLIDE_H_PT,
                     notes = analysis.notes,
                     fidelity = Fidelity.STATIC_FALLBACK
                 ),

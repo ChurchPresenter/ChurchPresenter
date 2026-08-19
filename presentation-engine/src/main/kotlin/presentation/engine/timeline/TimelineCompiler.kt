@@ -9,7 +9,6 @@ import presentation.engine.model.RectPt
 import presentation.engine.model.RepeatSpec
 import presentation.engine.model.Step
 import presentation.engine.model.Timeline
-import presentation.engine.pptx.BehaviorTarget
 import presentation.engine.pptx.TimeNode
 import presentation.engine.pptx.TimeNodeKind
 import presentation.engine.pptx.TimingBehavior
@@ -283,7 +282,9 @@ internal class TimelineCompiler(
             }
         }
 
-        val hasTranslate = curves.any { it.property == LayerProperty.TRANSLATE_X || it.property == LayerProperty.TRANSLATE_Y }
+        val hasTranslate = curves.any {
+            it.property == LayerProperty.TRANSLATE_X || it.property == LayerProperty.TRANSLATE_Y
+        }
         val hasScale = curves.any { it.property == LayerProperty.SCALE_X || it.property == LayerProperty.SCALE_Y }
         val hasRotate = curves.any { it.property == LayerProperty.ROTATION }
 
@@ -305,7 +306,8 @@ internal class TimelineCompiler(
             else -> PresetCatalog.fromPreset(effectNode.presetClass, effectNode.presetId, effectNode.presetSubtype)
                 ?: EffectSpec.Fade(role).also {
                     warnings.add(
-                        "Preset ${effectNode.presetClass}/${effectNode.presetId}/${effectNode.presetSubtype} degraded to fade"
+                        "Preset ${effectNode.presetClass}/${effectNode.presetId}/" +
+                            "${effectNode.presetSubtype} degraded to fade"
                     )
                 }
         }

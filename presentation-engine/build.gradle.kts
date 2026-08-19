@@ -8,18 +8,13 @@ plugins {
 
 group = "presentation.engine"
 
-// Coverage for this module's own logic. UI composables and the CLI diagnostic entry points are
-// excluded: the first need a real display, the second exist to print to stdout.
-// This module is a parser and a rasterizer: much of it is exercised only by real decks and its
-// output is pixels, so it sits well below the 85% the other modules hold. The floors below are its
-// measured coverage rounded down — a ratchet against regression, not a target. Raise them as
-// coverage improves; never lower one to make a change fit.
+// Only branch and complexity still fall short of the root build's 85% default — a parser and a
+// rasterizer are dense with per-format special cases, and the last of those need real documents to
+// reach. Both are the measured value rounded down: a ratchet, raised as tests are added, never
+// lowered to make a change fit, and deleted outright once a counter clears 85%.
 extra["coverageFloors"] = mapOf(
-    "INSTRUCTION" to "0.60",
-    "BRANCH" to "0.45",
-    "LINE" to "0.70",
-    "COMPLEXITY" to "0.40",
-    "METHOD" to "0.75",
+    "BRANCH" to "0.77",
+    "COMPLEXITY" to "0.71",
 )
 
 extra["coverageExcludes"] =
@@ -28,9 +23,6 @@ extra["coverageExcludes"] =
 kotlin {
     jvmToolchain(21)
 
-    // Deck's constructor and DeckSource are internal — only the loaders build a deck. The fixtures
-    // consumers' tests use to fake one (src/testFixtures) therefore have to see this module's
-    // internals, which is what associating the two compilations does.
     target.compilations.named("testFixtures") {
         associateWith(target.compilations.getByName("main"))
     }
@@ -40,16 +32,11 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.pdfbox)
     implementation(libs.apache.poi)
-    // poi-ooxml-lite is excluded in favor of poi-ooxml-full: the <p:timing> animation tree
-    // (CTTLTimeNode*, CTTLAnimateBehavior, …) is not exercised by POI's own code, so the lite
-    // schema jar omits those classes. Exactly one schema jar may be on the classpath.
     implementation(libs.apache.poi.ooxml) {
         exclude(group = "org.apache.poi", module = "poi-ooxml-lite")
     }
     implementation(libs.apache.poi.ooxmlFull)
     implementation(libs.apache.poi.scratchpad)
-    // Pure-Java snappy decompressor — used by the Keynote IWA reader. No native libraries,
-    // honoring the engine's "everything in-JVM, all platforms" rule.
     implementation(libs.aircompressor)
 
     testImplementation(kotlin("test"))

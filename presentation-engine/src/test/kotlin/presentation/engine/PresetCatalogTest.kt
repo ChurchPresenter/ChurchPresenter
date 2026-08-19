@@ -6,6 +6,7 @@ import presentation.engine.timeline.PresetCatalog
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -25,6 +26,10 @@ class PresetCatalogTest {
 
     // ── Filter strings ────────────────────────────────────────────────────────
 
+    /** The direction a reveal filter decodes to — the assertion these tests repeat. */
+    private fun wipeDirection(filter: String) =
+        (PresetCatalog.fromFilter(filter, entrance) as EffectSpec.Wipe).direction
+
     @Test
     fun `fade-like filters all map to a fade`() {
         for (filter in listOf("fade", "dissolve", "checkerboard", "randombar", "image", "pixelate", "randomeffect")) {
@@ -34,37 +39,37 @@ class PresetCatalogTest {
 
     @Test
     fun `a wipe decodes its direction argument`() {
-        assertEquals(Direction.DOWN, (PresetCatalog.fromFilter("wipe(down)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.UP, (PresetCatalog.fromFilter("wipe(up)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.LEFT, (PresetCatalog.fromFilter("wipe(left)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.RIGHT, (PresetCatalog.fromFilter("wipe(right)", entrance) as EffectSpec.Wipe).direction)
+        assertEquals(Direction.DOWN, wipeDirection("wipe(down)"))
+        assertEquals(Direction.UP, wipeDirection("wipe(up)"))
+        assertEquals(Direction.LEFT, wipeDirection("wipe(left)"))
+        assertEquals(Direction.RIGHT, wipeDirection("wipe(right)"))
     }
 
     @Test
     fun `from-edge wording is inverted into a direction of travel`() {
         // `fromLeft` describes where it starts; the engine wants where it moves.
-        assertEquals(Direction.RIGHT, (PresetCatalog.fromFilter("wipe(fromLeft)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.LEFT, (PresetCatalog.fromFilter("wipe(fromRight)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.UP, (PresetCatalog.fromFilter("wipe(fromBottom)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.DOWN, (PresetCatalog.fromFilter("wipe(fromTop)", entrance) as EffectSpec.Wipe).direction)
+        assertEquals(Direction.RIGHT, wipeDirection("wipe(fromLeft)"))
+        assertEquals(Direction.LEFT, wipeDirection("wipe(fromRight)"))
+        assertEquals(Direction.UP, wipeDirection("wipe(fromBottom)"))
+        assertEquals(Direction.DOWN, wipeDirection("wipe(fromTop)"))
     }
 
     @Test
     fun `a wipe with no argument still has a direction`() {
-        assertEquals(Direction.RIGHT, (PresetCatalog.fromFilter("wipe", entrance) as EffectSpec.Wipe).direction)
+        assertEquals(Direction.RIGHT, wipeDirection("wipe"))
     }
 
     @Test
     fun `blinds pick their axis from the argument`() {
-        assertEquals(Direction.DOWN, (PresetCatalog.fromFilter("blinds(horizontal)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.RIGHT, (PresetCatalog.fromFilter("blinds(vertical)", entrance) as EffectSpec.Wipe).direction)
+        assertEquals(Direction.DOWN, wipeDirection("blinds(horizontal)"))
+        assertEquals(Direction.RIGHT, wipeDirection("blinds(vertical)"))
     }
 
     @Test
     fun `diagonal strips collapse onto one axis`() {
-        assertEquals(Direction.DOWN, (PresetCatalog.fromFilter("strips(downLeft)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.UP, (PresetCatalog.fromFilter("strips(upRight)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.RIGHT, (PresetCatalog.fromFilter("strips", entrance) as EffectSpec.Wipe).direction)
+        assertEquals(Direction.DOWN, wipeDirection("strips(downLeft)"))
+        assertEquals(Direction.UP, wipeDirection("strips(upRight)"))
+        assertEquals(Direction.RIGHT, wipeDirection("strips"))
     }
 
     @Test
@@ -198,6 +203,53 @@ class PresetCatalogTest {
         for (id in listOf(4, 6, 8, 13, 23)) {
             assertEquals(0.0, (PresetCatalog.fromPreset("entr", id, null) as EffectSpec.Zoom).fromScale, 1e-9, "id $id")
             assertEquals(1.0, (PresetCatalog.fromPreset("exit", id, null) as EffectSpec.Zoom).fromScale, 1e-9, "id $id")
+        }
+    }
+
+    // ── The whole table ───────────────────────────────────────────────────────
+
+    /** Every entrance/exit preset id the catalog claims to know, from PowerPoint's own numbering. */
+    private val entranceExitIds = listOf(
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+        26, 30, 42, 47,
+    )
+
+    /** Every emphasis preset id the catalog claims to know. */
+    private val emphasisIds = listOf(1, 3, 6, 8, 9, 26, 32, 35, 36)
+
+    @Test
+    fun `every entrance id in the table maps to an effect that enters`() {
+        for (id in entranceExitIds) {
+            val effect = assertNotNull(PresetCatalog.fromPreset("entr", id, null), "entrance preset $id fell through")
+            assertEquals(entrance, effect.role, "preset $id came back with the wrong role")
+        }
+    }
+
+    @Test
+    fun `every exit id in the table maps to an effect that leaves`() {
+        for (id in entranceExitIds) {
+            val effect = assertNotNull(PresetCatalog.fromPreset("exit", id, null), "exit preset $id fell through")
+            assertEquals(exit, effect.role, "preset $id came back with the wrong role")
+        }
+    }
+
+    @Test
+    fun `every emphasis id in the table maps to an emphasis effect`() {
+        for (id in emphasisIds) {
+            val effect = assertNotNull(PresetCatalog.fromPreset("emph", id, null), "emphasis preset $id fell through")
+            assertEquals(EffectSpec.Role.EMPHASIS, effect.role, "preset $id came back with the wrong role")
+        }
+    }
+
+    @Test
+    fun `a subtype the catalog does not understand never turns a known preset into nothing`() {
+        // Subtypes vary per effect and per PowerPoint version; an unrecognized one must not be the
+        // difference between an animation and a blank slide.
+        for (id in entranceExitIds) {
+            assertNotNull(
+                PresetCatalog.fromPreset("entr", id, 12345),
+                "preset $id with an unknown subtype fell through",
+            )
         }
     }
 }

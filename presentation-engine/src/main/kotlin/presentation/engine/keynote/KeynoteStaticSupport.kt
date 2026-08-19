@@ -122,10 +122,11 @@ internal object KeynoteStaticSupport {
 
     private fun analyzeDirectory(dir: File): Analysis {
         // A package document is a directory, and File.listFiles hands back whatever order the
-        // filesystem happens to store — near-sorted on APFS, arbitrary on ext4. The zip branch can
-        // rely on entry order because Keynote writes it deliberately; a folder carries no such
-        // signal, so both lists are sorted instead. Without this the slide order — and with it
-        // which thumbnail belongs to which slide — differs from one machine to the next.
+        // filesystem stores — near-sorted on APFS, arbitrary on ext4. The zip branch can rely on
+        // entry order because Keynote writes it deliberately; a folder carries no such signal, so
+        // both lists are sorted instead. Without this the slide order — and with it which thumbnail
+        // belongs to which slide — differs from one machine to the next, which is exactly what it
+        // did: the same document opened with its slides in one order here and another on CI.
         val dataDir = File(dir, "Data")
         val thumbnails = dataDir.listFiles()
             ?.filter {
@@ -333,20 +334,31 @@ internal object KeynoteStaticSupport {
      * (protobuf field tag bytes 0xB2 0x38 followed by a varint length). Replaced by a real
      * IWA parse in WS5; kept as the fallback for undecodable documents.
      */
+    /** The presenter-notes field tag, and the varint decoding that follows it. */
+    private const val NOTE_TAG_BYTE_0 = 0xB2
+    private const val NOTE_TAG_BYTE_1 = 0x38
+    private const val NOTE_TAG_BYTES = 3
+    private const val BYTE_MASK = 0xFF
+    private const val VARINT_PAYLOAD_MASK = 0x7F
+    private const val VARINT_CONTINUATION_BIT = 0x80
+    private const val VARINT_PAYLOAD_BITS = 7
+
     private fun scanIwaForNoteText(bytes: ByteArray): String {
         val sb = StringBuilder()
         var i = 0
-        while (i < bytes.size - 3) {
-            if ((bytes[i].toInt() and 0xFF) == 0xB2 && (bytes[i + 1].toInt() and 0xFF) == 0x38) {
+        while (i < bytes.size - NOTE_TAG_BYTES) {
+            if ((bytes[i].toInt() and BYTE_MASK) == NOTE_TAG_BYTE_0 &&
+                (bytes[i + 1].toInt() and BYTE_MASK) == NOTE_TAG_BYTE_1
+            ) {
                 var length = 0
                 var shift = 0
                 var j = i + 2
                 while (j < bytes.size) {
                     val b = bytes[j].toInt() and 0xFF
-                    length = length or ((b and 0x7F) shl shift)
+                    length = length or ((b and VARINT_PAYLOAD_MASK) shl shift)
                     j++
-                    if (b and 0x80 == 0) break
-                    shift += 7
+                    if (b and VARINT_CONTINUATION_BIT == 0) break
+                    shift += VARINT_PAYLOAD_BITS
                 }
                 if (length in 1..4096 && j + length <= bytes.size) {
                     try {

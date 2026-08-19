@@ -123,17 +123,25 @@ internal class IwaMessage private constructor(
             return IwaMessage(fields)
         }
 
+        /** Protobuf base-128 varints: seven payload bits per byte, high bit = "another follows". */
+        private const val VARINT_PAYLOAD_BITS = 7
+        private const val VARINT_PAYLOAD_MASK = 0x7F
+        private const val VARINT_CONTINUATION_BIT = 0x80
+
+        /** A 64-bit value cannot need more shifting than this; past it the stream is corrupt. */
+        private const val VARINT_MAX_SHIFT = 64
+
         /** Returns (value, nextOffset) or null on truncation. */
         fun readVarint(data: ByteArray, offset: Int): Pair<Long, Int>? {
             var result = 0L
             var shift = 0
             var pos = offset
-            while (pos < data.size && shift < 64) {
+            while (pos < data.size && shift < VARINT_MAX_SHIFT) {
                 val b = data[pos].toInt()
-                result = result or ((b.toLong() and 0x7F) shl shift)
+                result = result or ((b.toLong() and VARINT_PAYLOAD_MASK.toLong()) shl shift)
                 pos++
-                if (b and 0x80 == 0) return result to pos
-                shift += 7
+                if (b and VARINT_CONTINUATION_BIT == 0) return result to pos
+                shift += VARINT_PAYLOAD_BITS
             }
             return null
         }

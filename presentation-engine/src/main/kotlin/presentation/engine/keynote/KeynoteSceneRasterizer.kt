@@ -31,6 +31,11 @@ import kotlin.math.floor
  */
 internal class KeynoteSceneRasterizer(private val scene: KeynoteScene) : AutoCloseable {
 
+    private companion object {
+        /** An empty paragraph still takes a line; Keynote's own leading is 1.2× the font size. */
+        const val EMPTY_LINE_HEIGHT_FACTOR = 1.2
+    }
+
     private var zipFile: ZipFile? = null
     private val imageCache = HashMap<String, BufferedImage?>()
     private val extractedTempFiles = HashMap<String, File?>()
@@ -305,11 +310,14 @@ internal class KeynoteSceneRasterizer(private val scene: KeynoteScene) : AutoClo
         var y = 0f
         for ((index, paragraph) in drawable.paragraphs.withIndex()) {
             if (paragraph.text.isBlank()) {
-                y += (paragraph.fontSizePt * 1.2).toFloat()
+                y += (paragraph.fontSizePt * EMPTY_LINE_HEIGHT_FACTOR).toFloat()
                 if (onlyIndex != null && index >= onlyIndex) break
                 continue
             }
-            y = layOutParagraph(graphics, paragraph, width, autoSized, frc, y, paint = onlyIndex == null || onlyIndex == index)
+            y = layOutParagraph(
+                graphics, paragraph, width, autoSized, frc, y,
+                paint = onlyIndex == null || onlyIndex == index,
+            )
             if (onlyIndex != null && index >= onlyIndex) break
         }
     }

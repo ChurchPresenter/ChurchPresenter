@@ -237,6 +237,15 @@ internal object TimingParser {
         }
     }
 
+    /** "150%" over this is 1.5×. */
+    private const val PERCENT_PER_UNIT = 100.0
+
+    /** ST_Percentage's integer form is thousandths of a percent: "150000" is also 1.5×. */
+    private const val PERCENT_THOUSANDTHS_PER_UNIT = 100_000.0
+
+    /** repeatCount is in 1000ths of an iteration: "3000" is three times through. */
+    private const val REPEAT_THOUSANDTHS_PER_ITERATION = 1000.0
+
     /**
      * ST_Percentage union: either an integer in thousandths-of-a-percent ("150000" = 1.5×) or a
      * percent string ("150%"). Returns a plain factor (1.0 = 100%).
@@ -244,9 +253,9 @@ internal object TimingParser {
     private fun parsePercentFactor(value: Any?): Double? {
         val text = value?.toString()?.trim() ?: return null
         return if (text.endsWith("%")) {
-            text.dropLast(1).toDoubleOrNull()?.div(100.0)
+            text.dropLast(1).toDoubleOrNull()?.div(PERCENT_PER_UNIT)
         } else {
-            text.toDoubleOrNull()?.div(100000.0)
+            text.toDoubleOrNull()?.div(PERCENT_THOUSANDTHS_PER_UNIT)
         }
     }
 
@@ -261,6 +270,6 @@ internal object TimingParser {
     private fun parseRepeat(value: Any?): Double? {
         val text = value?.toString() ?: return null
         if (text.equals("indefinite", ignoreCase = true)) return -1.0
-        return text.toDoubleOrNull()?.div(1000.0)
+        return text.toDoubleOrNull()?.div(REPEAT_THOUSANDTHS_PER_ITERATION)
     }
 }

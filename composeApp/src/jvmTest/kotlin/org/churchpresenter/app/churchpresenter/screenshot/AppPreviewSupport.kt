@@ -212,23 +212,21 @@ internal fun appPreview(
 }
 
 /**
- * Pins the lower-third playback to one frame, so a shot of a live lottie is the same picture twice.
+ * Pins the lower third to one frame, so a shot of a live lottie is the same picture twice.
  *
- * `main.kt` owns the playback clock; this harness drives [MainDesktop] directly, so nothing advances
- * the animation and the capture simply shows whichever frame the pre-render's decode worker happened
- * to publish first. Measured: two consecutive recordings of `lower_third_dark` differed over the
- * band itself — fully drawn in one, still fading in the other — which is a diff on every run for a
- * picture nobody changed.
+ * The presenter draws the pre-rendered frame stream when it is ready and composes the animation
+ * itself until then, and the pre-render finishes off the UI thread whenever it finishes — so the
+ * capture landed on a different frame every run: the band fully drawn in one recording, still
+ * fading in the next. Measured at 580 pixels over the band itself, under the change threshold and
+ * therefore never a failure, just a diff in every comparison for a picture nobody touched.
  *
- * The last frame is the settled one: it is what stays on screen once the entrance has played, which
- * is what a screenshot of a live lower third should show. Waiting on the published frame's own index
- * ends this on a positive signal rather than on a pause, and a deck with no lottie live falls
+ * Waiting for the pre-render puts every run on the same path, and the last frame is the settled one
+ * — what stays on screen once the entrance has played, which is what a shot of a live lower third
+ * should show. Both waits end on a positive signal, and a tab with no lower third live falls
  * straight through.
  */
 private fun ComposeUiTest.pinLottieFrame(presenterManager: PresenterManager) {
     if (presenterManager.presentingMode.value != Presenting.LOWER_THIRD) return
-    // The pre-render runs off the UI thread and finishes whenever it finishes; until it does, the
-    // presenter draws the composition itself. Waiting for it means every run takes the same path.
     waitUntil("the lower-third pre-render is ready", 15_000L) {
         (presenterManager.lottieFrameCount.value ?: 0) > 0
     }

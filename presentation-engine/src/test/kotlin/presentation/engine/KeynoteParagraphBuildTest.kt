@@ -102,7 +102,11 @@ class KeynoteParagraphBuildTest {
         val drawables = listOf(KnPlacedDrawable(drawableId, threeParagraphText()))
 
         val result = assertNotNull(KeynoteBuildMapper.map(index, slideMessage, drawables))
-        assertEquals(setOf(drawableId), result.paragraphBuiltDrawableIds, "drawable should be flagged as paragraph-built")
+        assertEquals(
+            setOf(drawableId),
+            result.paragraphBuiltDrawableIds,
+            "drawable should be flagged as paragraph-built",
+        )
         val timeline = assertNotNull(result.timeline)
         assertEquals(3, timeline.steps.size, "one click step per paragraph")
         timeline.steps.forEachIndexed { i, step ->

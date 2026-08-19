@@ -15,6 +15,60 @@ import presentation.engine.model.EffectSpec
  */
 internal object PresetCatalog {
 
+    // PowerPoint preset ids (`presetID` on the effect node). Entrance and exit share one
+    // numbering; emphasis has its own. The names are Microsoft's own effect names — the
+    // number is the wire value and the name is what the operator picked in PowerPoint.
+    private const val ENTR_APPEAR = 1
+    private const val ENTR_FLY = 2
+    private const val ENTR_BLINDS = 3
+    private const val ENTR_BOX = 4
+    private const val ENTR_CHECKERBOARD = 5
+    private const val ENTR_CIRCLE = 6
+    private const val ENTR_CRAWL = 7
+    private const val ENTR_DIAMOND = 8
+    private const val ENTR_DISSOLVE = 9
+    private const val ENTR_FADE = 10
+    private const val ENTR_FLASH_ONCE = 11
+    private const val ENTR_PEEK = 12
+    private const val ENTR_PLUS = 13
+    private const val ENTR_RANDOM_BARS = 14
+    private const val ENTR_SPIRAL = 15
+    private const val ENTR_SPLIT = 16
+    private const val ENTR_STRETCH = 17
+    private const val ENTR_STRIPS = 18
+    private const val ENTR_SWIVEL = 19
+    private const val ENTR_WEDGE = 20
+    private const val ENTR_WHEEL = 21
+    private const val ENTR_WIPE = 22
+    private const val ENTR_ZOOM = 23
+    private const val ENTR_RANDOM = 24
+    private const val ENTR_BOOMERANG = 25
+    private const val ENTR_BOUNCE_GROW_TURN = 26
+    private const val ENTR_BOUNCE = 30
+    private const val ENTR_FLOAT_UP = 42
+    private const val ENTR_FLOAT_DOWN = 47
+
+    private const val EMPH_FILL_COLOR = 1
+    private const val EMPH_FONT_COLOR = 3
+    private const val EMPH_GROW_SHRINK = 6
+    private const val EMPH_SPIN = 8
+    private const val EMPH_TRANSPARENCY = 9
+    private const val EMPH_PULSE = 26
+    private const val EMPH_TEETER = 32
+    private const val EMPH_COLOR_PULSE = 35
+    private const val EMPH_BLINK = 36
+
+    /** `presetSubtype` values that are not directions: blinds-vertical and split-horizontal. */
+    private const val SUBTYPE_BLINDS_VERTICAL = 10
+    private const val SUBTYPE_SPLIT_VERTICAL = 21
+
+    /** Grow/Shrink has no serialized factor of its own — PowerPoint's own default is 150%. */
+    private const val GROW_SHRINK_FACTOR = 1.5
+
+    /** Teeter is a small rock rather than a spin; degrees chosen to read as a wobble. */
+    private const val TEETER_DEGREES = 10.0
+
+
     /** Directions encoded in filter arguments like `wipe(down)` / `slide(fromLeft)`. */
     private fun filterDirection(arg: String?): Direction? = when (arg?.lowercase()) {
         "left", "fromright" -> Direction.LEFT
@@ -107,46 +161,55 @@ internal object PresetCatalog {
         fun zoomIn() = EffectSpec.Zoom(role, if (entering) 0.0 else 1.0)
         return when (role) {
             EffectSpec.Role.ENTRANCE, EffectSpec.Role.EXIT -> when (presetId) {
-                1 -> EffectSpec.Appear(role)
-                2 -> EffectSpec.Fly(role, subtypeDirection(presetSubtype, entering))
-                3 -> EffectSpec.Wipe(role, if (presetSubtype == 10) Direction.RIGHT else Direction.DOWN) // Blinds
-                4 -> zoomIn()                                            // Box
-                5 -> EffectSpec.Fade(role)                               // Checkerboard
-                6 -> zoomIn()                                            // Circle
-                7 -> EffectSpec.Fly(role, subtypeDirection(presetSubtype, entering)) // Crawl (slow fly)
-                8 -> zoomIn()                                            // Diamond
-                9 -> EffectSpec.Fade(role)                               // Dissolve
-                10 -> EffectSpec.Fade(role)                              // Fade
-                11 -> EffectSpec.Fade(role)                              // Flash Once (provisional)
-                12 -> EffectSpec.Fly(role, subtypeDirection(presetSubtype, entering)) // Peek
-                13 -> zoomIn()                                           // Plus
-                14 -> EffectSpec.Fade(role)                              // Random bars
-                15 -> zoomIn()                                           // Spiral (provisional)
-                16 -> EffectSpec.Split(role, horizontal = presetSubtype != 21, outward = !entering)
-                17 -> zoomIn()                                           // Stretch (provisional)
-                18 -> EffectSpec.Wipe(role, subtypeDirection(presetSubtype, entering)) // Strips
-                19 -> EffectSpec.GrowShrink(role, 1.0, 1.0)              // Swivel (provisional — no 3D flip)
-                20 -> zoomIn()                                           // Wedge (provisional)
-                21 -> EffectSpec.Wipe(role, Direction.RIGHT)             // Wheel (provisional)
-                22 -> EffectSpec.Wipe(role, subtypeDirection(presetSubtype, entering)) // Wipe
-                23 -> zoomIn()                                           // Zoom
-                24 -> EffectSpec.Fade(role)                              // Random (provisional)
-                25 -> EffectSpec.Fly(role, subtypeDirection(presetSubtype, entering)) // Boomerang (provisional)
-                26 -> zoomIn()                                           // Bounce/Grow&Turn (provisional)
-                30 -> EffectSpec.Fly(role, subtypeDirection(presetSubtype, entering)) // Bounce (provisional)
-                42 -> EffectSpec.Fly(role, if (entering) Direction.UP else Direction.DOWN)   // Float Up
-                47 -> EffectSpec.Fly(role, if (entering) Direction.DOWN else Direction.UP)   // Float Down (provisional)
+                ENTR_APPEAR -> EffectSpec.Appear(role)
+                ENTR_FLY -> EffectSpec.Fly(role, subtypeDirection(presetSubtype, entering))
+                ENTR_BLINDS -> EffectSpec.Wipe(
+                    role,
+                    if (presetSubtype == SUBTYPE_BLINDS_VERTICAL) Direction.RIGHT else Direction.DOWN,
+                )
+                ENTR_BOX -> zoomIn()
+                ENTR_CHECKERBOARD -> EffectSpec.Fade(role)
+                ENTR_CIRCLE -> zoomIn()
+                ENTR_CRAWL -> EffectSpec.Fly(role, subtypeDirection(presetSubtype, entering))  // Crawl (slow fly)
+                ENTR_DIAMOND -> zoomIn()
+                ENTR_DISSOLVE -> EffectSpec.Fade(role)
+                ENTR_FADE -> EffectSpec.Fade(role)
+                ENTR_FLASH_ONCE -> EffectSpec.Fade(role)  // Flash Once (provisional)
+                ENTR_PEEK -> EffectSpec.Fly(role, subtypeDirection(presetSubtype, entering))
+                ENTR_PLUS -> zoomIn()
+                ENTR_RANDOM_BARS -> EffectSpec.Fade(role)
+                ENTR_SPIRAL -> zoomIn()  // Spiral (provisional)
+                ENTR_SPLIT -> EffectSpec.Split(
+                    role,
+                    horizontal = presetSubtype != SUBTYPE_SPLIT_VERTICAL,
+                    outward = !entering,
+                )
+                ENTR_STRETCH -> zoomIn()  // Stretch (provisional)
+                ENTR_STRIPS -> EffectSpec.Wipe(role, subtypeDirection(presetSubtype, entering))
+                ENTR_SWIVEL -> EffectSpec.GrowShrink(role, 1.0, 1.0)  // Swivel (provisional — no 3D flip)
+                ENTR_WEDGE -> zoomIn()  // Wedge (provisional)
+                ENTR_WHEEL -> EffectSpec.Wipe(role, Direction.RIGHT)  // Wheel (provisional)
+                ENTR_WIPE -> EffectSpec.Wipe(role, subtypeDirection(presetSubtype, entering))
+                ENTR_ZOOM -> zoomIn()
+                ENTR_RANDOM -> EffectSpec.Fade(role)  // Random (provisional)
+                // Provisional: a boomerang's arc is not modeled, only its arrival direction.
+                ENTR_BOOMERANG -> EffectSpec.Fly(role, subtypeDirection(presetSubtype, entering))
+                ENTR_BOUNCE_GROW_TURN -> zoomIn()  // Bounce/Grow&Turn (provisional)
+                ENTR_BOUNCE -> EffectSpec.Fly(role, subtypeDirection(presetSubtype, entering))  // Bounce (provisional)
+                ENTR_FLOAT_UP -> EffectSpec.Fly(role, if (entering) Direction.UP else Direction.DOWN)
+                // Provisional: float has an ease PowerPoint applies that the engine does not.
+                ENTR_FLOAT_DOWN -> EffectSpec.Fly(role, if (entering) Direction.DOWN else Direction.UP)
                 else -> null
             }
             EffectSpec.Role.EMPHASIS -> when (presetId) {
-                1, 3 -> EffectSpec.Pulse(role)               // Fill/font color change → pulse degrade
-                6 -> EffectSpec.GrowShrink(role, 1.5, 1.5)   // Grow/Shrink
-                8 -> EffectSpec.Spin(role)                   // Spin
-                9 -> EffectSpec.Fade(role)                   // Transparency (provisional)
-                26 -> EffectSpec.Pulse(role)                 // Pulse
-                32 -> EffectSpec.Spin(role, degrees = 10.0)  // Teeter (provisional — small rock)
-                35 -> EffectSpec.Pulse(role)                 // Color pulse (provisional)
-                36 -> EffectSpec.Pulse(role)                 // Blink (provisional)
+                EMPH_FILL_COLOR, EMPH_FONT_COLOR -> EffectSpec.Pulse(role)  // Fill/font color change → pulse degrade
+                EMPH_GROW_SHRINK -> EffectSpec.GrowShrink(role, GROW_SHRINK_FACTOR, GROW_SHRINK_FACTOR)
+                EMPH_SPIN -> EffectSpec.Spin(role)
+                EMPH_TRANSPARENCY -> EffectSpec.Fade(role)  // Transparency (provisional)
+                EMPH_PULSE -> EffectSpec.Pulse(role)
+                EMPH_TEETER -> EffectSpec.Spin(role, degrees = TEETER_DEGREES)  // Teeter (provisional — small rock)
+                EMPH_COLOR_PULSE -> EffectSpec.Pulse(role)  // Color pulse (provisional)
+                EMPH_BLINK -> EffectSpec.Pulse(role)  // Blink (provisional)
                 else -> null
             }
         }

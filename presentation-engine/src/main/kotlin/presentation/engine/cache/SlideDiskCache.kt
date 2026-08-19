@@ -36,10 +36,13 @@ class SlideDiskCache(
 ) {
 
     companion object {
+        /** Cache directory names are the hash in hex — short, and filesystem-safe. */
+        private const val HEX_RADIX = 16
+
         const val SCHEMA_VERSION = 2
 
         /** Stable id per source path — same derivation the companion API has always used. */
-        fun idFor(absolutePath: String): String = absolutePath.hashCode().toUInt().toString(16)
+        fun idFor(absolutePath: String): String = absolutePath.hashCode().toUInt().toString(HEX_RADIX)
 
         /**
          * The writer that currently owns each entry directory, keyed by its absolute path.

@@ -54,7 +54,11 @@ class KeynoteRasterizerTest {
         }.toByteArray()
     }
 
-    private fun sceneOf(vararg drawables: Triple<Long, Int, ByteArray>, width: Float = 1920f, height: Float = 1080f) : File {
+    private fun sceneOf(
+        vararg drawables: Triple<Long, Int, ByteArray>,
+        width: Float = 1920f,
+        height: Float = 1080f,
+    ): File {
         val ids = drawables.map { it.first }
         val size = Fixtures.ProtoWriter().apply { floatField(1, width); floatField(2, height) }.toByteArray()
         val tree = Fixtures.ProtoWriter().apply { bytesField(2, reference(100L)) }.toByteArray()

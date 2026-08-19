@@ -141,7 +141,9 @@ class StaticPipelineTest {
 
     @Test
     fun `keynote with nothing usable reports EMPTY_DOCUMENT`() {
-        val key = Fixtures.createKeynoteZip(tempDir, previewPdf = null, thumbnails = emptyMap(), slideIwaIds = emptyList())
+        val key = Fixtures.createKeynoteZip(
+            tempDir, previewPdf = null, thumbnails = emptyMap(), slideIwaIds = emptyList(),
+        )
         val result = PresentationLoader.load(key)
         assertEquals(DeckLoadError.EMPTY_DOCUMENT, assertIs<LoadResult.Failure>(result).error)
     }

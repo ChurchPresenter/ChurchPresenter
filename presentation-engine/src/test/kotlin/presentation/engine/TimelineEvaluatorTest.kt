@@ -115,7 +115,14 @@ class TimelineEvaluatorTest {
     @Test
     fun `an indefinitely repeating interval keeps animating without blocking the step`() {
         val e = evaluator(
-            Step(listOf(entrance("a", EffectSpec.Pulse(EffectSpec.Role.EMPHASIS), dur = 300, repeat = RepeatSpec.Indefinite))),
+            Step(
+                listOf(
+                    entrance(
+                        "a", EffectSpec.Pulse(EffectSpec.Role.EMPHASIS),
+                        dur = 300, repeat = RepeatSpec.Indefinite,
+                    )
+                )
+            ),
             hidden = emptySet(),
         )
         val frame = e.evaluate(0, 10_000)
@@ -173,7 +180,9 @@ class TimelineEvaluatorTest {
     @Test
     fun `opposite fly directions displace opposite ways`() {
         fun startX(direction: Direction): Double {
-            val e = evaluator(Step(listOf(entrance("a", EffectSpec.Fly(EffectSpec.Role.ENTRANCE, direction), dur = 500))))
+            val e = evaluator(
+                Step(listOf(entrance("a", EffectSpec.Fly(EffectSpec.Role.ENTRANCE, direction), dur = 500)))
+            )
             return e.evaluate(0, 0).layerStates["a"]!!.translateXPt
         }
         assertTrue(startX(Direction.LEFT) * startX(Direction.RIGHT) < 0.0, "mirrored across the axis")
