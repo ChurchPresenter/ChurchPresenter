@@ -31,6 +31,13 @@ the rules those don't cover.
 ### Debugging
 - Keep debug logs until the fix is confirmed; ask before removing if unsure. Remove them once done.
 
+### Commit authorship — **NEVER** add yourself
+- **NEVER** add a `Co-Authored-By:` trailer for an agent, an assistant or a tool — no
+  `Co-Authored-By: Claude`, no `Generated with Claude Code`, no bot byline of any kind.
+- **NEVER** set yourself as the commit author or committer. Every commit is authored by the person
+  running the work, and its message says what changed and why — nothing about who or what typed it.
+- This applies to commit messages, merge commits, PR bodies and PR descriptions alike.
+
 ## Architecture
 
 All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/`:
