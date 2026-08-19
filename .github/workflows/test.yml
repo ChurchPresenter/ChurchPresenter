@@ -104,6 +104,11 @@ jobs:
             ble:
               - *shared
               - 'bible-engine/**'
+            # `settings/**` is the module directory. `settings.gradle.kts` is a different thing
+            # entirely and is already in *shared above, which is why a change to it runs everything.
+            settingsmodule:
+              - *shared
+              - 'settings/**'
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -120,7 +125,7 @@ jobs:
       # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
       # Pre-existing findings are in config/detekt/baseline.xml; this gates only new ones.
       - name: Detekt
-        run: ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :songlibrary:detekt
+        run: ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :songlibrary:detekt :settings:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -299,6 +304,14 @@ jobs:
         if: always() && steps.modules.outputs.songlibrary == 'true'
         run: ./gradlew :songlibrary:jacocoTestCoverageVerification -x test
 
+      - name: Settings tests
+        if: always() && steps.modules.outputs.settingsmodule == 'true'
+        run: ./gradlew :settings:test
+
+      - name: Settings coverage floor
+        if: always() && steps.modules.outputs.settingsmodule == 'true'
+        run: ./gradlew :settings:jacocoTestCoverageVerification -x test
+
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -325,6 +338,7 @@ jobs:
             core-models/build/test-results/**/TEST-*.xml
             songlibrary/build/test-results/**/TEST-*.xml
             bible-engine/build/test-results/**/TEST-*.xml
+            settings/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -340,6 +354,7 @@ jobs:
             Core models
             Song library
             Bible Lookup Engine
+            Settings
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -474,3 +489,5 @@ jobs:
             songlibrary/build/test-results/
             bible-engine/build/reports/tests/
             bible-engine/build/test-results/
+            settings/build/reports/tests/
+            settings/build/test-results/

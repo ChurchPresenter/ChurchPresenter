@@ -172,6 +172,7 @@ import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.app.churchpresenter.utils.isSystemUsing24HourFormat
 import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
@@ -559,7 +560,7 @@ fun AnnouncementsTab(
                         val timerTargetTimeLabel = stringResource(Res.string.timer_target_time)
                         // Not `remember`ed: re-checked every recomposition so a live OS format change
                         // (12h <-> 24h) takes effect immediately without requiring an app restart.
-                        val use24Hour = Utils.isSystemUsing24HourFormat()
+                        val use24Hour = isSystemUsing24HourFormat()
                         val targetIsPm = viewModel.targetHour >= 12
                         fun displayHour(hour24: Int): Int =
                             if (use24Hour) hour24 else ((hour24 + HOUR_WRAP_OFFSET) % HOURS_PER_HALF_DAY) + 1

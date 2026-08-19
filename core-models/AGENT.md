@@ -28,9 +28,10 @@ changed when they moved. A real Gradle module of this build: `include(":core-mod
 `StringResource` references and `tabs.Tabs`), `CompanionButtonState` (`ImageBitmap`) and
 `CompanionConnectionUiState`. Don't try again without removing those dependencies first.
 
-`TimerModes` lives here because `ScheduleItem` needs it; `utils.Constants.TIMER_MODE_*` in the app
-are aliases of it, so existing call sites are unchanged. **`Constants` itself cannot move** — it
-also holds composables and AWT screen-device helpers.
+`TimerModes` lives here because `ScheduleItem` needs it; `utils.Constants.TIMER_MODE_*` are
+aliases of it, so existing call sites are unchanged. `Constants` itself now lives in `:settings`,
+which depends on this module for exactly that alias — the composables and AWT screen-device
+helpers that used to share its file stayed behind in `:composeApp`.
 
 ## Rules
 

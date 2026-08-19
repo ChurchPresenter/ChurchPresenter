@@ -57,3 +57,6 @@ include(":crossword")
 // The presentation engine: PPTX/PPT/Keynote/PDF parsing, timing and animation. Its own module,
 // depended on by :composeApp, which drives it from PresentationViewModel and CompanionServer.
 include(":presentation-engine")
+// Everything the app persists: the settings data classes, the SettingsManager that loads, migrates
+// and saves settings.json, and the constants those defaults are spelled with.
+include(":settings")

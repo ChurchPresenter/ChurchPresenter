@@ -1,0 +1,107 @@
+package org.churchpresenter.app.churchpresenter.utils
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
+import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import java.awt.GraphicsDevice
+import java.awt.GraphicsEnvironment
+import java.awt.HeadlessException
+import java.awt.Rectangle
+
+private const val SCREEN_POLL_INTERVAL_MS = 2000L
+
+/** Empty on a headless JVM (CI, or a genuinely displayless deployment) instead of throwing. */
+private fun safeScreenDevices(): Array<GraphicsDevice> = try {
+    GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+} catch (_: HeadlessException) {
+    emptyArray()
+}
+
+/** Polls for screen devices every 2 seconds so hot-plugged displays trigger recomposition. */
+@Composable
+fun rememberScreenDevices(): Array<GraphicsDevice> {
+    var devices by remember { mutableStateOf(safeScreenDevices()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(SCREEN_POLL_INTERVAL_MS)
+            val current = safeScreenDevices()
+            if (current.size != devices.size) {
+                devices = current
+            }
+        }
+    }
+    return devices
+}
+
+/** The 1080p bounds [ScaledPresenterContent][org.churchpresenter.app.churchpresenter.composables.ScaledPresenterContent] assumes when no real display exists to ask (headless). */
+private val HEADLESS_PRESENTER_BOUNDS = Rectangle(0, 0, 1920, 1080)
+
+/** Returns the presenter screen bounds (first non-primary screen if available, else primary). */
+fun presenterScreenBounds(): Rectangle {
+    val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+    return try {
+        presenterBoundsOf(ge.screenDevices, ge.defaultScreenDevice)
+    } catch (_: HeadlessException) {
+        HEADLESS_PRESENTER_BOUNDS
+    }
+}
+
+internal fun presenterBoundsOf(screens: Array<GraphicsDevice>, primary: GraphicsDevice): Rectangle =
+    (screens.firstOrNull { it != primary } ?: primary).defaultConfiguration.bounds
+
+/**
+ * Bounds of the display [assignment] targets, or 1080p when there is no display to ask (headless).
+ *
+ * Used for aspect-ratio comparisons against content that will be shown there — a scene built 16:9
+ * on a 4:3 output is worth warning about before it goes live, and that check has to keep working on
+ * a machine with no second screen attached.
+ */
+fun assignedDisplayBounds(assignment: ScreenAssignment): Rectangle {
+    val screens = safeScreenDevices()
+    if (screens.isEmpty()) return HEADLESS_PRESENTER_BOUNDS
+    return try {
+        assignedBoundsOf(screens, GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice, assignment)
+    } catch (_: HeadlessException) {
+        HEADLESS_PRESENTER_BOUNDS
+    }
+}
+
+/**
+ * Which of [screens] an assignment resolves to, most specific first: the screen whose top-left
+ * corner matches the stored bounds, else the stored index, else any screen that is not [primary],
+ * else [primary] itself.
+ *
+ * Stored bounds win over the index because a display's index shifts when another is plugged in or
+ * removed, while its position on the desktop usually does not.
+ */
+internal fun assignedBoundsOf(
+    screens: Array<GraphicsDevice>,
+    primary: GraphicsDevice,
+    assignment: ScreenAssignment,
+): Rectangle {
+    val matched = if (assignment.targetBoundsX != Int.MIN_VALUE) {
+        screens.firstOrNull { device ->
+            val bounds = device.defaultConfiguration.bounds
+            bounds.x == assignment.targetBoundsX && bounds.y == assignment.targetBoundsY
+        }
+    } else null
+    val device = matched
+        ?: screens.getOrNull(assignment.targetDisplay)
+        ?: screens.firstOrNull { it != primary }
+        ?: primary
+    return device.defaultConfiguration.bounds
+}
+
+/** Find a screen index by stored bounds. Returns null if no match. */
+fun findScreenIndexByBounds(screens: Array<GraphicsDevice>, x: Int, y: Int, w: Int, h: Int): Int? {
+    if (x == Int.MIN_VALUE) return null  // bounds not set
+    return screens.indexOfFirst { device ->
+        val b = device.defaultConfiguration.bounds
+        b.x == x && b.y == y && b.width == w && b.height == h
+    }.takeIf { it >= 0 }
+}

@@ -27,6 +27,8 @@ private const val VERSION_SCREEN_ASSIGNMENTS = 6
  * (tabRows, leftSidebarRows, rightSidebarRows, etc.) — shared by the migrations below. */
 private val CompanionSurfacePlacementPrefixes = listOf("tab", "leftSidebar", "rightSidebar")
 
+// Load, migrate, save, import, export and the per-version migration steps, all against one file.
+@Suppress("TooManyFunctions")
 class SettingsManager {
     private val appDataDir = AppDataDir.resolve()
     private val settingsFile = File(appDataDir, "settings.json")

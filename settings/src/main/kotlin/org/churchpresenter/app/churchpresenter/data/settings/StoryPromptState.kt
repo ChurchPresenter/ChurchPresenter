@@ -29,10 +29,10 @@ data class StoryPromptState(
     val finished: Boolean = false,
 )
 
-internal fun StoryPromptState.stampingInstall(nowMillis: Long): StoryPromptState =
+fun StoryPromptState.stampingInstall(nowMillis: Long): StoryPromptState =
     if (installedAtMillis != 0L) this else copy(installedAtMillis = nowMillis)
 
-internal fun StoryPromptState.recordingUse(nowMillis: Long): StoryPromptState {
+fun StoryPromptState.recordingUse(nowMillis: Long): StoryPromptState {
     val thisWeek = storyPromptWeekOf(nowMillis)
     val kept = (activeWeeks + thisWeek).filter { it > thisWeek - STORY_PROMPT_WEEKS_KEPT }.toSet()
     return copy(activeWeeks = kept)
@@ -43,7 +43,7 @@ internal fun StoryPromptState.usedEveryWeek(nowMillis: Long): Boolean {
     return (0 until STORY_PROMPT_REQUIRED_ACTIVE_WEEKS).all { thisWeek - it in activeWeeks }
 }
 
-internal fun StoryPromptState.isDue(nowMillis: Long): Boolean {
+fun StoryPromptState.isDue(nowMillis: Long): Boolean {
     if (finished) return false
     if (installedAtMillis == 0L) return false
     if (timesShown >= STORY_PROMPT_MAX_SHOWS) return false
@@ -52,7 +52,7 @@ internal fun StoryPromptState.isDue(nowMillis: Long): Boolean {
     return usedEveryWeek(nowMillis)
 }
 
-internal fun StoryPromptState.shown(nowMillis: Long): StoryPromptState =
+fun StoryPromptState.shown(nowMillis: Long): StoryPromptState =
     copy(timesShown = timesShown + 1, lastShownAtMillis = nowMillis)
 
-internal fun StoryPromptState.answered(): StoryPromptState = copy(finished = true)
+fun StoryPromptState.answered(): StoryPromptState = copy(finished = true)

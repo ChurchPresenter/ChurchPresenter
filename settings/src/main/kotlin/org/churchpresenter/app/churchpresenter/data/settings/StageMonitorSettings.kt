@@ -30,7 +30,10 @@ enum class StageMonitorStyleZone {
     TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_MIDDLE, BOTTOM_RIGHT, FULL_SCREEN
 }
 
-/** Where the metronome flash dot is anchored on the stage monitor screen — a free 3x3 grid, independent of the content zones above (no full-screen option since it's a small overlay). */
+/**
+ * Where the metronome flash dot is anchored on the stage monitor screen — a free 3x3 grid,
+ * independent of the content zones above (no full-screen option since it's a small overlay).
+ */
 @Serializable
 enum class MetronomePosition {
     NONE,

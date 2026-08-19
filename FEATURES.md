@@ -3,6 +3,10 @@
 **Everything your church needs to put words on the screen — songs, scripture, slides, video, captions and broadcast graphics — in one free, open-source app.** 
 
 > Source paths below are relative to `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/`
+>
+> Except `data/settings/…` and `data/SettingsManager.kt`, which live in the `:settings` module
+> under `settings/src/main/kotlin/org/churchpresenter/app/churchpresenter/` — it kept the packages
+> the app already used, so the paths below are unchanged from the same package root.
 
 ## Songs & Lyrics
 - **Unlimited song library** — organize thousands of songs across as many songbooks as you like, indexed straight from a folder.
