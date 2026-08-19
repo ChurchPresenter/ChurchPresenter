@@ -63,11 +63,17 @@ class PicturesViewModelWatchTest {
         override fun context(): Path = Path.of(name)
     }
 
-    /** An OVERFLOW event as the JDK delivers it: no path, and a null context. */
+    /**
+     * An OVERFLOW event whose context throws rather than returning the null the JDK gives back.
+     *
+     * The kind has to be tested *before* the context is read, and a fake returning null cannot
+     * show that: the null-safe call would satisfy the assertion on its own, so the ordering guard
+     * could be deleted with the test still green. Throwing here is what pins the order.
+     */
     private class OverflowEvent : WatchEvent<Any> {
         override fun kind(): WatchEvent.Kind<Any> = StandardWatchEventKinds.OVERFLOW
         override fun count() = 1
-        override fun context(): Any? = null
+        override fun context(): Any = error("the context of an OVERFLOW event must never be read")
     }
 
     /** A non-OVERFLOW event whose context is null, which is what the field crash carried. */
@@ -274,7 +280,7 @@ class PicturesViewModelWatchTest {
     }
 
     @Test
-    fun `an overflow event is skipped without reading its context`() {
+    fun `an overflow event is skipped without its context being read`() {
         assertNull(model.watchedImageName(OverflowEvent()))
     }
 

@@ -58,11 +58,15 @@ class SongFolderWatcherEventTest {
         override fun context(): Path = Path.of(name)
     }
 
-    /** An OVERFLOW event as the JDK delivers it: no path, and a null context. */
+    /**
+     * An OVERFLOW event whose context throws rather than returning the null the JDK gives back, so
+     * that the test fails if the kind stops being checked before the context is read. A fake
+     * returning null would pass either way.
+     */
     private class OverflowEvent : WatchEvent<Any> {
         override fun kind(): WatchEvent.Kind<Any> = StandardWatchEventKinds.OVERFLOW
         override fun count() = 1
-        override fun context(): Any? = null
+        override fun context(): Any = error("the context of an OVERFLOW event must never be read")
     }
 
     private fun relevant(
