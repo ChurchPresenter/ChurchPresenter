@@ -351,6 +351,25 @@
     <string name="language_romanian">Rumänisch</string>
     <string name="language_slovak">Slowakisch</string>
     <string name="language_estonian">Estnisch</string>
+    <string name="language_latvian">Lettisch</string>
+    <string name="language_croatian">Kroatisch</string>
+    <string name="language_swedish">Schwedisch</string>
+    <string name="language_norwegian">Norwegisch</string>
+    <string name="language_finnish">Finnisch</string>
+    <string name="language_turkish">Türkisch</string>
+    <string name="language_uzbek">Usbekisch</string>
+    <string name="language_arabic">Arabisch</string>
+    <string name="language_persian">Persisch</string>
+    <string name="language_hindi">Hindi</string>
+    <string name="language_nepali">Nepalesisch</string>
+    <string name="language_thai">Thailändisch</string>
+    <string name="language_lao">Laotisch</string>
+    <string name="language_japanese">Japanisch</string>
+    <string name="language_chinese">Chinesisch (vereinfacht)</string>
+    <string name="language_indonesian">Indonesisch</string>
+    <string name="language_malay">Malaiisch</string>
+    <string name="language_tagalog">Tagalog</string>
+    <string name="language_swahili">Suaheli</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Keine Ergebnisse gefunden für "%1$s"</string>
@@ -843,6 +862,10 @@
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Detailliert</string>
     <string name="schedule_kind_lower_third">Unteres Drittel</string>
+    <string name="tooltip_schedule_options">Programm-Optionen</string>
+    <string name="schedule_show_buttons_under_title">Schaltflächen unter dem Titel anzeigen</string>
+    <string name="schedule_option_item_count">Anzahl der Elemente</string>
+    <string name="schedule_option_zoom">Zoom-Steuerung</string>
     <string name="schedule_drop_hint">Dateien hierher ziehen, um sie zum Programm hinzuzufügen</string>
     <string name="schedule_note_placeholder">Notiz hinzufügen…</string>
     <string name="screen_number">Bildschirm %1$d</string>
@@ -941,6 +964,18 @@
     <string name="statistics_exported_error">Statistik konnte nicht exportiert werden.</string>
     <string name="file_chooser_save_statistics">Statistik speichern als</string>
     <string name="file_filter_xls">Excel-Tabelle (*.xls)</string>
+    <string name="stats_period_label">Zeitraum:</string>
+    <string name="stats_period_all_time">Gesamter Zeitraum</string>
+    <string name="stats_period_last_3_months">Letzte 3 Monate</string>
+    <string name="stats_period_last_6_months">Letzte 6 Monate</string>
+    <string name="stats_period_last_12_months">Letzte 12 Monate</string>
+    <string name="stats_period_year">Jahr</string>
+    <string name="stats_filter_all_songbooks">Alle Liederbücher</string>
+    <string name="stats_filter_all_bibles">Alle Bibeln</string>
+    <string name="stats_period_custom">den ausgewählten Zeitraum</string>
+    <string name="stats_clear_item">Aus der Statistik entfernen</string>
+    <string name="stats_clear_item_confirm">%1$s aus der Statistik für %2$s entfernen? Das kann nicht rückgängig gemacht werden.</string>
+    <string name="stats_clear_all_confirm">Gesamte Statistik löschen? Damit wird auch der Abspielverlauf gelöscht, aus dem der CCLI-Bericht erstellt wird. Das kann nicht rückgängig gemacht werden.</string>
 
     <!-- Remote API / Companion Server (added) -->
     <string name="auto_fit_button_tooltip">Optimale Schriftgröße für den aktuellen Vers berechnen</string>
@@ -1662,6 +1697,7 @@
     <string name="media_vlc_arch_mismatch">Falsche VLC-Architektur. Dein Mac verwendet Apple Silicon (arm64), aber das installierte VLC ist nur für Intel (x86_64). Lade den Apple Silicon-Build von VLC auf videolan.org herunter und starte neu.</string>
     <string name="media_vlc_load_failed">VLC wurde gefunden, konnte aber nicht geladen werden. Versuchen Sie, VLC von videolan.org neu zu installieren (installieren Sie unter Windows auch das Microsoft Visual C++ Redistributable) und starten Sie die Anwendung dann neu.</string>
     <string name="open_converter">Konverter</string>
+    <string name="open_song_library">Liederbibliothek-Verwaltung</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Hintergrund</string>
     <string name="projection_content_lt_background">Lower-Third-Hintergrund</string>

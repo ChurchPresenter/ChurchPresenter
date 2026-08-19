@@ -14,7 +14,16 @@ group = "org.churchpresenter"
 // in this file -- see "JaCoCo lives in the root build" in AGENT.md. `songlibrary/ui/**` is Compose
 // desktop that needs a display, the same carve-out :converter makes; `SongLibraryState` is the part
 // with the decisions in it and is deliberately NOT under `ui/` so that this exclude can be honest.
-extra["coverageExcludes"] = listOf("songlibrary/ui/**", "songlibrary/MainKt*", "**/ComposableSingletons*")
+extra["coverageExcludes"] =
+    // `generated/resources` is the Compose resource accessor the build writes from
+    // `composeResources/values*/strings.xml`: one method per string per locale, 34 locales,
+    // and nothing in it is this module's code to test.
+    listOf(
+        "songlibrary/ui/**",
+        "songlibrary/MainKt*",
+        "songlibrary/generated/**",
+        "**/ComposableSingletons*",
+    )
 
 kotlin {
     jvmToolchain(21)
@@ -49,13 +58,14 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-// Same rules as the app's gate, on this module's own sources, and no baseline: what is analysed
-// here has to come out clean. `ui/**` is Compose desktop that needs a display; the state it draws
-// is the part with the logic, and that is analysed and covered.
+// Same rules as the app's gate, on every source file this module has, and no baseline: what is
+// written here has to come out clean. Detekt is static analysis, so the Compose UI is analysed
+// like the rest -- needing a display is a reason to exclude `ui/**` from the *coverage* floor
+// above, not from this.
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin/songlibrary/SongLibraryState.kt", "src/test/kotlin")
+    source.setFrom("src/main/kotlin", "src/test/kotlin")
     parallel = true
 }
 

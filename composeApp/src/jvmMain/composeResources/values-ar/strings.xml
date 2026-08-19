@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">تم حفظ معلومات التشخيص بنجاح.</string>
     <string name="diagnostic_info_save_failed">فشل حفظ معلومات التشخيص.</string>
     <string name="open_converter">المحوّل</string>
+    <string name="open_song_library">مدير مكتبة الترانيم</string>
     <string name="report_bug">الإبلاغ عن خطأ</string>
     <string name="submit_feature_request">طلب ميزة</string>
     <string name="action_ok">موافق</string>

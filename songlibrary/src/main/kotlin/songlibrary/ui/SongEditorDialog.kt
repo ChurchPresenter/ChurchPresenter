@@ -72,7 +72,11 @@ fun SongEditorDialog(request: SongEditorRequest) {
                     Field(stringResource(Res.string.editor_song_title), draft.title, Modifier.weight(2f)) {
                         draft = draft.copy(title = it)
                     }
-                    Field(stringResource(Res.string.editor_secondary_title), draft.secondaryTitle, Modifier.weight(2f)) {
+                    Field(
+                        stringResource(Res.string.editor_secondary_title),
+                        draft.secondaryTitle,
+                        Modifier.weight(2f),
+                    ) {
                         draft = draft.copy(secondaryTitle = it)
                     }
                     Field(stringResource(Res.string.editor_number), draft.number, Modifier.weight(1f)) {
@@ -170,7 +174,10 @@ private fun SongbookField(
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            DropdownMenuItem(text = { Text(stringResource(Res.string.no_song_book)) }, onClick = { onPick(""); open = false })
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.no_song_book)) },
+                onClick = { onPick(""); open = false },
+            )
             songbooks.forEach { book ->
                 DropdownMenuItem(
                     text = { Text(book, maxLines = 1, overflow = TextOverflow.Ellipsis) },

@@ -97,7 +97,9 @@ fun LibraryDialog(
                 horizontalArrangement = Arrangement.spacedBy(11.dp),
             ) {
                 Box(
-                    Modifier.size(30.dp).clip(RoundedCornerShape(8.dp)).background(scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA)),
+                    Modifier.size(30.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(icon, null, tint = scheme.primary, modifier = Modifier.size(15.dp))
@@ -166,7 +168,11 @@ fun NewSongBookDialog(
             PrimaryButton(stringResource(Res.string.create), onClick = { onCreate(trimmed, assign) }, enabled = valid)
         },
     ) {
-        Text(stringResource(Res.string.name).uppercase(), style = LibraryType.columnHead, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
+        Text(
+            stringResource(Res.string.name).uppercase(),
+            style = LibraryType.columnHead,
+            color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+        )
         Spacer(Modifier.height(6.dp))
         Box(
             Modifier.fillMaxWidth()
@@ -202,7 +208,11 @@ fun NewSongBookDialog(
                 Modifier.fillMaxWidth()
                     .clip(RoundedCornerShape(LibraryMetrics.radius))
                     .background(scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA))
-                    .border(1.dp, scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA), RoundedCornerShape(LibraryMetrics.radius))
+                    .border(
+                        1.dp,
+                        scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA),
+                        RoundedCornerShape(LibraryMetrics.radius),
+                    )
                     .clickable { assign = !assign }
                     .padding(horizontal = 11.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -261,7 +271,11 @@ fun BatchEditDialog(
             )
         },
     ) {
-        Text(stringResource(Res.string.batch_edit_hint), style = LibraryType.small, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
+        Text(
+            stringResource(Res.string.batch_edit_hint),
+            style = LibraryType.small,
+            color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+        )
         Spacer(Modifier.height(4.dp))
         fields.forEach { field ->
             val on = ticked[field] == true
@@ -296,7 +310,12 @@ fun BatchEditDialog(
                             .height(32.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .background(if (on) scheme.background else scheme.surfaceContainer)
-                            .border(1.dp, if (on) scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA) else scheme.onSurface.copy(alpha = HAIRLINE_ALPHA), RoundedCornerShape(8.dp))
+                            .border(
+                                1.dp,
+                                if (on) scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA)
+                                else scheme.onSurface.copy(alpha = HAIRLINE_ALPHA),
+                                RoundedCornerShape(8.dp),
+                            )
                             .padding(horizontal = 10.dp),
                         contentAlignment = Alignment.CenterStart,
                     ) {
@@ -325,7 +344,12 @@ private fun BatchSongbookField(
                 .height(32.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(if (enabled) scheme.background else scheme.surfaceContainer)
-                .border(1.dp, if (enabled) scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA) else scheme.onSurface.copy(alpha = HAIRLINE_ALPHA), RoundedCornerShape(8.dp))
+                .border(
+                    1.dp,
+                    if (enabled) scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA)
+                    else scheme.onSurface.copy(alpha = HAIRLINE_ALPHA),
+                    RoundedCornerShape(8.dp),
+                )
                 .clickable(enabled = enabled) { open = true }
                 .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -339,7 +363,12 @@ private fun BatchSongbookField(
                 modifier = Modifier.weight(1f, fill = false),
             )
             Spacer(Modifier.weight(1f))
-            Icon(Icons.Default.ArrowDropDown, null, tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA), modifier = Modifier.size(13.dp))
+            Icon(
+                Icons.Default.ArrowDropDown,
+                null,
+                tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+                modifier = Modifier.size(13.dp),
+            )
         }
         if (open) {
             LibraryPopup(width = 260.dp, maxHeight = menuMaxHeight, onDismiss = { open = false }) {
@@ -379,7 +408,13 @@ fun DeleteConfirmDialog(songs: List<SongItem>, onDismiss: () -> Unit, onConfirm:
         },
     ) {
         songs.take(DELETE_PREVIEW).forEach { song ->
-            Text(song.title, style = LibraryType.body, color = scheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                song.title,
+                style = LibraryType.body,
+                color = scheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
         if (songs.size > DELETE_PREVIEW) {
             Text(

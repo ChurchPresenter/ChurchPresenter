@@ -351,6 +351,25 @@
     <string name="language_romanian">Румын</string>
     <string name="language_slovak">Словак</string>
     <string name="language_estonian">Эстон тілі</string>
+    <string name="language_latvian">Латыш</string>
+    <string name="language_croatian">Хорват</string>
+    <string name="language_swedish">Швед</string>
+    <string name="language_norwegian">Норвег</string>
+    <string name="language_finnish">Фин</string>
+    <string name="language_turkish">Түрік</string>
+    <string name="language_uzbek">Өзбек</string>
+    <string name="language_arabic">Араб</string>
+    <string name="language_persian">Парсы</string>
+    <string name="language_hindi">Хинди</string>
+    <string name="language_nepali">Непал</string>
+    <string name="language_thai">Тай</string>
+    <string name="language_lao">Лаос</string>
+    <string name="language_japanese">Жапон</string>
+    <string name="language_chinese">Қытай (жеңілдетілген)</string>
+    <string name="language_indonesian">Индонезия</string>
+    <string name="language_malay">Малай</string>
+    <string name="language_tagalog">Тагал</string>
+    <string name="language_swahili">Суахили</string>
 
     <!-- Search Results -->
     <string name="no_results_found">"%1$s" үшін нәтижелер табылмады</string>
@@ -843,6 +862,10 @@
     <string name="schedule_density_normal">Қалыпты</string>
     <string name="schedule_density_detailed">Толық</string>
     <string name="schedule_kind_lower_third">Төменгі үштен бір</string>
+    <string name="tooltip_schedule_options">Бағдарлама параметрлері</string>
+    <string name="schedule_show_buttons_under_title">Түймелерді атаудың астында көрсету</string>
+    <string name="schedule_option_item_count">Элементтер саны</string>
+    <string name="schedule_option_zoom">Масштаб басқаруы</string>
     <string name="schedule_drop_hint">Бағдарламаға қосу үшін файлдарды осында сүйреңіз</string>
     <string name="schedule_note_placeholder">Ескертпе қосу…</string>
     <string name="screen_number">Экран %1$d</string>
@@ -941,6 +964,18 @@
     <string name="statistics_exported_error">Статистиканы экспорттау сәтсіз аяқталды.</string>
     <string name="file_chooser_save_statistics">Статистиканы сақтау</string>
     <string name="file_filter_xls">Excel кестесі (*.xls)</string>
+    <string name="stats_period_label">Кезең:</string>
+    <string name="stats_period_all_time">Бүкіл уақыт</string>
+    <string name="stats_period_last_3_months">Соңғы 3 ай</string>
+    <string name="stats_period_last_6_months">Соңғы 6 ай</string>
+    <string name="stats_period_last_12_months">Соңғы 12 ай</string>
+    <string name="stats_period_year">Жыл</string>
+    <string name="stats_filter_all_songbooks">Барлық жинақтар</string>
+    <string name="stats_filter_all_bibles">Барлық аудармалар</string>
+    <string name="stats_period_custom">таңдалған күндер</string>
+    <string name="stats_clear_item">Статистикадан жою</string>
+    <string name="stats_clear_item_confirm">%1$s %2$s кезеңінің статистикасынан жойылсын ба? Мұны қайтару мүмкін емес.</string>
+    <string name="stats_clear_all_confirm">Бүкіл статистика тазартылсын ба? Бұл CCLI есебі құрылатын көрсету тарихын да жояды. Мұны қайтару мүмкін емес.</string>
 
     <!-- Remote API / Companion Server (added) -->
     <string name="auto_fit_button_tooltip">Ағымдағы аят үшін оңтайлы қаріп өлшемін есептеу</string>
@@ -1662,6 +1697,7 @@
     <string name="media_vlc_arch_mismatch">VLC архитектурасы сәйкес емес. Сіздің Mac Apple Silicon (arm64) пайдаланады, бірақ орнатылған VLC тек Intel (x86_64) үшін. videolan.org сайтынан Apple Silicon нұсқасын жүктеп, қайта іске қосыңыз.</string>
     <string name="media_vlc_load_failed">VLC табылды, бірақ жүктелмеді. VLC бағдарламасын videolan.org сайтынан қайта орнатып көріңіз (Windows жүйесінде Microsoft Visual C++ Redistributable де орнатыңыз), содан кейін қолданбаны қайта іске қосыңыз.</string>
     <string name="open_converter">Конвертер</string>
+    <string name="open_song_library">Әндер жинағының менеджері</string>
     <string name="projection_content_web">Веб</string>
     <string name="projection_content_background">Фон</string>
     <string name="projection_content_lt_background">Төменгі үштен бір фоны</string>

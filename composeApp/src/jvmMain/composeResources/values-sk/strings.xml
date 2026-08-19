@@ -103,6 +103,7 @@
     <string name="about_copyright">© %1$s Church Presenter</string>
     <string name="open_crash_logs">Otvoriť protokoly zlyhaní</string>
     <string name="open_converter">Konvertor</string>
+    <string name="open_song_library">Správca knižnice piesní</string>
     <string name="report_bug">Nahlásiť chybu</string>
     <string name="submit_feature_request">Navrhnúť funkciu</string>
     <string name="action_ok">OK</string>
@@ -540,6 +541,10 @@
     <string name="schedule_density_normal">Normálne</string>
     <string name="schedule_density_detailed">Podrobné</string>
     <string name="schedule_kind_lower_third">Lower Third</string>
+    <string name="tooltip_schedule_options">Možnosti programu</string>
+    <string name="schedule_show_buttons_under_title">Zobraziť tlačidlá pod názvom</string>
+    <string name="schedule_option_item_count">Počet položiek</string>
+    <string name="schedule_option_zoom">Ovládanie priblíženia</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Pridať štítok</string>
@@ -1204,6 +1209,18 @@
     <string name="statistics_exported_error">Export štatistík zlyhal.</string>
     <string name="file_chooser_save_statistics">Uložiť štatistiky ako</string>
     <string name="file_filter_xls">Excel tabuľka (*.xls)</string>
+    <string name="stats_period_label">Obdobie:</string>
+    <string name="stats_period_all_time">Celé obdobie</string>
+    <string name="stats_period_last_3_months">Posledné 3 mesiace</string>
+    <string name="stats_period_last_6_months">Posledných 6 mesiacov</string>
+    <string name="stats_period_last_12_months">Posledných 12 mesiacov</string>
+    <string name="stats_period_year">Rok</string>
+    <string name="stats_filter_all_songbooks">Všetky spevníky</string>
+    <string name="stats_filter_all_bibles">Všetky Biblie</string>
+    <string name="stats_period_custom">vybraté dátumy</string>
+    <string name="stats_clear_item">Odstrániť zo štatistík</string>
+    <string name="stats_clear_item_confirm">Odstrániť %1$s zo štatistík za %2$s? Túto akciu nemožno vrátiť späť.</string>
+    <string name="stats_clear_all_confirm">Vymazať všetky štatistiky? Odstráni sa tým aj história zobrazení, z ktorej sa zostavuje správa CCLI. Túto akciu nemožno vrátiť späť.</string>
 
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Pridať do programu</string>
@@ -1725,6 +1742,25 @@
     <string name="language_dutch">Holandčina</string>
     <string name="language_slovak">Slovenčina</string>
     <string name="language_estonian">Estónčina</string>
+    <string name="language_latvian">Lotyština</string>
+    <string name="language_croatian">Chorvátčina</string>
+    <string name="language_swedish">Švédčina</string>
+    <string name="language_norwegian">Nórčina</string>
+    <string name="language_finnish">Fínčina</string>
+    <string name="language_turkish">Turečtina</string>
+    <string name="language_uzbek">Uzbečtina</string>
+    <string name="language_arabic">Arabčina</string>
+    <string name="language_persian">Perzština</string>
+    <string name="language_hindi">Hindčina</string>
+    <string name="language_nepali">Nepálčina</string>
+    <string name="language_thai">Thajčina</string>
+    <string name="language_lao">Laoština</string>
+    <string name="language_japanese">Japončina</string>
+    <string name="language_chinese">Čínština (zjednodušená)</string>
+    <string name="language_indonesian">Indonézština</string>
+    <string name="language_malay">Malajčina</string>
+    <string name="language_tagalog">Tagalog</string>
+    <string name="language_swahili">Svahilčina</string>
     <string name="tab_dictionary">Slovník</string>
     <string name="dictionary_search_hint">Hľadať podľa čísla, slova alebo definície…</string>
     <string name="dictionary_filter_all">Všetko</string>

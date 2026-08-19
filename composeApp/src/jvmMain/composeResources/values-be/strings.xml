@@ -351,6 +351,25 @@
     <string name="language_romanian">Румынская</string>
     <string name="language_slovak">Славацкая</string>
     <string name="language_estonian">Эстонская</string>
+    <string name="language_latvian">Латышская</string>
+    <string name="language_croatian">Харвацкая</string>
+    <string name="language_swedish">Шведская</string>
+    <string name="language_norwegian">Нарвежская</string>
+    <string name="language_finnish">Фінская</string>
+    <string name="language_turkish">Турэцкая</string>
+    <string name="language_uzbek">Узбекская</string>
+    <string name="language_arabic">Арабская</string>
+    <string name="language_persian">Персідская</string>
+    <string name="language_hindi">Хіндзі</string>
+    <string name="language_nepali">Непальская</string>
+    <string name="language_thai">Тайская</string>
+    <string name="language_lao">Лаоская</string>
+    <string name="language_japanese">Японская</string>
+    <string name="language_chinese">Кітайская (спрошчаная)</string>
+    <string name="language_indonesian">Інданезійская</string>
+    <string name="language_malay">Малайская</string>
+    <string name="language_tagalog">Тагальская</string>
+    <string name="language_swahili">Суахілі</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Вынікі не знойдзены для "%1$s"</string>
@@ -843,6 +862,10 @@
     <string name="schedule_density_normal">Звычайны</string>
     <string name="schedule_density_detailed">Падрабязны</string>
     <string name="schedule_kind_lower_third">Ніжняя траціна</string>
+    <string name="tooltip_schedule_options">Налады праграмы</string>
+    <string name="schedule_show_buttons_under_title">Паказваць кнопкі пад назвай</string>
+    <string name="schedule_option_item_count">Колькасць элементаў</string>
+    <string name="schedule_option_zoom">Кіраванне маштабам</string>
     <string name="schedule_drop_hint">Перацягніце файлы сюды, каб дадаць у праграму</string>
     <string name="schedule_note_placeholder">Дадаць нататку…</string>
     <string name="screen_number">Экран %1$d</string>
@@ -941,6 +964,18 @@
     <string name="statistics_exported_error">Не ўдалося экспартаваць статыстыку.</string>
     <string name="file_chooser_save_statistics">Захаваць статыстыку як</string>
     <string name="file_filter_xls">Электронная табліца Excel (*.xls)</string>
+    <string name="stats_period_label">Перыяд:</string>
+    <string name="stats_period_all_time">За ўвесь час</string>
+    <string name="stats_period_last_3_months">Апошнія 3 месяцы</string>
+    <string name="stats_period_last_6_months">Апошнія 6 месяцаў</string>
+    <string name="stats_period_last_12_months">Апошнія 12 месяцаў</string>
+    <string name="stats_period_year">Год</string>
+    <string name="stats_filter_all_songbooks">Усе зборнікі песень</string>
+    <string name="stats_filter_all_bibles">Усе пераклады Бібліі</string>
+    <string name="stats_period_custom">выбраныя даты</string>
+    <string name="stats_clear_item">Прыбраць са статыстыкі</string>
+    <string name="stats_clear_item_confirm">Прыбраць %1$s са статыстыкі за %2$s? Гэта дзеянне нельга адмяніць.</string>
+    <string name="stats_clear_all_confirm">Ачысціць усю статыстыку? Таксама будзе выдалена гісторыя паказаў, на якой будуецца справаздача CCLI. Гэта дзеянне нельга адмяніць.</string>
 
     <!-- Remote API / Companion Server (added) -->
     <string name="auto_fit_button_tooltip">Вылічыць аптымальны памер шрыфта для бягучага верша</string>
@@ -1662,6 +1697,7 @@
     <string name="media_vlc_arch_mismatch">Няправільная архітэктура VLC. Ваш Mac выкарыстоўвае Apple Silicon (arm64), а ўсталяваны VLC падтрымлівае толькі Intel (x86_64). Спампуйце версію VLC для Apple Silicon з сайта videolan.org і перазапусціце праграму.</string>
     <string name="media_vlc_load_failed">VLC знойдзены, але не ўдалося загрузіць. Паспрабуйце пераўсталяваць VLC з videolan.org (у Windows таксама ўсталюйце Microsoft Visual C++ Redistributable), потым перазапусціце праграму.</string>
     <string name="open_converter">Канвертар</string>
+    <string name="open_song_library">Менеджер зборніка песень</string>
     <string name="projection_content_web">Веб</string>
     <string name="projection_content_background">Фон</string>
     <string name="projection_content_lt_background">Фон ніжняй трэці</string>

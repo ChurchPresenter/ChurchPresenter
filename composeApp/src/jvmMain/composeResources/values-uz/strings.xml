@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">Diagnostika maʼlumotlari saqlandi.</string>
     <string name="diagnostic_info_save_failed">Diagnostika maʼlumotlarini saqlab boʻlmadi.</string>
     <string name="open_converter">Konvertor</string>
+    <string name="open_song_library">Qoʻshiq kutubxonasi menejeri</string>
     <string name="report_bug">Xato haqida xabar berish</string>
     <string name="submit_feature_request">Taklif yuborish</string>
     <string name="action_ok">OK</string>

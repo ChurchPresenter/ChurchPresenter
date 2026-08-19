@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">Maklumat diagnostik berjaya disimpan.</string>
     <string name="diagnostic_info_save_failed">Gagal menyimpan maklumat diagnostik.</string>
     <string name="open_converter">Penukar</string>
+    <string name="open_song_library">Pengurus Pustaka Lagu</string>
     <string name="report_bug">Laporkan Pepijat</string>
     <string name="submit_feature_request">Permintaan Ciri</string>
     <string name="action_ok">OK</string>

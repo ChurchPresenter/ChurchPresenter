@@ -103,6 +103,7 @@
     <string name="about_copyright">© %1$s Church Presenter</string>
     <string name="open_crash_logs">Ouvrir les journaux d'erreurs</string>
     <string name="open_converter">Convertisseur</string>
+    <string name="open_song_library">Gestionnaire de la bibliothèque de cantiques</string>
     <string name="report_bug">Signaler un bogue</string>
     <string name="submit_feature_request">Soumettre une demande de fonctionnalité</string>
     <string name="action_ok">OK</string>
@@ -540,6 +541,10 @@
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Détaillé</string>
     <string name="schedule_kind_lower_third">Bandeau inférieur</string>
+    <string name="tooltip_schedule_options">Options du programme</string>
+    <string name="schedule_show_buttons_under_title">Afficher les boutons sous le titre</string>
+    <string name="schedule_option_item_count">Nombre d’éléments</string>
+    <string name="schedule_option_zoom">Commandes de zoom</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Ajouter une étiquette</string>
@@ -1204,6 +1209,18 @@
     <string name="statistics_exported_error">Échec de l'exportation des statistiques.</string>
     <string name="file_chooser_save_statistics">Enregistrer les statistiques sous</string>
     <string name="file_filter_xls">Tableur Excel (*.xls)</string>
+    <string name="stats_period_label">Période :</string>
+    <string name="stats_period_all_time">Depuis le début</string>
+    <string name="stats_period_last_3_months">3 derniers mois</string>
+    <string name="stats_period_last_6_months">6 derniers mois</string>
+    <string name="stats_period_last_12_months">12 derniers mois</string>
+    <string name="stats_period_year">Année</string>
+    <string name="stats_filter_all_songbooks">Tous les recueils</string>
+    <string name="stats_filter_all_bibles">Toutes les Bibles</string>
+    <string name="stats_period_custom">les dates sélectionnées</string>
+    <string name="stats_clear_item">Retirer des statistiques</string>
+    <string name="stats_clear_item_confirm">Retirer %1$s des statistiques pour %2$s ? Cette action est irréversible.</string>
+    <string name="stats_clear_all_confirm">Effacer toutes les statistiques ? L’historique de diffusion sur lequel repose le rapport CCLI est également supprimé. Cette action est irréversible.</string>
 
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Ajouter au programme</string>
@@ -1725,6 +1742,25 @@
     <string name="language_dutch">Néerlandais</string>
     <string name="language_slovak">Slovaque</string>
     <string name="language_estonian">Estonien</string>
+    <string name="language_latvian">Letton</string>
+    <string name="language_croatian">Croate</string>
+    <string name="language_swedish">Suédois</string>
+    <string name="language_norwegian">Norvégien</string>
+    <string name="language_finnish">Finnois</string>
+    <string name="language_turkish">Turc</string>
+    <string name="language_uzbek">Ouzbek</string>
+    <string name="language_arabic">Arabe</string>
+    <string name="language_persian">Persan</string>
+    <string name="language_hindi">Hindi</string>
+    <string name="language_nepali">Népalais</string>
+    <string name="language_thai">Thaï</string>
+    <string name="language_lao">Lao</string>
+    <string name="language_japanese">Japonais</string>
+    <string name="language_chinese">Chinois (simplifié)</string>
+    <string name="language_indonesian">Indonésien</string>
+    <string name="language_malay">Malais</string>
+    <string name="language_tagalog">Tagalog</string>
+    <string name="language_swahili">Swahili</string>
     <string name="tab_dictionary">Dictionnaire</string>
     <string name="dictionary_search_hint">Rechercher par numéro, mot ou définition…</string>
     <string name="dictionary_filter_all">Tout</string>

@@ -70,7 +70,13 @@ fun PlainTextField(
     val scheme = MaterialTheme.colorScheme
     Box(modifier, contentAlignment = Alignment.CenterStart) {
         if (value.isEmpty() && placeholder.isNotEmpty()) {
-            Text(placeholder, style = style, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                placeholder,
+                style = style,
+                color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
         BasicTextField(
             value = value,
@@ -128,7 +134,12 @@ fun LibraryDropdown(
                 modifier = Modifier.weight(1f, fill = false),
             )
             Spacer(Modifier.width(8.dp))
-            Icon(Icons.Default.ArrowDropDown, null, tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA), modifier = Modifier.size(14.dp))
+            Icon(
+                Icons.Default.ArrowDropDown,
+                null,
+                tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+                modifier = Modifier.size(14.dp),
+            )
         }
         if (open) {
             LibraryPopup(width = menuWidth, maxHeight = menuMaxHeight, onDismiss = { open = false }) {
@@ -238,14 +249,23 @@ fun MenuRow(
         Spacer(Modifier.width(8.dp))
         when {
             trailing != null -> trailing()
-            count != null -> Text(count.toString(), style = LibraryType.small, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
+            count != null -> Text(
+                count.toString(),
+                style = LibraryType.small,
+                color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+            )
         }
     }
 }
 
 @Composable
 fun MenuDivider() {
-    Box(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 4.dp).height(1.dp).background(MaterialTheme.colorScheme.outlineVariant))
+    Box(
+        Modifier.fillMaxWidth()
+            .padding(horizontal = 6.dp, vertical = 4.dp)
+            .height(1.dp)
+            .background(MaterialTheme.colorScheme.outlineVariant)
+    )
 }
 
 /** The alphas the recessive chrome is built from, over whatever the scheme's own text colour is. */
@@ -291,7 +311,11 @@ fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true, i
             icon()
             Box(Modifier.size(7.dp))
         }
-        Text(label, style = LibraryType.button, color = if (enabled) scheme.onPrimary else scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
+        Text(
+            label,
+            style = LibraryType.button,
+            color = if (enabled) scheme.onPrimary else scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+        )
     }
 }
 
@@ -341,13 +365,31 @@ fun LibraryCheckbox(checked: Boolean, indeterminate: Boolean = false, onToggle: 
         Modifier.size(15.dp)
             .clip(RoundedCornerShape(4.dp))
             .background(if (checked || indeterminate) scheme.primary else Color.Transparent)
-            .border(1.5.dp, if (checked || indeterminate) scheme.primary else scheme.outlineVariant, RoundedCornerShape(4.dp))
+            .border(
+                1.5.dp,
+                if (checked || indeterminate) scheme.primary else scheme.outlineVariant,
+                RoundedCornerShape(4.dp),
+            )
             .then(if (onToggle != null) Modifier.clickable(onClick = onToggle) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
         when {
-            checked -> Icon(Icons.Default.Check, contentDescription = null, tint = scheme.onPrimary, modifier = Modifier.size(11.dp))
+            checked -> Icon(
+                Icons.Default.Check,
+                contentDescription = null,
+                tint = scheme.onPrimary,
+                modifier = Modifier.size(11.dp),
+            )
             indeterminate -> Box(Modifier.width(7.dp).height(2.dp).background(scheme.onPrimary))
         }
     }
+}
+
+@Composable
+internal fun Hairline() {
+    Box(
+        Modifier.fillMaxWidth()
+            .height(1.dp)
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = HAIRLINE_ALPHA))
+    )
 }

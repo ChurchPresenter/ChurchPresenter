@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">ບັນທຶກຂໍ້ມູນວິນິດໄສສຳເລັດແລ້ວ.</string>
     <string name="diagnostic_info_save_failed">ບັນທຶກຂໍ້ມູນວິນິດໄສບໍ່ສຳເລັດ.</string>
     <string name="open_converter">ຕົວແປງໄຟລ໌</string>
+    <string name="open_song_library">ຕົວຈັດການຄັງເພງ</string>
     <string name="report_bug">ລາຍງານບັນຫາ</string>
     <string name="submit_feature_request">ຂໍຟັງຊັນໃໝ່</string>
     <string name="action_ok">ຕົກລົງ</string>

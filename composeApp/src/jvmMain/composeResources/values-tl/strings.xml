@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">Matagumpay na nai-save ang diagnostic info.</string>
     <string name="diagnostic_info_save_failed">Hindi nai-save ang diagnostic info.</string>
     <string name="open_converter">Converter</string>
+    <string name="open_song_library">Tagapamahala ng Aklatan ng Awit</string>
     <string name="report_bug">Mag-report ng Bug</string>
     <string name="submit_feature_request">Feature Request</string>
     <string name="action_ok">OK</string>

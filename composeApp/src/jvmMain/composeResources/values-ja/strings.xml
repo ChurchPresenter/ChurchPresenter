@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">診断情報を保存しました。</string>
     <string name="diagnostic_info_save_failed">診断情報を保存できませんでした。</string>
     <string name="open_converter">コンバーター</string>
+    <string name="open_song_library">賛美歌ライブラリ管理</string>
     <string name="report_bug">不具合を報告</string>
     <string name="submit_feature_request">機能のご要望</string>
     <string name="action_ok">OK</string>

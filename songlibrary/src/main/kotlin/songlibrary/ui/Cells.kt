@@ -69,7 +69,8 @@ fun EditableCell(value: String, strong: Boolean = false, onCommit: (String) -> U
             Text(
                 value,
                 style = if (strong) LibraryType.bodyStrong else LibraryType.body,
-                color = if (value.isBlank()) scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA) else scheme.onSurface,
+                color =
+                    if (value.isBlank()) scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA) else scheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -151,13 +152,19 @@ fun SongbookCell(
             Text(
                 value.ifBlank { stringResource(Res.string.no_song_book) },
                 style = LibraryType.body,
-                color = if (value.isBlank()) scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA) else scheme.onSurface,
+                color =
+                    if (value.isBlank()) scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA) else scheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
             )
             Box(Modifier.weight(1f))
-            Icon(Icons.Default.ArrowDropDown, null, tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA), modifier = Modifier.size(13.dp))
+            Icon(
+                Icons.Default.ArrowDropDown,
+                null,
+                tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+                modifier = Modifier.size(13.dp),
+            )
         }
         if (open) {
             LibraryPopup(width = 250.dp, maxHeight = menuMaxHeight, onDismiss = { open = false }) {
