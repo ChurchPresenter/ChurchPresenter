@@ -8,10 +8,13 @@ plugins {
 
 group = "presentation.engine"
 
+// Only branch and complexity still fall short of the root build's 85% default — a parser and a
+// rasterizer are dense with per-format special cases, and the last of those need real documents to
+// reach. Both are the measured value rounded down: a ratchet, raised as tests are added, never
+// lowered to make a change fit, and deleted outright once a counter clears 85%.
 extra["coverageFloors"] = mapOf(
-    "INSTRUCTION" to "0.80",
-    "BRANCH" to "0.65",
-    "COMPLEXITY" to "0.60",
+    "BRANCH" to "0.77",
+    "COMPLEXITY" to "0.71",
 )
 
 extra["coverageExcludes"] =

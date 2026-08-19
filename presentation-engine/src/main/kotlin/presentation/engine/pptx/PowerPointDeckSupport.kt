@@ -120,8 +120,13 @@ internal object PowerPointDeckSupport {
                     resolveLayers = layerResolver(slide, layers)
                 ).compile(TimingParser.parse(slide))
                 if (compiled == null) {
-                    // Targets existed but nothing usable compiled — no point keeping layers.
-                    layers = null
+                    // Nothing usable compiled. A video layer still needs its own identity even
+                    // with no animation driving it — the app finds it there to drive playback —
+                    // so only fall back to the flattened static composite when there isn't one.
+                    // (KeynoteDeckSupport's native path makes the same exception, for the same
+                    // reason; without this a slide holding only an unanimated video loses the
+                    // layer the planner deliberately created for it.)
+                    if (layers.none { it is LayerSpec.Media }) layers = null
                 } else {
                     timeline = compiled.timeline
                     compiled.warnings.forEach { warnings.add("Slide ${slideIndex + 1}: $it") }

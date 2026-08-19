@@ -65,6 +65,10 @@ internal object KeynoteBuildMapper {
             val drawableId = build.message(F.BUILD_DRAWABLE)?.varint(F.REFERENCE_IDENTIFIER) ?: continue
             val anim = build.message(F.BUILD_ATTRIBUTES)?.message(F.BUILD_ATTRS_ANIMATION)
             val effect = anim?.string(F.ANIM_ATTRS_EFFECT) ?: ""
+            // Matched case-insensitively, as mapEffect matches the same string: the role check
+            // deciding a movie build is an entrance is what leaves the video area blank until the
+            // first click, and a capitalised effect name must not reintroduce that.
+            val effectKey = effect.lowercase()
             val animationType = anim?.string(F.ANIM_ATTRS_TYPE)?.lowercase() ?: ""
             val role = when {
                 // Movie start/pause/stop builds are Keynote "actions," not entrances — the
@@ -73,7 +77,7 @@ internal object KeynoteBuildMapper {
                 // must be special-cased ahead of that check or the layer would incorrectly stay
                 // hidden until the click (validated hands-on: a movie build classified as
                 // ENTRANCE left the video area blank until the first click).
-                effect.contains("movie") -> EffectSpec.Role.EMPHASIS
+                effectKey.contains("movie") -> EffectSpec.Role.EMPHASIS
                 animationType.contains("out") -> EffectSpec.Role.EXIT
                 animationType.contains("in") -> EffectSpec.Role.ENTRANCE
                 animationType.contains("action") -> EffectSpec.Role.EMPHASIS
