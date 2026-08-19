@@ -116,7 +116,11 @@ internal fun classify(row: StickyRow): Verdict {
     val exactHit = tokens.firstOrNull { BookResolver.ALIASES[it] == newBook && it.length >= 3 }
     if (exactHit != null) {
         return if (exactHit.length >= 6) Verdict(row, Category.CONFIDENT, "")
-        else Verdict(row, Category.SHORT_ALIAS, "matched a short exact alias \"$exactHit\" — confirm this wasn't ordinary vocabulary")
+        else Verdict(
+            row,
+            Category.SHORT_ALIAS,
+            "matched a short exact alias \"$exactHit\" — confirm this wasn't ordinary vocabulary",
+        )
     }
 
     // Reachable only via the inflection-tolerant stem fallback — measure how far the matched word
@@ -126,7 +130,8 @@ internal fun classify(row: StickyRow): Verdict {
         val extension = extensionOverBestStem(stemToken, newBook)
         return if (extension >= 3) {
             Verdict(row, Category.STEM_OVEREXTENSION,
-                "\"$stemToken\" extends ${extension} chars past its matched book alias's stem — confirm this wasn't an unrelated word")
+                "\"$stemToken\" extends ${extension} chars past its matched book alias's stem — " +
+                    "confirm this wasn't an unrelated word")
         } else {
             Verdict(row, Category.CONFIDENT, "")
         }
@@ -229,7 +234,10 @@ private fun printReport(path: String, verdicts: List<Verdict>) {
         stemOverext.forEach(::printRow)
         println()
     }
-    println("CONFIDENT (${confident.size}) — resolved via an explicit/long alias or a normal grammatical ending, no review needed.")
+    println(
+        "CONFIDENT (${confident.size}) — resolved via an explicit/long alias or a normal " +
+            "grammatical ending, no review needed."
+    )
     if (other.isNotEmpty()) {
         println("OTHER (${other.size}) — same book, or a book-only prime with no change of note.")
     }

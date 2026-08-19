@@ -641,7 +641,8 @@ object ReferenceWatcher {
                 recent.clear()
             }
             emit(curBook, chapter, verseStart, verseEnd, keywordSeen, sticky, now, out)
-            chapter = null; verseStart = null; verseEnd = null; keywordSeen = false; colonSeen = false; rangeArmed = false
+            chapter = null; verseStart = null; verseEnd = null
+            keywordSeen = false; colonSeen = false; rangeArmed = false
             fromMark = null
             pendingChapKw = false; pendingVerseKw = false
         }
@@ -693,7 +694,9 @@ object ReferenceWatcher {
                 is Atom.ListSep -> { /* keep recent; lists don't form ranges */ }
                 is Atom.Num -> when {
                     pendingChapKw -> { chapter = a.value; pendingChapKw = false; rangeArmed = false }
-                    pendingVerseKw && verseStart == null -> { verseStart = a.value; pendingVerseKw = false; rangeArmed = false }
+                    pendingVerseKw && verseStart == null -> {
+                        verseStart = a.value; pendingVerseKw = false; rangeArmed = false
+                    }
                     else -> { recent.add(a.value to rangeArmed); rangeArmed = false }
                 }
                 is Atom.Filler -> {
