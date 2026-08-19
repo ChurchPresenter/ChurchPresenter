@@ -42,16 +42,16 @@ and a rasterizer, some of it reachable only through real decks, and its output i
 floors in `build.gradle.kts` are its measured coverage rounded down —
 
 ```
-INSTRUCTION 0.70   BRANCH 0.55   LINE 0.80   COMPLEXITY 0.50   METHOD 0.84   CLASS 0.90
+INSTRUCTION 0.80   BRANCH 0.65   LINE 0.85   COMPLEXITY 0.60   METHOD 0.89   CLASS 0.95
 ```
 
 — a **ratchet, not a target**: raise one as tests are added, never lower one to make a change fit.
 `extra["coverageExcludes"]` drops `**/ui/**`, `**/MainKt*` and the CLI diagnostics (`**/*Dump*`,
 `**/MakeSampleDeck*`).
 
-**Where the remaining gap is**, in rough order of size: `KeynoteSceneRasterizer` (drawing real
-drawables), `KeynoteDeckParser`'s style/fill/text-attribute branches, `KeynoteBuildMapper`, and
-`SlideFontRegistry`'s system-font scan. Everything else is covered: timeline evaluation and
+**Where the remaining gap is**, in rough order of size: `KeynoteDeckParser`'s path/character-style
+branches, `KeynoteSceneRasterizer`'s text layout, `SlideFontRegistry`'s system-font scan (it walks
+the machine's real font directories) and `PptxSlideRasterizer`'s per-run fill handling. Everything else is covered: timeline evaluation and
 compilation, the `<p:timing>` parser, the preset catalog end to end, motion paths, the disk cache,
 the loaders and both Keynote container forms. A new effect, a new preset id or a new timing
 behavior has no excuse for arriving untested — `Fixtures` builds PPTX, PDF and IWA documents

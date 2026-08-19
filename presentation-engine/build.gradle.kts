@@ -16,12 +16,12 @@ group = "presentation.engine"
 // a change fit. The gap left is concentrated in the Keynote parser/rasterizer and the loaders;
 // everything pure (timeline, presets, motion paths, cache) is covered.
 extra["coverageFloors"] = mapOf(
-    "INSTRUCTION" to "0.70",
-    "BRANCH" to "0.55",
-    "LINE" to "0.80",
-    "COMPLEXITY" to "0.50",
-    "METHOD" to "0.84",
-    "CLASS" to "0.90",
+    "INSTRUCTION" to "0.80",
+    "BRANCH" to "0.65",
+    "LINE" to "0.85",
+    "COMPLEXITY" to "0.60",
+    "METHOD" to "0.89",
+    "CLASS" to "0.95",
 )
 
 extra["coverageExcludes"] =
