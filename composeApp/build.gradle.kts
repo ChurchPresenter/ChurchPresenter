@@ -316,6 +316,7 @@ kotlin {
             implementation(projects.companionSatellite)
             implementation(projects.theme)
             implementation(projects.coreModels)
+            implementation(projects.lottieGenerator)
             implementation(libs.kotlinx.coroutines.swing)
             // Sentry crash reporting
             implementation(libs.sentry)
@@ -668,8 +669,6 @@ kotlin {
     sourceSets {
         jvmMain {
             kotlin.srcDir(generateBuildConfig.map { layout.buildDirectory.dir("generated/buildconfig") })
-            // Include LottieGen module source (builds together, launches as separate window)
-            kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/kotlin")
             // Include Bible Lookup Engine (BLE) module source — runs in-process as a WebSocket
             // service started when STT connects.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-BLE/src/main/kotlin")
@@ -677,7 +676,6 @@ kotlin {
             // Keynote decks (static + animated) for PresentationViewModel and CompanionServer.
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/src/main/kotlin")
             // Include module resources (.properties files for localization)
-            resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/resources")
         }
     }
 }
@@ -989,6 +987,10 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         }
     )
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
+
+    onlyIf {
+        gradle.startParameter.taskRequests.none { request -> request.args.any { it == "--tests" } }
+    }
 
     reports {
         html.required.set(true)

@@ -13,27 +13,27 @@ data class RegisterResult(val specFile: File, val registryFile: File)
 /**
  * Writes an exported spec + registry entry straight into the dev's source checkout, so
  * the style ships in the next build with zero code edits (see registry handling in
- * LottieGenerator/StyleCatalog). Only possible when the editor runs from source — in a
+ * lottieGenerator/StyleCatalog). Only possible when the editor runs from source — in a
  * packaged build [locateStylesDir] returns null and the manual export flow remains.
  */
 object BuildRegistrar {
 
-    private const val SUBMODULE_STYLES = "src/main/resources/styles"
-    private const val COMPOSE_APP_STYLES =
-        "src/jvmMain/appResources/common/ChurchPresenter-LottieGen/$SUBMODULE_STYLES"
+    private const val MODULE_STYLES = "src/main/resources/styles"
+    private const val REPO_ROOT_STYLES = "lottieGenerator/$MODULE_STYLES"
 
     /**
      * The source checkout's styles resource dir, or null when not running from source.
      * Probes the working directory and a few ancestors against the known layouts —
-     * standalone submodule run (cwd = submodule root), embedded dev run (gradle sets
-     * cwd = composeApp/), and a repo-root cwd. Requires registry.json to already exist
-     * there so an unrelated directory can never be mistaken for the checkout.
+     * standalone module run (cwd = lottieGenerator/) and a repo-root cwd. An embedded dev
+     * run sets cwd = composeApp/, which the ancestor walk resolves to the repo root.
+     * Requires registry.json to already exist there so an unrelated directory can never be
+     * mistaken for the checkout.
      */
     fun locateStylesDir(): File? {
         var dir: File? = File(System.getProperty("user.dir"))
         repeat(4) {
             val base = dir ?: return null
-            for (relative in listOf(SUBMODULE_STYLES, COMPOSE_APP_STYLES, "composeApp/$COMPOSE_APP_STYLES")) {
+            for (relative in listOf(MODULE_STYLES, REPO_ROOT_STYLES)) {
                 val candidate = File(base, relative)
                 if (candidate.isDirectory && File(candidate, "registry.json").isFile) return candidate
             }
