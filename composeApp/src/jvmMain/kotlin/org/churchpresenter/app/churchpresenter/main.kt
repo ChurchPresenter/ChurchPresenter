@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import core.models.songs.SongItem
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
@@ -73,6 +74,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.CONTACT_TYPE_TESTIMONIAL
 import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
+import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.MemoryMonitorWindow
@@ -648,6 +650,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
     var contactDialogInitialType by remember { mutableStateOf<String?>(null) }
     var showStoryPrompt by remember { mutableStateOf(false) }
     var showConverterWindow by remember { mutableStateOf(false) }
+    var showSongLibraryWindow by remember { mutableStateOf(false) }
     var showLottieGenWindow by remember { mutableStateOf(false) }
     var showStyleEditorWindow by remember { mutableStateOf(false) }
     var showMemoryMonitorWindow by remember { mutableStateOf(false) }
@@ -1126,6 +1129,7 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                     instanceLinkViewModel.connectionStatus.collectAsState().value
                                 ),
                                 onConverter = { showConverterWindow = true },
+                                onSongLibrary = { showSongLibraryWindow = true },
                                 onHelp = {
                                     Desktop.getDesktop()
                                         .browse(URI("https://churchpresenter.org/wiki"))
@@ -1584,6 +1588,16 @@ private fun ApplicationScope.ChurchPresenterApp(coroutineExceptionHandler: Corou
                                 ConverterWindow(
                                     theme = theme,
                                     onClose = { showConverterWindow = false }
+                                )
+                            }
+                            if (showSongLibraryWindow) {
+                                SongLibraryWindow(
+                                    theme = theme,
+                                    songStorageDirectory = appSettings.songSettings.storageDirectory,
+                                    // What it writes lands in the songs folder, which SongsViewModel
+                                    // already watches -- so the list behind this window reloads on
+                                    // its own rather than on close.
+                                    onClose = { showSongLibraryWindow = false }
                                 )
                             }
                             if (showLottieGenWindow) {

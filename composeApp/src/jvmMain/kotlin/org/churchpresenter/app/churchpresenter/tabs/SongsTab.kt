@@ -68,7 +68,7 @@ import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.author
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.SongItem
+import core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem

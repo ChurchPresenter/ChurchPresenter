@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import core.models.songs.SongItem
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

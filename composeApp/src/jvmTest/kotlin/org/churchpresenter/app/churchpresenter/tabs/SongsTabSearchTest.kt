@@ -5,8 +5,8 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.data.SongFileParser
-import org.churchpresenter.app.churchpresenter.data.SongItem
+import core.models.songs.SongFileParser
+import core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File
 import kotlin.test.Test

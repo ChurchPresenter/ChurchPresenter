@@ -18,8 +18,8 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.Dispatchers
-import org.churchpresenter.app.churchpresenter.data.SongFileParser
-import org.churchpresenter.app.churchpresenter.data.SongItem
+import core.models.songs.SongFileParser
+import core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.utils.Constants

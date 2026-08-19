@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">Tanılama bilgileri kaydedildi.</string>
     <string name="diagnostic_info_save_failed">Tanılama bilgileri kaydedilemedi.</string>
     <string name="open_converter">Dönüştürücü</string>
+    <string name="open_song_library">Şarkı Kitaplığı Yöneticisi</string>
     <string name="report_bug">Hata Bildir</string>
     <string name="submit_feature_request">Özellik İsteği</string>
     <string name="action_ok">Tamam</string>

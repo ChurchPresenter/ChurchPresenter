@@ -195,6 +195,25 @@
     <string name="language_romanian">Rumunština</string>
     <string name="language_slovak">Slovenština</string>
     <string name="language_estonian">Estonština</string>
+    <string name="language_latvian">Lotyština</string>
+    <string name="language_croatian">Chorvatština</string>
+    <string name="language_swedish">Švédština</string>
+    <string name="language_norwegian">Norština</string>
+    <string name="language_finnish">Finština</string>
+    <string name="language_turkish">Turečtina</string>
+    <string name="language_uzbek">Uzbečtina</string>
+    <string name="language_arabic">Arabština</string>
+    <string name="language_persian">Perština</string>
+    <string name="language_hindi">Hindština</string>
+    <string name="language_nepali">Nepálština</string>
+    <string name="language_thai">Thajština</string>
+    <string name="language_lao">Laoština</string>
+    <string name="language_japanese">Japonština</string>
+    <string name="language_chinese">Čínština (zjednodušená)</string>
+    <string name="language_indonesian">Indonéština</string>
+    <string name="language_malay">Malajština</string>
+    <string name="language_tagalog">Tagalog</string>
+    <string name="language_swahili">Svahilština</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Pro "%1$s" nebyly nalezeny žádné výsledky</string>
@@ -888,6 +907,10 @@
     <string name="schedule_density_normal">Normální</string>
     <string name="schedule_density_detailed">Podrobný</string>
     <string name="schedule_kind_lower_third">Spodní třetina</string>
+    <string name="tooltip_schedule_options">Možnosti programu</string>
+    <string name="schedule_show_buttons_under_title">Zobrazit tlačítka pod názvem</string>
+    <string name="schedule_option_item_count">Počet položek</string>
+    <string name="schedule_option_zoom">Ovládání přiblížení</string>
     <string name="schedule_drop_hint">Přetáhněte soubory sem pro přidání do programu</string>
     <string name="schedule_note_placeholder">Přidat poznámku…</string>
     <string name="screen_number">Obrazovka %1$d</string>
@@ -989,6 +1012,18 @@
     <string name="statistics_exported_error">Statistiky se nepodařilo exportovat.</string>
     <string name="file_chooser_save_statistics">Uložit statistiky jako</string>
     <string name="file_filter_xls">Tabulka Excel (*.xls)</string>
+    <string name="stats_period_label">Období:</string>
+    <string name="stats_period_all_time">Celá doba</string>
+    <string name="stats_period_last_3_months">Poslední 3 měsíce</string>
+    <string name="stats_period_last_6_months">Posledních 6 měsíců</string>
+    <string name="stats_period_last_12_months">Posledních 12 měsíců</string>
+    <string name="stats_period_year">Rok</string>
+    <string name="stats_filter_all_songbooks">Všechny zpěvníky</string>
+    <string name="stats_filter_all_bibles">Všechny Bible</string>
+    <string name="stats_period_custom">vybraná data</string>
+    <string name="stats_clear_item">Odebrat ze statistik</string>
+    <string name="stats_clear_item_confirm">Odebrat %1$s ze statistik za %2$s? Tuto akci nelze vrátit zpět.</string>
+    <string name="stats_clear_all_confirm">Vymazat všechny statistiky? Odstraní se tím i historie přehrání, ze které se sestavuje zpráva CCLI. Tuto akci nelze vrátit zpět.</string>
 
     <!-- Remote API / Companion Server (added) -->
     <string name="auto_fit_button_tooltip">Vypočítat optimální velikost písma pro aktuální verš</string>
@@ -1712,6 +1747,7 @@
     <string name="media_vlc_arch_mismatch">Špatná architektura VLC. Tvůj Mac používá Apple Silicon (arm64), ale nainstalované VLC je pouze pro Intel (x86_64). Stáhni verzi VLC pro Apple Silicon z videolan.org a restartuj.</string>
     <string name="media_vlc_load_failed">VLC bylo nalezeno, ale nepodařilo se jej načíst. Zkuste VLC přeinstalovat z videolan.org (ve Windows nainstalujte také Microsoft Visual C++ Redistributable) a poté aplikaci restartujte.</string>
     <string name="open_converter">Konvertor</string>
+    <string name="open_song_library">Správce knihovny písní</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Pozadí</string>
     <string name="projection_content_lt_background">Pozadí spodní třetiny</string>

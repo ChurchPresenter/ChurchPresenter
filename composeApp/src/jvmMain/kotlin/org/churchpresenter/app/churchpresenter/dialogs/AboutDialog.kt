@@ -43,6 +43,7 @@ import churchpresenter.composeapp.generated.resources.about_title
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.action_ok
 import churchpresenter.composeapp.generated.resources.converter_window_title
+import churchpresenter.composeapp.generated.resources.open_song_library
 import churchpresenter.composeapp.generated.resources.diagnostic_info_save_failed
 import churchpresenter.composeapp.generated.resources.diagnostic_info_saved
 import churchpresenter.composeapp.generated.resources.lottie_gen_window_title
@@ -61,6 +62,7 @@ import org.churchpresenter.app.churchpresenter.utils.DeviceInfoReport
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.ic_app_icon
+import songlibrary.ui.SongLibraryApp
 import ui.App as ConverterApp
 import ui.Strings as ConverterStrings
 import lottiegen.App as LottieGenApp
@@ -271,6 +273,45 @@ fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
     ) {
         AppThemeWrapper(theme = theme) {
             ConverterApp()
+        }
+    }
+}
+
+/**
+ * The Song Library Manager, in a window of its own beside the converter.
+ *
+ * Its own module, like the converter: it is given the folder the app keeps songs in and edits the
+ * files there directly, so what it writes is what the app reads on its next scan. [onClosed] fires
+ * once the window is gone, which is where the app rescans.
+ */
+@Composable
+fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: () -> Unit) {
+    // No locale plumbing here: the window's strings are Compose resources now, and the app already
+    // sets the JVM default locale when the language changes — which is what picks values-xx.
+    Window(
+        onCloseRequest = onClose,
+        title = stringResource(Res.string.open_song_library),
+        icon = painterResource(Res.drawable.ic_app_icon),
+        state = rememberWindowState(width = 1420.dp, height = 880.dp)
+    ) {
+        AppThemeWrapper(theme = theme) {
+            SongLibraryApp(
+                libraryFolder = File(songStorageDirectory),
+                onClose = onClose,
+                // The row's Edit opens the app's own editor, so a song is edited in one place
+                // whether it was reached from the Songs tab or from here.
+                songEditor = { editing ->
+                    EditSongDialog(
+                        isVisible = true,
+                        song = editing.song,
+                        songbooks = editing.songbooks,
+                        existingSongs = editing.allSongs,
+                        theme = theme,
+                        onDismiss = editing.onDismiss,
+                        onSave = { edited, _ -> editing.onSave(edited) },
+                    )
+                },
+            )
         }
     }
 }

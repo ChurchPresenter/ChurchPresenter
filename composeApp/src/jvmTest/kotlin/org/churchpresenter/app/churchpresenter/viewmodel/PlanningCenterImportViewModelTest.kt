@@ -4,8 +4,8 @@ import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
-import org.churchpresenter.app.churchpresenter.data.SongFileParser
-import org.churchpresenter.app.churchpresenter.data.SongItem
+import core.models.songs.SongFileParser
+import core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import java.io.File
 import java.nio.file.Files

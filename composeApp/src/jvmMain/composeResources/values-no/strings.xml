@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">Diagnoseinformasjonen ble lagret.</string>
     <string name="diagnostic_info_save_failed">Kunne ikke lagre diagnoseinformasjonen.</string>
     <string name="open_converter">Konverterer</string>
+    <string name="open_song_library">Sangbibliotekbehandler</string>
     <string name="report_bug">Meld en feil</string>
     <string name="submit_feature_request">Forslag til funksjon</string>
     <string name="action_ok">OK</string>

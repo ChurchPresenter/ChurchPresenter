@@ -98,6 +98,9 @@ jobs:
             coremodels:
               - *shared
               - 'core-models/**'
+            songlibrary:
+              - *shared
+              - 'songlibrary/**'
             ble:
               - *shared
               - 'bible-engine/**'
@@ -129,7 +132,7 @@ jobs:
       - name: Detekt
         run: >-
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
-          :crossword:detekt :companion-satellite:detekt
+          :crossword:detekt :companion-satellite:detekt :songlibrary:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -175,10 +178,10 @@ jobs:
       # Excluding only `jvmTest` was not enough, and hid a whole missing suite. When Detekt fails,
       # `App unit tests` is skipped -- but this step still ran, and with the serial task NOT excluded
       # it quietly executed the thirteen serial classes on its own. That wrote a jvmTestSerial exec
-      # file and jvmTestSerial XML, so both PR comments then reported a run in which the suite had
-      # never started: "App 159 ran, 159 passed" from the junit reporter, and composeApp at 33%
-      # instruction in the coverage table. Both looked like a green partial run and a coverage
-      # collapse; neither had happened.
+      # file and jvmTestSerial XML, so both pull-request comments then described a run in which the
+      # suite had never started: "App 159 ran, 159 passed" from the junit reporter, and composeApp at
+      # 33% instruction in the coverage table. One looked like a small green suite and the other like
+      # a coverage collapse; neither had happened.
       #
       # Advisory after a failure, like the floor: the exec data is then from a run that stopped
       # early, so the numbers are understated. Still worth printing -- it is the only place the
@@ -213,8 +216,8 @@ jobs:
       # Advisory whenever the suite did not pass: the exec data is then from a run that did not
       # finish -- or, when Detekt failed and the suite step was SKIPPED, is not there at all -- so
       # the number is understated and a floor breach would be an artefact. The build is already red
-      # for a better reason, and `outcome != 'success'` covers the skipped case as well as the
-      # failed one. When the suite passed this gates exactly as before, in seconds.
+      # for a better reason, and `outcome != 'success'` covers the skipped case as well as the failed
+      # one. When the suite passed this gates exactly as before, in seconds.
       - name: Coverage floor
         if: always()
         continue-on-error: ${{ steps.unit_tests.outcome != 'success' }}
@@ -300,6 +303,14 @@ jobs:
         if: always() && steps.modules.outputs.coremodels == 'true'
         run: ./gradlew :core-models:jacocoTestCoverageVerification -x test
 
+      - name: Song library tests
+        if: always() && steps.modules.outputs.songlibrary == 'true'
+        run: ./gradlew :songlibrary:test
+
+      - name: Song library coverage floor
+        if: always() && steps.modules.outputs.songlibrary == 'true'
+        run: ./gradlew :songlibrary:jacocoTestCoverageVerification -x test
+
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -324,8 +335,12 @@ jobs:
             presentation-engine/build/test-results/**/TEST-*.xml
             theme/build/test-results/**/TEST-*.xml
             core-models/build/test-results/**/TEST-*.xml
+            songlibrary/build/test-results/**/TEST-*.xml
             bible-engine/build/test-results/**/TEST-*.xml
-          # Paired with report_paths BY INDEX -- keep the two lists in the same order.
+          # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
+          # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
+          # every row after the insertion, so core-models was reported under "Companion Satellite"
+          # and the song library under "Theme", each with the other's numbers.
           check_name: |
             App
             Converter
@@ -335,12 +350,13 @@ jobs:
             Presentation Engine
             Theme
             Core models
+            Song library
             Bible Lookup Engine
           detailed_summary: true
           include_passed: false
-          # Without this the second table is six rows of "No test annotations available" on every
-          # green run -- one per check_name, because `include_passed: false` leaves it nothing to
-          # list when nothing failed. Off, the table appears only when there is a failure in it.
+          # Without this the second table is one row of "No test annotations available" per
+          # check_name on every green run -- `include_passed: false` leaves it nothing to list when
+          # nothing failed. Off, that table appears only when there is a failure to put in it.
           verbose_summary: false
           fail_on_failure: false
           comment: true
@@ -466,5 +482,7 @@ jobs:
             theme/build/test-results/
             core-models/build/reports/tests/
             core-models/build/test-results/
+            songlibrary/build/reports/tests/
+            songlibrary/build/test-results/
             bible-engine/build/reports/tests/
             bible-engine/build/test-results/

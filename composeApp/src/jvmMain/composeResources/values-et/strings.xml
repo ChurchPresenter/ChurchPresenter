@@ -128,6 +128,7 @@
     <string name="lottie_gen_window_title">Lottie alumise kolmandiku generaator</string>
     <string name="open_crash_logs">Ava krahhilogid</string>
     <string name="open_converter">Konverter</string>
+    <string name="open_song_library">Laulukogu haldur</string>
     <string name="report_bug">Teata veast</string>
     <string name="submit_feature_request">Funktsioonisoov</string>
     <string name="action_ok">OK</string>
@@ -523,6 +524,25 @@
     <string name="language_romanian">Rumeenia</string>
     <string name="language_slovak">Slovaki</string>
     <string name="language_estonian">Eesti keel</string>
+    <string name="language_latvian">Läti</string>
+    <string name="language_croatian">Horvaadi</string>
+    <string name="language_swedish">Rootsi</string>
+    <string name="language_norwegian">Norra</string>
+    <string name="language_finnish">Soome</string>
+    <string name="language_turkish">Türgi</string>
+    <string name="language_uzbek">Usbeki</string>
+    <string name="language_arabic">Araabia</string>
+    <string name="language_persian">Pärsia</string>
+    <string name="language_hindi">Hindi</string>
+    <string name="language_nepali">Nepali</string>
+    <string name="language_thai">Tai</string>
+    <string name="language_lao">Lao</string>
+    <string name="language_japanese">Jaapani</string>
+    <string name="language_chinese">Hiina (lihtsustatud)</string>
+    <string name="language_indonesian">Indoneesia</string>
+    <string name="language_malay">Malai</string>
+    <string name="language_tagalog">Tagalogi</string>
+    <string name="language_swahili">Suahiili</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Tulemusi ei leitud päringule "%1$s"</string>
@@ -584,6 +604,10 @@
     <string name="schedule_density_normal">Tavaline</string>
     <string name="schedule_density_detailed">Üksikasjalik</string>
     <string name="schedule_kind_lower_third">Alumine kolmandik</string>
+    <string name="tooltip_schedule_options">Kava suvandid</string>
+    <string name="schedule_show_buttons_under_title">Näita nuppe pealkirja all</string>
+    <string name="schedule_option_item_count">Elementide arv</string>
+    <string name="schedule_option_zoom">Suumi juhtnupud</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Lisa silt</string>
@@ -1270,6 +1294,18 @@
     <string name="statistics_exported_error">Statistika eksportimine ebaõnnestus.</string>
     <string name="file_chooser_save_statistics">Salvesta statistika kui</string>
     <string name="file_filter_xls">Exceli tabel (*.xls)</string>
+    <string name="stats_period_label">Periood:</string>
+    <string name="stats_period_all_time">Kogu aeg</string>
+    <string name="stats_period_last_3_months">Viimased 3 kuud</string>
+    <string name="stats_period_last_6_months">Viimased 6 kuud</string>
+    <string name="stats_period_last_12_months">Viimased 12 kuud</string>
+    <string name="stats_period_year">Aasta</string>
+    <string name="stats_filter_all_songbooks">Kõik laulikud</string>
+    <string name="stats_filter_all_bibles">Kõik piiblitõlked</string>
+    <string name="stats_period_custom">valitud kuupäevad</string>
+    <string name="stats_clear_item">Eemalda statistikast</string>
+    <string name="stats_clear_item_confirm">Kas eemaldada %1$s perioodi %2$s statistikast? Seda ei saa tagasi võtta.</string>
+    <string name="stats_clear_all_confirm">Kas kustutada kogu statistika? Sellega kustub ka esitusajalugu, millest CCLI aruanne koostatakse. Seda ei saa tagasi võtta.</string>
 
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Lisa kavasse</string>

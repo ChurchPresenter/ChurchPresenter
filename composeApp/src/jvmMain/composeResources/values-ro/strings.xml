@@ -123,6 +123,7 @@
     <string name="recent">Recent:</string>
     <string name="open_crash_logs">Deschide Jurnalele de Erori</string>
     <string name="open_converter">Convertor</string>
+    <string name="open_song_library">Manager al bibliotecii de cântări</string>
     <string name="report_bug">Raportează o Eroare</string>
     <string name="submit_feature_request">Trimite Solicitare de Funcție</string>
     <string name="action_ok">OK</string>
@@ -567,6 +568,10 @@
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Detaliat</string>
     <string name="schedule_kind_lower_third">Lower Third</string>
+    <string name="tooltip_schedule_options">Opțiuni program</string>
+    <string name="schedule_show_buttons_under_title">Afișează butoanele sub titlu</string>
+    <string name="schedule_option_item_count">Număr de elemente</string>
+    <string name="schedule_option_zoom">Comenzi de zoom</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Adaugă Etichetă</string>
@@ -1242,6 +1247,18 @@
     <string name="statistics_exported_error">Exportul statisticilor a eșuat.</string>
     <string name="file_chooser_save_statistics">Salvează Statisticile Ca</string>
     <string name="file_filter_xls">Foaie de Calcul Excel (*.xls)</string>
+    <string name="stats_period_label">Perioadă:</string>
+    <string name="stats_period_all_time">Tot timpul</string>
+    <string name="stats_period_last_3_months">Ultimele 3 luni</string>
+    <string name="stats_period_last_6_months">Ultimele 6 luni</string>
+    <string name="stats_period_last_12_months">Ultimele 12 luni</string>
+    <string name="stats_period_year">An</string>
+    <string name="stats_filter_all_songbooks">Toate cărțile de cântări</string>
+    <string name="stats_filter_all_bibles">Toate Bibliile</string>
+    <string name="stats_period_custom">datele selectate</string>
+    <string name="stats_clear_item">Elimină din statistici</string>
+    <string name="stats_clear_item_confirm">Elimini %1$s din statisticile pentru %2$s? Această acțiune nu poate fi anulată.</string>
+    <string name="stats_clear_all_confirm">Golești toate statisticile? Se șterge și istoricul afișărilor pe care se bazează raportul CCLI. Această acțiune nu poate fi anulată.</string>
 
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Adaugă la Program</string>
@@ -1773,6 +1790,25 @@
     <string name="language_dutch">Olandeză</string>
     <string name="language_slovak">Slovacă</string>
     <string name="language_estonian">Estonă</string>
+    <string name="language_latvian">Letonă</string>
+    <string name="language_croatian">Croată</string>
+    <string name="language_swedish">Suedeză</string>
+    <string name="language_norwegian">Norvegiană</string>
+    <string name="language_finnish">Finlandeză</string>
+    <string name="language_turkish">Turcă</string>
+    <string name="language_uzbek">Uzbecă</string>
+    <string name="language_arabic">Arabă</string>
+    <string name="language_persian">Persană</string>
+    <string name="language_hindi">Hindi</string>
+    <string name="language_nepali">Nepaleză</string>
+    <string name="language_thai">Thailandeză</string>
+    <string name="language_lao">Laoțiană</string>
+    <string name="language_japanese">Japoneză</string>
+    <string name="language_chinese">Chineză (simplificată)</string>
+    <string name="language_indonesian">Indoneziană</string>
+    <string name="language_malay">Malaeză</string>
+    <string name="language_tagalog">Tagalog</string>
+    <string name="language_swahili">Swahili</string>
     <string name="tab_dictionary">Dicționar</string>
     <string name="dictionary_search_hint">Căutați după număr, cuvânt sau definiție…</string>
     <string name="dictionary_filter_all">Toate</string>

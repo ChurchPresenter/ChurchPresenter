@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">Dijagnostički podaci uspješno su spremljeni.</string>
     <string name="diagnostic_info_save_failed">Spremanje dijagnostičkih podataka nije uspjelo.</string>
     <string name="open_converter">Pretvarač</string>
+    <string name="open_song_library">Upravitelj knjižnice pjesama</string>
     <string name="report_bug">Prijavi grešku</string>
     <string name="submit_feature_request">Predloži novu funkciju</string>
     <string name="action_ok">U redu</string>
