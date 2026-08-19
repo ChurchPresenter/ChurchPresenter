@@ -81,8 +81,6 @@ jobs:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/**'
             ble:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE/**'
-            lottiegen:
-              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen/**'
             cross:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/**'
             converter:
@@ -91,6 +89,9 @@ jobs:
             satellite:
               - *shared
               - 'companion-satellite/**'
+            lottiegen:
+              - *shared
+              - 'lottieGenerator/**'
             theme:
               - *shared
               - 'theme/**'
@@ -226,6 +227,12 @@ jobs:
         if: always() && steps.modules.outputs.satellite == 'true'
         run: ./gradlew :companion-satellite:test
 
+      # Same reasoning as the converter above: a module of this build, so a root-wrapper task
+      # rather than a wrapper of its own.
+      - name: Lower Third generator tests
+        if: always() && steps.modules.outputs.lottiegen == 'true'
+        run: ./gradlew :lottieGenerator:test
+
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:test
@@ -256,11 +263,6 @@ jobs:
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE
         run: chmod +x gradlew && ./gradlew test
 
-      - name: LottieGen tests
-        if: always() && steps.modules.outputs.lottiegen == 'true'
-        working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen
-        run: chmod +x gradlew && ./gradlew test
-
 
       # Kotlin Multiplatform, so the JVM suite is `jvmTest` rather than `test`.
       - name: Crossword tests
@@ -286,6 +288,7 @@ jobs:
             composeApp/build/test-results/**/TEST-*.xml
             converter/build/test-results/**/TEST-*.xml
             companion-satellite/build/test-results/**/TEST-*.xml
+            lottieGenerator/build/test-results/**/TEST-*.xml
             theme/build/test-results/**/TEST-*.xml
             core-models/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
@@ -399,6 +402,8 @@ jobs:
             composeApp/build/test-results/
             converter/build/reports/tests/
             converter/build/test-results/
+            lottieGenerator/build/reports/tests/
+            lottieGenerator/build/test-results/
             theme/build/reports/tests/
             theme/build/test-results/
             core-models/build/reports/tests/
