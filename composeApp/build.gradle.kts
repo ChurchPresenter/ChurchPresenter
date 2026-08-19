@@ -426,6 +426,9 @@ val resolvedJdk21Home: String? = run {
 // now lives in :core-models.
 dependencies {
     add("jvmTestImplementation", testFixtures(projects.coreModels))
+    // pdfDeck(): Deck's constructor is internal to :presentation-engine, so tests that need a
+    // synthetic deck build it through the module's own fixtures.
+    add("jvmTestImplementation", testFixtures(projects.presentationEngine))
 }
 
 compose.desktop {

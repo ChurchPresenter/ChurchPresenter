@@ -26,15 +26,14 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import presentation.engine.LoadResult
 import presentation.engine.model.Deck
-import presentation.engine.model.DeckFormat
 import presentation.engine.model.DeckLoadError
-import presentation.engine.model.DeckSource
 import presentation.engine.model.Fidelity
 import presentation.engine.model.LayerSpec
 import presentation.engine.model.RectPt
 import presentation.engine.model.Slide
 import presentation.engine.model.Step
 import presentation.engine.model.Timeline
+import presentation.engine.model.pdfDeck
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -78,9 +77,8 @@ class PresentationTabScreenshotTest {
 
     private fun sermonDeck() = deckFile("Sermon.pdf", SERMON_SLIDES)
 
-    private fun syntheticDeck(file: File, slides: Int, video: Boolean = false, builds: Int = 0) = Deck(
+    private fun syntheticDeck(file: File, slides: Int, video: Boolean = false, builds: Int = 0) = pdfDeck(
         sourceFile = file,
-        format = DeckFormat.PDF,
         slideWidthPt = 720.0,
         slideHeightPt = 405.0,
         slides = (0 until slides).map { index ->
@@ -102,7 +100,6 @@ class PresentationTabScreenshotTest {
                 fidelity = Fidelity.NATIVE,
             )
         },
-        source = DeckSource.Pdf(file),
     )
 
     private fun shoot(

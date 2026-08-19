@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.kotlinx.serialization)
+    `java-test-fixtures`
     jacoco
 }
 
@@ -25,6 +26,13 @@ extra["coverageExcludes"] =
 
 kotlin {
     jvmToolchain(21)
+
+    // Deck's constructor and DeckSource are internal — only the loaders build a deck. The fixtures
+    // consumers' tests use to fake one (src/testFixtures) therefore have to see this module's
+    // internals, which is what associating the two compilations does.
+    target.compilations.named("testFixtures") {
+        associateWith(target.compilations.getByName("main"))
+    }
 }
 
 dependencies {
