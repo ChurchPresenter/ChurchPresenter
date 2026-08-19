@@ -42,19 +42,20 @@ and a rasterizer, some of it reachable only through real decks, and its output i
 floors in `build.gradle.kts` are its measured coverage rounded down —
 
 ```
-INSTRUCTION 0.65   BRANCH 0.50   LINE 0.75   COMPLEXITY 0.45   METHOD 0.80   CLASS 0.85 (default)
+INSTRUCTION 0.70   BRANCH 0.55   LINE 0.80   COMPLEXITY 0.50   METHOD 0.84   CLASS 0.90
 ```
 
 — a **ratchet, not a target**: raise one as tests are added, never lower one to make a change fit.
 `extra["coverageExcludes"]` drops `**/ui/**`, `**/MainKt*` and the CLI diagnostics (`**/*Dump*`,
 `**/MakeSampleDeck*`).
 
-**Where the remaining gap is**, in rough order of size: `KeynoteDeckParser`,
-`KeynoteSceneRasterizer` and `KeynoteBuildMapper` (real IWA documents — `Fixtures` can build them
-byte by byte, which is how the existing Keynote tests work), `PresentationLoader`'s native-Keynote
-path, and `SlideFontRegistry`'s system-font scan. Everything pure — timeline evaluation and
-compilation, the preset catalog, motion paths, the disk cache — is covered, so a new effect or a
-new preset id has no excuse for arriving untested.
+**Where the remaining gap is**, in rough order of size: `KeynoteSceneRasterizer` (drawing real
+drawables), `KeynoteDeckParser`'s style/fill/text-attribute branches, `KeynoteBuildMapper`, and
+`SlideFontRegistry`'s system-font scan. Everything else is covered: timeline evaluation and
+compilation, the `<p:timing>` parser, the preset catalog end to end, motion paths, the disk cache,
+the loaders and both Keynote container forms. A new effect, a new preset id or a new timing
+behavior has no excuse for arriving untested — `Fixtures` builds PPTX, PDF and IWA documents
+programmatically, including `addRawTiming` for arbitrary `<p:timing>` XML.
 
 ## Detekt
 

@@ -177,6 +177,31 @@ object Fixtures {
      * each with a `set style.visibility` + `animEffect fade` behavior — the same shape
      * PowerPoint itself writes for a Fade entrance.
      */
+    /**
+     * Injects a `<p:timing>` whose main sequence body is [mainSeqBody] verbatim, for tests that
+     * need timing XML the [addTiming] shape does not produce (raw animate/scale/rotate behaviors,
+     * keyframe lists, repeats, triggers). The wrapper — tmRoot, the sequence, the namespaces —
+     * is the same one PowerPoint writes, so only the interesting part has to be spelled out.
+     */
+    fun addRawTiming(slide: XSLFSlide, mainSeqBody: String) {
+        val pNs = "http://schemas.openxmlformats.org/presentationml/2006/main"
+        val aNs = "http://schemas.openxmlformats.org/drawingml/2006/main"
+        val timingXml = """
+            <p:timing xmlns:p="$pNs" xmlns:a="$aNs">
+              <p:tnLst><p:par>
+                <p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot">
+                  <p:childTnLst><p:seq concurrent="1" nextAc="seek">
+                    <p:cTn id="2" dur="indefinite" nodeType="mainSeq">
+                      <p:childTnLst>$mainSeqBody</p:childTnLst>
+                    </p:cTn>
+                  </p:seq></p:childTnLst>
+                </p:cTn>
+              </p:par></p:tnLst>
+            </p:timing>
+        """.trimIndent()
+        injectTiming(slide, timingXml)
+    }
+
     fun addTiming(slide: XSLFSlide, targets: List<TimingTarget>) {
         val pNs = "http://schemas.openxmlformats.org/presentationml/2006/main"
         val aNs = "http://schemas.openxmlformats.org/drawingml/2006/main"
@@ -243,6 +268,11 @@ object Fixtures {
             </p:timing>
         """.trimIndent()
 
+        injectTiming(slide, timingXml)
+    }
+
+    /** Copies a whole `<p:timing>` fragment onto the end of the slide's XML. */
+    private fun injectTiming(slide: XSLFSlide, timingXml: String) {
         val fragment = XmlObject.Factory.parse(timingXml)
         val source = fragment.newCursor()
         source.toFirstChild()

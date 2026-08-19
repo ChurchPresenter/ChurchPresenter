@@ -6,6 +6,7 @@ import presentation.engine.timeline.PresetCatalog
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -202,6 +203,53 @@ class PresetCatalogTest {
         for (id in listOf(4, 6, 8, 13, 23)) {
             assertEquals(0.0, (PresetCatalog.fromPreset("entr", id, null) as EffectSpec.Zoom).fromScale, 1e-9, "id $id")
             assertEquals(1.0, (PresetCatalog.fromPreset("exit", id, null) as EffectSpec.Zoom).fromScale, 1e-9, "id $id")
+        }
+    }
+
+    // ── The whole table ───────────────────────────────────────────────────────
+
+    /** Every entrance/exit preset id the catalog claims to know, from PowerPoint's own numbering. */
+    private val entranceExitIds = listOf(
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+        26, 30, 42, 47,
+    )
+
+    /** Every emphasis preset id the catalog claims to know. */
+    private val emphasisIds = listOf(1, 3, 6, 8, 9, 26, 32, 35, 36)
+
+    @Test
+    fun `every entrance id in the table maps to an effect that enters`() {
+        for (id in entranceExitIds) {
+            val effect = assertNotNull(PresetCatalog.fromPreset("entr", id, null), "entrance preset $id fell through")
+            assertEquals(entrance, effect.role, "preset $id came back with the wrong role")
+        }
+    }
+
+    @Test
+    fun `every exit id in the table maps to an effect that leaves`() {
+        for (id in entranceExitIds) {
+            val effect = assertNotNull(PresetCatalog.fromPreset("exit", id, null), "exit preset $id fell through")
+            assertEquals(exit, effect.role, "preset $id came back with the wrong role")
+        }
+    }
+
+    @Test
+    fun `every emphasis id in the table maps to an emphasis effect`() {
+        for (id in emphasisIds) {
+            val effect = assertNotNull(PresetCatalog.fromPreset("emph", id, null), "emphasis preset $id fell through")
+            assertEquals(EffectSpec.Role.EMPHASIS, effect.role, "preset $id came back with the wrong role")
+        }
+    }
+
+    @Test
+    fun `a subtype the catalog does not understand never turns a known preset into nothing`() {
+        // Subtypes vary per effect and per PowerPoint version; an unrecognized one must not be the
+        // difference between an animation and a blank slide.
+        for (id in entranceExitIds) {
+            assertNotNull(
+                PresetCatalog.fromPreset("entr", id, 12345),
+                "preset $id with an unknown subtype fell through",
+            )
         }
     }
 }
