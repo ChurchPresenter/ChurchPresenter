@@ -62,6 +62,14 @@ class CompanionSatelliteClient(
          * total silence for that whole span — is treated as the connection actually being gone. */
         private const val READ_TIMEOUT_MS = 10_000
         private const val MAX_CONSECUTIVE_READ_TIMEOUTS = 3
+
+        /** How long a simulated press is held down — long enough for Companion to register it as a
+         * real press rather than a glitch, short enough not to trip its long-press handling. */
+        private const val PRESS_HOLD_MS = 80L
+
+        /** Gap between successive CHANGE-PAGE messages, so Companion finishes one step before the
+         * next arrives. */
+        private const val PAGE_STEP_INTERVAL_MS = 150L
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -101,7 +109,10 @@ class CompanionSatelliteClient(
         activeDeviceId = deviceId
         onButtonsReset(rows * columns)
         connectJob = scope.launch {
-            connectLoop(myGeneration, host, port, deviceId, rows, columns, startRow, startColumn, bitmapSize, productName, reconnectDelayMs)
+            connectLoop(
+                myGeneration, host, port, deviceId, rows, columns,
+                startRow, startColumn, bitmapSize, productName, reconnectDelayMs,
+            )
         }
     }
 
@@ -130,7 +141,7 @@ class CompanionSatelliteClient(
         if (deviceId.isEmpty() || currentStatus != CompanionConnectionStatus.CONNECTED) return
         scope.launch {
             sendMessage("KEY-PRESS", deviceId, linkedMapOf("CONTROLID" to index.toString(), "PRESSED" to true))
-            delay(80)
+            delay(PRESS_HOLD_MS)
             sendMessage("KEY-PRESS", deviceId, linkedMapOf("CONTROLID" to index.toString(), "PRESSED" to false))
         }
     }
@@ -143,7 +154,7 @@ class CompanionSatelliteClient(
         scope.launch {
             repeat(times) {
                 sendMessage("CHANGE-PAGE", deviceId, linkedMapOf("DIRECTION" to forward))
-                delay(150)
+                delay(PAGE_STEP_INTERVAL_MS)
             }
         }
     }
@@ -196,7 +207,9 @@ class CompanionSatelliteClient(
                                 consecutiveTimeouts++
                                 if (consecutiveTimeouts >= MAX_CONSECUTIVE_READ_TIMEOUTS) {
                                     throw IOException(
-                                        "No data received for ${consecutiveTimeouts * READ_TIMEOUT_MS}ms — assuming dead connection",
+                                        "No data received for " +
+                                            "${consecutiveTimeouts * READ_TIMEOUT_MS}ms — " +
+                                            "assuming dead connection",
                                         e
                                     )
                                 }
@@ -213,12 +226,16 @@ class CompanionSatelliteClient(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                if (generation == this.generation) setStatus(CompanionConnectionStatus.ERROR, e.message ?: "Connection failed")
+                if (generation == this.generation) {
+                    setStatus(CompanionConnectionStatus.ERROR, e.message ?: "Connection failed")
+                }
             }
             if (generation == this.generation) {
                 socket = null
                 writer = null
-                if (currentStatus != CompanionConnectionStatus.ERROR) setStatus(CompanionConnectionStatus.DISCONNECTED, null)
+                if (currentStatus != CompanionConnectionStatus.ERROR) {
+                    setStatus(CompanionConnectionStatus.DISCONNECTED, null)
+                }
             }
             if (!scope.isActive || generation != this.generation) break
             delay(reconnectDelayMs)

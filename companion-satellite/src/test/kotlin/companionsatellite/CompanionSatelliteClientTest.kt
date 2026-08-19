@@ -174,7 +174,10 @@ class CompanionSatelliteClientTest {
 
             // Field set, encodings and the "page/row/column" LOCATION form are what the real
             // Companion sent; "Prog\nCAM1" is a real label from the captured instance.
-            fake.sendKeyState(DEVICE, controlId = 1, text = "Prog\nCAM1", color = "#ff0000", page = 1, row = 0, column = 1)
+            fake.sendKeyState(
+                DEVICE, controlId = 1, text = "Prog\nCAM1", color = "#ff0000",
+                page = 1, row = 0, column = 1,
+            )
             waitFor("button update") { events.buttons.isNotEmpty() }
 
             val update = events.buttons.single()
@@ -413,7 +416,10 @@ class CompanionSatelliteClientTest {
         FakeCompanion().use { fake ->
             val events = Events()
             val c = connected(fake, events)
-            c.connect("127.0.0.1", fake.port, "second-device", rows = 1, columns = 1, bitmapSize = 72, reconnectDelayMs = 100)
+            c.connect(
+                "127.0.0.1", fake.port, "second-device",
+                rows = 1, columns = 1, bitmapSize = 72, reconnectDelayMs = 100,
+            )
             waitFor("the second registration") {
                 fake.linesStartingWith("ADD-DEVICE").any { it.contains("second-device") }
             }

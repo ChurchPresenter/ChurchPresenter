@@ -143,6 +143,14 @@ object CrosswordEngine {
 
         val placedNumbers = placed.map { it.entry.number }.toSet()
         val placedPositions = placedNormalized.associate { it.entry.number to (it.row to it.col) }
-        return RenderedPuzzle(grid = cellMap, rows = rows, cols = cols, clues = clues, placedNumbers = placedNumbers, placedDirections = finalDirections, placedPositions = placedPositions)
+        return RenderedPuzzle(
+            grid = cellMap,
+            rows = rows,
+            cols = cols,
+            clues = clues,
+            placedNumbers = placedNumbers,
+            placedDirections = finalDirections,
+            placedPositions = placedPositions,
+        )
     }
 }

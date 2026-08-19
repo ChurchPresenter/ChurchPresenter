@@ -54,9 +54,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.churchpresenter.cross.data.ClueEntry
 import org.churchpresenter.cross.data.CrosswordEngine
-import org.churchpresenter.cross.data.Direction
 import org.churchpresenter.cross.data.decode
 import org.churchpresenter.cross.data.encode
 import org.churchpresenter.cross.data.fromPlaintext
@@ -68,6 +66,16 @@ import java.io.File
 
 private val PUZZLES_DIR = File("puzzles")
 private val ENCODED_DIR = File("encoded")
+
+/** How long typing has to pause before the editor writes the plaintext file back. */
+private const val AUTO_SAVE_DEBOUNCE_MS = 800L
+
+/** How long a status line stays on screen before it clears itself. */
+private const val STATUS_MESSAGE_MS = 3_000L
+
+/** Clue-list marker: green when the engine placed the clue on the grid, amber when it could not. */
+private val PLACED_CLUE_COLOR = Color(0xFF4CAF50)
+private val UNPLACED_CLUE_COLOR = Color(0xFFFFA500)
 
 private fun templateFor(level: Int) = """
 # Level $level
@@ -193,12 +201,16 @@ fun AdminApp() {
             rawText
         } else {
             val puzzle = CrosswordEngine.build(clues) ?: run {
-                showStatus("Cannot export: clues don't form a valid crossword — run Fix/Reorder first.", error = true); return
+                showStatus(
+                    "Cannot export: clues don't form a valid crossword — run Fix/Reorder first.",
+                    error = true,
+                )
+                return
             }
-            val enriched = toPlaintext(1, title, clues, puzzle.placedPositions, puzzle.placedDirections)
+            val enriched = toPlaintext(title, clues, puzzle.placedPositions, puzzle.placedDirections)
             rawText = enriched
             autoSaveJob.value?.cancel()
-            autoSaveJob.value = scope.launch { delay(800); autoSave() }
+            autoSaveJob.value = scope.launch { delay(AUTO_SAVE_DEBOUNCE_MS); autoSave() }
             enriched
         }
         ENCODED_DIR.mkdirs()
@@ -249,7 +261,7 @@ fun AdminApp() {
             } else {
                 val puzzle = CrosswordEngine.build(clues)
                 if (puzzle == null) { fail++; continue }
-                val enriched = toPlaintext(1, title, clues, puzzle.placedPositions, puzzle.placedDirections)
+                val enriched = toPlaintext(title, clues, puzzle.placedPositions, puzzle.placedDirections)
                 rawFile.writeText(enriched, Charsets.UTF_8)
                 enriched
             }
@@ -300,12 +312,15 @@ fun AdminApp() {
             val pos = puzzle.placedPositions[uniqueClues[i].number] ?: return@mapNotNull null
             fixedClues[i].number to pos
         }.toMap()
-        rawText = toPlaintext(1, title, fixedClues, fixedPositions)
+        rawText = toPlaintext(title, fixedClues, fixedPositions)
         unexportedLevels = unexportedLevels + currentLevel
         autoSaveJob.value?.cancel()
-        autoSaveJob.value = scope.launch { delay(800); autoSave() }
+        autoSaveJob.value = scope.launch { delay(AUTO_SAVE_DEBOUNCE_MS); autoSave() }
         val unplaced = uniqueClues.count { it.number !in placed }
-        showStatus(if (unplaced > 0) "Reordered — $unplaced clue(s) not in puzzle" else "Reordered — all ${fixedClues.size} clues placed")
+        showStatus(
+            if (unplaced > 0) "Reordered — $unplaced clue(s) not in puzzle"
+            else "Reordered — all ${fixedClues.size} clues placed"
+        )
     }
 
     fun decodeAll() {
@@ -341,7 +356,7 @@ fun AdminApp() {
     // Poll ALL levels for external file changes every 3 seconds
     LaunchedEffect(Unit) {
         while (true) {
-            delay(3_000)
+            delay(STATUS_MESSAGE_MS)
             val current = detectLevels()
             if (current != levels) levels = current
             unexportedLevels = scanUnexported(current)
@@ -448,7 +463,7 @@ fun AdminApp() {
                                 rawText = newText
                                 unexportedLevels = unexportedLevels + currentLevel
                                 autoSaveJob.value?.cancel()
-                                autoSaveJob.value = scope.launch { delay(800); autoSave() }
+                                autoSaveJob.value = scope.launch { delay(AUTO_SAVE_DEBOUNCE_MS); autoSave() }
                             },
                             modifier = Modifier.fillMaxSize().padding(12.dp).padding(start = 18.dp),
                             textStyle = editorStyle,
@@ -470,7 +485,7 @@ fun AdminApp() {
                                         Text(
                                             text = if (placed) "●" else "⚠",
                                             fontSize = 9.sp,
-                                            color = if (placed) Color(0xFF4CAF50) else Color(0xFFFFA500),
+                                            color = if (placed) PLACED_CLUE_COLOR else UNPLACED_CLUE_COLOR,
                                             modifier = Modifier.align(Alignment.Center)
                                         )
                                     }
@@ -500,7 +515,7 @@ fun AdminApp() {
                             rawText = file.readText(Charsets.UTF_8)
                             unexportedLevels = unexportedLevels + currentLevel
                             autoSaveJob.value?.cancel()
-                            autoSaveJob.value = scope.launch { delay(800); autoSave() }
+                            autoSaveJob.value = scope.launch { delay(AUTO_SAVE_DEBOUNCE_MS); autoSave() }
                             showStatus("Imported ${file.name}")
                         }) { Text(Strings.importTxt) }
                     }
@@ -519,7 +534,11 @@ fun AdminApp() {
 
                     Spacer(Modifier.width(8.dp))
 
-                    Tip("Build the crossword grid and renumber clues in reading order (top→bottom, left→right). Also converts simplified formats to standard layout.") {
+                    Tip(
+                        "Build the crossword grid and renumber clues in reading order " +
+                            "(top→bottom, left→right). Also converts simplified formats to " +
+                            "standard layout."
+                    ) {
                         OutlinedButton(onClick = { fixReorder() }) { Text(Strings.fixReorder) }
                     }
 
