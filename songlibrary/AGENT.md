@@ -39,4 +39,16 @@ All three gates run in CI, gated on this directory (or the shared build files) c
 ## Gates
 
 The root build's six counters at 85%, **no floor lowered** — this module declares no
-`coverageFloors`. detekt runs against the app's shared config with no baseline.
+`coverageFloors`. detekt runs against the app's shared config, over `src/main/kotlin` and
+`src/test/kotlin`, with no baseline.
+
+**Coverage does not currently pass, and that is the honest state.** With `coverageExcludes` removed
+the suite measures **2.7% of instructions (1,102 of 40,871)**: the 34 tests cover `SongLibraryState`
+and `MenuLayout` at 84.6%, and everything else at zero — 12,084 instructions of Compose UI in `ui/`
+and 27,484 in the generated resource accessor. The excluded list it used to carry is what made the
+same suite read 94.5%.
+
+The gap to close is `ui/`: the window is driven end to end by `SongLibraryScreenshotTest`, so the
+interactions are already reachable from a test — what is missing is assertions on what they do, not
+a way to reach them. Do not put an exclude back to make the number look better; see **NEVER exclude
+code from coverage without asking first** in the root `AGENT.md`.

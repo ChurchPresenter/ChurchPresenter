@@ -116,7 +116,28 @@ they must be set **above everything else** in the file:
   each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword` and `:songlibrary` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
-  `**/ComposableSingletons*` outright.
+  `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
+
+### **NEVER exclude code from coverage without asking first**
+An exclude does not make code tested; it makes the gate stop asking. It is the one change that can
+turn a real coverage failure green while leaving the untested code exactly as it was, and it is
+invisible in the number afterwards — a module reporting 98% over a tenth of its classes reads the
+same as one reporting 98% over all of them.
+
+So: **do not add a path to `extra["coverageExcludes"]`, and do not widen an existing pattern, on
+your own initiative.** Raise it, say what cannot be tested and why, and let the person running the
+work decide. The same goes for lowering `extra["coverageFloors"]`.
+
+If the honest answer is "this needs a display / a device / a network", the first move is the split
+described under **Tests** below — pull the decisions out of the unreachable call and test those —
+not an exclude. A carve-out that survives that exercise is worth stating in the module's own
+`AGENT.md`: what is excluded, and what makes it unreachable.
+
+**Measure what an exclude is hiding before believing the number beside it.** `:songlibrary`
+reported 94.5% instructions over 15 classes; with its four-path exclude list removed the same suite
+measures **2.7% over 48** — 1,102 instructions of 40,871. Nothing about the tests changed. Take the
+headline figure from a module that excludes anything as a statement about the excluded set, not
+about the module, and say which it is.
 
 **Do not re-declare `jacocoTestReport`/`jacocoTestCoverageVerification` in a module.** Configuring
 the task there realizes it during evaluation, before the `extra` above is set, and a second
