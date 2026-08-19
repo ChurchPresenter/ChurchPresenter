@@ -58,7 +58,7 @@ class EncoderTest {
 
     @Test
     fun `toPlaintext writes a title header and both direction sections`() {
-        val text = toPlaintext(level = 1, title = "Galatians 5", clues = clues)
+        val text = toPlaintext(title = "Galatians 5", clues = clues)
         val lines = text.lines()
         assertEquals("# Galatians 5", lines.first())
         assertTrue(lines.contains("ACROSS:"))
@@ -69,14 +69,14 @@ class EncoderTest {
 
     @Test
     fun `a section with no clues is omitted entirely`() {
-        val acrossOnly = toPlaintext(1, "T", listOf(ClueEntry(1, Direction.ACROSS, "c", "A")))
+        val acrossOnly = toPlaintext("T", listOf(ClueEntry(1, Direction.ACROSS, "c", "A")))
         assertTrue(!acrossOnly.contains("DOWN:"), "an empty section would parse back as nothing")
     }
 
     @Test
     fun `a layout section records the placed position and direction of each clue`() {
         val text = toPlaintext(
-            1, "T", clues,
+            "T", clues,
             layout = mapOf(1 to (0 to 0), 2 to (0 to 3)),
             placedDirections = mapOf(1 to Direction.ACROSS, 2 to Direction.DOWN),
         )
@@ -90,7 +90,7 @@ class EncoderTest {
         // The engine may flip a clue to its opposite direction to make it fit; the layout has to
         // record where it really ended up or the puzzle cannot be rebuilt from the file.
         val text = toPlaintext(
-            1, "T", listOf(ClueEntry(1, Direction.ACROSS, "c", "PEACE")),
+            "T", listOf(ClueEntry(1, Direction.ACROSS, "c", "PEACE")),
             layout = mapOf(1 to (0 to 0)),
             placedDirections = mapOf(1 to Direction.DOWN),
         )
@@ -99,7 +99,7 @@ class EncoderTest {
 
     @Test
     fun `a clue missing from the layout is skipped rather than written with a wrong position`() {
-        val text = toPlaintext(1, "T", clues, layout = mapOf(1 to (0 to 0)))
+        val text = toPlaintext("T", clues, layout = mapOf(1 to (0 to 0)))
         assertTrue(text.contains("1 ACROSS 0 0"))
         assertTrue(!text.contains("2 DOWN"), "an unplaced clue has no position to record")
     }
@@ -108,7 +108,7 @@ class EncoderTest {
 
     @Test
     fun `a full document round-trips through toPlaintext and back`() {
-        val text = toPlaintext(1, "Galatians 5", clues)
+        val text = toPlaintext("Galatians 5", clues)
         val (_, title, parsed) = fromPlaintext(text)!!
         assertEquals("Galatians 5", title)
         assertEquals(clues, parsed, "the format survives a full write-then-read cycle")

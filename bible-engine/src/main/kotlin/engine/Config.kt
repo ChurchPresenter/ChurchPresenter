@@ -31,7 +31,7 @@ object Config {
     // diagnostic for an unexplained stale/wrong sticky that never produced a logged detection.
     // Low-volume (sticky changes are infrequent, not per-utterance); same default spirit as logCandidates.
     var logStickyChanges = System.getProperty("engine.logStickyChanges")?.toBooleanStrictOrNull() ?: true
-    val continuationTimeoutMs = 30_000L
+    const val continuationTimeoutMs = 30_000L
 
     // Sequential continuation acceptance: fraction of the CANDIDATE VERSE's words that must be
     // present in the text window ("verse-side coverage", AgreementScorer.coverage). Verse-side —
@@ -52,7 +52,7 @@ object Config {
     // little/no extra correct verses. Provisional like every other floor in this file — revisit
     // once more sessions accumulate real data (TRAINING_PLAN.md has the full sweep table).
     var continuationMinCoverage = 0.5
-    val dedupWindow = 32
+    const val dedupWindow = 32
     // Suppress an identical reference only within this window (time-based, replaces the old fixed
     // count-only window) so a passage read again later can re-fire.
     var dedupTtlMs = 45_000L
@@ -64,10 +64,10 @@ object Config {
     var reEmitMinDelta = 0.15
     var reEmitCooldownMs = 10_000L
     var minConfidenceEmit = 0.4
-    val bm25K1 = 1.5
-    val bm25B = 0.75
-    val reverseWindowWords = 25
-    val reverseTopK = 10
+    const val bm25K1 = 1.5
+    const val bm25B = 0.75
+    const val reverseWindowWords = 25
+    const val reverseTopK = 10
 
     // Chapter-scoped continuation: once book+chapter is known (the sticky), score every verse in that
     // chapter against what was spoken instead of requiring an explicit verse citation. The candidate
@@ -139,15 +139,37 @@ object Config {
     // per-session header so a service's results are tied to the Bibles that produced them.
     var loadedBibles: List<String> = emptyList()
 
+    /**
+     * The tuning one aggressiveness level applies. The values are the levels themselves — see the
+     * per-field comments above for what each one gates.
+     */
+    private data class LevelPreset(
+        val reverseEnabled: Boolean,
+        val minConfidenceEmit: Double,
+        val reverseMinScoreRatio: Double,
+        val stickyTtlMs: Long,
+        val normalizeStt: Boolean,
+        val inferBookAtEnd: Boolean,
+    )
+
+    private val levelPresets = mapOf(
+        // "off" keeps the numeric floors it already had; only the gates go down.
+        "off" to LevelPreset(false, minConfidenceEmit, reverseMinScoreRatio, stickyTtlMs, false, false),
+        "conservative" to LevelPreset(true, 0.6, 2.5, 240_000L, normalizeStt = false, inferBookAtEnd = false),
+        "balanced" to LevelPreset(true, 0.4, 2.0, 180_000L, normalizeStt = true, inferBookAtEnd = false),
+        "aggressive" to LevelPreset(true, 0.3, 1.5, 90_000L, normalizeStt = true, inferBookAtEnd = true),
+    )
+
     /** Maps the client's aggressiveness level to reverse-lookup tuning + gated recall. */
     fun applyLevel(level: String) {
         this.level = level.lowercase()
-        when (level.lowercase()) {
-            "off"          -> { reverseEnabled = false; normalizeStt = false; inferBookAtEnd = false }
-            "conservative" -> { reverseEnabled = true; minConfidenceEmit = 0.6; reverseMinScoreRatio = 2.5; stickyTtlMs = 240_000L; normalizeStt = false; inferBookAtEnd = false }
-            "balanced"     -> { reverseEnabled = true; minConfidenceEmit = 0.4; reverseMinScoreRatio = 2.0; stickyTtlMs = 180_000L; normalizeStt = true;  inferBookAtEnd = false }
-            "aggressive"   -> { reverseEnabled = true; minConfidenceEmit = 0.3; reverseMinScoreRatio = 1.5; stickyTtlMs = 90_000L;  normalizeStt = true;  inferBookAtEnd = true }
-        }
+        val preset = levelPresets[level.lowercase()] ?: return
+        reverseEnabled = preset.reverseEnabled
+        minConfidenceEmit = preset.minConfidenceEmit
+        reverseMinScoreRatio = preset.reverseMinScoreRatio
+        stickyTtlMs = preset.stickyTtlMs
+        normalizeStt = preset.normalizeStt
+        inferBookAtEnd = preset.inferBookAtEnd
     }
 
     // The active "Verse speed" preset name, recorded on each logged detection the same way
@@ -163,11 +185,16 @@ object Config {
      */
     fun applyContinuationSpeed(speed: String) {
         this.continuationSpeed = speed.lowercase()
-        when (speed.lowercase()) {
-            "balanced" -> continuationMinCoverage = 0.5
-            "fast"     -> continuationMinCoverage = 0.45
+        continuationMinCoverage = when (speed.lowercase()) {
+            "balanced" -> BALANCED_MIN_COVERAGE
+            "fast" -> FAST_MIN_COVERAGE
+            else -> return
         }
     }
+
+    /** The two "Verse speed" presets — see [continuationMinCoverage] for where 0.45 comes from. */
+    private const val BALANCED_MIN_COVERAGE = 0.5
+    private const val FAST_MIN_COVERAGE = 0.45
 
     // ── Bible version detection ───────────────────────────────────────────────────
     // Which TRANSLATION the speaker is reading from, scored across every .spb in the bible root

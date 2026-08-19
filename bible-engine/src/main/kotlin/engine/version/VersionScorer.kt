@@ -45,7 +45,8 @@ object VersionScorer {
         // tokens no one else has, which inflates the rarity of every genuine competitor's words.
         val anchorTokens = AgreementScorer.tokens(anchorText)
         val viable = candidates.filter { c ->
-            c.script == script && jaccard(AgreementScorer.tokens(c.text), anchorTokens) >= Config.versionCandidateMinJaccard
+            c.script == script &&
+                jaccard(AgreementScorer.tokens(c.text), anchorTokens) >= Config.versionCandidateMinJaccard
         }
         // With a single rendering there is nothing to be distinctive *against*; no weight is
         // definable, so the comparative path below cannot run. What IS reportable is the weaker

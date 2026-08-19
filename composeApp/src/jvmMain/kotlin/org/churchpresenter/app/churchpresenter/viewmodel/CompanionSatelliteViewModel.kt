@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import companionsatellite.CompanionConnectionStatus
 import companionsatellite.CompanionSatelliteClient
+import companionsatellite.SurfaceSpec
 import io.sentry.SentryLevel
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
@@ -171,16 +172,18 @@ class CompanionSatelliteViewModel {
         activeParams[slot] = params
         // startRow/startColumn default to 0 (top-left) — ChurchPresenter no longer offers UI to
         // change them; Companion's own per-surface settings already cover this reliably. See
-        // buildLayoutManifest's doc in the submodule client for why LAYOUT_MANIFEST registration is
+        // buildLayoutManifest's doc in the satellite client for why LAYOUT_MANIFEST registration is
         // still used even at the default offset.
         clientFor(slot).connect(
             host = params.host,
             port = params.port,
-            deviceId = params.deviceId,
-            rows = params.rows,
-            columns = params.columns,
-            bitmapSize = params.bitmapSize,
-            productName = params.productName,
+            surface = SurfaceSpec(
+                deviceId = params.deviceId,
+                rows = params.rows,
+                columns = params.columns,
+                bitmapSize = params.bitmapSize,
+                productName = params.productName,
+            ),
             reconnectDelayMs = params.reconnectDelayMs.toLong()
         )
     }

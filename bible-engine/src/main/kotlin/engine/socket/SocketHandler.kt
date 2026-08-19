@@ -62,7 +62,8 @@ fun Route.bibleEngineSocket(
                         if (id.isBlank()) continue
                         // CP→engine WS path carries no STT session id — only the STT socket path does.
                         withContext(detectionContext) {
-                            engine.processTranscription(id, text, sessionId = null).forEach { broadcaster.broadcast(it) }
+                            engine.processTranscription(id, text, sessionId = null)
+                                .forEach { broadcaster.broadcast(it) }
                         }
                     }
                     "translation_update" -> {
