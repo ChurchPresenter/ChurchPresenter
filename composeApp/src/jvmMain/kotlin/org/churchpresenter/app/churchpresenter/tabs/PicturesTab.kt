@@ -152,8 +152,6 @@ import kotlinx.coroutines.delay
 
 private const val MILLIS_PER_SECOND = 1000
 private const val CAPTION_FONT_SP = 12.5f
-private const val TINY_LABEL_FONT_SP = 8f
-private const val TINY_LABEL_LINE_SP = 9f
 private const val SMALL_LABEL_FONT_SP = 11.5f
 private const val MAX_AUTO_SCROLL_SECONDS = 30
 private const val MIN_TRANSITION_MS = 100
@@ -443,7 +441,7 @@ fun PicturesTab(
                 .fillMaxWidth()
                 .heightIn(min = 52.dp)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 5.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -562,27 +560,30 @@ fun PicturesTab(
                 Column(
                     modifier = Modifier
                         .height(42.dp)
-                        .width(120.dp)
+                        .width(170.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
                         .clickable { editingInterval = true }
-                        .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
+                        .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = stringResource(Res.string.auto_scroll_interval).uppercase(),
-                        fontSize = TextUnit(TINY_LABEL_FONT_SP, TextUnitType.Sp),
-                        lineHeight = TextUnit(TINY_LABEL_LINE_SP, TextUnitType.Sp),
+                        fontSize = 10.sp,
+                        lineHeight = 11.sp,
                         fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 0.9.sp,
+                        letterSpacing = 0.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
+                    Spacer(Modifier.height(1.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "${appSettings.pictureSettings.autoScrollInterval.toInt()} ${stringResource(Res.string.unit_s)}",
                             style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 12.sp,
+                                fontSize = 13.sp,
+                                lineHeight = 14.sp,
                                 fontWeight = FontWeight.Medium
                             ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -625,27 +626,30 @@ fun PicturesTab(
                 Column(
                     modifier = Modifier
                         .height(42.dp)
-                        .width(120.dp)
+                        .width(170.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
                         .clickable { editingTransition = true }
-                        .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
+                        .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = stringResource(Res.string.transition_duration).uppercase(),
-                        fontSize = TextUnit(TINY_LABEL_FONT_SP, TextUnitType.Sp),
-                        lineHeight = TextUnit(TINY_LABEL_LINE_SP, TextUnitType.Sp),
+                        fontSize = 10.sp,
+                        lineHeight = 11.sp,
                         fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 0.9.sp,
+                        letterSpacing = 0.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
+                    Spacer(Modifier.height(1.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "${appSettings.pictureSettings.transitionDuration.toInt()} ${stringResource(Res.string.unit_ms)}",
                             style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 12.sp,
+                                fontSize = 13.sp,
+                                lineHeight = 14.sp,
                                 fontWeight = FontWeight.Medium
                             ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

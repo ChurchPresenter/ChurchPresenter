@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
 import java.nio.file.WatchEvent
 import javax.imageio.ImageIO
@@ -13,6 +14,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PicturesViewModelWatchTest {
@@ -53,6 +55,29 @@ class PicturesViewModelWatchTest {
 
     private fun removed(file: File): Boolean =
         runBlocking { with(model) { this@runBlocking.removeWatchedImage(file) } }
+
+    private class PathEvent(private val name: String, private val eventKind: WatchEvent.Kind<Path>) :
+        WatchEvent<Path> {
+        override fun kind(): WatchEvent.Kind<Path> = eventKind
+        override fun count() = 1
+        override fun context(): Path = Path.of(name)
+    }
+
+    /** An OVERFLOW event as the JDK delivers it: no path, and a null context. */
+    private class OverflowEvent : WatchEvent<Any> {
+        override fun kind(): WatchEvent.Kind<Any> = StandardWatchEventKinds.OVERFLOW
+        override fun count() = 1
+        override fun context(): Any? = null
+    }
+
+    /** A non-OVERFLOW event whose context is null, which is what the field crash carried. */
+    private class NullContextEvent : WatchEvent<Any> {
+        override fun kind(): WatchEvent.Kind<Any> =
+            @Suppress("UNCHECKED_CAST")
+            (StandardWatchEventKinds.ENTRY_CREATE as WatchEvent.Kind<Any>)
+        override fun count() = 1
+        override fun context(): Any? = null
+    }
 
     @Test
     fun `a new file lands in name order rather than at the end`() {
@@ -246,5 +271,30 @@ class PicturesViewModelWatchTest {
         model.loadImagesFromFolder(File(dir, "nope"))
 
         assertTrue(model.images.isEmpty())
+    }
+
+    @Test
+    fun `an overflow event is skipped without reading its context`() {
+        assertNull(model.watchedImageName(OverflowEvent()))
+    }
+
+    @Test
+    fun `an event with no context is skipped rather than crashing the watcher`() {
+        assertNull(model.watchedImageName(NullContextEvent()))
+    }
+
+    @Test
+    fun `a picture event yields its file name`() {
+        assertEquals("b.jpg", model.watchedImageName(PathEvent("b.jpg", StandardWatchEventKinds.ENTRY_CREATE)))
+    }
+
+    @Test
+    fun `an event for a file that is not a picture is skipped`() {
+        assertNull(model.watchedImageName(PathEvent("notes.txt", StandardWatchEventKinds.ENTRY_CREATE)))
+    }
+
+    @Test
+    fun `the picture extension is matched whatever case it was written in`() {
+        assertEquals("B.JPG", model.watchedImageName(PathEvent("B.JPG", StandardWatchEventKinds.ENTRY_CREATE)))
     }
 }
