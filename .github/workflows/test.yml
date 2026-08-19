@@ -228,11 +228,19 @@ jobs:
         if: always() && steps.modules.outputs.satellite == 'true'
         run: ./gradlew :companion-satellite:test
 
+      - name: Companion Satellite coverage floor
+        if: always() && steps.modules.outputs.satellite == 'true'
+        run: ./gradlew :companion-satellite:jacocoTestCoverageVerification -x test
+
       # Same reasoning as the converter above: a module of this build, so a root-wrapper task
       # rather than a wrapper of its own.
       - name: Lower Third generator tests
         if: always() && steps.modules.outputs.lottiegen == 'true'
         run: ./gradlew :lottieGenerator:test
+
+      - name: Lower Third generator coverage floor
+        if: always() && steps.modules.outputs.lottiegen == 'true'
+        run: ./gradlew :lottieGenerator:jacocoTestCoverageVerification -x test
 
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
@@ -245,6 +253,10 @@ jobs:
       - name: Bible Lookup Engine tests
         if: always() && steps.modules.outputs.ble == 'true'
         run: ./gradlew :bible-engine:test
+
+      - name: Bible Lookup Engine coverage floor
+        if: always() && steps.modules.outputs.ble == 'true'
+        run: ./gradlew :bible-engine:jacocoTestCoverageVerification -x test
 
       - name: Core models tests
         if: always() && steps.modules.outputs.coremodels == 'true'
