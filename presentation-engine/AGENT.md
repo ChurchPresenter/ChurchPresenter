@@ -38,16 +38,28 @@ What that changed, and what it did not:
 ## Coverage
 
 The module carries the root build's six-counter floor, but **not** at the usual 85%: it is a parser
-and a rasterizer, much of it reachable only through real decks, and its output is pixels. The
+and a rasterizer, some of it reachable only through real decks, and its output is pixels. The
 floors in `build.gradle.kts` are its measured coverage rounded down —
 
 ```
-INSTRUCTION 0.60   BRANCH 0.45   LINE 0.70   COMPLEXITY 0.40   METHOD 0.75   CLASS 0.85 (default)
+INSTRUCTION 0.65   BRANCH 0.50   LINE 0.75   COMPLEXITY 0.45   METHOD 0.80   CLASS 0.85 (default)
 ```
 
-— a **ratchet against regression, not a target**. Raise one as coverage improves; never lower one
-to make a change fit. `extra["coverageExcludes"]` drops `**/ui/**`, `**/MainKt*` and the CLI
-diagnostics (`**/*Dump*`, `**/MakeSampleDeck*`).
+— a **ratchet, not a target**: raise one as tests are added, never lower one to make a change fit.
+`extra["coverageExcludes"]` drops `**/ui/**`, `**/MainKt*` and the CLI diagnostics (`**/*Dump*`,
+`**/MakeSampleDeck*`).
+
+**Where the remaining gap is**, in rough order of size: `KeynoteDeckParser`,
+`KeynoteSceneRasterizer` and `KeynoteBuildMapper` (real IWA documents — `Fixtures` can build them
+byte by byte, which is how the existing Keynote tests work), `PresentationLoader`'s native-Keynote
+path, and `SlideFontRegistry`'s system-font scan. Everything pure — timeline evaluation and
+compilation, the preset catalog, motion paths, the disk cache — is covered, so a new effect or a
+new preset id has no excuse for arriving untested.
+
+## Detekt
+
+`./gradlew :presentation-engine:detekt` — the app's shared `config/detekt/detekt.yml`, **no
+baseline**, main and test sources both in scope.
 
 ## Dependencies
 

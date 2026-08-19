@@ -247,8 +247,8 @@ class DeckRasterizer(
     private fun renderKeynoteThumbnail(source: DeckSource.KeynoteStatic, slideIndex: Int): BufferedImage {
         val entry = source.orderedThumbnailEntries[slideIndex]
         val bytes = KeynoteStaticSupport.readThumbnailBytes(source.file, entry)
-            ?: throw IllegalStateException("Keynote thumbnail vanished: $entry")
+            ?: error("Keynote thumbnail vanished: $entry")
         return ImageIO.read(ByteArrayInputStream(bytes))
-            ?: throw IllegalStateException("Undecodable Keynote thumbnail: $entry")
+            ?: error("Undecodable Keynote thumbnail: $entry")
     }
 }

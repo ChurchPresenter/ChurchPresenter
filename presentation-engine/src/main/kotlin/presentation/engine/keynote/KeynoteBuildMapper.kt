@@ -34,7 +34,10 @@ internal object KeynoteBuildMapper {
      *  "By Character" deliveries are a known, separate gap — not attempted here, degrade to the
      *  existing whole-object build. */
     private fun isParagraphDelivery(delivery: String?): Boolean =
-        delivery != null && (delivery.contains("paragraph", ignoreCase = true) || delivery.contains("bullet", ignoreCase = true))
+        delivery != null && (
+            delivery.contains("paragraph", ignoreCase = true) ||
+                delivery.contains("bullet", ignoreCase = true)
+            )
 
     class Result(
         val timeline: Timeline?,

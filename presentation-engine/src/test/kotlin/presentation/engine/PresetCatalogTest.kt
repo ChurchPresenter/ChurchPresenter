@@ -25,6 +25,10 @@ class PresetCatalogTest {
 
     // ── Filter strings ────────────────────────────────────────────────────────
 
+    /** The direction a reveal filter decodes to — the assertion these tests repeat. */
+    private fun wipeDirection(filter: String) =
+        (PresetCatalog.fromFilter(filter, entrance) as EffectSpec.Wipe).direction
+
     @Test
     fun `fade-like filters all map to a fade`() {
         for (filter in listOf("fade", "dissolve", "checkerboard", "randombar", "image", "pixelate", "randomeffect")) {
@@ -34,37 +38,37 @@ class PresetCatalogTest {
 
     @Test
     fun `a wipe decodes its direction argument`() {
-        assertEquals(Direction.DOWN, (PresetCatalog.fromFilter("wipe(down)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.UP, (PresetCatalog.fromFilter("wipe(up)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.LEFT, (PresetCatalog.fromFilter("wipe(left)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.RIGHT, (PresetCatalog.fromFilter("wipe(right)", entrance) as EffectSpec.Wipe).direction)
+        assertEquals(Direction.DOWN, wipeDirection("wipe(down)"))
+        assertEquals(Direction.UP, wipeDirection("wipe(up)"))
+        assertEquals(Direction.LEFT, wipeDirection("wipe(left)"))
+        assertEquals(Direction.RIGHT, wipeDirection("wipe(right)"))
     }
 
     @Test
     fun `from-edge wording is inverted into a direction of travel`() {
         // `fromLeft` describes where it starts; the engine wants where it moves.
-        assertEquals(Direction.RIGHT, (PresetCatalog.fromFilter("wipe(fromLeft)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.LEFT, (PresetCatalog.fromFilter("wipe(fromRight)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.UP, (PresetCatalog.fromFilter("wipe(fromBottom)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.DOWN, (PresetCatalog.fromFilter("wipe(fromTop)", entrance) as EffectSpec.Wipe).direction)
+        assertEquals(Direction.RIGHT, wipeDirection("wipe(fromLeft)"))
+        assertEquals(Direction.LEFT, wipeDirection("wipe(fromRight)"))
+        assertEquals(Direction.UP, wipeDirection("wipe(fromBottom)"))
+        assertEquals(Direction.DOWN, wipeDirection("wipe(fromTop)"))
     }
 
     @Test
     fun `a wipe with no argument still has a direction`() {
-        assertEquals(Direction.RIGHT, (PresetCatalog.fromFilter("wipe", entrance) as EffectSpec.Wipe).direction)
+        assertEquals(Direction.RIGHT, wipeDirection("wipe"))
     }
 
     @Test
     fun `blinds pick their axis from the argument`() {
-        assertEquals(Direction.DOWN, (PresetCatalog.fromFilter("blinds(horizontal)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.RIGHT, (PresetCatalog.fromFilter("blinds(vertical)", entrance) as EffectSpec.Wipe).direction)
+        assertEquals(Direction.DOWN, wipeDirection("blinds(horizontal)"))
+        assertEquals(Direction.RIGHT, wipeDirection("blinds(vertical)"))
     }
 
     @Test
     fun `diagonal strips collapse onto one axis`() {
-        assertEquals(Direction.DOWN, (PresetCatalog.fromFilter("strips(downLeft)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.UP, (PresetCatalog.fromFilter("strips(upRight)", entrance) as EffectSpec.Wipe).direction)
-        assertEquals(Direction.RIGHT, (PresetCatalog.fromFilter("strips", entrance) as EffectSpec.Wipe).direction)
+        assertEquals(Direction.DOWN, wipeDirection("strips(downLeft)"))
+        assertEquals(Direction.UP, wipeDirection("strips(upRight)"))
+        assertEquals(Direction.RIGHT, wipeDirection("strips"))
     }
 
     @Test

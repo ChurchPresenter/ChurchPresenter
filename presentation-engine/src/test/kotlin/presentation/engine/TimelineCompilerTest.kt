@@ -71,7 +71,12 @@ class TimelineCompilerTest {
 
     private fun target(shapeId: Long = 1L, paragraph: Int? = null) = BehaviorTarget(shapeId, paragraph)
 
-    private fun animEffect(shapeId: Long = 1L, filter: String? = "fade", durMs: Long? = 500, transition: String = "in") =
+    private fun animEffect(
+        shapeId: Long = 1L,
+        filter: String? = "fade",
+        durMs: Long? = 500,
+        transition: String = "in",
+    ) =
         node(TimeNodeKind.BEHAVIOR, behavior = TimingBehavior.AnimEffect(target(shapeId), durMs, 0, transition, filter))
 
     /** One effect node (a par carrying preset metadata) wrapping the given behaviors. */
@@ -151,7 +156,14 @@ class TimelineCompilerTest {
     @Test
     fun `effects inside one group all begin together`() {
         val result = assertNotNull(
-            compiler().compile(slide(clickGroup(effect(behaviors = listOf(animEffect(1L))), effect(behaviors = listOf(animEffect(2L))))))
+            compiler().compile(
+                slide(
+                    clickGroup(
+                        effect(behaviors = listOf(animEffect(1L))),
+                        effect(behaviors = listOf(animEffect(2L))),
+                    )
+                )
+            )
         )
         val intervals = result.timeline.steps.single().intervals
         assertEquals(2, intervals.size)
@@ -245,7 +257,9 @@ class TimelineCompilerTest {
         val warnings = mutableListOf<String>()
         val behavior = node(
             TimeNodeKind.BEHAVIOR,
-            behavior = TimingBehavior.AnimateValue(target(), 500, 0, "style.fontWeight", "400", "700", null, emptyList()),
+            behavior = TimingBehavior.AnimateValue(
+                target(), 500, 0, "style.fontWeight", "400", "700", null, emptyList(),
+            ),
         )
         compiler(warnings).compile(slide(clickGroup(effect(behaviors = listOf(behavior)))))
         assertTrue(warnings.any { it.contains("fontWeight") }, "got $warnings")
@@ -258,7 +272,9 @@ class TimelineCompilerTest {
             behavior = TimingBehavior.AnimateRotation(target(), 500, 0, 0.0, 360.0, null),
         )
         val result = assertNotNull(
-            compiler().compile(slide(clickGroup(effect(presetClass = "emph", presetId = 8, behaviors = listOf(behavior)))))
+            compiler().compile(
+                slide(clickGroup(effect(presetClass = "emph", presetId = 8, behaviors = listOf(behavior))))
+            )
         )
         assertNotNull(result.timeline.steps.single().intervals.single().effect)
     }
@@ -347,7 +363,9 @@ class TimelineCompilerTest {
                 node(TimeNodeKind.SEQ, nodeType = "mainSeq", children = listOf(clickGroup(effect()))),
                 node(
                     TimeNodeKind.SEQ, nodeType = "interactiveSeq",
-                    children = listOf(node(TimeNodeKind.PAR, children = listOf(effect(behaviors = listOf(animEffect(2L)))))),
+                    children = listOf(
+                        node(TimeNodeKind.PAR, children = listOf(effect(behaviors = listOf(animEffect(2L)))))
+                    ),
                 ),
             ),
         )

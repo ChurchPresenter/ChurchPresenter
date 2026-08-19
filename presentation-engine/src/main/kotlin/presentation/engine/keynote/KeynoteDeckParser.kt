@@ -19,6 +19,18 @@ import kotlin.math.abs
  */
 internal object KeynoteDeckParser {
 
+    /** A style/template chain that long is a cycle in the document, not a real inheritance. */
+    private const val MAX_STYLE_CHAIN = 8
+
+    /** Keynote path element types, and how many points each needs. */
+    private const val PATH_MOVE_TO = 1
+    private const val PATH_LINE_TO = 2
+    private const val PATH_QUAD_TO = 3
+    private const val PATH_CURVE_TO = 4
+    private const val PATH_CLOSE = 5
+    private const val QUAD_POINTS = 2
+    private const val CURVE_POINTS = 3
+
     private val RENDERABLE_IMAGE_EXTENSIONS =
         setOf("jpg", "jpeg", "png", "gif", "tiff", "tif", "bmp")
 
@@ -73,14 +85,17 @@ internal object KeynoteDeckParser {
         val gate = Gate()
         val slide = index.message(slideId)
         if (slide == null) {
-            return KnSlide(slideIndex, null, emptyList(), "", null, emptySet(), emptySet(), null, "slide archive unreadable")
+            return KnSlide(
+                slideIndex, null, emptyList(), "", null, emptySet(), emptySet(), null,
+                "slide archive unreadable",
+            )
         }
 
         // Master chain, deepest first (theme decorations render below slide content).
         val masters = mutableListOf<IwaMessage>()
         var templateRef = slide.message(F.SLIDE_TEMPLATE_SLIDE)?.varint(F.REFERENCE_IDENTIFIER)
         var guard = 0
-        while (templateRef != null && guard++ < 8) {
+        while (templateRef != null && guard++ < MAX_STYLE_CHAIN) {
             val master = index.message(templateRef) ?: break
             masters.add(0, master)
             templateRef = master.message(F.SLIDE_TEMPLATE_SLIDE)?.varint(F.REFERENCE_IDENTIFIER)
@@ -287,7 +302,7 @@ internal object KeynoteDeckParser {
         var opacity: Double? = null
         var currentId = styleId
         var guard = 0
-        while (currentId != null && guard++ < 8) {
+        while (currentId != null && guard++ < MAX_STYLE_CHAIN) {
             val style = index.message(currentId) ?: break
             val props = style.message(F.SHAPE_STYLE_PROPERTIES)
             if (props != null) {
@@ -358,13 +373,13 @@ internal object KeynoteDeckParser {
                     ((p.float(F.POINT_Y)?.toDouble() ?: 0.0) / naturalH)
             }
             when (type) {
-                1 -> points.getOrNull(0)?.let { result.moveTo(it.first, it.second); hasContent = true }
-                2 -> points.getOrNull(0)?.let { result.lineTo(it.first, it.second); hasContent = true }
-                3 -> if (points.size >= 2) {
+                PATH_MOVE_TO -> points.getOrNull(0)?.let { result.moveTo(it.first, it.second); hasContent = true }
+                PATH_LINE_TO -> points.getOrNull(0)?.let { result.lineTo(it.first, it.second); hasContent = true }
+                PATH_QUAD_TO -> if (points.size >= QUAD_POINTS) {
                     result.quadTo(points[0].first, points[0].second, points[1].first, points[1].second)
                     hasContent = true
                 }
-                4 -> if (points.size >= 3) {
+                PATH_CURVE_TO -> if (points.size >= CURVE_POINTS) {
                     result.curveTo(
                         points[0].first, points[0].second,
                         points[1].first, points[1].second,
@@ -372,7 +387,7 @@ internal object KeynoteDeckParser {
                     )
                     hasContent = true
                 }
-                5 -> result.closePath()
+                PATH_CLOSE -> result.closePath()
                 else -> return null
             }
         }
@@ -458,7 +473,7 @@ internal object KeynoteDeckParser {
         var currentId = styleId
         var guard = 0
         var sawAny = false
-        while (currentId != null && guard++ < 8) {
+        while (currentId != null && guard++ < MAX_STYLE_CHAIN) {
             val style = index.message(currentId) ?: break
             val props = style.message(F.CHARACTER_STYLE_PROPERTIES)
             if (props != null) {

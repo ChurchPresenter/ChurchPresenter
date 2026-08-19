@@ -9,6 +9,13 @@ import java.io.File
  * per-slide drawable types, builds and transitions — the validation tool for the reverse-
  * engineered parser. Usage: `./gradlew dumpKeynote -Pfile=/path/deck.key`
  */
+
+/** How many rows of the object-type histogram the dump prints. */
+private const val HISTOGRAM_ROWS = 25
+
+/** Slide placeholder reference fields, by the label the dump prints for each. */
+private val PLACEHOLDER_FIELDS = listOf("title" to 5, "body" to 6, "slideNum" to 20, "object" to 30)
+
 object DumpKeynote {
 
     @JvmStatic
@@ -22,8 +29,9 @@ object DumpKeynote {
             return
         }
         println("=== ${File(path).name} ===")
-        println("Objects by type (top 25):")
-        index.typeHistogram().entries.sortedByDescending { it.value }.take(25).forEach { (type, count) ->
+        println("Objects by type (top $HISTOGRAM_ROWS):")
+        index.typeHistogram().entries.sortedByDescending { it.value }.take(HISTOGRAM_ROWS)
+            .forEach { (type, count) ->
             println("  type $type: $count")
         }
         println("Data files: ${index.dataFileNames.size}")
@@ -51,11 +59,14 @@ object DumpKeynote {
             val slideRef = node.message(KnFields.SLIDE_NODE_SLIDE)?.varint(KnFields.REFERENCE_IDENTIFIER)
             val skipped = node.bool(KnFields.SLIDE_NODE_IS_SKIPPED) == true
             slideNumber++
-            println("${"  ".repeat(depth)}node $nodeId fields=${node.fieldNumbers().sorted()} slide=$slideRef (type ${slideRef?.let { index.typeOf(it) }}) skipped=$skipped")
+            println(
+                "${"  ".repeat(depth)}node $nodeId fields=${node.fieldNumbers().sorted()} " +
+                    "slide=$slideRef (type ${slideRef?.let { index.typeOf(it) }}) skipped=$skipped"
+            )
             val slide = slideRef?.let { index.message(it) }
             if (slide != null) {
                 println("${"  ".repeat(depth)}  slide fields=${slide.fieldNumbers().sorted()}")
-                for ((label, field) in listOf("title" to 5, "body" to 6, "slideNum" to 20, "object" to 30)) {
+                for ((label, field) in PLACEHOLDER_FIELDS) {
                     val ref = slide.message(field)?.varint(KnFields.REFERENCE_IDENTIFIER) ?: continue
                     val ph = index.message(ref)
                     val shapeInfo = ph?.message(KnFields.PLACEHOLDER_SUPER)
@@ -107,7 +118,10 @@ object DumpKeynote {
                             ?.mapNotNull { it.varint(KnFields.REFERENCE_IDENTIFIER) } ?: emptyList()
                         println("${"  ".repeat(depth)}  group $id ${geometryLine(id)}")
                         for (child in children) {
-                            println("${"  ".repeat(depth)}    child $child:${index.typeOf(child)} ${geometryLine(child)}")
+                            println(
+                                "${"  ".repeat(depth)}    child $child:${index.typeOf(child)} " +
+                                    geometryLine(child)
+                            )
                         }
                     } else {
                         println("${"  ".repeat(depth)}  drawable $id:${index.typeOf(id)} ${geometryLine(id)}")
@@ -140,8 +154,10 @@ object DumpKeynote {
                         println("${"  ".repeat(depth)}    build $buildId drawable=" +
                             "${build.message(KnFields.BUILD_DRAWABLE)?.varint(KnFields.REFERENCE_IDENTIFIER)} " +
                             "delivery=${build.string(KnFields.BUILD_DELIVERY)} " +
-                            "type=${anim?.string(KnFields.ANIM_ATTRS_TYPE)} effect=${anim?.string(KnFields.ANIM_ATTRS_EFFECT)} " +
-                            "dur=${anim?.double(KnFields.ANIM_ATTRS_DURATION)} dir=${anim?.varint(KnFields.ANIM_ATTRS_DIRECTION)}")
+                            "type=${anim?.string(KnFields.ANIM_ATTRS_TYPE)} " +
+                            "effect=${anim?.string(KnFields.ANIM_ATTRS_EFFECT)} " +
+                            "dur=${anim?.double(KnFields.ANIM_ATTRS_DURATION)} " +
+                            "dir=${anim?.varint(KnFields.ANIM_ATTRS_DIRECTION)}")
                     }
                 }
                 val chunks = slide.messages(KnFields.SLIDE_BUILD_CHUNKS)
@@ -152,7 +168,8 @@ object DumpKeynote {
                         val chunk = index.message(chunkId) ?: continue
                         println("${"  ".repeat(depth)}    chunk $chunkId build=" +
                             "${chunk.message(KnFields.BUILD_CHUNK_BUILD)?.varint(KnFields.REFERENCE_IDENTIFIER)} " +
-                            "auto=${chunk.bool(KnFields.BUILD_CHUNK_AUTOMATIC)} delay=${chunk.double(KnFields.BUILD_CHUNK_DELAY)} " +
+                            "auto=${chunk.bool(KnFields.BUILD_CHUNK_AUTOMATIC)} " +
+                            "delay=${chunk.double(KnFields.BUILD_CHUNK_DELAY)} " +
                             "dur=${chunk.double(KnFields.BUILD_CHUNK_DURATION)}")
                     }
                 }
@@ -160,9 +177,13 @@ object DumpKeynote {
                     ?.message(KnFields.TRANSITION_ATTRIBUTES)
                     ?.message(KnFields.TRANSITION_ATTRS_ANIMATION)
                 if (transitionAnim != null) {
-                    println("${"  ".repeat(depth)}  transition: type=${transitionAnim.string(KnFields.ANIM_ATTRS_TYPE)} " +
-                        "effect=${transitionAnim.string(KnFields.ANIM_ATTRS_EFFECT)} " +
-                        "dur=${transitionAnim.double(KnFields.ANIM_ATTRS_DURATION)} dir=${transitionAnim.varint(KnFields.ANIM_ATTRS_DIRECTION)}")
+                    println(
+                        "${"  ".repeat(depth)}  transition: " +
+                            "type=${transitionAnim.string(KnFields.ANIM_ATTRS_TYPE)} " +
+                            "effect=${transitionAnim.string(KnFields.ANIM_ATTRS_EFFECT)} " +
+                            "dur=${transitionAnim.double(KnFields.ANIM_ATTRS_DURATION)} " +
+                            "dir=${transitionAnim.varint(KnFields.ANIM_ATTRS_DIRECTION)}"
+                    )
                 }
             }
             node.messages(KnFields.SLIDE_NODE_CHILDREN)

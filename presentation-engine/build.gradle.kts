@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.detekt)
     `java-test-fixtures`
     jacoco
 }
@@ -9,16 +10,17 @@ group = "presentation.engine"
 
 // Coverage for this module's own logic. UI composables and the CLI diagnostic entry points are
 // excluded: the first need a real display, the second exist to print to stdout.
-// This module is a parser and a rasterizer: much of it is exercised only by real decks and its
-// output is pixels, so it sits well below the 85% the other modules hold. The floors below are its
-// measured coverage rounded down — a ratchet against regression, not a target. Raise them as
-// coverage improves; never lower one to make a change fit.
+// This module is a parser and a rasterizer: some of it is reachable only through real decks and
+// its output is pixels, so it sits below the 85% the other modules hold. The floors are its
+// measured coverage rounded down — a ratchet, raised as tests are added and never lowered to make
+// a change fit. The gap left is concentrated in the Keynote parser/rasterizer and the loaders;
+// everything pure (timeline, presets, motion paths, cache) is covered.
 extra["coverageFloors"] = mapOf(
-    "INSTRUCTION" to "0.60",
-    "BRANCH" to "0.45",
-    "LINE" to "0.70",
-    "COMPLEXITY" to "0.40",
-    "METHOD" to "0.75",
+    "INSTRUCTION" to "0.65",
+    "BRANCH" to "0.50",
+    "LINE" to "0.75",
+    "COMPLEXITY" to "0.45",
+    "METHOD" to "0.80",
 )
 
 extra["coverageExcludes"] =
@@ -87,4 +89,22 @@ tasks.register<JavaExec>("dumpTiming") {
     systemProperty("java.awt.headless", "true")
     (project.findProperty("file") as String?)?.let { args(it) }
     (project.findProperty("out") as String?)?.let { args(it) }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+    source.setFrom("src/main/kotlin", "src/test/kotlin")
+    parallel = true
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    jvmTarget = "21"
+    reports {
+        html.required.set(true)
+        xml.required.set(false)
+        sarif.required.set(false)
+        txt.required.set(false)
+        md.required.set(false)
+    }
 }

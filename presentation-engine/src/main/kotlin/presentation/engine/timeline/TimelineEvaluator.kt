@@ -289,13 +289,18 @@ class TimelineEvaluator(
         }
     }
 
+    /** A split opens from the middle of the layer, in its own normalized space. */
+    private companion object {
+        const val CENTER = 0.5
+    }
+
     private fun splitClip(horizontal: Boolean, role: EffectSpec.Role, p: Double): RevealClip {
         val shown = if (role == EffectSpec.Role.EXIT) 1.0 - p else p
         val half = shown / 2.0
         return if (horizontal) {
-            RevealClip(0.0, 0.5 - half, 1.0, 0.5 + half)
+            RevealClip(0.0, CENTER - half, 1.0, CENTER + half)
         } else {
-            RevealClip(0.5 - half, 0.0, 0.5 + half, 1.0)
+            RevealClip(CENTER - half, 0.0, CENTER + half, 1.0)
         }
     }
 }

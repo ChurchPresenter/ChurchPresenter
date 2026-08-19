@@ -38,10 +38,16 @@ internal class ObjectIndex private constructor(
                     File(file, "Index").listFiles()
                         ?.filter { it.isFile && it.extension == "iwa" }
                         ?.sortedBy { it.name }
-                        ?.forEach { iwa -> IwaChunkReader.readObjects(iwa.readBytes()).forEach { objects[it.identifier] = it } }
+                        ?.forEach { iwa ->
+                            IwaChunkReader.readObjects(iwa.readBytes())
+                                .forEach { objects[it.identifier] = it }
+                        }
                     File(file, "Metadata").listFiles()
                         ?.filter { it.isFile && it.extension == "iwa" }
-                        ?.forEach { iwa -> IwaChunkReader.readObjects(iwa.readBytes()).forEach { objects[it.identifier] = it } }
+                        ?.forEach { iwa ->
+                            IwaChunkReader.readObjects(iwa.readBytes())
+                                .forEach { objects[it.identifier] = it }
+                        }
                 } else {
                     ZipFile(file).use { zip ->
                         for (entry in zip.entries()) {
