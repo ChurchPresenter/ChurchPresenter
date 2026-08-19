@@ -111,6 +111,17 @@ never lowered, and silently.
 `jvmMain` source set and a long exclude list, and registers its own task. The `kotlin("jvm")` plugin
 id is what separates the two.
 
+### The bible-engine module
+`bible-engine/` is the Bible Lookup Engine — speech-to-reference detection, served over a Ktor
+WebSocket that the app runs in-process (`engine.EngineServer`, `engine.EngineHandle`,
+`engine.engine.DetectionLogger` are all `:composeApp` calls). Package `engine`, so no import in the
+app changed. `./gradlew :bible-engine:test`, `:bible-engine:replayEval`, `:bible-engine:stickyAudit`.
+
+Its `jar` was a **fat jar** while it was a separate build; as a module of this build `:composeApp`
+consumes that jar directly, so it is a plain library jar now and ktor/logback/socket.io come through
+the dependency graph instead. Nothing packages or runs it standalone, but the `application` plugin
+stays so `:bible-engine:run` still works.
+
 ### The core-models module
 `core-models/` holds the shared data models — `ScheduleItem`, `SceneModels`, `Question`,
 `LyricSection`, `SelectedVerse`, `KeyChord` and friends — in the package they always had
@@ -143,13 +154,14 @@ The decoder in `data/CrosswordData.kt` mirrors this module's `Encoder` and share
 change one and change the other.
 
 ### Sub-builds
-Two module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
-have their own Gradle builds and test suites, under `src/jvmMain/appResources/common/`:
-`ChurchPresenter-PresentationEngine` and `-BLE`.
+One module source is still mounted into composeApp via `kotlin.srcDir` — it compiles as part of the
+app but has its own Gradle build and test suite, under `src/jvmMain/appResources/common/`:
+`ChurchPresenter-PresentationEngine`.
 
-The rest are no longer among them, and are the direction these two are headed: `converter/`
-(above), `companion-satellite/`, `theme/`, `core-models/`, `lottieGenerator/` and `crossword/` are
-**real Gradle modules of this build** — `implementation(projects.companionSatellite)`, tested with
+The rest are no longer among them, and are the direction it is headed: `converter/` (above),
+`companion-satellite/`, `theme/`, `core-models/`, `bible-engine/`, `lottieGenerator/` and
+`crossword/` are **real Gradle modules of this build** —
+`implementation(projects.companionSatellite)`, tested with
 `./gradlew :companion-satellite:test` on the root wrapper, with dependency versions from
 `gradle/libs.versions.toml` rather than hand-copied literals. Their `version` comes from the
 `subprojects` block in the root build; don't re-declare it.
@@ -161,7 +173,7 @@ plain `git clone` is enough and a change spanning the app and a module is one co
   the repo root AND `sh gradlew build` inside the module. The main build is more permissive and will
   accept code the module's own build rejects. This does not apply to `companion-satellite/` — there
   is only one build to satisfy there, which is the point of promoting it. Nor to any other module
-  of this build.
+  of this build — the Presentation Engine is the only mounted one left.
 - The Presentation Engine has **zero Compose dependency by construction** — accidental Compose
   imports fail its standalone build.
 - The Presentation Engine runs **entirely in-JVM**: never shell out to `osascript`, AppleScript,

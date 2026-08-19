@@ -79,8 +79,6 @@ jobs:
               - '.github/workflows/test.yml'
             engine:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/**'
-            ble:
-              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE/**'
             converter:
               - *shared
               - 'converter/**'
@@ -99,6 +97,9 @@ jobs:
             coremodels:
               - *shared
               - 'core-models/**'
+            ble:
+              - *shared
+              - 'bible-engine/**'
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -228,11 +229,19 @@ jobs:
         if: always() && steps.modules.outputs.satellite == 'true'
         run: ./gradlew :companion-satellite:test
 
+      - name: Companion Satellite coverage floor
+        if: always() && steps.modules.outputs.satellite == 'true'
+        run: ./gradlew :companion-satellite:jacocoTestCoverageVerification -x test
+
       # Same reasoning as the converter above: a module of this build, so a root-wrapper task
       # rather than a wrapper of its own.
       - name: Lower Third generator tests
         if: always() && steps.modules.outputs.lottiegen == 'true'
         run: ./gradlew :lottieGenerator:test
+
+      - name: Lower Third generator coverage floor
+        if: always() && steps.modules.outputs.lottiegen == 'true'
+        run: ./gradlew :lottieGenerator:jacocoTestCoverageVerification -x test
 
       # Same again: a module of this build, and its data layer carries the six-counter floor while
       # the Compose UI package is excluded from it.
@@ -252,6 +261,14 @@ jobs:
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:jacocoTestCoverageVerification -x test
 
+      - name: Bible Lookup Engine tests
+        if: always() && steps.modules.outputs.ble == 'true'
+        run: ./gradlew :bible-engine:test
+
+      - name: Bible Lookup Engine coverage floor
+        if: always() && steps.modules.outputs.ble == 'true'
+        run: ./gradlew :bible-engine:jacocoTestCoverageVerification -x test
+
       - name: Core models tests
         if: always() && steps.modules.outputs.coremodels == 'true'
         run: ./gradlew :core-models:test
@@ -267,11 +284,6 @@ jobs:
       - name: Presentation Engine tests
         if: always() && steps.modules.outputs.engine == 'true'
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine
-        run: chmod +x gradlew && ./gradlew test
-
-      - name: Bible Lookup Engine tests
-        if: always() && steps.modules.outputs.ble == 'true'
-        working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE
         run: chmod +x gradlew && ./gradlew test
 
 
@@ -297,6 +309,7 @@ jobs:
             crossword/build/test-results/**/TEST-*.xml
             theme/build/test-results/**/TEST-*.xml
             core-models/build/test-results/**/TEST-*.xml
+            bible-engine/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order.
           check_name: |
@@ -307,6 +320,7 @@ jobs:
             Crossword
             Theme
             Core models
+            Bible Lookup Engine
             Sub-builds (skipped unless their own directory changed)
           detailed_summary: true
           include_passed: false
@@ -437,5 +451,7 @@ jobs:
             theme/build/test-results/
             core-models/build/reports/tests/
             core-models/build/test-results/
+            bible-engine/build/reports/tests/
+            bible-engine/build/test-results/
             composeApp/src/jvmMain/appResources/common/*/build/reports/tests/
             composeApp/src/jvmMain/appResources/common/*/build/test-results/

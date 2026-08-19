@@ -51,7 +51,7 @@
 - `presenter/BiblePresenter.kt`
 - `dialogs/tabs/BibleSettingsTab.kt`
 - `core-models/src/main/kotlin/.../models/SelectedVerse.kt` (the `:core-models` module)
-- `appResources/common/ChurchPresenter-BLE/` — Bible Lookup Engine (speech-to-reference detection)
+- `bible-engine/` (the `:bible-engine` Gradle module, at the repo root) — Bible Lookup Engine (speech-to-reference detection)
 
 ## Slides & Presentations
 - **PowerPoint, Keynote & PDF** — drop in `.pptx`, `.ppt`, `.key` or `.pdf` files and present them as slides — no Microsoft or Apple software required.
