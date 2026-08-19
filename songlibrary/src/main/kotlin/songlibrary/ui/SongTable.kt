@@ -75,6 +75,9 @@ internal fun SongTable(
     val scroll = rememberScrollState()
     val listState = rememberLazyListState()
     val rows = state.rows
+    // Read here and passed down: as `state.songbooks` inside the row it was a scan and sort of the
+    // whole library per visible row per frame.
+    val songbooks = state.songbooks
     val columnWidth = state.visibleColumns.fold(0.dp) { total, field -> total + field.width() + 1.dp }
     val width = TICK_WIDTH + columnWidth + ACTIONS_WIDTH
 
@@ -91,6 +94,7 @@ internal fun SongTable(
                         SongRow(
                             song = song,
                             state = state,
+                            songbooks = songbooks,
                             width = width,
                             onEdit = { onEditRow(song) },
                             onDelete = { onDeleteRow(song) },
@@ -168,6 +172,7 @@ private fun TableHeader(state: SongLibraryState, width: Dp) {
 private fun SongRow(
     song: SongItem,
     state: SongLibraryState,
+    songbooks: List<String>,
     width: Dp,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
@@ -197,7 +202,7 @@ private fun SongRow(
                     if (field == SongField.SONGBOOK) {
                         SongbookCell(
                             value = field.of(song),
-                            songbooks = state.songbooks,
+                            songbooks = songbooks,
                             onPick = { state.edit(song.sourceFile, field, it) },
                             onNewBook = onNewBook,
                         )

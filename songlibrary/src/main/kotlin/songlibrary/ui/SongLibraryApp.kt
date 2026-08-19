@@ -10,8 +10,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.launch
 import core.models.songs.SongItem
 import java.io.File
 import songlibrary.SongLibraryState
@@ -40,6 +42,10 @@ fun SongLibraryApp(
 ) {
     val state = remember(libraryFolder) { SongLibraryState(libraryFolder) }
     LaunchedEffect(libraryFolder) { state.reloadAsync() }
+    // Writing a song, a songbook or a deletion goes to disk, which is why those calls suspend. They
+    // are started from here rather than awaited: the dialog closes at once and the grid keeps
+    // drawing while the folder is written.
+    val scope = rememberCoroutineScope()
 
     var newBookOpen by remember { mutableStateOf(false) }
     var batchOpen by remember { mutableStateOf(false) }
@@ -70,7 +76,7 @@ fun SongLibraryApp(
             selectedCount = state.selected.size,
             onDismiss = { newBookOpen = false },
             onCreate = { name, assign ->
-                state.createSongbook(name, assign)
+                scope.launch { state.createSongbook(name, assign) }
                 newBookOpen = false
             },
         )
@@ -93,7 +99,8 @@ fun SongLibraryApp(
             songs = pendingDelete,
             onDismiss = { pendingDelete = emptyList() },
             onConfirm = {
-                state.delete(pendingDelete)
+                val songs = pendingDelete
+                scope.launch { state.delete(songs) }
                 pendingDelete = emptyList()
             },
         )

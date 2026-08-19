@@ -24,8 +24,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.launch
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -78,9 +80,11 @@ internal fun LibraryHeader(state: SongLibraryState, onNewBook: () -> Unit) {
             SongBookFilter(state, onNewBook)
             ColumnsMenu(state)
             val newSongTitle = stringResource(Res.string.new_song)
+            val scope = rememberCoroutineScope()
             PrimaryButton(
                 label = newSongTitle,
-                onClick = { state.newSong(newSongTitle) },
+                enabled = !state.isWriting,
+                onClick = { scope.launch { state.newSong(newSongTitle) } },
                 icon = { Icon(Icons.Default.Add, null, Modifier.size(13.dp), tint = scheme.onPrimary) },
             )
         }
@@ -169,8 +173,17 @@ internal fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
                 )
             }
             Spacer(Modifier.weight(1f))
-            QuietButton(stringResource(Res.string.revert), onClick = { state.revert() }, enabled = state.isDirty)
-            PrimaryButton(stringResource(Res.string.save_changes), onClick = { state.save() }, enabled = state.isDirty)
+            val scope = rememberCoroutineScope()
+            QuietButton(
+                stringResource(Res.string.revert),
+                onClick = { state.revert() },
+                enabled = state.isDirty && !state.isWriting,
+            )
+            PrimaryButton(
+                stringResource(Res.string.save_changes),
+                onClick = { scope.launch { state.save() } },
+                enabled = state.isDirty && !state.isWriting,
+            )
             if (onClose != null) {
                 Box(Modifier.width(1.dp).height(20.dp).background(scheme.outlineVariant))
                 QuietButton(stringResource(Res.string.done), onClick = onClose)

@@ -1,11 +1,14 @@
 package songlibrary
 
+import core.models.songs.SaveOutcome
 import core.models.songs.SongField
 import core.models.songs.SortColumn
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.nio.file.Files
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -96,6 +99,11 @@ class SongLibraryStateTest {
         assertFalse(state.view.ascending)
         assertEquals(listOf("Ten", "Rise", "Loose", "Clap"), state.rows.map { it.title })
 
+        // And a third click turns it back, rather than sticking at descending.
+        state.sortBy(SortColumn.TITLE)
+        assertTrue(state.view.ascending)
+        assertEquals(listOf("Clap", "Loose", "Rise", "Ten"), state.rows.map { it.title })
+
         state.sortBy(SortColumn.AUTHOR)
         assertTrue(state.view.ascending)
         assertEquals(SortColumn.AUTHOR, state.view.sortBy)
@@ -181,7 +189,7 @@ class SongLibraryStateTest {
     @Test
     fun `a reload drops the selection, because the paths it holds may be gone`() {
         state.toggle(fileOf("Rise"))
-        state.reload()
+        state.reloadNow()
 
         assertTrue(state.selected.isEmpty())
     }
@@ -237,7 +245,7 @@ class SongLibraryStateTest {
     @Test
     fun `save writes the edit to the file and stops being dirty`() {
         state.edit(fileOf("Rise"), SongField.AUTHOR, "Wesley")
-        val outcome = state.save()
+        val outcome = state.saveNow()
 
         assertEquals(1, outcome.saved)
         assertTrue(outcome.errors.isEmpty())
@@ -249,7 +257,7 @@ class SongLibraryStateTest {
     @Test
     fun `renumbering a song moves its file and the state follows it`() {
         state.edit(fileOf("Rise"), SongField.NUMBER, "0042")
-        state.save()
+        state.saveNow()
 
         assertFalse(File(root, "Hymns/0002 - Rise.song").exists())
         assertTrue(File(root, "Hymns/0042 - Rise.song").exists())
@@ -259,7 +267,7 @@ class SongLibraryStateTest {
     @Test
     fun `a new song is written under the songbook being filtered on`() {
         state.view = state.view.copy(songbook = "Hymns")
-        state.newSong("Untitled")
+        state.newSongNow("Untitled")
 
         val fresh = state.songs.first { it.title == "Untitled" }
         assertEquals("Hymns", fresh.songbook)
@@ -268,7 +276,7 @@ class SongLibraryStateTest {
 
     @Test
     fun `a new song with no book being filtered on lands in the library root`() {
-        state.newSong("Untitled")
+        state.newSongNow("Untitled")
 
         val fresh = state.songs.first { it.title == "Untitled" }
         assertEquals("", fresh.songbook)
@@ -281,7 +289,7 @@ class SongLibraryStateTest {
         // there. Deterministic and cross-platform, unlike leaning on file permissions -- and a
         // target that merely exists is not enough: the library moves to a free name beside it.
         state.edit(fileOf("Rise"), SongField.SONGBOOK, "Loose.song")
-        val outcome = state.save()
+        val outcome = state.saveNow()
 
         assertEquals(0, outcome.saved)
         assertEquals(1, outcome.errors.size)
@@ -293,7 +301,7 @@ class SongLibraryStateTest {
     fun `deleting a selection removes the files and forgets the songs`() {
         val gone = File(fileOf("Rise"))
         state.toggle(gone.absolutePath)
-        val outcome = state.deleteSelected()
+        val outcome = state.deleteSelectedNow()
 
         assertTrue(outcome.errors.isEmpty())
         assertFalse(gone.exists())
@@ -306,7 +314,7 @@ class SongLibraryStateTest {
     fun `a new songbook is a folder, and can take the selection with it`() {
         state.toggle(fileOf("Loose"))
 
-        assertTrue(state.createSongbook("Anthems", assignSelected = true))
+        assertTrue(state.createSongbookNow("Anthems", assignSelected = true))
         assertTrue(File(root, "Anthems").isDirectory)
         assertEquals("Anthems", state.songs.first { it.title == "Loose" }.songbook)
     }
@@ -315,15 +323,51 @@ class SongLibraryStateTest {
     fun `a new songbook can be made without touching the selection`() {
         state.toggle(fileOf("Loose"))
 
-        assertTrue(state.createSongbook("Anthems", assignSelected = false))
+        assertTrue(state.createSongbookNow("Anthems", assignSelected = false))
         assertTrue(File(root, "Anthems").isDirectory)
         assertEquals("", state.songs.first { it.title == "Loose" }.songbook)
         assertFalse(state.isDirty)
     }
 
     @Test
+    fun `a write is flagged while it runs, so the buttons that started it stay off`() {
+        // A dispatcher that reads the flag at the moment the disk work is handed to it: the window
+        // is drawing then, and that is the frame the Save button has to be off for.
+        var duringWrite: Boolean? = null
+        val watching = object : CoroutineDispatcher() {
+            override fun dispatch(context: CoroutineContext, block: Runnable) {
+                if (duringWrite == null) duringWrite = state.isWriting
+                block.run()
+            }
+        }
+        state.edit(fileOf("Rise"), SongField.AUTHOR, "Wesley")
+        runBlocking { state.save(watching) }
+
+        assertEquals(true, duringWrite)
+        assertFalse(state.isWriting)
+    }
+
+    @Test
     fun `a songbook outside the library folder is refused`() {
-        assertFalse(state.createSongbook("../Escaped", assignSelected = false))
+        assertFalse(state.createSongbookNow("../Escaped", assignSelected = false))
         assertFalse(File(root.parentFile, "Escaped").exists())
     }
+
+    // ── The write path, run to completion ─────────────────────────────────────
+
+    // Everything that touches the disk suspends, so the window can keep drawing while it runs.
+    // Unconfined executes it inline on this thread, so a test still reads as one call and asserts
+    // on the next line without waiting for anything.
+    private fun SongLibraryState.reloadNow() = runBlocking { reloadAsync(Dispatchers.Unconfined) }
+
+    private fun SongLibraryState.saveNow(): SaveOutcome = runBlocking { save(Dispatchers.Unconfined) }
+
+    private fun SongLibraryState.newSongNow(title: String) =
+        runBlocking { newSong(title, Dispatchers.Unconfined) }
+
+    private fun SongLibraryState.deleteSelectedNow(): SaveOutcome =
+        runBlocking { deleteSelected(Dispatchers.Unconfined) }
+
+    private fun SongLibraryState.createSongbookNow(name: String, assignSelected: Boolean): Boolean =
+        runBlocking { createSongbook(name, assignSelected, Dispatchers.Unconfined) }
 }
