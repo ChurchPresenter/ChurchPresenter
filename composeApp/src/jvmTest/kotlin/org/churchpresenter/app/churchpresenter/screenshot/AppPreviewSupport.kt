@@ -35,6 +35,7 @@ import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.SourceTransform
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.RecentMediaFiles
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -203,9 +204,38 @@ internal fun appPreview(
             presenterManager.setAnnouncementTransitionAlpha(1f)
             presenterManager.setBibleTransitionAlpha(1f)
             presenterManager.setSongTransitionAlpha(1f)
+            pinLottieFrame(presenterManager)
             waitForIdle()
             captureTo(File("$ROOT/${name}_$suffix.png"))
         }
+    }
+}
+
+/**
+ * Pins the lower-third playback to one frame, so a shot of a live lottie is the same picture twice.
+ *
+ * `main.kt` owns the playback clock; this harness drives [MainDesktop] directly, so nothing advances
+ * the animation and the capture simply shows whichever frame the pre-render's decode worker happened
+ * to publish first. Measured: two consecutive recordings of `lower_third_dark` differed over the
+ * band itself — fully drawn in one, still fading in the other — which is a diff on every run for a
+ * picture nobody changed.
+ *
+ * The last frame is the settled one: it is what stays on screen once the entrance has played, which
+ * is what a screenshot of a live lower third should show. Waiting on the published frame's own index
+ * ends this on a positive signal rather than on a pause, and a deck with no lottie live falls
+ * straight through.
+ */
+private fun ComposeUiTest.pinLottieFrame(presenterManager: PresenterManager) {
+    if (presenterManager.presentingMode.value != Presenting.LOWER_THIRD) return
+    // The pre-render runs off the UI thread and finishes whenever it finishes; until it does, the
+    // presenter draws the composition itself. Waiting for it means every run takes the same path.
+    waitUntil("the lower-third pre-render is ready", 15_000L) {
+        (presenterManager.lottieFrameCount.value ?: 0) > 0
+    }
+    val settled = (presenterManager.lottieFrameCount.value ?: return) - 1
+    presenterManager.setLottieCurrentFrameIndex(settled)
+    waitUntil("lower-third frame $settled is the one on screen", 5_000L) {
+        presenterManager.lottieFrame.value?.index == settled
     }
 }
 
