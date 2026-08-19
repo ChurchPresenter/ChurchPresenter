@@ -35,6 +35,7 @@ import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.SourceTransform
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.RecentMediaFiles
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -203,9 +204,36 @@ internal fun appPreview(
             presenterManager.setAnnouncementTransitionAlpha(1f)
             presenterManager.setBibleTransitionAlpha(1f)
             presenterManager.setSongTransitionAlpha(1f)
+            pinLottieFrame(presenterManager)
             waitForIdle()
             captureTo(File("$ROOT/${name}_$suffix.png"))
         }
+    }
+}
+
+/**
+ * Pins the lower third to one frame, so a shot of a live lottie is the same picture twice.
+ *
+ * The presenter draws the pre-rendered frame stream when it is ready and composes the animation
+ * itself until then, and the pre-render finishes off the UI thread whenever it finishes — so the
+ * capture landed on a different frame every run: the band fully drawn in one recording, still
+ * fading in the next. Measured at 580 pixels over the band itself, under the change threshold and
+ * therefore never a failure, just a diff in every comparison for a picture nobody touched.
+ *
+ * Waiting for the pre-render puts every run on the same path, and the last frame is the settled one
+ * — what stays on screen once the entrance has played, which is what a shot of a live lower third
+ * should show. Both waits end on a positive signal, and a tab with no lower third live falls
+ * straight through.
+ */
+private fun ComposeUiTest.pinLottieFrame(presenterManager: PresenterManager) {
+    if (presenterManager.presentingMode.value != Presenting.LOWER_THIRD) return
+    waitUntil("the lower-third pre-render is ready", 15_000L) {
+        (presenterManager.lottieFrameCount.value ?: 0) > 0
+    }
+    val settled = (presenterManager.lottieFrameCount.value ?: return) - 1
+    presenterManager.setLottieCurrentFrameIndex(settled)
+    waitUntil("lower-third frame $settled is the one on screen", 5_000L) {
+        presenterManager.lottieFrame.value?.index == settled
     }
 }
 

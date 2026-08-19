@@ -110,15 +110,17 @@ class KeynotePackageDirectoryTest {
     }
 
     @Test
-    fun `thumbnails follow the slide order the Index declares`() {
-        // st-9 belongs to the first slide and st-3 to the second: name order is not slide order.
+    fun `thumbnails are matched to slides by id, in the same order on every machine`() {
+        // A folder has no declared order — File.listFiles answers in whatever order the filesystem
+        // stores, which differs between APFS and ext4 — so slide ids are what the mapping runs on:
+        // Slide-3 takes the lowest-numbered thumbnail, Slide-9 the next.
         val dir = bundle(slideIds = listOf(9L, 3L), thumbnails = listOf("st-3.jpg", "st-9.jpg"))
         val entries = KeynoteStaticSupport.analyze(dir).orderedThumbnailEntries
 
         assertContentEquals(
-            listOf("st-9.jpg", "st-3.jpg"),
+            listOf("st-3.jpg", "st-9.jpg"),
             entries.map { File(it).name },
-            "slide order comes from Index/Slide-<id>.iwa, not from the thumbnail file names",
+            "the id order is the order, whatever order the directory listing came back in",
         )
     }
 
