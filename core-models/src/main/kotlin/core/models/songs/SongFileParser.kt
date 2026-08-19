@@ -1,9 +1,8 @@
-package org.churchpresenter.app.churchpresenter.data
+package core.models.songs
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -33,6 +32,9 @@ data class SongCache(
 )
 
 private const val TITLE_KEY_LENGTH = 6
+
+/** The extension every song in a library carries. */
+const val SONG_EXTENSION = "song"
 
 class SongFileParser {
 
@@ -239,7 +241,7 @@ class SongFileParser {
 
         // Load .song files in this directory
         val songFiles = currentDir.listFiles { file ->
-            file.extension.lowercase() == Constants.EXTENSION_SONG
+            file.extension.equals(SONG_EXTENSION, ignoreCase = true)
         } ?: emptyArray()
         for (songFile in songFiles.sortedBy { it.name }) {
             val path = songFile.absolutePath

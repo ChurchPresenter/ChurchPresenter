@@ -311,6 +311,10 @@ kotlin {
             // The converter: a real module rather than a mounted source directory, opened in its
             // own window from the Help menu (AboutDialog) and used for Bible/song file conversion.
             implementation(projects.converter)
+            // The shared models: the song, the `.song` format and the library it lives in.
+            implementation(projects.coreModels)
+            // The song library: the grid of every song in the library, opened from the Help menu.
+            implementation(projects.songlibrary)
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.
             implementation(projects.companionSatellite)

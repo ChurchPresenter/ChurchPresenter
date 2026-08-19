@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">บันทึกข้อมูลวินิจฉัยสำเร็จแล้ว</string>
     <string name="diagnostic_info_save_failed">บันทึกข้อมูลวินิจฉัยไม่สำเร็จ</string>
     <string name="open_converter">ตัวแปลงไฟล์</string>
+    <string name="open_song_library">ตัวจัดการคลังเพลง</string>
     <string name="report_bug">แจ้งข้อบกพร่อง</string>
     <string name="submit_feature_request">ขอฟีเจอร์ใหม่</string>
     <string name="action_ok">ตกลง</string>

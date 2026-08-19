@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">Maelezo ya uchunguzi yamehifadhiwa.</string>
     <string name="diagnostic_info_save_failed">Kuhifadhi maelezo ya uchunguzi kumeshindikana.</string>
     <string name="open_converter">Kibadilishaji</string>
+    <string name="open_song_library">Kidhibiti cha Maktaba ya Nyimbo</string>
     <string name="report_bug">Ripoti Hitilafu</string>
     <string name="submit_feature_request">Omba Kipengele</string>
     <string name="action_ok">Sawa</string>

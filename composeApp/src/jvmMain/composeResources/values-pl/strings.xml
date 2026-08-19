@@ -351,6 +351,25 @@
     <string name="language_romanian">Rumuński</string>
     <string name="language_slovak">Słowacki</string>
     <string name="language_estonian">Estoński</string>
+    <string name="language_latvian">Łotewski</string>
+    <string name="language_croatian">Chorwacki</string>
+    <string name="language_swedish">Szwedzki</string>
+    <string name="language_norwegian">Norweski</string>
+    <string name="language_finnish">Fiński</string>
+    <string name="language_turkish">Turecki</string>
+    <string name="language_uzbek">Uzbecki</string>
+    <string name="language_arabic">Arabski</string>
+    <string name="language_persian">Perski</string>
+    <string name="language_hindi">Hindi</string>
+    <string name="language_nepali">Nepalski</string>
+    <string name="language_thai">Tajski</string>
+    <string name="language_lao">Laotański</string>
+    <string name="language_japanese">Japoński</string>
+    <string name="language_chinese">Chiński (uproszczony)</string>
+    <string name="language_indonesian">Indonezyjski</string>
+    <string name="language_malay">Malajski</string>
+    <string name="language_tagalog">Tagalski</string>
+    <string name="language_swahili">Suahili</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Nie znaleziono wyników dla "%1$s"</string>
@@ -842,6 +861,10 @@
     <string name="schedule_density_normal">Normalny</string>
     <string name="schedule_density_detailed">Szczegółowy</string>
     <string name="schedule_kind_lower_third">Dolna trzecia</string>
+    <string name="tooltip_schedule_options">Ustawienia programu</string>
+    <string name="schedule_show_buttons_under_title">Pokaż przyciski pod tytułem</string>
+    <string name="schedule_option_item_count">Liczba pozycji</string>
+    <string name="schedule_option_zoom">Sterowanie powiększeniem</string>
     <string name="schedule_drop_hint">Przeciągnij pliki tutaj, aby dodać do programu</string>
     <string name="schedule_note_placeholder">Dodaj notatkę…</string>
     <string name="screen_number">Ekran %1$d</string>
@@ -940,6 +963,18 @@
     <string name="statistics_exported_error">Nie udało się wyeksportować statystyk.</string>
     <string name="file_chooser_save_statistics">Zapisz statystyki jako</string>
     <string name="file_filter_xls">Arkusz Excel (*.xls)</string>
+    <string name="stats_period_label">Okres:</string>
+    <string name="stats_period_all_time">Cały czas</string>
+    <string name="stats_period_last_3_months">Ostatnie 3 miesiące</string>
+    <string name="stats_period_last_6_months">Ostatnie 6 miesięcy</string>
+    <string name="stats_period_last_12_months">Ostatnie 12 miesięcy</string>
+    <string name="stats_period_year">Rok</string>
+    <string name="stats_filter_all_songbooks">Wszystkie śpiewniki</string>
+    <string name="stats_filter_all_bibles">Wszystkie Biblie</string>
+    <string name="stats_period_custom">wybrane daty</string>
+    <string name="stats_clear_item">Usuń ze statystyk</string>
+    <string name="stats_clear_item_confirm">Usunąć %1$s ze statystyk za %2$s? Tej operacji nie można cofnąć.</string>
+    <string name="stats_clear_all_confirm">Wyczyścić wszystkie statystyki? Usunie to również historię wyświetleń, na której opiera się raport CCLI. Tej operacji nie można cofnąć.</string>
 
     <!-- Remote API / Companion Server (added) -->
     <string name="auto_fit_button_tooltip">Oblicz optymalny rozmiar czcionki dla bieżącego wersetu</string>
@@ -1662,6 +1697,7 @@
     <string name="media_vlc_arch_mismatch">Zła architektura VLC. Twój Mac używa Apple Silicon (arm64), ale zainstalowany VLC obsługuje tylko Intel (x86_64). Pobierz wersję VLC dla Apple Silicon ze strony videolan.org i uruchom ponownie.</string>
     <string name="media_vlc_load_failed">Znaleziono VLC, ale nie udało się go załadować. Spróbuj ponownie zainstalować VLC ze strony videolan.org (w systemie Windows zainstaluj też Microsoft Visual C++ Redistributable), a następnie uruchom ponownie aplikację.</string>
     <string name="open_converter">Konwerter</string>
+    <string name="open_song_library">Menedżer biblioteki pieśni</string>
     <string name="projection_content_web">Sieć</string>
     <string name="projection_content_background">Tło</string>
     <string name="projection_content_lt_background">Tło dolnej trzeciej</string>

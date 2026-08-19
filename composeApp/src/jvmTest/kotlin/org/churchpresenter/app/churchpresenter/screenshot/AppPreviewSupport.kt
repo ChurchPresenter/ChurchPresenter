@@ -17,8 +17,8 @@ import org.churchpresenter.app.churchpresenter.MainDesktop
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
-import org.churchpresenter.app.churchpresenter.data.SongFileParser
-import org.churchpresenter.app.churchpresenter.data.SongItem
+import core.models.songs.SongFileParser
+import core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings

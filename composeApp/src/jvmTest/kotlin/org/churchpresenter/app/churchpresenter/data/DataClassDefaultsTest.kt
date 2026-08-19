@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import core.models.songs.CachedSong
+import core.models.songs.SongCache
+import core.models.songs.SongItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

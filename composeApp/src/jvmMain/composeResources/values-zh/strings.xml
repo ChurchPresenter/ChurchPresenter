@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">诊断信息已成功保存。</string>
     <string name="diagnostic_info_save_failed">保存诊断信息失败。</string>
     <string name="open_converter">转换器</string>
+    <string name="open_song_library">歌曲库管理器</string>
     <string name="report_bug">反馈问题</string>
     <string name="submit_feature_request">功能建议</string>
     <string name="action_ok">确定</string>

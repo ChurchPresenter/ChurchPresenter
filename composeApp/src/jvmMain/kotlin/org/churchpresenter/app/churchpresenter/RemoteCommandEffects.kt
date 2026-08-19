@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
-import org.churchpresenter.app.churchpresenter.data.SongItem
+import core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest

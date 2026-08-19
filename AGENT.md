@@ -82,6 +82,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `lottieGenerator/` | `:lottieGenerator` | Animated lower-third generator, also a standalone app | [AGENT.md](lottieGenerator/AGENT.md) |
 | `crossword/` | `:crossword` | Crossword authoring tool + the encoded puzzles the app ships | [AGENT.md](crossword/AGENT.md) |
 | `presentation-engine/` | `:presentation-engine` | PPTX/PPT/Keynote/PDF parsing, timing and animation | [AGENT.md](presentation-engine/AGENT.md) |
+| `songlibrary/` | `:songlibrary` | The Song Library Manager window, opened from the Help menu | [AGENT.md](songlibrary/AGENT.md) |
 
 **Every one of them is a real Gradle module of this build** — `include(":theme")`,
 `implementation(projects.companionSatellite)`, tested with `./gradlew :<module>:test` on the root
@@ -111,11 +112,32 @@ A module's build file carries only what differs, and both are read when the task
 they must be set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults, so name only the
   counters that need a different number (usually the one or two that cannot reach 85%), never all
-  six. `:converter`, `:companion-satellite` and `:bible-engine` name two each; `:theme`,
-  `:core-models`, `:lottieGenerator` and `:crossword` name none. Each module's own `AGENT.md` says
-  which, and why.
+  six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
+  each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword` and `:songlibrary` name none.
+  Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
-  `**/ComposableSingletons*` outright.
+  `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
+
+### **NEVER exclude code from coverage without asking first**
+An exclude does not make code tested; it makes the gate stop asking. It is the one change that can
+turn a real coverage failure green while leaving the untested code exactly as it was, and it is
+invisible in the number afterwards — a module reporting 98% over a tenth of its classes reads the
+same as one reporting 98% over all of them.
+
+So: **do not add a path to `extra["coverageExcludes"]`, and do not widen an existing pattern, on
+your own initiative.** Raise it, say what cannot be tested and why, and let the person running the
+work decide. The same goes for lowering `extra["coverageFloors"]`.
+
+If the honest answer is "this needs a display / a device / a network", the first move is the split
+described under **Tests** below — pull the decisions out of the unreachable call and test those —
+not an exclude. A carve-out that survives that exercise is worth stating in the module's own
+`AGENT.md`: what is excluded, and what makes it unreachable.
+
+**Measure what an exclude is hiding before believing the number beside it.** `:songlibrary`
+reported 94.5% instructions over 15 classes; with its four-path exclude list removed the same suite
+measures **2.7% over 48** — 1,102 instructions of 40,871. Nothing about the tests changed. Take the
+headline figure from a module that excludes anything as a statement about the excluded set, not
+about the module, and say which it is.
 
 **Do not re-declare `jacocoTestReport`/`jacocoTestCoverageVerification` in a module.** Configuring
 the task there realizes it during evaluation, before the `extra` above is set, and a second

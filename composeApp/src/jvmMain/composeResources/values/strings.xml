@@ -186,6 +186,7 @@
     <string name="diagnostic_info_saved">Diagnostic info saved successfully.</string>
     <string name="diagnostic_info_save_failed">Failed to save diagnostic info.</string>
     <string name="open_converter">Converter</string>
+    <string name="open_song_library">Song Library Manager</string>
     <string name="report_bug">Report a Bug</string>
     <string name="submit_feature_request">Feature Request</string>
     <string name="action_ok">OK</string>

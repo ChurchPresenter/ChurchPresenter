@@ -103,6 +103,7 @@
     <string name="about_copyright">© %1$s Church Presenter</string>
     <string name="open_crash_logs">Crashlogs openen</string>
     <string name="open_converter">Converter</string>
+    <string name="open_song_library">Liedbibliotheekbeheer</string>
     <string name="report_bug">Bug melden</string>
     <string name="submit_feature_request">Functie aanvragen</string>
     <string name="action_ok">OK</string>
@@ -540,6 +541,10 @@
     <string name="schedule_density_normal">Normaal</string>
     <string name="schedule_density_detailed">Gedetailleerd</string>
     <string name="schedule_kind_lower_third">Lower Third</string>
+    <string name="tooltip_schedule_options">Programma-opties</string>
+    <string name="schedule_show_buttons_under_title">Knoppen onder de titel tonen</string>
+    <string name="schedule_option_item_count">Aantal items</string>
+    <string name="schedule_option_zoom">Zoomknoppen</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Label toevoegen</string>
@@ -1204,6 +1209,18 @@
     <string name="statistics_exported_error">Exporteren van statistieken mislukt.</string>
     <string name="file_chooser_save_statistics">Statistieken opslaan als</string>
     <string name="file_filter_xls">Excel-spreadsheet (*.xls)</string>
+    <string name="stats_period_label">Periode:</string>
+    <string name="stats_period_all_time">Alle tijd</string>
+    <string name="stats_period_last_3_months">Laatste 3 maanden</string>
+    <string name="stats_period_last_6_months">Laatste 6 maanden</string>
+    <string name="stats_period_last_12_months">Laatste 12 maanden</string>
+    <string name="stats_period_year">Jaar</string>
+    <string name="stats_filter_all_songbooks">Alle liedboeken</string>
+    <string name="stats_filter_all_bibles">Alle Bijbels</string>
+    <string name="stats_period_custom">de geselecteerde datums</string>
+    <string name="stats_clear_item">Uit de statistieken verwijderen</string>
+    <string name="stats_clear_item_confirm">%1$s uit de statistieken van %2$s verwijderen? Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="stats_clear_all_confirm">Alle statistieken wissen? Hiermee wordt ook de afspeelgeschiedenis verwijderd waarop het CCLI-rapport is gebaseerd. Dit kan niet ongedaan worden gemaakt.</string>
 
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Toevoegen aan programma</string>
@@ -1725,6 +1742,25 @@
     <string name="language_dutch">Nederlands</string>
     <string name="language_slovak">Slowaaks</string>
     <string name="language_estonian">Ests</string>
+    <string name="language_latvian">Lets</string>
+    <string name="language_croatian">Kroatisch</string>
+    <string name="language_swedish">Zweeds</string>
+    <string name="language_norwegian">Noors</string>
+    <string name="language_finnish">Fins</string>
+    <string name="language_turkish">Turks</string>
+    <string name="language_uzbek">Oezbeeks</string>
+    <string name="language_arabic">Arabisch</string>
+    <string name="language_persian">Perzisch</string>
+    <string name="language_hindi">Hindi</string>
+    <string name="language_nepali">Nepalees</string>
+    <string name="language_thai">Thai</string>
+    <string name="language_lao">Laotiaans</string>
+    <string name="language_japanese">Japans</string>
+    <string name="language_chinese">Chinees (vereenvoudigd)</string>
+    <string name="language_indonesian">Indonesisch</string>
+    <string name="language_malay">Maleis</string>
+    <string name="language_tagalog">Tagalog</string>
+    <string name="language_swahili">Swahili</string>
     <string name="tab_dictionary">Woordenboek</string>
     <string name="dictionary_search_hint">Zoek op nummer, woord of definitie…</string>
     <string name="dictionary_filter_all">Alles</string>

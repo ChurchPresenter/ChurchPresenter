@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import core.models.songs.SongItem
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.announcements
 import churchpresenter.composeapp.generated.resources.bible

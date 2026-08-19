@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">डायग्नोस्टिक जानकारी सफलतापूर्वक सहेजी गई।</string>
     <string name="diagnostic_info_save_failed">डायग्नोस्टिक जानकारी सहेजी नहीं जा सकी।</string>
     <string name="open_converter">कन्वर्टर</string>
+    <string name="open_song_library">गीत लाइब्रेरी प्रबंधक</string>
     <string name="report_bug">बग रिपोर्ट करें</string>
     <string name="submit_feature_request">नई सुविधा का अनुरोध</string>
     <string name="action_ok">ठीक है</string>

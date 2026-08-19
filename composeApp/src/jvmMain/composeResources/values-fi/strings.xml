@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">Diagnostiikkatiedot tallennettiin.</string>
     <string name="diagnostic_info_save_failed">Diagnostiikkatietojen tallennus epäonnistui.</string>
     <string name="open_converter">Muunnin</string>
+    <string name="open_song_library">Laulukirjaston hallinta</string>
     <string name="report_bug">Ilmoita virheestä</string>
     <string name="submit_feature_request">Ominaisuustoive</string>
     <string name="action_ok">OK</string>

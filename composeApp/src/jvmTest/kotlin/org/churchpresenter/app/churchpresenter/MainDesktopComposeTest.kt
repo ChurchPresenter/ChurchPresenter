@@ -18,8 +18,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.data.SongFileParser
-import org.churchpresenter.app.churchpresenter.data.SongItem
+import core.models.songs.SongFileParser
+import core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.data.settings.SongSettings

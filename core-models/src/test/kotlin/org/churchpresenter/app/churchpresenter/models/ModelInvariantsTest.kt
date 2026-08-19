@@ -37,41 +37,38 @@ class ModelInvariantsTest {
      * The test classes share the package, so the filter is what a model *is* — a data class or an
      * enum — rather than where its file sits.
      */
-    private fun modelClasses(): List<KClass<*>> {
-        val pkgPath = KeyChord::class.java.packageName.replace('.', '/')
-        val names = System.getProperty("java.class.path")
-            .split(File.pathSeparator)
-            .flatMapTo(mutableSetOf()) { entry -> classNamesIn(File(entry), pkgPath) }
-        return names.mapNotNull { runCatching { Class.forName(it).kotlin }.getOrNull() }
+    private fun modelClasses(): List<KClass<*>> =
+        System.getProperty("java.class.path").split(File.pathSeparator)
+            .flatMap { classNamesIn(File(it)) }
+            .toSet()
+            .mapNotNull { runCatching { Class.forName(it).kotlin }.getOrNull() }
             .filter { it.isData || it.java.isEnum }
             .filterNot { it.isAbstract || it.isSealed }
             .sortedBy { it.qualifiedName }
-    }
 
-    /**
-     * The names of the classes [root] holds under [pkgPath] — a directory of `.class` files under
-     * `build/classes`, or a jar on the test runtime classpath.
-     *
-     * Its own function so the walk stays one block deep: inline, the entry loop, the two-way [when]
-     * and the sequence lambdas nested five deep and detekt rejected it.
-     */
-    private fun classNamesIn(root: File, pkgPath: String): List<String> = when {
-        root.isDirectory -> File(root, pkgPath).takeIf { it.isDirectory }
-            ?.walkTopDown()
-            ?.filter { it.isFile && it.extension == "class" }
-            ?.map { it.relativeTo(root).path.removeSuffix(".class").replace(File.separatorChar, '.') }
-            ?.toList()
-            .orEmpty()
-
-        root.isFile && root.extension == "jar" -> ZipFile(root).use { jar ->
-            jar.entries().asSequence()
-                .filter { it.name.startsWith("$pkgPath/") && it.name.endsWith(".class") }
-                .map { it.name.removeSuffix(".class").replace('/', '.') }
-                .toList()
-        }
-
+    private fun classNamesIn(root: File): List<String> = when {
+        root.isDirectory -> directoryClassNames(root)
+        root.isFile && root.extension == "jar" -> jarClassNames(root)
         else -> emptyList()
     }
+
+    private fun directoryClassNames(root: File): List<String> {
+        val dir = File(root, PACKAGE_PATH)
+        if (!dir.isDirectory) return emptyList()
+        return dir.walkTopDown()
+            .filter { it.isFile && it.extension == "class" }
+            .map { it.relativeTo(root).path.removeSuffix(".class").replace(File.separatorChar, '.') }
+            .toList()
+    }
+
+    private fun jarClassNames(jar: File): List<String> =
+        ZipFile(jar).use { zip ->
+            zip.entries().asSequence()
+                .map { it.name }
+                .filter { it.startsWith("$PACKAGE_PATH/") && it.endsWith(".class") }
+                .map { it.removeSuffix(".class").replace('/', '.') }
+                .toList()
+        }
 
     /**
      * A value for [param] that is distinctive to its own name, so a swapped constructor argument
@@ -277,5 +274,10 @@ class ModelInvariantsTest {
             assertTrue(instance.id.isNotEmpty(), "${cls.simpleName}.id did not come through")
             assertTrue(instance.name.isNotEmpty(), "${cls.simpleName}.name did not come through")
         }
+    }
+
+    private companion object {
+        /** The package the models live in, as a class-file path. */
+        val PACKAGE_PATH: String = KeyChord::class.java.packageName.replace('.', '/')
     }
 }

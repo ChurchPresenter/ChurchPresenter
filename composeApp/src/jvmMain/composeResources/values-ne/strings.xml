@@ -181,6 +181,7 @@
     <string name="diagnostic_info_saved">निदान जानकारी सफलतापूर्वक सुरक्षित भयो।</string>
     <string name="diagnostic_info_save_failed">निदान जानकारी सुरक्षित गर्न सकिएन।</string>
     <string name="open_converter">रूपान्तरक</string>
+    <string name="open_song_library">गीत पुस्तकालय प्रबन्धक</string>
     <string name="report_bug">त्रुटि जनाउनुहोस्</string>
     <string name="submit_feature_request">सुविधाको अनुरोध</string>
     <string name="action_ok">ठीक छ</string>
