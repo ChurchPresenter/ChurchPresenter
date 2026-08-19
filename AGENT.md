@@ -81,29 +81,25 @@ file before changing it, and **put module-specific notes there, not here.**
 | `bible-engine/` | `:bible-engine` | Bible Lookup Engine — speech-to-reference detection | [AGENT.md](bible-engine/AGENT.md) |
 | `lottieGenerator/` | `:lottieGenerator` | Animated lower-third generator, also a standalone app | [AGENT.md](lottieGenerator/AGENT.md) |
 | `crossword/` | `:crossword` | Crossword authoring tool + the encoded puzzles the app ships | [AGENT.md](crossword/AGENT.md) |
-| `…/common/ChurchPresenter-PresentationEngine/` | *(none — sub-build)* | PPTX/PPT/Keynote/PDF parsing, timing and animation | [AGENT.md](composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/AGENT.md) |
+| `presentation-engine/` | `:presentation-engine` | PPTX/PPT/Keynote/PDF parsing, timing and animation | [AGENT.md](presentation-engine/AGENT.md) |
 
-All but the last are **real Gradle modules of this build** — `include(":theme")`,
+**Every one of them is a real Gradle module of this build** — `include(":theme")`,
 `implementation(projects.companionSatellite)`, tested with `./gradlew :<module>:test` on the root
 wrapper, with dependency versions from `gradle/libs.versions.toml` rather than hand-copied
 literals. Their `version` comes from the `subprojects` block in the root build; don't re-declare it.
+There are no mounted sub-builds and no second wrapper left: one `./gradlew` at the repo root builds
+and tests everything.
 
 **None of them are git submodules.** All of them are committed directly into this repository, so a
 plain `git clone` is enough and a change spanning the app and a module is one commit.
 
-### The one mounted sub-build
-`ChurchPresenter-PresentationEngine` is the last module whose source is mounted into `:composeApp`
-via `kotlin.srcDir` while keeping its own Gradle build and wrapper. Two rules follow, and its own
-`AGENT.md` has the rest:
-
-- **When touching its code, compile BOTH builds**: `./gradlew compileKotlinJvm` at the repo root
-  AND `sh gradlew build` inside the module. The main build is more permissive and will accept code
-  the module's own build rejects. This applies to no other module — one build to satisfy is the
-  point of promoting them.
-- Its presentation dependencies are **mirrored in `composeApp/build.gradle.kts` and must stay in
-  sync** — POI 5.3.0 with `poi-ooxml-lite` excluded in favor of `poi-ooxml-full`, PDFBox 2.0.33,
-  aircompressor. **Exactly ONE POI schema jar may be on the classpath**, and `:converter` ships one
-  too.
+### POI is shared by three modules
+`:presentation-engine`, `:converter` and `:composeApp` all pull Apache POI, and **exactly ONE POI
+schema jar may be on the classpath**: `poi-ooxml-full`, never `poi-ooxml-lite`, because the
+engine's `<p:timing>` parser needs classes (`CTTLTimeNode*`, `CTTLAnimateBehavior`, …) the lite jar
+omits. The version lives in `gradle/libs.versions.toml` (`apache-poi`) and nowhere else, and
+`:composeApp` excludes the lite module **graph-wide** in a `configurations.configureEach` block so
+no transitive path can reintroduce it.
 
 ### JaCoCo lives in the root build
 Every module of this build shares one shape — a `test` task, `src/main/kotlin`,

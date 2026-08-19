@@ -464,8 +464,8 @@ execution order, so it can appear on one machine and not another.
 ### The modules of this build
 
 `converter/`, `companion-satellite/`, `theme/`, `core-models/`, `bible-engine/`,
-`lottieGenerator/` and `crossword/` are part of this build, so none of them needs a wrapper of its
-own:
+`lottieGenerator/`, `crossword/` and `presentation-engine/` are all part of this build, so none of
+them needs a wrapper of its own:
 
 ```bash
 ./gradlew :converter:test              # its suite
@@ -477,24 +477,17 @@ own:
 ./gradlew :lottieGenerator:test        # the Lottie generator's suite
 ./gradlew :crossword:test              # the crossword authoring tool's suite
 ./gradlew :crossword:run               # the crossword admin editor on its own
+./gradlew :presentation-engine:test    # the PPTX/Keynote/PDF engine's suite
 ```
 
-### The one separate sub-build
+`:composeApp:check` does **not** reach any of them — each has its own suite, run through the root
+wrapper as above. CI runs them as their own steps, and only for the modules whose directory (or the
+shared build files) the change touched.
 
-`:composeApp:check` does **not** reach it — the Presentation Engine is its own Gradle build with its
-own wrapper, under `composeApp/src/jvmMain/appResources/common/`. CI runs it as a separate step. To
-run it yourself, from its directory:
-
-```bash
-./gradlew test        # macOS/Linux
-```
-```shell
-.\gradlew.bat test    # Windows
-```
-
-None of the seven modules above is in that list any more — each is a module of the main build,
-invoked as `./gradlew :<module>:test`. Promoting the Presentation Engine the same way is the plan;
-the Satellite client went first because it was the smallest.
+There are **no separate sub-builds left**: nothing under `composeApp/src/jvmMain/appResources/`
+carries a Gradle wrapper any more, and `bash test-changed.sh` names the module tasks a change
+implies. The Satellite client was promoted first because it was the smallest; the Presentation
+Engine last because it was the largest.
 
 ### DeckLink hardware tests
 

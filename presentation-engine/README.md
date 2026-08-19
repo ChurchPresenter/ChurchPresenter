@@ -2,8 +2,8 @@
 
 Parses and renders presentation files — **PPTX (animated), PPT (static), PDF, Keynote
 (animated via a reverse-engineered IWA parser)** — entirely in-JVM, cross-platform, with no
-external processes. Compiled into ChurchPresenter via `kotlin.srcDir` (see
-`composeApp/build.gradle.kts`) and buildable/testable standalone.
+external processes. A Gradle module of the ChurchPresenter build (`:presentation-engine`), taken by
+the app as `implementation(projects.presentationEngine)` and runnable/testable on its own.
 
 ## Public API
 
@@ -49,12 +49,12 @@ instead of crashing; use `dumpKeynote` to triage a document that stops parsing.
 ## Commands
 
 ```bash
-./gradlew test                                    # full suite, headless-safe
-./gradlew dumpTiming  -Pfile=deck.pptx -Pout=/tmp/frames   # parse audit + PNG renders
-./gradlew dumpKeynote -Pfile=deck.key             # IWA structure probe
-./gradlew makeSampleDeck -Pout=sample.pptx        # animated test deck (builds + transitions)
+./gradlew :presentation-engine:test                                    # full suite, headless-safe
+./gradlew :presentation-engine:dumpTiming  -Pfile=deck.pptx -Pout=/tmp/frames   # parse audit + PNG renders
+./gradlew :presentation-engine:dumpKeynote -Pfile=deck.key             # IWA structure probe
+./gradlew :presentation-engine:makeSampleDeck -Pout=sample.pptx        # animated test deck
 ```
 
-Dependency versions are kept in sync with `composeApp/build.gradle.kts` (note: `poi-ooxml`
-must exclude `poi-ooxml-lite` in favour of `poi-ooxml-full` — the timing schema classes are
-lite-omitted, and only one schema jar may be on the classpath).
+Dependency versions come from `gradle/libs.versions.toml`, shared with `:composeApp` and
+`:converter` (note: `poi-ooxml` must exclude `poi-ooxml-lite` in favor of `poi-ooxml-full` — the
+timing schema classes are lite-omitted, and only one schema jar may be on the classpath).

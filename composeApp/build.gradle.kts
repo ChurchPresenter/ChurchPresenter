@@ -318,6 +318,9 @@ kotlin {
             implementation(projects.coreModels)
             implementation(projects.lottieGenerator)
             implementation(projects.bibleEngine)
+            // The presentation engine: a real module rather than a mounted source directory —
+            // PresentationViewModel, PresentationPlayer and CompanionServer drive it.
+            implementation(projects.presentationEngine)
             implementation(libs.kotlinx.coroutines.swing)
             // Sentry crash reporting
             implementation(libs.sentry)
@@ -327,20 +330,16 @@ kotlin {
             implementation("com.twelvemonkeys.imageio:imageio-core:3.10.1")
             implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.10.1")
             // Apache PDFBox for PDF slide extraction
-            implementation("org.apache.pdfbox:pdfbox:2.0.33")
+            implementation(libs.pdfbox)
             // Apache POI for PowerPoint slide extraction.
             // poi-ooxml-lite is swapped for poi-ooxml-full: the presentation engine's timing
             // parser needs the <p:timing> schema classes (CTTLTimeNode*, …) that lite omits.
-            // Keep exactly one schema jar on the classpath (kept in sync with
-            // ChurchPresenter-PresentationEngine/build.gradle.kts).
-            implementation("org.apache.poi:poi:5.3.0")
-            implementation("org.apache.poi:poi-ooxml:5.3.0") {
-                exclude(group = "org.apache.poi", module = "poi-ooxml-lite")
-            }
-            implementation("org.apache.poi:poi-ooxml-full:5.3.0")
-            implementation("org.apache.poi:poi-scratchpad:5.3.0")
-            // Pure-Java snappy for the presentation engine's Keynote IWA reader
-            implementation("io.airlift:aircompressor:2.0.2")
+            // Keep exactly one schema jar on the classpath. Versions come from the catalogue,
+            // which is what :presentation-engine and :converter resolve from too.
+            implementation(libs.apache.poi)
+            implementation(libs.apache.poi.ooxml)
+            implementation(libs.apache.poi.ooxmlFull)
+            implementation(libs.apache.poi.scratchpad)
             // Ktor server for companion API
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.netty)
@@ -666,14 +665,18 @@ val generateBuildConfig by tasks.registering {
     }
 }
 
+// Exactly ONE POI schema jar may be on the classpath, and it must be poi-ooxml-full: the
+// presentation engine's <p:timing> parser needs schema classes (CTTLTimeNode*, …) that
+// poi-ooxml-lite omits. Excluded graph-wide rather than per-dependency, so no transitive path
+// through :presentation-engine or :converter can bring the lite jar back.
+configurations.configureEach {
+    exclude(group = "org.apache.poi", module = "poi-ooxml-lite")
+}
+
 kotlin {
     sourceSets {
         jvmMain {
             kotlin.srcDir(generateBuildConfig.map { layout.buildDirectory.dir("generated/buildconfig") })
-            // Include Presentation Engine module source — parses and renders PPTX/PPT/PDF/
-            // Keynote decks (static + animated) for PresentationViewModel and CompanionServer.
-            kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/src/main/kotlin")
-            // Include module resources (.properties files for localization)
         }
     }
 }
@@ -942,11 +945,9 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         layout.buildDirectory.file("jacoco/jvmTestSerial.exec"),
     )
 
-    // CRITICAL: composeApp mounts the Presentation Engine's sources through kotlin.srcDir (see
-    // the sourceSets block above), so its classes land in the SAME output directory as the app's.
-    // Reporting on everything would drown the app's real number in ~tens of thousands of lines of
-    // module code that has its own separate suites. Restrict to this app's package root; the
-    // modules are measured by their own builds.
+    // Restrict to this app's package root. Nothing else compiles into this output directory any
+    // more — every module is a real Gradle module now — but the app's own generated and
+    // synthetic classes are excluded below, and the modules are measured by their own builds.
     classDirectories.setFrom(
         fileTree(layout.buildDirectory.dir("classes/kotlin/jvm/main")) {
             include("org/churchpresenter/**")
