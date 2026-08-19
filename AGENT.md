@@ -127,17 +127,32 @@ composables and AWT screen-device helpers.
 
 Anything `:composeApp` calls has to be public here — `websiteDisplayText` was `internal`.
 
-### Sub-builds
-Three module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
-have their own Gradle builds and test suites, under `src/jvmMain/appResources/common/`:
-`ChurchPresenter-PresentationEngine`, `-BLE`, `-LottieGen`. A fourth, `-Cross`, is not mounted —
-`syncCrosswordFiles` copies its `encoded/*.xwp` into composeResources at build time.
+### The crossword module
+`crossword/` is the crossword puzzle authoring tool — a standalone Compose Desktop editor
+(`:crossword:run`) plus the encoded puzzles the app ships. It is **not** compiled into the app and
+`:composeApp` does not depend on it: `syncCrosswordFiles` copies `crossword/encoded/*.xwp` into
+composeResources at build time, so a new puzzle reaches the app by being exported there and
+committed. `./gradlew :crossword:test`, `:crossword:jacocoTestCoverageVerification`.
 
-Three are no longer among them, and are the direction the rest are headed: `converter/` (above),
-`companion-satellite/` and `theme/` are **real Gradle modules of this build** —
-`implementation(projects.companionSatellite)`, tested with `./gradlew :companion-satellite:test` on
-the root wrapper, with dependency versions from `gradle/libs.versions.toml` rather than hand-copied
-literals. Their `version` comes from the `subprojects` block in the root build; don't re-declare it.
+It was Kotlin Multiplatform with a `jvm()` target only; as a module of this build it is
+`kotlin("jvm")` with `src/main/kotlin` and `src/test/kotlin`, which is what puts it under the root
+build's JaCoCo wiring. It clears all six default floors, so it declares no `coverageFloors` — only
+`coverageExcludes`, which drop the Compose UI package that needs a display.
+
+The decoder in `data/CrosswordData.kt` mirrors this module's `Encoder` and shares its XOR key —
+change one and change the other.
+
+### Sub-builds
+Two module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
+have their own Gradle builds and test suites, under `src/jvmMain/appResources/common/`:
+`ChurchPresenter-PresentationEngine` and `-BLE`.
+
+The rest are no longer among them, and are the direction these two are headed: `converter/`
+(above), `companion-satellite/`, `theme/`, `core-models/`, `lottieGenerator/` and `crossword/` are
+**real Gradle modules of this build** — `implementation(projects.companionSatellite)`, tested with
+`./gradlew :companion-satellite:test` on the root wrapper, with dependency versions from
+`gradle/libs.versions.toml` rather than hand-copied literals. Their `version` comes from the
+`subprojects` block in the root build; don't re-declare it.
 
 **None of these are git submodules.** All of them are committed directly into this repository, so a
 plain `git clone` is enough and a change spanning the app and a module is one commit.
@@ -145,7 +160,8 @@ plain `git clone` is enough and a change spanning the app and a module is one co
 - **When touching a MOUNTED module's code, compile BOTH builds**: `./gradlew compileKotlinJvm` at
   the repo root AND `sh gradlew build` inside the module. The main build is more permissive and will
   accept code the module's own build rejects. This does not apply to `companion-satellite/` — there
-  is only one build to satisfy there, which is the point of promoting it. Nor to `theme/`.
+  is only one build to satisfy there, which is the point of promoting it. Nor to any other module
+  of this build.
 - The Presentation Engine has **zero Compose dependency by construction** — accidental Compose
   imports fail its standalone build.
 - The Presentation Engine runs **entirely in-JVM**: never shell out to `osascript`, AppleScript,

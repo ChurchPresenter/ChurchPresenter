@@ -81,8 +81,6 @@ jobs:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/**'
             ble:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE/**'
-            cross:
-              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/**'
             converter:
               - *shared
               - 'converter/**'
@@ -92,6 +90,9 @@ jobs:
             lottiegen:
               - *shared
               - 'lottieGenerator/**'
+            cross:
+              - *shared
+              - 'crossword/**'
             theme:
               - *shared
               - 'theme/**'
@@ -233,6 +234,16 @@ jobs:
         if: always() && steps.modules.outputs.lottiegen == 'true'
         run: ./gradlew :lottieGenerator:test
 
+      # Same again: a module of this build, and its data layer carries the six-counter floor while
+      # the Compose UI package is excluded from it.
+      - name: Crossword tests
+        if: always() && steps.modules.outputs.cross == 'true'
+        run: ./gradlew :crossword:test
+
+      - name: Crossword coverage floor
+        if: always() && steps.modules.outputs.cross == 'true'
+        run: ./gradlew :crossword:jacocoTestCoverageVerification -x test
+
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:test
@@ -264,12 +275,6 @@ jobs:
         run: chmod +x gradlew && ./gradlew test
 
 
-      # Kotlin Multiplatform, so the JVM suite is `jvmTest` rather than `test`.
-      - name: Crossword tests
-        if: always() && steps.modules.outputs.cross == 'true'
-        working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross
-        run: chmod +x gradlew && ./gradlew jvmTest
-
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
       # Also annotates the failing line in the Files-changed view.
@@ -289,6 +294,7 @@ jobs:
             converter/build/test-results/**/TEST-*.xml
             companion-satellite/build/test-results/**/TEST-*.xml
             lottieGenerator/build/test-results/**/TEST-*.xml
+            crossword/build/test-results/**/TEST-*.xml
             theme/build/test-results/**/TEST-*.xml
             core-models/build/test-results/**/TEST-*.xml
             composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
@@ -297,6 +303,8 @@ jobs:
             App
             Converter
             Companion Satellite
+            Lower Third generator
+            Crossword
             Theme
             Core models
             Sub-builds (skipped unless their own directory changed)
@@ -423,6 +431,8 @@ jobs:
             converter/build/test-results/
             lottieGenerator/build/reports/tests/
             lottieGenerator/build/test-results/
+            crossword/build/reports/tests/
+            crossword/build/test-results/
             theme/build/reports/tests/
             theme/build/test-results/
             core-models/build/reports/tests/

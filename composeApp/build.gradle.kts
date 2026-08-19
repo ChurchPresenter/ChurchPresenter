@@ -1390,11 +1390,10 @@ tasks.register("signLinuxDeb") {
 }
 
 // ── Crossword puzzle sync ─────────────────────────────────────────────────────
-// Copies encrypted .xwp files from the ChurchPresenter-Cross module into
-// composeResources so they are bundled with the app. Edit the puzzles in that
-// module's `encoded/` directory, then rebuild.
+// Copies encrypted .xwp files from the :crossword module into composeResources so they are
+// bundled with the app. Edit the puzzles in that module's `encoded/` directory, then rebuild.
 val syncCrosswordFiles by tasks.registering(Copy::class) {
-    from(rootProject.file("composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/encoded"))
+    from(rootProject.file("crossword/encoded"))
     include("*.xwp")
     into(layout.projectDirectory.file("src/jvmMain/composeResources/files/crossword"))
     doFirst {

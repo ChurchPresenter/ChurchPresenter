@@ -4,7 +4,7 @@ import java.util.Base64
 
 private const val CLUE_LINE_FIELDS = 4
 
-// XOR key shared with the ChurchPresenter-Cross encoder app
+// XOR key shared with the :crossword encoder app
 internal const val CROSSWORD_XOR_KEY = "CHURCHPRESENTER"
 
 enum class CrosswordDirection { ACROSS, DOWN }
@@ -38,7 +38,7 @@ internal data class PlacedEntry(
 )
 
 // ---------------------------------------------------------------------------
-// Decoder — mirrors the encoder in ChurchPresenter-Cross
+// Decoder — mirrors the encoder in the :crossword module
 // ---------------------------------------------------------------------------
 
 object CrosswordDecoder {

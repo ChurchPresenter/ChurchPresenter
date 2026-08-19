@@ -1,6 +1,7 @@
-# ChurchPresenter-Cross
+# Crossword
 
-Admin editor app and encoded puzzle content for ChurchPresenter's crossword feature.
+Admin editor app and encoded puzzle content for ChurchPresenter's crossword feature. A module of
+the main build (`:crossword`), so every command below runs on the repo-root wrapper.
 
 ## Admin App
 
@@ -9,24 +10,30 @@ A cross-platform (Windows / macOS / Linux) Compose Desktop app for creating and 
 ### Run
 
 ```bash
-./gradlew run
+./gradlew :crossword:run
 ```
 
 Requires Java 21. Gradle will download the rest automatically.
 
+### Test
+
+```bash
+./gradlew :crossword:test
+```
+
 ### Build a distributable
 
 ```bash
-./gradlew packageMsi        # Windows
-./gradlew packageDmg        # macOS
-./gradlew packageDeb        # Linux
+./gradlew :crossword:packageMsi        # Windows
+./gradlew :crossword:packageDmg        # macOS
+./gradlew :crossword:packageDeb        # Linux
 ```
 
 ---
 
 ## Workflow
 
-1. Open the admin app (`./gradlew run`)
+1. Open the admin app (`./gradlew :crossword:run`)
 2. Enter the **title** and **clues** (number, direction, clue text, answer)
 3. Watch the **live crossword grid** build on the right as you type
 4. Optionally **Save Plaintext…** to keep a local copy for editing later (gitignored — stays on your machine)
