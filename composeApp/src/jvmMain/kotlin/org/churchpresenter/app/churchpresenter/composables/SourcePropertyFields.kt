@@ -196,27 +196,28 @@ internal fun FontDropdown(
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded.value = true }
-                .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
+                .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
             verticalArrangement = Arrangement.Center
         ) {
             if (label.isNotEmpty()) {
                 Text(
                     text = label.uppercase(),
-                    fontSize = 8.sp,
-                    lineHeight = 9.sp,
+                    fontSize = 10.sp,
+                    lineHeight = 11.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 0.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Spacer(Modifier.height(1.dp))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = selected,
                     style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 12.sp,
-                        lineHeight = 13.sp,
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
                         fontWeight = FontWeight.Medium,
                         fontFamily = selectedFontFamily
                     ),
