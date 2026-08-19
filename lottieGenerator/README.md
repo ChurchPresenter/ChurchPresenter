@@ -49,7 +49,7 @@ Requires JDK 21.
 
 ## Integration with ChurchPresenter
 
-This project lives inside the ChurchPresenter repository as its own module. Its source is compiled as part of the main app via `kotlin.srcDir` and launched as a separate Compose window from the Lower Third settings.
+This project is a Gradle module of the ChurchPresenter build (`:lottieGenerator`). The app takes it as `implementation(projects.lottieGenerator)` and launches it as a separate Compose window from the Lower Third settings.
 
 When running inside ChurchPresenter:
 - Canvas size defaults to the presenter display resolution
