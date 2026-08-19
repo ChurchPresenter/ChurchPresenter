@@ -77,8 +77,6 @@ jobs:
               - 'gradle/wrapper/**'
               - 'config/detekt/**'
               - '.github/workflows/test.yml'
-            engine:
-              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/**'
             converter:
               - *shared
               - 'converter/**'
@@ -91,6 +89,9 @@ jobs:
             cross:
               - *shared
               - 'crossword/**'
+            engine:
+              - *shared
+              - 'presentation-engine/**'
             theme:
               - *shared
               - 'theme/**'
@@ -253,6 +254,16 @@ jobs:
         if: always() && steps.modules.outputs.cross == 'true'
         run: ./gradlew :crossword:jacocoTestCoverageVerification -x test
 
+      # The last module to be promoted out of the mounted sub-builds. Its floors are its measured
+      # coverage rather than the 85% default — see the comment in its build file.
+      - name: Presentation Engine tests
+        if: always() && steps.modules.outputs.engine == 'true'
+        run: ./gradlew :presentation-engine:test
+
+      - name: Presentation Engine coverage floor
+        if: always() && steps.modules.outputs.engine == 'true'
+        run: ./gradlew :presentation-engine:jacocoTestCoverageVerification -x test
+
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:test
@@ -277,15 +288,6 @@ jobs:
         if: always() && steps.modules.outputs.coremodels == 'true'
         run: ./gradlew :core-models:jacocoTestCoverageVerification -x test
 
-      # Each module is its own Gradle build with its own wrapper, so they cannot be reached
-      # from the root build and are invoked individually. `if: always()` keeps a failure in one
-      # suite from hiding the results of the others; the `steps.modules` half skips a module whose
-      # own directory this change did not touch.
-      - name: Presentation Engine tests
-        if: always() && steps.modules.outputs.engine == 'true'
-        working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine
-        run: chmod +x gradlew && ./gradlew test
-
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -307,10 +309,10 @@ jobs:
             companion-satellite/build/test-results/**/TEST-*.xml
             lottieGenerator/build/test-results/**/TEST-*.xml
             crossword/build/test-results/**/TEST-*.xml
+            presentation-engine/build/test-results/**/TEST-*.xml
             theme/build/test-results/**/TEST-*.xml
             core-models/build/test-results/**/TEST-*.xml
             bible-engine/build/test-results/**/TEST-*.xml
-            composeApp/src/jvmMain/appResources/common/*/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order.
           check_name: |
             App
@@ -318,10 +320,10 @@ jobs:
             Companion Satellite
             Lower Third generator
             Crossword
+            Presentation Engine
             Theme
             Core models
             Bible Lookup Engine
-            Sub-builds (skipped unless their own directory changed)
           detailed_summary: true
           include_passed: false
           # Without this the second table is six rows of "No test annotations available" on every
@@ -348,7 +350,6 @@ jobs:
           COUNTERS = ["INSTRUCTION", "BRANCH", "LINE", "COMPLEXITY", "METHOD", "CLASS"]
           PATTERNS = [
               "*/build/reports/jacoco/*/*.xml",
-              "composeApp/src/jvmMain/appResources/common/*/build/reports/jacoco/*/*.xml",
           ]
 
           # The floor as the verification task itself has it, so the cap reported is the cap enforced.
@@ -447,11 +448,11 @@ jobs:
             lottieGenerator/build/test-results/
             crossword/build/reports/tests/
             crossword/build/test-results/
+            presentation-engine/build/reports/tests/
+            presentation-engine/build/test-results/
             theme/build/reports/tests/
             theme/build/test-results/
             core-models/build/reports/tests/
             core-models/build/test-results/
             bible-engine/build/reports/tests/
             bible-engine/build/test-results/
-            composeApp/src/jvmMain/appResources/common/*/build/reports/tests/
-            composeApp/src/jvmMain/appResources/common/*/build/test-results/

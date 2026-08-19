@@ -27,12 +27,13 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
     implementation(libs.sqlite.jdbc)
     implementation(libs.kotlinx.serialization.json)
-    implementation("org.apache.pdfbox:pdfbox:2.0.33")
+    implementation(libs.pdfbox)
 
-    implementation("org.apache.poi:poi-ooxml:5.3.0") {
+    // Exactly one POI schema jar on the classpath — see :presentation-engine and :composeApp.
+    implementation(libs.apache.poi.ooxml) {
         exclude(group = "org.apache.poi", module = "poi-ooxml-lite")
     }
-    implementation("org.apache.poi:poi-ooxml-full:5.3.0")
+    implementation(libs.apache.poi.ooxmlFull)
 
     testImplementation(kotlin("test"))
 }

@@ -29,9 +29,8 @@ import java.io.File
 
 /**
  * Orchestrates presentation loading for the Presentation tab. All parsing and rendering lives in
- * the presentation engine ([PresentationLoader]/[DeckRasterizer], see
- * ChurchPresenter-PresentationEngine); this class owns UI state, the shared slide disk cache and
- * job lifecycle only.
+ * the presentation engine ([PresentationLoader]/[DeckRasterizer], the :presentation-engine
+ * module); this class owns UI state, the shared slide disk cache and job lifecycle only.
  */
 class PresentationViewModel(private val appSettings: AppSettings? = null) {
 

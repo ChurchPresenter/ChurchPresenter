@@ -48,3 +48,6 @@ include(":bible-engine")
 // The crossword puzzle authoring tool: its own module, not compiled into the app — a build-time
 // task copies its encoded puzzles into :composeApp's resources.
 include(":crossword")
+// The presentation engine: PPTX/PPT/Keynote/PDF parsing, timing and animation. Its own module,
+// depended on by :composeApp, which drives it from PresentationViewModel and CompanionServer.
+include(":presentation-engine")

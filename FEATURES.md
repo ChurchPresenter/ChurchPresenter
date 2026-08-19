@@ -63,7 +63,7 @@
 - `tabs/PresentationTab.kt` — main UI
 - `viewmodel/PresentationViewModel.kt`
 - `presenter/PresentationPlayer.kt`, `presenter/PresentationPresenter.kt` — animated playback
-- `appResources/common/ChurchPresenter-PresentationEngine/` — PPTX/Keynote parsing, timing and animation engine
+- `presentation-engine/` (the `:presentation-engine` Gradle module, at the repo root) — PPTX/Keynote parsing, timing and animation engine
 - `data/settings/PresentationSettings.kt`
 - `server/CompanionServer.kt` — slide API for mobile (background rendering)
 

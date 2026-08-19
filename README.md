@@ -19,8 +19,8 @@ git clone https://github.com/ChurchPresenter/ChurchPresenter
 ```
 
 The app is built from several modules that all live in this repository — there are no submodules and
-nothing to fetch separately. Seven of them are **Gradle modules of this build**, with no wrapper of
-their own:
+nothing to fetch separately. Every one of them is a **Gradle module of this build**, with no
+wrapper of its own — one `./gradlew` at the repo root builds and tests the lot:
 
 > **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop,
 > accessible from the Help menu. `./gradlew :converter:test`, `./gradlew :converter:packageDmg`.
@@ -44,11 +44,9 @@ their own:
 > **[`crossword/`](./crossword)** — the crossword puzzle authoring tool. Not compiled into the app;
 > a build-time task copies its encoded puzzles into the app's resources.
 > `./gradlew :crossword:test`, `./gradlew :crossword:run`.
-
-One sub-build is left under `composeApp/src/jvmMain/appResources/common/`. It keeps its own Gradle
-wrapper and test suite, and its sources are compiled into the main app via `kotlin.srcDir`:
-
-> **ChurchPresenter-PresentationEngine** — PPTX/PPT/Keynote/PDF parsing, timing and animation.
+>
+> **[`presentation-engine/`](./presentation-engine)** — PPTX/PPT/Keynote/PDF parsing, timing and
+> animation, entirely in-JVM. `./gradlew :presentation-engine:test`.
 
 
 ---
