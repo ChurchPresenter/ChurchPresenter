@@ -24,7 +24,36 @@ class AppPreviewDictionaryScreenshotTest {
         // Clearing the search puts all 14,197 entries back in the list; the selection survives it.
         onAllNodes(hasSetTextAction())[0].performTextReplacement("")
         waitForIdle()
+        waitForTheListToSettle()
         goLive()
+    }
+
+    /**
+     * Waits for the list to stop moving before the shot is taken.
+     *
+     * Clearing the search puts the selected entry ~2,600 rows down a 14,197-row list, and
+     * `DictionaryTab` brings it back into view with `animateScrollToItem` — an animation, started
+     * from a `LaunchedEffect`, that `waitForIdle` returns out of the middle of. The capture then
+     * lands at whatever offset the scroll had reached, so a different set of rows (and a different
+     * scrollbar thumb) is drawn on every run. It looks stable on a fast machine and is not: this is
+     * the "row heights are not stable between runs" the screenshot notes recorded, and it is why
+     * this picture kept turning up in the pipeline's diff for changes that never touched it.
+     *
+     * The settled position is its own signal — the selected row's top stops moving — so this ends
+     * on that rather than on a pause, and fails loudly if the list never comes to rest.
+     */
+    private fun ComposeUiTest.waitForTheListToSettle() {
+        val deadline = System.currentTimeMillis() + RENDER_TIMEOUT_MS
+        var previous: Float? = null
+        while (System.currentTimeMillis() < deadline) {
+            waitForIdle()
+            val top = onAllNodes(hasText("chêçêd", substring = true))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .firstOrNull()?.boundsInRoot?.top
+            if (top != null && top == previous) return
+            previous = top
+        }
+        error("the dictionary list never stopped scrolling — the selected row sat at $previous")
     }
 
     /**
