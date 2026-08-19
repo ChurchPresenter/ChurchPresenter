@@ -356,15 +356,32 @@ jobs:
                   if ratios:
                       found[module] = ratios
 
+          def under(module, counter):
+              floor = floors.get(module, {}).get(counter)
+              if floor is None or module not in found or counter not in found[module]:
+                  return None
+              gap = floor - found[module][counter]
+              return gap if gap > 0 else None
+
+          breached = {
+              module: [c for c in COUNTERS if under(module, c) is not None]
+              for module in found
+          }
+          total_breached = sum(len(v) for v in breached.values())
+
           print("<!-- coverage-table -->")
           print("## Coverage")
           if not found:
               print()
               print("No JaCoCo reports were produced in this run.")
+          elif total_breached:
+              print()
+              modules = ", ".join(f"`{m}`" for m in sorted(breached) if breached[m])
+              print(f":warning: **{total_breached} counter(s) below floor** in {modules}.")
           for module in sorted(found, key=lambda m: (m != "composeApp", m)):
               ratios = found[module]
               print()
-              print(f"### {module}")
+              print(f"### {module}" + (" :warning:" if breached.get(module) else ""))
               print()
               print("| Counter | Floor | Actual |")
               print("|---|---|---|")
@@ -373,7 +390,9 @@ jobs:
                       continue
                   floor = floors.get(module, {}).get(counter)
                   cap = "" if floor is None else f"{floor:.0f}%"
-                  print(f"| {counter.title()} | {cap} | {ratios[counter]:.2f}% |")
+                  gap = under(module, counter)
+                  mark = "" if gap is None else f" :warning: -{gap:.2f}pt"
+                  print(f"| {counter.title()} | {cap} | {ratios[counter]:.2f}%{mark} |")
           if found:
               print()
               print("Modules whose tests did not run in this build are not listed. The floors are")

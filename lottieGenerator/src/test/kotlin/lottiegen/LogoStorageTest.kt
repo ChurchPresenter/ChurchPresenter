@@ -37,8 +37,6 @@ class LogoStorageTest {
         return file
     }
 
-    // ── listLogos ─────────────────────────────────────────────────────────────
-
     @Test
     fun `an empty logo folder lists nothing`() {
         assertEquals(emptyList(), LogoStorage.listLogos())
@@ -60,8 +58,6 @@ class LogoStorageTest {
         }
         assertEquals(5, LogoStorage.listLogos().size)
     }
-
-    // ── loadLogoData ──────────────────────────────────────────────────────────
 
     @Test
     fun `a missing file loads as null rather than throwing`() {
@@ -95,15 +91,12 @@ class LogoStorageTest {
 
     @Test
     fun `a file ImageIO cannot decode still loads, at a fallback size`() {
-        // an SVG is a supported logo but not a raster ImageIO can read
-        val svg = File(temp, "logo.svg").apply { writeText("<svg xmlns='http://www.w3.org/2000/svg'/>") }
+        val svg = File(temp, "logo.svg").apply { writeText("<svg/>") }
         val data = assertNotNull(LogoStorage.loadLogoData(svg))
 
         assertEquals(100, data.width)
         assertEquals(100, data.height)
     }
-
-    // ── importLogo ────────────────────────────────────────────────────────────
 
     @Test
     fun `importing copies the file into the logo folder under its own name`() {

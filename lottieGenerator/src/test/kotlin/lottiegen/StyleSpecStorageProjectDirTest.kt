@@ -10,7 +10,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/** The parts of [StyleSpecStorage] that resolve the project dir out of user.home. */
 class StyleSpecStorageProjectDirTest {
 
     private lateinit var temp: File

@@ -79,8 +79,7 @@ class ColorThemeStorageTest {
     fun `saving into an unwritable location reports the failure instead of throwing`() {
         val dir = themesFile().parentFile
         dir.mkdirs()
-        themesFile().mkdirs() // a directory where the file should be — writeText will fail
-
+        themesFile().mkdirs()
         ColorThemeStorage.save(listOf(theme("Mine")))
 
         assertTrue(themesFile().isDirectory, "save must not throw out of a UI callback")

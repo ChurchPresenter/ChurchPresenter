@@ -10,8 +10,6 @@ plugins {
 
 group = "org.churchpresenter"
 
-// Coverage for this module's own logic. UI composables and the app entry point are excluded:
-// both need a real display.
 extra["coverageExcludes"] = listOf("**/ui/**", "**/MainKt*", "**/ComposableSingletons*")
 
 kotlin {
@@ -34,8 +32,6 @@ tasks.test {
     systemProperty("java.awt.headless", "true")
 }
 
-// The generator also ships as a standalone desktop app, separately from the copy the main app
-// opens from its Lower Third settings.
 compose.desktop {
     application {
         mainClass = "lottiegen.MainKt"

@@ -24,8 +24,6 @@ class LottieBuilderTest {
 
     private fun JsonObject.layer(i: Int) = getValue("layers").jsonArray[i].jsonObject
 
-    // ── addFont ───────────────────────────────────────────────────────────────
-
     @Test
     fun `a bold weight names the Bold face and a light weight the Regular one`() {
         val b = builder()
@@ -51,8 +49,6 @@ class LottieBuilderTest {
 
         assertEquals(1, b.fonts.size)
     }
-
-    // ── optional layer keys ───────────────────────────────────────────────────
 
     @Test
     fun `a plain shape layer carries no matte or parent keys`() {
@@ -96,8 +92,6 @@ class LottieBuilderTest {
         assertNotEquals(first, second)
         assertEquals(first, b.toJson().layer(0).getValue("ind").jsonPrimitive.content.toInt())
     }
-
-    // ── document assembly ─────────────────────────────────────────────────────
 
     @Test
     fun `a document with no fonts omits the font list entirely`() {
@@ -146,8 +140,6 @@ class LottieBuilderTest {
         assertEquals("logo", asset.getValue("id").jsonPrimitive.content)
         assertEquals(64, asset.getValue("w").jsonPrimitive.content.toInt())
     }
-
-    // ── defaultTransform ──────────────────────────────────────────────────────
 
     @Test
     fun `the default transform is identity on every channel`() {

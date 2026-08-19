@@ -16,8 +16,6 @@ import kotlin.test.assertTrue
 
 class StyleCatalogAndModelTest {
 
-    // ── Enum id round trips ───────────────────────────────────────────────────
-
     @Test
     fun `every alignment survives an id round trip and has a label`() {
         LottieAlignment.entries.forEach {
@@ -44,8 +42,6 @@ class StyleCatalogAndModelTest {
         assertFailsWith<NoSuchElementException> { TextTransform.fromId("smallcaps") }
     }
 
-    // ── Timing presets ────────────────────────────────────────────────────────
-
     @Test
     fun `each built-in timing preset resolves a translated label`() {
         TIMING_PRESETS.forEach {
@@ -58,8 +54,6 @@ class StyleCatalogAndModelTest {
     fun `an unrecognised timing key shows itself rather than blank`() {
         assertEquals("custom", TimingPreset("custom", 1f, 1f).label)
     }
-
-    // ── StyleCatalog ──────────────────────────────────────────────────────────
 
     @Test
     fun `the catalog lists every compiled style`() {
@@ -125,8 +119,6 @@ class StyleCatalogAndModelTest {
         assertEquals("no-such-style", StyleCatalog.labelFor("no-such-style"))
     }
 
-    // ── Editor template ───────────────────────────────────────────────────────
-
     @Test
     fun `the bundled template loads as a real spec`() {
         val spec = EditorViewModel.templateSpec()
@@ -143,7 +135,6 @@ class StyleCatalogAndModelTest {
 
     @Test
     fun `a template that is not spec JSON degrades to a blank spec`() {
-        // a real classpath resource that is not a spec
         val spec = EditorViewModel.templateSpec("/lottiegen_strings.properties")
 
         assertEquals(emptyList(), spec.elements)

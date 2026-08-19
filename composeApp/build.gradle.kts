@@ -988,6 +988,10 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     )
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
 
+    onlyIf {
+        gradle.startParameter.taskRequests.none { request -> request.args.any { it == "--tests" } }
+    }
+
     reports {
         html.required.set(true)
         xml.required.set(true)  // for CI/coverage services

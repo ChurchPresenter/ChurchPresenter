@@ -22,15 +22,12 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-/** The lottie shape primitives — pure JSON builders, so every branch is a plain call. */
 class ShapeHelpersTest {
 
     private fun kfs(): JsonArray = buildJsonArray { add(buildJsonObject { put("t", JsonPrimitive(0)) }) }
 
     private fun JsonObject.pos(): List<Double> =
         getValue("p").jsonObject.getValue("k").jsonArray.map { it.jsonPrimitive.content.toDouble() }
-
-    // ── position defaulting ───────────────────────────────────────────────────
 
     @Test
     fun `a rect with no position sits at the origin`() {
@@ -53,8 +50,6 @@ class ShapeHelpersTest {
         assertEquals(listOf(0.0, 0.0), makeEllipse(w = 8.0, h = 8.0).pos())
         assertEquals(listOf(1.0, 2.0), makeEllipse(w = 8.0, h = 8.0, position = listOf(1.0, 2.0)).pos())
     }
-
-    // ── trim path: static vs keyframed ────────────────────────────────────────
 
     @Test
     fun `a trim path with no keyframes is static on both ends`() {
@@ -83,8 +78,6 @@ class ShapeHelpersTest {
         assertEquals(42.0, trim.getValue("e").jsonObject.getValue("k").jsonPrimitive.content.toDouble())
     }
 
-    // ── stroke ────────────────────────────────────────────────────────────────
-
     @Test
     fun `a zero-width stroke is dropped rather than emitted`() {
         assertNull(makeStroke(color = listOf(1.0, 0.0, 0.0), width = 0.0))
@@ -111,8 +104,6 @@ class ShapeHelpersTest {
         assertFalse(makeAnimatedStroke(listOf(1.0, 1.0, 1.0), kfs()).containsKey("d"))
         assertTrue(makeAnimatedStroke(listOf(1.0, 1.0, 1.0), kfs(), dashPx = 4.0).containsKey("d"))
     }
-
-    // ── group transform defaulting ────────────────────────────────────────────
 
     private fun JsonObject.groupTransform(): JsonObject =
         getValue("it").jsonArray.map { it.jsonObject }.single { it["ty"]?.jsonPrimitive?.content == "tr" }
@@ -141,7 +132,6 @@ class ShapeHelpersTest {
         assertEquals(listOf(9.0, 9.0), tr.getValue("p").jsonObject.getValue("k").jsonArray
             .map { it.jsonPrimitive.content.toDouble() })
         assertEquals(25, tr.getValue("o").jsonObject.getValue("k").jsonPrimitive.content.toInt())
-        // channels the caller omitted still fall back
         assertEquals(listOf(100.0, 100.0), tr.getValue("s").jsonObject.getValue("k").jsonArray
             .map { it.jsonPrimitive.content.toDouble() })
     }

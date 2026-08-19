@@ -11,13 +11,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/**
- * The interpreter's guard clauses: an element that cannot be drawn is skipped rather than
- * throwing. These run while a spec is deliberately half-finished in the editor.
- */
 class SpecDegenerateElementTest {
 
-    /** 1×1 transparent PNG. */
     private val png = "data:image/png;base64," +
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
 
@@ -27,8 +22,6 @@ class SpecDegenerateElementTest {
     private fun JsonObject.layers() = getValue("layers").jsonArray.map { it.jsonObject }
     private fun JsonObject.imageLayers() = layers().filter { it["ty"]?.jsonPrimitive?.int == 2 }
     private fun JsonObject.assets() = getValue("assets").jsonArray
-
-    // ── LogoElement ───────────────────────────────────────────────────────────
 
     @Test
     fun `a logo element with no logo configured draws nothing`() {
@@ -61,8 +54,6 @@ class SpecDegenerateElementTest {
         assertEquals(1, json.assets().size)
     }
 
-    // ── ImageElement ──────────────────────────────────────────────────────────
-
     private fun image(dataUri: String = png, w: Int = 100, h: Int = 50) = ImageElement(
         id = "img", name = "Art", dataUri = dataUri,
         naturalW = w, naturalH = h, size = SizeSpec.Em(2.0, 2.0)
@@ -94,8 +85,6 @@ class SpecDegenerateElementTest {
         assertEquals(1, generate(image()).imageLayers().size)
     }
 
-    // ── PolygonElement ────────────────────────────────────────────────────────
-
     @Test
     fun `a polygon with no vertices does not throw`() {
         val json = generate(PolygonElement(id = "poly", verticesEm = emptyList()))
@@ -112,8 +101,6 @@ class SpecDegenerateElementTest {
 
         assertTrue(generate(poly).layers().any { it["ty"]?.jsonPrimitive?.int == 4 })
     }
-
-    // ── RepeatSpec ────────────────────────────────────────────────────────────
 
     @Test
     fun `a single-copy repeat still renders`() {

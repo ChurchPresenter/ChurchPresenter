@@ -33,7 +33,6 @@ class BuildRegistrarTest {
         temp.deleteRecursively()
     }
 
-    /** A styles dir at [relative] under [temp], with a registry holding [entries]. */
     private fun stylesDir(relative: String, entries: List<RegistryEntry> = emptyList()): File {
         val dir = File(temp, relative).apply { mkdirs() }
         File(dir, "registry.json").writeText(StyleRegistry.encode(StyleRegistry(entries)), Charsets.UTF_8)
@@ -41,8 +40,6 @@ class BuildRegistrarTest {
     }
 
     private fun cwd(dir: File) = System.setProperty("user.dir", dir.absolutePath)
-
-    // ── locateStylesDir ───────────────────────────────────────────────────────
 
     @Test
     fun `finds the styles dir when run from the module root`() {
@@ -60,7 +57,6 @@ class BuildRegistrarTest {
 
     @Test
     fun `finds the styles dir from a sibling module's working directory`() {
-        // gradle sets cwd = composeApp/ for an embedded dev run; the ancestor walk climbs out.
         val styles = stylesDir("lottieGenerator/src/main/resources/styles")
         val composeApp = File(temp, "composeApp").apply { mkdirs() }
         cwd(composeApp)
@@ -86,12 +82,9 @@ class BuildRegistrarTest {
         val deep = File(temp, "a/b/c/d/e").apply { mkdirs() }
         cwd(deep)
         assertNull(BuildRegistrar.locateStylesDir())
-        // proving the same layout IS found from within range
         cwd(File(temp, "a/b"))
         assertEquals(styles.canonicalFile, BuildRegistrar.locateStylesDir()?.canonicalFile)
     }
-
-    // ── register ──────────────────────────────────────────────────────────────
 
     @Test
     fun `registering writes the spec under an id and slug derived name`() {
