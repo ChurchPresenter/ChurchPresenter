@@ -32,6 +32,8 @@ ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
 
 MAIN_SRC="composeApp/src/jvmMain/kotlin composeApp/src/commonMain/kotlin"
+# The other modules of this build, by directory — each maps to a `:<dir>:test` task.
+MODULE_DIRS="converter|companion-satellite|theme|core-models|bible-engine|lottieGenerator|crossword|presentation-engine"
 TEST_SRC="composeApp/src/jvmTest/kotlin"
 MAX_PATTERNS=120          # past this a full run is cheaper than a vast --tests filter
 BASE_REF="${BASE_REF:-origin/main}"
@@ -63,9 +65,9 @@ if [ -z "$ALL_CHANGED" ]; then
   echo "nothing changed."; exit 0
 fi
 
-# The app's own Kotlin only. The six sub-builds under appResources/common/ are separate Gradle
-# builds with their own suites — :composeApp:jvmTest cannot run them, so a --tests pattern derived
-# from one would match nothing. They are reported at the end instead.
+# The app's own Kotlin only. Every other module of this build has its own suite that
+# :composeApp:jvmTest cannot run, so a --tests pattern derived from one would match nothing. Those
+# are reported at the end instead.
 APP_KT='^composeApp/src/(jvmMain|commonMain|jvmTest|commonTest)/kotlin/.*\.kt$'
 
 # Only files that still exist: a pattern derived from a deleted file matches nothing, and Gradle
@@ -73,25 +75,25 @@ APP_KT='^composeApp/src/(jvmMain|commonMain|jvmTest|commonTest)/kotlin/.*\.kt$'
 KT_CHANGED="$(printf '%s\n' "$ALL_CHANGED" | grep -E "$APP_KT" | while read -r f; do
   [ -f "$f" ] && echo "$f"
 done || true)"
-NON_KT="$(printf '%s\n' "$ALL_CHANGED" | grep -vE "$APP_KT" | grep -v '^composeApp/src/jvmMain/appResources/common/' || true)"
+NON_KT="$(printf '%s\n' "$ALL_CHANGED" | grep -vE "$APP_KT" | grep -vE "^($MODULE_DIRS)/" || true)"
 
-# Which of the six sub-builds a change touched — each has to be run through its own wrapper.
+# Which modules of this build a change touched. They are all modules of the root build now, so each
+# is a task on this wrapper — but :composeApp:jvmTest still does not run any of their suites.
 MODULES_CHANGED="$(printf '%s\n' "$ALL_CHANGED" \
-  | sed -nE 's|^composeApp/src/jvmMain/appResources/common/(ChurchPresenter-[A-Za-z]+)/.*|\1|p' \
+  | sed -nE "s#^($MODULE_DIRS)/.*#\1#p" \
   | sort -u || true)"
 
 report_modules() {
   [ -n "$MODULES_CHANGED" ] || return 0
   echo
-  echo "sub-builds touched — each is its own Gradle build, run it through its own wrapper:"
+  echo "modules touched — :composeApp:jvmTest does not run their suites:"
   for m in $MODULES_CHANGED; do
-    task="build"; [ "$m" = "ChurchPresenter-Cross" ] && task="jvmTest"
-    echo "  (cd composeApp/src/jvmMain/appResources/common/$m && sh gradlew $task)"
+    echo "  ./gradlew :$m:test"
   done
 }
 
 if [ -z "$KT_CHANGED" ]; then
-  echo "no app Kotlin changed (build files / resources / fixtures / sub-builds only):"
+  echo "no app Kotlin changed (build files / resources / fixtures / other modules only):"
   printf '%s\n' "$NON_KT" | sed 's/^/  /'
   report_modules
   [ "$FALLBACK" -eq 1 ] || { echo ">> --no-fallback: running nothing."; exit 0; }

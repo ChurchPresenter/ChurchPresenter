@@ -58,6 +58,17 @@ class SongFolderWatcherEventTest {
         override fun context(): Path = Path.of(name)
     }
 
+    /**
+     * An OVERFLOW event whose context throws rather than returning the null the JDK gives back, so
+     * that the test fails if the kind stops being checked before the context is read. A fake
+     * returning null would pass either way.
+     */
+    private class OverflowEvent : WatchEvent<Any> {
+        override fun kind(): WatchEvent.Kind<Any> = StandardWatchEventKinds.OVERFLOW
+        override fun count() = 1
+        override fun context(): Any = error("the context of an OVERFLOW event must never be read")
+    }
+
     private fun relevant(
         name: String,
         kind: WatchEvent.Kind<Path> = StandardWatchEventKinds.ENTRY_MODIFY,
@@ -123,5 +134,10 @@ class SongFolderWatcherEventTest {
     @Test
     fun `a subfolder that vanished before the event was read falls back to its name`() {
         assertFalse(relevant("DeletedFolder", StandardWatchEventKinds.ENTRY_DELETE))
+    }
+
+    @Test
+    fun `an overflow event is not relevant and its context is never read`() {
+        assertFalse(watcher.isRelevantEvent(OverflowEvent(), FakeKey(dir.toPath()), watchService))
     }
 }

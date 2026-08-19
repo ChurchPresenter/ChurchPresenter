@@ -40,7 +40,7 @@ native/decklink/DeckLinkAPI_i.c
 native/decklink/build/
 
 
-# Crossword .xwp files — owned by ChurchPresenter-Cross submodule, synced by Gradle at build time
+# Crossword .xwp files — owned by the :crossword module, synced by Gradle at build time
 composeApp/src/jvmMain/composeResources/files/crossword/
 
 # Credential / config files
@@ -50,5 +50,7 @@ google-services.json
 *.p12
 .env
 **/analytics.properties
-CLAUDE*.md
+# Personal, machine-local agent notes. The committed CLAUDE.md files — the root one and one
+# per module, each loading that module's AGENT.md — are shared and must stay tracked.
+CLAUDE.local.md
 .impeccable/

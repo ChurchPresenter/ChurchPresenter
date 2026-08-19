@@ -13,7 +13,7 @@ package org.churchpresenter.app.churchpresenter.data
  *
  * Reference matching is intentionally simple (one reference filling an entire line, or several
  * comma/semicolon-separated references on one line) rather than the fuzzy free-text matching used
- * by the live speech-detection engine (`ChurchPresenter-BLE`) — this is for cleanly-authored plan
+ * by the live speech-detection engine (`:bible-engine`) — this is for cleanly-authored plan
  * text, not spoken audio transcripts.
  */
 object PlanningCenterScriptureDetector {

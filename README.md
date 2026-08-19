@@ -19,8 +19,8 @@ git clone https://github.com/ChurchPresenter/ChurchPresenter
 ```
 
 The app is built from several modules that all live in this repository — there are no submodules and
-nothing to fetch separately. Four of them are **Gradle modules of this build**, with no wrapper of
-their own:
+nothing to fetch separately. Every one of them is a **Gradle module of this build**, with no
+wrapper of its own — one `./gradlew` at the repo root builds and tests the lot:
 
 > **[`songlibrary/`](./songlibrary)** — the Song Library Manager: every song in the library folder in one editable grid, opened from the Help menu. It reads and writes through **[`core-models/`](./core-models)**, which holds the song model and the `.song` file format the app itself uses.
 >
@@ -35,20 +35,20 @@ their own:
 >
 > **[`core-models/`](./core-models)** — the shared data models (schedule items, scenes, questions,
 > lyrics). `./gradlew :core-models:test`.
-
-The other four sit under `composeApp/src/jvmMain/appResources/common/`. Each still keeps its own
-Gradle wrapper and test suite, and the first three have their sources compiled into the main app via
-`kotlin.srcDir`:
-
-> **ChurchPresenter-LottieGen** — a standalone Compose Desktop app for generating animated
-> lower-third overlays as Lottie JSON files, launched from the Lower Third settings.
 >
-> **ChurchPresenter-PresentationEngine** — PPTX/PPT/Keynote/PDF parsing, timing and animation.
+> **[`bible-engine/`](./bible-engine)** — the Bible Lookup Engine: speech-to-reference detection.
+> `./gradlew :bible-engine:test`.
 >
-> **ChurchPresenter-BLE** — the Bible Lookup Engine, speech-to-reference detection.
+> **[`lottieGenerator/`](./lottieGenerator)** — a standalone Compose Desktop app for generating
+> animated lower-third overlays as Lottie JSON files, launched from the Lower Third settings.
+> `./gradlew :lottieGenerator:test`.
 >
-> **ChurchPresenter-Cross** — the crossword puzzle authoring tool. Not compiled into the app; a
-> build-time task copies its encoded puzzles into the app's resources.
+> **[`crossword/`](./crossword)** — the crossword puzzle authoring tool. Not compiled into the app;
+> a build-time task copies its encoded puzzles into the app's resources.
+> `./gradlew :crossword:test`, `./gradlew :crossword:run`.
+>
+> **[`presentation-engine/`](./presentation-engine)** — PPTX/PPT/Keynote/PDF parsing, timing and
+> animation, entirely in-JVM. `./gradlew :presentation-engine:test`.
 
 
 ---

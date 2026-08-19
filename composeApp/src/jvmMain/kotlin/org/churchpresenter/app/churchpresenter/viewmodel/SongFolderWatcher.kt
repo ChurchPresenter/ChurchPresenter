@@ -91,7 +91,10 @@ class SongFolderWatcher(
         key: WatchKey,
         watchService: WatchService,
     ): Boolean {
-        val fileName = event.context().toString()
+        // OVERFLOW carries no path and its context is null; the caller filters it, but nothing
+        // here enforces that and a null dereference would take the watcher's whole coroutine down.
+        if (event.kind() == StandardWatchEventKinds.OVERFLOW) return false
+        val fileName = event.context()?.toString() ?: return false
         val isSongFile = fileName.substringAfterLast('.', "").lowercase() == Constants.EXTENSION_SONG
         val file = (key.watchable() as? Path)?.resolve(fileName)?.toFile()
         if (file?.isDirectory != true) return isSongFile

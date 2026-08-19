@@ -54,7 +54,7 @@
 - `presenter/BiblePresenter.kt`
 - `dialogs/tabs/BibleSettingsTab.kt`
 - `core-models/src/main/kotlin/.../models/SelectedVerse.kt` (the `:core-models` module)
-- `appResources/common/ChurchPresenter-BLE/` — Bible Lookup Engine (speech-to-reference detection)
+- `bible-engine/` (the `:bible-engine` Gradle module, at the repo root) — Bible Lookup Engine (speech-to-reference detection)
 
 ## Slides & Presentations
 - **PowerPoint, Keynote & PDF** — drop in `.pptx`, `.ppt`, `.key` or `.pdf` files and present them as slides — no Microsoft or Apple software required.
@@ -66,7 +66,7 @@
 - `tabs/PresentationTab.kt` — main UI
 - `viewmodel/PresentationViewModel.kt`
 - `presenter/PresentationPlayer.kt`, `presenter/PresentationPresenter.kt` — animated playback
-- `appResources/common/ChurchPresenter-PresentationEngine/` — PPTX/Keynote parsing, timing and animation engine
+- `presentation-engine/` (the `:presentation-engine` Gradle module, at the repo root) — PPTX/Keynote parsing, timing and animation engine
 - `data/settings/PresentationSettings.kt`
 - `server/CompanionServer.kt` — slide API for mobile (background rendering)
 

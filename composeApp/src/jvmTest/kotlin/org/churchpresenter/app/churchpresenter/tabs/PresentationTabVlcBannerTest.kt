@@ -11,13 +11,11 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import presentation.engine.LoadResult
-import presentation.engine.model.Deck
-import presentation.engine.model.DeckFormat
-import presentation.engine.model.DeckSource
 import presentation.engine.model.Fidelity
 import presentation.engine.model.LayerSpec
 import presentation.engine.model.RectPt
 import presentation.engine.model.Slide
+import presentation.engine.model.pdfDeck
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -51,7 +49,7 @@ import kotlin.test.assertTrue
  * would be testing defensive code that never runs. They are parameters here only so the *wording*
  * stops depending on whether the machine running the tests has VLC installed.
  *
- * The deck is a synthetic [Deck] over a **real one-page PDF**: the view model rasterises whatever
+ * The deck is a synthetic deck over a **real one-page PDF**: the view model rasterises whatever
  * `loadDeck` returns, so the source file has to be openable, while the `slides` list is ours to
  * shape — which is the only way to get a `LayerSpec.Media` layer without an actual PowerPoint
  * carrying an embedded video.
@@ -81,9 +79,8 @@ class PresentationTabVlcBannerTest {
         return file
     }
 
-    private fun deck(file: File, withVideo: Boolean) = Deck(
+    private fun deck(file: File, withVideo: Boolean) = pdfDeck(
         sourceFile = file,
-        format = DeckFormat.PDF,
         slideWidthPt = 720.0,
         slideHeightPt = 540.0,
         slides = listOf(
@@ -105,7 +102,6 @@ class PresentationTabVlcBannerTest {
                 fidelity = Fidelity.NATIVE,
             )
         ),
-        source = DeckSource.Pdf(file),
     )
 
     /**
