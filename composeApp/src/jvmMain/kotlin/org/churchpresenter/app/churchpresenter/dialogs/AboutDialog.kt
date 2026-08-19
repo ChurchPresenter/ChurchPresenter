@@ -63,7 +63,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import songlibrary.ui.SongLibraryApp
-import songlibrary.ui.Strings as SongLibraryStrings
 import ui.App as ConverterApp
 import ui.Strings as ConverterStrings
 import lottiegen.App as LottieGenApp
@@ -287,10 +286,8 @@ fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
  */
 @Composable
 fun SongLibraryWindow(theme: ThemeMode, songStorageDirectory: String, onClose: () -> Unit) {
-    val language = LocalLanguage.current
-    // Same reason as the converter: the module reads its own bundle and would otherwise answer in
-    // the machine's language rather than the one chosen in the app.
-    remember(language) { SongLibraryStrings.setLocale(Locale.forLanguageTag(language.code)) }
+    // No locale plumbing here: the window's strings are Compose resources now, and the app already
+    // sets the JVM default locale when the language changes — which is what picks values-xx.
     Window(
         onCloseRequest = onClose,
         title = stringResource(Res.string.open_song_library),

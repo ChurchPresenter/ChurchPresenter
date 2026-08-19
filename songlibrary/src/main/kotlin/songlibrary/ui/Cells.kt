@@ -35,6 +35,10 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import songlibrary.generated.resources.Res
+import songlibrary.generated.resources.new_song_book_menu
+import songlibrary.generated.resources.no_song_book
 
 /**
  * A cell that is text until it is clicked, and a field while it is being typed in.
@@ -145,7 +149,7 @@ fun SongbookCell(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                value.ifBlank { Strings["no_song_book"] },
+                value.ifBlank { stringResource(Res.string.no_song_book) },
                 style = LibraryType.body,
                 color = if (value.isBlank()) scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA) else scheme.onSurface,
                 maxLines = 1,
@@ -157,7 +161,7 @@ fun SongbookCell(
         }
         if (open) {
             LibraryPopup(width = 250.dp, maxHeight = menuMaxHeight, onDismiss = { open = false }) {
-                MenuRow(Strings["no_song_book"], selected = value.isBlank()) {
+                MenuRow(stringResource(Res.string.no_song_book), selected = value.isBlank()) {
                     onPick("")
                     open = false
                 }
@@ -169,7 +173,7 @@ fun SongbookCell(
                 }
                 MenuDivider()
                 MenuRow(
-                    label = Strings["new_song_book_menu"],
+                    label = stringResource(Res.string.new_song_book_menu),
                     accent = true,
                     leading = { Icon(Icons.Default.Add, null, tint = scheme.primary, modifier = Modifier.size(11.dp)) },
                 ) {

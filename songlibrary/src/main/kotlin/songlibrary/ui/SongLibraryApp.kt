@@ -41,7 +41,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ViewColumn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -65,8 +64,46 @@ import core.models.songs.SongField
 import core.models.songs.SongItem
 import core.models.songs.SortColumn
 import java.io.File
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.jetbrains.compose.resources.stringResource
 import songlibrary.OPTIONAL_COLUMNS
 import songlibrary.SongLibraryState
+import songlibrary.generated.resources.Res
+import songlibrary.generated.resources.all_song_books
+import songlibrary.generated.resources.batch_edit_menu
+import songlibrary.generated.resources.clear
+import songlibrary.generated.resources.column_author
+import songlibrary.generated.resources.column_ccli
+import songlibrary.generated.resources.column_composer
+import songlibrary.generated.resources.column_number
+import songlibrary.generated.resources.column_secondary_title
+import songlibrary.generated.resources.column_song_book
+import songlibrary.generated.resources.column_title
+import songlibrary.generated.resources.column_tune
+import songlibrary.generated.resources.columns
+import songlibrary.generated.resources.columns_always
+import songlibrary.generated.resources.columns_show_all
+import songlibrary.generated.resources.delete
+import songlibrary.generated.resources.delete_song
+import songlibrary.generated.resources.done
+import songlibrary.generated.resources.edit_song
+import songlibrary.generated.resources.empty_title
+import songlibrary.generated.resources.footer_songs
+import songlibrary.generated.resources.library_empty
+import songlibrary.generated.resources.loading
+import songlibrary.generated.resources.new_song
+import songlibrary.generated.resources.new_song_book_menu
+import songlibrary.generated.resources.no_song_book
+import songlibrary.generated.resources.reset_filters
+import songlibrary.generated.resources.revert
+import songlibrary.generated.resources.save_changes
+import songlibrary.generated.resources.save_failed
+import songlibrary.generated.resources.search_placeholder
+import songlibrary.generated.resources.selected_count
+import songlibrary.generated.resources.subhead_counts
+import songlibrary.generated.resources.subhead_filtered
+import songlibrary.generated.resources.unsaved_changes
+import songlibrary.generated.resources.window_title
 
 /**
  * One song asked to be edited, and everything an editor needs to do it.
@@ -191,16 +228,17 @@ private fun LibraryHeader(state: SongLibraryState, onNewBook: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Column(Modifier.weight(1f)) {
-                Text(Strings["window_title"], style = LibraryType.title, color = scheme.onSurface)
+                Text(stringResource(Res.string.window_title), style = LibraryType.title, color = scheme.onSurface)
                 Text(subhead(state), style = LibraryType.small, color = scheme.onSurfaceVariant)
             }
 
             SearchField(state.view.query) { state.view = state.view.copy(query = it) }
             SongBookFilter(state, onNewBook)
             ColumnsMenu(state)
+            val newSongTitle = stringResource(Res.string.new_song)
             PrimaryButton(
-                label = Strings["new_song"],
-                onClick = { state.newSong(Strings["new_song"]) },
+                label = newSongTitle,
+                onClick = { state.newSong(newSongTitle) },
                 icon = { Icon(Icons.Default.Add, null, Modifier.size(13.dp), tint = scheme.onPrimary) },
             )
         }
@@ -208,10 +246,11 @@ private fun LibraryHeader(state: SongLibraryState, onNewBook: () -> Unit) {
     }
 }
 
+@Composable
 private fun subhead(state: SongLibraryState): String =
-    if (state.isLoading) Strings["loading"]
-    else if (state.view.isFiltered) Strings.format("subhead_filtered", state.rows.size, state.songs.size)
-    else Strings.format("subhead_counts", state.songs.size, state.songbooks.size)
+    if (state.isLoading) stringResource(Res.string.loading)
+    else if (state.view.isFiltered) stringResource(Res.string.subhead_filtered, state.rows.size, state.songs.size)
+    else stringResource(Res.string.subhead_counts, state.songs.size, state.songbooks.size)
 
 @Composable
 private fun BulkBar(state: SongLibraryState, onBatchEdit: () -> Unit, onDelete: () -> Unit) {
@@ -223,20 +262,20 @@ private fun BulkBar(state: SongLibraryState, onBatchEdit: () -> Unit, onDelete: 
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                Strings.format("selected_count", state.selected.size),
+                stringResource(Res.string.selected_count, state.selected.size),
                 style = LibraryType.bodyStrong,
                 color = scheme.primary,
             )
             Box(Modifier.width(1.dp).height(16.dp).background(scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA)))
             PrimaryButton(
-                label = Strings["batch_edit_menu"],
+                label = stringResource(Res.string.batch_edit_menu),
                 onClick = onBatchEdit,
                 icon = { Icon(Icons.Default.Edit, null, Modifier.size(12.dp), tint = scheme.onPrimary) },
             )
             Spacer(Modifier.weight(1f))
-            QuietButton(Strings["delete"], onClick = onDelete, danger = true)
+            QuietButton(stringResource(Res.string.delete), onClick = onDelete, danger = true)
             Text(
-                Strings["clear"],
+                stringResource(Res.string.clear),
                 style = LibraryType.button,
                 color = scheme.onSurfaceVariant,
                 modifier = Modifier.clip(RoundedCornerShape(8.dp))
@@ -490,8 +529,8 @@ private fun SongRow(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                RowAction(Icons.Default.Edit, Strings["edit_song"], scheme.primary, onEdit)
-                RowAction(Icons.Default.Delete, Strings["delete_song"], scheme.error, onDelete)
+                RowAction(Icons.Default.Edit, stringResource(Res.string.edit_song), scheme.primary, onEdit)
+                RowAction(Icons.Default.Delete, stringResource(Res.string.delete_song), scheme.error, onDelete)
             }
         }
         Hairline()
@@ -523,12 +562,12 @@ private fun EmptyState(state: SongLibraryState, width: Dp) {
             Icon(Icons.Default.Search, null, tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA), modifier = Modifier.size(19.dp))
         }
         Text(
-            if (state.view.isFiltered) Strings["empty_title"] else Strings["library_empty"],
+            if (state.view.isFiltered) stringResource(Res.string.empty_title) else stringResource(Res.string.library_empty),
             style = LibraryType.bodyStrong,
             color = scheme.onSurfaceVariant,
         )
         if (state.view.isFiltered) {
-            QuietButton(Strings["reset_filters"], onClick = {
+            QuietButton(stringResource(Res.string.reset_filters), onClick = {
                 state.view = state.view.copy(query = "", songbook = null)
             })
         }
@@ -545,7 +584,7 @@ private fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(Strings.format("footer_songs", state.songs.size), style = LibraryType.small, color = scheme.onSurfaceVariant)
+            Text(stringResource(Res.string.footer_songs, state.songs.size), style = LibraryType.small, color = scheme.onSurfaceVariant)
             if (state.isDirty) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -553,7 +592,7 @@ private fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
                 ) {
                     Box(Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.semantic.warning))
                     Text(
-                        Strings.format("unsaved_changes", state.changedCount),
+                        stringResource(Res.string.unsaved_changes, state.changedCount),
                         style = LibraryType.button,
                         color = MaterialTheme.semantic.warning,
                     )
@@ -561,7 +600,7 @@ private fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
             }
             state.lastOutcome?.errors?.firstOrNull()?.let {
                 Text(
-                    Strings.format("save_failed", it),
+                    stringResource(Res.string.save_failed, it),
                     style = LibraryType.small,
                     color = scheme.error,
                     maxLines = 1,
@@ -569,11 +608,11 @@ private fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
                 )
             }
             Spacer(Modifier.weight(1f))
-            QuietButton(Strings["revert"], onClick = { state.revert() }, enabled = state.isDirty)
-            PrimaryButton(Strings["save_changes"], onClick = { state.save() }, enabled = state.isDirty)
+            QuietButton(stringResource(Res.string.revert), onClick = { state.revert() }, enabled = state.isDirty)
+            PrimaryButton(stringResource(Res.string.save_changes), onClick = { state.save() }, enabled = state.isDirty)
             if (onClose != null) {
                 Box(Modifier.width(1.dp).height(20.dp).background(scheme.outlineVariant))
-                QuietButton(Strings["done"], onClick = onClose)
+                QuietButton(stringResource(Res.string.done), onClick = onClose)
             }
         }
     }
@@ -596,7 +635,7 @@ private fun SearchField(value: String, onChange: (String) -> Unit) {
         PlainTextField(
             value = value,
             onValueChange = onChange,
-            placeholder = Strings["search_placeholder"],
+            placeholder = stringResource(Res.string.search_placeholder),
             modifier = Modifier.weight(1f),
         )
     }
@@ -606,16 +645,16 @@ private fun SearchField(value: String, onChange: (String) -> Unit) {
 private fun SongBookFilter(state: SongLibraryState, onNewBook: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     val label = when (val book = state.view.songbook) {
-        null -> Strings["all_song_books"]
-        "" -> Strings["no_song_book"]
+        null -> stringResource(Res.string.all_song_books)
+        "" -> stringResource(Res.string.no_song_book)
         else -> book
     }
     LibraryDropdown(label = label, highlighted = state.view.songbook != null, menuWidth = 250.dp) { close ->
-        MenuRow(Strings["all_song_books"], selected = state.view.songbook == null, count = state.songs.size) {
+        MenuRow(stringResource(Res.string.all_song_books), selected = state.view.songbook == null, count = state.songs.size) {
             state.view = state.view.copy(songbook = null)
             close()
         }
-        MenuRow(Strings["no_song_book"], selected = state.view.songbook == "", count = state.counts[""] ?: 0) {
+        MenuRow(stringResource(Res.string.no_song_book), selected = state.view.songbook == "", count = state.counts[""] ?: 0) {
             state.view = state.view.copy(songbook = "")
             close()
         }
@@ -628,7 +667,7 @@ private fun SongBookFilter(state: SongLibraryState, onNewBook: () -> Unit) {
         }
         MenuDivider()
         MenuRow(
-            label = Strings["new_song_book_menu"],
+            label = stringResource(Res.string.new_song_book_menu),
             accent = true,
             leading = { Icon(Icons.Default.Add, null, tint = scheme.primary, modifier = Modifier.size(11.dp)) },
         ) {
@@ -642,18 +681,18 @@ private fun SongBookFilter(state: SongLibraryState, onNewBook: () -> Unit) {
 private fun ColumnsMenu(state: SongLibraryState) {
     val scheme = MaterialTheme.colorScheme
     LibraryDropdown(
-        label = Strings["columns"],
+        label = stringResource(Res.string.columns),
         highlighted = state.hiddenColumns.isNotEmpty(),
         menuWidth = 224.dp,
         leading = { Icon(Icons.Default.ViewColumn, null, tint = scheme.onSurfaceVariant, modifier = Modifier.size(13.dp)) },
     ) { _ ->
-        MenuRow(Strings["columns_show_all"], accent = true) { state.showAllColumns() }
+        MenuRow(stringResource(Res.string.columns_show_all), accent = true) { state.showAllColumns() }
         MenuDivider()
         // The title is always shown: a row identified only by its number is unreadable.
         MenuRow(
             label = columnLabel(SongField.TITLE),
             leading = { LibraryCheckbox(checked = true) },
-            trailing = { Text(Strings["columns_always"], style = LibraryType.columnHead, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA)) },
+            trailing = { Text(stringResource(Res.string.columns_always), style = LibraryType.columnHead, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA)) },
             onClick = null,
         )
         OPTIONAL_COLUMNS.forEach { field ->
@@ -670,15 +709,16 @@ private fun Hairline() {
     Box(Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = HAIRLINE_ALPHA)))
 }
 
+@Composable
 private fun columnLabel(field: SongField): String = when (field) {
-    SongField.NUMBER -> Strings["column_number"]
-    SongField.TITLE -> Strings["column_title"]
-    SongField.SECONDARY_TITLE -> Strings["column_secondary_title"]
-    SongField.SONGBOOK -> Strings["column_song_book"]
-    SongField.AUTHOR -> Strings["column_author"]
-    SongField.COMPOSER -> Strings["column_composer"]
-    SongField.TUNE -> Strings["column_tune"]
-    SongField.CCLI -> Strings["column_ccli"]
+    SongField.NUMBER -> stringResource(Res.string.column_number)
+    SongField.TITLE -> stringResource(Res.string.column_title)
+    SongField.SECONDARY_TITLE -> stringResource(Res.string.column_secondary_title)
+    SongField.SONGBOOK -> stringResource(Res.string.column_song_book)
+    SongField.AUTHOR -> stringResource(Res.string.column_author)
+    SongField.COMPOSER -> stringResource(Res.string.column_composer)
+    SongField.TUNE -> stringResource(Res.string.column_tune)
+    SongField.CCLI -> stringResource(Res.string.column_ccli)
 }
 
 private fun SongField.sortColumn(): SortColumn = when (this) {

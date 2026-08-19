@@ -40,6 +40,34 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import core.models.songs.SongField
 import core.models.songs.SongItem
+import org.jetbrains.compose.resources.stringResource
+import songlibrary.generated.resources.Res
+import songlibrary.generated.resources.new_song_book_invalid
+import songlibrary.generated.resources.new_song_book_exists
+import songlibrary.generated.resources.batch_edit
+import songlibrary.generated.resources.batch_edit_apply
+import songlibrary.generated.resources.batch_edit_hint
+import songlibrary.generated.resources.batch_edit_nothing
+import songlibrary.generated.resources.batch_edit_subhead
+import songlibrary.generated.resources.cancel
+import songlibrary.generated.resources.column_author
+import songlibrary.generated.resources.column_ccli
+import songlibrary.generated.resources.column_composer
+import songlibrary.generated.resources.column_song_book
+import songlibrary.generated.resources.column_title
+import songlibrary.generated.resources.column_tune
+import songlibrary.generated.resources.create
+import songlibrary.generated.resources.delete_confirm_action
+import songlibrary.generated.resources.delete_confirm_body
+import songlibrary.generated.resources.delete_confirm_one
+import songlibrary.generated.resources.delete_confirm_title
+import songlibrary.generated.resources.name
+import songlibrary.generated.resources.new_song_book
+import songlibrary.generated.resources.new_song_book_assign
+import songlibrary.generated.resources.new_song_book_placeholder
+import songlibrary.generated.resources.new_song_book_subhead
+import songlibrary.generated.resources.no_song_book
+import songlibrary.generated.resources.song_count
 
 /**
  * The panel every dialog in this window is: an icon, a title and a line under it, a body, and a
@@ -130,15 +158,15 @@ fun NewSongBookDialog(
 
     LibraryDialog(
         icon = Icons.Default.LibraryBooks,
-        title = Strings["new_song_book"],
-        subtitle = Strings["new_song_book_subhead"],
+        title = stringResource(Res.string.new_song_book),
+        subtitle = stringResource(Res.string.new_song_book_subhead),
         onDismiss = onDismiss,
         footer = {
-            QuietButton(Strings["cancel"], onClick = onDismiss)
-            PrimaryButton(Strings["create"], onClick = { onCreate(trimmed, assign) }, enabled = valid)
+            QuietButton(stringResource(Res.string.cancel), onClick = onDismiss)
+            PrimaryButton(stringResource(Res.string.create), onClick = { onCreate(trimmed, assign) }, enabled = valid)
         },
     ) {
-        Text(Strings["name"].uppercase(), style = LibraryType.columnHead, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
+        Text(stringResource(Res.string.name).uppercase(), style = LibraryType.columnHead, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
         Spacer(Modifier.height(6.dp))
         Box(
             Modifier.fillMaxWidth()
@@ -156,13 +184,14 @@ fun NewSongBookDialog(
             PlainTextField(
                 value = name,
                 onValueChange = { name = it },
-                placeholder = Strings["new_song_book_placeholder"],
+                placeholder = stringResource(Res.string.new_song_book_placeholder),
             )
         }
         if (clash || invalid) {
             Spacer(Modifier.height(6.dp))
             Text(
-                Strings[if (clash) "new_song_book_exists" else "new_song_book_invalid"],
+                if (clash) stringResource(Res.string.new_song_book_exists)
+                else stringResource(Res.string.new_song_book_invalid),
                 style = LibraryType.small,
                 color = scheme.error,
             )
@@ -181,7 +210,7 @@ fun NewSongBookDialog(
             ) {
                 LibraryCheckbox(checked = assign)
                 Text(
-                    Strings.format("new_song_book_assign", selectedCount),
+                    stringResource(Res.string.new_song_book_assign, selectedCount),
                     style = LibraryType.body,
                     color = scheme.primary,
                 )
@@ -214,25 +243,25 @@ fun BatchEditDialog(
 
     LibraryDialog(
         icon = Icons.Default.Edit,
-        title = Strings["batch_edit"],
-        subtitle = Strings.format("batch_edit_subhead", count),
+        title = stringResource(Res.string.batch_edit),
+        subtitle = stringResource(Res.string.batch_edit_subhead, count),
         width = 520.dp,
         onDismiss = onDismiss,
         footer = {
             Text(
-                if (chosen.isEmpty()) Strings["batch_edit_nothing"] else "",
+                if (chosen.isEmpty()) stringResource(Res.string.batch_edit_nothing) else "",
                 style = LibraryType.small,
                 color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
             )
-            QuietButton(Strings["cancel"], onClick = onDismiss)
+            QuietButton(stringResource(Res.string.cancel), onClick = onDismiss)
             PrimaryButton(
-                Strings.format("batch_edit_apply", count),
+                stringResource(Res.string.batch_edit_apply, count),
                 onClick = { onApply(chosen) },
                 enabled = chosen.isNotEmpty(),
             )
         },
     ) {
-        Text(Strings["batch_edit_hint"], style = LibraryType.small, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
+        Text(stringResource(Res.string.batch_edit_hint), style = LibraryType.small, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
         Spacer(Modifier.height(4.dp))
         fields.forEach { field ->
             val on = ticked[field] == true
@@ -302,7 +331,7 @@ private fun BatchSongbookField(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                value.ifBlank { Strings["no_song_book"] },
+                value.ifBlank { stringResource(Res.string.no_song_book) },
                 style = LibraryType.body,
                 color = if (enabled) scheme.onSurface else scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
                 maxLines = 1,
@@ -314,7 +343,7 @@ private fun BatchSongbookField(
         }
         if (open) {
             LibraryPopup(width = 260.dp, maxHeight = menuMaxHeight, onDismiss = { open = false }) {
-                MenuRow(Strings["no_song_book"], selected = value.isBlank()) {
+                MenuRow(stringResource(Res.string.no_song_book), selected = value.isBlank()) {
                     onPick("")
                     open = false
                 }
@@ -340,13 +369,13 @@ fun DeleteConfirmDialog(songs: List<SongItem>, onDismiss: () -> Unit, onConfirm:
     val scheme = MaterialTheme.colorScheme
     LibraryDialog(
         icon = Icons.Default.Delete,
-        title = if (songs.size == 1) Strings.format("delete_confirm_one", songs.single().title)
-        else Strings.format("delete_confirm_title", Strings.format("song_count", songs.size)),
-        subtitle = Strings["delete_confirm_body"],
+        title = if (songs.size == 1) stringResource(Res.string.delete_confirm_one, songs.single().title)
+        else stringResource(Res.string.delete_confirm_title, stringResource(Res.string.song_count, songs.size)),
+        subtitle = stringResource(Res.string.delete_confirm_body),
         onDismiss = onDismiss,
         footer = {
-            QuietButton(Strings["cancel"], onClick = onDismiss)
-            DangerButton(Strings["delete_confirm_action"], onClick = onConfirm)
+            QuietButton(stringResource(Res.string.cancel), onClick = onDismiss)
+            DangerButton(stringResource(Res.string.delete_confirm_action), onClick = onConfirm)
         },
     ) {
         songs.take(DELETE_PREVIEW).forEach { song ->
@@ -354,7 +383,7 @@ fun DeleteConfirmDialog(songs: List<SongItem>, onDismiss: () -> Unit, onConfirm:
         }
         if (songs.size > DELETE_PREVIEW) {
             Text(
-                Strings.format("song_count", songs.size - DELETE_PREVIEW),
+                stringResource(Res.string.song_count, songs.size - DELETE_PREVIEW),
                 style = LibraryType.small,
                 color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
             )
@@ -381,11 +410,12 @@ private fun DangerButton(label: String, onClick: () -> Unit) {
 
 private const val DELETE_PREVIEW = 6
 
+@Composable
 private fun batchLabel(field: SongField): String = when (field) {
-    SongField.SONGBOOK -> Strings["column_song_book"]
-    SongField.AUTHOR -> Strings["column_author"]
-    SongField.COMPOSER -> Strings["column_composer"]
-    SongField.TUNE -> Strings["column_tune"]
-    SongField.CCLI -> Strings["column_ccli"]
-    else -> Strings["column_title"]
+    SongField.SONGBOOK -> stringResource(Res.string.column_song_book)
+    SongField.AUTHOR -> stringResource(Res.string.column_author)
+    SongField.COMPOSER -> stringResource(Res.string.column_composer)
+    SongField.TUNE -> stringResource(Res.string.column_tune)
+    SongField.CCLI -> stringResource(Res.string.column_ccli)
+    else -> stringResource(Res.string.column_title)
 }

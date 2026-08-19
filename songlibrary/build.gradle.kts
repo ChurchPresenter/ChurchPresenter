@@ -20,6 +20,13 @@ kotlin {
     jvmToolchain(21)
 }
 
+compose.resources {
+    // Generated into the module's own package, so `Res.string.window_title` here and in the app
+    // are different classes and neither shadows the other.
+    packageOfResClass = "songlibrary.generated.resources"
+    publicResClass = true
+}
+
 dependencies {
     // The song, the `.song` format and the library folder -- the same ones the app uses.
     implementation(projects.coreModels)
@@ -30,6 +37,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
     implementation(compose.desktop.currentOs)
+    // The window's own strings, as Compose resources — the same mechanism the app uses, so a
+    // translation lands as values-xx/strings.xml here exactly as it does there.
+    implementation(compose.components.resources)
     // Compose artefacts come from the version catalogue rather than the `compose.*` accessors, so
     // this module and :composeApp resolve the SAME material3 and icon versions -- composeApp
     // depends on this module, and a second version line here would silently upgrade the app's.

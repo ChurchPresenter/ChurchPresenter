@@ -27,6 +27,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import songlibrary.generated.resources.Res
+import songlibrary.generated.resources.cancel
+import songlibrary.generated.resources.editor_author
+import songlibrary.generated.resources.editor_ccli
+import songlibrary.generated.resources.editor_composer
+import songlibrary.generated.resources.editor_lyrics
+import songlibrary.generated.resources.editor_lyrics_hint
+import songlibrary.generated.resources.editor_number
+import songlibrary.generated.resources.editor_save
+import songlibrary.generated.resources.editor_secondary_lyrics
+import songlibrary.generated.resources.editor_secondary_title
+import songlibrary.generated.resources.editor_song_book
+import songlibrary.generated.resources.editor_song_title
+import songlibrary.generated.resources.editor_title
+import songlibrary.generated.resources.editor_tune
+import songlibrary.generated.resources.no_song_book
 
 /**
  * One song opened in full: its fields, its lyrics, and the second language beside them.
@@ -48,17 +65,17 @@ fun SongEditorDialog(request: SongEditorRequest) {
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.width(920.dp),
-        title = { Text(Strings["editor_title"]) },
+        title = { Text(stringResource(Res.string.editor_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Field(Strings["editor_song_title"], draft.title, Modifier.weight(2f)) {
+                    Field(stringResource(Res.string.editor_song_title), draft.title, Modifier.weight(2f)) {
                         draft = draft.copy(title = it)
                     }
-                    Field(Strings["editor_secondary_title"], draft.secondaryTitle, Modifier.weight(2f)) {
+                    Field(stringResource(Res.string.editor_secondary_title), draft.secondaryTitle, Modifier.weight(2f)) {
                         draft = draft.copy(secondaryTitle = it)
                     }
-                    Field(Strings["editor_number"], draft.number, Modifier.weight(1f)) {
+                    Field(stringResource(Res.string.editor_number), draft.number, Modifier.weight(1f)) {
                         draft = draft.copy(number = it)
                     }
                 }
@@ -69,34 +86,34 @@ fun SongEditorDialog(request: SongEditorRequest) {
                         modifier = Modifier.weight(1f),
                         onPick = { draft = draft.copy(songbook = it) },
                     )
-                    Field(Strings["editor_author"], draft.author, Modifier.weight(1f)) {
+                    Field(stringResource(Res.string.editor_author), draft.author, Modifier.weight(1f)) {
                         draft = draft.copy(author = it)
                     }
-                    Field(Strings["editor_composer"], draft.composer, Modifier.weight(1f)) {
+                    Field(stringResource(Res.string.editor_composer), draft.composer, Modifier.weight(1f)) {
                         draft = draft.copy(composer = it)
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Field(Strings["editor_tune"], draft.tune, Modifier.weight(1f)) {
+                    Field(stringResource(Res.string.editor_tune), draft.tune, Modifier.weight(1f)) {
                         draft = draft.copy(tune = it)
                     }
-                    Field(Strings["editor_ccli"], draft.ccliNumber, Modifier.weight(1f)) {
+                    Field(stringResource(Res.string.editor_ccli), draft.ccliNumber, Modifier.weight(1f)) {
                         draft = draft.copy(ccliNumber = it)
                     }
                 }
-                Text(Strings["editor_lyrics_hint"], style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(Res.string.editor_lyrics_hint), style = MaterialTheme.typography.labelSmall)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = lyrics,
                         onValueChange = { lyrics = it },
-                        label = { Text(Strings["editor_lyrics"]) },
+                        label = { Text(stringResource(Res.string.editor_lyrics)) },
                         modifier = Modifier.weight(1f).height(280.dp),
                         textStyle = MaterialTheme.typography.bodySmall,
                     )
                     OutlinedTextField(
                         value = secondary,
                         onValueChange = { secondary = it },
-                        label = { Text(Strings["editor_secondary_lyrics"]) },
+                        label = { Text(stringResource(Res.string.editor_secondary_lyrics)) },
                         modifier = Modifier.weight(1f).height(280.dp),
                         textStyle = MaterialTheme.typography.bodySmall,
                     )
@@ -113,9 +130,9 @@ fun SongEditorDialog(request: SongEditorRequest) {
                         )
                     )
                 }
-            ) { Text(Strings["editor_save"]) }
+            ) { Text(stringResource(Res.string.editor_save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(Strings["cancel"]) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 
@@ -142,9 +159,9 @@ private fun SongbookField(
     Box(modifier) {
         OutlinedButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
             Column(Modifier.weight(1f)) {
-                Text(Strings["editor_song_book"], style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(Res.string.editor_song_book), style = MaterialTheme.typography.labelSmall)
                 Text(
-                    value.ifBlank { Strings["no_song_book"] },
+                    value.ifBlank { stringResource(Res.string.no_song_book) },
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -153,7 +170,7 @@ private fun SongbookField(
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            DropdownMenuItem(text = { Text(Strings["no_song_book"]) }, onClick = { onPick(""); open = false })
+            DropdownMenuItem(text = { Text(stringResource(Res.string.no_song_book)) }, onClick = { onPick(""); open = false })
             songbooks.forEach { book ->
                 DropdownMenuItem(
                     text = { Text(book, maxLines = 1, overflow = TextOverflow.Ellipsis) },
