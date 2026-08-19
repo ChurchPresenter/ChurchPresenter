@@ -37,15 +37,16 @@ What that changed, and what it did not:
 
 ## Coverage
 
-The module carries the root build's six-counter floor, but **not** at the usual 85%: it is a parser
-and a rasterizer, some of it reachable only through real decks, and its output is pixels. The
-floors in `build.gradle.kts` are its measured coverage rounded down —
+The module carries the root build's six-counter floor. **Line, method and class clear the 85%
+default and so are not named** in `build.gradle.kts` — only the three that fall short are, at their
+measured value rounded down:
 
 ```
-INSTRUCTION 0.80   BRANCH 0.65   LINE 0.85   COMPLEXITY 0.60   METHOD 0.89   CLASS 0.95
+INSTRUCTION 0.80   BRANCH 0.65   COMPLEXITY 0.60      (line/method/class inherit the 85% default)
 ```
 
-— a **ratchet, not a target**: raise one as tests are added, never lower one to make a change fit.
+A named floor is a **ratchet, not a target**: raise one as tests are added, never lower one to make
+a change fit — and delete it outright once its counter clears 85%.
 `extra["coverageExcludes"]` drops `**/ui/**`, `**/MainKt*` and the CLI diagnostics (`**/*Dump*`,
 `**/MakeSampleDeck*`).
 
