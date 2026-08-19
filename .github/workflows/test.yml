@@ -79,8 +79,6 @@ jobs:
               - '.github/workflows/test.yml'
             engine:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/**'
-            lottiegen:
-              - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen/**'
             cross:
               - 'composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/**'
             converter:
@@ -89,6 +87,9 @@ jobs:
             satellite:
               - *shared
               - 'companion-satellite/**'
+            lottiegen:
+              - *shared
+              - 'lottieGenerator/**'
             theme:
               - *shared
               - 'theme/**'
@@ -227,6 +228,12 @@ jobs:
         if: always() && steps.modules.outputs.satellite == 'true'
         run: ./gradlew :companion-satellite:test
 
+      # Same reasoning as the converter above: a module of this build, so a root-wrapper task
+      # rather than a wrapper of its own.
+      - name: Lower Third generator tests
+        if: always() && steps.modules.outputs.lottiegen == 'true'
+        run: ./gradlew :lottieGenerator:test
+
       - name: Theme tests
         if: always() && steps.modules.outputs.theme == 'true'
         run: ./gradlew :theme:test
@@ -256,11 +263,6 @@ jobs:
         working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine
         run: chmod +x gradlew && ./gradlew test
 
-      - name: LottieGen tests
-        if: always() && steps.modules.outputs.lottiegen == 'true'
-        working-directory: composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen
-        run: chmod +x gradlew && ./gradlew test
-
 
       # Kotlin Multiplatform, so the JVM suite is `jvmTest` rather than `test`.
       - name: Crossword tests
@@ -286,6 +288,7 @@ jobs:
             composeApp/build/test-results/**/TEST-*.xml
             converter/build/test-results/**/TEST-*.xml
             companion-satellite/build/test-results/**/TEST-*.xml
+            lottieGenerator/build/test-results/**/TEST-*.xml
             theme/build/test-results/**/TEST-*.xml
             core-models/build/test-results/**/TEST-*.xml
             bible-engine/build/test-results/**/TEST-*.xml
@@ -354,15 +357,32 @@ jobs:
                   if ratios:
                       found[module] = ratios
 
+          def under(module, counter):
+              floor = floors.get(module, {}).get(counter)
+              if floor is None or module not in found or counter not in found[module]:
+                  return None
+              gap = floor - found[module][counter]
+              return gap if gap > 0 else None
+
+          breached = {
+              module: [c for c in COUNTERS if under(module, c) is not None]
+              for module in found
+          }
+          total_breached = sum(len(v) for v in breached.values())
+
           print("<!-- coverage-table -->")
           print("## Coverage")
           if not found:
               print()
               print("No JaCoCo reports were produced in this run.")
+          elif total_breached:
+              print()
+              modules = ", ".join(f"`{m}`" for m in sorted(breached) if breached[m])
+              print(f":warning: **{total_breached} counter(s) below floor** in {modules}.")
           for module in sorted(found, key=lambda m: (m != "composeApp", m)):
               ratios = found[module]
               print()
-              print(f"### {module}")
+              print(f"### {module}" + (" :warning:" if breached.get(module) else ""))
               print()
               print("| Counter | Floor | Actual |")
               print("|---|---|---|")
@@ -371,7 +391,9 @@ jobs:
                       continue
                   floor = floors.get(module, {}).get(counter)
                   cap = "" if floor is None else f"{floor:.0f}%"
-                  print(f"| {counter.title()} | {cap} | {ratios[counter]:.2f}% |")
+                  gap = under(module, counter)
+                  mark = "" if gap is None else f" :warning: -{gap:.2f}pt"
+                  print(f"| {counter.title()} | {cap} | {ratios[counter]:.2f}%{mark} |")
           if found:
               print()
               print("Modules whose tests did not run in this build are not listed. The floors are")
@@ -400,6 +422,8 @@ jobs:
             composeApp/build/test-results/
             converter/build/reports/tests/
             converter/build/test-results/
+            lottieGenerator/build/reports/tests/
+            lottieGenerator/build/test-results/
             theme/build/reports/tests/
             theme/build/test-results/
             core-models/build/reports/tests/
