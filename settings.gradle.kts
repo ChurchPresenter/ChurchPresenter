@@ -41,3 +41,6 @@ include(":converter")
 include(":companion-satellite")
 include(":theme")
 include(":core-models")
+// The animated lower-third generator: its own module, compiled and packaged separately, and
+// depended on by :composeApp, which opens it in a window from the Lower Third settings.
+include(":lottieGenerator")

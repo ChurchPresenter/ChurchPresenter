@@ -28,6 +28,10 @@ subprojects {
     version = "1.0.0"
 }
 
+val isFilteredTestRun = gradle.startParameter.taskRequests.any { request ->
+    request.args.any { it == "--tests" }
+}
+
 val defaultCoverageFloors = mapOf(
     "INSTRUCTION" to "0.85",
     "BRANCH" to "0.85",
@@ -61,6 +65,7 @@ subprojects {
                 dependsOn("test")
                 reports { xml.required.set(true); html.required.set(true) }
                 classDirectories.setFrom(coveredClasses())
+                onlyIf { !isFilteredTestRun }
             }
 
             tasks.withType<JacocoCoverageVerification>().configureEach {
