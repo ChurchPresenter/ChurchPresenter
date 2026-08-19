@@ -15,8 +15,6 @@ kotlin {
 }
 
 compose.resources {
-    // Generated into the module's own package, so `Res.string.window_title` here and in the app
-    // are different classes and neither shadows the other.
     packageOfResClass = "songlibrary.generated.resources"
     publicResClass = true
 }
@@ -33,6 +31,8 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
 
     testImplementation(kotlin("test"))
+    testImplementation(compose.desktop.uiTestJUnit4)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 detekt {
