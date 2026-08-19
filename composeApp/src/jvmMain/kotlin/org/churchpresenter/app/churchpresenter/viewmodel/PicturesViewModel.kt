@@ -494,13 +494,9 @@ class PicturesViewModel(
                 }
                 while (isActive) {
                     val key = watchService.take()
-                    var changed = false
                     for (event in key.pollEvents()) {
-                        val kind = event.kind()
-                        val fileName = event.context().toString()
-                        val ext = fileName.substringAfterLast('.', "").lowercase()
-                        if (kind == StandardWatchEventKinds.OVERFLOW || ext !in imageExtensions) continue
-                        if (applyWatchEvent(kind, File(folder, fileName))) changed = true
+                        val fileName = watchedImageName(event) ?: continue
+                        applyWatchEvent(event.kind(), File(folder, fileName))
                     }
                     if (!key.reset()) break
                 }
@@ -515,6 +511,19 @@ class PicturesViewModel(
         }
     }
 
+
+    /**
+     * The image file name [event] refers to, or null when it is not an event to act on.
+     *
+     * OVERFLOW is filtered *before* [WatchEvent.context] is read. Its context is not a path and is
+     * null in practice, so testing for OVERFLOW after dereferencing the context never runs — the
+     * null dereference throws first, which is how this crashed in the field.
+     */
+    internal fun watchedImageName(event: WatchEvent<*>): String? {
+        if (event.kind() == StandardWatchEventKinds.OVERFLOW) return null
+        val fileName = event.context()?.toString() ?: return null
+        return if (fileName.substringAfterLast('.', "").lowercase() in imageExtensions) fileName else null
+    }
 
     /** Applies one watch event to the image list; true when the list actually changed. */
     internal fun CoroutineScope.applyWatchEvent(kind: WatchEvent.Kind<*>, file: File): Boolean = when (kind) {
