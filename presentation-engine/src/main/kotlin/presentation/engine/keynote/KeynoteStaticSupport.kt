@@ -121,15 +121,25 @@ internal object KeynoteStaticSupport {
     }
 
     private fun analyzeDirectory(dir: File): Analysis {
+        // A package document is a directory, and File.listFiles hands back whatever order the
+        // filesystem happens to store — near-sorted on APFS, arbitrary on ext4. The zip branch can
+        // rely on entry order because Keynote writes it deliberately; a folder carries no such
+        // signal, so both lists are sorted instead. Without this the slide order — and with it
+        // which thumbnail belongs to which slide — differs from one machine to the next.
         val dataDir = File(dir, "Data")
         val thumbnails = dataDir.listFiles()
-            ?.filter { it.isFile && it.extension.lowercase() in IMAGE_EXTENSIONS && it.name.lowercase().startsWith("st-") }
+            ?.filter {
+                it.isFile && it.extension.lowercase() in IMAGE_EXTENSIONS &&
+                    it.name.lowercase().startsWith("st-")
+            }
             ?.map { it.absolutePath }
+            ?.sorted()
             ?: emptyList()
         val slideIwaOrder = File(dir, "Index").listFiles()
             ?.map { it.name }
             ?.filter { it.startsWith("Slide-") && it.endsWith(".iwa") }
             ?.mapNotNull { slideIwaId(it) }
+            ?.sorted()
             ?: emptyList()
         val apxlXml = File(dir, "index.apxl").takeIf { it.exists() }?.readText()
         val iwaNotes = mutableMapOf<Long, String>()
