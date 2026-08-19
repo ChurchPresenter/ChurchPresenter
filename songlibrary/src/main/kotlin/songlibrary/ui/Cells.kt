@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,7 +45,7 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun EditableCell(value: String, strong: Boolean = false, onCommit: (String) -> Unit) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     var editing by remember(value) { mutableStateOf(false) }
     var draft by remember(value) { mutableStateOf(value) }
     var everFocused by remember(value) { mutableStateOf(false) }
@@ -64,7 +65,7 @@ fun EditableCell(value: String, strong: Boolean = false, onCommit: (String) -> U
             Text(
                 value,
                 style = if (strong) LibraryType.bodyStrong else LibraryType.body,
-                color = if (value.isBlank()) c.textFaint else c.text,
+                color = if (value.isBlank()) scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA) else scheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -87,8 +88,8 @@ fun EditableCell(value: String, strong: Boolean = false, onCommit: (String) -> U
             style = if (strong) LibraryType.bodyStrong else LibraryType.body,
             modifier = Modifier.fillMaxWidth()
                 .clip(RoundedCornerShape(6.dp))
-                .background(c.background)
-                .border(1.5.dp, c.accent, RoundedCornerShape(6.dp))
+                .background(scheme.background)
+                .border(1.5.dp, scheme.primary, RoundedCornerShape(6.dp))
                 .padding(horizontal = 6.dp, vertical = 5.dp),
             textModifier = Modifier.focusRequester(focus)
                 // Only once it HAS been focused. `onFocusChanged` also fires as the modifier
@@ -133,7 +134,7 @@ fun SongbookCell(
     onPick: (String) -> Unit,
     onNewBook: () -> Unit,
 ) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     var open by remember { mutableStateOf(false) }
     MenuAnchorBox { menuMaxHeight ->
         Row(
@@ -146,13 +147,13 @@ fun SongbookCell(
             Text(
                 value.ifBlank { Strings["no_song_book"] },
                 style = LibraryType.body,
-                color = if (value.isBlank()) c.textFaint else c.text,
+                color = if (value.isBlank()) scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA) else scheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
             )
             Box(Modifier.weight(1f))
-            Icon(Icons.Default.ArrowDropDown, null, tint = c.textFaint, modifier = Modifier.size(13.dp))
+            Icon(Icons.Default.ArrowDropDown, null, tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA), modifier = Modifier.size(13.dp))
         }
         if (open) {
             LibraryPopup(width = 250.dp, maxHeight = menuMaxHeight, onDismiss = { open = false }) {
@@ -170,7 +171,7 @@ fun SongbookCell(
                 MenuRow(
                     label = Strings["new_song_book_menu"],
                     accent = true,
-                    leading = { Icon(Icons.Default.Add, null, tint = c.accent, modifier = Modifier.size(11.dp)) },
+                    leading = { Icon(Icons.Default.Add, null, tint = scheme.primary, modifier = Modifier.size(11.dp)) },
                 ) {
                     open = false
                     onNewBook()

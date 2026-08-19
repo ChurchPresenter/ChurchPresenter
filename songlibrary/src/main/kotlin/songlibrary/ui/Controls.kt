@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,15 +35,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import songlibrary.menuMaxHeight
@@ -63,17 +67,17 @@ fun PlainTextField(
     style: TextStyle = LibraryType.body,
     textModifier: Modifier = Modifier,
 ) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     Box(modifier, contentAlignment = Alignment.CenterStart) {
         if (value.isEmpty() && placeholder.isNotEmpty()) {
-            Text(placeholder, style = style, color = c.textFaint, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(placeholder, style = style, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
             singleLine = true,
-            textStyle = style.copy(color = c.text),
-            cursorBrush = SolidColor(c.accent),
+            textStyle = style.copy(color = scheme.onSurface),
+            cursorBrush = SolidColor(scheme.primary),
             modifier = textModifier.fillMaxWidth(),
         )
     }
@@ -94,17 +98,17 @@ fun LibraryDropdown(
     leading: (@Composable () -> Unit)? = null,
     content: @Composable (close: () -> Unit) -> Unit,
 ) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     var open by remember { mutableStateOf(false) }
     MenuAnchorBox { menuMaxHeight ->
         Row(
             Modifier.height(LibraryMetrics.control)
                 .widthIn(max = 210.dp)
                 .clip(RoundedCornerShape(LibraryMetrics.radius))
-                .background(c.inputSurface)
+                .background(scheme.surfaceContainerHigh)
                 .border(
                     1.dp,
-                    if (highlighted) c.accentBorder else c.border,
+                    if (highlighted) scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA) else scheme.outlineVariant,
                     RoundedCornerShape(LibraryMetrics.radius),
                 )
                 .clickable { open = true }
@@ -118,13 +122,13 @@ fun LibraryDropdown(
             Text(
                 label,
                 style = LibraryType.button,
-                color = c.text,
+                color = scheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
             )
             Spacer(Modifier.width(8.dp))
-            Icon(Icons.Default.ArrowDropDown, null, tint = c.textFaint, modifier = Modifier.size(14.dp))
+            Icon(Icons.Default.ArrowDropDown, null, tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA), modifier = Modifier.size(14.dp))
         }
         if (open) {
             LibraryPopup(width = menuWidth, maxHeight = menuMaxHeight, onDismiss = { open = false }) {
@@ -166,7 +170,7 @@ fun MenuAnchorBox(modifier: Modifier = Modifier, content: @Composable (menuMaxHe
  */
 @Composable
 fun LibraryPopup(width: Dp, maxHeight: Dp, onDismiss: () -> Unit, content: @Composable () -> Unit) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     val scroll = rememberScrollState()
     Popup(
         onDismissRequest = onDismiss,
@@ -175,8 +179,8 @@ fun LibraryPopup(width: Dp, maxHeight: Dp, onDismiss: () -> Unit, content: @Comp
         Box(Modifier.padding(top = 5.dp).width(width).heightIn(max = maxHeight)) {
             Column(
                 Modifier.clip(RoundedCornerShape(10.dp))
-                    .background(c.popupSurface)
-                    .border(1.dp, c.border, RoundedCornerShape(10.dp))
+                    .background(scheme.surfaceContainerHigh)
+                    .border(1.dp, scheme.outlineVariant, RoundedCornerShape(10.dp))
                     .padding(4.dp)
                     .verticalScroll(scroll),
             ) {
@@ -205,7 +209,7 @@ fun MenuRow(
     trailing: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     Row(
         Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(7.dp))
@@ -216,7 +220,7 @@ fun MenuRow(
         Box(Modifier.width(if (leading != null) 20.dp else 14.dp), contentAlignment = Alignment.CenterStart) {
             when {
                 leading != null -> leading()
-                selected -> Icon(Icons.Default.Check, null, tint = c.accent, modifier = Modifier.size(11.dp))
+                selected -> Icon(Icons.Default.Check, null, tint = scheme.primary, modifier = Modifier.size(11.dp))
             }
         }
         // `weight(1f)`, and the trailing count measured before it rather than given a weight of its
@@ -226,7 +230,7 @@ fun MenuRow(
         Text(
             label,
             style = LibraryType.body,
-            color = if (accent) c.accentText else if (onClick == null) c.textMuted else c.text,
+            color = if (accent) scheme.primary else if (onClick == null) scheme.onSurfaceVariant else scheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
@@ -234,12 +238,116 @@ fun MenuRow(
         Spacer(Modifier.width(8.dp))
         when {
             trailing != null -> trailing()
-            count != null -> Text(count.toString(), style = LibraryType.small, color = c.textFaint)
+            count != null -> Text(count.toString(), style = LibraryType.small, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
         }
     }
 }
 
 @Composable
 fun MenuDivider() {
-    Box(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 4.dp).height(1.dp).background(colors.border))
+    Box(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 4.dp).height(1.dp).background(MaterialTheme.colorScheme.outlineVariant))
+}
+
+/** The alphas the recessive chrome is built from, over whatever the scheme's own text colour is. */
+internal const val HAIRLINE_ALPHA = 0.07f
+internal const val FAINT_TEXT_ALPHA = 0.55f
+internal const val ACCENT_SURFACE_ALPHA = 0.10f
+internal const val ACCENT_BORDER_ALPHA = 0.28f
+internal const val SKELETON_ALPHA = 0.09f
+internal const val SKELETON_HIGHLIGHT_ALPHA = 0.20f
+
+/** The type scale of the design: small, tight, and even down the table. */
+object LibraryType {
+    val title = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.3).sp)
+    val body = TextStyle(fontSize = 12.5.sp)
+    val bodyStrong = TextStyle(fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold)
+    val small = TextStyle(fontSize = 11.5.sp)
+    val button = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+    val columnHead = TextStyle(fontSize = 9.5.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 0.9.sp)
+}
+
+/** Corner radii, control heights and the row height the whole table is built on. */
+object LibraryMetrics {
+    val control = 32.dp
+    val radius = 9.dp
+    val panelRadius = 14.dp
+    val rowHeight = 38.dp
+    val headerHeight = 32.dp
+}
+
+/** A filled button in the accent colour: the one action a bar is really offering. */
+@Composable
+fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true, icon: (@Composable () -> Unit)? = null) {
+    val scheme = MaterialTheme.colorScheme
+    Row(
+        Modifier.height(LibraryMetrics.control)
+            .clip(RoundedCornerShape(LibraryMetrics.radius))
+            .background(if (enabled) scheme.primary else scheme.surfaceContainerHigh)
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (icon != null) {
+            icon()
+            Box(Modifier.size(7.dp))
+        }
+        Text(label, style = LibraryType.button, color = if (enabled) scheme.onPrimary else scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
+    }
+}
+
+/** An outlined button: everything that is not the one action. */
+@Composable
+fun QuietButton(
+    label: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    danger: Boolean = false,
+    icon: (@Composable () -> Unit)? = null,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val border = when {
+        !enabled -> scheme.onSurface.copy(alpha = HAIRLINE_ALPHA)
+        danger -> scheme.error
+        else -> scheme.outlineVariant
+    }
+    val text = when {
+        !enabled -> scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA)
+        // Drawn on `dangerSurface` below, so it is that surface's own foreground, not `danger`.
+        danger -> scheme.onErrorContainer
+        else -> scheme.onSurface
+    }
+    Row(
+        Modifier.height(LibraryMetrics.control)
+            .clip(RoundedCornerShape(LibraryMetrics.radius))
+            .background(if (danger && enabled) scheme.errorContainer else scheme.surfaceContainerHigh)
+            .border(1.dp, border, RoundedCornerShape(LibraryMetrics.radius))
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (icon != null) {
+            icon()
+            Box(Modifier.size(7.dp))
+        }
+        Text(label, style = LibraryType.button, color = text)
+    }
+}
+
+/** The tick box the table and the menus share, drawn at the size the design uses. */
+@Composable
+fun LibraryCheckbox(checked: Boolean, indeterminate: Boolean = false, onToggle: (() -> Unit)? = null) {
+    val scheme = MaterialTheme.colorScheme
+    Box(
+        Modifier.size(15.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(if (checked || indeterminate) scheme.primary else Color.Transparent)
+            .border(1.5.dp, if (checked || indeterminate) scheme.primary else scheme.outlineVariant, RoundedCornerShape(4.dp))
+            .then(if (onToggle != null) Modifier.clickable(onClick = onToggle) else Modifier),
+        contentAlignment = Alignment.Center,
+    ) {
+        when {
+            checked -> Icon(Icons.Default.Check, contentDescription = null, tint = scheme.onPrimary, modifier = Modifier.size(11.dp))
+            indeterminate -> Box(Modifier.width(7.dp).height(2.dp).background(scheme.onPrimary))
+        }
+    }
 }

@@ -40,6 +40,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ViewColumn
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import org.churchpresenter.app.churchpresenter.ui.theme.semantic
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -100,7 +102,7 @@ fun SongLibraryApp(
      * so the plain one below stands in.
      */
     songEditor: (@Composable (editing: SongEditorRequest) -> Unit)? = null,
-) = LibraryTheme {
+) {
     val state = remember(libraryFolder) { SongLibraryState(libraryFolder) }
     LaunchedEffect(libraryFolder) { state.reloadAsync() }
 
@@ -108,7 +110,7 @@ fun SongLibraryApp(
     var batchOpen by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<List<SongItem>>(emptyList()) }
 
-    Column(Modifier.fillMaxSize().background(colors.background)) {
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         LibraryHeader(state, onNewBook = { newBookOpen = true })
         if (state.selected.isNotEmpty()) {
             BulkBar(
@@ -181,7 +183,7 @@ fun SongLibraryApp(
 
 @Composable
 private fun LibraryHeader(state: SongLibraryState, onNewBook: () -> Unit) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     Column {
         Row(
             Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 14.dp, bottom = 12.dp),
@@ -189,8 +191,8 @@ private fun LibraryHeader(state: SongLibraryState, onNewBook: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Column(Modifier.weight(1f)) {
-                Text(Strings["window_title"], style = LibraryType.title, color = c.text)
-                Text(subhead(state), style = LibraryType.small, color = c.textMuted)
+                Text(Strings["window_title"], style = LibraryType.title, color = scheme.onSurface)
+                Text(subhead(state), style = LibraryType.small, color = scheme.onSurfaceVariant)
             }
 
             SearchField(state.view.query) { state.view = state.view.copy(query = it) }
@@ -199,7 +201,7 @@ private fun LibraryHeader(state: SongLibraryState, onNewBook: () -> Unit) {
             PrimaryButton(
                 label = Strings["new_song"],
                 onClick = { state.newSong(Strings["new_song"]) },
-                icon = { Icon(Icons.Default.Add, null, Modifier.size(13.dp), tint = c.onPrimary) },
+                icon = { Icon(Icons.Default.Add, null, Modifier.size(13.dp), tint = scheme.onPrimary) },
             )
         }
         Hairline()
@@ -213,36 +215,36 @@ private fun subhead(state: SongLibraryState): String =
 
 @Composable
 private fun BulkBar(state: SongLibraryState, onBatchEdit: () -> Unit, onDelete: () -> Unit) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     Column {
         Row(
-            Modifier.fillMaxWidth().background(c.accentSurface).padding(horizontal = 18.dp, vertical = 8.dp),
+            Modifier.fillMaxWidth().background(scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA)).padding(horizontal = 18.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
                 Strings.format("selected_count", state.selected.size),
                 style = LibraryType.bodyStrong,
-                color = c.accentText,
+                color = scheme.primary,
             )
-            Box(Modifier.width(1.dp).height(16.dp).background(c.accentBorder))
+            Box(Modifier.width(1.dp).height(16.dp).background(scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA)))
             PrimaryButton(
                 label = Strings["batch_edit_menu"],
                 onClick = onBatchEdit,
-                icon = { Icon(Icons.Default.Edit, null, Modifier.size(12.dp), tint = c.onPrimary) },
+                icon = { Icon(Icons.Default.Edit, null, Modifier.size(12.dp), tint = scheme.onPrimary) },
             )
             Spacer(Modifier.weight(1f))
             QuietButton(Strings["delete"], onClick = onDelete, danger = true)
             Text(
                 Strings["clear"],
                 style = LibraryType.button,
-                color = c.textMuted,
+                color = scheme.onSurfaceVariant,
                 modifier = Modifier.clip(RoundedCornerShape(8.dp))
                     .clickable { state.clearSelection() }
                     .padding(horizontal = 9.dp, vertical = 7.dp),
             )
         }
-        Box(Modifier.fillMaxWidth().height(1.dp).background(c.accentBorder))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA)))
     }
 }
 
@@ -319,10 +321,10 @@ private fun SkeletonTable(state: SongLibraryState, width: Dp) {
 
 @Composable
 private fun SkeletonRow(state: SongLibraryState, width: Dp, sweep: State<Float>, row: Int) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     Column(Modifier.width(width)) {
         Row(
-            Modifier.fillMaxWidth().height(LibraryMetrics.rowHeight).background(c.rowSurface),
+            Modifier.fillMaxWidth().height(LibraryMetrics.rowHeight).background(scheme.background),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // Every bar is told where it sits across the table, so the highlight crosses the whole
@@ -337,7 +339,7 @@ private fun SkeletonRow(state: SongLibraryState, width: Dp, sweep: State<Float>,
                 Box(Modifier.width(cell).padding(horizontal = 9.dp), contentAlignment = Alignment.CenterStart) {
                     SkeletonBar((cell - 18.dp) * barFraction(row, field.ordinal), sweep, offset + 9.dp, width)
                 }
-                Box(Modifier.width(1.dp).height(LibraryMetrics.rowHeight).background(c.hairline))
+                Box(Modifier.width(1.dp).height(LibraryMetrics.rowHeight).background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA)))
                 offset += cell + 1.dp
             }
             Spacer(Modifier.width(ACTIONS_WIDTH))
@@ -349,7 +351,7 @@ private fun SkeletonRow(state: SongLibraryState, width: Dp, sweep: State<Float>,
 /** One bar, filled with the moving gradient. [xOffset] is where it starts across [tableWidth]. */
 @Composable
 private fun SkeletonBar(barWidth: Dp, sweep: State<Float>, xOffset: Dp, tableWidth: Dp) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     Box(
         Modifier.width(barWidth)
             .height(SKELETON_BAR_HEIGHT)
@@ -362,7 +364,7 @@ private fun SkeletonBar(barWidth: Dp, sweep: State<Float>, xOffset: Dp, tableWid
                 val head = -band + sweep.value * (total + band * 2) - xOffset.toPx()
                 drawRect(
                     Brush.linearGradient(
-                        colorStops = arrayOf(0f to c.skeleton, 0.5f to c.skeletonHighlight, 1f to c.skeleton),
+                        colorStops = arrayOf(0f to scheme.onSurface.copy(alpha = SKELETON_ALPHA), 0.5f to scheme.onSurface.copy(alpha = SKELETON_HIGHLIGHT_ALPHA), 1f to scheme.onSurface.copy(alpha = SKELETON_ALPHA)),
                         start = Offset(head, 0f),
                         end = Offset(head + band, 0f),
                     )
@@ -388,14 +390,14 @@ private val SKELETON_BAR_HEIGHT = 9.dp
 
 @Composable
 private fun TableHeader(state: SongLibraryState, width: Dp) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     val visible = state.rows.map { it.sourceFile }
     val all = visible.isNotEmpty() && visible.all { it in state.selected }
     val some = !all && visible.any { it in state.selected }
 
     Column(Modifier.width(width)) {
         Row(
-            Modifier.fillMaxWidth().height(LibraryMetrics.headerHeight).background(c.surface),
+            Modifier.fillMaxWidth().height(LibraryMetrics.headerHeight).background(scheme.surfaceContainer),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(Modifier.width(TICK_WIDTH), contentAlignment = Alignment.Center) {
@@ -414,7 +416,7 @@ private fun TableHeader(state: SongLibraryState, width: Dp) {
                     Text(
                         columnLabel(field).uppercase(),
                         style = LibraryType.columnHead,
-                        color = if (sorted) c.accent else c.textFaint,
+                        color = if (sorted) scheme.primary else scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false),
@@ -423,12 +425,12 @@ private fun TableHeader(state: SongLibraryState, width: Dp) {
                         Icon(
                             if (state.view.ascending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                             contentDescription = null,
-                            tint = c.accent,
+                            tint = scheme.primary,
                             modifier = Modifier.size(14.dp),
                         )
                     }
                 }
-                Box(Modifier.width(1.dp).fillMaxHeight().background(c.hairline))
+                Box(Modifier.width(1.dp).fillMaxHeight().background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA)))
             }
             Spacer(Modifier.width(ACTIONS_WIDTH))
         }
@@ -445,13 +447,13 @@ private fun SongRow(
     onDelete: () -> Unit,
     onNewBook: () -> Unit,
 ) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     val checked = song.sourceFile in state.selected
     Column(Modifier.width(width)) {
         Row(
             Modifier.fillMaxWidth()
                 .heightIn(min = LibraryMetrics.rowHeight)
-                .background(if (checked) c.accentSurface else c.rowSurface),
+                .background(if (checked) scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA) else scheme.background),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // The stripe down the left is what makes a ticked row readable at a glance in a
@@ -459,7 +461,7 @@ private fun SongRow(
             Box(
                 Modifier.width(2.dp)
                     .height(LibraryMetrics.rowHeight)
-                    .background(if (checked) c.accent else Color.Transparent)
+                    .background(if (checked) scheme.primary else Color.Transparent)
             )
             Box(Modifier.width(TICK_WIDTH - 2.dp), contentAlignment = Alignment.Center) {
                 LibraryCheckbox(checked = checked, onToggle = { state.toggle(song.sourceFile) })
@@ -481,15 +483,15 @@ private fun SongRow(
                         )
                     }
                 }
-                Box(Modifier.width(1.dp).height(LibraryMetrics.rowHeight).background(c.hairline))
+                Box(Modifier.width(1.dp).height(LibraryMetrics.rowHeight).background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA)))
             }
             Row(
                 Modifier.width(ACTIONS_WIDTH).padding(end = 8.dp),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                RowAction(Icons.Default.Edit, Strings["edit_song"], c.accentText, onEdit)
-                RowAction(Icons.Default.Delete, Strings["delete_song"], c.danger, onDelete)
+                RowAction(Icons.Default.Edit, Strings["edit_song"], scheme.primary, onEdit)
+                RowAction(Icons.Default.Delete, Strings["delete_song"], scheme.error, onDelete)
             }
         }
         Hairline()
@@ -508,22 +510,22 @@ private fun RowAction(icon: ImageVector, description: String, tint: Color, onCli
 
 @Composable
 private fun EmptyState(state: SongLibraryState, width: Dp) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     Column(
         Modifier.width(width).padding(vertical = 70.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(9.dp),
     ) {
         Box(
-            Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(c.surface),
+            Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(scheme.surfaceContainer),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Default.Search, null, tint = c.textFaint, modifier = Modifier.size(19.dp))
+            Icon(Icons.Default.Search, null, tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA), modifier = Modifier.size(19.dp))
         }
         Text(
             if (state.view.isFiltered) Strings["empty_title"] else Strings["library_empty"],
             style = LibraryType.bodyStrong,
-            color = c.textMuted,
+            color = scheme.onSurfaceVariant,
         )
         if (state.view.isFiltered) {
             QuietButton(Strings["reset_filters"], onClick = {
@@ -535,25 +537,25 @@ private fun EmptyState(state: SongLibraryState, width: Dp) {
 
 @Composable
 private fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     Column {
         Hairline()
         Row(
-            Modifier.fillMaxWidth().height(52.dp).background(c.surface).padding(horizontal = 18.dp),
+            Modifier.fillMaxWidth().height(52.dp).background(scheme.surfaceContainer).padding(horizontal = 18.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(Strings.format("footer_songs", state.songs.size), style = LibraryType.small, color = c.textMuted)
+            Text(Strings.format("footer_songs", state.songs.size), style = LibraryType.small, color = scheme.onSurfaceVariant)
             if (state.isDirty) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(7.dp),
                 ) {
-                    Box(Modifier.size(6.dp).clip(CircleShape).background(c.warning))
+                    Box(Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.semantic.warning))
                     Text(
                         Strings.format("unsaved_changes", state.changedCount),
                         style = LibraryType.button,
-                        color = c.warning,
+                        color = MaterialTheme.semantic.warning,
                     )
                 }
             }
@@ -561,7 +563,7 @@ private fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
                 Text(
                     Strings.format("save_failed", it),
                     style = LibraryType.small,
-                    color = c.danger,
+                    color = scheme.error,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -570,7 +572,7 @@ private fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
             QuietButton(Strings["revert"], onClick = { state.revert() }, enabled = state.isDirty)
             PrimaryButton(Strings["save_changes"], onClick = { state.save() }, enabled = state.isDirty)
             if (onClose != null) {
-                Box(Modifier.width(1.dp).height(20.dp).background(c.border))
+                Box(Modifier.width(1.dp).height(20.dp).background(scheme.outlineVariant))
                 QuietButton(Strings["done"], onClick = onClose)
             }
         }
@@ -579,17 +581,17 @@ private fun LibraryFooter(state: SongLibraryState, onClose: (() -> Unit)?) {
 
 @Composable
 private fun SearchField(value: String, onChange: (String) -> Unit) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     Row(
         Modifier.width(236.dp)
             .height(LibraryMetrics.control)
             .clip(RoundedCornerShape(LibraryMetrics.radius))
-            .background(c.inputSurface)
-            .border(1.dp, c.border, RoundedCornerShape(LibraryMetrics.radius))
+            .background(scheme.surfaceContainerHigh)
+            .border(1.dp, scheme.outlineVariant, RoundedCornerShape(LibraryMetrics.radius))
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Icons.Default.Search, null, tint = c.textFaint, modifier = Modifier.size(13.dp))
+        Icon(Icons.Default.Search, null, tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA), modifier = Modifier.size(13.dp))
         Spacer(Modifier.width(7.dp))
         PlainTextField(
             value = value,
@@ -602,7 +604,7 @@ private fun SearchField(value: String, onChange: (String) -> Unit) {
 
 @Composable
 private fun SongBookFilter(state: SongLibraryState, onNewBook: () -> Unit) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     val label = when (val book = state.view.songbook) {
         null -> Strings["all_song_books"]
         "" -> Strings["no_song_book"]
@@ -628,7 +630,7 @@ private fun SongBookFilter(state: SongLibraryState, onNewBook: () -> Unit) {
         MenuRow(
             label = Strings["new_song_book_menu"],
             accent = true,
-            leading = { Icon(Icons.Default.Add, null, tint = c.accent, modifier = Modifier.size(11.dp)) },
+            leading = { Icon(Icons.Default.Add, null, tint = scheme.primary, modifier = Modifier.size(11.dp)) },
         ) {
             close()
             onNewBook()
@@ -638,12 +640,12 @@ private fun SongBookFilter(state: SongLibraryState, onNewBook: () -> Unit) {
 
 @Composable
 private fun ColumnsMenu(state: SongLibraryState) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     LibraryDropdown(
         label = Strings["columns"],
         highlighted = state.hiddenColumns.isNotEmpty(),
         menuWidth = 224.dp,
-        leading = { Icon(Icons.Default.ViewColumn, null, tint = c.textMuted, modifier = Modifier.size(13.dp)) },
+        leading = { Icon(Icons.Default.ViewColumn, null, tint = scheme.onSurfaceVariant, modifier = Modifier.size(13.dp)) },
     ) { _ ->
         MenuRow(Strings["columns_show_all"], accent = true) { state.showAllColumns() }
         MenuDivider()
@@ -651,7 +653,7 @@ private fun ColumnsMenu(state: SongLibraryState) {
         MenuRow(
             label = columnLabel(SongField.TITLE),
             leading = { LibraryCheckbox(checked = true) },
-            trailing = { Text(Strings["columns_always"], style = LibraryType.columnHead, color = c.textFaint) },
+            trailing = { Text(Strings["columns_always"], style = LibraryType.columnHead, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA)) },
             onClick = null,
         )
         OPTIONAL_COLUMNS.forEach { field ->
@@ -665,7 +667,7 @@ private fun ColumnsMenu(state: SongLibraryState) {
 
 @Composable
 private fun Hairline() {
-    Box(Modifier.fillMaxWidth().height(1.dp).background(colors.hairline))
+    Box(Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = HAIRLINE_ALPHA)))
 }
 
 private fun columnLabel(field: SongField): String = when (field) {

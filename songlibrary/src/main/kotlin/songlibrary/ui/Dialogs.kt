@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LibraryBooks
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,13 +55,13 @@ fun LibraryDialog(
     footer: @Composable RowScopeFooter.() -> Unit,
     body: @Composable () -> Unit,
 ) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(
             Modifier.width(width)
                 .clip(RoundedCornerShape(LibraryMetrics.panelRadius))
-                .background(c.surface)
-                .border(1.dp, c.border, RoundedCornerShape(LibraryMetrics.panelRadius)),
+                .background(scheme.surfaceContainer)
+                .border(1.dp, scheme.outlineVariant, RoundedCornerShape(LibraryMetrics.panelRadius)),
         ) {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 14.dp),
@@ -68,30 +69,30 @@ fun LibraryDialog(
                 horizontalArrangement = Arrangement.spacedBy(11.dp),
             ) {
                 Box(
-                    Modifier.size(30.dp).clip(RoundedCornerShape(8.dp)).background(c.accentSurface),
+                    Modifier.size(30.dp).clip(RoundedCornerShape(8.dp)).background(scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(icon, null, tint = c.accentText, modifier = Modifier.size(15.dp))
+                    Icon(icon, null, tint = scheme.primary, modifier = Modifier.size(15.dp))
                 }
                 Column(Modifier.weight(1f)) {
-                    Text(title, style = LibraryType.bodyStrong, color = c.text)
-                    Text(subtitle, style = LibraryType.small, color = c.textMuted)
+                    Text(title, style = LibraryType.bodyStrong, color = scheme.onSurface)
+                    Text(subtitle, style = LibraryType.small, color = scheme.onSurfaceVariant)
                 }
                 Box(
                     Modifier.size(28.dp)
                         .clip(RoundedCornerShape(7.dp))
-                        .background(c.inputSurface)
+                        .background(scheme.surfaceContainerHigh)
                         .clickable(onClick = onDismiss),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(Icons.Default.Close, null, tint = c.textMuted, modifier = Modifier.size(12.dp))
+                    Icon(Icons.Default.Close, null, tint = scheme.onSurfaceVariant, modifier = Modifier.size(12.dp))
                 }
             }
-            Box(Modifier.fillMaxWidth().height(1.dp).background(c.border))
+            Box(Modifier.fillMaxWidth().height(1.dp).background(scheme.outlineVariant))
             Column(Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) { body() }
-            Box(Modifier.fillMaxWidth().height(1.dp).background(c.border))
+            Box(Modifier.fillMaxWidth().height(1.dp).background(scheme.outlineVariant))
             Row(
-                Modifier.fillMaxWidth().background(c.background).padding(horizontal = 18.dp, vertical = 12.dp),
+                Modifier.fillMaxWidth().background(scheme.background).padding(horizontal = 18.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(9.dp),
             ) {
@@ -119,7 +120,7 @@ fun NewSongBookDialog(
     onDismiss: () -> Unit,
     onCreate: (name: String, assignSelected: Boolean) -> Unit,
 ) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     var name by remember { mutableStateOf("") }
     var assign by remember { mutableStateOf(selectedCount > 0) }
     val trimmed = name.trim().trim('/')
@@ -137,16 +138,16 @@ fun NewSongBookDialog(
             PrimaryButton(Strings["create"], onClick = { onCreate(trimmed, assign) }, enabled = valid)
         },
     ) {
-        Text(Strings["name"].uppercase(), style = LibraryType.columnHead, color = c.textFaint)
+        Text(Strings["name"].uppercase(), style = LibraryType.columnHead, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
         Spacer(Modifier.height(6.dp))
         Box(
             Modifier.fillMaxWidth()
                 .height(36.dp)
                 .clip(RoundedCornerShape(LibraryMetrics.radius))
-                .background(c.background)
+                .background(scheme.background)
                 .border(
                     1.dp,
-                    if (clash || invalid) c.dangerBorder else c.accentBorder,
+                    if (clash || invalid) scheme.error else scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA),
                     RoundedCornerShape(LibraryMetrics.radius),
                 )
                 .padding(horizontal = 11.dp),
@@ -163,7 +164,7 @@ fun NewSongBookDialog(
             Text(
                 Strings[if (clash) "new_song_book_exists" else "new_song_book_invalid"],
                 style = LibraryType.small,
-                color = c.danger,
+                color = scheme.error,
             )
         }
         if (selectedCount > 0) {
@@ -171,8 +172,8 @@ fun NewSongBookDialog(
             Row(
                 Modifier.fillMaxWidth()
                     .clip(RoundedCornerShape(LibraryMetrics.radius))
-                    .background(c.accentSurface)
-                    .border(1.dp, c.accentBorder, RoundedCornerShape(LibraryMetrics.radius))
+                    .background(scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA))
+                    .border(1.dp, scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA), RoundedCornerShape(LibraryMetrics.radius))
                     .clickable { assign = !assign }
                     .padding(horizontal = 11.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -182,7 +183,7 @@ fun NewSongBookDialog(
                 Text(
                     Strings.format("new_song_book_assign", selectedCount),
                     style = LibraryType.body,
-                    color = c.accentText,
+                    color = scheme.primary,
                 )
             }
         }
@@ -203,7 +204,7 @@ fun BatchEditDialog(
     onDismiss: () -> Unit,
     onApply: (Map<SongField, String>) -> Unit,
 ) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     val ticked = remember { mutableStateMapOf<SongField, Boolean>() }
     val values = remember { mutableStateMapOf<SongField, String>() }
     val fields = listOf(
@@ -221,7 +222,7 @@ fun BatchEditDialog(
             Text(
                 if (chosen.isEmpty()) Strings["batch_edit_nothing"] else "",
                 style = LibraryType.small,
-                color = c.textFaint,
+                color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
             )
             QuietButton(Strings["cancel"], onClick = onDismiss)
             PrimaryButton(
@@ -231,11 +232,11 @@ fun BatchEditDialog(
             )
         },
     ) {
-        Text(Strings["batch_edit_hint"], style = LibraryType.small, color = c.textFaint)
+        Text(Strings["batch_edit_hint"], style = LibraryType.small, color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA))
         Spacer(Modifier.height(4.dp))
         fields.forEach { field ->
             val on = ticked[field] == true
-            Box(Modifier.fillMaxWidth().height(1.dp).background(c.hairline))
+            Box(Modifier.fillMaxWidth().height(1.dp).background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA)))
             Row(
                 Modifier.fillMaxWidth().padding(vertical = 7.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -250,7 +251,7 @@ fun BatchEditDialog(
                     Text(
                         batchLabel(field),
                         style = LibraryType.bodyStrong,
-                        color = if (on) c.text else c.textMuted,
+                        color = if (on) scheme.onSurface else scheme.onSurfaceVariant,
                     )
                 }
                 if (field == SongField.SONGBOOK) {
@@ -265,8 +266,8 @@ fun BatchEditDialog(
                         Modifier.fillMaxWidth()
                             .height(32.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(if (on) c.background else c.surface)
-                            .border(1.dp, if (on) c.accentBorder else c.hairline, RoundedCornerShape(8.dp))
+                            .background(if (on) scheme.background else scheme.surfaceContainer)
+                            .border(1.dp, if (on) scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA) else scheme.onSurface.copy(alpha = HAIRLINE_ALPHA), RoundedCornerShape(8.dp))
                             .padding(horizontal = 10.dp),
                         contentAlignment = Alignment.CenterStart,
                     ) {
@@ -287,15 +288,15 @@ private fun BatchSongbookField(
     enabled: Boolean,
     onPick: (String) -> Unit,
 ) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     var open by remember { mutableStateOf(false) }
     MenuAnchorBox(Modifier.fillMaxWidth()) { menuMaxHeight ->
         Row(
             Modifier.fillMaxWidth()
                 .height(32.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(if (enabled) c.background else c.surface)
-                .border(1.dp, if (enabled) c.accentBorder else c.hairline, RoundedCornerShape(8.dp))
+                .background(if (enabled) scheme.background else scheme.surfaceContainer)
+                .border(1.dp, if (enabled) scheme.primary.copy(alpha = ACCENT_BORDER_ALPHA) else scheme.onSurface.copy(alpha = HAIRLINE_ALPHA), RoundedCornerShape(8.dp))
                 .clickable(enabled = enabled) { open = true }
                 .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -303,13 +304,13 @@ private fun BatchSongbookField(
             Text(
                 value.ifBlank { Strings["no_song_book"] },
                 style = LibraryType.body,
-                color = if (enabled) c.text else c.textFaint,
+                color = if (enabled) scheme.onSurface else scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
             )
             Spacer(Modifier.weight(1f))
-            Icon(Icons.Default.ArrowDropDown, null, tint = c.textFaint, modifier = Modifier.size(13.dp))
+            Icon(Icons.Default.ArrowDropDown, null, tint = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA), modifier = Modifier.size(13.dp))
         }
         if (open) {
             LibraryPopup(width = 260.dp, maxHeight = menuMaxHeight, onDismiss = { open = false }) {
@@ -336,7 +337,7 @@ private fun BatchSongbookField(
  */
 @Composable
 fun DeleteConfirmDialog(songs: List<SongItem>, onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     LibraryDialog(
         icon = Icons.Default.Delete,
         title = if (songs.size == 1) Strings.format("delete_confirm_one", songs.single().title)
@@ -349,13 +350,13 @@ fun DeleteConfirmDialog(songs: List<SongItem>, onDismiss: () -> Unit, onConfirm:
         },
     ) {
         songs.take(DELETE_PREVIEW).forEach { song ->
-            Text(song.title, style = LibraryType.body, color = c.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(song.title, style = LibraryType.body, color = scheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         if (songs.size > DELETE_PREVIEW) {
             Text(
                 Strings.format("song_count", songs.size - DELETE_PREVIEW),
                 style = LibraryType.small,
-                color = c.textFaint,
+                color = scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
             )
         }
     }
@@ -364,17 +365,17 @@ fun DeleteConfirmDialog(songs: List<SongItem>, onDismiss: () -> Unit, onConfirm:
 /** The filled button for the one action that destroys something. */
 @Composable
 private fun DangerButton(label: String, onClick: () -> Unit) {
-    val c = colors
+    val scheme = MaterialTheme.colorScheme
     Row(
         Modifier.height(LibraryMetrics.control)
             .clip(RoundedCornerShape(LibraryMetrics.radius))
-            .background(c.dangerSurface)
-            .border(1.dp, c.dangerBorder, RoundedCornerShape(LibraryMetrics.radius))
+            .background(scheme.errorContainer)
+            .border(1.dp, scheme.error, RoundedCornerShape(LibraryMetrics.radius))
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, style = LibraryType.button, color = c.onDangerSurface)
+        Text(label, style = LibraryType.button, color = scheme.onErrorContainer)
     }
 }
 
