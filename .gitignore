@@ -50,5 +50,7 @@ google-services.json
 *.p12
 .env
 **/analytics.properties
-CLAUDE*.md
+# Personal, machine-local agent notes. The committed CLAUDE.md files — the root one and one
+# per module, each loading that module's AGENT.md — are shared and must stay tracked.
+CLAUDE.local.md
 .impeccable/
