@@ -19,7 +19,7 @@ git clone https://github.com/ChurchPresenter/ChurchPresenter
 ```
 
 The app is built from several modules that all live in this repository — there are no submodules and
-nothing to fetch separately. Four of them are **Gradle modules of this build**, with no wrapper of
+nothing to fetch separately. Seven of them are **Gradle modules of this build**, with no wrapper of
 their own:
 
 > **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop,
@@ -36,18 +36,19 @@ their own:
 >
 > **[`bible-engine/`](./bible-engine)** — the Bible Lookup Engine: speech-to-reference detection.
 > `./gradlew :bible-engine:test`.
-
-The other three sit under `composeApp/src/jvmMain/appResources/common/`. Each still keeps its own
-Gradle wrapper and test suite, and the first two have their sources compiled into the main app via
-`kotlin.srcDir`:
-
-> **ChurchPresenter-LottieGen** — a standalone Compose Desktop app for generating animated
-> lower-third overlays as Lottie JSON files, launched from the Lower Third settings.
 >
+> **[`lottieGenerator/`](./lottieGenerator)** — a standalone Compose Desktop app for generating
+> animated lower-third overlays as Lottie JSON files, launched from the Lower Third settings.
+> `./gradlew :lottieGenerator:test`.
+>
+> **[`crossword/`](./crossword)** — the crossword puzzle authoring tool. Not compiled into the app;
+> a build-time task copies its encoded puzzles into the app's resources.
+> `./gradlew :crossword:test`, `./gradlew :crossword:run`.
+
+One sub-build is left under `composeApp/src/jvmMain/appResources/common/`. It keeps its own Gradle
+wrapper and test suite, and its sources are compiled into the main app via `kotlin.srcDir`:
+
 > **ChurchPresenter-PresentationEngine** — PPTX/PPT/Keynote/PDF parsing, timing and animation.
->
-> **ChurchPresenter-Cross** — the crossword puzzle authoring tool. Not compiled into the app; a
-> build-time task copies its encoded puzzles into the app's resources.
 
 
 ---

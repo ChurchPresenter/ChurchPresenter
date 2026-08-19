@@ -63,9 +63,9 @@ if [ -z "$ALL_CHANGED" ]; then
   echo "nothing changed."; exit 0
 fi
 
-# The app's own Kotlin only. The six sub-builds under appResources/common/ are separate Gradle
-# builds with their own suites — :composeApp:jvmTest cannot run them, so a --tests pattern derived
-# from one would match nothing. They are reported at the end instead.
+# The app's own Kotlin only. The sub-build under appResources/common/ is a separate Gradle build
+# with its own suite — :composeApp:jvmTest cannot run it, so a --tests pattern derived from it
+# would match nothing. It is reported at the end instead.
 APP_KT='^composeApp/src/(jvmMain|commonMain|jvmTest|commonTest)/kotlin/.*\.kt$'
 
 # Only files that still exist: a pattern derived from a deleted file matches nothing, and Gradle
@@ -75,7 +75,7 @@ KT_CHANGED="$(printf '%s\n' "$ALL_CHANGED" | grep -E "$APP_KT" | while read -r f
 done || true)"
 NON_KT="$(printf '%s\n' "$ALL_CHANGED" | grep -vE "$APP_KT" | grep -v '^composeApp/src/jvmMain/appResources/common/' || true)"
 
-# Which of the six sub-builds a change touched — each has to be run through its own wrapper.
+# Whether a change touched the sub-build — it has to be run through its own wrapper.
 MODULES_CHANGED="$(printf '%s\n' "$ALL_CHANGED" \
   | sed -nE 's|^composeApp/src/jvmMain/appResources/common/(ChurchPresenter-[A-Za-z]+)/.*|\1|p' \
   | sort -u || true)"
@@ -85,8 +85,7 @@ report_modules() {
   echo
   echo "sub-builds touched — each is its own Gradle build, run it through its own wrapper:"
   for m in $MODULES_CHANGED; do
-    task="build"; [ "$m" = "ChurchPresenter-Cross" ] && task="jvmTest"
-    echo "  (cd composeApp/src/jvmMain/appResources/common/$m && sh gradlew $task)"
+    echo "  (cd composeApp/src/jvmMain/appResources/common/$m && sh gradlew build)"
   done
 }
 

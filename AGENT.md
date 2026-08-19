@@ -31,6 +31,13 @@ the rules those don't cover.
 ### Debugging
 - Keep debug logs until the fix is confirmed; ask before removing if unsure. Remove them once done.
 
+### Commit authorship — **NEVER** add yourself
+- **NEVER** add a `Co-Authored-By:` trailer for an agent, an assistant or a tool — no
+  `Co-Authored-By: Claude`, no `Generated with Claude Code`, no bot byline of any kind.
+- **NEVER** set yourself as the commit author or committer. Every commit is authored by the person
+  running the work, and its message says what changed and why — nothing about who or what typed it.
+- This applies to commit messages, merge commits, PR bodies and PR descriptions alike.
+
 ## Architecture
 
 All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/`:
@@ -58,38 +65,48 @@ main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
 - New user-facing strings go in `composeApp/src/jvmMain/composeResources/values/strings.xml`.
 - Per-feature source locations are listed in `FEATURES.md`.
 
-### The converter module
-`converter/` is a real Gradle module of this build — `include(":converter")`, and `:composeApp`
-takes it as `implementation(projects.converter)`. It is neither a submodule nor a mounted source
-directory: build it with `./gradlew :converter:build`, test it with `./gradlew :converter:test`.
-Its POI dependency excludes `poi-ooxml-lite` and adds `poi-ooxml-full` — its jar is on the app's
-classpath, and exactly ONE schema jar may be there.
+## Modules
 
-- `./gradlew :converter:detekt` — same `config/detekt/detekt.yml` as the app, **no baseline**, and
-  everything it analyses is clean. `ui/**` is out of scope (see the comment on `source` in the build
-  file): it is the pre-existing Compose desktop GUI, which is what :composeApp keeps in its own
-  baseline rather than gating. Everything that parses a file is analysed.
-- `./gradlew :converter:jacocoTestCoverageVerification` — the root build's six counters at 85%, with
-  BRANCH and COMPLEXITY lowered in `converter/build.gradle.kts` because they cannot reach it.
-  `ui/**` and `MainKt` are excluded: they need a display. Both run in CI as their own steps.
+**Each module documents itself.** Every one of these directories holds its own `AGENT.md` — what it
+is, what `:composeApp` uses from it, its layout, its commands, its gates and its rules — and a
+`CLAUDE.md` that loads it (plus the module's `README.md` where there is one). Read the module's own
+file before changing it, and **put module-specific notes there, not here.**
 
-### The theme module
-`theme/` is a real Gradle module of this build — `include(":theme")`, `implementation(projects.theme)`.
-It holds the nine color schemes, `SemanticColors`, the typography and shape scales and
-`ThemeManager`, in the package they always had (`…ui.theme`), so no import in the app changed.
+| Module | Gradle | What it is | Notes |
+|---|---|---|---|
+| `converter/` | `:converter` | Song/Bible format converter, also a standalone app | [AGENT.md](converter/AGENT.md) |
+| `companion-satellite/` | `:companion-satellite` | Bitfocus Companion Satellite protocol client | [AGENT.md](companion-satellite/AGENT.md) |
+| `theme/` | `:theme` | The nine color schemes, semantic colors, type and shape scales | [AGENT.md](theme/AGENT.md) |
+| `core-models/` | `:core-models` | The shared data models | [AGENT.md](core-models/AGENT.md) |
+| `bible-engine/` | `:bible-engine` | Bible Lookup Engine — speech-to-reference detection | [AGENT.md](bible-engine/AGENT.md) |
+| `lottieGenerator/` | `:lottieGenerator` | Animated lower-third generator, also a standalone app | [AGENT.md](lottieGenerator/AGENT.md) |
+| `crossword/` | `:crossword` | Crossword authoring tool + the encoded puzzles the app ships | [AGENT.md](crossword/AGENT.md) |
+| `…/common/ChurchPresenter-PresentationEngine/` | *(none — sub-build)* | PPTX/PPT/Keynote/PDF parsing, timing and animation | [AGENT.md](composeApp/src/jvmMain/appResources/common/ChurchPresenter-PresentationEngine/AGENT.md) |
 
-- **A color literal belongs in this module or nowhere.** It depends on Compose and on nothing of
-  the app's own, so nothing here can start reading a setting.
-- `LanguageProvider` stays in `:composeApp` — it is i18n, and it resolves layout direction from the
-  app's `Language` catalogue.
-- `./gradlew :theme:test`, `:theme:detekt` (no baseline, must be clean),
-  `:theme:jacocoTestCoverageVerification` (the root build's default six counters at 85%). All three
-  run in CI.
-- Anything `:composeApp` calls has to be public here — `colorSchemeFor` was `internal` and is not
-  any more.
+All but the last are **real Gradle modules of this build** — `include(":theme")`,
+`implementation(projects.companionSatellite)`, tested with `./gradlew :<module>:test` on the root
+wrapper, with dependency versions from `gradle/libs.versions.toml` rather than hand-copied
+literals. Their `version` comes from the `subprojects` block in the root build; don't re-declare it.
+
+**None of them are git submodules.** All of them are committed directly into this repository, so a
+plain `git clone` is enough and a change spanning the app and a module is one commit.
+
+### The one mounted sub-build
+`ChurchPresenter-PresentationEngine` is the last module whose source is mounted into `:composeApp`
+via `kotlin.srcDir` while keeping its own Gradle build and wrapper. Two rules follow, and its own
+`AGENT.md` has the rest:
+
+- **When touching its code, compile BOTH builds**: `./gradlew compileKotlinJvm` at the repo root
+  AND `sh gradlew build` inside the module. The main build is more permissive and will accept code
+  the module's own build rejects. This applies to no other module — one build to satisfy is the
+  point of promoting them.
+- Its presentation dependencies are **mirrored in `composeApp/build.gradle.kts` and must stay in
+  sync** — POI 5.3.0 with `poi-ooxml-lite` excluded in favor of `poi-ooxml-full`, PDFBox 2.0.33,
+  aircompressor. **Exactly ONE POI schema jar may be on the classpath**, and `:converter` ships one
+  too.
 
 ### JaCoCo lives in the root build
-`:converter`, `:companion-satellite` and `:theme` share one shape — a `test` task, `src/main/kotlin`,
+Every module of this build shares one shape — a `test` task, `src/main/kotlin`,
 `classes/kotlin/main` — so the JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor are
 written **once** in the root `build.gradle.kts`, in the `subprojects { plugins.withId(...) }` block.
 The default floor is 85% on all six counters.
@@ -98,7 +115,9 @@ A module's build file carries only what differs, and both are read when the task
 they must be set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults, so name only the
   counters that need a different number (usually the one or two that cannot reach 85%), never all
-  six. `:converter` and `:companion-satellite` name two each; `:theme` names none.
+  six. `:converter`, `:companion-satellite` and `:bible-engine` name two each; `:theme`,
+  `:core-models`, `:lottieGenerator` and `:crossword` name none. Each module's own `AGENT.md` says
+  which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright.
 
@@ -110,70 +129,6 @@ never lowered, and silently.
 `:composeApp` is deliberately out of scope: it is Kotlin Multiplatform, with two exec files, a
 `jvmMain` source set and a long exclude list, and registers its own task. The `kotlin("jvm")` plugin
 id is what separates the two.
-
-### The bible-engine module
-`bible-engine/` is the Bible Lookup Engine — speech-to-reference detection, served over a Ktor
-WebSocket that the app runs in-process (`engine.EngineServer`, `engine.EngineHandle`,
-`engine.engine.DetectionLogger` are all `:composeApp` calls). Package `engine`, so no import in the
-app changed. `./gradlew :bible-engine:test`, `:bible-engine:replayEval`, `:bible-engine:stickyAudit`.
-
-Its `jar` was a **fat jar** while it was a separate build; as a module of this build `:composeApp`
-consumes that jar directly, so it is a plain library jar now and ktor/logback/socket.io come through
-the dependency graph instead. Nothing packages or runs it standalone, but the `application` plugin
-stays so `:bible-engine:run` still works.
-
-### The core-models module
-`core-models/` holds the shared data models — `ScheduleItem`, `SceneModels`, `Question`,
-`LyricSection`, `SelectedVerse`, `KeyChord` and friends — in the package they always had
-(`…models`), so no import in the app changed. `./gradlew :core-models:test`, `:core-models:detekt`.
-
-It depends on Compose's `Key`/`KeyEvent` and kotlinx-serialization and on nothing of the app's own.
-Three models stayed in `:composeApp` because they cannot: `ShortcutAction` (60+ generated
-`StringResource` refs and `tabs.Tabs`), `CompanionButtonState` (`ImageBitmap`) and
-`CompanionConnectionUiState`.
-
-`TimerModes` lives here because `ScheduleItem` needs it; `utils.Constants.TIMER_MODE_*` are aliases
-of it so existing call sites are unchanged. `Constants` itself cannot move — it also holds
-composables and AWT screen-device helpers.
-
-Anything `:composeApp` calls has to be public here — `websiteDisplayText` was `internal`.
-
-### Sub-builds
-Two module sources are mounted into composeApp via `kotlin.srcDir` — they compile as one app but
-have their own Gradle builds and test suites, under `src/jvmMain/appResources/common/`:
-`ChurchPresenter-PresentationEngine` and `-LottieGen`. A third, `-Cross`, is not mounted —
-`syncCrosswordFiles` copies its `encoded/*.xwp` into composeResources at build time.
-
-The rest are no longer among them, and are the direction these are headed: `converter/` (above),
-`companion-satellite/`, `theme/`, `core-models/` and `bible-engine/` are **real Gradle modules of
-this build** — `implementation(projects.companionSatellite)`, tested with
-`./gradlew :companion-satellite:test` on the root wrapper, with dependency versions from
-`gradle/libs.versions.toml` rather than hand-copied literals. Their `version` comes from the
-`subprojects` block in the root build; don't re-declare it.
-
-**None of these are git submodules.** All of them are committed directly into this repository, so a
-plain `git clone` is enough and a change spanning the app and a module is one commit.
-
-- **When touching a MOUNTED module's code, compile BOTH builds**: `./gradlew compileKotlinJvm` at
-  the repo root AND `sh gradlew build` inside the module. The main build is more permissive and will
-  accept code the module's own build rejects. This does not apply to `companion-satellite/` — there
-  is only one build to satisfy there, which is the point of promoting it. Nor to `theme/`,
-  `core-models/` or `bible-engine/`.
-- The Presentation Engine has **zero Compose dependency by construction** — accidental Compose
-  imports fail its standalone build.
-- The Presentation Engine runs **entirely in-JVM**: never shell out to `osascript`, AppleScript,
-  `qlmanage`, `sips`, or `unzip`.
-
-## Dependencies
-
-Presentation deps in `composeApp/build.gradle.kts` are mirrored in
-`ChurchPresenter-PresentationEngine/build.gradle.kts` — **keep versions in sync**:
-- `pdfbox:2.0.33`, `poi:5.3.0`, `poi-scratchpad:5.3.0`
-- `poi-ooxml:5.3.0` **with `poi-ooxml-lite` excluded** + `poi-ooxml-full:5.3.0` — the animation
-  timing parser needs `<p:timing>` schema classes lite omits. **Exactly ONE schema jar may be on
-  the classpath.**
-- `io.airlift:aircompressor` — pure-Java snappy for the Keynote IWA reader.
-- All POI/PDFBox access is typed, no reflection.
 
 ## Commands
 

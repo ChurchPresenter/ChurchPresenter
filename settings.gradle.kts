@@ -45,3 +45,6 @@ include(":core-models")
 // depended on by :composeApp, which opens it in a window from the Lower Third settings.
 include(":lottieGenerator")
 include(":bible-engine")
+// The crossword puzzle authoring tool: its own module, not compiled into the app — a build-time
+// task copies its encoded puzzles into :composeApp's resources.
+include(":crossword")

@@ -463,8 +463,9 @@ execution order, so it can appear on one machine and not another.
 
 ### The modules of this build
 
-`converter/`, `companion-satellite/`, `theme/` and `core-models/` are part of this build, so none
-of them needs a wrapper of its own:
+`converter/`, `companion-satellite/`, `theme/`, `core-models/`, `bible-engine/`,
+`lottieGenerator/` and `crossword/` are part of this build, so none of them needs a wrapper of its
+own:
 
 ```bash
 ./gradlew :converter:test              # its suite
@@ -472,25 +473,28 @@ of them needs a wrapper of its own:
 ./gradlew :companion-satellite:test    # the Satellite protocol client's suite
 ./gradlew :theme:test                  # the theme module's suite
 ./gradlew :core-models:test            # the shared data models' suite
+./gradlew :bible-engine:test           # the Bible Lookup Engine's suite
+./gradlew :lottieGenerator:test        # the Lottie generator's suite
+./gradlew :crossword:test              # the crossword authoring tool's suite
+./gradlew :crossword:run               # the crossword admin editor on its own
 ```
 
-### The four separate sub-builds
+### The one separate sub-build
 
-`:composeApp:check` does **not** reach them — each is its own Gradle build with its own wrapper,
-under `composeApp/src/jvmMain/appResources/common/`. CI runs them as separate steps. To run one
-yourself, from its directory:
+`:composeApp:check` does **not** reach it — the Presentation Engine is its own Gradle build with its
+own wrapper, under `composeApp/src/jvmMain/appResources/common/`. CI runs it as a separate step. To
+run it yourself, from its directory:
 
 ```bash
-./gradlew test        # macOS/Linux — jvmTest for ChurchPresenter-Cross, which is Multiplatform
+./gradlew test        # macOS/Linux
 ```
 ```shell
-.\gradlew.bat test    # Windows — .\gradlew.bat jvmTest for ChurchPresenter-Cross
+.\gradlew.bat test    # Windows
 ```
 
-Neither `converter/` nor `companion-satellite/` is in that list any more — both are modules of the
-main build, invoked as `./gradlew :<module>:test`, with `:composeApp` depending on them like any
-other project. Promoting the remaining three the same way is the plan; the Satellite client went
-first because it is the smallest.
+None of the seven modules above is in that list any more — each is a module of the main build,
+invoked as `./gradlew :<module>:test`. Promoting the Presentation Engine the same way is the plan;
+the Satellite client went first because it was the smallest.
 
 ### DeckLink hardware tests
 

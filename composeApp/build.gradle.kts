@@ -942,8 +942,8 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         layout.buildDirectory.file("jacoco/jvmTestSerial.exec"),
     )
 
-    // CRITICAL: composeApp mounts four sub-builds' sources through kotlin.srcDir (see the
-    // sourceSets block above), so their classes land in the SAME output directory as the app's.
+    // CRITICAL: composeApp mounts the Presentation Engine's sources through kotlin.srcDir (see
+    // the sourceSets block above), so its classes land in the SAME output directory as the app's.
     // Reporting on everything would drown the app's real number in ~tens of thousands of lines of
     // module code that has its own separate suites. Restrict to this app's package root; the
     // modules are measured by their own builds.
@@ -1376,11 +1376,10 @@ tasks.register("signLinuxDeb") {
 }
 
 // ── Crossword puzzle sync ─────────────────────────────────────────────────────
-// Copies encrypted .xwp files from the ChurchPresenter-Cross module into
-// composeResources so they are bundled with the app. Edit the puzzles in that
-// module's `encoded/` directory, then rebuild.
+// Copies encrypted .xwp files from the :crossword module into composeResources so they are
+// bundled with the app. Edit the puzzles in that module's `encoded/` directory, then rebuild.
 val syncCrosswordFiles by tasks.registering(Copy::class) {
-    from(rootProject.file("composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/encoded"))
+    from(rootProject.file("crossword/encoded"))
     include("*.xwp")
     into(layout.projectDirectory.file("src/jvmMain/composeResources/files/crossword"))
     doFirst {
