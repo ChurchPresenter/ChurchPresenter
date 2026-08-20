@@ -2,9 +2,7 @@ package org.churchpresenter.app.churchpresenter.utils
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
-import java.util.Locale
 import kotlin.math.abs
-import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -55,30 +53,11 @@ class UtilsParseHexColorTest {
 }
 
 /**
- * The rest of [Utils]: locale-driven clock format and font lookup. Both read process-global state
- * (default Locale, installed fonts), so the locale is restored after each test.
+ * The rest of [Utils]: font lookup, which reads process-global state (the installed families). The
+ * locale-driven clock format moved to :settings with the settings default that asks it —
+ * `ClockFormatTest` there.
  */
 class UtilsSystemTest {
-
-    private val originalLocale: Locale = Locale.getDefault()
-
-    @AfterTest
-    fun restoreLocale() {
-        Locale.setDefault(originalLocale)
-    }
-
-    @Test
-    fun `24-hour detection follows the default locale`() {
-        // Drives the clock/countdown display format, so it must track the OS locale, not a guess.
-        Locale.setDefault(Locale.US)
-        assertEquals(false, Utils.isSystemUsing24HourFormat(), "en-US uses AM/PM")
-
-        Locale.setDefault(Locale.GERMANY)
-        assertEquals(true, Utils.isSystemUsing24HourFormat(), "de-DE uses a 24-hour clock")
-
-        Locale.setDefault(Locale.FRANCE)
-        assertEquals(true, Utils.isSystemUsing24HourFormat(), "fr-FR uses a 24-hour clock")
-    }
 
     @Test
     fun `system font list is non-empty and sorted case-insensitively`() {

@@ -49,7 +49,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `presenter/`     | Output window rendering (what the audience sees)                    |
 | `server/`        | Ktor REST/WebSocket server, ATEM client, tunnel, SSL                |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
-| `data/settings/` | Data classes for all persisted settings                             |
+| `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
 | `models/`        | Only what needs the app: ShortcutAction, the two Companion UI states |
 | `composables/`   | Reusable UI components (VideoPlayer, SceneCanvas, etc.)             |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
@@ -83,6 +83,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `crossword/` | `:crossword` | Crossword authoring tool + the encoded puzzles the app ships | [AGENT.md](crossword/AGENT.md) |
 | `presentation-engine/` | `:presentation-engine` | PPTX/PPT/Keynote/PDF parsing, timing and animation | [AGENT.md](presentation-engine/AGENT.md) |
 | `songlibrary/` | `:songlibrary` | The Song Library Manager window, opened from the Help menu | [AGENT.md](songlibrary/AGENT.md) |
+| `settings/` | `:settings` | Everything the app persists: the settings classes, `SettingsManager`, `Constants` | [AGENT.md](settings/AGENT.md) |
 
 **Every one of them is a real Gradle module of this build** — `include(":theme")`,
 `implementation(projects.companionSatellite)`, tested with `./gradlew :<module>:test` on the root
@@ -113,7 +114,8 @@ they must be set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults, so name only the
   counters that need a different number (usually the one or two that cannot reach 85%), never all
   six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
-  each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword` and `:songlibrary` name none.
+  each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword`, `:songlibrary` and `:settings` name
+  none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**

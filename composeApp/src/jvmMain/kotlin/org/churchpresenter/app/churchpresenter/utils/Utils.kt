@@ -3,10 +3,6 @@ package org.churchpresenter.app.churchpresenter.utils
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontFamily
-import java.time.chrono.Chronology
-import java.time.format.DateTimeFormatterBuilder
-import java.time.format.FormatStyle
-import java.util.Locale
 
 private const val SRGB_LINEAR_THRESHOLD = 0.03928
 private const val SRGB_LINEAR_DIVISOR = 12.92
@@ -23,15 +19,6 @@ object Utils {
 
     /** The installed font families — see [SystemFonts], which enumerates them once per process. */
     fun getAvailableSystemFonts(): List<String> = SystemFonts.families()
-
-    /** True if the system's default locale displays time in 24-hour format (no AM/PM). */
-    fun isSystemUsing24HourFormat(): Boolean {
-        val locale = Locale.getDefault()
-        val pattern = DateTimeFormatterBuilder.getLocalizedDateTimePattern(
-            null, FormatStyle.SHORT, Chronology.ofLocale(locale), locale
-        )
-        return !pattern.contains('h')
-    }
 
     @OptIn(ExperimentalTextApi::class)
     fun systemFontFamilyOrDefault(fontName: String): FontFamily {

@@ -7,13 +7,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextReplacement
 import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.app.churchpresenter.utils.isSystemUsing24HourFormat
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class AnnouncementsTabTargetTimeTest {
 
-    private val use24Hour = Utils.isSystemUsing24HourFormat()
+    private val use24Hour = isSystemUsing24HourFormat()
 
     private fun clockSettings(hour: Int) = AnnouncementsSettings(
         timerMode = Constants.TIMER_MODE_CLOCK,

@@ -13,6 +13,9 @@ package org.churchpresenter.app.churchpresenter.data.settings
  * clearing it means "open where the OS puts you" rather than "open at 0,0" — a real difference on a
  * multi-monitor setup, where 0,0 may be a screen that is no longer attached.
  */
+// The six are the window's measured state as AWT reports it; a wrapper type for them would exist
+// only to be unpacked again at the one call site.
+@Suppress("LongParameterList")
 fun AppSettings.withWindowGeometry(
     placement: String,
     isFloating: Boolean,
