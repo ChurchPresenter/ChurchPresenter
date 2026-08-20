@@ -60,3 +60,6 @@ include(":presentation-engine")
 // Everything the app persists: the settings data classes, the SettingsManager that loads, migrates
 // and saves settings.json, and the constants those defaults are spelled with.
 include(":settings")
+// Crash reporting and diagnostics: the crash log on disk and the Sentry forwarding behind it.
+// Depended on by :composeApp and by every module that needs to report a fault.
+include(":diagnostics")
