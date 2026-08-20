@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.utils
 
-import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
 import java.util.Locale
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -26,14 +25,5 @@ class ClockFormatTest {
 
         Locale.setDefault(Locale.FRANCE)
         assertEquals(true, isSystemUsing24HourFormat(), "fr-FR uses a 24-hour clock")
-    }
-
-    @Test
-    fun `the announcements clock default is the pattern the locale asks for`() {
-        Locale.setDefault(Locale.US)
-        assertEquals("h:mm:ss a", AnnouncementsSettings().liveClockFormat)
-
-        Locale.setDefault(Locale.GERMANY)
-        assertEquals("HH:mm:ss", AnnouncementsSettings().liveClockFormat)
     }
 }

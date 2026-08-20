@@ -4,49 +4,48 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-private const val ONE_DAY_MS = 24L * 60 * 60 * 1000
-
 /**
- * The gate on the silent startup check. It is stored in `settings.json` by name, so the entries
- * are part of the file format; what each one means is this.
+ * [UpdateCheckInterval.isDueSince] gates the silent background update check. NEVER must be
+ * absolute -- a user who turned checks off should never see network traffic.
  */
 class UpdateCheckIntervalTest {
 
+    private fun daysAgo(days: Int) = System.currentTimeMillis() - days * 24L * 60 * 60 * 1000
+
     @Test
-    fun `every launch is always due, even a moment after the last check`() {
+    fun `EVERY_LAUNCH is always due`() {
         assertTrue(UpdateCheckInterval.EVERY_LAUNCH.isDueSince(System.currentTimeMillis()))
+        assertTrue(UpdateCheckInterval.EVERY_LAUNCH.isDueSince(0L))
     }
 
     @Test
-    fun `never is never due, however long ago the last check was`() {
-        assertFalse(UpdateCheckInterval.NEVER.isDueSince(0L))
+    fun `NEVER is never due, no matter how long it has been`() {
+        assertFalse(UpdateCheckInterval.NEVER.isDueSince(0L), "'never' must mean never, even after decades")
+        assertFalse(UpdateCheckInterval.NEVER.isDueSince(daysAgo(10_000)))
     }
 
     @Test
-    fun `a fixed interval is due only once its own span has elapsed`() {
-        val now = System.currentTimeMillis()
+    fun `a periodic interval is due only once its window has elapsed`() {
+        assertFalse(UpdateCheckInterval.WEEKLY.isDueSince(daysAgo(6)))
+        assertTrue(UpdateCheckInterval.WEEKLY.isDueSince(daysAgo(8)))
 
-        assertFalse(UpdateCheckInterval.WEEKLY.isDueSince(now - 6 * ONE_DAY_MS))
-        assertTrue(UpdateCheckInterval.WEEKLY.isDueSince(now - 8 * ONE_DAY_MS))
-
-        assertFalse(UpdateCheckInterval.MONTHLY.isDueSince(now - 29 * ONE_DAY_MS))
-        assertTrue(UpdateCheckInterval.MONTHLY.isDueSince(now - 31 * ONE_DAY_MS))
+        assertFalse(UpdateCheckInterval.MONTHLY.isDueSince(daysAgo(29)))
+        assertTrue(UpdateCheckInterval.MONTHLY.isDueSince(daysAgo(31)))
     }
 
     @Test
-    fun `the longer intervals are ordered as their names say`() {
-        val now = System.currentTimeMillis()
-        val twoMonthsAgo = now - 61 * ONE_DAY_MS
-
-        assertTrue(UpdateCheckInterval.EVERY_2_MONTHS.isDueSince(twoMonthsAgo))
-        assertFalse(UpdateCheckInterval.EVERY_3_MONTHS.isDueSince(twoMonthsAgo))
-        assertFalse(UpdateCheckInterval.EVERY_6_MONTHS.isDueSince(twoMonthsAgo))
+    fun `longer intervals wait longer`() {
+        val sixWeeksAgo = daysAgo(42)
+        assertTrue(UpdateCheckInterval.MONTHLY.isDueSince(sixWeeksAgo))
+        assertFalse(UpdateCheckInterval.EVERY_2_MONTHS.isDueSince(sixWeeksAgo))
+        assertFalse(UpdateCheckInterval.EVERY_6_MONTHS.isDueSince(sixWeeksAgo))
     }
 
     @Test
-    fun `a never-checked install is due on every interval that checks at all`() {
-        UpdateCheckInterval.entries.filter { it != UpdateCheckInterval.NEVER }.forEach {
-            assertTrue(it.isDueSince(0L), "$it should be due when nothing was ever checked")
+    fun `a never-checked install reads as due for every periodic interval`() {
+        // lastCheckedAtMillis defaults to 0L in AppSettings, i.e. the epoch.
+        for (interval in UpdateCheckInterval.entries.filter { it != UpdateCheckInterval.NEVER }) {
+            assertTrue(interval.isDueSince(0L), "$interval should be due on a fresh install")
         }
     }
 }

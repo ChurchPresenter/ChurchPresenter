@@ -493,6 +493,7 @@
     <ID>MaxLineLength:CompanionSurfacePanel.kt$stringResource(Res.string.companion_satellite_status_error, state.errorMessage) to MaterialTheme.colorScheme.error</ID>
     <ID>MaxLineLength:ConnectionStatusRow.kt$InstanceLinkStatus.DISCONNECTED -&gt; MaterialTheme.colorScheme.onSurfaceVariant to Res.string.instance_link_status_disconnected</ID>
     <ID>MaxLineLength:DisplayGeometry.kt$/** The 1080p bounds [ScaledPresenterContent][org.churchpresenter.app.churchpresenter.composables.ScaledPresenterContent] assumes when no real display exists to ask (headless). */</ID>
+    <ID>MaxLineLength:Constants.kt$/** The 1080p bounds [ScaledPresenterContent][org.churchpresenter.app.churchpresenter.composables.ScaledPresenterContent] assumes when no real display exists to ask (headless). */</ID>
     <ID>MaxLineLength:ContactUsDialog.kt$Text(stringResource(Res.string.contact_open_browser), style = MaterialTheme.typography.labelLarge)</ID>
     <ID>MaxLineLength:CrosswordData.kt$CrosswordDecoder$fun</ID>
     <ID>MaxLineLength:CrosswordData.kt$CrosswordDecoder$private</ID>
@@ -1514,6 +1515,7 @@
     <ID>TooManyFunctions:ChordTransposer.kt$ChordTransposer</ID>
     <ID>TooManyFunctions:CompanionSatelliteViewModel.kt$CompanionSatelliteViewModel</ID>
     <ID>TooManyFunctions:CompanionServer.kt$CompanionServer</ID>
+    <ID>TooManyFunctions:Constants.kt$org.churchpresenter.app.churchpresenter.utils.Constants.kt</ID>
     <ID>TooManyFunctions:CrashReporter.kt$CrashReporter</ID>
     <ID>TooManyFunctions:DeckLinkManager.kt$DeckLinkManager</ID>
     <ID>TooManyFunctions:DictionaryTab.kt$org.churchpresenter.app.churchpresenter.tabs.DictionaryTab.kt</ID>

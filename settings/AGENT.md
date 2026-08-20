@@ -43,10 +43,12 @@ old document is still migrated on load and on Settings → Import.
 `OBSSettings`, not persisted state, and it is the only thing in the package that needed
 `presenter.Presenting` — moving it would have dragged the live-content enum down here.
 
-The screen-device and aspect-ratio helpers that used to share `Constants.kt` are `utils/DisplayGeometry.kt`
-and `utils/AspectRatio.kt` in `:composeApp`: they are `@Composable`, they read
-`GraphicsEnvironment`, and they take a `ScreenAssignment` — i.e. they depend on this module, not
-the other way round.
+**Only `object Constants` came out of `Constants.kt`.** The screen-device, aspect-ratio and song
+header helpers that shared that file stayed behind, in `:composeApp`'s own `utils/Constants.kt`,
+under the name they always had: they are `@Composable`, they read `GraphicsEnvironment`, and they
+take a `ScreenAssignment` — i.e. they depend on this module, not the other way round. Two files
+named `Constants.kt` is fine here for the same reason two modules may share a package: this one
+declares nothing at top level, so it generates no `ConstantsKt` facade to collide with the app's.
 
 ## Rules
 
