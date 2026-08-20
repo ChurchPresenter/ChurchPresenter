@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -12,11 +14,13 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -99,7 +103,6 @@ import churchpresenter.composeapp.generated.resources.media_network_url
 import churchpresenter.composeapp.generated.resources.media_no_source
 import churchpresenter.composeapp.generated.resources.media_now_playing
 import churchpresenter.composeapp.generated.resources.media_now_presenting
-import churchpresenter.composeapp.generated.resources.media_preview
 import churchpresenter.composeapp.generated.resources.media_seek_backward
 import churchpresenter.composeapp.generated.resources.media_seek_forward
 import churchpresenter.composeapp.generated.resources.media_select_file
@@ -269,14 +272,22 @@ fun MediaTab(
             }
     ) {
         // ── Source bar ────────────────────────────────────────────────
-        Row(
+        // FlowRow rather than Row: Media carries a source-type SegmentedButton that neither the
+        // Pictures nor the Presentation bar has, so at a narrow panel width the fixed content
+        // overruns 48.dp of a single line and the action buttons would be clipped off the right
+        // edge. Wrapping degrades instead. At any ordinary width this renders exactly the 48.dp
+        // single-line bar those two tabs use.
+        FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .heightIn(min = 48.dp)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            // The centre alignment matters: a bare spacedBy anchors the lines to the top of the
+            // heightIn box, so the controls sat high in the bar instead of centred in it.
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
         ) {
             SegmentedButton(
                 items = sourceTypeItems,
@@ -330,13 +341,6 @@ fun MediaTab(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    if (viewModel.isLoaded) {
-                        Text(
-                            text = stringResource(Res.string.media_now_playing),
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 }
                 Constants.MEDIA_TYPE_URL -> {
                     Row(
@@ -384,6 +388,45 @@ fun MediaTab(
                     ) {
                         Text(stringResource(Res.string.media_load), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold))
                     }
+                }
+            }
+            // The "now playing" label travels with the two action buttons as one group, so the
+            // status and the controls it describes wrap together rather than splitting across
+            // lines at a narrow width.
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (viewModel.isLoaded) {
+                    Text(
+                        text = stringResource(Res.string.media_now_playing),
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                if (onAddToSchedule != null) {
+                    AddToScheduleButton(
+                        onClick = { onAddToSchedule(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType) },
+                        enabled = viewModel.isLoaded,
+                        tooltipText = stringResource(Res.string.add_to_schedule)
+                    )
+                }
+                if (presenterManager != null) {
+                    GoLiveButton(
+                        onClick = {
+                            presenterManager.setPresentingMode(Presenting.MEDIA)
+                            presenterManager.setShowPresenterWindow(true)
+                            presenterManager.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
+                            viewModel.play()
+                            onInstanceLinkSendProject?.invoke(
+                                ScheduleItem.MediaItem(
+                                    id = java.util.UUID.randomUUID().toString(),
+                                    mediaUrl = viewModel.mediaUrl,
+                                    mediaTitle = viewModel.mediaTitle,
+                                    mediaType = viewModel.mediaType
+                                )
+                            )
+                        },
+                        enabled = viewModel.isLoaded,
+                        tooltipText = stringResource(Res.string.go_live)
+                    )
                 }
             }
         }
@@ -448,15 +491,23 @@ fun MediaTab(
         }
 
         // ── Playback controls bar ─────────────────────────────────────
-        Row(
+        FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .heightIn(min = 52.dp)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 16.dp, vertical = 5.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            // The centre alignment matters: a bare spacedBy anchors the lines to the top of the
+            // heightIn box, so the controls sat high in the bar instead of centred in it.
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
         ) {
+            // One tint for every transport control, so the enabled/disabled ramp cannot drift
+            // between the rewind, stop, forward and volume buttons.
+            val transportTint = MaterialTheme.colorScheme.onSurface
+                .copy(alpha = if (viewModel.isLoaded) 0.7f else 0.3f)
+
             // Transport (inner gap 4dp)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TooltipArea(
@@ -464,7 +515,12 @@ fun MediaTab(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(onClick = { viewModel.seekBackward() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(Res.drawable.ic_fast_rewind), contentDescription = stringResource(Res.string.media_seek_backward), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f))
+                        Icon(
+                            painterResource(Res.drawable.ic_fast_rewind),
+                            contentDescription = stringResource(Res.string.media_seek_backward),
+                            modifier = Modifier.size(16.dp),
+                            tint = transportTint,
+                        )
                     }
                 }
                 TooltipArea(
@@ -493,7 +549,12 @@ fun MediaTab(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(onClick = { viewModel.stop() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(Res.drawable.ic_stop), contentDescription = stringResource(Res.string.stop), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f))
+                        Icon(
+                            painterResource(Res.drawable.ic_stop),
+                            contentDescription = stringResource(Res.string.stop),
+                            modifier = Modifier.size(16.dp),
+                            tint = transportTint,
+                        )
                     }
                 }
                 TooltipArea(
@@ -501,7 +562,12 @@ fun MediaTab(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(onClick = { viewModel.seekForward() }, enabled = viewModel.isLoaded, modifier = Modifier.size(30.dp)) {
-                        Icon(painterResource(Res.drawable.ic_fast_forward), contentDescription = stringResource(Res.string.media_seek_forward), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f))
+                        Icon(
+                            painterResource(Res.drawable.ic_fast_forward),
+                            contentDescription = stringResource(Res.string.media_seek_forward),
+                            modifier = Modifier.size(16.dp),
+                            tint = transportTint,
+                        )
                     }
                 }
             }
@@ -523,7 +589,7 @@ fun MediaTab(
                             painter = painterResource(if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up),
                             contentDescription = stringResource(Res.string.media_volume),
                             modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f)
+                            tint = transportTint
                         )
                     }
                 }
@@ -553,39 +619,6 @@ fun MediaTab(
                             }
                         }
                     }
-                }
-            }
-
-            Spacer(Modifier.weight(1f))
-
-            // Action buttons
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (onAddToSchedule != null) {
-                    AddToScheduleButton(
-                        onClick = { onAddToSchedule(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType) },
-                        enabled = viewModel.isLoaded,
-                        tooltipText = stringResource(Res.string.add_to_schedule)
-                    )
-                }
-                if (presenterManager != null) {
-                    GoLiveButton(
-                        onClick = {
-                            presenterManager.setPresentingMode(Presenting.MEDIA)
-                            presenterManager.setShowPresenterWindow(true)
-                            presenterManager.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
-                            viewModel.play()
-                            onInstanceLinkSendProject?.invoke(
-                                ScheduleItem.MediaItem(
-                                    id = java.util.UUID.randomUUID().toString(),
-                                    mediaUrl = viewModel.mediaUrl,
-                                    mediaTitle = viewModel.mediaTitle,
-                                    mediaType = viewModel.mediaType
-                                )
-                            )
-                        },
-                        enabled = viewModel.isLoaded,
-                        tooltipText = stringResource(Res.string.go_live)
-                    )
                 }
             }
         }
@@ -618,14 +651,7 @@ fun MediaTab(
         } else {
             if (viewModel.isLoaded) SoftwareVideoPlayer(viewModel = viewModel, modifier = Modifier.size(0.dp))
 
-            Text(
-                text = stringResource(Res.string.media_preview),
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 6.dp)
-            )
-
-            Box(modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp, vertical = 0.dp).padding(bottom = 16.dp), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp, vertical = 18.dp), contentAlignment = Alignment.Center) {
                 Box(
                     modifier = Modifier
                         .aspectRatio(presenterAspectRatio())

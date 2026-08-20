@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.animation.core.Animatable
@@ -27,6 +29,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -876,40 +880,37 @@ fun LowerThirdTab(
                     stringResource(Res.string.aspect_ratio_mismatch, comp.width.toInt(), comp.height.toInt(), formatAspectRatio(comp.width.toInt(), comp.height.toInt()), screenBounds.width, screenBounds.height, formatAspectRatio(screenBounds.width, screenBounds.height))
                 else null
             } else null
-            Column(
+            // One bar: the preset name, then ATEM, then the Play · Add to Schedule · Go Live tail.
+            // There is no second controls row — everything it held now sits here, which is the
+            // shape the Pictures and Presentation headers use. FlowRow so the ATEM buttons wrap
+            // rather than clip on a narrow panel; heightIn because the aspect-ratio warning adds
+            // a second line beneath the name.
+            FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(min = 48.dp)
                     .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .padding(horizontal = 16.dp, vertical = 5.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
             ) {
-                Text(
-                    text = selectedFile?.nameWithoutExtension ?: stringResource(Res.string.lottie_select_preset),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = if (selectedFile != null) FontWeight.Medium else FontWeight.Normal),
-                    color = if (selectedFile != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (arMismatch != null) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = arMismatch,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.error
+                        text = selectedFile?.nameWithoutExtension ?: stringResource(Res.string.lottie_select_preset),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = if (selectedFile != null) FontWeight.Medium else FontWeight.Normal),
+                        color = if (selectedFile != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
+                    if (arMismatch != null) {
+                        Text(
+                            text = arMismatch,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
                 }
-            }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-            // ── Controls bar ──────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Spacer(Modifier.weight(1f))
+                }
 
                 // ATEM controls — deliberately LEFT of the primary actions so
                 // Play/Pause · Add to Schedule · Go Live keep the canonical rightmost tail.
@@ -992,7 +993,7 @@ fun LowerThirdTab(
                             }
                         },
                         enabled = canPlay,
-                        modifier = Modifier.size(38.dp),
+                        modifier = Modifier.size(34.dp),
                         shape = RoundedCornerShape(8.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -1007,41 +1008,41 @@ fun LowerThirdTab(
                     }
                 }
 
-                // Add to Schedule
-                AddToScheduleButton(
-                    onClick = {
-                        val file = selectedFile ?: return@AddToScheduleButton
-                        onAddToSchedule(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)
-                    },
-                    enabled = selectedFile != null,
-                    tooltipText = stringResource(Res.string.add_to_schedule)
-                )
+                    // Add to Schedule
+                    AddToScheduleButton(
+                        onClick = {
+                            val file = selectedFile ?: return@AddToScheduleButton
+                            onAddToSchedule(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)
+                        },
+                        enabled = selectedFile != null,
+                        tooltipText = stringResource(Res.string.add_to_schedule)
+                    )
 
-                // Go Live
-                GoLiveButton(
-                    onClick = {
-                        val atemSettings = appSettings.atemSettings
-                        if (atemSettings.goLiveKey && atemConfigured) {
-                            val durationMs = LottieRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
-                            val name = selectedFile?.nameWithoutExtension ?: ""
-                            val useDsk = atemSettings.useDownstreamKey
-                            scope.launch {
-                                val keyError = LowerThirdSequencer.run(
-                                    name = name, json = jsonContent, durationMs = durationMs,
-                                    pauseAtFrame = false, pauseDurationMs = 0L,
-                                    mixEffect = if (useDsk) 0 else atemSettings.keyMixEffect,
-                                    keyer = if (useDsk) atemSettings.dskIndex else atemSettings.keyIndex,
-                                    atem = atemSettings, useDownstreamKey = useDsk
-                                )
-                                if (keyError != null) atemError = keyError
+                    // Go Live
+                    GoLiveButton(
+                        onClick = {
+                            val atemSettings = appSettings.atemSettings
+                            if (atemSettings.goLiveKey && atemConfigured) {
+                                val durationMs = LottieRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
+                                val name = selectedFile?.nameWithoutExtension ?: ""
+                                val useDsk = atemSettings.useDownstreamKey
+                                scope.launch {
+                                    val keyError = LowerThirdSequencer.run(
+                                        name = name, json = jsonContent, durationMs = durationMs,
+                                        pauseAtFrame = false, pauseDurationMs = 0L,
+                                        mixEffect = if (useDsk) 0 else atemSettings.keyMixEffect,
+                                        keyer = if (useDsk) atemSettings.dskIndex else atemSettings.keyIndex,
+                                        atem = atemSettings, useDownstreamKey = useDsk
+                                    )
+                                    if (keyError != null) atemError = keyError
+                                }
+                            } else {
+                                onGoLive(jsonContent, false, -1f, 0L, selectedFile?.nameWithoutExtension ?: "")
                             }
-                        } else {
-                            onGoLive(jsonContent, false, -1f, 0L, selectedFile?.nameWithoutExtension ?: "")
-                        }
-                    },
-                    enabled = canPlay,
-                    tooltipText = stringResource(Res.string.go_live)
-                )
+                        },
+                        enabled = canPlay,
+                        tooltipText = stringResource(Res.string.go_live)
+                    )
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 

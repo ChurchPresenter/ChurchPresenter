@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -134,6 +135,19 @@ import androidx.compose.foundation.layout.RowScope
 private const val REBUILD_CLICK_WINDOW_MS = 800
 private const val REBUILD_CLICK_COUNT = 3
 private const val SCROLL_SETTLE_MS = 100L
+
+/**
+ * Shared minimum height for the two bars across the top of the Songs tab — the search row on the
+ * left and the action row on the right.
+ *
+ * They hold different-sized content (a 42.dp search field against 34.dp action buttons), so left to
+ * their natural heights the two bars ended 8.dp apart and the divider under them stepped at the
+ * pane boundary. Pinning both to one height lines them up without resizing either control: the
+ * field keeps Bible's 42.dp and the buttons keep the 34.dp `ActionIconButton` every tab uses.
+ *
+ * 60.dp = the taller bar's natural height, 42.dp of field plus its 10.dp/8.dp inset.
+ */
+internal val SongsTopBarMinHeight = 60.dp
 
 /**
  * The song list down the left of the Songs tab: search and filters, the resizable and reorderable
@@ -245,9 +259,13 @@ fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
         // Search controls — wraps to new line if not enough space
         @OptIn(ExperimentalLayoutApi::class)
         FlowRow(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            // Bible's search-row inset (BibleSearchRow.kt), so the two tabs' top bars sit on the
+            // same margins instead of Songs starting 8.dp further left and 6.dp higher.
+            modifier = Modifier.fillMaxWidth()
+                .heightIn(min = SongsTopBarMinHeight)
+                .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
             itemVerticalAlignment = Alignment.CenterVertically
         ) {
             // Styled search field matching the dropdown aesthetic

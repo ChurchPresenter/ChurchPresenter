@@ -691,10 +691,7 @@
     <ID>MaxLineLength:MediaTab.kt$Icon(Icons.Default.Movie, contentDescription = null, modifier = Modifier.size(56.dp), tint = Color.White.copy(alpha = 0.6f))</ID>
     <ID>MaxLineLength:MediaTab.kt$Icon(Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(56.dp), tint = Color.White.copy(alpha = 0.4f))</ID>
     <ID>MaxLineLength:MediaTab.kt$Icon(painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))</ID>
-    <ID>MaxLineLength:MediaTab.kt$Icon(painterResource(Res.drawable.ic_fast_forward), contentDescription = stringResource(Res.string.media_seek_forward), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f))</ID>
-    <ID>MaxLineLength:MediaTab.kt$Icon(painterResource(Res.drawable.ic_fast_rewind), contentDescription = stringResource(Res.string.media_seek_backward), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f))</ID>
     <ID>MaxLineLength:MediaTab.kt$Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))</ID>
-    <ID>MaxLineLength:MediaTab.kt$Icon(painterResource(Res.drawable.ic_stop), contentDescription = stringResource(Res.string.stop), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (viewModel.isLoaded) 0.7f else 0.35f))</ID>
     <ID>MaxLineLength:MediaTab.kt$Icon(painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star), contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin), modifier = Modifier.size(12.dp), tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f))</ID>
     <ID>MaxLineLength:MediaTab.kt$IconButton</ID>
     <ID>MaxLineLength:MediaTab.kt$LazyRow</ID>
