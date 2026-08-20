@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import companionsatellite.CompanionButtonUpdate
 import companionsatellite.CompanionConnectionStatus
 import companionsatellite.CompanionSatelliteClient
+import companionsatellite.SurfaceSpec
 import io.mockk.every
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
@@ -51,18 +52,7 @@ class CompanionSatelliteViewModelTest {
     @BeforeTest
     fun stubClient() {
         mockkConstructor(CompanionSatelliteClient::class)
-        every { anyConstructed<CompanionSatelliteClient>().connect(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-        ) } returns Unit
+        every { anyConstructed<CompanionSatelliteClient>().connect(any(), any(), any(), any()) } returns Unit
         every { anyConstructed<CompanionSatelliteClient>().disconnect() } returns Unit
         every { anyConstructed<CompanionSatelliteClient>().dispose() } returns Unit
         every { anyConstructed<CompanionSatelliteClient>().pressButton(any()) } returns Unit
@@ -196,35 +186,13 @@ class CompanionSatelliteViewModelTest {
     @Test
     fun `a connection with no host is not attempted`() {
         vm().connectAll(settings(host = "", tab = true))
-        verify(exactly = 0) { anyConstructed<CompanionSatelliteClient>().connect(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-        ) }
+        verify(exactly = 0) { anyConstructed<CompanionSatelliteClient>().connect(any(), any(), any(), any()) }
     }
 
     @Test
     fun `a connection with no placement enabled registers nothing`() {
         vm().connectAll(settings())
-        verify(exactly = 0) { anyConstructed<CompanionSatelliteClient>().connect(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-        ) }
+        verify(exactly = 0) { anyConstructed<CompanionSatelliteClient>().connect(any(), any(), any(), any()) }
     }
 
     @Test
@@ -232,9 +200,16 @@ class CompanionSatelliteViewModelTest {
         vm().connectAll(settings(tab = true, tabRows = 2, tabColumns = 6))
         verify(exactly = 1) {
             anyConstructed<CompanionSatelliteClient>().connect(
-                host = "10.0.0.5", port = 16622, deviceId = "device-1",
-                rows = 2, columns = 6, bitmapSize = 72,
-                productName = "ChurchPresenter", reconnectDelayMs = 2000L,
+                host = "10.0.0.5",
+                port = 16622,
+                surface = SurfaceSpec(
+                    deviceId = "device-1",
+                    rows = 2,
+                    columns = 6,
+                    bitmapSize = 72,
+                    productName = "ChurchPresenter",
+                ),
+                reconnectDelayMs = 2000L,
             )
         }
     }
@@ -245,8 +220,10 @@ class CompanionSatelliteViewModelTest {
         listOf("device-1", "device-1-left_sidebar", "device-1-right_sidebar").forEach { id ->
             verify(exactly = 1) {
                 anyConstructed<CompanionSatelliteClient>().connect(
-                    host = any(), port = any(), deviceId = id, rows = any(), columns = any(),
-                    bitmapSize = any(), productName = any(), reconnectDelayMs = any(),
+                    host = any(),
+                    port = any(),
+                    surface = match { it.deviceId == id },
+                    reconnectDelayMs = any(),
                 )
             }
         }
@@ -263,8 +240,10 @@ class CompanionSatelliteViewModelTest {
 
         verify(exactly = 1) {
             anyConstructed<CompanionSatelliteClient>().connect(
-                host = any(), port = any(), deviceId = "device-1", rows = any(), columns = any(),
-                bitmapSize = any(), productName = any(), reconnectDelayMs = any(),
+                host = any(),
+                port = any(),
+                surface = match { it.deviceId == "device-1" },
+                reconnectDelayMs = any(),
             )
         }
     }
@@ -278,14 +257,18 @@ class CompanionSatelliteViewModelTest {
 
         verify(exactly = 1) {
             anyConstructed<CompanionSatelliteClient>().connect(
-                host = any(), port = any(), deviceId = "device-1", rows = any(), columns = any(),
-                bitmapSize = any(), productName = any(), reconnectDelayMs = any(),
+                host = any(),
+                port = any(),
+                surface = match { it.deviceId == "device-1" },
+                reconnectDelayMs = any(),
             )
         }
         verify(exactly = 1) {
             anyConstructed<CompanionSatelliteClient>().connect(
-                host = any(), port = any(), deviceId = "device-1-left_sidebar", rows = any(), columns = any(),
-                bitmapSize = any(), productName = any(), reconnectDelayMs = any(),
+                host = any(),
+                port = any(),
+                surface = match { it.deviceId == "device-1-left_sidebar" },
+                reconnectDelayMs = any(),
             )
         }
     }
@@ -299,8 +282,10 @@ class CompanionSatelliteViewModelTest {
 
         verify(exactly = 1) {
             anyConstructed<CompanionSatelliteClient>().connect(
-                host = any(), port = any(), deviceId = "device-1", rows = any(), columns = 2,
-                bitmapSize = any(), productName = any(), reconnectDelayMs = any(),
+                host = any(),
+                port = any(),
+                surface = match { it.deviceId == "device-1" && it.columns == 2 },
+                reconnectDelayMs = any(),
             )
         }
     }

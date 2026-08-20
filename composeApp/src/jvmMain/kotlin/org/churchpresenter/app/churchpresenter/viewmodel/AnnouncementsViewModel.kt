@@ -12,7 +12,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettin
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.app.churchpresenter.utils.isSystemUsing24HourFormat
 
 class AnnouncementsViewModel {
 
@@ -108,7 +108,7 @@ class AnnouncementsViewModel {
 
     /** Java DateTimeFormatter pattern for TIMER_MODE_CLOCK_DISPLAY, e.g. "h:mm:ss a" or "HH:mm". */
     private val _liveClockFormat = mutableStateOf(
-        if (Utils.isSystemUsing24HourFormat()) "HH:mm:ss" else "h:mm:ss a"
+        if (isSystemUsing24HourFormat()) "HH:mm:ss" else "h:mm:ss a"
     )
     val liveClockFormat: String get() = _liveClockFormat.value
 

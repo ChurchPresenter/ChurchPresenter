@@ -89,7 +89,11 @@ object DetectionLogger {
 
     /** Keeps `[A-Za-z0-9._-]`, replacing anything else with `_`, so any session id is filename-safe. */
     private fun sanitize(raw: String): String =
-        raw.map { if (it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '.' || it == '_' || it == '-') it else '_' }
+        raw.map {
+            if (it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' ||
+                it == '.' || it == '_' || it == '-'
+            ) it else '_'
+        }
             .joinToString("")
 
     /** Deletes dated detection + candidate + sticky logs older than [MAX_AGE_DAYS] in [dir]. Once per process. */
@@ -134,10 +138,14 @@ object DetectionLogger {
                 append("\"ts\":\"").append(Instant.now()).append("\",")
                 if (sessionId != null) append("\"sessionId\":\"").append(esc(sessionId!!)).append("\",")
                 else append("\"sessionId\":null,")
-                append("\"bibles\":[").append(Config.loadedBibles.joinToString(",") { "\"" + esc(it) + "\"" }).append("],")
+                append("\"bibles\":[")
+                    .append(Config.loadedBibles.joinToString(",") { "\"" + esc(it) + "\"" })
+                    .append("],")
                 // Which versions could possibly have been named by version detection this session —
                 // wider than "bibles" above, and the only way to interpret a detectedVersion later.
-                append("\"versionCorpus\":[").append(Config.versionCorpusLabels.joinToString(",") { "\"" + esc(it) + "\"" }).append("],")
+                append("\"versionCorpus\":[")
+                    .append(Config.versionCorpusLabels.joinToString(",") { "\"" + esc(it) + "\"" })
+                    .append("],")
                 append("\"level\":\"").append(esc(Config.level)).append("\",")
                 append("\"continuationSpeed\":\"").append(esc(Config.continuationSpeed)).append("\",")
                 append("\"continuationMinCoverage\":").append(Config.continuationMinCoverage).append(',')
@@ -228,7 +236,8 @@ object DetectionLogger {
             event.detectedVersion?.let { append("\"detectedVersion\":\"").append(esc(it)).append("\",") }
             event.detectedVersionId?.let { append("\"detectedVersionId\":\"").append(esc(it)).append("\",") }
             event.detectedVersionConfidence?.let { append("\"detectedVersionConfidence\":").append(it).append(',') }
-            append("\"refKey\":\"").append(r.bookId).append(':').append(r.chapter).append(':').append(r.verseStart).append("\",")
+            append("\"refKey\":\"").append(r.bookId).append(':').append(r.chapter)
+                .append(':').append(r.verseStart).append("\",")
             // book/chapter/verseStart above are the MATCHED MODULE's own numbering, which differs
             // between modules of the same translation: this machine carries two RST files, one
             // numbering Psalms per the Synodal (Ps 23 = "Господня земля") and one per the Hebrew
@@ -245,7 +254,8 @@ object DetectionLogger {
             event.stickyChapter?.let { append("\"stickyChapter\":").append(it).append(',') }
             append("\"agreement\":").append(AgreementScorer.score(event.verseText, transcript, translation)).append(',')
             append("\"coverageTranscript\":").append(AgreementScorer.coverage(event.verseText, transcript)).append(',')
-            append("\"coverageTranslation\":").append(AgreementScorer.coverage(event.verseText, translation)).append(',')
+            append("\"coverageTranslation\":")
+                .append(AgreementScorer.coverage(event.verseText, translation)).append(',')
             // Stable per-service session id — the exact join key tying this row to the STT db and the
             // CP live-references log. Null when STT didn't provide it (pre-session_id data).
             if (event.sessionId != null) append("\"sessionId\":\"").append(esc(event.sessionId)).append("\",")

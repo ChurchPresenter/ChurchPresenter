@@ -67,7 +67,9 @@ object VersionCorpusLoader {
         if (files.isEmpty()) return VersionCorpus.EMPTY
 
         val capped = files.toHashSet()
-        all.filterNot { it in capped }.forEach { onSkip(it.name, "over the ${Config.versionMaxCorpusBibles}-module cap") }
+        all.filterNot { it in capped }.forEach {
+            onSkip(it.name, "over the ${Config.versionMaxCorpusBibles}-module cap")
+        }
 
         val seenIds = mutableMapOf<String, Int>()
         val indexes = files.mapNotNull { f ->

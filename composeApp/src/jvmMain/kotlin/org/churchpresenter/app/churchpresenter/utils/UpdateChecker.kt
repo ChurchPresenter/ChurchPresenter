@@ -6,7 +6,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
@@ -19,10 +18,6 @@ import java.net.HttpURLConnection
 import java.net.URI
 import kotlin.time.Duration.Companion.seconds
 
-private const val HOURS_PER_DAY = 24L
-private const val MINUTES_PER_HOUR = 60
-private const val SECONDS_PER_MINUTE = 60
-private const val MILLIS_PER_SECOND = 1000
 private const val CONNECT_TIMEOUT_MS = 5_000
 private const val READ_TIMEOUT_MS = 5_000
 private const val HTTP_OK = 200
@@ -39,28 +34,6 @@ data class UpdateInfo(
 sealed class UpdateCheckResult {
     data class Available(val info: UpdateInfo) : UpdateCheckResult()
     object UpToDate : UpdateCheckResult()
-}
-
-/**
- * How often the automatic startup check is allowed to run. Manual "Check for Updates…"
- * always runs regardless of this setting — it only gates the silent background check.
- */
-@Serializable
-enum class UpdateCheckInterval(private val days: Int?) {
-    EVERY_LAUNCH(0),
-    WEEKLY(7),
-    MONTHLY(30),
-    EVERY_2_MONTHS(60),
-    EVERY_3_MONTHS(90),
-    EVERY_6_MONTHS(180),
-    NEVER(null);
-
-    fun isDueSince(lastCheckedAtMillis: Long): Boolean {
-        val intervalDays = days ?: return false
-        if (intervalDays == 0) return true
-        val elapsedMillis = System.currentTimeMillis() - lastCheckedAtMillis
-        return elapsedMillis >= intervalDays * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MILLIS_PER_SECOND
-    }
 }
 
 object UpdateChecker {

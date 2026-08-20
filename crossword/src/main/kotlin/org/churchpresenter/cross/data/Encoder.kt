@@ -19,7 +19,6 @@ fun decode(encoded: String): String {
 }
 
 fun toPlaintext(
-    level: Int,
     title: String,
     clues: List<ClueEntry>,
     layout: Map<Int, Pair<Int, Int>>? = null,          // clue number → normalized (row, col)
@@ -53,11 +52,19 @@ fun fromPlaintextSimple(text: String): List<ClueEntry>? {
     val clueRegex = Regex("""^(.+?)\s*\|\s*(\S+)$""")
     val clues = text.lines()
         .map { it.trim() }
-        .filter { it.isNotEmpty() && !it.startsWith("#") && !it.equals("ACROSS:", ignoreCase = true) && !it.equals("DOWN:", ignoreCase = true) }
+        .filter {
+            it.isNotEmpty() && !it.startsWith("#") &&
+                !it.equals("ACROSS:", ignoreCase = true) && !it.equals("DOWN:", ignoreCase = true)
+        }
         .filter { !it.matches(Regex("""^\d+\..+\|.+""")) }
         .mapIndexedNotNull { idx, line ->
             val m = clueRegex.matchEntire(line) ?: return@mapIndexedNotNull null
-            ClueEntry(number = idx + 1, direction = Direction.ACROSS, clue = m.groupValues[1].trim(), answer = m.groupValues[2].trim().uppercase())
+            ClueEntry(
+                number = idx + 1,
+                direction = Direction.ACROSS,
+                clue = m.groupValues[1].trim(),
+                answer = m.groupValues[2].trim().uppercase(),
+            )
         }
     return if (clues.isEmpty()) null else clues
 }

@@ -61,7 +61,7 @@ import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.app.churchpresenter.utils.isSystemUsing24HourFormat
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -568,7 +568,7 @@ private fun CenteredText(text: String, style: StageMonitorZoneStyle) {
 }
 
 private fun formatClock(): String {
-    val pattern = if (Utils.isSystemUsing24HourFormat()) "HH:mm:ss" else "hh:mm:ss a"
+    val pattern = if (isSystemUsing24HourFormat()) "HH:mm:ss" else "hh:mm:ss a"
     return LocalTime.now().format(DateTimeFormatter.ofPattern(pattern))
 }
 

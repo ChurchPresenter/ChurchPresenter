@@ -332,8 +332,6 @@
     <ID>MaxLineLength:BibleSearchRow.kt$Row</ID>
     <ID>MaxLineLength:BibleSearchRow.kt$Surface</ID>
     <ID>MaxLineLength:BibleSearchRow.kt$tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))</ID>
-    <ID>MaxLineLength:BibleSettings.kt$BibleSettings$fun</ID>
-    <ID>MaxLineLength:BibleSettings.kt$BibleSettings$lowerThirdTextUnderline = secondaryBibleLowerThirdUnderline</ID>
     <ID>MaxLineLength:BibleSettingsTab.kt$NumberSettingsTextField(modifier = Modifier.width(100.dp), label = stringResource(Res.string.bottom), initialText = settings.bibleSettings.marginBottom, onValueChange = { value -&gt; onSettingsChange { s -&gt; s.copy(bibleSettings = s.bibleSettings.copy(marginBottom = value)) } }, range = 0..500)</ID>
     <ID>MaxLineLength:BibleSettingsTab.kt$NumberSettingsTextField(modifier = Modifier.width(100.dp), label = stringResource(Res.string.left), initialText = settings.bibleSettings.marginLeft, onValueChange = { value -&gt; onSettingsChange { s -&gt; s.copy(bibleSettings = s.bibleSettings.copy(marginLeft = value)) } }, range = 0..500)</ID>
     <ID>MaxLineLength:BibleSettingsTab.kt$NumberSettingsTextField(modifier = Modifier.width(100.dp), label = stringResource(Res.string.right), initialText = settings.bibleSettings.marginRight, onValueChange = { value -&gt; onSettingsChange { s -&gt; s.copy(bibleSettings = s.bibleSettings.copy(marginRight = value)) } }, range = 0..500)</ID>
@@ -494,6 +492,7 @@
     <ID>MaxLineLength:CompanionSurfacePanel.kt$stringResource(Res.string.companion_satellite_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)</ID>
     <ID>MaxLineLength:CompanionSurfacePanel.kt$stringResource(Res.string.companion_satellite_status_error, state.errorMessage) to MaterialTheme.colorScheme.error</ID>
     <ID>MaxLineLength:ConnectionStatusRow.kt$InstanceLinkStatus.DISCONNECTED -&gt; MaterialTheme.colorScheme.onSurfaceVariant to Res.string.instance_link_status_disconnected</ID>
+    <ID>MaxLineLength:DisplayGeometry.kt$/** The 1080p bounds [ScaledPresenterContent][org.churchpresenter.app.churchpresenter.composables.ScaledPresenterContent] assumes when no real display exists to ask (headless). */</ID>
     <ID>MaxLineLength:Constants.kt$/** The 1080p bounds [ScaledPresenterContent][org.churchpresenter.app.churchpresenter.composables.ScaledPresenterContent] assumes when no real display exists to ask (headless). */</ID>
     <ID>MaxLineLength:ContactUsDialog.kt$Text(stringResource(Res.string.contact_open_browser), style = MaterialTheme.typography.labelLarge)</ID>
     <ID>MaxLineLength:CrosswordData.kt$CrosswordDecoder$fun</ID>
@@ -1167,9 +1166,6 @@
     <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$is ScheduleItem.AnnouncementItem -&gt; onPresentAnnouncement?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)</ID>
     <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$is ScheduleItem.DictionaryItem -&gt; onPresentDictionary?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)</ID>
     <ID>MaxLineLength:ScheduleViewModel.kt$ScheduleViewModel$is ScheduleItem.PresentationItem -&gt; onPresentPresentation?.invoke(item) ?: onPresenting(Presenting.PRESENTATION)</ID>
-    <ID>MaxLineLength:ScreenAssignment.kt$ScreenAssignment$val</ID>
-    <ID>MaxLineLength:ScreenAssignment.kt$ScreenAssignment$val showBibleBackground: Boolean = true</ID>
-    <ID>MaxLineLength:ScreenAssignment.kt$ScreenAssignment$val showSongsBackground: Boolean = true</ID>
     <ID>MaxLineLength:SegmentedButton.kt$index == 0 -&gt; RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 0.dp, bottomEnd = 0.dp)</ID>
     <ID>MaxLineLength:SegmentedButton.kt$index == rowItems.lastIndex -&gt; RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = 4.dp, bottomEnd = 4.dp)</ID>
     <ID>MaxLineLength:SelectionList.kt$val isSelected = if (selectedIndices != null) selectedIndices.contains(index) else index == selectedIndex</ID>
@@ -1404,7 +1400,6 @@
     <ID>MaxLineLength:StageMonitorScreen.kt$StageZoneBox(sm, StageMonitorZone.BOTTOM_RIGHT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))</ID>
     <ID>MaxLineLength:StageMonitorScreen.kt$StageZoneBox(sm, StageMonitorZone.TOP_LEFT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))</ID>
     <ID>MaxLineLength:StageMonitorScreen.kt$StageZoneBox(sm, StageMonitorZone.TOP_RIGHT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))</ID>
-    <ID>MaxLineLength:StageMonitorSettings.kt$MetronomePosition$/** Where the metronome flash dot is anchored on the stage monitor screen — a free 3x3 grid, independent of the content zones above (no full-screen option since it's a small overlay). */</ID>
     <ID>MaxLineLength:StageMonitorSettingsTab.kt$ZoneLabelCell(text = labelsFor(StageMonitorZone.BOTTOM_MIDDLE), modifier = Modifier.weight(BOTTOM_MIDDLE_WEIGHT))</ID>
     <ID>MaxLineLength:StageMonitorSettingsTab.kt$copy(zoneStyles = zoneStyles + (StageMonitorStyleZone.FULL_SCREEN to styleFor(StageMonitorStyleZone.FULL_SCREEN).block()))</ID>
     <ID>MaxLineLength:StageMonitorSettingsTab.kt$onColorChange = onShadowColorChange</ID>
@@ -1509,7 +1504,6 @@
     <ID>TooManyFunctions:Bible.kt$Bible</ID>
     <ID>TooManyFunctions:BibleEngineClient.kt$BibleEngineClient</ID>
     <ID>TooManyFunctions:BibleInstallSupport.kt$BibleInstallSupport</ID>
-    <ID>TooManyFunctions:BibleSettings.kt$BibleSettings</ID>
     <ID>TooManyFunctions:BibleViewModel.kt$BibleViewModel</ID>
     <ID>TooManyFunctions:BibleViewModelDetection.kt$org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModelDetection.kt</ID>
     <ID>TooManyFunctions:BibleViewModelSmartSearch.kt$org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModelSmartSearch.kt</ID>
@@ -1548,7 +1542,6 @@
     <ID>TooManyFunctions:SceneViewModel.kt$SceneViewModel</ID>
     <ID>TooManyFunctions:ScheduleViewModel.kt$ScheduleViewModel</ID>
     <ID>TooManyFunctions:ServerSettingsTab.kt$org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab.kt</ID>
-    <ID>TooManyFunctions:SettingsManager.kt$SettingsManager</ID>
     <ID>TooManyFunctions:SetupWizardDialog.kt$org.churchpresenter.app.churchpresenter.dialogs.SetupWizardDialog.kt</ID>
     <ID>TooManyFunctions:SharedBrowserFrameCache.kt$SharedBrowserFrameCache</ID>
     <ID>TooManyFunctions:SongChordPreview.kt$org.churchpresenter.app.churchpresenter.composables.SongChordPreview.kt</ID>
@@ -1607,7 +1600,6 @@
     <ID>LongParameterList:SwingFileChooser.kt$SwingFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, title: String, selectDirectory: Boolean, multiple: Boolean, frame: JFrame, showDialog: (JFileChooser, JFrame) -&gt; Int )</ID>
     <ID>LongParameterList:SwingFileChooser.kt$SwingFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, title: String, selectDirectory: Boolean, multiple: Boolean, show: (JFileChooser) -&gt; Int )</ID>
     <ID>LongParameterList:WebSocketRoute.kt$( server: CompanionServer, _apiKey: MutableStateFlow&lt;String&gt;, _apiKeyEnabled: MutableStateFlow&lt;Boolean&gt;, _bibleCatalog: MutableStateFlow&lt;BibleCatalogResponse?&gt;, _catalog: MutableStateFlow&lt;SongCatalogResponse&gt;, _connectedInstanceLinkFollowers: MutableStateFlow&lt;Set&lt;String&gt;&gt;, _liveState: MutableStateFlow&lt;LiveStateDto?&gt;, _pictureCatalog: MutableStateFlow&lt;PictureFolderResponse?&gt;, _pictureCatalogs: ConcurrentHashMap&lt;String, PictureFolderResponse&gt;, _presentationCatalog: MutableStateFlow&lt;PresentationCatalogResponse&gt;, _presentationCatalogs: ConcurrentHashMap&lt;String, PresentationDto&gt;, _schedule: MutableStateFlow&lt;List&lt;ScheduleItemDto&gt;&gt;, _scheduleItemToPresentationId: ConcurrentHashMap&lt;String, String&gt;, json: Json, scope: CoroutineScope, )</ID>
-    <ID>LongParameterList:WindowGeometry.kt$( placement: String, isFloating: Boolean, width: Int, height: Int, x: Int, y: Int, )</ID>
     <ID>LongParameterList:X11WindowCapture.kt$X11WindowCapture.X11$(display: Pointer, drawable: NativeLong, x: Int, y: Int, width: Int, height: Int, planeMask: NativeLong, format: Int)</ID>
     <ID>LongParameterList:XdgFileChooser.kt$XdgFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, suggestedName: String?, selectDirectory: Boolean, multiple: Boolean, token: String )</ID>
     <ID>LongParameterList:XdgFileChooser.kt$XdgFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, suggestedName: String?, selectDirectory: Boolean, multiple: Boolean, uniqueName: String, token: String, ask: suspend (options: Map&lt;String, Variant&lt;*&gt;&gt;, requestPath: String) -&gt; List&lt;String&gt;? )</ID>

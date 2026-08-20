@@ -42,8 +42,9 @@ data class ScreenAssignment(
     val showCanvas: Boolean = true,
     val showFullscreenBackground: Boolean = true, // show configured background in fullscreen mode
     val showLowerThirdBackground: Boolean = true, // show configured background in lower third mode
-    val showBibleBackground: Boolean = true, // additional layer on top of showFullscreenBackground/showLowerThirdBackground
-    val showSongsBackground: Boolean = true, // additional layer on top of showFullscreenBackground/showLowerThirdBackground
+    // Both are an additional layer on top of showFullscreenBackground/showLowerThirdBackground.
+    val showBibleBackground: Boolean = true,
+    val showSongsBackground: Boolean = true,
     val browserSourceApiKeyRequired: Boolean = false, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceEnabled: Boolean = true, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceWidth: Int = 1920, // only used by ProjectionSettings.browserSourceOutputs entries
@@ -54,7 +55,9 @@ data class ScreenAssignment(
     val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF
 
     /** True if [displayMode] is either lower-third band orientation (horizontal or vertical). */
-    val isLowerThird: Boolean get() = displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL || displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL
+    val isLowerThird: Boolean
+        get() = displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL ||
+            displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL
     val isLowerThirdVertical: Boolean get() = displayMode == Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL
 
     /** Whether a key output target is configured */
