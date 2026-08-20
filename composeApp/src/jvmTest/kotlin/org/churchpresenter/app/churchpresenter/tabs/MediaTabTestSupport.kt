@@ -2,16 +2,23 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -49,6 +56,10 @@ internal fun mediaTab(
     vlcAvailable: Boolean = true,
     vlcArchMismatch: Boolean = false,
     vlcLoadFailed: Boolean = false,
+    /** Fixed panel width, for the narrow-layout screenshots; unconstrained when null. */
+    width: Dp? = null,
+    /** Which theme to compose in; the plain M3 default when null. */
+    themeMode: ThemeMode? = null,
     instanceLinkMediaStreamUrl: ((itemId: String) -> String)? = null,
     onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
     block: ComposeUiTest.(vm: MediaViewModel, reports: MediaReports) -> Unit,
@@ -62,8 +73,9 @@ internal fun mediaTab(
     val vm = MediaViewModel()
     runComposeUiTest {
         setContent {
-            MaterialTheme {
+            ThemedForTest(themeMode) {
                 CompositionLocalProvider(LocalMediaViewModel provides vm) {
+                Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
                 MediaTab(
                     appSettings = appSettings,
                     selectedMediaItem = selectedMediaItem,
@@ -75,6 +87,7 @@ internal fun mediaTab(
                     instanceLinkMediaStreamUrl = instanceLinkMediaStreamUrl,
                     onInstanceLinkSendProject = onInstanceLinkSendProject,
                 )
+                }
                 }
             }
         }
@@ -117,3 +130,9 @@ internal fun ComposeUiTest.hasMediaButton(label: String): Boolean =
     onAllNodesWithContentDescription(label)
         .fetchSemanticsNodes(atLeastOneRootRequired = false)
         .isNotEmpty()
+
+@Composable
+private fun ThemedForTest(themeMode: ThemeMode?, content: @Composable () -> Unit) {
+    if (themeMode == null) MaterialTheme(content = content)
+    else ChurchPresenterTheme(themeMode = themeMode, content = content)
+}

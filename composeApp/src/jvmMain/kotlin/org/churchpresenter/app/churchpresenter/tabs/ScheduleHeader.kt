@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -72,7 +73,6 @@ import churchpresenter.composeapp.generated.resources.ic_label
 import churchpresenter.composeapp.generated.resources.ic_redo
 import churchpresenter.composeapp.generated.resources.ic_remove
 import churchpresenter.composeapp.generated.resources.ic_save
-import churchpresenter.composeapp.generated.resources.ic_settings
 import churchpresenter.composeapp.generated.resources.ic_undo
 import churchpresenter.composeapp.generated.resources.ic_zoom_in
 import churchpresenter.composeapp.generated.resources.planning_center_import_title
@@ -363,17 +363,19 @@ private fun ScheduleOptionsButton(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        PillGroup {
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_settings),
-                text = stringResource(Res.string.tooltip_schedule_options),
-                onClick = { expanded = true },
-                modifier = Modifier.testTag(ScheduleToolbarTags.OPTIONS),
-                buttonSize = 24.dp,
-                iconSize = 13.dp,
-                iconTint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        // Styled as the tab-visibility button in `MainDesktop`, not as the pill-group toolbar
+        // buttons beside it: both open a checkbox DropdownMenu of panel-level options, so they
+        // read as the same control. Hence the same Tune icon, the bare 36.dp button and the
+        // onSurface tint, and no
+        // PillGroup — the pills are for the compact file/undo/label actions on the row below.
+        TooltipIconButton(
+            painter = rememberVectorPainter(Icons.Default.Tune),
+            text = stringResource(Res.string.tooltip_schedule_options),
+            onClick = { expanded = true },
+            modifier = Modifier.testTag(ScheduleToolbarTags.OPTIONS),
+            buttonSize = 36.dp,
+            iconTint = MaterialTheme.colorScheme.onSurface
+        )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.schedule_show_buttons_under_title)) },

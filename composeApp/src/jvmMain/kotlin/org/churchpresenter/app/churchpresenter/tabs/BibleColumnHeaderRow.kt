@@ -102,7 +102,10 @@ internal fun BibleColumnHeaderRow(
                     .fillMaxWidth()
                     .heightIn(min = 31.dp)
                     .background(MaterialTheme.colorScheme.surface)
-                    .padding(start = 4.dp),
+                    // Vertical inset as well as the start one: this row carries 34.dp
+                    // ActionIconButtons, taller than its 31.dp minimum, so without it the buttons
+                    // sat flush against the dividers above and below with no breathing room.
+                    .padding(start = 4.dp, top = 5.dp, bottom = 5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(modifier = Modifier.width(bookWidth).padding(start = 12.dp)) {

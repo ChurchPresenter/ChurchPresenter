@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -130,9 +131,13 @@ internal fun RowScope.SongLyricsPanel(
         val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && selectedSectionIndex >= 0
         @OptIn(ExperimentalLayoutApi::class)
         FlowRow(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+            // Same inset and the same minimum height as the search row opposite it, so the two top
+            // bars end level and the divider beneath them runs straight across both panes.
+            modifier = Modifier.fillMaxWidth()
+                .heightIn(min = SongsTopBarMinHeight)
+                .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
         ) {
             if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
                 ActionIconButton(

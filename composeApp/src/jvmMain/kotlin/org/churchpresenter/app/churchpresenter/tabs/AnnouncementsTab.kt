@@ -330,7 +330,7 @@ fun AnnouncementsTab(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -404,9 +404,9 @@ fun AnnouncementsTab(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(48.dp)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -432,7 +432,7 @@ fun AnnouncementsTab(
         AnimatedVisibility(visible = viewModel.shadow) {
             Column {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(horizontal = 12.dp, vertical = 6.dp)) {
+                Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(horizontal = 16.dp, vertical = 6.dp)) {
                     ShadowDetailRow(
                         shadowColor = appSettings.announcementsSettings.shadowColor,
                         shadowSize = appSettings.announcementsSettings.shadowSize,
