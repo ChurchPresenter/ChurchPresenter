@@ -123,9 +123,21 @@ jobs:
         run: chmod +x gradlew
 
       # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
-      # Pre-existing findings are in config/detekt/baseline.xml; this gates only new ones.
+      # Pre-existing findings are in config/detekt/baseline.xml; this gates only new ones, and only
+      # for :composeApp -- no other module has a baseline, so what is listed here has to be clean.
+      #
+      # NOT paths-filtered, deliberately. A module's detekt task costs seconds, and the gate is
+      # worth nothing if a change that breaks it can skip it: the shared config/detekt/detekt.yml
+      # governs every module at once, so "this PR didn't touch that folder" does not mean that
+      # folder still passes.
+      #
+      # :bible-engine, :lottieGenerator and :presentation-engine are deliberately absent -- they
+      # have the plugin applied and currently fail (151, 409 and 56 findings). Add each one here
+      # the moment it comes clean; until then listing it would make every PR red.
       - name: Detekt
-        run: ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :songlibrary:detekt :settings:detekt
+        run: >-
+          ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
+          :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
 
       - name: App unit tests
         id: unit_tests

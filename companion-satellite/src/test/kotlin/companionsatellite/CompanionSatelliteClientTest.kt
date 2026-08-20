@@ -72,9 +72,17 @@ class CompanionSatelliteClientTest {
     ): CompanionSatelliteClient {
         val c = newClient(events)
         c.connect(
-            host = "127.0.0.1", port = fake.port, deviceId = deviceId,
-            rows = rows, columns = columns, bitmapSize = 72,
-            startRow = startRow, startColumn = startColumn, reconnectDelayMs = 100,
+            host = "127.0.0.1",
+            port = fake.port,
+            surface = SurfaceSpec(
+                deviceId = deviceId,
+                rows = rows,
+                columns = columns,
+                bitmapSize = 72,
+                startRow = startRow,
+                startColumn = startColumn,
+            ),
+            reconnectDelayMs = 100,
         )
         waitFor("CONNECTED") { events.status == CompanionConnectionStatus.CONNECTED }
         return c
@@ -116,7 +124,12 @@ class CompanionSatelliteClientTest {
         FakeCompanion(acceptRegistration = false, registrationError = "Invalid LAYOUT_MANIFEST").use { fake ->
             val events = Events()
             val c = newClient(events)
-            c.connect("127.0.0.1", fake.port, DEVICE, rows = 2, columns = 2, bitmapSize = 72, reconnectDelayMs = 60_000)
+            c.connect(
+                "127.0.0.1",
+                fake.port,
+                SurfaceSpec(DEVICE, rows = 2, columns = 2, bitmapSize = 72),
+                reconnectDelayMs = 60_000,
+            )
             waitFor("ERROR status") { events.status == CompanionConnectionStatus.ERROR }
             assertEquals("Invalid LAYOUT_MANIFEST", events.statuses.last().second)
         }
@@ -174,7 +187,10 @@ class CompanionSatelliteClientTest {
 
             // Field set, encodings and the "page/row/column" LOCATION form are what the real
             // Companion sent; "Prog\nCAM1" is a real label from the captured instance.
-            fake.sendKeyState(DEVICE, controlId = 1, text = "Prog\nCAM1", color = "#ff0000", page = 1, row = 0, column = 1)
+            fake.sendKeyState(
+                DEVICE, controlId = 1, text = "Prog\nCAM1", color = "#ff0000",
+                page = 1, row = 0, column = 1,
+            )
             waitFor("button update") { events.buttons.isNotEmpty() }
 
             val update = events.buttons.single()
@@ -302,7 +318,12 @@ class CompanionSatelliteClientTest {
             c.pressButton(0)
             // Now connect for real: reaching CONNECTED proves the client got that far, and the
             // press above still must not appear ahead of the registration.
-            c.connect("127.0.0.1", fake.port, DEVICE, rows = 1, columns = 1, bitmapSize = 72, reconnectDelayMs = 100)
+            c.connect(
+                "127.0.0.1",
+                fake.port,
+                SurfaceSpec(DEVICE, rows = 1, columns = 1, bitmapSize = 72),
+                reconnectDelayMs = 100,
+            )
             waitFor("CONNECTED") { events.status == CompanionConnectionStatus.CONNECTED }
             assertTrue(fake.linesStartingWith("KEY-PRESS").isEmpty(), "a press with no session is dropped")
         }
@@ -413,7 +434,12 @@ class CompanionSatelliteClientTest {
         FakeCompanion().use { fake ->
             val events = Events()
             val c = connected(fake, events)
-            c.connect("127.0.0.1", fake.port, "second-device", rows = 1, columns = 1, bitmapSize = 72, reconnectDelayMs = 100)
+            c.connect(
+                "127.0.0.1",
+                fake.port,
+                SurfaceSpec("second-device", rows = 1, columns = 1, bitmapSize = 72),
+                reconnectDelayMs = 100,
+            )
             waitFor("the second registration") {
                 fake.linesStartingWith("ADD-DEVICE").any { it.contains("second-device") }
             }

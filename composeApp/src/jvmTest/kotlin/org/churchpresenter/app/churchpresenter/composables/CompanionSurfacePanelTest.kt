@@ -58,7 +58,7 @@ class CompanionSurfacePanelTest {
         mockkConstructor(CompanionSatelliteClient::class)
         every {
             anyConstructed<CompanionSatelliteClient>()
-                .connect(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+                .connect(any(), any(), any(), any())
         } returns Unit
         every { anyConstructed<CompanionSatelliteClient>().disconnect() } returns Unit
         every { anyConstructed<CompanionSatelliteClient>().dispose() } returns Unit
