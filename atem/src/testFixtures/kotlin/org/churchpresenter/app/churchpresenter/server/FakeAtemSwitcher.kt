@@ -47,8 +47,20 @@ class FakeAtemSwitcher(
     private val chunksPerGrant: Int = 320,
     /** Emit FTDE(code 1, "busy — retry") this many times before letting a transfer through. */
     private val ftdeRetriesBeforeSuccess: Int = 0,
+    /**
+     * When set, every transfer is refused with FTDE carrying this code instead of being granted.
+     * Same four-byte FTDE the captures show and [ftdeRetriesBeforeSuccess] already emits — only the
+     * code byte differs, and anything other than 1 is a refusal the client must not retry.
+     */
+    private val ftdeFatalCode: Int? = null,
     /** When false the hello is ignored, so a connect attempt fails as if nothing is listening. */
     private val answerHello: Boolean = true,
+    /**
+     * When false, commands are received and recorded but never ACKed — a switcher that has gone
+     * deaf mid-session. Withholding a reply, like [answerHello]; nothing here invents a layout the
+     * captures did not show.
+     */
+    private val ackCommands: Boolean = true,
 ) : AutoCloseable {
 
     companion object {
@@ -112,7 +124,7 @@ class FakeAtemSwitcher(
         }
         if (flags and FLAG_ACK_REQUEST == 0) return
 
-        ack(u16(pkt, 10))
+        if (ackCommands) ack(u16(pkt, 10))
         val commands = parseCommands(pkt)
         if (commands.isNotEmpty()) lastCommandSession = byteArrayOf(pkt[2], pkt[3])
         for ((name, payload) in commands) {
@@ -135,7 +147,10 @@ class FakeAtemSwitcher(
                 bytesThisTransfer = 0
                 chunksSinceGrant = 0
                 val transferId = u16(payload, 0)
-                if (ftdeSent < ftdeRetriesBeforeSuccess) {
+                val fatal = ftdeFatalCode
+                if (fatal != null) {
+                    emit("FTDE", ByteArray(4).also { writeU16(it, 0, transferId); it[2] = fatal.toByte() })
+                } else if (ftdeSent < ftdeRetriesBeforeSuccess) {
                     ftdeSent++
                     // code 1 = "busy, retry the whole transfer"
                     emit("FTDE", ByteArray(4).also { writeU16(it, 0, transferId); it[2] = 1 })

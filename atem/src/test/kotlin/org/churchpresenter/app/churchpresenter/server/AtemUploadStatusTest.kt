@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.server
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -153,4 +154,23 @@ class AtemUploadStatusTest {
 
         assertNull(AtemUploadStatus.state.value, "nothing may put a bar back on screen after it cleared")
     }
+    @Test
+    fun `a clip upload is marked as a clip and a still is not`() {
+        // The bar's label reads "Clip" or "Still" off this flag; getting it wrong tells the operator
+        // the wrong thing is uploading.
+        AtemUploadStatus.begin("lower-third", clip = true, slot = 1)
+        assertTrue(AtemUploadStatus.state.value!!.clip)
+        AtemUploadStatus.begin("logo", clip = false, slot = 2)
+        assertFalse(AtemUploadStatus.state.value!!.clip)
+    }
+
+    @Test
+    fun `failing an upload that is no longer current leaves the bar idle`() {
+        // A clip that errors after the operator dismissed the bar must not resurrect it.
+        val id = AtemUploadStatus.begin("gone", clip = false, slot = 0)
+        AtemUploadStatus.clear(id)
+        AtemUploadStatus.fail(id, "too late")
+        assertNull(AtemUploadStatus.state.value, "an idle bar stays idle")
+    }
+
 }

@@ -122,7 +122,15 @@ class AtemProtocolException(message: String) : IOException(message)
 // still leaves ~29, so no refactor reaches the threshold; a wire protocol has as many functions as
 // it has commands. Carried as a baseline entry in :composeApp before this module existed.
 @Suppress("TooManyFunctions")
-class AtemClient(val host: String, val port: Int = 9910) {
+class AtemClient(
+    val host: String,
+    val port: Int = 9910,
+
+    private val connectTimeoutMs: Int = CONNECT_TIMEOUT_MS,
+    private val commandTimeoutMs: Long = CMD_TIMEOUT_MS.toLong(),
+    private val keepAliveIntervalMs: Long = KEEPALIVE_INTERVAL_MS,
+    private val silenceTimeoutMs: Long = CONNECT_TIMEOUT_MS.toLong(),
+) {
 
     companion object {
         private const val HEADER_SIZE = 12
@@ -334,7 +342,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
      */
     suspend fun connect(collectState: Boolean = true, keepAlive: Boolean = false) = withContext(Dispatchers.IO) {
         val sock = DatagramSocket()
-        sock.soTimeout = CONNECT_TIMEOUT_MS
+        sock.soTimeout = connectTimeoutMs
         socket = sock
 
         var handshakeComplete = false
@@ -349,7 +357,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
             sendRaw(CONNECT_HELLO)
 
             // Wait for the hello response (receiveAndProcess ACKs it and flips the flag)
-            val deadline = System.currentTimeMillis() + CONNECT_TIMEOUT_MS
+            val deadline = System.currentTimeMillis() + connectTimeoutMs
             while (!helloReceived) {
                 if (System.currentTimeMillis() >= deadline ||
                     receiveAndProcess() == null
@@ -394,11 +402,11 @@ class AtemClient(val host: String, val port: Int = 9910) {
         lastReceivedAt = System.currentTimeMillis()
         keepAliveJob = scope.launch {
             while (isActive) {
-                delay(KEEPALIVE_INTERVAL_MS)
+                delay(keepAliveIntervalMs)
                 opMutex.withLock {
                     if (socket == null) return@withLock
                     runCatching { drainAndAck() }
-                    if (System.currentTimeMillis() - lastReceivedAt > CONNECT_TIMEOUT_MS) {
+                    if (System.currentTimeMillis() - lastReceivedAt > silenceTimeoutMs) {
                         closeSocketOnly()
                     }
                 }
@@ -533,7 +541,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
 
         opMutex.withLock {
             // Lock still store (storeId 0)
-            sendCommandAndWait("LOCK", buildLockPayload(0, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
+            sendCommandAndWait("LOCK", buildLockPayload(0, locked = true), "LKOB", timeout = commandTimeoutMs)
             try {
                 CrashReporter.trace("atem.upload", "ATEM upload still") {
                     performTransfer(storeId = 0, frameIndex = slot, frame = frame, name = name, onProgress = onProgress)
@@ -585,7 +593,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
                 "LOCK",
                 buildLockPayload(storeId, locked = true),
                 "LKOB",
-                timeout = CMD_TIMEOUT_MS.toLong()
+                timeout = commandTimeoutMs
             )
             try {
                 // Clear the clip slot before uploading new frames
@@ -675,7 +683,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
         sendCommand("FTSD", buildUploadRequestPayload(transferId, storeId, frameIndex, frame.rawLen))
 
         while (true) {
-            val (cmd, payload) = waitForAnyCommand(setOf("FTCD", "FTDC", "FTDE"), CMD_TIMEOUT_MS.toLong())
+            val (cmd, payload) = waitForAnyCommand(setOf("FTCD", "FTDC", "FTDE"), commandTimeoutMs)
             // Ignore messages that belong to other transfers
             val cmdTransferId = if (payload.size < 2) null
                 else ((payload[0].toInt() and 0xFF) shl 8) or (payload[1].toInt() and 0xFF)
@@ -849,7 +857,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
         name: String,
         data: ByteArray,
         expectedResponse: String?,
-        timeout: Long = CMD_TIMEOUT_MS.toLong()
+        timeout: Long = commandTimeoutMs
     ) {
         val pktId = sendCommand(name, data)
         if (expectedResponse == null) {
@@ -930,8 +938,17 @@ class AtemClient(val host: String, val port: Int = 9910) {
         return packetId == ackId || ((shortlyBefore || beforeWrap) && !shortlyAfter)
     }
 
-    /** Resend buffered in-flight packets starting from [fromId] (ATEM retransmit request). */
-    private fun retransmitFrom(fromId: Int) {
+    /** The packet ids still awaiting an ACK, oldest first — the buffer [retransmitFrom] resends from. */
+    internal fun inFlightIds(): List<Int> = inFlight.keys.toList()
+
+    /**
+     * Resend buffered in-flight packets starting from [fromId] (ATEM retransmit request).
+     *
+     * `internal` rather than private so a test can drive it directly. Reaching it through
+     * [FakeAtemSwitcher] would mean the fake emitting a retransmit request, and there is no capture
+     * of one — writing those bytes by reading this file is what the fake's doc comment forbids.
+     */
+    internal fun retransmitFrom(fromId: Int) {
         if (!inFlight.containsKey(fromId)) {
             throw AtemProtocolException("ATEM requested retransmit of packet $fromId, which is no longer buffered")
         }

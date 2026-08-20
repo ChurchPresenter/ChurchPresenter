@@ -72,36 +72,51 @@ it; they drive `FakeAtemSwitcher` through `testFixtures(projects.atem)`.
   builder/parser into a separate object still leaves ~29, so no refactor reaches it.
 
   **Do not add a baseline file to this module, and do not add a `@Suppress` without asking.**
-- **Coverage**: `BRANCH` 0.80 and `COMPLEXITY` 0.78 are the only two counters named. `AtemClient`'s
-  receive loop branches on every malformed packet a switcher could send, and the fake only replays
-  what real hardware sent, so those two cannot reach 85% from a loopback fake alone.
-  Measured: BRANCH 81.3%, COMPLEXITY 79.5%. The other four clear the 85% default unaided —
-  INSTRUCTION 91.5%, LINE 94.0%, METHOD 96.4%, CLASS 100%. **No `coverageExcludes`.**
+- **Coverage**: **no `coverageFloors` override and no `coverageExcludes`.** The root build's
+  default six counters at 85%, as written, and all six pass:
+  INSTRUCTION 95.8%, BRANCH 88.0%, LINE 99.1%, COMPLEXITY 85.8%, METHOD 99.3%, CLASS 100%.
 
-  Raise the floors when the number moves, rather than leaving slack: they sit just under the
-  measured value on purpose, so a regression trips them.
+  COMPLEXITY is the tight one — it clears by under a point, so a new branch in `AtemClient` will
+  need a test with it. **Do not answer that by writing a floor into this file.** The root
+  `AGENT.md` requires asking before lowering one, and a floor written before the number is measured
+  is a carve-out for a problem nobody has shown exists.
+
+  What made the timeout paths reachable is the four defaulted constructor parameters on
+  `AtemClient` — see the rule below.
+
+## The four timeout parameters — how the deadline paths are tested
+
+`AtemClient` takes `connectTimeoutMs`, `commandTimeoutMs`, `keepAliveIntervalMs` and
+`silenceTimeoutMs` as **defaulted constructor parameters**. Production passes none of them; the
+defaults are the values this client has always used (5s, 8s, 1.5s, 5s).
+
+They exist because every failure path here ends when a deadline expires — a switcher that never
+answers the hello, a command that is never ACKed, a session the ATEM has silently dropped. At the
+shipped values each of those tests would cost 5–8 seconds, which the root `AGENT.md` rules out. At
+60ms they cost 60ms, and they still assert against a *real* deadline rather than a stubbed one.
+`AtemClientTimeoutTest` is the whole set: 12 tests, ~1.5s.
+
+This is the `BibleEngineClient.retryFloorMs` shape the root `AGENT.md` blesses, **not** the ad-hoc
+mutable singleton seam it bans. Do not turn any of them into a `var`.
+
+`FakeAtemSwitcher` has two knobs for the same purpose — `ackCommands = false` and
+`ftdeFatalCode` — which withhold or vary a reply the captures already showed. Neither invents a
+byte layout, which is the line that matters (see the fake's doc comment).
 
 ## What is not tested here, and why
 
-Listed in `AtemClientSocketTest`'s doc comment, which is the place to keep this current:
-
-- `isReachable`'s failure path and `connect` against a **silent** host. Both end only when a socket
-  timeout expires (2s and 5s), neither is injectable, so a test of them would cost its whole
-  timeout — the shape the root `AGENT.md` rules out.
-- **The keepalive loop**, and with it `drainAndAck` and `closeSocketOnly`, which nothing else
-  calls. Its cadence is a hard-coded 1.5s `delay` and its liveness window a hard-coded 5s, so any
-  assertion about it is an assertion about two durations. If it ever needs covering, the move is a
-  pair of *defaulted constructor parameters* — the `BibleEngineClient.retryFloorMs` shape — not a
-  mutable seam. Worth roughly 85 instructions and 17 branches, the largest single gap left.
-- **`retransmitFrom`**, both paths. Reaching it means `FakeAtemSwitcher` sending a retransmit
-  request, and there is no capture of one — writing the bytes by reading `AtemClient` is precisely
-  what the fake's doc comment forbids. Get a capture first.
+- **`retransmitFrom` through the wire.** The function itself is tested directly — it is `internal`
+  for that — but nothing drives `receiveAndProcess`'s retransmit-request branch, because that needs
+  `FakeAtemSwitcher` to *send* one and there is no capture of it. Writing those bytes by reading
+  `AtemClient` is precisely what the fake's doc comment forbids. Get a capture first.
 - The in-flight eviction at `MAX_IN_FLIGHT` (2048 packets), which no upload of a testable size
   reaches.
+- One dead sub-branch of `isCoveredByAck`: `(shortlyBefore || beforeWrap) && shortlyAfter`.
+  `shortlyAfter` is mutually exclusive with both of the others by construction, so the guard cannot
+  be false there. Do not write a test for it; there is no input that reaches it.
 - The exceptional arm of each `runCatching { socket?.soTimeout = prev }` restore. JaCoCo puts the
-  whole duplicated exception path on that one line — 34 instructions in `awaitRealSession`, 53 in
-  `drainAndAck` — and it only runs if setting a socket timeout throws. Read those two line numbers
-  as noise, not as untested logic.
+  whole duplicated exception path on that one line, and it only runs if *setting a socket timeout*
+  throws. Read those line numbers as noise, not as untested logic.
 
 ## Commands
 

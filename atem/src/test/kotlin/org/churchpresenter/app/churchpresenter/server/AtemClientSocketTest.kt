@@ -18,15 +18,13 @@ import kotlin.test.assertTrue
  * This suite is that missing half. See [FakeAtemSwitcher] for why the fake's byte layouts come
  * from a capture of real hardware rather than from [AtemClient] itself.
  *
- * **Not covered here, deliberately:**
- * - `isReachable`'s failure path and `connect`'s no-response path against a *silent* host. Both
- *   end only when a socket timeout expires (2s and 5s respectively), and neither timeout is
- *   injectable, so a test of them would cost its whole timeout — the shape `AGENT.md` rules out.
- *   The success paths are covered below.
- * - The keepalive loop. Its cadence is a hard-coded 1.5s `delay`, so any assertion about it is an
- *   assertion about a duration.
- * - `retransmitFrom`'s throw when the requested packet has already been evicted: it needs
- *   MAX_IN_FLIGHT (2048) packets sent to force eviction, which no upload this size reaches.
+ * **Elsewhere, deliberately:** every path that ends on an expiring deadline — a silent host, an
+ * unacknowledged command, the keepalive dropping a dead session — is in `AtemClientTimeoutTest`,
+ * which drives `AtemClient`'s four timeout constructor parameters in milliseconds. This suite only
+ * covers what a switcher that *answers* does.
+ *
+ * **Not covered anywhere:** the in-flight eviction at MAX_IN_FLIGHT (2048 packets), which no upload
+ * of a testable size reaches. See `AGENT.md` for the rest.
  */
 class AtemClientSocketTest {
 
@@ -335,6 +333,41 @@ class AtemClientSocketTest {
         }
     }
 
+    @Test
+    fun `a transfer the switcher refuses outright fails without retrying`() {
+        // FTDE code 1 means "busy, try again" and is retried; any other code is a refusal. Retrying
+        // one of those would hammer the switcher for the full 40-retry budget and still fail.
+        FakeAtemSwitcher(ftdeFatalCode = 5).use { fake ->
+            val client = connected(fake)
+            try {
+                val failure = assertFailsWith<AtemProtocolException> {
+                    runBlocking { client.uploadStillEncoded(slot = 0, frame = frame(600), name = "refused") }
+                }
+                assertTrue(failure.message!!.contains("5"), "the code the switcher gave: ${failure.message}")
+            } finally {
+                client.disconnect()
+            }
+            assertEquals(1, fake.commandsNamed("FTSD").size, "the transfer was not attempted a second time")
+        }
+    }
+
+    @Test
+    fun `a clip frame the switcher refuses outright fails without retrying`() {
+        FakeAtemSwitcher(ftdeFatalCode = 3).use { fake ->
+            val client = connected(fake)
+            try {
+                assertFailsWith<AtemProtocolException> {
+                    runBlocking {
+                        client.uploadClipEncoded(0, frameCount = 2, name = "refused", nextFrame = { frame(400) })
+                    }
+                }
+            } finally {
+                client.disconnect()
+            }
+            assertEquals(1, fake.commandsNamed("FTSD").size, "it stopped at the first refused frame")
+        }
+    }
+
     // ── Keyers ────────────────────────────────────────────────────────────────
 
     @Test
@@ -431,6 +464,43 @@ class AtemClientSocketTest {
     }
 
     // ── Uploading without a state dump ────────────────────────────────────────
+
+    @Test
+    fun `a switcher that reports no still slots is not treated as rejecting the upload`() {
+        // A device whose firmware sends no MPfe at all reads as an empty pool, which is not the same
+        // as "slot 0 does not exist". Refusing here would block every upload to such a switcher;
+        // the device itself rejects a slot it really lacks.
+        FakeAtemSwitcher(stillSlotCount = 0).use { fake ->
+            val payload = frame(1_200)
+            fake.expectedTransferBytes = payload.data.size
+            val client = connected(fake)
+            try {
+                assertTrue(client.lastKnownState!!.stillSlots.isEmpty(), "the precondition: an empty pool")
+                runBlocking { client.uploadStillEncoded(slot = 0, frame = payload, name = "empty-pool") }
+            } finally {
+                client.disconnect()
+            }
+            assertEquals(2, fake.awaitCommandsNamed("LOCK", 2).size, "the transfer ran to its unlock")
+        }
+    }
+
+    @Test
+    fun `a switcher that reports no clip banks is not treated as rejecting the upload`() {
+        FakeAtemSwitcher(clipSlotCount = 0).use { fake ->
+            val payload = frame(900)
+            fake.expectedTransferBytes = payload.data.size
+            val client = connected(fake)
+            try {
+                assertTrue(client.lastKnownState!!.clipSlots.isEmpty(), "the precondition: no clip banks")
+                runBlocking {
+                    client.uploadClipEncoded(slot = 0, frameCount = 1, name = "empty-pool", nextFrame = { payload })
+                }
+            } finally {
+                client.disconnect()
+            }
+            assertTrue(fake.commandsNamed("FTSD").isNotEmpty(), "the transfer was not refused up front")
+        }
+    }
 
     @Test
     fun `a still uploads on a connection that never read the media pool`() {
