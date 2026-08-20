@@ -37,14 +37,7 @@ object AtemConnectionManager {
         needsState: Boolean = false,
         block: suspend (AtemClient) -> T
     ): T = mutex.withLock {
-        val c = ensureConnected(host, port, needsState)
-        try {
-            block(c)
-        } catch (e: Exception) {
-            client?.disconnect()
-            client = null
-            throw e
-        }
+        runInvalidatingOnFailure(ensureConnected(host, port, needsState), block)
     }
 
     /**
@@ -61,17 +54,34 @@ object AtemConnectionManager {
     ): Boolean {
         if (!mutex.tryLock()) return false
         try {
-            val c = ensureConnected(host, port, needsState)
-            try {
-                block(c)
-            } catch (e: Exception) {
-                client?.disconnect()
-                client = null
-                throw e
-            }
+            runInvalidatingOnFailure(ensureConnected(host, port, needsState), block)
             return true
         } finally {
             mutex.unlock()
+        }
+    }
+
+    /**
+     * Runs [block] against [client], discarding the cached connection unless it completes.
+     *
+     * `finally` on a success flag rather than `catch (e: Exception) { …; throw e }`, which named
+     * the exception only to rethrow it untouched and covered nothing outside `Exception`. The
+     * reason this manager exists is that an ATEM silently expires an idle session, and what
+     * surfaces from a stale one is whatever the caller's own command happened to throw — so
+     * anything other than a completed call means "reconnect next time", cancellation included,
+     * and the cause travels on unchanged.
+     */
+    private suspend fun <T> runInvalidatingOnFailure(client: AtemClient, block: suspend (AtemClient) -> T): T {
+        var completed = false
+        try {
+            val result = block(client)
+            completed = true
+            return result
+        } finally {
+            if (!completed) {
+                this.client?.disconnect()
+                this.client = null
+            }
         }
     }
 

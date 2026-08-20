@@ -224,7 +224,8 @@
 - **Bitfocus Companion** — trigger lower thirds, ATEM keys and any content from a Stream Deck, either with ready-made HTTP buttons or a native Companion Satellite connection with live status right in the app.
 
 **Source locations:**
-- `server/AtemClient.kt`, `server/AtemConnectionManager.kt`, `server/AtemFrameEncoder.kt`, `server/AtemRenderCache.kt`, `server/AtemUploadStatus.kt`
+- `atem/` (the `:atem` Gradle module, at the repo root) — the ATEM protocol client itself: `AtemClient`, `AtemConnectionManager`, `AtemFrameEncoder`, `AtemUploadStatus`
+- `server/AtemBridge.kt` — the app-side wiring between that client, `AtemSettings` and the lower third
 - `viewmodel/OBSWebSocketManager.kt`
 - `tabs/CompanionSurfaceTab.kt`, `viewmodel/CompanionSatelliteViewModel.kt`, `composables/CompanionSurfacePanel.kt`, `composables/CompanionConnectionChipRow.kt`
 - `companion-satellite/` (repository root) — native Companion Satellite protocol client

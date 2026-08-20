@@ -112,6 +112,9 @@ jobs:
             diagnostics:
               - *shared
               - 'diagnostics/**'
+            atem:
+              - *shared
+              - 'atem/**'
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -141,7 +144,7 @@ jobs:
         run: >-
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
-          :diagnostics:detekt
+          :diagnostics:detekt :atem:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -336,6 +339,17 @@ jobs:
         if: always() && steps.modules.outputs.diagnostics == 'true'
         run: ./gradlew :diagnostics:jacocoTestCoverageVerification -x test
 
+      # The ATEM protocol client. Its suite is loopback UDP against FakeAtemSwitcher -- no
+      # hardware, no display -- so it runs here like any other module. Its BRANCH/COMPLEXITY floors
+      # are below the 85% default for the reason given in its build file.
+      - name: ATEM client tests
+        if: always() && steps.modules.outputs.atem == 'true'
+        run: ./gradlew :atem:test
+
+      - name: ATEM client coverage floor
+        if: always() && steps.modules.outputs.atem == 'true'
+        run: ./gradlew :atem:jacocoTestCoverageVerification -x test
+
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -364,6 +378,7 @@ jobs:
             bible-engine/build/test-results/**/TEST-*.xml
             settings/build/test-results/**/TEST-*.xml
             diagnostics/build/test-results/**/TEST-*.xml
+            atem/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -380,6 +395,8 @@ jobs:
             Song library
             Bible Lookup Engine
             Settings
+            Diagnostics
+            ATEM client
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -518,3 +535,5 @@ jobs:
             settings/build/test-results/
             diagnostics/build/reports/tests/
             diagnostics/build/test-results/
+            atem/build/reports/tests/
+            atem/build/test-results/

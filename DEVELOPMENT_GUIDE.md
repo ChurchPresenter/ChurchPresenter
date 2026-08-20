@@ -464,8 +464,8 @@ execution order, so it can appear on one machine and not another.
 ### The modules of this build
 
 `converter/`, `companion-satellite/`, `theme/`, `core-models/`, `bible-engine/`,
-`lottieGenerator/`, `crossword/`, `presentation-engine/` and `settings/` are all part of this
-build, so none of them needs a wrapper of its own:
+`lottieGenerator/`, `crossword/`, `presentation-engine/`, `settings/`, `diagnostics/` and `atem/`
+are all part of this build, so none of them needs a wrapper of its own:
 
 ```bash
 ./gradlew :converter:test              # its suite
@@ -479,6 +479,7 @@ build, so none of them needs a wrapper of its own:
 ./gradlew :crossword:run               # the crossword admin editor on its own
 ./gradlew :presentation-engine:test    # the PPTX/Keynote/PDF engine's suite
 ./gradlew :settings:test               # the persisted-settings module's suite
+./gradlew :atem:test                   # the ATEM protocol client's suite
 ```
 
 `:composeApp:check` does **not** reach any of them — each has its own suite, run through the root

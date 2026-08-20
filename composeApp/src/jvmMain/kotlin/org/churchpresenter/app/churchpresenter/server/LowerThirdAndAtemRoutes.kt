@@ -264,7 +264,7 @@ private suspend fun uploadStillFrame(
                     AtemUploadStatus.progress(uploadId, p)
                 }
             }
-            if (key.on) client.setKeyOnAir(key.useDsk, key.mixEffect, key.keyer, true)
+            if (key.on) client.setKeyOnAir(AtemKey(key.useDsk, key.mixEffect, key.keyer), true)
         }
         AtemUploadStatus.complete(uploadId)
         delay(KEY_SETTLE_MS)
@@ -322,7 +322,7 @@ private suspend fun uploadClipFrames(
             // within the timeout.
             AtemUploadStatus.startProcessing(uploadId)
             client.awaitClipReady(slot, frameCount) { p -> AtemUploadStatus.progress(uploadId, p) }
-            if (key.on) client.setKeyOnAir(key.useDsk, key.mixEffect, key.keyer, true)
+            if (key.on) client.setKeyOnAir(AtemKey(key.useDsk, key.mixEffect, key.keyer), true)
         }
         AtemUploadStatus.complete(uploadId)
         delay(KEY_SETTLE_MS)
@@ -332,7 +332,7 @@ private suspend fun uploadClipFrames(
         if (key.on) {
             delay(if (fps > 0.0) ((frameCount.toDouble() * MILLIS_PER_SECOND) / fps).toLong() else 0L)
             AtemConnectionManager.use(atem.host, atem.port, needsState = false) { client ->
-                client.setKeyOnAir(key.useDsk, key.mixEffect, key.keyer, false)
+                client.setKeyOnAir(AtemKey(key.useDsk, key.mixEffect, key.keyer), false)
             }
         }
     } catch (e: Exception) {

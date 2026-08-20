@@ -38,6 +38,11 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > **[`companion-satellite/`](./companion-satellite)** — a pure-Kotlin Bitfocus Companion Satellite
 > protocol client. `./gradlew :companion-satellite:test`.
 >
+> **[`atem/`](./atem)** — the Blackmagic ATEM protocol client: the UDP conversation with the
+> switcher, from the handshake to a media-pool upload. Its suite runs against a loopback fake
+> switcher built from a capture of real hardware, so no device is needed.
+> `./gradlew :atem:test`.
+>
 > **[`theme/`](./theme)** — the app's look: the nine color schemes, the semantic color roles, the
 > typography and shape scales. `./gradlew :theme:test`.
 >

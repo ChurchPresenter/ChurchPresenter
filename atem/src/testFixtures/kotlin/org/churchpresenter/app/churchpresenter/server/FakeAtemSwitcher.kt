@@ -29,8 +29,12 @@ import kotlin.concurrent.thread
  * **Nothing here waits on a clock.** Every response is emitted in reaction to a packet that
  * arrived, and a transfer completes the moment [expectedTransferBytes] have been received, so
  * tests end on a positive signal rather than by outlasting a timeout.
+ *
+ * Public rather than `internal` because it is a test *fixture* of `:atem`: `:composeApp`'s ATEM
+ * suites — the bridge, the upload routes, the lower third — drive the same fake through
+ * `testFixtures(projects.atem)`, and `internal` does not cross a module boundary.
  */
-internal class FakeAtemSwitcher(
+class FakeAtemSwitcher(
     private val videoMode: Int = VIDEO_MODE_1080P5994,
     private val mixEffects: Int = 4,
     private val downstreamKeyers: Int = 2,

@@ -23,6 +23,22 @@ import java.util.concurrent.atomic.AtomicInteger
 data class AtemMediaSlot(val index: Int, val name: String, val isUsed: Boolean)
 
 /**
+ * Which key a cut is aimed at.
+ *
+ * The three values are never chosen independently — every caller picks a keyer *kind* and the two
+ * indices that go with it, then passes all three to whatever cuts it (`setKeyOnAir`, `cutKey`, and
+ * the app's own `validateKeyTarget`). Grouping them names that, and takes `cutKey` under detekt's
+ * six-parameter limit without a suppression. Named `AtemKey`, not `AtemKeyTarget`: `:composeApp`'s
+ * `LowerThirdAndAtemRoutes.kt` already has a private `AtemKeyTarget` in this same package, which is
+ * this plus the request's on/off flag.
+ *
+ * @param useDsk    true to drive a downstream keyer, false for an upstream keyer
+ * @param mixEffect 0-based M/E index; ignored when [useDsk] is true, since DSKs are global
+ * @param keyer     0-based keyer index — the DSK index when [useDsk], else the USK on [mixEffect]
+ */
+data class AtemKey(val useDsk: Boolean, val mixEffect: Int, val keyer: Int)
+
+/**
  * ATEM device state read on connect.
  *
  * @param fps              exact frame rate derived from [videoMode], e.g. 25.0, 29.97, 59.94
@@ -101,6 +117,11 @@ class AtemProtocolException(message: String) : IOException(message)
  * The real session id is NOT in the hello response — the ATEM assigns it in its first
  * post-handshake packet, so it is re-read from every incoming packet.
  */
+// TooManyFunctions: 46 against a threshold of 11 — 2 public, 8 suspend commands, 18 internal byte
+// builders/parsers and 18 private helpers. Extracting every pure helper into a separate object
+// still leaves ~29, so no refactor reaches the threshold; a wire protocol has as many functions as
+// it has commands. Carried as a baseline entry in :composeApp before this module existed.
+@Suppress("TooManyFunctions")
 class AtemClient(val host: String, val port: Int = 9910) {
 
     companion object {
@@ -242,16 +263,15 @@ class AtemClient(val host: String, val port: Int = 9910) {
             }
 
         /**
-         * Cut a key (upstream or downstream) using a fresh short-lived connection — the DSK-aware
-         * counterpart of [cutUpstreamKeyer]. For a downstream key [mixEffect] is ignored and
-         * [keyer] is the DSK index.
+         * Cut the key [target] names using a fresh short-lived connection — the DSK-aware
+         * counterpart of [cutUpstreamKeyer].
          */
-        suspend fun cutKey(host: String, port: Int, useDsk: Boolean, mixEffect: Int, keyer: Int, onAir: Boolean) =
+        suspend fun cutKey(host: String, port: Int, target: AtemKey, onAir: Boolean) =
             withContext(Dispatchers.IO) {
                 val c = AtemClient(host, port)
                 try {
                     c.connect(collectState = false)
-                    c.setKeyOnAir(useDsk, mixEffect, keyer, onAir)
+                    c.setKeyOnAir(target, onAir)
                 } finally {
                     c.disconnect()
                 }
@@ -317,6 +337,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
         sock.soTimeout = CONNECT_TIMEOUT_MS
         socket = sock
 
+        var handshakeComplete = false
         try {
             sessionId = TEMP_SESSION_ID   // temporary client session id, replaced by the ATEM's
             lastReceivedPacketId = 0
@@ -346,9 +367,14 @@ class AtemClient(val host: String, val port: Int = 9910) {
             }
 
             if (keepAlive) startKeepAlive()
-        } catch (e: Exception) {
-            disconnect()
-            throw e
+            handshakeComplete = true
+        } finally {
+            // Not `catch (e: Exception) { disconnect(); throw e }`, which named the exception only
+            // to rethrow it untouched and covered nothing outside Exception. Any exit from the
+            // handshake other than a completed one leaves a half-open socket, so the teardown runs
+            // for all of them — cancellation and Error included — and the cause travels on
+            // unchanged.
+            if (!handshakeComplete) disconnect()
         }
     }
 
@@ -450,13 +476,10 @@ class AtemClient(val host: String, val port: Int = 9910) {
         }
     }
 
-    /**
-     * Cut the configured key on or off air. When [useDsk] is true the key is driven as a downstream
-     * keyer ([keyer] is the DSK index and [mixEffect] is ignored); otherwise as an upstream keyer.
-     */
-    suspend fun setKeyOnAir(useDsk: Boolean, mixEffect: Int, keyer: Int, onAir: Boolean) {
-        if (useDsk) setDownstreamKeyerOnAir(keyer, onAir)
-        else setUpstreamKeyerOnAir(mixEffect, keyer, onAir)
+    /** Cut the key [target] names on or off air, downstream or upstream as it says. */
+    suspend fun setKeyOnAir(target: AtemKey, onAir: Boolean) {
+        if (target.useDsk) setDownstreamKeyerOnAir(target.keyer, onAir)
+        else setUpstreamKeyerOnAir(target.mixEffect, target.keyer, onAir)
     }
 
     /** Disconnect and release the socket and the keepalive loop. The client is not reused after this. */
@@ -503,7 +526,8 @@ class AtemClient(val host: String, val port: Int = 9910) {
         if (!knownStills.isNullOrEmpty()) {
             // 1-based in messages to match ATEM Software Control's numbering
             require(knownStills.any { it.index == slot }) {
-                "Still slot ${slot + 1} does not exist on this ATEM (available: 1–${knownStills.maxOf { it.index } + 1})"
+                val available = knownStills.maxOf { it.index } + 1
+                "Still slot ${slot + 1} does not exist on this ATEM (available: 1–$available)"
             }
         }
 
@@ -643,6 +667,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
         val dataBuf = java.nio.ByteBuffer.wrap(data)
         val hash = MessageDigest.getInstance("MD5").digest(data)
         val transferId = transferIdCounter.getAndIncrement()
+        val transfer = Transfer(transferId, data, dataBuf, onProgress)
         var bytesSent = 0
         var descriptionSent = false
         var retries = 0
@@ -662,7 +687,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
                         sendCommand("FTFD", buildFileDescriptionPayload(transferId, name, hash))
                         descriptionSent = true
                     }
-                    bytesSent = sendGrantedChunks(payload, transferId, data, dataBuf, bytesSent, onProgress)
+                    bytesSent = sendGrantedChunks(payload, transfer, bytesSent)
                 }
                 "FTDC" -> return
                 "FTDE" -> {
@@ -684,30 +709,38 @@ class AtemClient(val host: String, val port: Int = 9910) {
 
 
     /**
-     * Sends as much of [data] as this FTCD grant allows, and returns the new total sent.
+     * One in-progress media-pool transfer: what is being sent, and to which transfer id.
+     *
+     * These four were separate parameters of [sendGrantedChunks] alongside the grant itself, which
+     * put it over detekt's six-parameter limit. They are not independent — [dataBuf] wraps [data],
+     * and both are fixed for the whole transfer while only the grant changes per FTCD.
+     */
+    private class Transfer(
+        val transferId: Int,
+        val data: ByteArray,
+        val dataBuf: java.nio.ByteBuffer,
+        val onProgress: (Float) -> Unit,
+    )
+
+    /**
+     * Sends as much of the transfer as this FTCD grant allows, and returns the new total sent.
      *
      * ATEM grants chunkCount chunks of chunkSize bytes (rounded down to 8).
      */
-    private fun sendGrantedChunks(
-        payload: ByteArray,
-        transferId: Int,
-        data: ByteArray,
-        dataBuf: java.nio.ByteBuffer,
-        alreadySent: Int,
-        onProgress: (Float) -> Unit,
-    ): Int {
+    private fun sendGrantedChunks(payload: ByteArray, transfer: Transfer, alreadySent: Int): Int {
         val chunkSize = if (payload.size < FTCD_MIN_SIZE) 0
             else (u16(payload, OFFSET_FTCD_CHUNK_SIZE) / CHUNK_SIZE_ALIGNMENT) * CHUNK_SIZE_ALIGNMENT
         val chunkCount = if (payload.size < FTCD_MIN_SIZE) 0 else u16(payload, OFFSET_FTCD_CHUNK_COUNT)
+        val data = transfer.data
         var bytesSent = alreadySent
         var sent = 0
         while (chunkSize > 0 && sent < chunkCount && bytesSent < data.size) {
-            val len = chunkLengthAt(dataBuf, data.size, bytesSent, chunkSize)
-            sendCommand("FTDa", buildDataChunkPayload(transferId, data, bytesSent, len))
+            val len = chunkLengthAt(transfer.dataBuf, data.size, bytesSent, chunkSize)
+            sendCommand("FTDa", buildDataChunkPayload(transfer.transferId, data, bytesSent, len))
             bytesSent += len
             sent++
         }
-        if (chunkSize > 0) onProgress(bytesSent.toFloat() / data.size)
+        if (chunkSize > 0) transfer.onProgress(bytesSent.toFloat() / data.size)
         return bytesSent
     }
 
