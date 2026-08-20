@@ -10,7 +10,6 @@ import io.sentry.SpanStatus
 import io.sentry.UserFeedback
 import io.sentry.protocol.Message
 import io.sentry.protocol.User
-import org.churchpresenter.app.churchpresenter.BuildConfig
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -26,12 +25,37 @@ private const val MIN_SCRUBBED_NAME_LENGTH = 3
 private const val RELEASE_SAMPLE_RATE = 0.2
 
 /**
+ * What the reporter says this build is: the version it stamps on a crash log and a Sentry event,
+ * and whether it is a release.
+ *
+ * A parameter rather than a `BuildConfig` read because `BuildConfig` is generated into
+ * `:composeApp` and does not exist here. `main.kt` passes the real values to [CrashReporter
+ * .initialize]; the defaults are what an uninitialised reporter reports, which is what the
+ * `try { BuildConfig… } catch { "unknown" }` around every former read already produced.
+ */
+data class BuildIdentity(
+    val versionDisplay: String = UNKNOWN_VERSION,
+    val appVersion: String = UNKNOWN_VERSION,
+    val isRelease: Boolean = false,
+)
+
+private const val UNKNOWN_VERSION = "unknown"
+
+/**
  * Global crash reporter that:
  *  1. Writes crash logs to ~/.churchpresenter/crash-reports/ (always)
  *  2. Forwards crashes to Sentry when a DSN is configured in sentry.properties
  *
  * Install as early as possible in main() via [initialize].
  */
+// Two findings that were in :composeApp's detekt baseline and surface here, where there is no
+// baseline. Both are the object's nature rather than something to fix:
+//   TooManyFunctions — it is the single telemetry facade the whole app calls; splitting it into
+//     "the writer" and "the Sentry bridge" would give every call site two objects to choose
+//     between for no behavioural gain.
+//   TooGenericExceptionCaught — `trace` catches Throwable because it must mark the transaction
+//     failed and RETHROW unchanged. Narrowing it would let some failures pass through unrecorded.
+@Suppress("TooManyFunctions", "TooGenericExceptionCaught")
 object CrashReporter {
 
     /**
@@ -58,6 +82,10 @@ object CrashReporter {
     private val crashCountFile: File get() = File(appDir, ".crash_count")
     private val installIdFile: File get() = File(appDir, ".install_id")
     private val timestampFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss")
+
+    /** Set once by [initialize]; the default is what an uninitialised reporter stamps. */
+    @Volatile
+    private var build: BuildIdentity = BuildIdentity()
     private const val MAX_AGE_DAYS = 30L
     private const val CRASH_THRESHOLD = 2 // disable video backgrounds after this many consecutive crashes
 
@@ -80,7 +108,29 @@ object CrashReporter {
      * (unless the user has opted out of analytics reporting), and clean
      * up old crash logs. Call this as the very first line in main().
      */
-    fun initialize(analyticsReportingEnabled: Boolean = true) {
+    fun initialize(analyticsReportingEnabled: Boolean, buildIdentity: BuildIdentity) =
+        startUp(analyticsReportingEnabled, buildIdentity)
+
+    /**
+     * The startup sequence itself, with the one step a test cannot take handed in.
+     *
+     * [setUncaughtHandler] and [addShutdownHook] are those steps: both outlive the test that
+     * installed them, so a suite calling [initialize] would leave them behind for every later test
+     * in the fork. They are two parameters rather than one so each stays where it always was — the
+     * handler before [cleanOldLogs], the shutdown hook last; a test that reordered them would be
+     * testing a different startup. Everything else here — creating the crash directory, the
+     * analytics gate, the crash-escalation arithmetic, the run lock file — is ordinary logic, and a
+     * test drives the real order of it by collecting both and then running them.
+     */
+    internal fun startUp(
+        analyticsReportingEnabled: Boolean,
+        buildIdentity: BuildIdentity,
+        setUncaughtHandler: (Thread.UncaughtExceptionHandler) -> Unit = {
+            Thread.setDefaultUncaughtExceptionHandler(it)
+        },
+        addShutdownHook: (Runnable) -> Unit = { Runtime.getRuntime().addShutdownHook(Thread(it)) },
+    ) {
+        build = buildIdentity
         crashDir.mkdirs()
 
         if (analyticsReportingEnabled) {
@@ -89,7 +139,7 @@ object CrashReporter {
         }
 
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
-        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+        setUncaughtHandler { thread, throwable ->
             writeCrashLog(throwable, context = "Thread: ${thread.name}", fatal = true)
             // Flush Sentry synchronously so the event is delivered before the JVM exits
             try { Sentry.flush(FLUSH_TIMEOUT_MS) } catch (_: Exception) {}
@@ -109,9 +159,7 @@ object CrashReporter {
         try { runningFile.parentFile?.mkdirs(); runningFile.createNewFile() } catch (_: Exception) {}
 
         // Delete lock file on clean exit
-        Runtime.getRuntime().addShutdownHook(Thread {
-            try { runningFile.delete() } catch (_: Exception) {}
-        })
+        addShutdownHook { try { runningFile.delete() } catch (_: Exception) {} }
     }
 
     /**
@@ -215,23 +263,32 @@ object CrashReporter {
     }
 
     /** DSN from sentry.properties with the secret key partially masked. Empty when not configured. */
-    fun maskedDsn(): String = try {
-        val dsn = readDsn()
+    fun maskedDsn(): String = try { maskDsn(readDsn()) } catch (_: Exception) { "" }
+
+    /**
+     * The masking itself, over a DSN that has already been read.
+     *
+     * Separate from [maskedDsn] because this is the part with the rules — how much of the key
+     * survives, what a DSN with no `@` falls back to — and the only thing [maskedDsn] adds is
+     * reading the file it cannot be given.
+     */
+    internal fun maskDsn(dsn: String): String {
         if (dsn.isBlank()) return ""
         val atIdx = dsn.indexOf('@')
         if (atIdx < 0) return dsn.take(DSN_PREFIX_CHARS) + "••••"
         val beforeAt = dsn.substring(0, atIdx)
-        val afterAt  = dsn.substring(atIdx)
+        val afterAt = dsn.substring(atIdx)
         val schemeEnd = beforeAt.indexOf("//") + 2
         val key = beforeAt.substring(schemeEnd)
         val scheme = beforeAt.substring(0, schemeEnd)
-        "$scheme${key.take(DSN_KEY_VISIBLE_CHARS)}${"•".repeat(maxOf(0, key.length - DSN_KEY_VISIBLE_CHARS))}$afterAt"
-    } catch (_: Exception) { "" }
+        return "$scheme${key.take(DSN_KEY_VISIBLE_CHARS)}" +
+            "${"•".repeat(maxOf(0, key.length - DSN_KEY_VISIBLE_CHARS))}$afterAt"
+    }
 
     /** Sends a test exception to Sentry and flushes. Returns true on success. */
     fun sendTestEvent(): Boolean = try {
         if (!isEnabled()) return false
-        val version = try { BuildConfig.VERSION_DISPLAY } catch (_: Exception) { "unknown" }
+        val version = build.versionDisplay
         Sentry.captureException(RuntimeException("🧪 ChurchPresenter Sentry test event — v$version"))
         Sentry.flush(SHUTDOWN_FLUSH_TIMEOUT_MS)
         true
@@ -358,11 +415,13 @@ object CrashReporter {
 
     // ── Sentry ────────────────────────────────────────────────────────────────
 
-    private fun readDsn(): String {
+    private fun readDsn(): String =
+        dsnFrom(CrashReporter::class.java.classLoader?.getResourceAsStream("sentry.properties"))
+
+    /** The `dsn` property of an already-opened sentry.properties, or "" when there is none. */
+    internal fun dsnFrom(stream: java.io.InputStream?): String {
         val props = java.util.Properties()
-        CrashReporter::class.java.classLoader
-            ?.getResourceAsStream("sentry.properties")
-            ?.use { props.load(it) }
+        stream?.use { props.load(it) }
         return props.getProperty("dsn", "").trim()
     }
 
@@ -370,46 +429,59 @@ object CrashReporter {
         try {
             val dsn = readDsn()
             if (dsn.isBlank()) return   // no DSN → stay disabled, nothing sent
-            val appVersion = try { BuildConfig.APP_VERSION } catch (_: Exception) { "unknown" }
-            Sentry.init { options ->
-                options.dsn = dsn
-                options.release = appVersion
-                // Keep developer test runs out of production release-health stats.
-                options.environment = if (BuildConfig.IS_RELEASE) "production" else "development"
-                options.isEnableUncaughtExceptionHandler = true
-                options.isAttachThreads = false
-                options.isAttachStacktrace = true
-                // Sample perf/profile volume down in release so it can't crowd out error
-                // events in the quota (errors are captured directly and are unaffected).
-                options.tracesSampleRate = if (BuildConfig.IS_RELEASE) RELEASE_SAMPLE_RATE else 1.0
-                // Capture CPU profiles for sampled transactions (see Performance → Profiling).
-                options.profilesSampleRate = if (BuildConfig.IS_RELEASE) RELEASE_SAMPLE_RATE else 1.0
-                options.isEnableAutoSessionTracking = true
-                // Privacy: don't send end-users' machine hostnames to Sentry.
-                options.isAttachServerName = false
-                // Mark our own packages as in-app so app frames stand out in stack traces.
-                options.addInAppInclude("org.churchpresenter")
-                // Scrub PII from every outgoing event, then attach the most recent local
-                // crash-report file (also scrubbed) to error/fatal events.
-                options.beforeSend = SentryOptions.BeforeSendCallback { event, hint ->
-                    try { scrubEvent(event) } catch (_: Exception) { /* never block delivery */ }
-                    try {
-                        if (event.level == SentryLevel.ERROR || event.level == SentryLevel.FATAL) {
-                            latestCrashFile()?.let { file ->
-                                val scrubbed = scrubPii(file.readText()) ?: ""
-                                hint.addAttachment(Attachment(scrubbed.toByteArray(), file.name))
-                            }
-                        }
-                    } catch (_: Exception) { /* never block delivery */ }
-                    event
-                }
-            }
+            Sentry.init { options -> configureOptions(options, dsn) }
             // Static context that helps triage: OS arch and dev/release build.
             setTag("os.arch", System.getProperty("os.arch", "unknown"))
-            setTag("build.type", if (BuildConfig.IS_RELEASE) "release" else "dev")
+            setTag("build.type", if (build.isRelease) "release" else "dev")
         } catch (_: Exception) {
             // Sentry failing to init must never prevent the app from starting
         }
+    }
+
+    /**
+     * Everything [initSentry] decides, applied to an options object it is handed.
+     *
+     * Split out because `Sentry.init` is the one call a test cannot make — it installs a live SDK
+     * for the whole JVM — while every choice inside the lambda is an ordinary decision about
+     * release, environment and sampling that a test can check by passing a plain [SentryOptions].
+     */
+    internal fun configureOptions(options: SentryOptions, dsn: String) {
+        options.dsn = dsn
+        options.release = build.appVersion
+        // Keep developer test runs out of production release-health stats.
+        options.environment = if (build.isRelease) "production" else "development"
+        options.isEnableUncaughtExceptionHandler = true
+        options.isAttachThreads = false
+        options.isAttachStacktrace = true
+        // Sample perf/profile volume down in release so it can't crowd out error
+        // events in the quota (errors are captured directly and are unaffected).
+        options.tracesSampleRate = if (build.isRelease) RELEASE_SAMPLE_RATE else 1.0
+        // Capture CPU profiles for sampled transactions (see Performance → Profiling).
+        options.profilesSampleRate = if (build.isRelease) RELEASE_SAMPLE_RATE else 1.0
+        options.isEnableAutoSessionTracking = true
+        // Privacy: don't send end-users' machine hostnames to Sentry.
+        options.isAttachServerName = false
+        // Mark our own packages as in-app so app frames stand out in stack traces.
+        options.addInAppInclude("org.churchpresenter")
+        options.beforeSend = crashAttachingBeforeSend()
+    }
+
+    /**
+     * Scrubs PII from every outgoing event, then attaches the most recent local crash-report file
+     * (also scrubbed) to error and fatal events. Neither step may block delivery, which is why
+     * both are wrapped.
+     */
+    internal fun crashAttachingBeforeSend() = SentryOptions.BeforeSendCallback { event, hint ->
+        try { scrubEvent(event) } catch (_: Exception) { /* never block delivery */ }
+        try {
+            if (event.level == SentryLevel.ERROR || event.level == SentryLevel.FATAL) {
+                latestCrashFile()?.let { file ->
+                    val scrubbed = scrubPii(file.readText()) ?: ""
+                    hint.addAttachment(Attachment(scrubbed.toByteArray(), file.name))
+                }
+            }
+        } catch (_: Exception) { /* never block delivery */ }
+        event
     }
 
     private fun sentryMessage(text: String): Message = Message().apply { message = text }
@@ -445,7 +517,7 @@ object CrashReporter {
             val osName = System.getProperty("os.name", "unknown")
             val osVersion = System.getProperty("os.version", "")
             val javaVersion = System.getProperty("java.version", "unknown")
-            val appVersion = try { BuildConfig.VERSION_DISPLAY } catch (_: Exception) { "unknown" }
+            val appVersion = build.versionDisplay
 
             val report = buildString {
                 appendLine("=== ChurchPresenter Crash Report ===")

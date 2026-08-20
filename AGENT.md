@@ -72,18 +72,18 @@ is, what `:composeApp` uses from it, its layout, its commands, its gates and its
 `CLAUDE.md` that loads it (plus the module's `README.md` where there is one). Read the module's own
 file before changing it, and **put module-specific notes there, not here.**
 
-| Module | Gradle | What it is | Notes |
-|---|---|---|---|
-| `converter/` | `:converter` | Song/Bible format converter, also a standalone app | [AGENT.md](converter/AGENT.md) |
-| `companion-satellite/` | `:companion-satellite` | Bitfocus Companion Satellite protocol client | [AGENT.md](companion-satellite/AGENT.md) |
-| `theme/` | `:theme` | The nine color schemes, semantic colors, type and shape scales | [AGENT.md](theme/AGENT.md) |
-| `core-models/` | `:core-models` | The shared data models | [AGENT.md](core-models/AGENT.md) |
-| `bible-engine/` | `:bible-engine` | Bible Lookup Engine — speech-to-reference detection | [AGENT.md](bible-engine/AGENT.md) |
-| `lottieGenerator/` | `:lottieGenerator` | Animated lower-third generator, also a standalone app | [AGENT.md](lottieGenerator/AGENT.md) |
-| `crossword/` | `:crossword` | Crossword authoring tool + the encoded puzzles the app ships | [AGENT.md](crossword/AGENT.md) |
-| `presentation-engine/` | `:presentation-engine` | PPTX/PPT/Keynote/PDF parsing, timing and animation | [AGENT.md](presentation-engine/AGENT.md) |
-| `songlibrary/` | `:songlibrary` | The Song Library Manager window, opened from the Help menu | [AGENT.md](songlibrary/AGENT.md) |
-| `settings/` | `:settings` | Everything the app persists: the settings classes, `SettingsManager`, `Constants` | [AGENT.md](settings/AGENT.md) |
+| Module                 | Gradle                 | What it is                                                                        | Notes                                    |
+|------------------------|------------------------|-----------------------------------------------------------------------------------|------------------------------------------|
+| `converter/`           | `:converter`           | Song/Bible format converter, also a standalone app                                | [AGENT.md](converter/AGENT.md)           |
+| `companion-satellite/` | `:companion-satellite` | Bitfocus Companion Satellite protocol client                                      | [AGENT.md](companion-satellite/AGENT.md) |
+| `theme/`               | `:theme`               | The nine color schemes, semantic colors, type and shape scales                    | [AGENT.md](theme/AGENT.md)               |
+| `core-models/`         | `:core-models`         | The shared data models                                                            | [AGENT.md](core-models/AGENT.md)         |
+| `bible-engine/`        | `:bible-engine`        | Bible Lookup Engine — speech-to-reference detection                               | [AGENT.md](bible-engine/AGENT.md)        |
+| `lottieGenerator/`     | `:lottieGenerator`     | Animated lower-third generator, also a standalone app                             | [AGENT.md](lottieGenerator/AGENT.md)     |
+| `crossword/`           | `:crossword`           | Crossword authoring tool + the encoded puzzles the app ships                      | [AGENT.md](crossword/AGENT.md)           |
+| `presentation-engine/` | `:presentation-engine` | PPTX/PPT/Keynote/PDF parsing, timing and animation                                | [AGENT.md](presentation-engine/AGENT.md) |
+| `songlibrary/`         | `:songlibrary`         | The Song Library Manager window, opened from the Help menu                        | [AGENT.md](songlibrary/AGENT.md)         |
+| `settings/`            | `:settings`            | Everything the app persists: the settings classes, `SettingsManager`, `Constants` | [AGENT.md](settings/AGENT.md)            |
 
 **Every one of them is a real Gradle module of this build** — `include(":theme")`,
 `implementation(projects.companionSatellite)`, tested with `./gradlew :<module>:test` on the root
@@ -271,9 +271,9 @@ so the committed images are for humans and never enter the diff CI computes.
 The cost is real and does not go away by being committed. **Skia rasterises text per platform**, and
 git keeps every version of a binary for ever. Measured on 2026-08-08 against the 247-image set:
 
-| re-record | images that change |
-|---|---|
-| same platform, unchanged states (macOS → macOS) | **21 of 247 — 8.5%** |
+| re-record                                                  | images that change     |
+|------------------------------------------------------------|------------------------|
+| same platform, unchanged states (macOS → macOS)            | **21 of 247 — 8.5%**   |
 | across platforms (the committed set vs CI's Linux renders) | **246 of 247 — 99.6%** |
 
 **The two numbers are what matter, not an average of them.** Re-recording on the platform the set

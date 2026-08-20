@@ -120,6 +120,7 @@ import org.churchpresenter.app.churchpresenter.utils.isSongLineMode
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
+import org.churchpresenter.app.churchpresenter.utils.BuildIdentity
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
@@ -241,7 +242,16 @@ fun main() {
     }
 
     val startupSettings = SettingsManager().loadSettings()
-    CrashReporter.initialize(startupSettings.analyticsReportingEnabled)
+    CrashReporter.initialize(
+        startupSettings.analyticsReportingEnabled,
+        // BuildConfig is generated into :composeApp, so :diagnostics is told what this build is
+        // rather than reading it.
+        BuildIdentity(
+            versionDisplay = BuildConfig.VERSION_DISPLAY,
+            appVersion = BuildConfig.APP_VERSION,
+            isRelease = BuildConfig.IS_RELEASE,
+        ),
+    )
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
 
     if (shouldBundleDefaultBible(startupSettings.bibleSettings)) bundleDefaultBible(startupSettings)

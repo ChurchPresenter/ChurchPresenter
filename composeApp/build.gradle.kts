@@ -316,6 +316,9 @@ kotlin {
             // Everything the app persists: the settings data classes, SettingsManager and the
             // Constants their defaults are spelled with.
             implementation(projects.settings)
+            // Crash reporting: the crash log on disk and the Sentry forwarding behind it. It
+            // exposes SentryLevel through CrashReporter.breadcrumb, hence `api` on its side.
+            implementation(projects.diagnostics)
             // The song library: the grid of every song in the library, opened from the Help menu.
             implementation(projects.songlibrary)
             // The Companion Satellite protocol client: a real module rather than a mounted source
