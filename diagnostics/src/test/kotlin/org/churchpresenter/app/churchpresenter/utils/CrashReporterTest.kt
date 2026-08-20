@@ -237,6 +237,7 @@ class CrashReporterTest {
         assertEquals(safe, scrubPii(safe))
         assertEquals("", scrubPii(""))
         assertEquals(null, scrubPii(null))
+        assertEquals("", scrubPii(""), "an empty body has nothing to scrub and must come back unchanged")
     }
 
     @Test

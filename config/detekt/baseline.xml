@@ -1448,7 +1448,6 @@
     <ID>TooGenericExceptionCaught:BibleViewModel.kt$BibleViewModel$e: Exception</ID>
     <ID>TooGenericExceptionCaught:BibleViewModelLoading.kt$e: Exception</ID>
     <ID>TooGenericExceptionCaught:CompanionServer.kt$CompanionServer$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:CrashReporter.kt$CrashReporter$e: Throwable</ID>
     <ID>TooGenericExceptionCaught:EBibleSource.kt$EBibleSource$e: Exception</ID>
     <ID>TooGenericExceptionCaught:FileChooser.kt$FileChooser$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:FileManager.kt$FileManager$e: Exception</ID>
@@ -1513,7 +1512,6 @@
     <ID>TooManyFunctions:CompanionSatelliteViewModel.kt$CompanionSatelliteViewModel</ID>
     <ID>TooManyFunctions:CompanionServer.kt$CompanionServer</ID>
     <ID>TooManyFunctions:Constants.kt$org.churchpresenter.app.churchpresenter.utils.Constants.kt</ID>
-    <ID>TooManyFunctions:CrashReporter.kt$CrashReporter</ID>
     <ID>TooManyFunctions:DeckLinkManager.kt$DeckLinkManager</ID>
     <ID>TooManyFunctions:DictionaryTab.kt$org.churchpresenter.app.churchpresenter.tabs.DictionaryTab.kt</ID>
     <ID>TooManyFunctions:DictionaryViewModel.kt$DictionaryViewModel</ID>

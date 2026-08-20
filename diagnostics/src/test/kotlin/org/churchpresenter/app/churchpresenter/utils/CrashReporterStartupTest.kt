@@ -145,6 +145,10 @@ class CrashReporterStartupTest {
 
         startUp(analyticsReportingEnabled = true)
         assertTrue(installIdFile.exists())
+        val minted = installIdFile.readText().trim()
+
+        startUp(analyticsReportingEnabled = true)
+        assertEquals(minted, installIdFile.readText().trim(), "a restart is the same install")
     }
 
     @Test
@@ -356,5 +360,31 @@ class CrashReporterStartupTest {
     @Test
     fun `a test event cannot be sent while Sentry is disabled`() {
         assertFalse(CrashReporter.sendTestEvent(), "nothing may be sent without a configured DSN")
+    }
+
+    @Test
+    fun `only crash logs are considered, not whatever else is in the folder`() {
+        crashDir.mkdirs()
+        File(crashDir, "notes.txt").writeText("not a crash log")
+        File(crashDir, "subdir").mkdirs()
+
+        assertEquals(null, CrashReporter.latestCrashFile(), "a stray file must not be sent to Sentry")
+    }
+
+    @Test
+    fun `logs older than the retention window are cleaned up and recent ones are kept`() {
+        crashDir.mkdirs()
+        val stale = File(crashDir, "crash_stale.txt").apply { writeText("old") }
+        val recent = File(crashDir, "crash_recent.txt").apply { writeText("new") }
+        val other = File(crashDir, "keep.txt").apply { writeText("not ours") }
+        val fortyDaysAgo = System.currentTimeMillis() - 40L * 24 * 60 * 60 * 1000
+        stale.setLastModified(fortyDaysAgo)
+        other.setLastModified(fortyDaysAgo)
+
+        CrashReporter.cleanOldLogs()
+
+        assertFalse(stale.exists(), "crash logs are personal data and must not accumulate for ever")
+        assertTrue(recent.exists(), "a recent log is still the one a user would be asked for")
+        assertTrue(other.exists(), "cleanup owns crash_ files only")
     }
 }

@@ -84,6 +84,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `presentation-engine/` | `:presentation-engine` | PPTX/PPT/Keynote/PDF parsing, timing and animation                                | [AGENT.md](presentation-engine/AGENT.md) |
 | `songlibrary/`         | `:songlibrary`         | The Song Library Manager window, opened from the Help menu                        | [AGENT.md](songlibrary/AGENT.md)         |
 | `settings/`            | `:settings`            | Everything the app persists: the settings classes, `SettingsManager`, `Constants` | [AGENT.md](settings/AGENT.md)            |
+| `diagnostics/`         | `:diagnostics`         | Crash reporting: the crash log on disk and the Sentry bridge behind it            | [AGENT.md](diagnostics/AGENT.md)         |
 
 **Every one of them is a real Gradle module of this build** — `include(":theme")`,
 `implementation(projects.companionSatellite)`, tested with `./gradlew :<module>:test` on the root

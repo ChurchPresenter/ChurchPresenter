@@ -26,6 +26,10 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > `SettingsManager` that loads, migrates and saves `settings.json`, and the constants their
 > defaults are written with. `./gradlew :settings:test`.
 >
+> **[`diagnostics/`](./diagnostics)** — crash reporting: the crash log written to
+> `~/.churchpresenter/crash-reports/` and the Sentry forwarding behind it, including the PII
+> scrubbing every outgoing event passes through. `./gradlew :diagnostics:test`.
+>
 > **[`songlibrary/`](./songlibrary)** — the Song Library Manager: every song in the library folder in one editable grid, opened from the Help menu. It reads and writes through **[`core-models/`](./core-models)**, which holds the song model and the `.song` file format the app itself uses.
 >
 > **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop,

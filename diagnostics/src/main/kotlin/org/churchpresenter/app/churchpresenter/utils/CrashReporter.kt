@@ -48,14 +48,10 @@ private const val UNKNOWN_VERSION = "unknown"
  *
  * Install as early as possible in main() via [initialize].
  */
-// Two findings that were in :composeApp's detekt baseline and surface here, where there is no
-// baseline. Both are the object's nature rather than something to fix:
-//   TooManyFunctions — it is the single telemetry facade the whole app calls; splitting it into
-//     "the writer" and "the Sentry bridge" would give every call site two objects to choose
-//     between for no behavioural gain.
-//   TooGenericExceptionCaught — `trace` catches Throwable because it must mark the transaction
-//     failed and RETHROW unchanged. Narrowing it would let some failures pass through unrecorded.
-@Suppress("TooManyFunctions", "TooGenericExceptionCaught")
+// Was in :composeApp's detekt baseline and surfaces here, where there is no baseline. This is the
+// single telemetry facade the whole app calls; splitting it into "the writer" and "the Sentry
+// bridge" would give every call site two objects to choose between for no behavioural gain.
+@Suppress("TooManyFunctions")
 object CrashReporter {
 
     /**
@@ -109,7 +105,12 @@ object CrashReporter {
      * up old crash logs. Call this as the very first line in main().
      */
     fun initialize(analyticsReportingEnabled: Boolean, buildIdentity: BuildIdentity) =
-        startUp(analyticsReportingEnabled, buildIdentity)
+        startUp(
+            analyticsReportingEnabled,
+            buildIdentity,
+            setUncaughtHandler = { Thread.setDefaultUncaughtExceptionHandler(it) },
+            addShutdownHook = { Runtime.getRuntime().addShutdownHook(Thread(it)) },
+        )
 
     /**
      * The startup sequence itself, with the one step a test cannot take handed in.
@@ -125,10 +126,8 @@ object CrashReporter {
     internal fun startUp(
         analyticsReportingEnabled: Boolean,
         buildIdentity: BuildIdentity,
-        setUncaughtHandler: (Thread.UncaughtExceptionHandler) -> Unit = {
-            Thread.setDefaultUncaughtExceptionHandler(it)
-        },
-        addShutdownHook: (Runnable) -> Unit = { Runtime.getRuntime().addShutdownHook(Thread(it)) },
+        setUncaughtHandler: (Thread.UncaughtExceptionHandler) -> Unit,
+        addShutdownHook: (Runnable) -> Unit,
     ) {
         build = buildIdentity
         crashDir.mkdirs()
@@ -334,15 +333,16 @@ object CrashReporter {
     inline fun <T> trace(operation: String, name: String, block: () -> T): T {
         if (!isEnabled()) return block()
         val tx = try { Sentry.startTransaction(name, operation) } catch (_: Exception) { null } ?: return block()
-        return try {
-            block()
-        } catch (e: Throwable) {
-            tx.throwable = e
+        // runCatching so the failure is recorded and rethrown unchanged without naming a type: the
+        // block is arbitrary caller code, and an Error — an OOM mid-render is the realistic one —
+        // has to mark the transaction failed just as an exception does.
+        val outcome = runCatching { block() }
+        outcome.exceptionOrNull()?.let { failure ->
+            tx.throwable = failure
             tx.status = SpanStatus.INTERNAL_ERROR
-            throw e
-        } finally {
-            try { tx.finish() } catch (_: Exception) {}
         }
+        try { tx.finish() } catch (_: Exception) {}
+        return outcome.getOrThrow()
     }
 
     /** Sends user-provided feedback (e.g. after a crash) as a Sentry event + user feedback. */

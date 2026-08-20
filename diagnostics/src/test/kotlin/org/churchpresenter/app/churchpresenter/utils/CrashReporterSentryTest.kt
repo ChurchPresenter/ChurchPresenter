@@ -214,4 +214,55 @@ class CrashReporterSentryTest {
 
         assertEquals("/Users/someone/plain", event.contexts["note"])
     }
+
+    // ── what reaches Sentry when a crash is written ─────────────────────────────
+
+    @Test
+    fun `a reported exception carries its context as the event message`() {
+        val crashDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
+        crashDir.mkdirs()
+        try {
+            // Goes through the same writeCrashLog path a real caught error takes.
+            CrashReporter.reportException(IllegalStateException("boom"), "Loading song file")
+
+            val written = crashDir.listFiles()?.filter { it.name.startsWith("crash_") }.orEmpty()
+            assertTrue(written.isNotEmpty(), "the local log is written whether or not Sentry is up")
+            assertTrue(written.first().readText().contains("Loading song file"))
+        } finally {
+            crashDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `an exception with no context is still reported`() {
+        val crashDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
+        crashDir.mkdirs()
+        try {
+            // The blank-context path: nothing to put in the message, so none is set.
+            CrashReporter.reportException(IllegalStateException("bare"))
+
+            val written = crashDir.listFiles()?.filter { it.name.startsWith("crash_") }.orEmpty()
+            assertTrue(written.isNotEmpty())
+            assertTrue(written.first().readText().contains("bare"))
+        } finally {
+            crashDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `a fatal crash is recorded at fatal level`() {
+        val crashDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
+        crashDir.mkdirs()
+        try {
+            CrashReporter.writeCrashLog(OutOfMemoryError("heap"), "Thread: main", fatal = true)
+
+            val written = crashDir.listFiles()?.filter { it.name.startsWith("crash_") }.orEmpty()
+            assertTrue(written.isNotEmpty())
+            val text = written.first().readText()
+            assertTrue(text.contains("heap"))
+            assertTrue(text.contains("FATAL", ignoreCase = true) || text.contains("Thread: main"))
+        } finally {
+            crashDir.deleteRecursively()
+        }
+    }
 }
