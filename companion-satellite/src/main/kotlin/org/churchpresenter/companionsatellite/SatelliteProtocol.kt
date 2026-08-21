@@ -1,4 +1,4 @@
-package companionsatellite
+package org.churchpresenter.companionsatellite
 
 import java.io.BufferedReader
 import java.io.IOException

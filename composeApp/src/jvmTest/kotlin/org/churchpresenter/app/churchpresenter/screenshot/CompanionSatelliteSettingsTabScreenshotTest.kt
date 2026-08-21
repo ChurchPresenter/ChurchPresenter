@@ -15,7 +15,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
-import companionsatellite.CompanionConnectionStatus
+import org.churchpresenter.companionsatellite.CompanionConnectionStatus
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CompanionSatelliteSettingsTab

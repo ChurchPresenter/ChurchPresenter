@@ -5,9 +5,9 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import companionsatellite.CompanionConnectionStatus
-import companionsatellite.CompanionSatelliteClient
-import companionsatellite.SurfaceSpec
+import org.churchpresenter.companionsatellite.CompanionConnectionStatus
+import org.churchpresenter.companionsatellite.CompanionSatelliteClient
+import org.churchpresenter.companionsatellite.SurfaceSpec
 import io.sentry.SentryLevel
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
