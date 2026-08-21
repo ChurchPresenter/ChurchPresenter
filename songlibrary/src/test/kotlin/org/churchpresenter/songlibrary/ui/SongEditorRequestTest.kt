@@ -1,4 +1,4 @@
-package songlibrary.ui
+package org.churchpresenter.songlibrary.ui
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

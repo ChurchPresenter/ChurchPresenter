@@ -1,4 +1,4 @@
-package songlibrary
+package org.churchpresenter.songlibrary
 
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test

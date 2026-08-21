@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalTestApi::class)
 
-package songlibrary.ui
+package org.churchpresenter.songlibrary.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width

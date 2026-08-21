@@ -1,4 +1,4 @@
-package songlibrary
+package org.churchpresenter.songlibrary
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp

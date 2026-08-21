@@ -1,4 +1,4 @@
-package songlibrary.ui
+package org.churchpresenter.songlibrary.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,9 +36,9 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import songlibrary.generated.resources.Res
-import songlibrary.generated.resources.new_song_book_menu
-import songlibrary.generated.resources.no_song_book
+import org.churchpresenter.songlibrary.generated.resources.Res
+import org.churchpresenter.songlibrary.generated.resources.new_song_book_menu
+import org.churchpresenter.songlibrary.generated.resources.no_song_book
 
 /**
  * A cell that is text until it is clicked, and a field while it is being typed in.

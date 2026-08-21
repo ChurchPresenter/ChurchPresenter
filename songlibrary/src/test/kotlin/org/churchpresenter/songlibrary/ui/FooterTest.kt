@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalTestApi::class)
 
-package songlibrary.ui
+package org.churchpresenter.songlibrary.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest
@@ -8,7 +8,7 @@ import org.churchpresenter.core.models.songs.SongField
 import org.churchpresenter.core.models.songs.SongLibrary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import songlibrary.SongLibraryState
+import org.churchpresenter.songlibrary.SongLibraryState
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertTrue

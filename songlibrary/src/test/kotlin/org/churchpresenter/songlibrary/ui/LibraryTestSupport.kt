@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalTestApi::class)
 
-package songlibrary.ui
+package org.churchpresenter.songlibrary.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.ComposeUiTest

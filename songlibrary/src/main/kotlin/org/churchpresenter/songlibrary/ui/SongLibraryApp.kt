@@ -1,4 +1,4 @@
-package songlibrary.ui
+package org.churchpresenter.songlibrary.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -18,8 +18,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.churchpresenter.core.models.songs.SongItem
 import java.io.File
-import songlibrary.SongLibraryState
-import songlibrary.generated.resources.delete
+import org.churchpresenter.songlibrary.SongLibraryState
+import org.churchpresenter.songlibrary.generated.resources.delete
 
 /**
  * The Song Library Manager: every song in the library folder in one grid, editable in place.
