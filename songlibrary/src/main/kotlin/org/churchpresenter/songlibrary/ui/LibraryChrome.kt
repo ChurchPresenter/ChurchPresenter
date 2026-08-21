@@ -1,4 +1,4 @@
-package songlibrary.ui
+package org.churchpresenter.songlibrary.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,31 +35,31 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.songs.SongField
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
-import songlibrary.OPTIONAL_COLUMNS
-import songlibrary.SongLibraryState
-import songlibrary.generated.resources.Res
-import songlibrary.generated.resources.all_song_books
-import songlibrary.generated.resources.batch_edit_menu
-import songlibrary.generated.resources.clear
-import songlibrary.generated.resources.columns
-import songlibrary.generated.resources.columns_always
-import songlibrary.generated.resources.columns_show_all
-import songlibrary.generated.resources.delete
-import songlibrary.generated.resources.done
-import songlibrary.generated.resources.footer_songs
-import songlibrary.generated.resources.loading
-import songlibrary.generated.resources.new_song
-import songlibrary.generated.resources.new_song_book_menu
-import songlibrary.generated.resources.no_song_book
-import songlibrary.generated.resources.revert
-import songlibrary.generated.resources.save_changes
-import songlibrary.generated.resources.save_failed
-import songlibrary.generated.resources.search_placeholder
-import songlibrary.generated.resources.selected_count
-import songlibrary.generated.resources.subhead_counts
-import songlibrary.generated.resources.subhead_filtered
-import songlibrary.generated.resources.unsaved_changes
-import songlibrary.generated.resources.window_title
+import org.churchpresenter.songlibrary.OPTIONAL_COLUMNS
+import org.churchpresenter.songlibrary.SongLibraryState
+import org.churchpresenter.songlibrary.generated.resources.Res
+import org.churchpresenter.songlibrary.generated.resources.all_song_books
+import org.churchpresenter.songlibrary.generated.resources.batch_edit_menu
+import org.churchpresenter.songlibrary.generated.resources.clear
+import org.churchpresenter.songlibrary.generated.resources.columns
+import org.churchpresenter.songlibrary.generated.resources.columns_always
+import org.churchpresenter.songlibrary.generated.resources.columns_show_all
+import org.churchpresenter.songlibrary.generated.resources.delete
+import org.churchpresenter.songlibrary.generated.resources.done
+import org.churchpresenter.songlibrary.generated.resources.footer_songs
+import org.churchpresenter.songlibrary.generated.resources.loading
+import org.churchpresenter.songlibrary.generated.resources.new_song
+import org.churchpresenter.songlibrary.generated.resources.new_song_book_menu
+import org.churchpresenter.songlibrary.generated.resources.no_song_book
+import org.churchpresenter.songlibrary.generated.resources.revert
+import org.churchpresenter.songlibrary.generated.resources.save_changes
+import org.churchpresenter.songlibrary.generated.resources.save_failed
+import org.churchpresenter.songlibrary.generated.resources.search_placeholder
+import org.churchpresenter.songlibrary.generated.resources.selected_count
+import org.churchpresenter.songlibrary.generated.resources.subhead_counts
+import org.churchpresenter.songlibrary.generated.resources.subhead_filtered
+import org.churchpresenter.songlibrary.generated.resources.unsaved_changes
+import org.churchpresenter.songlibrary.generated.resources.window_title
 
 // The frame around the table: the header and its filters, the selection bar, the footer.
 

@@ -1,4 +1,4 @@
-package songlibrary.ui
+package org.churchpresenter.songlibrary.ui
 
 import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
@@ -46,21 +46,21 @@ import org.churchpresenter.core.models.songs.SongField
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SortColumn
 import org.jetbrains.compose.resources.stringResource
-import songlibrary.SongLibraryState
-import songlibrary.generated.resources.Res
-import songlibrary.generated.resources.column_author
-import songlibrary.generated.resources.column_ccli
-import songlibrary.generated.resources.column_composer
-import songlibrary.generated.resources.column_number
-import songlibrary.generated.resources.column_secondary_title
-import songlibrary.generated.resources.column_song_book
-import songlibrary.generated.resources.column_title
-import songlibrary.generated.resources.column_tune
-import songlibrary.generated.resources.delete_song
-import songlibrary.generated.resources.edit_song
-import songlibrary.generated.resources.empty_title
-import songlibrary.generated.resources.library_empty
-import songlibrary.generated.resources.reset_filters
+import org.churchpresenter.songlibrary.SongLibraryState
+import org.churchpresenter.songlibrary.generated.resources.Res
+import org.churchpresenter.songlibrary.generated.resources.column_author
+import org.churchpresenter.songlibrary.generated.resources.column_ccli
+import org.churchpresenter.songlibrary.generated.resources.column_composer
+import org.churchpresenter.songlibrary.generated.resources.column_number
+import org.churchpresenter.songlibrary.generated.resources.column_secondary_title
+import org.churchpresenter.songlibrary.generated.resources.column_song_book
+import org.churchpresenter.songlibrary.generated.resources.column_title
+import org.churchpresenter.songlibrary.generated.resources.column_tune
+import org.churchpresenter.songlibrary.generated.resources.delete_song
+import org.churchpresenter.songlibrary.generated.resources.edit_song
+import org.churchpresenter.songlibrary.generated.resources.empty_title
+import org.churchpresenter.songlibrary.generated.resources.library_empty
+import org.churchpresenter.songlibrary.generated.resources.reset_filters
 
 // The grid itself: the header row, one row per song, and what stands in when there are none.
 

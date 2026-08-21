@@ -1,4 +1,4 @@
-package songlibrary.ui
+package org.churchpresenter.songlibrary.ui
 
 import org.churchpresenter.core.models.songs.SongItem
 

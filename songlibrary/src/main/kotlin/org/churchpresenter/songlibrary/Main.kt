@@ -1,4 +1,4 @@
-package songlibrary
+package org.churchpresenter.songlibrary
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -8,9 +8,9 @@ import java.io.File
 import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
-import songlibrary.generated.resources.Res
-import songlibrary.generated.resources.window_title
-import songlibrary.ui.SongLibraryApp
+import org.churchpresenter.songlibrary.generated.resources.Res
+import org.churchpresenter.songlibrary.generated.resources.window_title
+import org.churchpresenter.songlibrary.ui.SongLibraryApp
 
 /**
  * The library on its own, for working on a folder of songs without opening the app.

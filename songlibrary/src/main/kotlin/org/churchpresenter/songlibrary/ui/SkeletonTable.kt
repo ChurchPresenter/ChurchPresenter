@@ -1,4 +1,4 @@
-package songlibrary.ui
+package org.churchpresenter.songlibrary.ui
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -26,7 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import songlibrary.SongLibraryState
+import org.churchpresenter.songlibrary.SongLibraryState
 
 /**
  * What the table shows while the folder is still being read.

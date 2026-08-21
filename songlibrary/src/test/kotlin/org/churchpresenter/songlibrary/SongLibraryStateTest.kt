@@ -1,4 +1,4 @@
-package songlibrary
+package org.churchpresenter.songlibrary
 
 import org.churchpresenter.core.models.songs.SaveOutcome
 import org.churchpresenter.core.models.songs.SongField

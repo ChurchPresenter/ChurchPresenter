@@ -1,4 +1,4 @@
-package songlibrary.ui
+package org.churchpresenter.songlibrary.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -41,33 +41,33 @@ import androidx.compose.ui.window.DialogProperties
 import org.churchpresenter.core.models.songs.SongField
 import org.churchpresenter.core.models.songs.SongItem
 import org.jetbrains.compose.resources.stringResource
-import songlibrary.generated.resources.Res
-import songlibrary.generated.resources.new_song_book_invalid
-import songlibrary.generated.resources.new_song_book_exists
-import songlibrary.generated.resources.batch_edit
-import songlibrary.generated.resources.batch_edit_apply
-import songlibrary.generated.resources.batch_edit_hint
-import songlibrary.generated.resources.batch_edit_nothing
-import songlibrary.generated.resources.batch_edit_subhead
-import songlibrary.generated.resources.cancel
-import songlibrary.generated.resources.column_author
-import songlibrary.generated.resources.column_ccli
-import songlibrary.generated.resources.column_composer
-import songlibrary.generated.resources.column_song_book
-import songlibrary.generated.resources.column_title
-import songlibrary.generated.resources.column_tune
-import songlibrary.generated.resources.create
-import songlibrary.generated.resources.delete_confirm_action
-import songlibrary.generated.resources.delete_confirm_body
-import songlibrary.generated.resources.delete_confirm_one
-import songlibrary.generated.resources.delete_confirm_title
-import songlibrary.generated.resources.name
-import songlibrary.generated.resources.new_song_book
-import songlibrary.generated.resources.new_song_book_assign
-import songlibrary.generated.resources.new_song_book_placeholder
-import songlibrary.generated.resources.new_song_book_subhead
-import songlibrary.generated.resources.no_song_book
-import songlibrary.generated.resources.song_count
+import org.churchpresenter.songlibrary.generated.resources.Res
+import org.churchpresenter.songlibrary.generated.resources.new_song_book_invalid
+import org.churchpresenter.songlibrary.generated.resources.new_song_book_exists
+import org.churchpresenter.songlibrary.generated.resources.batch_edit
+import org.churchpresenter.songlibrary.generated.resources.batch_edit_apply
+import org.churchpresenter.songlibrary.generated.resources.batch_edit_hint
+import org.churchpresenter.songlibrary.generated.resources.batch_edit_nothing
+import org.churchpresenter.songlibrary.generated.resources.batch_edit_subhead
+import org.churchpresenter.songlibrary.generated.resources.cancel
+import org.churchpresenter.songlibrary.generated.resources.column_author
+import org.churchpresenter.songlibrary.generated.resources.column_ccli
+import org.churchpresenter.songlibrary.generated.resources.column_composer
+import org.churchpresenter.songlibrary.generated.resources.column_song_book
+import org.churchpresenter.songlibrary.generated.resources.column_title
+import org.churchpresenter.songlibrary.generated.resources.column_tune
+import org.churchpresenter.songlibrary.generated.resources.create
+import org.churchpresenter.songlibrary.generated.resources.delete_confirm_action
+import org.churchpresenter.songlibrary.generated.resources.delete_confirm_body
+import org.churchpresenter.songlibrary.generated.resources.delete_confirm_one
+import org.churchpresenter.songlibrary.generated.resources.delete_confirm_title
+import org.churchpresenter.songlibrary.generated.resources.name
+import org.churchpresenter.songlibrary.generated.resources.new_song_book
+import org.churchpresenter.songlibrary.generated.resources.new_song_book_assign
+import org.churchpresenter.songlibrary.generated.resources.new_song_book_placeholder
+import org.churchpresenter.songlibrary.generated.resources.new_song_book_subhead
+import org.churchpresenter.songlibrary.generated.resources.no_song_book
+import org.churchpresenter.songlibrary.generated.resources.song_count
 
 /**
  * The panel every dialog in this window is: an icon, a title and a line under it, a body, and a

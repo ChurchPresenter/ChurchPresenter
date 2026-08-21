@@ -1,4 +1,4 @@
-package songlibrary
+package org.churchpresenter.songlibrary
 
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
