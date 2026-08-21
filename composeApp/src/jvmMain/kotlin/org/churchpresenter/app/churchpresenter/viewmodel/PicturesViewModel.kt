@@ -50,6 +50,9 @@ private const val THUMBNAIL_RETRY_ATTEMPTS = 3
  * The write races the thread advancing the global snapshot and can lose; the window is momentary, so
  * a handful of tries a few milliseconds apart clears it without costing anything measurable.
  */
+private const val PUBLISH_ATTEMPTS = 4
+private const val PUBLISH_RETRY_MS = 20L
+
 /**
  * How many unreadable files one warning describes in full.
  *
@@ -57,9 +60,6 @@ private const val THUMBNAIL_RETRY_ATTEMPTS = 3
  * already say which kind of file it is.
  */
 private const val MAX_REPORTED_FAILURES = 20
-
-private const val PUBLISH_ATTEMPTS = 4
-private const val PUBLISH_RETRY_MS = 20L
 
 class PicturesViewModel(
     appSettings: AppSettings? = null

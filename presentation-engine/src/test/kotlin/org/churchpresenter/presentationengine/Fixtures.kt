@@ -173,11 +173,6 @@ object Fixtures {
     )
 
     /**
-     * Injects a realistic `<p:timing>` main sequence into [slide]: one click step per target,
-     * each with a `set style.visibility` + `animEffect fade` behavior — the same shape
-     * PowerPoint itself writes for a Fade entrance.
-     */
-    /**
      * Injects a `<p:timing>` whose main sequence body is [mainSeqBody] verbatim, for tests that
      * need timing XML the [addTiming] shape does not produce (raw animate/scale/rotate behaviors,
      * keyframe lists, repeats, triggers). The wrapper — tmRoot, the sequence, the namespaces —
@@ -202,6 +197,11 @@ object Fixtures {
         injectTiming(slide, timingXml)
     }
 
+    /**
+     * Injects a realistic `<p:timing>` main sequence into [slide]: one click step per target,
+     * each with a `set style.visibility` + `animEffect fade` behavior — the same shape
+     * PowerPoint itself writes for a Fade entrance.
+     */
     fun addTiming(slide: XSLFSlide, targets: List<TimingTarget>) {
         val pNs = "http://schemas.openxmlformats.org/presentationml/2006/main"
         val aNs = "http://schemas.openxmlformats.org/drawingml/2006/main"

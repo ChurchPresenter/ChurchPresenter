@@ -345,10 +345,6 @@ internal fun batchEventSummary(items: List<ScheduleItem>): Pair<String, String> 
 }
 
 /**
- * Executes a project request — adds to schedule and sets presenter state.
- * Fixes the original bug where SongItem projection never selected the song in the Songs tab.
- */
-/**
  * Copies a remotely-projected [ScheduleItem.AnnouncementItem]'s style into
  * [AppSettings.announcementsSettings] so the live output renders with the
  * announcement's own colour / font / animation rather than the desktop's
@@ -416,6 +412,10 @@ internal suspend fun emitRemoteTabSelection(
     else -> false
 }
 
+/**
+ * Executes a project request — adds to schedule and sets presenter state.
+ * Fixes the original bug where SongItem projection never selected the song in the Songs tab.
+ */
 internal fun executeProjectItem(
     item: ScheduleItem,
     scheduleActions: ScheduleActions,
