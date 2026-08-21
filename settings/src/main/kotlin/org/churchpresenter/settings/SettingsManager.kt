@@ -11,6 +11,7 @@ import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
@@ -74,6 +75,10 @@ class SettingsManager {
         2 to ::migrateProjectionSettings,
         3 to ::migrateCompanionSatelliteStartPage,
         4 to ::migrateCompanionSatelliteRowColumnRangeBackToCount,
+        7 to ::migrateStageMonitorChords,
+        // Also version 7: the stage monitor's chord switch and its zone names moved in the same
+        // unreleased change, so they share a version rather than spending two on one release.
+        7 to ::migrateStageMonitorZoneNames,
     )
 
     fun loadSettings(): AppSettings {
@@ -369,6 +374,88 @@ class SettingsManager {
         if (!changed) return raw
         val newRoot = buildJsonObject {
             root.forEach { (k, v) -> if (k == "companionSatelliteConnections") put(k, newConnections) else put(k, v) }
+        }
+        return newRoot.toString()
+    }
+
+    /** Schema version 7. Moves the global `stageMonitorSettings.showChords` switch onto every
+     * output, where it now lives. Only an operator who had switched it off has anything to carry —
+     * the per-output field defaults to on, as the old global did. The old key is left in place so a
+     * downgrade still finds its switch. */
+    private fun migrateStageMonitorChords(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val showChords = root["stageMonitorSettings"]?.jsonObject
+            ?.get("showChords")
+            ?.let { (it as? JsonPrimitive)?.content?.toBooleanStrictOrNull() }
+        val proj = if (showChords == false) root["projectionSettings"]?.jsonObject else null
+        if (proj == null) return raw
+
+        fun withChordsOff(key: String): JsonArray? {
+            val outputs = proj[key]?.jsonArray ?: return null
+            return buildJsonArray {
+                for (element in outputs) {
+                    val obj = element.jsonObject
+                    if ("showChords" in obj) add(element) else add(buildJsonObject {
+                        obj.forEach { (k, v) -> put(k, v) }
+                        put("showChords", JsonPrimitive(false))
+                    })
+                }
+            }
+        }
+        val newAssignments = withChordsOff("screenAssignments")
+        val newBrowserSources = withChordsOff("browserSourceOutputs")
+        if (newAssignments == null && newBrowserSources == null) return raw
+
+        val newProj = buildJsonObject {
+            proj.forEach { (k, v) ->
+                when (k) {
+                    "screenAssignments" -> put(k, newAssignments ?: v)
+                    "browserSourceOutputs" -> put(k, newBrowserSources ?: v)
+                    else -> put(k, v)
+                }
+            }
+        }
+        val newRoot = buildJsonObject {
+            root.forEach { (k, v) -> if (k == "projectionSettings") put(k, newProj) else put(k, v) }
+        }
+        return newRoot.toString()
+    }
+
+    /** Schema version 7. Renames the stage monitor's fixed zone names to the layout slots that
+     * replaced them, so a saved screen keeps the arrangement it had. The five positions become the
+     * five slots of the CLASSIC layout in the order it draws them, which is the layout every
+     * existing document opens with. */
+    private fun migrateStageMonitorZoneNames(raw: String): String {
+        val stageMonitor = parseSettingsRoot(raw)?.get("stageMonitorSettings")?.jsonObject ?: return raw
+        val root = parseSettingsRoot(raw) ?: return raw
+        val slots = mapOf(
+            "TOP_LEFT" to "A", "TOP_RIGHT" to "B",
+            "BOTTOM_LEFT" to "C", "BOTTOM_MIDDLE" to "D", "BOTTOM_RIGHT" to "E",
+        )
+        val zones = stageMonitor["contentZones"]?.jsonObject
+        val styles = stageMonitor["zoneStyles"]?.jsonObject
+        if (zones == null && styles == null) return raw
+
+        val newStageMonitor = buildJsonObject {
+            stageMonitor.forEach { (k, v) ->
+                when (k) {
+                    // Values name the zone: "BIBLE": "TOP_LEFT".
+                    "contentZones" -> put(k, buildJsonObject {
+                        zones?.forEach { (type, zone) ->
+                            val named = (zone as? JsonPrimitive)?.content
+                            put(type, JsonPrimitive(slots[named] ?: named ?: ""))
+                        }
+                    })
+                    // Keys name the zone: "TOP_LEFT": { ...style... }.
+                    "zoneStyles" -> put(k, buildJsonObject {
+                        styles?.forEach { (zone, style) -> put(slots[zone] ?: zone, style) }
+                    })
+                    else -> put(k, v)
+                }
+            }
+        }
+        val newRoot = buildJsonObject {
+            root.forEach { (k, v) -> if (k == "stageMonitorSettings") put(k, newStageMonitor) else put(k, v) }
         }
         return newRoot.toString()
     }

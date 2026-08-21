@@ -35,7 +35,7 @@ import kotlin.test.assertTrue
  */
 class StageMonitorSettingsTabRenderingTest {
 
-    private val zone = StageMonitorStyleZone.TOP_LEFT
+    private val zone = StageMonitorStyleZone.A
     private val ordinal = ZoneOrdinal.of(zone)
 
     /** The pixels [locate] paints when the zone's style is [style]. */
@@ -167,7 +167,7 @@ class StageMonitorSettingsTabRenderingTest {
     @Test
     fun `selecting in one zone does not repaint another zone's buttons`() {
         stageMonitorTab { _ ->
-            val otherOrdinal = ZoneOrdinal.of(StageMonitorStyleZone.BOTTOM_RIGHT)
+            val otherOrdinal = ZoneOrdinal.of(StageMonitorStyleZone.E)
             val otherBefore = styleButton(otherOrdinal, "B").performScrollTo().renderedPixels()
 
             styleButton(ordinal, "B").performScrollTo().performClick()

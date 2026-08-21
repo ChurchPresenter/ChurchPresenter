@@ -31,46 +31,59 @@ class StageMonitorSettingsTabLabelsTest {
     /** Every string the tab renders out of the box, and how many times it must appear. */
     private val outOfTheBox = mapOf(
         // Section headings.
-        "Screen Content" to 1,
         "Screen Layout" to 1,
+        "Screen Content" to 1,
+        "Shows" to 1,
+        "Transition Settings" to 1,
+
+        // The layout catalog: one tab per zone count, and the name of the layout in force.
+        "2 zones" to 1, "3 zones" to 1, "4 zones" to 1, "5 zones" to 1,
+        ZoneLabel.CLASSIC to 1,
+        // The other five-zone arrangement, whose card is drawn beside the classic one.
+        "Top / 4 below" to 1,
+
+        // The transition card.
+        "Transition Duration:" to 1,
+        "500ms" to 1,
+        "Fade In" to 1, "Fade Out" to 1, "Crossfade" to 1,
 
         // Routing dropdown captions — one per content type, plus the metronome.
         "BIBLE" to 1, "SONGS" to 1, "PRESENTATION" to 1, "PRESENTER NOTES" to 1, "PICTURES" to 1,
         "MEDIA" to 1, "LOWER THIRD" to 1, "WEB" to 1, "STT" to 1, "CANVAS" to 1, "Q&A" to 1,
         "DICTIONARY" to 1, "CLOCK" to 1, "ANNOUNCEMENTS" to 1, "NEXT" to 1,
         ContentLabel.METRONOME to 1,
-        // The preview restates the anchor under a title-case caption of its own, which is a
-        // different string from the dropdown's uppercased one above.
-        "Metronome Position" to 1,
 
-        // Zone names. Each titles one editor; each is also the value of every dropdown set to it,
-        // and Full Screen and None additionally caption a preview row.
-        ZoneLabel.TOP_LEFT to 3,        // title + Bible + Songs
-        ZoneLabel.TOP_RIGHT to 2,       // title + Next
-        ZoneLabel.BOTTOM_LEFT to 2,     // title + Announcements
-        ZoneLabel.BOTTOM_CENTER to 2,   // title + Clock
-        ZoneLabel.BOTTOM_RIGHT to 1,    // title only — nothing is routed there
-        ZoneLabel.FULL_SCREEN to 12,    // title + preview caption + the 10 types routed there
-        ZoneLabel.NONE to 3,            // preview caption + the metronome's value and its own caption
+        // Zone names. Each names one preview cell and titles one editor, and is additionally the
+        // value of every routing dropdown set to it.
+        ZoneLabel.ZONE_1 to 4,        // cell + title + Bible + Songs
+        ZoneLabel.ZONE_2 to 3,        // cell + title + Next
+        ZoneLabel.ZONE_3 to 3,        // cell + title + Announcements
+        ZoneLabel.ZONE_4 to 3,        // cell + title + Clock
+        ZoneLabel.ZONE_5 to 2,        // cell + title — nothing is routed there
+        ZoneLabel.FULL_SCREEN to 12,  // chip + title + the 10 types routed there
+        ZoneLabel.NONE to 2,          // the None chip and the metronome's value
+
+        // What the preview cells say is in each zone.
+        "Bible, Songs" to 1,
+        "Next" to 1,
+        "Announcements" to 1,
+        "Clock" to 1,
+        "\u2014" to 2,                 // Zone 5 is empty, and so is None
 
         // Per-zone controls, six of each.
         "FONT TYPE" to 6,
         "FONT SIZE" to 6,
         "Arial" to 6,
+        "TEXT COLOR" to 6,
         "BACKGROUND COLOR" to 6,
         "Shadow" to 6,
-
-        // The one switch in Screen Content: whether a song with chords is drawn as a chart.
-        "Show Chords" to 1,
         "SIZE (%)" to 6,
         "INTENSITY (%)" to 6,
         "B" to 6, "I" to 6, "U" to 6, "S" to 6,
 
-        // "COLOR" captions the text colour and the shadow colour in every editor — except in the
-        // two zones a chart can land in, where the text colour is named "LYRICS COLOR" instead so
-        // it says which of the two colours it is.
-        "COLOR" to 10,
-        "LYRICS COLOR" to CHORD_COLOUR_ZONES,
+        // "COLOR" is now only the shadow colour's caption: the text colour has a name of its own,
+        // and every zone but the full screen also carries a chord colour.
+        "COLOR" to 6,
         "CHORD COLOR" to CHORD_COLOUR_ZONES,
         "#4FD3E8" to CHORD_COLOUR_ZONES,
 
@@ -80,13 +93,6 @@ class StageMonitorSettingsTabLabelsTest {
         "35" to 5,        // five zones' font size
         "80" to 7,        // Full Screen's font size, plus every zone's shadow intensity
         "100" to 6,       // every zone's shadow size
-
-        // The preview.
-        "Bible, Songs" to 1,
-        "Next" to 1,
-        "Announcements" to 1,
-        "Clock" to 1,
-        "—" to 2,         // Bottom-Right is empty, and nothing is switched off
     )
 
     @Test
@@ -109,6 +115,7 @@ class StageMonitorSettingsTabLabelsTest {
         onAllNodesWithText(expected).assertCountEquals(1)
     }
 
+    /** Guards against a control being added to the tab without a test noticing. */
     /** Guards against a control being added to the tab without a test noticing. */
     @Test
     fun `the tab renders no text beyond the inventory`() = stageMonitorTab { _ ->

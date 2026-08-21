@@ -53,21 +53,14 @@ internal fun isMultiTranslationPresentation(translationCount: Int, outputs: List
 }
 
 /**
- * True when [song] carries chords and they are actually being drawn for the platform.
- *
- * Chords reach only one surface — the stage monitor, gated by `StageMonitorSettings.showChords`
- * (see `StageMonitorScreen`) — so a chord-carrying song is a chord chart in use only when a live
- * output is in stage-monitor mode and that switch is on. Without both, the same song is just lyrics.
- *
- * @param showChords `StageMonitorSettings.showChords`.
+ * True when [song] carries chords and some live output is set to draw them.
  */
 internal fun isChordChartPresentation(
     song: SongItem,
-    showChords: Boolean,
     outputs: List<ScreenAssignment>,
 ): Boolean {
-    if (!showChords || song.lyrics.none { ChordTransposer.hasChords(it) }) return false
-    return outputs.any { it.isLiveOutput() && it.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR }
+    if (song.lyrics.none { ChordTransposer.hasChords(it) }) return false
+    return outputs.any { it.isLiveOutput() && it.showChords }
 }
 
 /**

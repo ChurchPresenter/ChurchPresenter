@@ -193,11 +193,11 @@ class StageMonitorZoneMappingTest {
 
     @Test
     fun `each zone maps to the style of the same name`() {
-        assertEquals(StageMonitorStyleZone.TOP_LEFT, StageMonitorZone.TOP_LEFT.toStyleZone())
-        assertEquals(StageMonitorStyleZone.TOP_RIGHT, StageMonitorZone.TOP_RIGHT.toStyleZone())
-        assertEquals(StageMonitorStyleZone.BOTTOM_LEFT, StageMonitorZone.BOTTOM_LEFT.toStyleZone())
-        assertEquals(StageMonitorStyleZone.BOTTOM_MIDDLE, StageMonitorZone.BOTTOM_MIDDLE.toStyleZone())
-        assertEquals(StageMonitorStyleZone.BOTTOM_RIGHT, StageMonitorZone.BOTTOM_RIGHT.toStyleZone())
+        assertEquals(StageMonitorStyleZone.A, StageMonitorZone.A.toStyleZone())
+        assertEquals(StageMonitorStyleZone.B, StageMonitorZone.B.toStyleZone())
+        assertEquals(StageMonitorStyleZone.C, StageMonitorZone.C.toStyleZone())
+        assertEquals(StageMonitorStyleZone.D, StageMonitorZone.D.toStyleZone())
+        assertEquals(StageMonitorStyleZone.E, StageMonitorZone.E.toStyleZone())
         assertEquals(StageMonitorStyleZone.FULL_SCREEN, StageMonitorZone.FULL_SCREEN.toStyleZone())
     }
 

@@ -414,7 +414,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                         }
                         var showContentDialog by remember { mutableStateOf(false) }
                         val enabledCount = contentOutputsEnabledCount(output, contentGroup, backgroundGroup)
-                        val totalCount = 2 + contentGroup.size + backgroundGroup.size
+                        val totalCount = contentOutputsTotalCount(contentGroup, backgroundGroup)
                         OutlinedButton(
                             shape = RoundedCornerShape(6.dp),
                             onClick = { showContentDialog = true },

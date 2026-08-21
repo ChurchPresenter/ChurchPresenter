@@ -1400,6 +1400,18 @@
     <string name="stage_monitor_zone_none">Немає</string>
     <string name="stage_monitor_notes_from_presentation">Нотатки автоматично відображаються з активного слайда PowerPoint або Keynote.</string>
     <string name="stage_monitor_content_section">Вміст екрана</string>
+    <string name="stage_monitor_zone_n">Зона %1$d</string>
+    <string name="stage_monitor_zone_shows">Показує</string>
+    <string name="stage_monitor_zone_count">Зон: %1$d</string>
+    <string name="stage_monitor_layout_stranded">Не показується в цьому розкладі: %1$s</string>
+    <string name="stage_monitor_layout_classic">Класична (2 / 3)</string>
+    <string name="stage_monitor_layout_top_bottom">Зверху / знизу</string>
+    <string name="stage_monitor_layout_left_right">Ліворуч / праворуч</string>
+    <string name="stage_monitor_layout_top_two_below">Зверху / 2 знизу</string>
+    <string name="stage_monitor_layout_three_rows">Три ряди</string>
+    <string name="stage_monitor_layout_quad">Чотири зони</string>
+    <string name="stage_monitor_layout_top_three_below">Зверху / 3 знизу</string>
+    <string name="stage_monitor_layout_top_four_below">Зверху / 4 знизу</string>
     <string name="stage_monitor_metronome_position">Позиція метронома</string>
     <string name="stage_monitor_position_top_center">Вгорі по центру</string>
     <string name="stage_monitor_position_middle_left">Посередині зліва</string>
@@ -1980,6 +1992,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA пісні</string>
     <string name="projection_content_song_la_tooltip">Наступний розділ пісні</string>
+    <string name="projection_content_chords_tooltip">Показувати пісню з акордами як акордову схему, акорди над словами</string>
     <string name="swap_bibles_hint">Поміняти місцями основну та додаткову Біблії</string>
     <string name="screen_lang_tooltip_off">Не показувати на цьому екрані</string>
     <string name="screen_lang_tooltip_primary">Показувати лише основну мову</string>

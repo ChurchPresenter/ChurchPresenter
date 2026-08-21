@@ -120,10 +120,6 @@ class StageMonitorSettingsTabScreenshotTest {
         freezeClock = true,
     )
 
-    /** Chords off, which is the one switch on this tab. */
-    @Test
-    fun `chords switched off`() = shoot("chords_off", settings = stageMonitor { copy(showChords = false) })
-
     // ── The style blocks, below the fold ────────────────────────────────────────────────────────
     // Scrolled by the "Shadow" row each block carries — one per block, in composition order, and the
     // only handle that is not also a zone name used by a dropdown value somewhere else on the tab.
@@ -250,19 +246,19 @@ class StageMonitorSettingsTabScreenshotTest {
     private fun routed() = stageMonitor {
         copy(
             contentZones = mapOf(
-                StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT,
-                StageMonitorContentType.SONGS to StageMonitorZone.TOP_LEFT,
-                StageMonitorContentType.PRESENTATION to StageMonitorZone.TOP_LEFT,
-                StageMonitorContentType.NEXT to StageMonitorZone.TOP_RIGHT,
-                StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.TOP_RIGHT,
-                StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.BOTTOM_LEFT,
-                StageMonitorContentType.STT to StageMonitorZone.BOTTOM_LEFT,
-                StageMonitorContentType.QA to StageMonitorZone.BOTTOM_LEFT,
-                StageMonitorContentType.CLOCK to StageMonitorZone.BOTTOM_MIDDLE,
-                StageMonitorContentType.DICTIONARY to StageMonitorZone.BOTTOM_MIDDLE,
-                StageMonitorContentType.PICTURES to StageMonitorZone.BOTTOM_RIGHT,
-                StageMonitorContentType.MEDIA to StageMonitorZone.BOTTOM_RIGHT,
-                StageMonitorContentType.CANVAS to StageMonitorZone.BOTTOM_RIGHT,
+                StageMonitorContentType.BIBLE to StageMonitorZone.A,
+                StageMonitorContentType.SONGS to StageMonitorZone.A,
+                StageMonitorContentType.PRESENTATION to StageMonitorZone.A,
+                StageMonitorContentType.NEXT to StageMonitorZone.B,
+                StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.B,
+                StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.C,
+                StageMonitorContentType.STT to StageMonitorZone.C,
+                StageMonitorContentType.QA to StageMonitorZone.C,
+                StageMonitorContentType.CLOCK to StageMonitorZone.D,
+                StageMonitorContentType.DICTIONARY to StageMonitorZone.D,
+                StageMonitorContentType.PICTURES to StageMonitorZone.E,
+                StageMonitorContentType.MEDIA to StageMonitorZone.E,
+                StageMonitorContentType.CANVAS to StageMonitorZone.E,
                 StageMonitorContentType.LOWER_THIRD to StageMonitorZone.NONE,
                 StageMonitorContentType.WEB to StageMonitorZone.NONE,
             ),
@@ -306,7 +302,7 @@ class StageMonitorSettingsTabScreenshotTest {
                     shadowColor = SHADOW_COLOUR,
                     shadow = true,
                 ),
-                StageMonitorStyleZone.TOP_LEFT to styleFor(StageMonitorStyleZone.TOP_LEFT).copy(
+                StageMonitorStyleZone.A to styleFor(StageMonitorStyleZone.A).copy(
                     chordColor = CHORD_COLOUR,
                 ),
             ),

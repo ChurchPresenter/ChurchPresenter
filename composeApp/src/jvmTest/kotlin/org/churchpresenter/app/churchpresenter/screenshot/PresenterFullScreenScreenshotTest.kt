@@ -136,6 +136,89 @@ class PresenterFullScreenScreenshotTest {
         SongPresenter(lyricSection = song(), appSettings = AppSettings(), lookAheadEnabled = true)
     }
 
+    // ── Songs: chord charts ─────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a verse as a chord chart`() = shoot("song_chords") {
+        SongPresenter(
+            lyricSection = song(chords = CHORD_LINES),
+            appSettings = AppSettings(),
+            showChords = true,
+        )
+    }
+
+    /** The chords take their own configured colour; the words keep the lyric colour. */
+    @Test
+    fun `chords in their own colour`() = shoot("song_chords_coloured") {
+        SongPresenter(
+            lyricSection = song(chords = CHORD_LINES),
+            appSettings = songSettings(lyricsColor = "#FFFFFF", lyricsChordColor = "#FFD54F"),
+            showChords = true,
+        )
+    }
+
+    /** The same song with the switch off: the words alone, and no `[G]` anywhere. */
+    @Test
+    fun `a chorded song with chords switched off`() = shoot("song_chords_off") {
+        SongPresenter(
+            lyricSection = song(chords = CHORD_LINES),
+            appSettings = AppSettings(),
+            showChords = false,
+        )
+    }
+
+    /** Aligned left, to show the chart lands where the lyrics are configured to land. */
+    @Test
+    fun `a chord chart aligned left`() = shoot("song_chords_align_left") {
+        SongPresenter(
+            lyricSection = song(chords = CHORD_LINES),
+            appSettings = songSettings(lyricsHorizontalAlignment = Constants.LEFT),
+            showChords = true,
+        )
+    }
+
+    /** Line-at-a-time: the chart is sliced the way the words are — the one line, with its chords. */
+    @Test
+    fun `a chord chart follows line-at-a-time`() = shoot("song_chords_line_mode") {
+        SongPresenter(
+            lyricSection = song(chords = CHORD_LINES),
+            appSettings = songSettings(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_LINE),
+            displayLineIndex = 1,
+            showChords = true,
+        )
+    }
+
+    /**
+     * Line-at-a-time with look-ahead: two rows either way, and no folded intro row.
+     *
+     * Look-ahead brings its own display mode with it, which is why this sets
+     * `lookAheadDisplayMode` rather than the full-screen one.
+     */
+    @Test
+    fun `a chord chart follows the look-ahead`() = shoot("song_chords_look_ahead") {
+        SongPresenter(
+            lyricSection = song(chords = INTRO_AND_CHORD_LINES),
+            appSettings = AppSettings(
+                songSettings = SongSettings(lookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE),
+            ),
+            displayLineIndex = 0,
+            lookAheadEnabled = true,
+            allLyricSections = listOf(song(chords = INTRO_AND_CHORD_LINES)),
+            displaySectionIndex = 0,
+            showChords = true,
+        )
+    }
+
+    /** The whole section, where the folded intro row does belong. */
+    @Test
+    fun `a chord chart carrying a folded intro`() = shoot("song_chords_folded_intro") {
+        SongPresenter(
+            lyricSection = song(chords = INTRO_AND_CHORD_LINES),
+            appSettings = AppSettings(),
+            showChords = true,
+        )
+    }
+
     // ── Songs: two languages ────────────────────────────────────────────────────────────────────
 
     @Test
@@ -828,6 +911,7 @@ class PresenterFullScreenScreenshotTest {
         type: String = Constants.SECTION_TYPE_VERSE,
         lines: List<String> = VERSE_LINES,
         secondary: List<String> = emptyList(),
+        chords: List<String> = emptyList(),
     ) = LyricSection(
         header = header,
         title = "Amazing Grace",
@@ -835,6 +919,7 @@ class PresenterFullScreenScreenshotTest {
         type = type,
         lines = lines,
         secondaryLines = secondary,
+        chordLines = chords,
     )
 
     private fun songSettings(
@@ -844,6 +929,7 @@ class PresenterFullScreenScreenshotTest {
         fullscreenLanguageDisplay: String = SongSettings().fullscreenLanguageDisplay,
         bilingualLayout: String = SongSettings().bilingualLayout,
         lyricsColor: String = SongSettings().lyricsColor,
+        lyricsChordColor: String = SongSettings().lyricsChordColor,
         lyricsBold: Boolean = false,
         lyricsItalic: Boolean = false,
         lyricsUnderline: Boolean = false,
@@ -880,6 +966,7 @@ class PresenterFullScreenScreenshotTest {
             fullscreenLanguageDisplay = fullscreenLanguageDisplay,
             bilingualLayout = bilingualLayout,
             lyricsColor = lyricsColor,
+            lyricsChordColor = lyricsChordColor,
             lyricsBold = lyricsBold,
             lyricsItalic = lyricsItalic,
             lyricsUnderline = lyricsUnderline,
@@ -1114,6 +1201,15 @@ class PresenterFullScreenScreenshotTest {
             "Amazing grace how sweet the sound",
             "That saved a wretch like me",
         )
+
+        /** [VERSE_LINES] as the band reads them, chords inline before the syllable they land on. */
+        val CHORD_LINES = listOf(
+            "[G]Amazing [C]grace how [G]sweet the sound",
+            "That [D]saved a [G]wretch like me",
+        )
+
+        /** [CHORD_LINES] with a chord-only intro folded in ahead of it, carrying no words. */
+        val INTRO_AND_CHORD_LINES = listOf("[Intro]", "[G] [C] [D] [G]") + CHORD_LINES
 
         val SECONDARY_LINES = listOf(
             "О благодать, спасён тобой",

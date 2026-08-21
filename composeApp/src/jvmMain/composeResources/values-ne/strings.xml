@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">गीत पूर्वदृश्य</string>
     <string name="projection_content_song_la_tooltip">गीतको अर्को भाग पहिल्यै हेर्ने</string>
+    <string name="projection_content_chords_tooltip">कर्ड भएको गीतलाई कर्ड चार्टका रूपमा देखाउनुहोस्, शब्दहरूमाथि कर्ड</string>
     <string name="projection_content_stt_tooltip">बोलीबाट पाठ — प्रत्यक्ष क्याप्सन र अनुवाद</string>
     <string name="projection_content_web">वेब</string>
     <string name="projection_content_background">पृष्ठभूमि</string>
@@ -1711,6 +1712,18 @@
     <string name="stage_monitor_zone_none">कुनै पनि होइन</string>
     <string name="stage_monitor_notes_from_presentation">टिपोटहरू चलिरहेको PowerPoint वा Keynote स्लाइडबाट आफैँ देखाइन्छन्।</string>
     <string name="stage_monitor_content_section">पर्दाको सामग्री</string>
+    <string name="stage_monitor_zone_n">क्षेत्र %1$d</string>
+    <string name="stage_monitor_zone_shows">देखाउँछ</string>
+    <string name="stage_monitor_zone_count">%1$d क्षेत्र</string>
+    <string name="stage_monitor_layout_stranded">यो लेआउटमा देखिँदैन: %1$s</string>
+    <string name="stage_monitor_layout_classic">क्लासिक (2 / 3)</string>
+    <string name="stage_monitor_layout_top_bottom">माथि / तल</string>
+    <string name="stage_monitor_layout_left_right">बायाँ / दायाँ</string>
+    <string name="stage_monitor_layout_top_two_below">माथि / 2 तल</string>
+    <string name="stage_monitor_layout_three_rows">तीन पङ्क्ति</string>
+    <string name="stage_monitor_layout_quad">चार क्षेत्र</string>
+    <string name="stage_monitor_layout_top_three_below">माथि / 3 तल</string>
+    <string name="stage_monitor_layout_top_four_below">माथि / 4 तल</string>
     <string name="stage_monitor_metronome_position">मेट्रोनोमको स्थान</string>
     <string name="stage_monitor_position_top_center">माथि बीचमा</string>
     <string name="stage_monitor_position_middle_left">बीच बायाँ</string>

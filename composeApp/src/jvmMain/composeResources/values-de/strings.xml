@@ -1400,6 +1400,18 @@
     <string name="stage_monitor_zone_none">Keine</string>
     <string name="stage_monitor_notes_from_presentation">Notizen werden automatisch aus der aktiven PowerPoint- oder Keynote-Folie angezeigt.</string>
     <string name="stage_monitor_content_section">Bildschirminhalt</string>
+    <string name="stage_monitor_zone_n">Zone %1$d</string>
+    <string name="stage_monitor_zone_shows">Zeigt</string>
+    <string name="stage_monitor_zone_count">%1$d Zonen</string>
+    <string name="stage_monitor_layout_stranded">In diesem Layout nicht sichtbar: %1$s</string>
+    <string name="stage_monitor_layout_classic">Klassisch (2 / 3)</string>
+    <string name="stage_monitor_layout_top_bottom">Oben / unten</string>
+    <string name="stage_monitor_layout_left_right">Links / rechts</string>
+    <string name="stage_monitor_layout_top_two_below">Oben / 2 unten</string>
+    <string name="stage_monitor_layout_three_rows">Drei Reihen</string>
+    <string name="stage_monitor_layout_quad">Vier Zonen</string>
+    <string name="stage_monitor_layout_top_three_below">Oben / 3 unten</string>
+    <string name="stage_monitor_layout_top_four_below">Oben / 4 unten</string>
     <string name="stage_monitor_metronome_position">Metronom-Position</string>
     <string name="stage_monitor_position_top_center">Oben Mitte</string>
     <string name="stage_monitor_position_middle_left">Mitte links</string>
@@ -1980,6 +1992,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">Lied LA</string>
     <string name="projection_content_song_la_tooltip">Lied Vorschau</string>
+    <string name="projection_content_chords_tooltip">Ein Lied mit Akkorden als Akkordblatt anzeigen, Akkorde über dem Text</string>
     <string name="swap_bibles_hint">Primäre und sekundäre Bibel tauschen</string>
     <string name="screen_lang_tooltip_off">Nicht auf diesem Bildschirm anzeigen</string>
     <string name="screen_lang_tooltip_primary">Nur Primärsprache anzeigen</string>

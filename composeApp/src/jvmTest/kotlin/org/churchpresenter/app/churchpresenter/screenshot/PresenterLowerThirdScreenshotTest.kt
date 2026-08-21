@@ -68,6 +68,25 @@ class PresenterLowerThirdScreenshotTest {
     @Test
     fun `a lyric band`() = shootSong("song", song())
 
+    /** The band drawn as a chord chart, and how far auto-fit steps the type down to fit one. */
+    @Test
+    fun `a chord chart in the band`() =
+        shootSong("song_chords", song(chords = CHORD_LINES), showChords = true)
+
+    /** The chords take the band's own chord colour, separate from the full-screen one. */
+    @Test
+    fun `chords in the band's own colour`() = shootSong(
+        "song_chords_coloured",
+        song(chords = CHORD_LINES),
+        settings = songSettings(lyricsLowerThirdChordColor = "#FFD54F"),
+        showChords = true,
+    )
+
+    /** The vertical band, where the chart is narrower still. */
+    @Test
+    fun `a chord chart in the vertical band`() =
+        shootSong("song_chords_vertical", song(chords = CHORD_LINES), vertical = true, showChords = true)
+
     @Test
     fun `a lyric band carrying the title and number`() = shootSong(
         "song_title_and_number",
@@ -397,6 +416,7 @@ class PresenterLowerThirdScreenshotTest {
         transitionAlpha: Float = 1f,
         displayLineIndex: Int = -1,
         overlayPhoto: Boolean = false,
+        showChords: Boolean = false,
     ) = shoot(name) {
         if (overlayPhoto) CameraFeed()
         SongPresenter(
@@ -407,6 +427,7 @@ class PresenterLowerThirdScreenshotTest {
             outputRole = outputRole,
             transitionAlpha = transitionAlpha,
             displayLineIndex = displayLineIndex,
+            showChords = showChords,
         )
     }
 
@@ -451,6 +472,7 @@ class PresenterLowerThirdScreenshotTest {
     private fun song(
         lines: List<String> = VERSE_LINES,
         secondary: List<String> = emptyList(),
+        chords: List<String> = emptyList(),
     ) = LyricSection(
         header = "[Verse 1]",
         title = "Amazing Grace",
@@ -458,6 +480,7 @@ class PresenterLowerThirdScreenshotTest {
         type = Constants.SECTION_TYPE_VERSE,
         lines = lines,
         secondaryLines = secondary,
+        chordLines = chords,
     )
 
     private fun songSettings(
@@ -467,6 +490,7 @@ class PresenterLowerThirdScreenshotTest {
         lowerThirdDisplayMode: String = SongSettings().lowerThirdDisplayMode,
         lowerThirdLanguageDisplay: String = SongSettings().lowerThirdLanguageDisplay,
         lyricsLowerThirdColor: String = SongSettings().lyricsLowerThirdColor,
+        lyricsLowerThirdChordColor: String = SongSettings().lyricsLowerThirdChordColor,
         lyricsLowerThirdBold: Boolean = false,
         lyricsLowerThirdItalic: Boolean = false,
         lyricsLowerThirdShadow: Boolean = false,
@@ -487,6 +511,7 @@ class PresenterLowerThirdScreenshotTest {
             lowerThirdDisplayMode = lowerThirdDisplayMode,
             lowerThirdLanguageDisplay = lowerThirdLanguageDisplay,
             lyricsLowerThirdColor = lyricsLowerThirdColor,
+            lyricsLowerThirdChordColor = lyricsLowerThirdChordColor,
             lyricsLowerThirdBold = lyricsLowerThirdBold,
             lyricsLowerThirdItalic = lyricsLowerThirdItalic,
             lyricsLowerThirdHorizontalAlignment = lyricsLowerThirdHorizontalAlignment,
@@ -608,6 +633,12 @@ class PresenterLowerThirdScreenshotTest {
         val VERSE_LINES = listOf(
             "Amazing grace how sweet the sound",
             "That saved a wretch like me",
+        )
+
+        /** [VERSE_LINES] as the band reads them, chords inline before the syllable they land on. */
+        val CHORD_LINES = listOf(
+            "[G]Amazing [C]grace how [G]sweet the sound",
+            "That [D]saved a [G]wretch like me",
         )
 
         val SECONDARY_LINES = listOf(

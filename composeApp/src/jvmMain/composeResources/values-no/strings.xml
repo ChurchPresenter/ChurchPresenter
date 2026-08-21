@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Sang NV</string>
     <string name="projection_content_song_la_tooltip">Neste-visning for sang</string>
+    <string name="projection_content_chords_tooltip">Vis en sang med akkorder som akkordark, akkorder over teksten</string>
     <string name="projection_content_stt_tooltip">Tale til tekst – teksting og oversettelse i sanntid</string>
     <string name="projection_content_web">Nett</string>
     <string name="projection_content_background">Bakgrunn</string>
@@ -1711,6 +1712,18 @@
     <string name="stage_monitor_zone_none">Ingen</string>
     <string name="stage_monitor_notes_from_presentation">Notatene vises automatisk fra det aktive PowerPoint- eller Keynote-lysbildet.</string>
     <string name="stage_monitor_content_section">Skjerminnhold</string>
+    <string name="stage_monitor_zone_n">Sone %1$d</string>
+    <string name="stage_monitor_zone_shows">Viser</string>
+    <string name="stage_monitor_zone_count">%1$d soner</string>
+    <string name="stage_monitor_layout_stranded">Vises ikke i dette oppsettet: %1$s</string>
+    <string name="stage_monitor_layout_classic">Klassisk (2 / 3)</string>
+    <string name="stage_monitor_layout_top_bottom">Topp / bunn</string>
+    <string name="stage_monitor_layout_left_right">Venstre / høyre</string>
+    <string name="stage_monitor_layout_top_two_below">Topp / 2 under</string>
+    <string name="stage_monitor_layout_three_rows">Tre rader</string>
+    <string name="stage_monitor_layout_quad">Fire soner</string>
+    <string name="stage_monitor_layout_top_three_below">Topp / 3 under</string>
+    <string name="stage_monitor_layout_top_four_below">Topp / 4 under</string>
     <string name="stage_monitor_metronome_position">Plassering av metronom</string>
     <string name="stage_monitor_position_top_center">Øverst i midten</string>
     <string name="stage_monitor_position_middle_left">Midt til venstre</string>

@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.color
+import churchpresenter.composeapp.generated.resources.song_chord_color
 import churchpresenter.composeapp.generated.resources.display_mode_label
 import churchpresenter.composeapp.generated.resources.display_mode_one_line
 import churchpresenter.composeapp.generated.resources.display_mode_one_verse
@@ -275,6 +276,14 @@ internal fun RightColumn(
             color = settings.songSettings.lyricsColor,
             onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsColor = it)) } }
         )
+        ColorPickerField(
+            label = stringResource(Res.string.song_chord_color),
+            modifier = Modifier.width(120.dp),
+            color = settings.songSettings.lyricsChordColor,
+            onColorChange = { picked ->
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsChordColor = picked)) }
+            }
+        )
         TextStyleButtons(
             bold = settings.songSettings.lyricsBold,
             italic = settings.songSettings.lyricsItalic,
@@ -432,6 +441,16 @@ internal fun RightColumn(
             modifier = Modifier.width(120.dp),
             color = settings.songSettings.lyricsLowerThirdColor,
             onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdColor = it)) } }
+        )
+        ColorPickerField(
+            label = stringResource(Res.string.song_chord_color),
+            modifier = Modifier.width(120.dp),
+            color = settings.songSettings.lyricsLowerThirdChordColor,
+            onColorChange = { picked ->
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdChordColor = picked))
+                }
+            }
         )
         TextStyleButtons(
             bold = settings.songSettings.lyricsLowerThirdBold,

@@ -484,6 +484,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Laulu LA</string>
     <string name="projection_content_song_la_tooltip">Laulu eelvaade</string>
+    <string name="projection_content_chords_tooltip">Kuva akordidega laul akordilehena, akordid sõnade kohal</string>
     <string name="projection_content_web">Veeb</string>
     <string name="projection_content_background">Taust</string>
     <string name="projection_content_lt_background">Alumise kolmandiku taust</string>
@@ -1543,6 +1544,18 @@
     <string name="stage_monitor_zone_none">Puudub</string>
     <string name="stage_monitor_notes_from_presentation">Märkmed kuvatakse automaatselt aktiivsest PowerPointi või Keynote'i slaidist.</string>
     <string name="stage_monitor_content_section">Ekraani sisu</string>
+    <string name="stage_monitor_zone_n">Tsoon %1$d</string>
+    <string name="stage_monitor_zone_shows">Näitab</string>
+    <string name="stage_monitor_zone_count">%1$d tsooni</string>
+    <string name="stage_monitor_layout_stranded">Selles paigutuses ei kuvata: %1$s</string>
+    <string name="stage_monitor_layout_classic">Klassikaline (2 / 3)</string>
+    <string name="stage_monitor_layout_top_bottom">Üleval / all</string>
+    <string name="stage_monitor_layout_left_right">Vasak / parem</string>
+    <string name="stage_monitor_layout_top_two_below">Üleval / 2 all</string>
+    <string name="stage_monitor_layout_three_rows">Kolm rida</string>
+    <string name="stage_monitor_layout_quad">Neli tsooni</string>
+    <string name="stage_monitor_layout_top_three_below">Üleval / 3 all</string>
+    <string name="stage_monitor_layout_top_four_below">Üleval / 4 all</string>
     <string name="stage_monitor_metronome_position">Metronoomi asukoht</string>
     <string name="stage_monitor_position_top_center">Üleval keskel</string>
     <string name="stage_monitor_position_middle_left">Keskel vasakul</string>

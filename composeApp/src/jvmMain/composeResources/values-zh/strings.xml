@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">歌曲预览</string>
     <string name="projection_content_song_la_tooltip">歌曲预览——提前显示下一段歌词</string>
+    <string name="projection_content_chords_tooltip">将带和弦的歌曲显示为和弦谱，和弦位于歌词上方</string>
     <string name="projection_content_stt_tooltip">语音转文字——实时字幕与翻译</string>
     <string name="projection_content_web">网页</string>
     <string name="projection_content_background">背景</string>
@@ -1711,6 +1712,18 @@
     <string name="stage_monitor_zone_none">无</string>
     <string name="stage_monitor_notes_from_presentation">备注会自动取自当前的 PowerPoint 或 Keynote 幻灯片。</string>
     <string name="stage_monitor_content_section">屏幕内容</string>
+    <string name="stage_monitor_zone_n">区域 %1$d</string>
+    <string name="stage_monitor_zone_shows">显示内容</string>
+    <string name="stage_monitor_zone_count">%1$d 个区域</string>
+    <string name="stage_monitor_layout_stranded">此布局中不显示：%1$s</string>
+    <string name="stage_monitor_layout_classic">经典 (2 / 3)</string>
+    <string name="stage_monitor_layout_top_bottom">上 / 下</string>
+    <string name="stage_monitor_layout_left_right">左 / 右</string>
+    <string name="stage_monitor_layout_top_two_below">上 / 下方 2 个</string>
+    <string name="stage_monitor_layout_three_rows">三行</string>
+    <string name="stage_monitor_layout_quad">四宫格</string>
+    <string name="stage_monitor_layout_top_three_below">上 / 下方 3 个</string>
+    <string name="stage_monitor_layout_top_four_below">上 / 下方 4 个</string>
     <string name="stage_monitor_metronome_position">节拍器位置</string>
     <string name="stage_monitor_position_top_center">上中</string>
     <string name="stage_monitor_position_middle_left">中左</string>

@@ -100,63 +100,77 @@ internal fun AppSettings.styleOf(zone: StageMonitorStyleZone): StageMonitorZoneS
 
 // ── Labels, as the tab renders them ─────────────────────────────────────────────────────────────
 
-/** Zone names, as they appear in the routing dropdowns and as zone-editor titles. */
+/**
+ * Zone names, as they appear in the routing dropdowns and as zone-editor titles.
+ *
+ * Slots are numbered rather than named for a position: which corner Zone 3 occupies depends on the
+ * layout drawing it, so the metronome's own anchors — which really are positions — keep their own
+ * strings in [MetronomeLabel] and no longer share these.
+ */
 internal object ZoneLabel {
-    const val TOP_LEFT = "Top-Left"
-    const val TOP_RIGHT = "Top-Right"
-    const val BOTTOM_LEFT = "Bottom-Left"
-    const val BOTTOM_CENTER = "Bottom-Center"
-    const val BOTTOM_RIGHT = "Bottom-Right"
+    const val ZONE_1 = "Zone 1"
+    const val ZONE_2 = "Zone 2"
+    const val ZONE_3 = "Zone 3"
+    const val ZONE_4 = "Zone 4"
+    const val ZONE_5 = "Zone 5"
     const val FULL_SCREEN = "Full Screen"
     const val NONE = "None"
 
-    /** Every option a routing dropdown offers, in the order [StageMonitorZone] declares them. */
-    val all = listOf(TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT, FULL_SCREEN, NONE)
+    /** The layout the tab opens on, named on its card in the catalog. */
+    const val CLASSIC = "Classic (2 / 3)"
+
+    /** Every option a routing dropdown offers on the default layout, in the order it offers them. */
+    val all = listOf(ZONE_1, ZONE_2, ZONE_3, ZONE_4, ZONE_5, FULL_SCREEN, NONE)
 
     fun of(zone: StageMonitorZone): String = when (zone) {
-        StageMonitorZone.TOP_LEFT -> TOP_LEFT
-        StageMonitorZone.TOP_RIGHT -> TOP_RIGHT
-        StageMonitorZone.BOTTOM_LEFT -> BOTTOM_LEFT
-        StageMonitorZone.BOTTOM_MIDDLE -> BOTTOM_CENTER
-        StageMonitorZone.BOTTOM_RIGHT -> BOTTOM_RIGHT
+        StageMonitorZone.A -> ZONE_1
+        StageMonitorZone.B -> ZONE_2
+        StageMonitorZone.C -> ZONE_3
+        StageMonitorZone.D -> ZONE_4
+        StageMonitorZone.E -> ZONE_5
         StageMonitorZone.FULL_SCREEN -> FULL_SCREEN
         StageMonitorZone.NONE -> NONE
     }
 
     fun of(zone: StageMonitorStyleZone): String = when (zone) {
-        StageMonitorStyleZone.TOP_LEFT -> TOP_LEFT
-        StageMonitorStyleZone.TOP_RIGHT -> TOP_RIGHT
-        StageMonitorStyleZone.BOTTOM_LEFT -> BOTTOM_LEFT
-        StageMonitorStyleZone.BOTTOM_MIDDLE -> BOTTOM_CENTER
-        StageMonitorStyleZone.BOTTOM_RIGHT -> BOTTOM_RIGHT
+        StageMonitorStyleZone.A -> ZONE_1
+        StageMonitorStyleZone.B -> ZONE_2
+        StageMonitorStyleZone.C -> ZONE_3
+        StageMonitorStyleZone.D -> ZONE_4
+        StageMonitorStyleZone.E -> ZONE_5
         StageMonitorStyleZone.FULL_SCREEN -> FULL_SCREEN
     }
 }
 
-/** Metronome anchor names — a 3x3 grid plus None, sharing several strings with [ZoneLabel]. */
+/** Metronome anchor names — a 3x3 grid plus None, and genuinely positional unlike the zones. */
 internal object MetronomeLabel {
     const val NONE = "None"
+    const val TOP_LEFT = "Top-Left"
     const val TOP_CENTER = "Top-Center"
+    const val TOP_RIGHT = "Top-Right"
     const val MIDDLE_LEFT = "Middle-Left"
     const val CENTER = "Center"
     const val MIDDLE_RIGHT = "Middle-Right"
+    const val BOTTOM_LEFT = "Bottom-Left"
+    const val BOTTOM_CENTER = "Bottom-Center"
+    const val BOTTOM_RIGHT = "Bottom-Right"
     val all = listOf(
-        NONE, ZoneLabel.TOP_LEFT, TOP_CENTER, ZoneLabel.TOP_RIGHT,
+        NONE, TOP_LEFT, TOP_CENTER, TOP_RIGHT,
         MIDDLE_LEFT, CENTER, MIDDLE_RIGHT,
-        ZoneLabel.BOTTOM_LEFT, ZoneLabel.BOTTOM_CENTER, ZoneLabel.BOTTOM_RIGHT,
+        BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT,
     )
 
     fun of(position: MetronomePosition): String = when (position) {
         MetronomePosition.NONE -> NONE
-        MetronomePosition.TOP_LEFT -> ZoneLabel.TOP_LEFT
+        MetronomePosition.TOP_LEFT -> TOP_LEFT
         MetronomePosition.TOP_CENTER -> TOP_CENTER
-        MetronomePosition.TOP_RIGHT -> ZoneLabel.TOP_RIGHT
+        MetronomePosition.TOP_RIGHT -> TOP_RIGHT
         MetronomePosition.MIDDLE_LEFT -> MIDDLE_LEFT
         MetronomePosition.CENTER -> CENTER
         MetronomePosition.MIDDLE_RIGHT -> MIDDLE_RIGHT
-        MetronomePosition.BOTTOM_LEFT -> ZoneLabel.BOTTOM_LEFT
-        MetronomePosition.BOTTOM_CENTER -> ZoneLabel.BOTTOM_CENTER
-        MetronomePosition.BOTTOM_RIGHT -> ZoneLabel.BOTTOM_RIGHT
+        MetronomePosition.BOTTOM_LEFT -> BOTTOM_LEFT
+        MetronomePosition.BOTTOM_CENTER -> BOTTOM_CENTER
+        MetronomePosition.BOTTOM_RIGHT -> BOTTOM_RIGHT
     }
 }
 
@@ -204,36 +218,36 @@ internal object ContentLabel {
 
 // ── Ordinals ────────────────────────────────────────────────────────────────────────────────────
 
-/** The zones offered a chord colour: the two a song's chart can be routed to. */
-internal const val CHORD_COLOUR_ZONES = 2
+/** The zones offered a chord colour: every slot the layout draws, but never the full screen. */
+internal const val CHORD_COLOUR_ZONES = 5
 
 /**
  * Where each zone's style editor sits among the tab's repeated controls, in composition order.
  *
- * The left column composes first — routing, then Full Screen, Top-Left, Top-Right — and the right
- * column second — preview, then Bottom-Left, Bottom-Center, Bottom-Right. That is the order, not the
- * on-screen one: Bottom-Left's editor sits beside Full Screen's on screen but composes after it.
+ * All six live in the right column now, Full Screen first and then the layout's own slots in the
+ * order it draws them. The left column carries no style editor at all — it is the layout picker,
+ * the preview, the routing dropdowns and the transition card.
  */
 internal object ZoneOrdinal {
     const val COUNT = 6
 
     fun of(zone: StageMonitorStyleZone): Int = when (zone) {
         StageMonitorStyleZone.FULL_SCREEN -> 0
-        StageMonitorStyleZone.TOP_LEFT -> 1
-        StageMonitorStyleZone.TOP_RIGHT -> 2
-        StageMonitorStyleZone.BOTTOM_LEFT -> 3
-        StageMonitorStyleZone.BOTTOM_MIDDLE -> 4
-        StageMonitorStyleZone.BOTTOM_RIGHT -> 5
+        StageMonitorStyleZone.A -> 1
+        StageMonitorStyleZone.B -> 2
+        StageMonitorStyleZone.C -> 3
+        StageMonitorStyleZone.D -> 4
+        StageMonitorStyleZone.E -> 5
     }
 
     /** Composition order, which is the order every ordinal-addressed collection follows. */
     val inOrder = listOf(
         StageMonitorStyleZone.FULL_SCREEN,
-        StageMonitorStyleZone.TOP_LEFT,
-        StageMonitorStyleZone.TOP_RIGHT,
-        StageMonitorStyleZone.BOTTOM_LEFT,
-        StageMonitorStyleZone.BOTTOM_MIDDLE,
-        StageMonitorStyleZone.BOTTOM_RIGHT,
+        StageMonitorStyleZone.A,
+        StageMonitorStyleZone.B,
+        StageMonitorStyleZone.C,
+        StageMonitorStyleZone.D,
+        StageMonitorStyleZone.E,
     )
 }
 
