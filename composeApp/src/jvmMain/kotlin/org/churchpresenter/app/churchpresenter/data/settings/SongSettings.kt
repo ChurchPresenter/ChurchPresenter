@@ -60,12 +60,7 @@ data class SongSettings(
     val lyricsHorizontalAlignment: String = Constants.CENTER,
     val lyricsLowerThirdHorizontalAlignment: String = Constants.CENTER,
     val lyricsColor: String = "#FFFFFF", // White
-    /**
-     * The color the chords are drawn in when a chorded song is shown as a chart on a full-screen
-     * output. Everything else about them — face, weight, size — follows the lyrics, so a chart
-     * reads as the output's own words with the chords lifted above them; only the color separates
-     * the two. See [lyricsLowerThirdChordColor] for the lower-third band's own.
-     */
+    /** The chords' own color in a chart; everything else about them follows the lyrics. */
     val lyricsChordColor: String = "#4FD3E8",
     val lyricsBold: Boolean = false,
     val lyricsItalic: Boolean = false,
@@ -75,7 +70,6 @@ data class SongSettings(
     // Lyrics settings — lower third
     val lyricsLowerThirdFontType: String = "Arial",
     val lyricsLowerThirdColor: String = "#FFFFFF",
-    /** The lower-third counterpart of [lyricsChordColor]. */
     val lyricsLowerThirdChordColor: String = "#4FD3E8",
     val lyricsLowerThirdBold: Boolean = false,
     val lyricsLowerThirdItalic: Boolean = false,

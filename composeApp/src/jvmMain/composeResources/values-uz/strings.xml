@@ -551,6 +551,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Kelgusi</string>
     <string name="projection_content_song_la_tooltip">Qoʻshiqda oldinga qarash</string>
+    <string name="projection_content_chords_tooltip">Akkordli qoʻshiqni akkord jadvali sifatida koʻrsatish, akkordlar soʻzlar ustida</string>
     <string name="projection_content_stt_tooltip">Nutqni matnga aylantirish — jonli subtitrlar va tarjima</string>
     <string name="projection_content_web">Veb</string>
     <string name="projection_content_background">Fon</string>

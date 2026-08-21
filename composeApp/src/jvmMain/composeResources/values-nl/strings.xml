@@ -1966,6 +1966,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA lied</string>
     <string name="projection_content_song_la_tooltip">Vooruitkijken lied</string>
+    <string name="projection_content_chords_tooltip">Een lied met akkoorden als akkoordschema tonen, akkoorden boven de tekst</string>
     <string name="swap_bibles_hint">Primaire en secundaire Bijbel omwisselen</string>
     <string name="screen_lang_tooltip_off">Niet weergeven op dit scherm</string>
     <string name="screen_lang_tooltip_primary">Alleen primaire taal weergeven</string>

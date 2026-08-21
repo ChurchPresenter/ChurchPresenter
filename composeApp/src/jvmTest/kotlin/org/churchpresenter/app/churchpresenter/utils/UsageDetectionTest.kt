@@ -192,7 +192,6 @@ class UsageDetectionTest {
         )
     }
 
-    /** The switch is per output, so a second output with it on is enough on its own. */
     @Test
     fun `one output with chords off and another with them on is still a chord chart`() {
         assertTrue(
@@ -206,7 +205,6 @@ class UsageDetectionTest {
         )
     }
 
-    /** A full-screen output draws the chart in place of the words, so it counts as much as a monitor. */
     @Test
     fun `chords on a full-screen output are a chord chart too`() {
         assertTrue(
@@ -219,7 +217,6 @@ class UsageDetectionTest {
         )
     }
 
-    /** The band draws the chart in place of its words, in both orientations. */
     @Test
     fun `a lower third with chords on is a chord chart`() {
         assertTrue(

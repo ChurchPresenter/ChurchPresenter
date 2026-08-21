@@ -137,8 +137,6 @@ class PresenterFullScreenScreenshotTest {
     }
 
     // ── Songs: chord charts ─────────────────────────────────────────────────────────────────────
-    // Drawn when the output has Show Chords on AND the song carries chords. The chart replaces the
-    // words: its own rows are the lyrics, with the chords stacked over the syllables they land on.
 
     @Test
     fun `a verse as a chord chart`() = shoot("song_chords") {
@@ -159,10 +157,7 @@ class PresenterFullScreenScreenshotTest {
         )
     }
 
-    /**
-     * The same song with the output's switch off: the words alone, and no `[G]` anywhere — the
-     * markup is stripped where the song is parsed, so the chart is the only thing that ever shows it.
-     */
+    /** The same song with the switch off: the words alone, and no `[G]` anywhere. */
     @Test
     fun `a chorded song with chords switched off`() = shoot("song_chords_off") {
         SongPresenter(
@@ -182,19 +177,44 @@ class PresenterFullScreenScreenshotTest {
         )
     }
 
-    /**
-     * Line-at-a-time meets a chart: the whole section is drawn regardless.
-     *
-     * `chordLines` is the section as it was written and is not row-for-row with `lines` — a
-     * chord-only intro row has no lyric line of its own — so there is no line to single out. Shot
-     * so the behaviour is looked at rather than discovered live.
-     */
+    /** Line-at-a-time: the chart is sliced the way the words are — the one line, with its chords. */
     @Test
-    fun `a chord chart ignores line-at-a-time`() = shoot("song_chords_line_mode") {
+    fun `a chord chart follows line-at-a-time`() = shoot("song_chords_line_mode") {
         SongPresenter(
             lyricSection = song(chords = CHORD_LINES),
             appSettings = songSettings(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_LINE),
             displayLineIndex = 1,
+            showChords = true,
+        )
+    }
+
+    /**
+     * Line-at-a-time with look-ahead: two rows either way, and no folded intro row.
+     *
+     * Look-ahead brings its own display mode with it, which is why this sets
+     * `lookAheadDisplayMode` rather than the full-screen one.
+     */
+    @Test
+    fun `a chord chart follows the look-ahead`() = shoot("song_chords_look_ahead") {
+        SongPresenter(
+            lyricSection = song(chords = INTRO_AND_CHORD_LINES),
+            appSettings = AppSettings(
+                songSettings = SongSettings(lookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE),
+            ),
+            displayLineIndex = 0,
+            lookAheadEnabled = true,
+            allLyricSections = listOf(song(chords = INTRO_AND_CHORD_LINES)),
+            displaySectionIndex = 0,
+            showChords = true,
+        )
+    }
+
+    /** The whole section, where the folded intro row does belong. */
+    @Test
+    fun `a chord chart carrying a folded intro`() = shoot("song_chords_folded_intro") {
+        SongPresenter(
+            lyricSection = song(chords = INTRO_AND_CHORD_LINES),
+            appSettings = AppSettings(),
             showChords = true,
         )
     }
@@ -1187,6 +1207,9 @@ class PresenterFullScreenScreenshotTest {
             "[G]Amazing [C]grace how [G]sweet the sound",
             "That [D]saved a [G]wretch like me",
         )
+
+        /** [CHORD_LINES] with a chord-only intro folded in ahead of it, carrying no words. */
+        val INTRO_AND_CHORD_LINES = listOf("[Intro]", "[G] [C] [D] [G]") + CHORD_LINES
 
         val SECONDARY_LINES = listOf(
             "О благодать, спасён тобой",

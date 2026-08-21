@@ -1944,6 +1944,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">Lied LA</string>
     <string name="projection_content_song_la_tooltip">Lied Vorschau</string>
+    <string name="projection_content_chords_tooltip">Ein Lied mit Akkorden als Akkordblatt anzeigen, Akkorde über dem Text</string>
     <string name="swap_bibles_hint">Primäre und sekundäre Bibel tauschen</string>
     <string name="screen_lang_tooltip_off">Nicht auf diesem Bildschirm anzeigen</string>
     <string name="screen_lang_tooltip_primary">Nur Primärsprache anzeigen</string>

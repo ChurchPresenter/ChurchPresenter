@@ -551,6 +551,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Wimbo Mbele</string>
     <string name="projection_content_song_la_tooltip">Kuangalia Mbele kwa Wimbo</string>
+    <string name="projection_content_chords_tooltip">Onyesha wimbo wenye kodi kama chati ya kodi, kodi juu ya maneno</string>
     <string name="projection_content_stt_tooltip">Speech to Text — manukuu ya live na tafsiri</string>
     <string name="projection_content_web">Wavuti</string>
     <string name="projection_content_background">Usuli</string>

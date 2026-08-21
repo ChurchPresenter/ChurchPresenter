@@ -551,6 +551,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">پیش‌نمای سرود</string>
     <string name="projection_content_song_la_tooltip">پیش‌نمای بخش بعدی سرود</string>
+    <string name="projection_content_chords_tooltip">نمایش آهنگ دارای آکورد به‌صورت جدول آکورد، آکوردها بالای کلمات</string>
     <string name="projection_content_stt_tooltip">گفتار به نوشتار — زیرنویس و ترجمه زنده</string>
     <string name="projection_content_web">وب</string>
     <string name="projection_content_background">پس‌زمینه</string>

@@ -551,6 +551,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Sang NV</string>
     <string name="projection_content_song_la_tooltip">Neste-visning for sang</string>
+    <string name="projection_content_chords_tooltip">Vis en sang med akkorder som akkordark, akkorder over teksten</string>
     <string name="projection_content_stt_tooltip">Tale til tekst – teksting og oversettelse i sanntid</string>
     <string name="projection_content_web">Nett</string>
     <string name="projection_content_background">Bakgrunn</string>

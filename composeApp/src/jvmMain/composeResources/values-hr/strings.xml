@@ -551,6 +551,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Najava</string>
     <string name="projection_content_song_la_tooltip">Najava sljedećeg dijela pjesme</string>
+    <string name="projection_content_chords_tooltip">Prikaži pjesmu s akordima kao akordni zapis, akordi iznad teksta</string>
     <string name="projection_content_stt_tooltip">Govor u tekst — titlovi i prijevod uživo</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Pozadina</string>

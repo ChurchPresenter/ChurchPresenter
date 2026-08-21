@@ -551,6 +551,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Laulu EN</string>
     <string name="projection_content_song_la_tooltip">Laulun ennakkonäkymä</string>
+    <string name="projection_content_chords_tooltip">Näytä sointuja sisältävä laulu sointulehtenä, soinnut sanojen yläpuolella</string>
     <string name="projection_content_stt_tooltip">Puheentunnistus — live-tekstitys ja käännös</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Tausta</string>

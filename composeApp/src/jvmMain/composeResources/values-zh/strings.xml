@@ -551,6 +551,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">歌曲预览</string>
     <string name="projection_content_song_la_tooltip">歌曲预览——提前显示下一段歌词</string>
+    <string name="projection_content_chords_tooltip">将带和弦的歌曲显示为和弦谱，和弦位于歌词上方</string>
     <string name="projection_content_stt_tooltip">语音转文字——实时字幕与翻译</string>
     <string name="projection_content_web">网页</string>
     <string name="projection_content_background">背景</string>

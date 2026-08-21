@@ -1944,6 +1944,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA песні</string>
     <string name="projection_content_song_la_tooltip">Наступны раздзел песні</string>
+    <string name="projection_content_chords_tooltip">Паказваць песню з акордамі як схему, акорды над словамі</string>
     <string name="swap_bibles_hint">Памяняць месцамі асноўную і другасную Біблію</string>
     <string name="screen_lang_tooltip_off">Не паказваць на гэтым экране</string>
     <string name="screen_lang_tooltip_primary">Паказваць толькі асноўную мову</string>

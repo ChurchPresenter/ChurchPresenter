@@ -1974,6 +1974,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA cântec</string>
     <string name="projection_content_song_la_tooltip">Previzualizare cântec</string>
+    <string name="projection_content_chords_tooltip">Afișează un cântec cu acorduri ca grilă de acorduri, acordurile deasupra versurilor</string>
     <string name="swap_bibles_hint">Schimbați Bibliile primară și secundară</string>
     <string name="screen_lang_tooltip_off">Nu afișa pe acest ecran</string>
     <string name="screen_lang_tooltip_primary">Afișați numai limba primară</string>

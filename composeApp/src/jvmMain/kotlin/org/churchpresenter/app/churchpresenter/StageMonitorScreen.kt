@@ -163,9 +163,6 @@ internal fun activeStageTypes(
 fun StageMonitorScreen(
     sm: StageMonitorSettings,
     presentingMode: Presenting,
-    // Whether this monitor draws a chord-carrying song as a chart — `ScreenAssignment.showChords`,
-    // per output rather than global, so one stage monitor can carry the chart while the next
-    // carries only the words.
     showChords: Boolean = true,
     // True when an announcement has been routed to this stage monitor — either because it's what's
     // actually live everywhere (presentingMode == ANNOUNCEMENTS), or because Announcements was sent

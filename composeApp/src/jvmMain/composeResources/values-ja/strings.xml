@@ -551,6 +551,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">先読み</string>
     <string name="projection_content_song_la_tooltip">賛美歌の先読み表示</string>
+    <string name="projection_content_chords_tooltip">コード付きの曲をコード譜として表示し、歌詞の上にコードを置きます</string>
     <string name="projection_content_stt_tooltip">音声認識 — ライブ字幕と翻訳</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">背景</string>

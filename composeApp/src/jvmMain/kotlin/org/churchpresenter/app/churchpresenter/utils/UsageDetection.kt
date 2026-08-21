@@ -52,12 +52,7 @@ internal fun isMultiTranslationPresentation(translationCount: Int, outputs: List
 }
 
 /**
- * True when [song] carries chords and they are actually being drawn for the platform.
- *
- * Whether a chart is drawn is that output's own `ScreenAssignment.showChords`, whatever its display
- * mode: the stage monitor draws one in its song zone, and a full-screen or lower-third output draws
- * one in place of the words. So a chord-carrying song is a chord chart in use as soon as any live
- * output has the switch on; without one, the same song is just lyrics.
+ * True when [song] carries chords and some live output is set to draw them.
  */
 internal fun isChordChartPresentation(
     song: SongItem,
