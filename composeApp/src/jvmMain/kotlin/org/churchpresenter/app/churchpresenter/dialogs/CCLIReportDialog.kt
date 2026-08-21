@@ -168,8 +168,8 @@ import org.churchpresenter.app.churchpresenter.data.VerseKey
 import org.churchpresenter.app.churchpresenter.data.VerseSummary
 import org.churchpresenter.app.churchpresenter.data.availableYears
 import org.churchpresenter.app.churchpresenter.data.resolveDates
-import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.text.SimpleDateFormat
@@ -179,7 +179,7 @@ import java.util.Date
 import java.util.Locale
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 
 private const val LAST_HOUR = 23
 private const val LAST_MINUTE = 59

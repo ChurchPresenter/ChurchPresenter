@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.ui.theme
+package org.churchpresenter.theme
 
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,7 +42,7 @@ class ThemeRenderTest {
 
     /** One of the private schemes in `Theme.kt`, by name. */
     private fun scheme(name: String): ColorScheme =
-        Class.forName("org.churchpresenter.app.churchpresenter.ui.theme.ThemeKt")
+        Class.forName("org.churchpresenter.theme.ThemeKt")
             .getDeclaredField(name)
             .apply { isAccessible = true }
             .get(null) as ColorScheme

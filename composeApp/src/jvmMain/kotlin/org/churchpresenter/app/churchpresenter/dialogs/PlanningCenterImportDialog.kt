@@ -97,12 +97,12 @@ import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.server.PlanningCenterAuthServer
-import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.viewmodel.PlanningCenterImportViewModel
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image as SkiaImage
 

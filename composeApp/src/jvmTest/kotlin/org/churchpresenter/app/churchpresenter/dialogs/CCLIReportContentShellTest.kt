@@ -18,7 +18,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ThemeMode
 import java.io.File
 import java.time.LocalDate
 import java.nio.file.Files

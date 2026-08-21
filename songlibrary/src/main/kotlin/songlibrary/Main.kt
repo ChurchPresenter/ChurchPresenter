@@ -5,8 +5,8 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import java.io.File
-import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
 import songlibrary.generated.resources.Res
 import songlibrary.generated.resources.window_title

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.ui.theme
+package org.churchpresenter.theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
@@ -28,7 +28,7 @@ import kotlin.test.assertTrue
 class ThemeTest {
 
     private fun scheme(name: String): ColorScheme =
-        Class.forName("org.churchpresenter.app.churchpresenter.ui.theme.ThemeKt")
+        Class.forName("org.churchpresenter.theme.ThemeKt")
             .getDeclaredField(name)
             .apply { isAccessible = true }
             .get(null) as ColorScheme
