@@ -9,8 +9,8 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContentType
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZone
+import org.churchpresenter.settings.StageMonitorContentType
+import org.churchpresenter.settings.StageMonitorStyleZone
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

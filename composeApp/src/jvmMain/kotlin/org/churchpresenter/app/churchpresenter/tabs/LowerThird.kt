@@ -120,8 +120,8 @@ import churchpresenter.composeapp.generated.resources.atem_uploading_video
 import churchpresenter.composeapp.generated.resources.atem_processing
 import churchpresenter.composeapp.generated.resources.atem_upload_mode
 import churchpresenter.composeapp.generated.resources.atem_uploading
-import org.churchpresenter.app.churchpresenter.server.AtemMediaSlot
-import org.churchpresenter.app.churchpresenter.server.AtemState
+import org.churchpresenter.atem.AtemMediaSlot
+import org.churchpresenter.atem.AtemState
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.confirm_delete_file
@@ -146,11 +146,11 @@ import kotlinx.coroutines.withContext
 import java.nio.file.FileSystems
 import java.nio.file.StandardWatchEventKinds
 import javax.swing.JOptionPane
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.formatAtemFps
-import org.churchpresenter.app.churchpresenter.server.AtemClient
+import org.churchpresenter.atem.AtemClient
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
-import org.churchpresenter.app.churchpresenter.server.AtemUploadStatus
+import org.churchpresenter.atem.AtemUploadStatus
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts

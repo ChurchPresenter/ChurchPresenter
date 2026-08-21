@@ -13,7 +13,7 @@ import kotlin.test.assertTrue
  * time anything touches it. The Gradle test task already points the whole `jvmTest` JVM's
  * `user.home` at a throwaway `build/test-home` directory before any test runs (see
  * `composeApp/build.gradle.kts`), which is what [RecentColors] has therefore always resolved
- * against here — the same safeguard [CrashReporterTest][org.churchpresenter.app.churchpresenter.utils.CrashReporterTest]
+ * against here — the same safeguard [CrashReporterTest][org.churchpresenter.diagnostics.CrashReporterTest]
  * relies on for its own `~/.churchpresenter` file, and the same reason this test manages its one
  * file/state directly rather than swapping `user.home` itself.
  *

@@ -53,7 +53,7 @@ import churchpresenter.composeapp.generated.resources.save_diagnostic_info
 import churchpresenter.composeapp.generated.resources.style_editor_window_title
 import churchpresenter.composeapp.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.LocalLanguage
@@ -62,11 +62,11 @@ import org.churchpresenter.app.churchpresenter.utils.DeviceInfoReport
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.ic_app_icon
-import songlibrary.ui.SongLibraryApp
+import org.churchpresenter.songlibrary.ui.SongLibraryApp
 import org.churchpresenter.converter.ui.App as ConverterApp
 import org.churchpresenter.converter.ui.Strings as ConverterStrings
-import lottiegen.App as LottieGenApp
-import lottiegen.editor.StyleEditorApp
+import org.churchpresenter.lottiegen.App as LottieGenApp
+import org.churchpresenter.lottiegen.editor.StyleEditorApp
 import java.awt.Desktop
 import java.awt.Window as AwtWindow
 import java.io.File

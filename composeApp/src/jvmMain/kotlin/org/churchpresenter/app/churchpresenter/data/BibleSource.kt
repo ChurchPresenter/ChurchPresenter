@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import java.io.File
 
 /** The archives the downloader can install from, in the order they are offered. */

@@ -9,7 +9,7 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.settings.AtemSettings
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import java.io.File
@@ -19,6 +19,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.churchpresenter.app.churchpresenter.testPort
+import org.churchpresenter.atem.AtemConnectionManager
+import org.churchpresenter.atem.FakeAtemSwitcher
 
 /**
  * `POST /api/atem/still/{name}` all the way to a switcher: render the named lower third, then push

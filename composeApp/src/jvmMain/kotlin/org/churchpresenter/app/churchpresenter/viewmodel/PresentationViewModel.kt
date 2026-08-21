@@ -11,11 +11,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.presentation.PresentationLoadError
-import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.presentationengine.DeckRasterizer
 import org.churchpresenter.presentationengine.LoadResult
 import org.churchpresenter.presentationengine.PresentationLoader
@@ -24,6 +22,8 @@ import org.churchpresenter.presentationengine.cache.SlideDiskCache
 import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.presentationengine.model.DeckFormat
 import org.churchpresenter.presentationengine.model.DeckLoadError
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.utils.Constants
 import java.awt.image.BufferedImage
 import java.io.File
 

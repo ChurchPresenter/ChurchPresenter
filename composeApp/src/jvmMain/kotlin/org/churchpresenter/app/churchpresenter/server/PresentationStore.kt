@@ -10,13 +10,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.presentationengine.DeckRasterizer
 import org.churchpresenter.presentationengine.LoadResult
 import org.churchpresenter.presentationengine.PresentationLoader
 import org.churchpresenter.presentationengine.cache.SlideCacheSupersededException
 import org.churchpresenter.presentationengine.cache.SlideDiskCache
+import org.churchpresenter.settings.utils.Constants
 
 /**
  * Presentations as the companion API serves them: the catalogue, the per-slide JPEG cache and the

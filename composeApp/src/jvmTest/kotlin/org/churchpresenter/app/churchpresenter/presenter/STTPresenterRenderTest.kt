@@ -8,7 +8,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.data.settings.STTSettings
+import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
 import kotlin.test.Test
 

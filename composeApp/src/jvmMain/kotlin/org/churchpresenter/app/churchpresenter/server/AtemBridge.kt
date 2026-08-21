@@ -10,8 +10,11 @@ import io.ktor.server.response.respondText
 import io.ktor.websocket.readText
 import java.io.File
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
+import org.churchpresenter.atem.AtemClient
+import org.churchpresenter.atem.AtemConnectionManager
+import org.churchpresenter.atem.AtemKey
 
 /**
  * Everything the companion API does with ATEM hardware and the lower-third folder: which files are

@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.server
 
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 
 /**
  * Infer a [ScheduleItem] from the flat [RemoteItemDto] by detecting which fields are present.

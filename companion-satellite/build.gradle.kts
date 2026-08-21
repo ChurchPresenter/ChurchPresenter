@@ -4,7 +4,7 @@ plugins {
     jacoco
 }
 
-group = "companionsatellite"
+group = "org.churchpresenter"
 
 extra["coverageFloors"] = mapOf(
     "BRANCH" to "0.75",

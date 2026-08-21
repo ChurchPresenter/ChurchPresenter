@@ -10,7 +10,7 @@ import androidx.compose.ui.test.performClick
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarButton
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarTags
 import org.churchpresenter.app.churchpresenter.tabs.scheduleTab
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import java.io.File
 import kotlin.test.Test

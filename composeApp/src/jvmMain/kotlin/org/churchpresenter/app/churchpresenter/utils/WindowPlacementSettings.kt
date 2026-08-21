@@ -5,7 +5,7 @@ import androidx.compose.ui.window.WindowPlacement
 /**
  * How the main window's placement is stored in settings and read back at launch.
  *
- * Lives in `utils/` rather than beside [org.churchpresenter.app.churchpresenter.data.settings.AppSettings]
+ * Lives in `utils/` rather than beside [org.churchpresenter.settings.AppSettings]
  * because [WindowPlacement] is a Compose type and `data/settings` is deliberately Compose-free.
  */
 

@@ -93,7 +93,7 @@ FN        — operator confirmed, engine missed          → fix; find the missi
         STEM OVER-EXTENSION   — book resolved only by extending well past its alias's stem (the
                                 "открывает"/"откр" shape)
     CONFIDENT/OTHER rows are collapsed to a count — don't need review. See
-    `src/main/kotlin/engine/tools/StickyAudit.kt` for the exact heuristic and why a naive
+    `src/main/kotlin/org/churchpresenter/bibleengine/tools/StickyAudit.kt` for the exact heuristic and why a naive
     "any stem match is risky" first version was too noisy to use (flagged 35 of 61 real jumps).
 
 2a. Replay with the bibles the SERVICE ran, not whatever loads by default:
@@ -360,9 +360,9 @@ ChurchPresenter-BLE/
     extract_training_samples.py   ← compact JSONL per session (DB needed for FN anchor text)
     eval_metrics.py               ← precision / recall / premature / latency table
     match_training_data.py        ← artifact pairing helper
-  src/main/kotlin/engine/tools/
+  src/main/kotlin/org/churchpresenter/bibleengine/tools/
     StickyAudit.kt                 ← sticky-log auto-triage, `./gradlew stickyAudit --args="<path>"`
-  src/test/kotlin/engine/
+  src/test/kotlin/org/churchpresenter/bibleengine/
     ReferenceWatcherTest.kt       ← explicit/sticky parsing regression guard; grows with each new FN/FP,
                                      plus mechanism-level invariant/fuzz tests and a growing negative corpus
     ContinuationEngineTest.kt     ← chapter-scan / chapter-history regression guard

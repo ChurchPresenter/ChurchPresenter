@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.settings.AtemSettings
 import java.io.File
 import java.io.IOException
 import java.nio.ByteBuffer

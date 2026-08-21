@@ -2,9 +2,9 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import engine.EngineHandle
-import engine.EngineServer
-import engine.engine.DetectionLogger
+import org.churchpresenter.bibleengine.EngineHandle
+import org.churchpresenter.bibleengine.EngineServer
+import org.churchpresenter.bibleengine.engine.DetectionLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 import java.io.File
 import java.time.Instant
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import org.json.JSONObject
 
 private const val JITTER_MIN = 0.8

@@ -1,7 +1,8 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.BibleSettings
 import java.io.File
 import javax.swing.JOptionPane
 import java.awt.Window
@@ -79,7 +80,7 @@ class FileManager {
      * translation under that — so a flat listing finds nothing but whatever happens to sit at the
      * top level. Relative rather than bare names because a collection can easily carry two files of
      * the same name in different folders, and the returned string is the identity everything else
-     * keys on ([org.churchpresenter.app.churchpresenter.data.settings.BibleSettings.primaryBible],
+     * keys on ([BibleSettings.primaryBible],
      * the display-name map, the engine's file list).
      *
      * Callers resolve with `File(storageDirectory, value)`, which handles the embedded separators on

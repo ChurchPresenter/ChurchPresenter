@@ -9,6 +9,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import org.churchpresenter.atem.AtemClient
+import org.churchpresenter.atem.EncodedFrame
+import org.churchpresenter.atem.FakeAtemSwitcher
 
 class AtemUploadTracedTest {
 

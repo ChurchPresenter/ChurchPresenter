@@ -6,8 +6,8 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.server.AtemMediaSlot
-import org.churchpresenter.app.churchpresenter.server.AtemState
+import org.churchpresenter.atem.AtemMediaSlot
+import org.churchpresenter.atem.AtemState
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

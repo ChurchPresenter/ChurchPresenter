@@ -13,8 +13,9 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.AppSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -48,7 +49,7 @@ class ProjectionSettingsTabContentOutputsTest {
         onAllNodesWithText(label).assertCountEquals(if (shown) 2 else 1)
     }
 
-    private fun row0(get: () -> org.churchpresenter.app.churchpresenter.data.settings.AppSettings): ScreenAssignment =
+    private fun row0(get: () -> AppSettings): ScreenAssignment =
         get().projectionSettings.screenAssignments[0]
 
     // ── Opening and closing ─────────────────────────────────────────────────────────────────────

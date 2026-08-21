@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.settings.utils.Constants
 import java.time.LocalTime
 import kotlin.test.AfterTest
 import kotlin.test.Test

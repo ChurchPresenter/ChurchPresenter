@@ -8,11 +8,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.server.AtemMediaSlot
-import org.churchpresenter.app.churchpresenter.server.AtemState
-import org.churchpresenter.app.churchpresenter.server.AtemUploadStatus
+import org.churchpresenter.atem.AtemMediaSlot
+import org.churchpresenter.atem.AtemState
+import org.churchpresenter.atem.AtemUploadStatus
 import org.churchpresenter.app.churchpresenter.tabs.LowerThirdLabel
 import org.churchpresenter.app.churchpresenter.tabs.lottieFolder
 import org.churchpresenter.app.churchpresenter.tabs.lottieFolderWithContent

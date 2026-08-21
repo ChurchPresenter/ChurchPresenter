@@ -1,0 +1,687 @@
+package org.churchpresenter.planningcenter
+
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.http.encodeURLParameter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.settings.utils.Constants
+import java.io.File
+import java.io.IOException
+import java.nio.channels.UnresolvedAddressException
+
+/**
+ * OAuth2 + REST client for Planning Center Online's Services/People APIs. Each church registers
+ * its own free PCO Developer OAuth application and supplies its own client id/secret (Settings ->
+ * Planning Center) — no credentials ship with the app, matching the app's existing Pexels/Pixabay
+ * bring-your-own-key pattern in `StockMediaClient`. One-way pull only; nothing is written back to
+ * Planning Center.
+ *
+ * Every request function turns a failure into a value rather than throwing, and each catches the
+ * three things that actually happen, in this order:
+ *  - [IOException] — refused, reset or timed out. A retry is worth offering: `NetworkError`.
+ *  - [UnresolvedAddressException] — no DNS answer, which is what being offline looks like. It is
+ *    an [IllegalArgumentException] subclass, so it MUST be caught before the clause below or an
+ *    offline operator is told their plan is malformed.
+ *  - [IllegalArgumentException] — the body was not what the API documents. `SerializationException`
+ *    (not valid JSON at all) and the `jsonObject`/`jsonPrimitive` accessors (valid JSON of the
+ *    wrong shape) both land here, and both mean `Failure`: retrying changes nothing.
+ *
+ * Anything else is left to propagate, `CancellationException` included — a cancelled import must
+ * cancel, not come back as a network error.
+ */
+@Suppress("TooManyFunctions") // 14 request functions, one per PCO endpoint this integration uses.
+object PlanningCenterClient {
+
+    private const val AUTHORIZE_URL = "https://api.planningcenteronline.com/oauth/authorize"
+    private const val TOKEN_URL = "https://api.planningcenteronline.com/oauth/token"
+    private const val ME_URL = "https://api.planningcenteronline.com/people/v2/me"
+
+    /** "people" is needed for [getCurrentPerson]; "services" for the plan/song import phases. */
+    private const val OAUTH_SCOPE = "people services"
+
+    data class TokenSet(
+        val accessToken: String,
+        val refreshToken: String,
+        val expiresAtEpochMs: Long
+    )
+
+    data class ConnectedPerson(val displayName: String)
+
+    sealed interface TokenOutcome {
+        data class Success(val tokens: TokenSet) : TokenOutcome
+        data object InvalidCredentials : TokenOutcome
+        data object NetworkError : TokenOutcome
+        data object Failure : TokenOutcome
+    }
+
+    sealed interface PersonOutcome {
+        data class Success(val person: ConnectedPerson) : PersonOutcome
+        data object Unauthorized : PersonOutcome
+        data object NetworkError : PersonOutcome
+        data object Failure : PersonOutcome
+    }
+
+    private val json = Json { ignoreUnknownKeys = true }
+
+    private val defaultHttp by lazy {
+        HttpClient(CIO) {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 20_000
+                connectTimeoutMillis = 8_000
+            }
+        }
+    }
+
+    /** Every warning from this client carries the same tag, so Sentry groups the integration. */
+    private val PCO_TAGS = mapOf("subsystem" to "planning_center")
+
+    /**
+     * Reports [e] and hands back [outcome], so a catch clause stays one line and the three-clause
+     * shape above reads as the mapping it is rather than as thirty lines of reporting.
+     */
+    private fun <T> reported(message: String, e: Throwable, outcome: T): T {
+        CrashReporter.reportWarning(message, throwable = e, tags = PCO_TAGS)
+        return outcome
+    }
+
+    fun redirectUri(): String = "http://127.0.0.1:${Constants.PLANNING_CENTER_OAUTH_PORT}/callback"
+
+    fun buildAuthorizationUrl(clientId: String): String {
+        val redirect = redirectUri().encodeURLParameter()
+        val scope = OAUTH_SCOPE.encodeURLParameter()
+        return "$AUTHORIZE_URL?client_id=$clientId&redirect_uri=$redirect&response_type=code&scope=$scope"
+    }
+
+    @Serializable
+    internal data class TokenResponse(
+        @SerialName("access_token") val accessToken: String = "",
+        @SerialName("refresh_token") val refreshToken: String = "",
+        @SerialName("expires_in") val expiresIn: Long = 0L
+    )
+
+    suspend fun exchangeCodeForToken(
+        clientId: String,
+        clientSecret: String,
+        code: String,
+        http: HttpClient = defaultHttp,
+    ): TokenOutcome =
+        requestToken(
+            clientId = clientId,
+            clientSecret = clientSecret,
+            formParams = mapOf(
+                "grant_type" to "authorization_code",
+                "code" to code,
+                "redirect_uri" to redirectUri()
+            ),
+            http = http,
+        )
+
+    suspend fun refreshAccessToken(
+        clientId: String,
+        clientSecret: String,
+        refreshToken: String,
+        http: HttpClient = defaultHttp,
+    ): TokenOutcome =
+        requestToken(
+            clientId = clientId,
+            clientSecret = clientSecret,
+            formParams = mapOf(
+                "grant_type" to "refresh_token",
+                "refresh_token" to refreshToken
+            ),
+            http = http,
+        )
+
+    /**
+     * Authenticates via HTTP Basic (`Authorization: Basic base64(client_id:client_secret)`) —
+     * the RFC 6749 §2.3.1 client-authentication method, and the one most OAuth providers
+     * (including Doorkeeper, which PCO's API runs on) expect for confidential clients. Also still
+     * includes client_id/secret as body params for servers that only check there — belt and
+     * braces, since a mismatch here surfaces as an opaque "unknown client" error either way.
+     */
+    private suspend fun requestToken(
+        clientId: String,
+        clientSecret: String,
+        formParams: Map<String, String>,
+        http: HttpClient,
+    ): TokenOutcome = withContext(Dispatchers.IO) {
+        try {
+            val bodyParams = formParams + mapOf("client_id" to clientId, "client_secret" to clientSecret)
+            val body = bodyParams.entries.joinToString("&") { (k, v) -> "$k=${v.encodeURLParameter()}" }
+            val credentials = "$clientId:$clientSecret".toByteArray(Charsets.UTF_8)
+            val basicAuth = java.util.Base64.getEncoder().encodeToString(credentials)
+            val response = http.post(TOKEN_URL) {
+                header("Authorization", "Basic $basicAuth")
+                contentType(ContentType.Application.FormUrlEncoded)
+                setBody(body)
+            }
+            if (response.status == HttpStatusCode.BadRequest || response.status == HttpStatusCode.Unauthorized) {
+                return@withContext TokenOutcome.InvalidCredentials
+            }
+            if (response.status.value !in 200..299) {
+                CrashReporter.reportWarning(
+                    "Planning Center token request returned HTTP ${response.status.value}",
+                    tags = mapOf("subsystem" to "planning_center")
+                )
+                return@withContext TokenOutcome.Failure
+            }
+            val parsed = json.decodeFromString(TokenResponse.serializer(), response.body())
+            if (parsed.accessToken.isBlank()) return@withContext TokenOutcome.InvalidCredentials
+            TokenOutcome.Success(
+                TokenSet(
+                    accessToken = parsed.accessToken,
+                    refreshToken = parsed.refreshToken,
+                    expiresAtEpochMs = System.currentTimeMillis() + parsed.expiresIn * 1000
+                )
+            )
+        } catch (e: IOException) {
+            reported("Planning Center token request failed", e, TokenOutcome.NetworkError)
+        } catch (e: UnresolvedAddressException) {
+            reported("Planning Center token request failed", e, TokenOutcome.NetworkError)
+        } catch (e: IllegalArgumentException) {
+            reported("Planning Center token response could not be parsed", e, TokenOutcome.Failure)
+        }
+    }
+
+    @Serializable
+    internal data class PersonAttributes(
+        val name: String? = null,
+        @SerialName("first_name") val firstName: String? = null,
+        @SerialName("last_name") val lastName: String? = null
+    )
+
+    @Serializable
+    internal data class PersonData(val id: String = "", val attributes: PersonAttributes = PersonAttributes())
+
+    @Serializable
+    internal data class PersonResponse(val data: PersonData = PersonData())
+
+    suspend fun getCurrentPerson(
+        accessToken: String,
+        http: HttpClient = defaultHttp,
+    ): PersonOutcome = withContext(Dispatchers.IO) {
+        try {
+            val response = http.get(ME_URL) {
+                header("Authorization", "Bearer $accessToken")
+            }
+            if (response.status == HttpStatusCode.Unauthorized || response.status == HttpStatusCode.Forbidden) {
+                return@withContext PersonOutcome.Unauthorized
+            }
+            if (response.status.value !in 200..299) {
+                CrashReporter.reportWarning(
+                    "Planning Center /people/v2/me returned HTTP ${response.status.value}",
+                    tags = mapOf("subsystem" to "planning_center")
+                )
+                return@withContext PersonOutcome.Failure
+            }
+            val parsed = json.decodeFromString(PersonResponse.serializer(), response.body())
+            val attrs = parsed.data.attributes
+            val name = attrs.name
+                ?: listOfNotNull(attrs.firstName, attrs.lastName).joinToString(" ").ifBlank { "Connected" }
+            PersonOutcome.Success(ConnectedPerson(displayName = name))
+        } catch (e: IOException) {
+            reported("Planning Center /people/v2/me failed", e, PersonOutcome.NetworkError)
+        } catch (e: UnresolvedAddressException) {
+            reported("Planning Center /people/v2/me failed", e, PersonOutcome.NetworkError)
+        } catch (e: IllegalArgumentException) {
+            reported("Planning Center /people/v2/me response could not be parsed", e, PersonOutcome.Failure)
+        }
+    }
+
+    // ── Services: service types / plans / plan items / arrangement lyrics ──────
+
+    private const val SERVICES_BASE_URL = "https://api.planningcenteronline.com/services/v2"
+
+    data class ServiceType(val id: String, val name: String)
+    data class Plan(val id: String, val title: String, val dates: String)
+
+    data class PlanItem(
+        val id: String,
+        val title: String,
+        val description: String = "",
+        /**
+         * PCO's rich-text "Details" field for the item — some worship leaders paste lyrics here
+         * (as HTML) instead of the plain-text "description" field. Raw HTML; run through
+         * [PlanningCenterLyricsFormatter.htmlDetailsToPlainText] before display.
+         */
+        val htmlDetails: String = "",
+        /** PCO's own item_type string: "song", "header", "media", or "item" (generic). */
+        val itemType: String,
+        val sequence: Int,
+        val songId: String? = null,
+        val arrangementId: String? = null,
+        val songTitle: String? = null,
+        val songAuthor: String? = null,
+        val songCcliNumber: String? = null
+    )
+
+    data class ArrangementDetail(val chordChart: String, val lyrics: String)
+
+    sealed interface ServiceTypesOutcome {
+        data class Success(val serviceTypes: List<ServiceType>) : ServiceTypesOutcome
+        data object Unauthorized : ServiceTypesOutcome
+        data object NetworkError : ServiceTypesOutcome
+        data object Failure : ServiceTypesOutcome
+    }
+
+    sealed interface PlansOutcome {
+        data class Success(val plans: List<Plan>) : PlansOutcome
+        data object Unauthorized : PlansOutcome
+        data object NetworkError : PlansOutcome
+        data object Failure : PlansOutcome
+    }
+
+    sealed interface PlanItemsOutcome {
+        data class Success(val items: List<PlanItem>) : PlanItemsOutcome
+        data object Unauthorized : PlanItemsOutcome
+        data object NetworkError : PlanItemsOutcome
+        data object Failure : PlanItemsOutcome
+    }
+
+    sealed interface ArrangementOutcome {
+        data class Success(val detail: ArrangementDetail) : ArrangementOutcome
+        data object Unauthorized : ArrangementOutcome
+        data object NetworkError : ArrangementOutcome
+        data object Failure : ArrangementOutcome
+    }
+
+    suspend fun listServiceTypes(
+        accessToken: String,
+        http: HttpClient = defaultHttp,
+    ): ServiceTypesOutcome = withContext(Dispatchers.IO) {
+        try {
+            val response = http.get("$SERVICES_BASE_URL/service_types") {
+                header("Authorization", "Bearer $accessToken")
+                parameter("per_page", 100)
+            }
+            if (response.status == HttpStatusCode.Unauthorized || response.status == HttpStatusCode.Forbidden) {
+                return@withContext ServiceTypesOutcome.Unauthorized
+            }
+            if (response.status.value !in 200..299) {
+                CrashReporter.reportWarning(
+                    "Planning Center service_types returned HTTP ${response.status.value}",
+                    tags = mapOf("subsystem" to "planning_center")
+                )
+                return@withContext ServiceTypesOutcome.Failure
+            }
+            val root = json.parseToJsonElement(response.body()).jsonObject
+            val serviceTypes = (root["data"] as? JsonArray ?: JsonArray(emptyList())).map { el ->
+                val obj = el.jsonObject
+                ServiceType(
+                    id = obj["id"]?.jsonPrimitive?.contentOrNull ?: "",
+                    name = obj["attributes"]?.jsonObject?.get("name")?.jsonPrimitive?.contentOrNull ?: ""
+                )
+            }
+            ServiceTypesOutcome.Success(serviceTypes)
+        } catch (e: IOException) {
+            reported("Planning Center service_types request failed", e, ServiceTypesOutcome.NetworkError)
+        } catch (e: UnresolvedAddressException) {
+            reported("Planning Center service_types request failed", e, ServiceTypesOutcome.NetworkError)
+        } catch (e: IllegalArgumentException) {
+            reported("Planning Center service_types response could not be parsed", e, ServiceTypesOutcome.Failure)
+        }
+    }
+
+    suspend fun listUpcomingPlans(
+        accessToken: String,
+        serviceTypeId: String,
+        http: HttpClient = defaultHttp,
+    ): PlansOutcome = withContext(Dispatchers.IO) {
+        try {
+            val response = http.get("$SERVICES_BASE_URL/service_types/$serviceTypeId/plans") {
+                header("Authorization", "Bearer $accessToken")
+                parameter("filter", "future")
+                parameter("order", "sort_date")
+                parameter("per_page", 25)
+            }
+            if (response.status == HttpStatusCode.Unauthorized || response.status == HttpStatusCode.Forbidden) {
+                return@withContext PlansOutcome.Unauthorized
+            }
+            if (response.status.value !in 200..299) {
+                CrashReporter.reportWarning(
+                    "Planning Center plans returned HTTP ${response.status.value}",
+                    tags = mapOf("subsystem" to "planning_center")
+                )
+                return@withContext PlansOutcome.Failure
+            }
+            val root = json.parseToJsonElement(response.body()).jsonObject
+            val plans = (root["data"] as? JsonArray ?: JsonArray(emptyList())).map { el ->
+                val obj = el.jsonObject
+                val attrs = obj["attributes"]?.jsonObject
+                val title = attrs?.get("title")?.jsonPrimitive?.contentOrNull?.ifBlank { null }
+                    ?: attrs?.get("series_title")?.jsonPrimitive?.contentOrNull
+                    ?: "Untitled Plan"
+                Plan(
+                    id = obj["id"]?.jsonPrimitive?.contentOrNull ?: "",
+                    title = title,
+                    dates = attrs?.get("dates")?.jsonPrimitive?.contentOrNull ?: ""
+                )
+            }
+            PlansOutcome.Success(plans)
+        } catch (e: IOException) {
+            reported("Planning Center plans request failed", e, PlansOutcome.NetworkError)
+        } catch (e: UnresolvedAddressException) {
+            reported("Planning Center plans request failed", e, PlansOutcome.NetworkError)
+        } catch (e: IllegalArgumentException) {
+            reported("Planning Center plans response could not be parsed", e, PlansOutcome.Failure)
+        }
+    }
+
+    suspend fun getPlanItems(
+        accessToken: String,
+        serviceTypeId: String,
+        planId: String,
+        http: HttpClient = defaultHttp,
+    ): PlanItemsOutcome =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = http.get("$SERVICES_BASE_URL/service_types/$serviceTypeId/plans/$planId/items") {
+                    header("Authorization", "Bearer $accessToken")
+                    parameter("include", "song")
+                    parameter("per_page", 200)
+                }
+                if (response.status == HttpStatusCode.Unauthorized || response.status == HttpStatusCode.Forbidden) {
+                    return@withContext PlanItemsOutcome.Unauthorized
+                }
+                if (response.status.value !in 200..299) {
+                    CrashReporter.reportWarning(
+                        "Planning Center plan items returned HTTP ${response.status.value}",
+                        tags = mapOf("subsystem" to "planning_center")
+                    )
+                    return@withContext PlanItemsOutcome.Failure
+                }
+                val root = json.parseToJsonElement(response.body()).jsonObject
+                val dataArray = root["data"] as? JsonArray ?: JsonArray(emptyList())
+                val includedArray = root["included"] as? JsonArray ?: JsonArray(emptyList())
+                val includedByKey = includedArray.associateBy { el ->
+                    val obj = el.jsonObject
+                    "${obj["type"]?.jsonPrimitive?.contentOrNull}::${obj["id"]?.jsonPrimitive?.contentOrNull}"
+                }
+
+                val items = dataArray.map { el ->
+                    val obj = el.jsonObject
+                    val attrs = obj["attributes"]?.jsonObject
+                    val rel = obj["relationships"]?.jsonObject
+                    val songRef = rel?.get("song")?.jsonObject?.get("data")
+                        ?.let { it as? JsonObject }
+                    val arrangementRef = rel?.get("arrangement")?.jsonObject?.get("data")
+                        ?.let { it as? JsonObject }
+                    val songId = songRef?.get("id")?.jsonPrimitive?.contentOrNull
+                    val songAttrs = songId?.let {
+                        includedByKey["Song::$it"]?.jsonObject?.get("attributes")?.jsonObject
+                    }
+
+                    PlanItem(
+                        id = obj["id"]?.jsonPrimitive?.contentOrNull ?: "",
+                        title = attrs?.get("title")?.jsonPrimitive?.contentOrNull ?: "",
+                        description = attrs?.get("description")?.jsonPrimitive?.contentOrNull ?: "",
+                        htmlDetails = attrs?.get("html_details")?.jsonPrimitive?.contentOrNull ?: "",
+                        itemType = attrs?.get("item_type")?.jsonPrimitive?.contentOrNull ?: "item",
+                        sequence = attrs?.get("sequence")?.jsonPrimitive?.int ?: 0,
+                        songId = songId,
+                        arrangementId = arrangementRef?.get("id")?.jsonPrimitive?.contentOrNull,
+                        songTitle = songAttrs?.get("title")?.jsonPrimitive?.contentOrNull,
+                        songAuthor = songAttrs?.get("author")?.jsonPrimitive?.contentOrNull,
+                        songCcliNumber = songAttrs?.get("ccli_number")?.jsonPrimitive?.contentOrNull
+                    )
+                }.sortedBy { it.sequence }
+
+                PlanItemsOutcome.Success(items)
+            } catch (e: IOException) {
+                reported("Planning Center plan items request failed", e, PlanItemsOutcome.NetworkError)
+            } catch (e: UnresolvedAddressException) {
+                reported("Planning Center plan items request failed", e, PlanItemsOutcome.NetworkError)
+            } catch (e: IllegalArgumentException) {
+                reported("Planning Center plan items response could not be parsed", e, PlanItemsOutcome.Failure)
+            }
+        }
+
+    suspend fun getArrangementDetail(
+        accessToken: String,
+        songId: String,
+        arrangementId: String,
+        http: HttpClient = defaultHttp,
+    ): ArrangementOutcome =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = http.get("$SERVICES_BASE_URL/songs/$songId/arrangements/$arrangementId") {
+                    header("Authorization", "Bearer $accessToken")
+                }
+                if (response.status == HttpStatusCode.Unauthorized || response.status == HttpStatusCode.Forbidden) {
+                    return@withContext ArrangementOutcome.Unauthorized
+                }
+                if (response.status.value !in 200..299) {
+                    CrashReporter.reportWarning(
+                        "Planning Center arrangement returned HTTP ${response.status.value}",
+                        tags = mapOf("subsystem" to "planning_center")
+                    )
+                    return@withContext ArrangementOutcome.Failure
+                }
+                val root = json.parseToJsonElement(response.body()).jsonObject
+                val attrs = root["data"]?.jsonObject?.get("attributes")?.jsonObject
+                val chordChart = attrs?.get("chord_chart")?.jsonPrimitive?.contentOrNull ?: ""
+                // PCO's own "lyrics" attribute is already chord-free (server-side stripped) —
+                // prefer it over our own regex stripping; fall back only if it's ever absent.
+                val pcoLyrics = attrs?.get("lyrics")?.jsonPrimitive?.contentOrNull
+                ArrangementOutcome.Success(
+                    ArrangementDetail(
+                        chordChart = chordChart,
+                        lyrics = pcoLyrics?.takeIf { it.isNotBlank() }
+                            ?: PlanningCenterLyricsFormatter.stripChords(chordChart)
+                    )
+                )
+            } catch (e: IOException) {
+                reported("Planning Center arrangement request failed", e, ArrangementOutcome.NetworkError)
+            } catch (e: UnresolvedAddressException) {
+                reported("Planning Center arrangement request failed", e, ArrangementOutcome.NetworkError)
+            } catch (e: IllegalArgumentException) {
+                reported("Planning Center arrangement response could not be parsed", e, ArrangementOutcome.Failure)
+            }
+        }
+
+    // ── Attachments (media backgrounds, slide decks) ────────────────────────────
+
+    /**
+     * [thumbnailUrl] (when present) is a public, unauthenticated S3 URL suitable for a small
+     * preview — cheap, no token needed. It is NOT a full-resolution download source. The
+     * attachment's own `url` attribute is deliberately not kept here: it's a
+     * `services.planningcenteronline.com` **web app** link (browser-session auth), not an API
+     * download link — hitting it with an OAuth bearer token 302s to the PCO login page, which is
+     * silently what got saved as "the image" before this was found. The real file must be
+     * fetched via [resolveAttachmentDownloadUrl].
+     */
+    data class PlanAttachment(val id: String, val filename: String, val thumbnailUrl: String? = null)
+
+    sealed interface AttachmentsOutcome {
+        data class Success(val attachments: List<PlanAttachment>) : AttachmentsOutcome
+        data object Unauthorized : AttachmentsOutcome
+        data object NetworkError : AttachmentsOutcome
+        data object Failure : AttachmentsOutcome
+    }
+
+    sealed interface FileDownloadOutcome {
+        data class Success(val file: File) : FileDownloadOutcome
+        data object NetworkError : FileDownloadOutcome
+        data object Failure : FileDownloadOutcome
+    }
+
+    sealed interface AttachmentUrlOutcome {
+        data class Success(val url: String) : AttachmentUrlOutcome
+        data object Unauthorized : AttachmentUrlOutcome
+        data object Failure : AttachmentUrlOutcome
+    }
+
+    suspend fun getItemAttachments(
+        accessToken: String,
+        serviceTypeId: String,
+        planId: String,
+        itemId: String,
+        http: HttpClient = defaultHttp,
+    ): AttachmentsOutcome = withContext(Dispatchers.IO) {
+        try {
+            val response = http.get(
+                "$SERVICES_BASE_URL/service_types/$serviceTypeId/plans/$planId/items/$itemId/attachments"
+            ) {
+                header("Authorization", "Bearer $accessToken")
+                parameter("per_page", 50)
+            }
+            if (response.status == HttpStatusCode.Unauthorized || response.status == HttpStatusCode.Forbidden) {
+                return@withContext AttachmentsOutcome.Unauthorized
+            }
+            if (response.status.value !in 200..299) {
+                CrashReporter.reportWarning(
+                    "Planning Center item attachments returned HTTP ${response.status.value}",
+                    tags = mapOf("subsystem" to "planning_center")
+                )
+                return@withContext AttachmentsOutcome.Failure
+            }
+            val root = json.parseToJsonElement(response.body()).jsonObject
+            val attachments = (root["data"] as? JsonArray ?: JsonArray(emptyList())).mapNotNull { el ->
+                val obj = el.jsonObject
+                val id = obj["id"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
+                val attrs = obj["attributes"]?.jsonObject
+                val filename = attrs?.get("filename")?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
+                val thumbnailUrl = attrs.get("thumbnail_url")?.jsonPrimitive?.contentOrNull
+                PlanAttachment(id = id, filename = filename, thumbnailUrl = thumbnailUrl)
+            }
+            AttachmentsOutcome.Success(attachments)
+        } catch (e: IOException) {
+            reported("Planning Center item attachments request failed", e, AttachmentsOutcome.NetworkError)
+        } catch (e: UnresolvedAddressException) {
+            reported("Planning Center item attachments request failed", e, AttachmentsOutcome.NetworkError)
+        } catch (e: IllegalArgumentException) {
+            reported("Planning Center item attachments response could not be parsed", e, AttachmentsOutcome.Failure)
+        }
+    }
+
+    /**
+     * Exchanges an attachment id for a real, temporary download URL (a pre-signed S3 link).
+     * PCO's API requires this to be a POST — confirmed by GETting the endpoint first, which
+     * returns a description saying so, rather than guessing. This is the same request PCO's own
+     * web app makes when a user clicks "download"; it records one `AttachmentActivity` "open"
+     * event on the account as an audit-trail entry, same as any legitimate download — not a
+     * destructive or content-modifying call.
+     */
+    suspend fun resolveAttachmentDownloadUrl(
+        accessToken: String,
+        attachmentId: String,
+        http: HttpClient = defaultHttp,
+    ): AttachmentUrlOutcome =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = http.post("$SERVICES_BASE_URL/attachments/$attachmentId/open") {
+                    header("Authorization", "Bearer $accessToken")
+                }
+                if (response.status == HttpStatusCode.Unauthorized || response.status == HttpStatusCode.Forbidden) {
+                    return@withContext AttachmentUrlOutcome.Unauthorized
+                }
+                if (response.status.value !in 200..299) {
+                    CrashReporter.reportWarning(
+                        "Planning Center attachment open returned HTTP ${response.status.value}",
+                        tags = mapOf("subsystem" to "planning_center")
+                    )
+                    return@withContext AttachmentUrlOutcome.Failure
+                }
+                val root = json.parseToJsonElement(response.body()).jsonObject
+                val url = root["data"]?.jsonObject?.get("attributes")?.jsonObject
+                    ?.get("attachment_url")?.jsonPrimitive?.contentOrNull
+                    ?: return@withContext AttachmentUrlOutcome.Failure
+                AttachmentUrlOutcome.Success(url)
+            } catch (e: IOException) {
+                reported("Planning Center attachment open failed", e, AttachmentUrlOutcome.Failure)
+            } catch (e: UnresolvedAddressException) {
+                reported("Planning Center attachment open failed", e, AttachmentUrlOutcome.Failure)
+            } catch (e: IllegalArgumentException) {
+                reported(
+                    "Planning Center attachment open response could not be parsed",
+                    e,
+                    AttachmentUrlOutcome.Failure,
+                )
+            }
+        }
+
+    /**
+     * Downloads a file's bytes from an already-resolved URL (a pre-signed S3 link — no auth
+     * header needed or wanted).
+     */
+    /**
+     * Also on stderr, the same way BibleEngineClient reports a failed connect. The Sentry warning
+     * carries the exception, but `reportWarning` returns immediately when Sentry is not enabled —
+     * which is every test run, and every operator who has not opted in. Without the stderr line the
+     * only surviving evidence is the word `NetworkError`, which says neither what failed nor why: a
+     * refused connection, a timeout and a closed client are indistinguishable, and each wants a
+     * different answer.
+     */
+    private fun downloadFailed(url: String, e: Throwable): FileDownloadOutcome {
+        System.err.println(
+            "planning-center: download of $url failed — ${e.javaClass.simpleName}: ${e.message}"
+        )
+        return reported("Planning Center attachment download failed", e, FileDownloadOutcome.NetworkError)
+    }
+
+    suspend fun downloadFile(
+        url: String,
+        destination: File,
+        http: HttpClient = defaultHttp,
+    ): FileDownloadOutcome = withContext(Dispatchers.IO) {
+        try {
+            val response = http.get(url)
+            if (response.status.value !in 200..299) {
+                CrashReporter.reportWarning(
+                    "Planning Center attachment download returned HTTP ${response.status.value}",
+                    tags = mapOf("subsystem" to "planning_center")
+                )
+                return@withContext FileDownloadOutcome.Failure
+            }
+            val bytes: ByteArray = response.body()
+            destination.parentFile?.mkdirs()
+            destination.writeBytes(bytes)
+            FileDownloadOutcome.Success(destination)
+        } catch (e: IOException) {
+            downloadFailed(url, e)
+        } catch (e: IllegalArgumentException) {
+            // No JSON is parsed here, so this is not a malformed body: it is a URL ktor could not
+            // use — an unparseable one, or a host with no DNS answer (UnresolvedAddressException is
+            // an IllegalArgumentException). Both are still "the file did not arrive".
+            downloadFailed(url, e)
+        }
+    }
+
+    /** Fetches raw bytes for an attachment thumbnail preview (public S3 URL, no auth); null on any failure. */
+    suspend fun fetchThumbnailBytes(
+        url: String,
+        http: HttpClient = defaultHttp,
+    ): ByteArray? = withContext(Dispatchers.IO) {
+        try {
+            val response = http.get(url)
+            if (response.status.value in 200..299) response.body() else null
+        } catch (_: IOException) {
+            null
+        } catch (_: IllegalArgumentException) {
+            // Unreachable, unresolvable or not a URL at all. A missing preview is not worth
+            // reporting — the row simply draws without a thumbnail.
+            null
+        }
+    }
+}
