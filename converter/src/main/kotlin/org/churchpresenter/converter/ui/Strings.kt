@@ -1,4 +1,4 @@
-package ui
+package org.churchpresenter.converter.ui
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

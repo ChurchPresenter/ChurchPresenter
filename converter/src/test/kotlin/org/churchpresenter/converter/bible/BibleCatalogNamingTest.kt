@@ -1,4 +1,4 @@
-package converter.bible
+package org.churchpresenter.converter.bible
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

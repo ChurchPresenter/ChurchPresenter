@@ -1,4 +1,4 @@
-package ui
+package org.churchpresenter.converter.ui
 
 import java.util.Locale
 import java.util.Properties

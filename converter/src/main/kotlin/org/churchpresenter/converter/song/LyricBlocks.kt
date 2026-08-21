@@ -1,4 +1,4 @@
-package converter.song
+package org.churchpresenter.converter.song
 
 /**
  * Turns a song's lyrics into sections, for the formats that do not hand over a list of slides

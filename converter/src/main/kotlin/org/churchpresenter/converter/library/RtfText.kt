@@ -1,4 +1,4 @@
-package converter.library
+package org.churchpresenter.converter.library
 
 import java.nio.charset.Charset
 

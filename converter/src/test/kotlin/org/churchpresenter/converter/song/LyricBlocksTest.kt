@@ -1,4 +1,4 @@
-package converter.song
+package org.churchpresenter.converter.song
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

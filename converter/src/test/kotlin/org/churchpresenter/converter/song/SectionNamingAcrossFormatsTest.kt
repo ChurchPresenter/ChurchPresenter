@@ -1,4 +1,4 @@
-package converter.song
+package org.churchpresenter.converter.song
 
 import java.io.File
 import java.nio.charset.Charset

@@ -1,4 +1,4 @@
-package converter.song
+package org.churchpresenter.converter.song
 
 /**
  * Rows of chords written above the words, and what they become in the inline `[G]lyric` convention

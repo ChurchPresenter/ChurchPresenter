@@ -1,4 +1,4 @@
-package converter.song
+package org.churchpresenter.converter.song
 
 /**
  * The section names other song apps use, mapped onto the ones ChurchPresenter writes.

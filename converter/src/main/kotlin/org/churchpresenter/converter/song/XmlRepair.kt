@@ -1,4 +1,4 @@
-package converter.song
+package org.churchpresenter.converter.song
 
 /**
  * Makes a song export parseable when the app that wrote it did not escape its own text.

@@ -1,4 +1,4 @@
-package converter.bible
+package org.churchpresenter.converter.bible
 
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory

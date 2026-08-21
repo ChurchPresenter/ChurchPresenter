@@ -1,4 +1,4 @@
-package converter.song
+package org.churchpresenter.converter.song
 
 /**
  * Just enough of the protocol-buffer wire format to walk a ProPresenter 7 document.

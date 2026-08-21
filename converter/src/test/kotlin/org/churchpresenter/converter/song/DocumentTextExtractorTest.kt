@@ -1,4 +1,4 @@
-package converter.song
+package org.churchpresenter.converter.song
 
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage

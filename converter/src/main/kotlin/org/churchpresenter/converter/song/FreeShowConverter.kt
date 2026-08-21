@@ -1,4 +1,4 @@
-package converter.song
+package org.churchpresenter.converter.song
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray

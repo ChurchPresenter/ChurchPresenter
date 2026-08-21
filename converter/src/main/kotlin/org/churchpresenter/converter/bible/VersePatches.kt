@@ -1,4 +1,4 @@
-package converter.bible
+package org.churchpresenter.converter.bible
 
 /**
  * Known incomplete or incorrect verse texts in source XML Bible files.

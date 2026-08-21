@@ -1,4 +1,4 @@
-package ui
+package org.churchpresenter.converter.ui
 
 /** Where a source format sits in the "Convert from" rail. */
 enum class SourceGroup { SONGS, DOCUMENTS }

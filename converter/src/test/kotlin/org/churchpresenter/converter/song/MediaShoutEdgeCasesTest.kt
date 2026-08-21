@@ -1,4 +1,4 @@
-package converter.song
+package org.churchpresenter.converter.song
 
 import java.io.ByteArrayOutputStream
 import java.io.File
