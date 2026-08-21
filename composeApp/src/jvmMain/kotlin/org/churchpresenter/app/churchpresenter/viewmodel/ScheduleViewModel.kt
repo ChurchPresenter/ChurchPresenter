@@ -1,13 +1,13 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.websiteDisplayText
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.schedule.websiteDisplayText
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.app.churchpresenter.utils.Constants

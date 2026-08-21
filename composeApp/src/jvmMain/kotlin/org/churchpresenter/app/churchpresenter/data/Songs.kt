@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import core.models.songs.SongFileParser
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongFileParser
+import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.runtime.mutableStateListOf
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.SongSectionWords

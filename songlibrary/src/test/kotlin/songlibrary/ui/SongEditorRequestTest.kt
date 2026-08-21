@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.songs.SongItem
 
 /**
  * The request a row's Edit button hands to whoever is hosting the window.
@@ -28,7 +29,7 @@ class SongEditorRequestTest {
 
     @Test
     fun `saving hands the edited song back`() {
-        var saved: core.models.songs.SongItem? = null
+        var saved: SongItem? = null
         val request = SongEditorRequest(song, books, STOCK, onSave = { saved = it }, onDismiss = {})
 
         val edited = song.copy(author = "Charles Wesley")

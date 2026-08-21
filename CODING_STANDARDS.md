@@ -4,8 +4,8 @@
 
 ### ✅ DO: Use proper imports
 ```kotlin
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 
 fun myFunction(
@@ -19,8 +19,8 @@ fun myFunction(
 ```kotlin
 // WRONG - Don't do this!
 fun myFunction(
-    item: org.churchpresenter.app.churchpresenter.models.ScheduleItem,
-    section: org.churchpresenter.app.churchpresenter.models.LyricSection,
+    item: org.churchpresenter.core.models.schedule.ScheduleItem,
+    section: org.churchpresenter.core.models.songs.LyricSection,
     viewModel: org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 ) { ... }
 ```
@@ -28,7 +28,7 @@ fun myFunction(
 ### Import Style Rules
 
 1. **Always import classes explicitly** - Add the proper import statement at the top of the file
-2. **Never use wildcard imports** - Avoid `import org.churchpresenter.app.churchpresenter.models.*`
+2. **Never use wildcard imports** - Avoid `import org.churchpresenter.core.models.schedule.*`
 3. **Remove unused imports** - Clean up imports that are no longer needed
 4. **Group imports properly** - Keep imports organized by package
 

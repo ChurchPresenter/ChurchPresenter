@@ -5,6 +5,7 @@ import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.shortcuts.KeyChord
 
 /**
  * Guards the shipped bindings.

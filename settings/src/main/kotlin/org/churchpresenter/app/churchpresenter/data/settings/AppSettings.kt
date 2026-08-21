@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.data.settings
 import kotlinx.serialization.Serializable
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckInterval
-import org.churchpresenter.app.churchpresenter.models.SongTuning
+import org.churchpresenter.core.models.songs.SongTuning
 
 @Serializable
 data class AppSettings(

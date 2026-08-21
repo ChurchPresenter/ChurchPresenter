@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.models
 
 import companionsatellite.CompanionConnectionStatus
+import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
 
 /** Live status for one Companion Satellite registration, keyed by [CompanionSurfaceSlot]. */
 data class CompanionConnectionUiState(

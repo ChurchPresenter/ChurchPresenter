@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.ui.geometry.Offset
-import org.churchpresenter.app.churchpresenter.models.SourceTransform
+import org.churchpresenter.core.models.scene.SourceTransform
 import java.awt.Cursor
 import kotlin.math.abs
 import kotlin.test.Test

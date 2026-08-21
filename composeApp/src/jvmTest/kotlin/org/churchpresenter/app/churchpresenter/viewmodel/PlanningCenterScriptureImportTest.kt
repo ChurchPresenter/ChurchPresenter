@@ -6,7 +6,7 @@ import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
 import java.io.File
 import java.nio.file.Files

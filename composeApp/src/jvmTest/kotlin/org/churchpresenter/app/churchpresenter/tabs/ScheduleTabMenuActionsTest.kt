@@ -2,12 +2,12 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
 import java.nio.file.Files
 import javax.swing.filechooser.FileNameExtensionFilter

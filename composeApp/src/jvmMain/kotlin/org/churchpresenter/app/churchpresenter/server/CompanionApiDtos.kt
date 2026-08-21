@@ -1,11 +1,11 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
 
 // ── API DTOs ─────────────────────────────────────────────────────────────────
