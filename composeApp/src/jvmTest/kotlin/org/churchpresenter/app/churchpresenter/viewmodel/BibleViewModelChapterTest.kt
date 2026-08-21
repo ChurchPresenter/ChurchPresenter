@@ -40,6 +40,12 @@ class BibleViewModelChapterTest {
             ),
         )
         awaitUntil("books to load") { vm.books.value.isNotEmpty() }
+        // Books alone are not enough: `loadBibles` publishes a books-only module first and the
+        // verse text second. A chapter opened in that window reads a book whose chapters hold no
+        // verses -- `loadChapter` publishes the empty list and bumps the selection token anyway,
+        // so `openChapter` returns satisfied and every later index check silently falls out of
+        // range. Every sibling suite already waits for this; this one did not, and failed on CI.
+        awaitUntil("verse data to load") { vm.isFullyLoaded }
     }
 
     @AfterTest
