@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
-import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
+import org.churchpresenter.settings.BackgroundSettings
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

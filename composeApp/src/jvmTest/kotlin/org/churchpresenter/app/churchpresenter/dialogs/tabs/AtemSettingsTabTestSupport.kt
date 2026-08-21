@@ -25,8 +25,8 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.AtemSettings
 import java.net.DatagramSocket
 import java.net.InetAddress
 import kotlin.math.abs

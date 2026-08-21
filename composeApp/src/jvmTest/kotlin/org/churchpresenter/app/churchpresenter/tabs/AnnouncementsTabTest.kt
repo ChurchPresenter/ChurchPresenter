@@ -5,7 +5,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
+import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals

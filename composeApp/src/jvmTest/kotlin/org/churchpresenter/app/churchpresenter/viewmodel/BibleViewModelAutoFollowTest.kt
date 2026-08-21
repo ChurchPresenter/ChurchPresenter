@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleEngineSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleEngineSettings
+import org.churchpresenter.settings.BibleSettings
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

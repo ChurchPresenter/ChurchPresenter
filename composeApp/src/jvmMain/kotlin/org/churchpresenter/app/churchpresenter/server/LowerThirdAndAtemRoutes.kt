@@ -14,7 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 
 private const val KEY_SETTLE_MS = 800L

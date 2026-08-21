@@ -56,7 +56,7 @@ import churchpresenter.composeapp.generated.resources.qa_retry
 import churchpresenter.composeapp.generated.resources.qa_starting_tunnel
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.jetbrains.compose.resources.stringResource

@@ -54,8 +54,8 @@ import churchpresenter.composeapp.generated.resources.content_outputs_quick_sele
 import churchpresenter.composeapp.generated.resources.content_outputs_section_backgrounds
 import churchpresenter.composeapp.generated.resources.content_outputs_section_content
 import churchpresenter.composeapp.generated.resources.content_outputs_select_all
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 /**

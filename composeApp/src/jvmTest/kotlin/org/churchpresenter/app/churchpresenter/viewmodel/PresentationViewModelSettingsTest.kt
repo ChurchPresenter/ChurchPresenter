@@ -2,8 +2,8 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import io.mockk.every
 import io.mockk.mockk
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.PresentationSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.PresentationSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.presentationengine.model.DeckFormat

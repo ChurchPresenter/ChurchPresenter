@@ -7,7 +7,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.tabs.PictureLabel
 import org.churchpresenter.app.churchpresenter.tabs.RecentPictureFolders
 import org.churchpresenter.app.churchpresenter.tabs.openAnimationDropdown
@@ -15,7 +15,7 @@ import org.churchpresenter.app.churchpresenter.tabs.openIntervalEditor
 import org.churchpresenter.app.churchpresenter.tabs.openTransitionEditor
 import org.churchpresenter.app.churchpresenter.tabs.pictureButton
 import org.churchpresenter.app.churchpresenter.tabs.picturesTab
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import java.awt.Color

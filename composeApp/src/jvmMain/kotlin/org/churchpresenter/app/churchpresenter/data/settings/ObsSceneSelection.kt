@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data.settings
 
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.settings.OBSSettings
 
 /**
  * The OBS scene to switch to when the live content type becomes [mode], or **null** to leave OBS

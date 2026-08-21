@@ -4,7 +4,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.data.settings.BibleEngineSettings
+import org.churchpresenter.settings.BibleEngineSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ContinuationSpeed
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager

@@ -23,7 +23,7 @@ import churchpresenter.composeapp.generated.resources.image_files_filter
 import churchpresenter.composeapp.generated.resources.no_image_selected
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import javax.swing.filechooser.FileNameExtensionFilter

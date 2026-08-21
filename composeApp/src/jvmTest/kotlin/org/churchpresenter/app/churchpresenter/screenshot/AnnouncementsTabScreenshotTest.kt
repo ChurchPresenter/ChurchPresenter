@@ -6,15 +6,15 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ProjectionSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementLabel
 import org.churchpresenter.app.churchpresenter.tabs.annButton
 import org.churchpresenter.app.churchpresenter.tabs.announcementsTab
 import org.churchpresenter.app.churchpresenter.tabs.timerButton
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 
 /**

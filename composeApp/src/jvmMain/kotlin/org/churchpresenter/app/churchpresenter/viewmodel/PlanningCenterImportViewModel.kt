@@ -13,7 +13,7 @@ import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterLyricsFormatter
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterScriptureDetector
-import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.presentationengine.LoadResult

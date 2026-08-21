@@ -9,7 +9,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
+import org.churchpresenter.settings.CompanionSatelliteSettings
 
 /**
  * Drives the eight connection-level boxes on a card, plus the auto-connect switch.

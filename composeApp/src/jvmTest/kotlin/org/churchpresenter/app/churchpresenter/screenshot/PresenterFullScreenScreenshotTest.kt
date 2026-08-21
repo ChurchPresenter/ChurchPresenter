@@ -17,15 +17,15 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Color as ComposeColor
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.DictionarySettings
-import org.churchpresenter.app.churchpresenter.data.settings.QASettings
-import org.churchpresenter.app.churchpresenter.data.settings.BackgroundConfig
-import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
-import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
+import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.DictionarySettings
+import org.churchpresenter.settings.QASettings
+import org.churchpresenter.settings.BackgroundConfig
+import org.churchpresenter.settings.BackgroundSettings
+import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.qa.Question
@@ -42,7 +42,7 @@ import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import java.awt.Color
 import java.awt.GradientPaint
 import java.awt.image.BufferedImage
