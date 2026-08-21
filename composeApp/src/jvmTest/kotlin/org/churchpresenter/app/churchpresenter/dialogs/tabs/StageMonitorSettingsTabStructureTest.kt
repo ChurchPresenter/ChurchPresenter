@@ -27,17 +27,18 @@ class StageMonitorSettingsTabStructureTest {
     // ── Sections ────────────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `the tab renders its two headed sections and all six zone editors`() = stageMonitorTab { _ ->
-        onNodeWithText("Screen Content").assertExists("the routing section must be headed")
-        onNodeWithText("Screen Layout").assertExists("as must the preview")
+    fun `the tab renders its headed sections and all six zone editors`() = stageMonitorTab { _ ->
+        for (heading in listOf("Screen Layout", "Screen Content", "Shows", "Transition Settings")) {
+            onNodeWithText(heading).assertExists("the $heading section must be headed")
+        }
 
-        // Each zone editor is titled with its zone name. The titles are matched as *non-clickable*
-        // text: a routing dropdown merges its caption and its current value into one node, so
-        // "Top-Left" also matches the Bible and Songs dropdowns that are currently set to it.
+        // Each zone editor is titled with its zone name, and the preview names the same zone in its
+        // cell. Titles are matched as *non-clickable* text: a routing dropdown merges its caption
+        // and its current value into one node, so "Zone 1" would also match every dropdown set to it.
         for (zone in StageMonitorStyleZone.entries) {
-            val expected = if (zone == StageMonitorStyleZone.FULL_SCREEN) 2 else 1 // + the preview row
-            onAllNodes(hasText(ZoneLabel.of(zone)) and !hasClickAction())
-                .assertCountEquals(expected)
+            // The five slots are named twice — the preview cell and the editor title. Full Screen
+            // has no cell in the grid; it is named by its chip beneath and by its editor.
+            onAllNodes(hasText(ZoneLabel.of(zone)) and !hasClickAction()).assertCountEquals(2)
         }
     }
 
@@ -93,7 +94,7 @@ class StageMonitorSettingsTabStructureTest {
      */
     @Test
     fun `the shadow controls are always shown, whatever the shadow flag says`() {
-        stageMonitorTab(initial = zoneStyled(StageMonitorStyleZone.TOP_LEFT) { copy(shadow = false) }) { _ ->
+        stageMonitorTab(initial = zoneStyled(StageMonitorStyleZone.A) { copy(shadow = false) }) { _ ->
             onAllNodesWithText("Shadow").assertCountEquals(ZoneOrdinal.COUNT)
             onAllNodesWithText("SIZE (%)").assertCountEquals(ZoneOrdinal.COUNT)
         }

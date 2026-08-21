@@ -38,9 +38,9 @@ class StageMonitorSettingsTabRoutingTest {
     fun `every content type routes to the zone it is given, and only it`() {
         for (type in StageMonitorContentType.entries) {
             val target = if (type == StageMonitorContentType.CLOCK) {
-                StageMonitorZone.TOP_RIGHT
+                StageMonitorZone.B
             } else {
-                StageMonitorZone.BOTTOM_RIGHT
+                StageMonitorZone.E
             }
             stageMonitorTab { get ->
                 val before = get().stageMonitorSettings.contentZones
@@ -74,15 +74,15 @@ class StageMonitorSettingsTabRoutingTest {
     fun `a routed zone is what a fresh render of the saved settings shows`() {
         var saved = StageMonitorZone.NONE
         stageMonitorTab { get ->
-            chooseRouting(ContentLabel.of(StageMonitorContentType.MEDIA), ZoneLabel.BOTTOM_LEFT)
+            chooseRouting(ContentLabel.of(StageMonitorContentType.MEDIA), ZoneLabel.ZONE_3)
             saved = get().stageMonitorSettings.zoneFor(StageMonitorContentType.MEDIA)
         }
-        assertEquals(StageMonitorZone.BOTTOM_LEFT, saved, "the pick must have been stored to be re-rendered")
+        assertEquals(StageMonitorZone.C, saved, "the pick must have been stored to be re-rendered")
 
         stageMonitorTab(
             initial = stageSettings { copy(contentZones = contentZones + (StageMonitorContentType.MEDIA to saved)) },
         ) { _ ->
-            assertRoutingShows(ContentLabel.of(StageMonitorContentType.MEDIA), ZoneLabel.BOTTOM_LEFT)
+            assertRoutingShows(ContentLabel.of(StageMonitorContentType.MEDIA), ZoneLabel.ZONE_3)
         }
     }
 
@@ -185,25 +185,28 @@ class StageMonitorSettingsTabRoutingTest {
     }
 
     /**
-     * The metronome shares five of its ten labels with the zone menus ("Top-Left", "None", …), so
-     * this checks the two dropdowns really are independent rather than accidentally writing through
-     * the same label lookup.
+     * Two routing dropdowns showing the same zone are still separate settings.
+     *
+     * They share their displayed text, and `DropdownSettingsField` keeps its own copy of it, so a
+     * pick reaching the wrong field would look right on screen. Both are checked through the
+     * settings object instead.
      */
     @Test
-    fun `a shared label picked in one dropdown does not move the other`() = stageMonitorTab { get ->
-        chooseRouting(ContentLabel.METRONOME, ZoneLabel.TOP_LEFT)
-        assertEquals(MetronomePosition.TOP_LEFT, get().stageMonitorSettings.metronomePosition)
+    fun `a pick in one dropdown does not move another showing the same zone`() = stageMonitorTab { get ->
+        chooseRouting(ContentLabel.of(StageMonitorContentType.WEB), ZoneLabel.ZONE_1)
+        assertEquals(StageMonitorZone.A, get().stageMonitorSettings.zoneFor(StageMonitorContentType.WEB))
         assertEquals(
-            StageMonitorZone.FULL_SCREEN,
-            get().stageMonitorSettings.zoneFor(StageMonitorContentType.WEB),
-            "the Web routing must be untouched by a metronome pick",
+            StageMonitorZone.A,
+            get().stageMonitorSettings.zoneFor(StageMonitorContentType.BIBLE),
+            "Bible was already there and must stay",
         )
 
-        chooseRouting(ContentLabel.of(StageMonitorContentType.WEB), ZoneLabel.TOP_LEFT)
+        chooseRouting(ContentLabel.of(StageMonitorContentType.WEB), ZoneLabel.ZONE_2)
+        assertEquals(StageMonitorZone.B, get().stageMonitorSettings.zoneFor(StageMonitorContentType.WEB))
         assertEquals(
-            MetronomePosition.TOP_LEFT,
-            get().stageMonitorSettings.metronomePosition,
-            "and the metronome untouched by a routing pick",
+            StageMonitorZone.A,
+            get().stageMonitorSettings.zoneFor(StageMonitorContentType.BIBLE),
+            "moving Web off the zone must not move Bible with it",
         )
     }
 }

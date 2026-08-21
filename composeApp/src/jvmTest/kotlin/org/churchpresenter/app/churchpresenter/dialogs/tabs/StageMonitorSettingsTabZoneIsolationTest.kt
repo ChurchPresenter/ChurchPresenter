@@ -119,16 +119,16 @@ class StageMonitorSettingsTabZoneIsolationTest {
      */
     @Test
     fun `configuring one zone after another keeps both`() = stageMonitorTab { get ->
-        styleButton(ZoneOrdinal.of(StageMonitorStyleZone.TOP_RIGHT), "U").performScrollTo().performClick()
+        styleButton(ZoneOrdinal.of(StageMonitorStyleZone.B), "U").performScrollTo().performClick()
         waitForIdle()
-        styleButton(ZoneOrdinal.of(StageMonitorStyleZone.BOTTOM_LEFT), "B").performScrollTo().performClick()
+        styleButton(ZoneOrdinal.of(StageMonitorStyleZone.C), "B").performScrollTo().performClick()
         waitForIdle()
 
-        assertEquals(true, get().styleOf(StageMonitorStyleZone.TOP_RIGHT).underline, "the first edit must survive")
-        assertEquals(true, get().styleOf(StageMonitorStyleZone.BOTTOM_LEFT).bold, "and the second must land")
+        assertEquals(true, get().styleOf(StageMonitorStyleZone.B).underline, "the first edit must survive")
+        assertEquals(true, get().styleOf(StageMonitorStyleZone.C).bold, "and the second must land")
         assertEquals(
-            defaults.getValue(StageMonitorStyleZone.TOP_RIGHT).bold,
-            get().styleOf(StageMonitorStyleZone.TOP_RIGHT).bold,
+            defaults.getValue(StageMonitorStyleZone.B).bold,
+            get().styleOf(StageMonitorStyleZone.B).bold,
             "without the second edit leaking into the first zone",
         )
     }

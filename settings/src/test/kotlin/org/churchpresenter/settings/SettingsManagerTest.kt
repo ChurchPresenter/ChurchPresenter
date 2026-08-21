@@ -570,4 +570,85 @@ class SettingsManagerTest {
         assertTrue(assignments[0].showChords, "an explicit per-output value wins over the old global")
         assertFalse(assignments[1].showChords)
     }
+
+    // ── Version 7: the stage monitor's zone names became layout slots ───────────
+
+    @Test
+    fun `saved zone names become the classic layout's slots`() {
+        writeSettings(
+            """{"settingsVersion":6,"stageMonitorSettings":{
+               "contentZones":{"BIBLE":"TOP_LEFT","NEXT":"TOP_RIGHT","CLOCK":"BOTTOM_MIDDLE",
+               "ANNOUNCEMENT_TEXT":"BOTTOM_LEFT","MEDIA":"FULL_SCREEN","WEB":"NONE"},
+               "zoneStyles":{"TOP_LEFT":{"fontSize":41},"BOTTOM_RIGHT":{"fontSize":42}}}}""",
+        )
+
+        val sm = SettingsManager().loadSettings().stageMonitorSettings
+
+        assertEquals(StageMonitorLayout.CLASSIC, sm.layout, "an existing screen opens as it was drawn")
+        assertEquals(StageMonitorZone.A, sm.zoneFor(StageMonitorContentType.BIBLE))
+        assertEquals(StageMonitorZone.B, sm.zoneFor(StageMonitorContentType.NEXT))
+        assertEquals(StageMonitorZone.C, sm.zoneFor(StageMonitorContentType.ANNOUNCEMENT_TEXT))
+        assertEquals(StageMonitorZone.D, sm.zoneFor(StageMonitorContentType.CLOCK))
+        assertEquals(
+            StageMonitorZone.FULL_SCREEN, sm.zoneFor(StageMonitorContentType.MEDIA),
+            "the two zones that were never positions keep their names",
+        )
+        assertEquals(StageMonitorZone.NONE, sm.zoneFor(StageMonitorContentType.WEB))
+    }
+
+    @Test
+    fun `saved zone styles follow their zone to its slot`() {
+        // The styles are keyed by zone, so the rename has to reach the keys as well as the values —
+        // miss them and every zone silently resets to the built-in defaults.
+        writeSettings(
+            """{"settingsVersion":6,"stageMonitorSettings":{
+               "zoneStyles":{"TOP_LEFT":{"fontSize":41,"color":"#ABCDEF"},
+               "BOTTOM_RIGHT":{"fontSize":42},"FULL_SCREEN":{"fontSize":43}}}}""",
+        )
+
+        val sm = SettingsManager().loadSettings().stageMonitorSettings
+
+        assertEquals(41, sm.styleFor(StageMonitorStyleZone.A).fontSize)
+        assertEquals("#ABCDEF", sm.styleFor(StageMonitorStyleZone.A).color)
+        assertEquals(42, sm.styleFor(StageMonitorStyleZone.E).fontSize)
+        assertEquals(43, sm.styleFor(StageMonitorStyleZone.FULL_SCREEN).fontSize)
+    }
+
+    @Test
+    fun `both version 7 steps run on the same document`() {
+        // The chord switch and the zone names moved in one unreleased change and share a version.
+        writeSettings(
+            """{"settingsVersion":6,"stageMonitorSettings":{"showChords":false,
+               "contentZones":{"BIBLE":"TOP_RIGHT"}},
+               "projectionSettings":{"screenAssignments":[{"targetDisplay":0}]}}""",
+        )
+
+        val settings = SettingsManager().loadSettings()
+
+        assertFalse(settings.projectionSettings.screenAssignments.single().showChords)
+        assertEquals(StageMonitorZone.B, settings.stageMonitorSettings.zoneFor(StageMonitorContentType.BIBLE))
+    }
+
+    @Test
+    fun `a document with no stage monitor section is left alone`() {
+        writeSettings("""{"settingsVersion":6,"theme":"dark"}""")
+
+        val settings = SettingsManager().loadSettings()
+
+        assertEquals("dark", settings.theme)
+        assertEquals(StageMonitorSettings(), settings.stageMonitorSettings, "the defaults, untouched")
+    }
+
+    @Test
+    fun `a document already at version 7 keeps its slot names`() {
+        // Running the rename twice would map nothing — A is not an old name — but the guard is that
+        // it does not run at all, which is what the version is for.
+        writeSettings(
+            """{"settingsVersion":7,"stageMonitorSettings":{"contentZones":{"BIBLE":"E"}}}""",
+        )
+
+        val sm = SettingsManager().loadSettings().stageMonitorSettings
+
+        assertEquals(StageMonitorZone.E, sm.zoneFor(StageMonitorContentType.BIBLE))
+    }
 }
