@@ -40,6 +40,13 @@ class AtemTransferChunkingTest {
     }
 
     @Test
+    fun `a chunk shorter than the block it would look back over keeps its length`() {
+        // The guard on the look-back itself: with an 8-byte chunk there is no 16-bytes-back word to
+        // read, so the two-word check must short-circuit rather than index before the chunk.
+        assertEquals(8, atem.chunkLengthAt(payload(32), dataSize = 64, bytesSent = 0, chunkSize = 8))
+    }
+
+    @Test
     fun `the final chunk is never shortened, header or not`() {
         // Ends the data, so there is no following block to run into.
         assertEquals(16, atem.chunkLengthAt(payload(56), dataSize = 64, bytesSent = 48, chunkSize = 24))

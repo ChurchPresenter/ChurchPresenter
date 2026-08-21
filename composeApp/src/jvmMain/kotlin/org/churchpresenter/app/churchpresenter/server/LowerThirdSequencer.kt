@@ -91,7 +91,7 @@ object LowerThirdSequencer {
         if (mixEffect != null && keyer != null && atem.host.isNotBlank()) {
             try {
                 AtemConnectionManager.use(atem.host, atem.port, needsState = false) { client ->
-                    client.setKeyOnAir(useDownstreamKey, mixEffect, keyer, true)
+                    client.setKeyOnAir(AtemKey(useDownstreamKey, mixEffect, keyer), true)
                 }
                 activeHost = atem.host
                 activePort = atem.port
@@ -167,7 +167,7 @@ object LowerThirdSequencer {
         activeKeyer = -1
         activeUseDsk = false
         runCatching {
-            AtemConnectionManager.use(host, port) { it.setKeyOnAir(useDsk, mixEffect, keyer, false) }
+            AtemConnectionManager.use(host, port) { it.setKeyOnAir(AtemKey(useDsk, mixEffect, keyer), false) }
         }.onFailure {
             System.err.println("[LowerThirdSequencer] key off failed: ${it.message}")
             CrashReporter.reportWarning(
