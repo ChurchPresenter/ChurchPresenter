@@ -14,7 +14,7 @@ import io.sentry.SentryLevel
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

@@ -10,6 +10,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import java.awt.GraphicsEnvironment
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import org.churchpresenter.diagnostics.CrashReporter
 
 /**
  * Builds a plain-text snapshot of the machine/app configuration for bug reports — OS, display
