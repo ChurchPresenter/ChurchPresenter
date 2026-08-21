@@ -182,6 +182,12 @@ fun PicturesTab(
      *  machine (e.g. a network drive mounted differently, or not mounted at all, here). */
     instanceLinkFetchPictureImageBytes: (suspend (folderId: String, index: Int) -> ByteArray?)? = null,
     selectedPictureItem: ScheduleItem.PictureItem? = null,
+    /**
+     * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
+     * effect below. Keyed on the item alone, an unchanged item is an unchanged key and the second
+     * click does nothing.
+     */
+    selectedPictureItemVersion: Int = 0,
     presenterManager: PresenterManager? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     viewModel: PicturesViewModel = remember { PicturesViewModel(appSettings) }
@@ -199,7 +205,7 @@ fun PicturesTab(
     val focusRequester = remember { FocusRequester() }
 
     // Load folder when a picture schedule item is selected
-    LaunchedEffect(selectedPictureItem) {
+    LaunchedEffect(selectedPictureItem, selectedPictureItemVersion) {
         selectedPictureItem?.let { pictureItem ->
             val folder = File(pictureItem.folderPath)
             if (folder.exists() && folder.isDirectory) {
