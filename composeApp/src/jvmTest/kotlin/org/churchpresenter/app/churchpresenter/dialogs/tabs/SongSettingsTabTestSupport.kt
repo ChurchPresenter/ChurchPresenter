@@ -30,7 +30,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.text.input.ImeAction
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.assertFalse

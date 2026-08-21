@@ -8,11 +8,11 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
+import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.app.churchpresenter.tabs.SongFixture
 import org.churchpresenter.app.churchpresenter.tabs.search
 import org.churchpresenter.app.churchpresenter.tabs.songsTab
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import kotlin.test.Test
 

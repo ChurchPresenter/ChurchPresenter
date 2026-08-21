@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.utils
 
-import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
+import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.utils.Constants
 
 /**
  * True when any of the four song output surfaces — fullscreen, lower third, and their look-ahead

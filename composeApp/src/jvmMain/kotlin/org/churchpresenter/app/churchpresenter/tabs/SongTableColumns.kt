@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.mergeColumnOrder
 
 internal class SongTableColumns(

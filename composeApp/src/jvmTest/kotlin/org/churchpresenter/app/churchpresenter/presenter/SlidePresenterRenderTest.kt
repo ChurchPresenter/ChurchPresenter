@@ -14,7 +14,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.presentation.AnimationType
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 
 class SlidePresenterRenderTest {

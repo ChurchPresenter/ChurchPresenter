@@ -9,7 +9,7 @@ import org.churchpresenter.companionsatellite.CompanionConnectionStatus
 import org.churchpresenter.companionsatellite.CompanionSatelliteClient
 import org.churchpresenter.companionsatellite.SurfaceSpec
 import io.sentry.SentryLevel
-import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
+import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement

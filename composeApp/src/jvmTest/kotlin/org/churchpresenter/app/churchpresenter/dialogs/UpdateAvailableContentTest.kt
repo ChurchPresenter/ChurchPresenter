@@ -16,7 +16,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import org.churchpresenter.app.churchpresenter.utils.UpdateCheckInterval
+import org.churchpresenter.settings.utils.UpdateCheckInterval
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.churchpresenter.app.churchpresenter.utils.UpdateInfo

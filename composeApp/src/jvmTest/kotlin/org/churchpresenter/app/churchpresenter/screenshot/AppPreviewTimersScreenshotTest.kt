@@ -2,9 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
-import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
+import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 
 class AppPreviewTimersScreenshotTest {

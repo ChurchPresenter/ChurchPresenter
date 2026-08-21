@@ -6,7 +6,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 
 // ── API DTOs ─────────────────────────────────────────────────────────────────
 

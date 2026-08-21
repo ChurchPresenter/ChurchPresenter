@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 
 /**
  * Routes for the OBS/vMix Browser Source overlay page and its frame WebSocket.

@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.filechooser
 
 import kotlinx.coroutines.CompletableDeferred
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.Struct
 import org.freedesktop.dbus.annotations.DBusInterfaceName

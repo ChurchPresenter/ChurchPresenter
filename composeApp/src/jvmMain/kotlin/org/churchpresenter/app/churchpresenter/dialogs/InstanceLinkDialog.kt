@@ -75,9 +75,9 @@ import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
-import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
-import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
-import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkSettings
+import org.churchpresenter.settings.BibleSyncMode
+import org.churchpresenter.settings.InstanceLinkRole
+import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.LiveStateDto
 import org.jetbrains.compose.resources.stringResource

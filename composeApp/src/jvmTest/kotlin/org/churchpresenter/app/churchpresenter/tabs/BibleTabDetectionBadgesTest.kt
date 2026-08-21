@@ -9,7 +9,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.data.settings.BibleEngineSettings
+import org.churchpresenter.settings.BibleEngineSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager

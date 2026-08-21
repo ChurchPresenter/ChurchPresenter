@@ -16,9 +16,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import java.nio.ByteBuffer
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest

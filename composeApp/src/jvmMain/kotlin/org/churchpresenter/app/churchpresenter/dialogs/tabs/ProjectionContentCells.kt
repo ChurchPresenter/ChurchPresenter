@@ -62,7 +62,7 @@ import churchpresenter.composeapp.generated.resources.content_bible_translations
 import churchpresenter.composeapp.generated.resources.content_bible_translations_more
 import churchpresenter.composeapp.generated.resources.song_language_primary
 import churchpresenter.composeapp.generated.resources.top
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 private const val DIMMED_ALPHA = 0.55f

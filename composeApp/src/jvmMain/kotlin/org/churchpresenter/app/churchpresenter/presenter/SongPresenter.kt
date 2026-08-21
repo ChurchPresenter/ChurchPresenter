@@ -46,10 +46,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.geometry.Offset
 import kotlin.math.min
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor

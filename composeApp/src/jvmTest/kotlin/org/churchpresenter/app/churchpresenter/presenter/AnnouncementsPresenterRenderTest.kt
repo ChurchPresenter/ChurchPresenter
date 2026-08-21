@@ -7,9 +7,9 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

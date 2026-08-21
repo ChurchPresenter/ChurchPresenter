@@ -7,9 +7,9 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import org.churchpresenter.app.churchpresenter.data.settings.MetronomePosition
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContentType
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZone
+import org.churchpresenter.settings.MetronomePosition
+import org.churchpresenter.settings.StageMonitorContentType
+import org.churchpresenter.settings.StageMonitorZone
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

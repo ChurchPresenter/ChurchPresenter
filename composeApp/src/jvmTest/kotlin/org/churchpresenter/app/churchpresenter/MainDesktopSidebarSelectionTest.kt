@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
+import org.churchpresenter.settings.CompanionSatelliteSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

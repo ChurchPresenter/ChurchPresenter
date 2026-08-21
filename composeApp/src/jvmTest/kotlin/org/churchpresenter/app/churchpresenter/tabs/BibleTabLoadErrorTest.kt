@@ -6,8 +6,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.app.churchpresenter.CrashReportSweep
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleTranslationSettings
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

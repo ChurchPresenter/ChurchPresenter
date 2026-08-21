@@ -2,11 +2,11 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import kotlinx.coroutines.Dispatchers
 
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
 import org.churchpresenter.app.churchpresenter.server.SongDto
 import org.churchpresenter.app.churchpresenter.server.SongbookEntry
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

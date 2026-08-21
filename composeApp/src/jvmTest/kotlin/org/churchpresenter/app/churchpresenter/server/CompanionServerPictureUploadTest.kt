@@ -20,7 +20,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import java.io.File

@@ -102,11 +102,11 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextDecoration
 import churchpresenter.composeapp.generated.resources.auto_fit
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.moveBibleTranslation
-import org.churchpresenter.app.churchpresenter.data.settings.removeBibleTranslation
-import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.moveBibleTranslation
+import org.churchpresenter.settings.removeBibleTranslation
+import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize

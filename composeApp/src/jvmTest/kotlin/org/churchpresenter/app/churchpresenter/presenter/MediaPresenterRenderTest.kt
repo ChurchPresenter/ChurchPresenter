@@ -16,7 +16,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.SharedVideoOutput
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import kotlin.test.AfterTest

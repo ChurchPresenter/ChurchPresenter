@@ -39,7 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
+import org.churchpresenter.settings.BibleTranslationSettings
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule

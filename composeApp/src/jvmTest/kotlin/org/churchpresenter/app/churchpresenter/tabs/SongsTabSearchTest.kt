@@ -7,7 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -16,8 +16,8 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.test.withKeyDown
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.KeyboardShortcutSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.KeyboardShortcutSettings
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.models.ShortcutScope

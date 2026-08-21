@@ -5,7 +5,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.junit.AfterClass
 import org.junit.BeforeClass
