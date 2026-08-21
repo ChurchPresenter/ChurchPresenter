@@ -76,6 +76,9 @@ class SettingsManager {
         3 to ::migrateCompanionSatelliteStartPage,
         4 to ::migrateCompanionSatelliteRowColumnRangeBackToCount,
         7 to ::migrateStageMonitorChords,
+        // Also version 7: the stage monitor's chord switch and its zone names moved in the same
+        // unreleased change, so they share a version rather than spending two on one release.
+        7 to ::migrateStageMonitorZoneNames,
     )
 
     fun loadSettings(): AppSettings {
@@ -414,6 +417,45 @@ class SettingsManager {
         }
         val newRoot = buildJsonObject {
             root.forEach { (k, v) -> if (k == "projectionSettings") put(k, newProj) else put(k, v) }
+        }
+        return newRoot.toString()
+    }
+
+    /** Schema version 7. Renames the stage monitor's fixed zone names to the layout slots that
+     * replaced them, so a saved screen keeps the arrangement it had. The five positions become the
+     * five slots of the CLASSIC layout in the order it draws them, which is the layout every
+     * existing document opens with. */
+    private fun migrateStageMonitorZoneNames(raw: String): String {
+        val stageMonitor = parseSettingsRoot(raw)?.get("stageMonitorSettings")?.jsonObject ?: return raw
+        val root = parseSettingsRoot(raw) ?: return raw
+        val slots = mapOf(
+            "TOP_LEFT" to "A", "TOP_RIGHT" to "B",
+            "BOTTOM_LEFT" to "C", "BOTTOM_MIDDLE" to "D", "BOTTOM_RIGHT" to "E",
+        )
+        val zones = stageMonitor["contentZones"]?.jsonObject
+        val styles = stageMonitor["zoneStyles"]?.jsonObject
+        if (zones == null && styles == null) return raw
+
+        val newStageMonitor = buildJsonObject {
+            stageMonitor.forEach { (k, v) ->
+                when (k) {
+                    // Values name the zone: "BIBLE": "TOP_LEFT".
+                    "contentZones" -> put(k, buildJsonObject {
+                        zones?.forEach { (type, zone) ->
+                            val named = (zone as? JsonPrimitive)?.content
+                            put(type, JsonPrimitive(slots[named] ?: named ?: ""))
+                        }
+                    })
+                    // Keys name the zone: "TOP_LEFT": { ...style... }.
+                    "zoneStyles" -> put(k, buildJsonObject {
+                        styles?.forEach { (zone, style) -> put(slots[zone] ?: zone, style) }
+                    })
+                    else -> put(k, v)
+                }
+            }
+        }
+        val newRoot = buildJsonObject {
+            root.forEach { (k, v) -> if (k == "stageMonitorSettings") put(k, newStageMonitor) else put(k, v) }
         }
         return newRoot.toString()
     }

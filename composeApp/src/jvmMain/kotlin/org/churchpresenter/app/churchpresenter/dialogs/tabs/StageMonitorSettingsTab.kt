@@ -4,12 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -18,58 +21,46 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_color
-import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.content_announcements
+import churchpresenter.composeapp.generated.resources.animation_crossfade
+import churchpresenter.composeapp.generated.resources.fade_in
+import churchpresenter.composeapp.generated.resources.fade_out
 import churchpresenter.composeapp.generated.resources.font_size
+import churchpresenter.composeapp.generated.resources.milliseconds_suffix
 import churchpresenter.composeapp.generated.resources.font_type
-import churchpresenter.composeapp.generated.resources.media
-import churchpresenter.composeapp.generated.resources.obs_mode_lower_third
-import churchpresenter.composeapp.generated.resources.pictures
-import churchpresenter.composeapp.generated.resources.presentation
-import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.stage_monitor_content_section
+import churchpresenter.composeapp.generated.resources.stage_monitor_layout_stranded
+import churchpresenter.composeapp.generated.resources.stage_monitor_zone_shows
 import churchpresenter.composeapp.generated.resources.stage_monitor_metronome_position
-import churchpresenter.composeapp.generated.resources.stage_monitor_position_center
-import churchpresenter.composeapp.generated.resources.stage_monitor_position_middle_left
-import churchpresenter.composeapp.generated.resources.stage_monitor_position_middle_right
-import churchpresenter.composeapp.generated.resources.stage_monitor_position_top_center
-import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_clock
-import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_next
-import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_notes
 import churchpresenter.composeapp.generated.resources.shadow_settings
 import churchpresenter.composeapp.generated.resources.song_chord_color
-import churchpresenter.composeapp.generated.resources.song_lyrics_color
 import churchpresenter.composeapp.generated.resources.stage_monitor_layout_section
-import churchpresenter.composeapp.generated.resources.stage_monitor_zone_bottom_left
-import churchpresenter.composeapp.generated.resources.stage_monitor_zone_bottom_center
-import churchpresenter.composeapp.generated.resources.stage_monitor_zone_bottom_right
-import churchpresenter.composeapp.generated.resources.stage_monitor_zone_full_screen
-import churchpresenter.composeapp.generated.resources.stage_monitor_zone_none
-import churchpresenter.composeapp.generated.resources.stage_monitor_zone_top_left
-import churchpresenter.composeapp.generated.resources.stage_monitor_zone_top_right
-import churchpresenter.composeapp.generated.resources.tab_canvas
-import churchpresenter.composeapp.generated.resources.tab_dictionary
-import churchpresenter.composeapp.generated.resources.tab_qa
-import churchpresenter.composeapp.generated.resources.tab_stt
-import churchpresenter.composeapp.generated.resources.tab_web
+import churchpresenter.composeapp.generated.resources.stage_monitor_text_color
+import churchpresenter.composeapp.generated.resources.transition_duration
+import churchpresenter.composeapp.generated.resources.transition_settings
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.MetronomeDot
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
@@ -83,11 +74,21 @@ import org.churchpresenter.settings.StageMonitorSettings
 import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZone
 import org.churchpresenter.settings.StageMonitorZoneStyle
+import org.churchpresenter.settings.toZone
+import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_WIDTH_FRACTION = 0.9f
-private const val BOTTOM_MIDDLE_WEIGHT = 0.8f
+private const val SHOWS_COLUMNS = 4
+private const val TRANSITION_LABEL_WIDTH = 120
+private const val TRANSITION_STEP_MS = 50f
+private const val TRANSITION_MIN_MS = 100f
+private const val TRANSITION_MAX_MS = 2000f
+private const val ZONE_ALPHA = 0.10f
+private const val ZONE_BORDER_ALPHA = 0.45f
+private const val ZONE_CAPTION_ALPHA = 0.6f
+private const val ZONE_LINE_HEIGHT = 1.2f
 
 @Composable
 fun StageMonitorSettingsTab(
@@ -116,55 +117,39 @@ fun StageMonitorSettingsTab(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // ── Left column: content assignment + Top-Left/Top-Right style ──────
                 Column(
                     modifier = Modifier.weight(1f).widthIn(min = 320.dp, max = 480.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    StageMonitorContentSection(sm = sm, update = ::update)
-
-                    ZoneStyleSection(
-                        title = styleZoneLabel(StageMonitorStyleZone.FULL_SCREEN),
-                        style = sm.styleFor(StageMonitorStyleZone.FULL_SCREEN),
-                        availableFonts = availableFonts,
-                        onStyleChange = { block ->
-                            update {
-                                copy(zoneStyles = zoneStyles + (StageMonitorStyleZone.FULL_SCREEN to styleFor(StageMonitorStyleZone.FULL_SCREEN).block()))
-                            }
-                        }
-                    )
-
-                    listOf(StageMonitorStyleZone.TOP_LEFT, StageMonitorStyleZone.TOP_RIGHT).forEach { zone ->
-                        ZoneStyleSection(
-                            title = styleZoneLabel(zone),
-                            style = sm.styleFor(zone),
-                            availableFonts = availableFonts,
-                            showChordColor = true,
-                            onStyleChange = { block ->
-                                update { copy(zoneStyles = zoneStyles + (zone to styleFor(zone).block())) }
-                            }
+                    SettingsSection(title = stringResource(Res.string.stage_monitor_layout_section)) {
+                        StageMonitorLayoutPicker(
+                            layout = sm.layout,
+                            onPick = { picked -> update { withLayout(picked) } },
                         )
                     }
+                    StageMonitorContentSection(sm = sm, update = ::update)
+                    StageMonitorTransitionSection(sm = sm, update = ::update)
                 }
 
-                // ── Right column: layout preview + remaining zone styles + clock ────
                 Column(
                     modifier = Modifier.weight(1f).widthIn(min = 320.dp, max = 480.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    StageMonitorLayoutPreviewSection(sm = sm)
+                    StageMonitorPreviewSection(sm = sm)
 
-                    listOf(
-                        StageMonitorStyleZone.BOTTOM_LEFT,
-                        StageMonitorStyleZone.BOTTOM_MIDDLE,
-                        StageMonitorStyleZone.BOTTOM_RIGHT
-                    ).forEach { zone ->
+                    // Every zone the layout draws gets its own editor, plus the full-screen
+                    // override, so nothing has to be selected to be styled.
+                    val styleZones = listOf(StageMonitorStyleZone.FULL_SCREEN) + sm.layout.slots
+                    styleZones.forEach { styleZone ->
                         ZoneStyleSection(
-                            title = styleZoneLabel(zone),
-                            style = sm.styleFor(zone),
+                            title = zoneLabel(styleZone.toZone()),
+                            style = sm.styleFor(styleZone),
                             availableFonts = availableFonts,
+                            // Songs cannot be routed full-screen, so only the layout's own zones
+                            // can ever draw a chart.
+                            showChordColor = styleZone != StageMonitorStyleZone.FULL_SCREEN,
                             onStyleChange = { block ->
-                                update { copy(zoneStyles = zoneStyles + (zone to styleFor(zone).block())) }
+                                update { copy(zoneStyles = zoneStyles + (styleZone to styleFor(styleZone).block())) }
                             }
                         )
                     }
@@ -176,77 +161,168 @@ fun StageMonitorSettingsTab(
 }
 
 @Composable
-private fun contentTypeLabel(type: StageMonitorContentType): String = when (type) {
-    StageMonitorContentType.BIBLE -> stringResource(Res.string.bible)
-    StageMonitorContentType.SONGS -> stringResource(Res.string.songs)
-    StageMonitorContentType.PRESENTATION -> stringResource(Res.string.presentation)
-    StageMonitorContentType.PRESENTATION_NOTES -> stringResource(Res.string.stage_monitor_quadrant_notes)
-    StageMonitorContentType.PICTURES -> stringResource(Res.string.pictures)
-    StageMonitorContentType.MEDIA -> stringResource(Res.string.media)
-    StageMonitorContentType.LOWER_THIRD -> stringResource(Res.string.obs_mode_lower_third)
-    StageMonitorContentType.WEB -> stringResource(Res.string.tab_web)
-    StageMonitorContentType.STT -> stringResource(Res.string.tab_stt)
-    StageMonitorContentType.CANVAS -> stringResource(Res.string.tab_canvas)
-    StageMonitorContentType.QA -> stringResource(Res.string.tab_qa)
-    StageMonitorContentType.DICTIONARY -> stringResource(Res.string.tab_dictionary)
-    StageMonitorContentType.CLOCK -> stringResource(Res.string.stage_monitor_quadrant_clock)
-    StageMonitorContentType.ANNOUNCEMENT_TEXT -> stringResource(Res.string.content_announcements)
-    StageMonitorContentType.NEXT -> stringResource(Res.string.stage_monitor_quadrant_next)
+private fun MetronomeRow(
+    sm: StageMonitorSettings,
+    update: (StageMonitorSettings.() -> StageMonitorSettings) -> Unit
+) {
+    val options = MetronomePosition.entries.map { metronomePositionLabel(it) }
+    val byLabel = MetronomePosition.entries.associateBy { metronomePositionLabel(it) }
+    DropdownSettingsField(
+        label = stringResource(Res.string.stage_monitor_metronome_position),
+        value = metronomePositionLabel(sm.metronomePosition),
+        options = options,
+        onValueChange = { picked ->
+            byLabel[picked]?.let { position -> update { copy(metronomePosition = position) } }
+        },
+        modifier = Modifier.padding(vertical = 4.dp)
+    )
 }
 
+/**
+ * The monitor as it will be divided, every zone clickable.
+ *
+ * Full Screen and None sit under the grid rather than in it: neither is a position, and both have
+ * to be selectable to be edited or emptied.
+ */
 @Composable
-private fun zoneLabel(zone: StageMonitorZone): String = when (zone) {
-    StageMonitorZone.TOP_LEFT -> stringResource(Res.string.stage_monitor_zone_top_left)
-    StageMonitorZone.TOP_RIGHT -> stringResource(Res.string.stage_monitor_zone_top_right)
-    StageMonitorZone.BOTTOM_LEFT -> stringResource(Res.string.stage_monitor_zone_bottom_left)
-    StageMonitorZone.BOTTOM_MIDDLE -> stringResource(Res.string.stage_monitor_zone_bottom_center)
-    StageMonitorZone.BOTTOM_RIGHT -> stringResource(Res.string.stage_monitor_zone_bottom_right)
-    StageMonitorZone.FULL_SCREEN -> stringResource(Res.string.stage_monitor_zone_full_screen)
-    StageMonitorZone.NONE -> stringResource(Res.string.stage_monitor_zone_none)
+private fun StageMonitorPreviewSection(sm: StageMonitorSettings) {
+    SettingsSection(title = stringResource(Res.string.stage_monitor_content_section)) {
+        TvScreenBox(
+            modifier = Modifier.fillMaxWidth(PREVIEW_WIDTH_FRACTION).height(200.dp),
+            bezelColor = stageMonitorBezelColor(),
+            screenColor = Color.Black,
+        ) {
+            // Inset, so the screen itself shows around the zones instead of being papered over.
+            Column(modifier = Modifier.fillMaxSize().padding(4.dp)) {
+                sm.layout.rows.forEach { row ->
+                    Row(modifier = Modifier.fillMaxWidth().weight(row.weight)) {
+                        row.cells.forEach { cell ->
+                            val zone = cell.slot.toZone()
+                            ZoneLabelCell(
+                                caption = zoneLabel(zone),
+                                text = sm.typesIn(zone).map { contentTypeLabel(it) }.joinToString(", "),
+                                modifier = Modifier.weight(cell.weight)
+                            )
+                        }
+                    }
+                }
+            }
+            sm.metronomePosition.toAlignment()?.let { alignment ->
+                MetronomeDot(
+                    bpm = 100,
+                    active = true,
+                    size = 24.dp,
+                    modifier = Modifier.align(alignment).padding(6.dp)
+                )
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            listOf(StageMonitorZone.FULL_SCREEN, StageMonitorZone.NONE).forEach { zone ->
+                OffGridZoneChip(
+                    label = zoneLabel(zone),
+                    contents = sm.typesIn(zone).map { contentTypeLabel(it) }.joinToString(", "),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+        val stranded = sm.strandedTypes()
+        if (stranded.isNotEmpty()) {
+            Text(
+                text = stringResource(
+                    Res.string.stage_monitor_layout_stranded,
+                    stranded.map { contentTypeLabel(it) }.joinToString(", "),
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 6.dp)
+            )
+        }
+    }
 }
 
+/** How text changing in a zone is animated — one setting for every zone and the full screen. */
 @Composable
-private fun metronomePositionLabel(position: MetronomePosition): String = when (position) {
-    MetronomePosition.NONE -> stringResource(Res.string.stage_monitor_zone_none)
-    MetronomePosition.TOP_LEFT -> stringResource(Res.string.stage_monitor_zone_top_left)
-    MetronomePosition.TOP_CENTER -> stringResource(Res.string.stage_monitor_position_top_center)
-    MetronomePosition.TOP_RIGHT -> stringResource(Res.string.stage_monitor_zone_top_right)
-    MetronomePosition.MIDDLE_LEFT -> stringResource(Res.string.stage_monitor_position_middle_left)
-    MetronomePosition.CENTER -> stringResource(Res.string.stage_monitor_position_center)
-    MetronomePosition.MIDDLE_RIGHT -> stringResource(Res.string.stage_monitor_position_middle_right)
-    MetronomePosition.BOTTOM_LEFT -> stringResource(Res.string.stage_monitor_zone_bottom_left)
-    MetronomePosition.BOTTOM_CENTER -> stringResource(Res.string.stage_monitor_zone_bottom_center)
-    MetronomePosition.BOTTOM_RIGHT -> stringResource(Res.string.stage_monitor_zone_bottom_right)
+private fun StageMonitorTransitionSection(
+    sm: StageMonitorSettings,
+    update: (StageMonitorSettings.() -> StageMonitorSettings) -> Unit
+) {
+    SettingsSection(title = stringResource(Res.string.transition_settings)) {
+        val msSuffix = stringResource(Res.string.milliseconds_suffix)
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(Res.string.transition_duration),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.width(TRANSITION_LABEL_WIDTH.dp)
+            )
+            SlimSlider(
+                value = sm.transitionDuration,
+                onValueChange = { raw ->
+                    val snapped = (raw / TRANSITION_STEP_MS).toInt() * TRANSITION_STEP_MS
+                    update { copy(transitionDuration = snapped) }
+                },
+                valueRange = TRANSITION_MIN_MS..TRANSITION_MAX_MS,
+                modifier = Modifier.weight(1f),
+                trailingLabel = "${sm.transitionDuration.toInt()}$msSuffix"
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            LabeledCheckbox(
+                checked = sm.fadeIn,
+                onCheckedChange = { on -> update { copy(fadeIn = on) } },
+                controlModifier = Modifier.size(24.dp),
+                label = stringResource(Res.string.fade_in),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            LabeledCheckbox(
+                checked = sm.fadeOut,
+                onCheckedChange = { on -> update { copy(fadeOut = on) } },
+                controlModifier = Modifier.size(24.dp),
+                label = stringResource(Res.string.fade_out),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            LabeledCheckbox(
+                checked = sm.crossfade,
+                onCheckedChange = { on -> update { copy(crossfade = on) } },
+                controlModifier = Modifier.size(24.dp),
+                label = stringResource(Res.string.animation_crossfade),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+    }
 }
 
-@Composable
-private fun styleZoneLabel(zone: StageMonitorStyleZone): String = when (zone) {
-    StageMonitorStyleZone.TOP_LEFT -> stringResource(Res.string.stage_monitor_zone_top_left)
-    StageMonitorStyleZone.TOP_RIGHT -> stringResource(Res.string.stage_monitor_zone_top_right)
-    StageMonitorStyleZone.BOTTOM_LEFT -> stringResource(Res.string.stage_monitor_zone_bottom_left)
-    StageMonitorStyleZone.BOTTOM_MIDDLE -> stringResource(Res.string.stage_monitor_zone_bottom_center)
-    StageMonitorStyleZone.BOTTOM_RIGHT -> stringResource(Res.string.stage_monitor_zone_bottom_right)
-    StageMonitorStyleZone.FULL_SCREEN -> stringResource(Res.string.stage_monitor_zone_full_screen)
-}
-
-/** For every content type, a dropdown choosing which zone (or none) it is routed to. */
+/**
+ * One dropdown per content type, naming the zone it is routed to.
+ *
+ * The routing is content-first and stays that way — a zone can host several types, and whichever
+ * is live is what it draws. Only the zones this layout actually draws are offered, plus Full
+ * Screen and None, so a type cannot be sent somewhere nothing would put it on screen.
+ */
 @Composable
 private fun StageMonitorContentSection(
     sm: StageMonitorSettings,
     update: (StageMonitorSettings.() -> StageMonitorSettings) -> Unit
 ) {
     // Bible/Songs/Next are always meant to share the screen with other zones, never take it over.
-    val noFullScreenTypes = setOf(StageMonitorContentType.BIBLE, StageMonitorContentType.SONGS, StageMonitorContentType.NEXT)
-    val allZones = StageMonitorZone.entries.map { zoneLabel(it) }
-    val zonesWithoutFullScreen = StageMonitorZone.entries.filter { it != StageMonitorZone.FULL_SCREEN }.map { zoneLabel(it) }
-    val zoneByLabel = StageMonitorZone.entries.associateBy { zoneLabel(it) }
+    val noFullScreenTypes = setOf(
+        StageMonitorContentType.BIBLE, StageMonitorContentType.SONGS, StageMonitorContentType.NEXT
+    )
+    val drawn = sm.layout.slots.map { it.toZone() } + listOf(StageMonitorZone.FULL_SCREEN, StageMonitorZone.NONE)
+    val allZones = drawn.map { zoneLabel(it) }
+    val zonesWithoutFullScreen = drawn.filter { it != StageMonitorZone.FULL_SCREEN }.map { zoneLabel(it) }
+    val zoneByLabel = mutableMapOf<String, StageMonitorZone>()
+    drawn.forEach { zoneByLabel[zoneLabel(it)] = it }
     val types = StageMonitorContentType.entries
-    val columns = types.chunked((types.size + 3) / 4)
+    val columns = types.chunked((types.size + SHOWS_COLUMNS - 1) / SHOWS_COLUMNS)
 
-    val metronomeOptions = MetronomePosition.entries.map { metronomePositionLabel(it) }
-    val metronomeByLabel = MetronomePosition.entries.associateBy { metronomePositionLabel(it) }
-
-    SettingsSection(title = stringResource(Res.string.stage_monitor_content_section)) {
+    SettingsSection(title = stringResource(Res.string.stage_monitor_zone_shows)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -262,7 +338,9 @@ private fun StageMonitorContentSection(
                             value = zoneLabel(sm.zoneFor(type)),
                             options = if (type in noFullScreenTypes) zonesWithoutFullScreen else allZones,
                             onValueChange = { picked ->
-                                zoneByLabel[picked]?.let { zone -> update { copy(contentZones = contentZones + (type to zone)) } }
+                                zoneByLabel[picked]?.let { zone ->
+                                    update { copy(contentZones = contentZones + (type to zone)) }
+                                }
                             },
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
@@ -270,96 +348,61 @@ private fun StageMonitorContentSection(
                 }
             }
         }
-        DropdownSettingsField(
-            label = stringResource(Res.string.stage_monitor_metronome_position),
-            value = metronomePositionLabel(sm.metronomePosition),
-            options = metronomeOptions,
-            onValueChange = { picked ->
-                metronomeByLabel[picked]?.let { position -> update { copy(metronomePosition = position) } }
-            },
-            modifier = Modifier.padding(vertical = 4.dp)
-        )
-    }
-}
-
-/** Visual preview of the screen: shows which content types land in each zone, as labels. */
-@Composable
-private fun StageMonitorLayoutPreviewSection(sm: StageMonitorSettings) {
-    val labeledTypes = StageMonitorContentType.entries.map { it to contentTypeLabel(it) }
-    val byZone: Map<StageMonitorZone, List<String>> = labeledTypes
-        .groupBy({ sm.zoneFor(it.first) }, { it.second })
-    fun labelsFor(zone: StageMonitorZone): String = byZone[zone].orEmpty().joinToString(", ")
-
-    SettingsSection(title = stringResource(Res.string.stage_monitor_layout_section)) {
-        TvScreenBox(
-            modifier = Modifier.fillMaxWidth(PREVIEW_WIDTH_FRACTION).height(200.dp)
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                    ZoneLabelCell(text = labelsFor(StageMonitorZone.TOP_LEFT), modifier = Modifier.weight(1f))
-                    ZoneLabelCell(text = labelsFor(StageMonitorZone.TOP_RIGHT), modifier = Modifier.weight(1f))
-                }
-                Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                    ZoneLabelCell(text = labelsFor(StageMonitorZone.BOTTOM_LEFT), modifier = Modifier.weight(1f))
-                    ZoneLabelCell(text = labelsFor(StageMonitorZone.BOTTOM_MIDDLE), modifier = Modifier.weight(BOTTOM_MIDDLE_WEIGHT))
-                    ZoneLabelCell(text = labelsFor(StageMonitorZone.BOTTOM_RIGHT), modifier = Modifier.weight(1f))
-                }
-            }
-            // Preview of where the metronome dot will flash — demo rate, independent of the zone grid above.
-            sm.metronomePosition.toAlignment()?.let { alignment ->
-                MetronomeDot(
-                    bpm = 100,
-                    active = true,
-                    size = 24.dp,
-                    modifier = Modifier.align(alignment).padding(6.dp)
-                )
-            }
-        }
-        SettingRow(label = stringResource(Res.string.stage_monitor_zone_full_screen)) {
-            Text(
-                text = labelsFor(StageMonitorZone.FULL_SCREEN).ifBlank { "—" },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        SettingRow(label = stringResource(Res.string.stage_monitor_zone_none)) {
-            Text(
-                text = labelsFor(StageMonitorZone.NONE).ifBlank { "—" },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        SettingRow(label = stringResource(Res.string.stage_monitor_metronome_position)) {
-            Text(
-                text = metronomePositionLabel(sm.metronomePosition),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        MetronomeRow(sm = sm, update = update)
     }
 }
 
 @Composable
 private fun ZoneLabelCell(
+    caption: String,
     text: String,
     modifier: Modifier = Modifier,
-    cellColor: Color = MaterialTheme.colorScheme.surfaceVariant
 ) {
+    // Content on a lit screen — a translucent panel over the black, not an opaque tile.
     Box(
         modifier = modifier
             .fillMaxSize()
             .padding(2.dp)
-            .background(cellColor, RoundedCornerShape(4.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+            .background(Color.White.copy(alpha = ZONE_ALPHA), RoundedCornerShape(3.dp))
+            .border(1.dp, Color.White.copy(alpha = ZONE_BORDER_ALPHA), RoundedCornerShape(3.dp))
             .padding(4.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = text.ifBlank { "—" },
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+        val body = text.ifBlank { "—" }
+        BoxWithConstraints(contentAlignment = Alignment.Center) {
+            // A narrow zone in a five-zone layout has room for a word, not a list, so the label
+            // steps down until it fits rather than being clipped mid-name.
+            val measurer = rememberTextMeasurer()
+            val base = MaterialTheme.typography.labelSmall
+            val ceiling = base.fontSize.value.toInt()
+            val fitted = remember(caption, body, base, maxWidth, maxHeight) {
+                calculateAutoFitFontSize(
+                    textMeasurer = measurer,
+                    text = "$caption\n$body",
+                    baseStyle = base,
+                    availableWidth = maxWidth.value.toInt(),
+                    availableHeight = maxHeight.value.toInt(),
+                ).coerceAtMost(ceiling)
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = caption,
+                    style = base,
+                    fontSize = fitted.sp,
+                    lineHeight = (fitted * ZONE_LINE_HEIGHT).sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White.copy(alpha = ZONE_CAPTION_ALPHA),
+                )
+                Text(
+                    text = body,
+                    style = base,
+                    fontSize = fitted.sp,
+                    lineHeight = (fitted * ZONE_LINE_HEIGHT).sp,
+                    color = Color.White.copy(alpha = if (text.isBlank()) ZONE_BORDER_ALPHA else 1f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 
@@ -424,8 +467,7 @@ private fun QuadrantFontSettings(
     fontType: String, fontSize: Int,
     color: String, bgColor: String,
     shadowColor: String, shadowSize: Int, shadowOpacity: Int,
-    // Non-null only for a zone a song's chart can land in. Its presence also renames the text
-    // colour to "Lyrics Color", because once chords are on screen "Color" no longer says which.
+    // Non-null only for a zone a song's chart can land in.
     chordColor: String? = null,
     onChordColorChange: (String) -> Unit = {},
     availableFonts: List<String>,
@@ -457,9 +499,7 @@ private fun QuadrantFontSettings(
         ColorPickerField(
             color = color,
             onColorChange = onColorChange,
-            label = stringResource(
-                if (chordColor != null) Res.string.song_lyrics_color else Res.string.color
-            ).removeSuffix(":"),
+            label = stringResource(Res.string.stage_monitor_text_color).removeSuffix(":"),
             modifier = Modifier.widthIn(max = 150.dp)
         )
         if (chordColor != null) {
