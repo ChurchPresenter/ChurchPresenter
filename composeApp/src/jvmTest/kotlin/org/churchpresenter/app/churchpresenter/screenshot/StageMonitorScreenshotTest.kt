@@ -690,6 +690,209 @@ class StageMonitorScreenshotTest {
         sections = listOf(SWEEP_SECTION),
     )
 
+    // ── Every zone at every alignment ───────────────────────────────────────────────────────────
+    // One shot per alignment, with EVERY zone set to it: nine shots then show each zone at each of
+    // the nine positions, which nine-per-zone would have taken fifty-four to say.
+
+    @Test
+    fun `every zone aligned top left`() = alignedShot("align_top_left", Constants.TOP, Constants.LEFT)
+
+    @Test
+    fun `every zone aligned top centre`() = alignedShot("align_top_center", Constants.TOP, Constants.CENTER)
+
+    @Test
+    fun `every zone aligned top right`() = alignedShot("align_top_right", Constants.TOP, Constants.RIGHT)
+
+    @Test
+    fun `every zone aligned middle left`() = alignedShot("align_middle_left", Constants.MIDDLE, Constants.LEFT)
+
+    @Test
+    fun `every zone aligned middle centre`() = alignedShot("align_middle_center", Constants.MIDDLE, Constants.CENTER)
+
+    @Test
+    fun `every zone aligned middle right`() = alignedShot("align_middle_right", Constants.MIDDLE, Constants.RIGHT)
+
+    @Test
+    fun `every zone aligned bottom left`() = alignedShot("align_bottom_left", Constants.BOTTOM, Constants.LEFT)
+
+    @Test
+    fun `every zone aligned bottom centre`() = alignedShot("align_bottom_center", Constants.BOTTOM, Constants.CENTER)
+
+    @Test
+    fun `every zone aligned bottom right`() = alignedShot("align_bottom_right", Constants.BOTTOM, Constants.RIGHT)
+
+    // ── The full-screen zone at every alignment ─────────────────────────────────────────────────
+    // It takes the whole monitor and so is never in the grid above; its nine positions are its own.
+
+    @Test
+    fun `full screen aligned top left`() = fullScreenAlignedShot("full_align_top_left", Constants.TOP, Constants.LEFT)
+
+    @Test
+    fun `full screen aligned top centre`() =
+        fullScreenAlignedShot("full_align_top_center", Constants.TOP, Constants.CENTER)
+
+    @Test
+    fun `full screen aligned top right`() =
+        fullScreenAlignedShot("full_align_top_right", Constants.TOP, Constants.RIGHT)
+
+    @Test
+    fun `full screen aligned middle left`() =
+        fullScreenAlignedShot("full_align_middle_left", Constants.MIDDLE, Constants.LEFT)
+
+    @Test
+    fun `full screen aligned middle centre`() =
+        fullScreenAlignedShot("full_align_middle_center", Constants.MIDDLE, Constants.CENTER)
+
+    @Test
+    fun `full screen aligned middle right`() =
+        fullScreenAlignedShot("full_align_middle_right", Constants.MIDDLE, Constants.RIGHT)
+
+    @Test
+    fun `full screen aligned bottom left`() =
+        fullScreenAlignedShot("full_align_bottom_left", Constants.BOTTOM, Constants.LEFT)
+
+    @Test
+    fun `full screen aligned bottom centre`() =
+        fullScreenAlignedShot("full_align_bottom_center", Constants.BOTTOM, Constants.CENTER)
+
+    @Test
+    fun `full screen aligned bottom right`() =
+        fullScreenAlignedShot("full_align_bottom_right", Constants.BOTTOM, Constants.RIGHT)
+
+    // ── Each text switch on its own, in every zone ──────────────────────────────────────────────
+    // `zone_text_switches` shows all four at once, which cannot say which switch drew what.
+
+    @Test
+    fun `every zone bold`() = switchShot("switch_bold") { copy(bold = true) }
+
+    @Test
+    fun `every zone italic`() = switchShot("switch_italic") { copy(italic = true) }
+
+    @Test
+    fun `every zone underlined`() = switchShot("switch_underline") { copy(underline = true) }
+
+    @Test
+    fun `every zone shadowed`() = switchShot("switch_shadow") { copy(shadow = true) }
+
+    /** A shadow is three settings, not one: a colour, a size and an intensity. */
+    @Test
+    fun `every zone shadowed in its own colour and weight`() = switchShot("switch_shadow_styled") {
+        copy(shadow = true, shadowColor = "#4FD3E8", shadowSize = 200, shadowOpacity = 100)
+    }
+
+    // ── Type, colour and ground, one distinct value per zone ────────────────────────────────────
+
+    /** A different face in every zone at once, so no two are being told apart by position alone. */
+    @Test
+    fun `a different font in every zone`() = perZoneShot("zone_fonts_all") { index ->
+        copy(fontType = FACES[index], fontSize = 34)
+    }
+
+    @Test
+    fun `a different size in every zone`() = perZoneShot("zone_sizes_all") { index ->
+        copy(fontSize = 24 + index * 12)
+    }
+
+    @Test
+    fun `a different text colour in every zone`() = perZoneShot("zone_text_colours_all") { index ->
+        copy(color = INKS[index])
+    }
+
+    @Test
+    fun `a different background in every zone`() = perZoneShot("zone_backgrounds_all") { index ->
+        copy(bgColor = GROUNDS[index])
+    }
+
+    // ── A chart's chord colour, in every zone it can land in ────────────────────────────────────
+    // A song occupies one zone at a time, so unlike the sweeps above this one needs a shot per zone.
+
+    @Test
+    fun `chords in zone one`() = chordsInZone("chords_zone_1", StageMonitorZone.A)
+
+    @Test
+    fun `chords in zone two`() = chordsInZone("chords_zone_2", StageMonitorZone.B)
+
+    @Test
+    fun `chords in zone three`() = chordsInZone("chords_zone_3", StageMonitorZone.C)
+
+    @Test
+    fun `chords in zone four`() = chordsInZone("chords_zone_4", StageMonitorZone.D)
+
+    @Test
+    fun `chords in zone five`() = chordsInZone("chords_zone_5", StageMonitorZone.E)
+
+    // ── Drivers for the style sweeps ────────────────────────────────────────────────────────────
+
+    /** [change] applied to every one of the six zones, so one shot speaks for all of them. */
+    private fun everyZone(change: StageMonitorZoneStyle.() -> StageMonitorZoneStyle) =
+        StageMonitorStyleZone.entries.associateWith { StageMonitorSettings().styleFor(it).change() }
+
+    private fun alignedShot(name: String, vertical: String, horizontal: String) = shoot(
+        name,
+        settings = stageSettings(
+            zones = filling(StageMonitorLayout.CLASSIC),
+            styles = everyZone { copy(verticalAlignment = vertical, horizontalAlignment = horizontal) },
+        ),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse()),
+        nextVerses = listOf(verse(number = 17, text = "For God sent not his Son to condemn the world.")),
+        announcementActive = true,
+        announcementText = "Offering after the second song",
+    )
+
+    private fun fullScreenAlignedShot(name: String, vertical: String, horizontal: String) = shoot(
+        name,
+        settings = stageSettings(
+            zones = mapOf(StageMonitorContentType.BIBLE to StageMonitorZone.FULL_SCREEN),
+            styles = everyZone { copy(verticalAlignment = vertical, horizontalAlignment = horizontal) },
+        ),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse()),
+    )
+
+    private fun switchShot(name: String, change: StageMonitorZoneStyle.() -> StageMonitorZoneStyle) = shoot(
+        name,
+        settings = stageSettings(
+            zones = filling(StageMonitorLayout.CLASSIC),
+            styles = everyZone(change),
+        ),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse()),
+        nextVerses = listOf(verse(number = 17, text = "For God sent not his Son to condemn the world.")),
+        announcementActive = true,
+        announcementText = "Offering after the second song",
+    )
+
+    /** [change] receives each zone's index, so every zone can be given a value of its own. */
+    private fun perZoneShot(name: String, change: StageMonitorZoneStyle.(Int) -> StageMonitorZoneStyle) = shoot(
+        name,
+        settings = stageSettings(
+            zones = filling(StageMonitorLayout.CLASSIC),
+            styles = StageMonitorStyleZone.entries.mapIndexed { index, zone ->
+                zone to StageMonitorSettings().styleFor(zone).change(index)
+            }.toMap(),
+        ),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse()),
+        nextVerses = listOf(verse(number = 17, text = "For God sent not his Son to condemn the world.")),
+        announcementActive = true,
+        announcementText = "Offering after the second song",
+    )
+
+    private fun chordsInZone(name: String, zone: StageMonitorZone) = shoot(
+        name,
+        showChords = true,
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.SONGS to zone,
+                StageMonitorContentType.NEXT to StageMonitorZone.NONE,
+            ),
+            styles = everyZone { copy(chordColor = "#FFD54F") },
+        ),
+        section = chordSection(),
+        sections = listOf(chordSection()),
+    )
+
     // ── Fixtures ────────────────────────────────────────────────────────────────────────────────
 
     /**
@@ -852,6 +1055,11 @@ class StageMonitorScreenshotTest {
                 "And grace will lead me home",
             ),
         )
+
+        /** Six faces and six colours, one per zone, for the per-zone sweeps. */
+        val FACES = listOf("Georgia", "Courier New", "Arial", "Times New Roman", "Verdana", "Impact")
+        val INKS = listOf("#FFD54F", "#8FB3F5", "#5DDBA8", "#FF8A80", "#CE93D8", "#FFFFFF")
+        val GROUNDS = listOf("#1B2A5B", "#10131A", "#3B1F5B", "#0E2A22", "#2A1215", "#000000")
 
         const val NOTES =
             "Read the passage slowly. Pause before the last line — the band comes back in on the " +
