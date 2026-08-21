@@ -49,9 +49,9 @@ import churchpresenter.composeapp.generated.resources.bible_catalog_license_unkn
 import churchpresenter.composeapp.generated.resources.bible_catalog_overwrite_confirm
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.bible_catalog_book_names_english
-import org.churchpresenter.app.churchpresenter.data.BebliaSource
-import org.churchpresenter.app.churchpresenter.data.BibleModule
-import org.churchpresenter.app.churchpresenter.data.BibleSourceId
+import org.churchpresenter.bibleformats.catalog.BebliaSource
+import org.churchpresenter.bibleformats.catalog.BibleModule
+import org.churchpresenter.bibleformats.catalog.BibleSourceId
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
