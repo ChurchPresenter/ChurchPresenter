@@ -1,4 +1,4 @@
-package org.churchpresenter.cross.ui
+package org.churchpresenter.crossword.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,9 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.cross.data.ClueEntry
-import org.churchpresenter.cross.data.CrosswordEngine
-import org.churchpresenter.cross.data.Direction
+import org.churchpresenter.crossword.data.ClueEntry
+import org.churchpresenter.crossword.data.CrosswordEngine
+import org.churchpresenter.crossword.data.Direction
 
 @Composable
 fun CrosswordPreview(clues: List<ClueEntry>, modifier: Modifier = Modifier) {
