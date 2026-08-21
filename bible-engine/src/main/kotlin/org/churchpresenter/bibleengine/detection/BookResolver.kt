@@ -635,11 +635,11 @@ object BookResolver {
             .map { (stem, v) -> stem to v.first().second }
             .sortedByDescending { it.first.length }
 
-    /** Resolves a single token to a book number by inflection-tolerant stem prefix, or null. */
     /** A stem-prefix hit: which book and via which stem — the caller gates on how much longer
      *  the token is than the matched stem (see ReferenceWatcher.classify's over-extension gate). */
     data class StemMatch(val bookNum: Int, val stem: String)
 
+    /** Resolves a single token to a book number by inflection-tolerant stem prefix, or null. */
     fun resolveStem(token: String): StemMatch? =
         _stemIndex.firstOrNull { token.length >= it.first.length && token.startsWith(it.first) }
             ?.let { StemMatch(it.second, it.first) }

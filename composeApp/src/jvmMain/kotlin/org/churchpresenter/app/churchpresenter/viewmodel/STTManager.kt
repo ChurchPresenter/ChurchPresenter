@@ -348,11 +348,6 @@ class STTManager {
         }
     }
 
-    /**
-     * The highlighted-word list is not pushed on connect, so it is pulled over REST once the socket
-     * comes up. `internal` rather than private for the same reason as the `handle*Update` parsers:
-     * in production it is only reachable from a socket callback, and it is plain HTTP otherwise.
-     */
     /** The enabled highlighted words in the payload; words in a disabled colour group are dropped. */
     private fun highlightedWordsFrom(json: JSONObject): List<HighlightedWord> {
         val disabledArray = json.optJSONArray("disabled_colors")
@@ -373,6 +368,11 @@ class STTManager {
             }
     }
 
+    /**
+     * The highlighted-word list is not pushed on connect, so it is pulled over REST once the socket
+     * comes up. `internal` rather than private for the same reason as the `handle*Update` parsers:
+     * in production it is only reachable from a socket callback, and it is plain HTTP otherwise.
+     */
     internal fun fetchWordHighlighting(baseUrl: String) {
         try {
             val client = HttpClient.newHttpClient()

@@ -251,11 +251,6 @@ class AtemClient(
         private val INTERESTING_COMMANDS = setOf("FTCD", "FTDC", "FTDE", "FTUA", "LKOB", "LKST", "MPCS")
 
         /**
-         * Lightweight reachability probe: one hello packet, true if anything answers.
-         * The half-open session is never ACKed — the ATEM expires it on its own.
-         * Cheap enough to poll (single ~20-byte UDP round-trip).
-         */
-        /**
          * Cut an upstream keyer using a fresh short-lived connection. Used as the fallback
          * when the shared upload connection is busy, so a key cut never waits behind an upload.
          */
@@ -285,6 +280,11 @@ class AtemClient(
                 }
             }
 
+        /**
+         * Lightweight reachability probe: one hello packet, true if anything answers.
+         * The half-open session is never ACKed — the ATEM expires it on its own.
+         * Cheap enough to poll (single ~20-byte UDP round-trip).
+         */
         suspend fun isReachable(host: String, port: Int = 9910, timeoutMs: Int = 2000): Boolean =
             withContext(Dispatchers.IO) {
                 try {

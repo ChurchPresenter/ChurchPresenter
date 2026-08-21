@@ -622,10 +622,6 @@ object PlanningCenterClient {
         }
 
     /**
-     * Downloads a file's bytes from an already-resolved URL (a pre-signed S3 link — no auth
-     * header needed or wanted).
-     */
-    /**
      * Also on stderr, the same way BibleEngineClient reports a failed connect. The Sentry warning
      * carries the exception, but `reportWarning` returns immediately when Sentry is not enabled —
      * which is every test run, and every operator who has not opted in. Without the stderr line the
@@ -640,6 +636,10 @@ object PlanningCenterClient {
         return reported("Planning Center attachment download failed", e, FileDownloadOutcome.NetworkError)
     }
 
+    /**
+     * Downloads a file's bytes from an already-resolved URL (a pre-signed S3 link — no auth
+     * header needed or wanted).
+     */
     suspend fun downloadFile(
         url: String,
         destination: File,

@@ -98,10 +98,6 @@ internal fun installerSuffixFor(downloadUrl: String): String = when {
 }
 
 /**
- * Fraction of the download complete, or -1f (indeterminate) when the server didn't report a
- * content length to measure against.
- */
-/**
  * Copies [input] to [output], reporting progress as each chunk lands, and returns the bytes copied.
  *
  * Split out of the update download so it can be tested without a server: what it has to get right is
@@ -129,6 +125,10 @@ internal suspend fun copyReportingProgress(
     return bytesRead
 }
 
+/**
+ * Fraction of the download complete, or -1f (indeterminate) when the server didn't report a
+ * content length to measure against.
+ */
 internal fun downloadProgressFraction(bytesRead: Long, contentLength: Long): Float =
     if (contentLength > 0) (bytesRead.toFloat() / contentLength.toFloat()).coerceIn(0f, 1f) else -1f
 

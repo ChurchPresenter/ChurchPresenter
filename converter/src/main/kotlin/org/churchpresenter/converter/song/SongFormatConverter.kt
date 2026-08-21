@@ -118,7 +118,6 @@ object FreeWorshipFormat : SongFormatConverter {
     override fun outputNameFor(input: File) = FreeWorshipConverter.outputNameFor(input)
 }
 
-/** OpenLP libraries: either the `songs.sqlite` database itself or an OpenLyrics XML export. */
 /**
  * ProPresenter documents, versions 4 through 7 — one song per file.
  *
@@ -185,6 +184,7 @@ object MediaShoutFormat : SongFormatConverter {
     override fun outputNameFor(input: File): String = input.nameWithoutExtension
 }
 
+/** OpenLP libraries: either the `songs.sqlite` database itself or an OpenLyrics XML export. */
 object OpenLpFormat : SongFormatConverter {
     override val id = "openlp"
     override val extensions = listOf("xml", "sqlite", "db")

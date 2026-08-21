@@ -5,6 +5,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -102,7 +103,7 @@ class BibleScheduleSelectionTest {
      */
     private fun scheduleClick(
         item: ScheduleItem.BibleVerseItem,
-        block: androidx.compose.ui.test.ComposeUiTest.(
+        block: ComposeUiTest.(
             vm: BibleViewModel,
             pushed: List<List<SelectedVerse>>,
             release: () -> Unit,
