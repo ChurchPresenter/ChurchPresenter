@@ -1,6 +1,6 @@
-package converter.song
+package org.churchpresenter.converter.song
 
-import converter.library.RtfText
+import org.churchpresenter.converter.library.RtfText
 import org.w3c.dom.Element
 import java.io.File
 import java.util.Base64

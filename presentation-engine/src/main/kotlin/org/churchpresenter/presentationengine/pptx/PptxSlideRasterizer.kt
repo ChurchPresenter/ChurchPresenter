@@ -25,6 +25,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import kotlin.math.ceil
 import kotlin.math.floor
+import org.churchpresenter.presentationengine.DeckRasterizer
 
 /**
  * Renders the [PptxLayerPlanner]'s layer decomposition into transparent ARGB bitmaps.
@@ -39,7 +40,7 @@ internal object PptxSlideRasterizer {
 
     /**
      * [extractedTempFiles] caches embedded video files extracted from the pptx zip, keyed by
-     * relationship id — owned by the caller ([org.churchpresenter.presentationengine.DeckRasterizer], which already
+     * relationship id — owned by the caller ([DeckRasterizer], which already
      * owns the rest of this deck's per-open lifecycle) so temp files are extracted once and
      * deleted when the deck closes rather than relying on `deleteOnExit()` alone.
      */

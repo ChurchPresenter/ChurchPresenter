@@ -2,6 +2,8 @@ package org.churchpresenter.presentationengine.model
 
 import org.churchpresenter.presentationengine.keynote.KeynoteScene
 import java.io.File
+import org.churchpresenter.presentationengine.DeckRasterizer
+import org.churchpresenter.presentationengine.PresentationLoader
 
 /** Source format of a loaded presentation. */
 enum class DeckFormat { PDF, PPTX, PPT, KEYNOTE }
@@ -16,7 +18,7 @@ enum class DeckFormat { PDF, PPTX, PPT, KEYNOTE }
  */
 enum class Fidelity { NATIVE, STATIC_FALLBACK }
 
-/** Why a presentation failed to load. The engine never throws out of [org.churchpresenter.presentationengine.PresentationLoader]. */
+/** Why a presentation failed to load. The engine never throws out of [PresentationLoader]. */
 enum class DeckLoadError { UNSUPPORTED_FORMAT, PASSWORD_PROTECTED, EMPTY_DOCUMENT, PARSE_FAILED }
 
 /** A rectangle in slide points (1/72 inch — the native coordinate space of every slide format). */
@@ -24,7 +26,7 @@ data class RectPt(val x: Double, val y: Double, val w: Double, val h: Double)
 
 /**
  * A parsed presentation: pure description, no pixels. Rasterization happens on demand through
- * [org.churchpresenter.presentationengine.DeckRasterizer], which re-opens [sourceFile] as needed — a Deck itself
+ * [DeckRasterizer], which re-opens [sourceFile] as needed — a Deck itself
  * holds no open resources and never needs closing.
  */
 class Deck internal constructor(
@@ -132,7 +134,7 @@ data class SlideTransitionSpec(
 enum class TransitionType { NONE, FADE, PUSH, WIPE, SPLIT, COVER }
 
 /**
- * Internal handle telling [org.churchpresenter.presentationengine.DeckRasterizer] how to reproduce pixels for this
+ * Internal handle telling [DeckRasterizer] how to reproduce pixels for this
  * deck. Not part of the public contract.
  */
 internal sealed interface DeckSource {

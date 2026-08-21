@@ -1,4 +1,4 @@
-package ui
+package org.churchpresenter.converter.ui
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas

@@ -1,8 +1,8 @@
-package converter.library
+package org.churchpresenter.converter.library
 
-import converter.song.MarkdownToSongConverter
-import converter.song.ParsedSong
-import converter.song.SongSection
+import org.churchpresenter.converter.song.MarkdownToSongConverter
+import org.churchpresenter.converter.song.ParsedSong
+import org.churchpresenter.converter.song.SongSection
 
 import java.io.File
 import java.nio.file.Files

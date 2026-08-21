@@ -20,6 +20,7 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.presentationengine.keynote.ObjectIndex
 
 /**
  * Keynote's animation *names* into the engine's effects.
@@ -88,7 +89,7 @@ class KeynoteBuildEffectMappingTest {
                 Triple(chunkId, KnFields.TYPE_KN_BUILD_CHUNK, chunkPayload),
             ),
         )
-        val index = assertNotNull(org.churchpresenter.presentationengine.keynote.ObjectIndex.load(dir))
+        val index = assertNotNull(ObjectIndex.load(dir))
         val slidePayload = ProtoWriter().apply {
             bytesField(
                 KnFields.SLIDE_BUILDS,

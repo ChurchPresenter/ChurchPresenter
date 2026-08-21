@@ -1,4 +1,4 @@
-package ui
+package org.churchpresenter.converter.ui
 
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.ScrollbarStyle

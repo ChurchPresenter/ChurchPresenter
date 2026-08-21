@@ -1,6 +1,6 @@
-package ui
+package org.churchpresenter.converter.ui
 
-import converter.song.SongFormatConverters
+import org.churchpresenter.converter.song.SongFormatConverters
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame

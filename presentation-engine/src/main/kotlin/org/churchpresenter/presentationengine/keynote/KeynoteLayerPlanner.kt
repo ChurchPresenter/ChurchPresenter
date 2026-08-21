@@ -8,6 +8,7 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
+import org.churchpresenter.presentationengine.model.Step
 
 /**
  * Layer decomposition for a native Keynote slide — same z-band flattening as the PPTX planner:
@@ -117,7 +118,7 @@ internal object KeynoteLayerPlanner {
         }
         val remapped = Timeline(
             timeline.steps.map { step ->
-                org.churchpresenter.presentationengine.model.Step(
+                Step(
                     step.intervals.mapNotNull { interval ->
                         val target = childToTop[interval.layerId] ?: interval.layerId
                         if (target in layerIds) interval.copy(layerId = target) else null

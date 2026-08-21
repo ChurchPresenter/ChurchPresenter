@@ -1,6 +1,6 @@
-package converter.song
+package org.churchpresenter.converter.song
 
-import converter.library.TextUtils
+import org.churchpresenter.converter.library.TextUtils
 
 import java.io.File
 import java.nio.charset.StandardCharsets

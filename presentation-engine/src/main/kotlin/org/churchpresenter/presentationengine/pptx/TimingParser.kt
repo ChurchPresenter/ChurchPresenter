@@ -17,6 +17,7 @@ import org.openxmlformats.schemas.presentationml.x2006.main.CTTLTimeNodeParallel
 import org.openxmlformats.schemas.presentationml.x2006.main.CTTLTimeNodeSequence
 import org.openxmlformats.schemas.presentationml.x2006.main.CTTLTimeTargetElement
 import org.openxmlformats.schemas.presentationml.x2006.main.CTTimeNodeList
+import org.churchpresenter.presentationengine.timeline.PresetCatalog
 
 /**
  * Parses a slide's `<p:timing>` tree into [TimeNode]s, preserving document order (which encodes
@@ -215,7 +216,7 @@ internal object TimingParser {
      * (meant only as a dummy placeholder), which this engine's [MotionExpr] happily evaluated as
      * "slide's left edge"/"slide's right edge", flinging the shape off-screen. If any keyframe in
      * the list has a formula, the whole sequence is unreliable — return empty so the caller finds
-     * no usable curve and falls through to [org.churchpresenter.presentationengine.timeline.PresetCatalog]'s
+     * no usable curve and falls through to [PresetCatalog]'s
      * preset-id backstop instead (Spiral already degrades there to a safe on-screen zoom).
      */
     private fun parseKeyframes(anim: CTTLAnimateBehavior): List<Pair<Double, String>> {

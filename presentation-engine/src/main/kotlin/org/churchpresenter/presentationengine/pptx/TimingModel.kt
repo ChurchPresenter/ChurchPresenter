@@ -1,5 +1,6 @@
 package org.churchpresenter.presentationengine.pptx
 
+import org.churchpresenter.presentationengine.timeline.TimelineCompiler
 /**
  * A faithful, format-agnostic snapshot of a slide's `<p:timing>` tree. Produced by
  * [TimingParser], consumed by the timeline compiler. Nothing here is interpreted yet —
@@ -124,7 +125,7 @@ internal sealed interface TimingBehavior {
      * `<p:cmd>` — a media/verb command (`playFrom(0.0)`, `togglePause`, `pause`, `stop`, …), not
      * a visual effect. Used to click-gate embedded video/audio playback: the click sequence
      * position is the same as any other behavior, only the interpretation differs — see
-     * [org.churchpresenter.presentationengine.timeline.TimelineCompiler]'s Command handling.
+     * [TimelineCompiler]'s Command handling.
      */
     data class Command(
         override val target: BehaviorTarget?,

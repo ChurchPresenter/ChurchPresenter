@@ -1,9 +1,11 @@
+package org.churchpresenter.converter
+
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import ui.App
-import ui.ConverterTheme
+import org.churchpresenter.converter.ui.App
+import org.churchpresenter.converter.ui.ConverterTheme
 
 fun main() = application {
     Window(

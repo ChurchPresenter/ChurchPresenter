@@ -63,8 +63,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import songlibrary.ui.SongLibraryApp
-import ui.App as ConverterApp
-import ui.Strings as ConverterStrings
+import org.churchpresenter.converter.ui.App as ConverterApp
+import org.churchpresenter.converter.ui.Strings as ConverterStrings
 import lottiegen.App as LottieGenApp
 import lottiegen.editor.StyleEditorApp
 import java.awt.Desktop

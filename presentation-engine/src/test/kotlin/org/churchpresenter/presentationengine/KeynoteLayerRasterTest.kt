@@ -19,6 +19,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.presentationengine.keynote.KeynoteScene
 
 /**
  * Rendering **one layer at a time** out of a Keynote scene.
@@ -91,7 +92,7 @@ class KeynoteLayerRasterTest {
         drawables: List<Triple<Long, Int, ByteArray>>,
         extra: List<Triple<Long, Int, ByteArray>> = emptyList(),
         backgroundStyleId: Long? = null,
-    ): org.churchpresenter.presentationengine.keynote.KeynoteScene {
+    ): KeynoteScene {
         val size = ProtoWriter().apply {
             floatField(1, slideW.toFloat())
             floatField(2, slideH.toFloat())

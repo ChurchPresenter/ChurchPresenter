@@ -14,8 +14,8 @@ import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import ui.App
-import ui.ConverterTheme
+import org.churchpresenter.converter.ui.App
+import org.churchpresenter.converter.ui.ConverterTheme
 import java.io.File
 import kotlin.test.Test
 

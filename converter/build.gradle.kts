@@ -60,7 +60,7 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 // packages it), separately from the copy the main app opens from its Help menu.
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "org.churchpresenter.converter.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)

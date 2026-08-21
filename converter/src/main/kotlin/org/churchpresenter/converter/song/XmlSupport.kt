@@ -1,6 +1,6 @@
-package converter.song
+package org.churchpresenter.converter.song
 
-import converter.library.TextUtils
+import org.churchpresenter.converter.library.TextUtils
 
 import org.w3c.dom.Element
 import org.w3c.dom.Node

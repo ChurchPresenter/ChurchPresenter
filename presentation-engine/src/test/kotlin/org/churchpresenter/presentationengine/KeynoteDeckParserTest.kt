@@ -9,6 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.presentationengine.keynote.KeynoteSceneRasterizer
 
 /**
  * Walking a Keynote IWA object graph into a renderable scene:
@@ -25,7 +26,7 @@ import kotlin.test.assertTrue
  * The fixtures stay programmatic — no binary deck is committed, matching [Fixtures]' existing rule
  * for these formats.
  *
- * **Not covered here:** rendering. [org.churchpresenter.presentationengine.keynote.KeynoteSceneRasterizer] draws real
+ * **Not covered here:** rendering. [KeynoteSceneRasterizer] draws real
  * drawables, and a drawable rich enough to rasterize needs far more of the graph than a parser test
  * should hand-build; a real deck with content is the honest way in, and none is committed.
  */
