@@ -58,19 +58,51 @@ abstract class FileChooser {
      * @param filters the filters to apply when showing files in the dialog. If empty, no filtering will be applied.
      * @param title The title of the file chooser dialog.
      * @return The path of the selected file, or null if the user canceled the dialog.
-     * When filters are provided, the returned path is guaranteed to carry one of the
-     * filter extensions (the first one is appended if the user omitted it).
+     * [suggestedName] is written in full, with the extension; it is [baseName] that reaches the
+     * platform dialog. When filters are provided, the returned path is guaranteed to carry exactly
+     * one of the filter extensions — appended if the dialog dropped it, collapsed if it added a
+     * second.
      */
     suspend fun save(location: Path?, suggestedName: String, filters: List<FileNameExtensionFilter>, title: String): Path? {
         val initialLocation = location ?: Path(System.getProperty(Constants.SystemProperties.USER_HOME))
-        val result = withContext(Dispatchers.IO) { saveImpl(initialLocation, suggestedName, filters, title) } ?: return null
         val extensions = filters.flatMap { it.extensions.toList() }
-        val name = result.fileName.toString()
-        return if (extensions.isEmpty() || extensions.any { name.endsWith(".$it", ignoreCase = true) }) {
-            result
-        } else {
-            result.resolveSibling("$name.${extensions.first()}")
+        val offered = baseName(suggestedName, extensions)
+        val result = withContext(Dispatchers.IO) { saveImpl(initialLocation, offered, filters, title) } ?: return null
+        val name = normalizeSavedName(result.fileName.toString(), extensions)
+        return if (name == result.fileName.toString()) result else result.resolveSibling(name)
+    }
+
+    /**
+     * [suggestedName] with a trailing filter extension taken off, which is what the dialogs are
+     * offered.
+     *
+     * Every caller writes the name it wants in full ("schedule.cps"), and every native saver adds
+     * the extension back itself — FileKit by an unconditional concat, the macOS panel and the
+     * Windows dialog from the type they are told to save as — so a name handed over whole comes
+     * back as `schedule.cps.cps`. Stripping it here means the split is done once, for every
+     * platform, rather than in whichever backend last remembered to.
+     */
+    internal fun baseName(suggestedName: String, extensions: List<String>): String {
+        val matched = extensions.firstOrNull { suggestedName.endsWith(".$it", ignoreCase = true) }
+        return matched?.let { suggestedName.dropLast(it.length + 1) } ?: suggestedName
+    }
+
+    /**
+     * [name] carrying exactly one of [extensions]: a repeat collapsed, a missing one added.
+     *
+     * [baseName] removes the cause on the way in; this removes the symptom on the way out, because
+     * what a native dialog does to a name is not ours to predict and a doubled extension has
+     * already shipped. Only a repeat of the *same* filter extension is collapsed, so a deliberate
+     * `service.tar.gz` keeps both halves.
+     */
+    internal fun normalizeSavedName(name: String, extensions: List<String>): String {
+        if (extensions.isEmpty()) return name
+        var out = name
+        val doubled = extensions.firstOrNull { out.endsWith(".$it.$it", ignoreCase = true) }
+        if (doubled != null) {
+            while (out.endsWith(".$doubled.$doubled", ignoreCase = true)) out = out.dropLast(doubled.length + 1)
         }
+        return if (extensions.any { out.endsWith(".$it", ignoreCase = true) }) out else "$out.${extensions.first()}"
     }
 
     protected abstract suspend fun saveImpl(location: Path, suggestedName: String, filters: List<FileNameExtensionFilter>, title: String): Path?

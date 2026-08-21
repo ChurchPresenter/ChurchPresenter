@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.slot
 import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
@@ -12,6 +13,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import java.io.File
 import java.nio.file.Files
+import java.time.LocalDate
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -328,6 +330,30 @@ class ScheduleFileTest {
         vm.saveSchedule() // never saved before
 
         assertTrue(file.exists(), "the first save must prompt and write")
+    }
+
+    // ── The name a new schedule is offered under ────────────────────────────────
+
+    @Test
+    fun `a new schedule is offered under today's date`() {
+        assertEquals("2026-08-20-schedule.cps", vm().suggestedScheduleFileName(LocalDate.of(2026, 8, 20)))
+    }
+
+    @Test
+    fun `the offered name is the one the dialog is given`() = runBlocking {
+        val file = scheduleFile()
+        val suggested = slot<String>()
+        coEvery { chooser.save(any(), capture(suggested), any(), any()) } returns file.toPath()
+
+        val vm = vm()
+        vm.addSong(1, "First", "Hymnal")
+        vm.saveScheduleAs()
+
+        assertEquals(vm.suggestedScheduleFileName(), suggested.captured)
+        assertTrue(
+            suggested.captured.endsWith("-schedule.cps") && !suggested.captured.endsWith(".cps.cps"),
+            "one extension, and the date in front of it: ${suggested.captured}",
+        )
     }
 
     @Test

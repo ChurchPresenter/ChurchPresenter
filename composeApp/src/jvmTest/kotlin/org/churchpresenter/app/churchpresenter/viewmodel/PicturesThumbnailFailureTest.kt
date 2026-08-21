@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import kotlinx.coroutines.runBlocking
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
@@ -10,6 +11,8 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -89,6 +92,44 @@ class PicturesThumbnailFailureTest {
         assertTrue(
             vm.thumbnailFailures.getValue(broken).isNotEmpty(),
             "with a reason, so the tile and the log can say what went wrong"
+        )
+    }
+
+    @Test
+    fun `an unreadable picture is reported with what is wrong with it, and never with its name`() {
+        // The report used to carry Skia's `Failed to Image::makeFromEncoded` and the file name and
+        // nothing else — the same sentence for an empty placeholder, a truncated copy and a file
+        // that is not a picture at all, titled with a name belonging to whoever reported it.
+        writeUndecodable("holiday snap.png")
+        val vm = viewModel()
+
+        val reported = runBlocking { vm.decodeThumbnail(File(folder, "holiday snap.png")) }
+
+        assertNotNull(reported, "an unreadable picture is worth a report")
+        assertContains(reported, "ext=png")
+        assertContains(
+            reported,
+            "imageio=none",
+            message = "no reader claimed it — that is what makes it broken"
+        )
+        assertFalse("holiday" in reported, "picture names stay on the machine: $reported")
+    }
+
+    @Test
+    fun `a file with no bytes in it yet fails its tile but is not reported`() {
+        // A cloud placeholder or a copy that has not started is not something the app got wrong,
+        // and reporting one buries the files that genuinely could not be read.
+        File(folder, "still-syncing.png").createNewFile()
+        val vm = viewModel()
+        val empty = File(folder, "still-syncing.png")
+
+        val reported = runBlocking { vm.decodeThumbnail(empty) }
+
+        assertNull(reported, "nothing to report: $reported")
+        assertContains(
+            vm.thumbnailFailures,
+            empty,
+            "the tile still has to say the picture is not there"
         )
     }
 

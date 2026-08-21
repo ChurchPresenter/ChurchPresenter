@@ -129,6 +129,12 @@ fun WebTab(
     modifier: Modifier = Modifier,
     presenterManager: PresenterManager? = null,
     selectedWebsiteItem: ScheduleItem.WebsiteItem? = null,
+    /**
+     * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
+     * effect below. Keyed on the item alone, an unchanged item is an unchanged key and the second
+     * click does nothing.
+     */
+    selectedWebsiteItemVersion: Int = 0,
     appSettings: AppSettings = AppSettings(),
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((url: String, title: String) -> Unit)? = null,
@@ -185,7 +191,7 @@ fun WebTab(
     }
 
     // When a schedule item selects this tab, restore its URL and go live
-    LaunchedEffect(selectedWebsiteItem) {
+    LaunchedEffect(selectedWebsiteItem, selectedWebsiteItemVersion) {
         selectedWebsiteItem?.let { item ->
             urlInput = item.url
             liveUrl = item.url

@@ -51,6 +51,7 @@ class CrashReporterSentryTest {
             "ATEM key on failed",
             throwable = IllegalStateException("unreachable"),
             tags = mapOf("subsystem" to "atem"),
+            extras = mapOf("detail" to "no reply to the handshake"),
         )
         CrashReporter.reportWarning("no throwable at all")
 

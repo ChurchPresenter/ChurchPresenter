@@ -180,6 +180,48 @@ class FileChooserTest {
     }
 
     @Test
+    fun `a doubled extension is collapsed back to one`() = runBlocking {
+        // What the field reported: a dialog that appends its type to a name that already carried
+        // it. Which platform does it is not ours to control, so the returned name is repaired here.
+        val chosen = savingAs("sunday.cps.cps").save(null, "schedule.cps", listOf(scheduleFilter), "")
+
+        assertEquals("sunday.cps", chosen?.fileName.toString())
+    }
+
+    @Test
+    fun `a name doubled more than once still collapses to one`() = runBlocking {
+        val chosen = savingAs("sunday.cps.cps.cps").save(null, "schedule.cps", listOf(scheduleFilter), "")
+
+        assertEquals("sunday.cps", chosen?.fileName.toString())
+    }
+
+    @Test
+    fun `collapsing ignores case, like the append check`() = runBlocking {
+        val chosen = savingAs("SUNDAY.CPS.cps").save(null, "schedule.cps", listOf(scheduleFilter), "")
+
+        assertEquals("SUNDAY.CPS", chosen?.fileName.toString())
+    }
+
+    @Test
+    fun `two different extensions are not a doubling`() = runBlocking {
+        // Only a repeat of the SAME extension is collapsed, so a deliberate two-part name survives.
+        val archives = filter("Archives", "gz")
+
+        val chosen = savingAs("service.tar.gz").save(null, "service.gz", listOf(archives), "")
+
+        assertEquals("service.tar.gz", chosen?.fileName.toString())
+    }
+
+    @Test
+    fun `a base name the caller wrote without an extension is offered as it stands`() = runBlocking {
+        val chooser = savingAs("sunday.cps")
+
+        chooser.save(null, "my.schedule", listOf(scheduleFilter), "")
+
+        assertEquals("my.schedule", chooser.saveCall?.suggestedName, "only a filter extension comes off")
+    }
+
+    @Test
     fun `the corrected name stays in the folder the user chose`() = runBlocking {
         val elsewhere = File(home, "Documents").also { it.mkdirs() }
         val chooser = RecordingChooser(saveResult = File(elsewhere, "sunday").toPath())
@@ -202,7 +244,11 @@ class FileChooserTest {
         chooser.save(null, "schedule.cps", listOf(scheduleFilter), "Save Schedule As")
 
         assertEquals(Path(home.absolutePath), chooser.saveCall?.location)
-        assertEquals("schedule.cps", chooser.saveCall?.suggestedName)
+        assertEquals(
+            "schedule",
+            chooser.saveCall?.suggestedName,
+            "the dialog adds the extension itself; offering it whole is what produced schedule.cps.cps",
+        )
         assertEquals("Save Schedule As", chooser.saveCall?.title)
     }
 

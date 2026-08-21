@@ -51,10 +51,10 @@ object FileKitFileChooser : FileChooser() {
     /**
      * Splits [suggestedName] into the base name and default extension FileKit wants.
      *
-     * Callers pass names WITH the extension ("schedule.cps") but FileKit appends the default
-     * extension itself, so a matching extension has to come off first or the dialog opens
-     * offering "schedule.cps.cps". A name carrying none of [extensions] is left whole and simply
-     * gains the first one.
+     * [FileChooser.baseName] has already taken a matching extension off, so this normally only
+     * names the default extension for the saver to add. It still strips, because the split is
+     * cheap and a name that reached here whole — a caller that bypassed [FileChooser.save] — would
+     * otherwise open the dialog offering "schedule.cps.cps".
      */
     internal fun saveNameParts(suggestedName: String, extensions: List<String>): Pair<String, String?> {
         val matched = extensions.firstOrNull { suggestedName.endsWith(".$it", ignoreCase = true) }

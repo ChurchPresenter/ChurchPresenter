@@ -55,7 +55,6 @@ import churchpresenter.composeapp.generated.resources.scope
 import churchpresenter.composeapp.generated.resources.tab_focus_lost
 import churchpresenter.composeapp.generated.resources.verse
 import java.awt.Window as AwtWindow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
@@ -75,6 +74,7 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
@@ -136,6 +136,12 @@ fun BibleTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit)? = null,
     selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
+    /**
+     * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
+     * selection. Without it the effect below is keyed on an unchanged item and the second click
+     * does nothing at all — which is what made a failed first click unrecoverable.
+     */
+    selectedVerseItemVersion: Int = 0,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
 
     onInstanceLinkSendVerse: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit)? = null,
@@ -169,15 +175,33 @@ fun BibleTab(
 
     val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(selectedVerseItem) {
+    /**
+     * Puts a schedule item's verse on screen.
+     *
+     * The push is made here, from the resolution itself, rather than left to
+     * `LaunchedEffect(verseSelectionToken)` below: that effect is skipped while a multi-verse
+     * selection is live and while split-browse is on — both right for an interactive selection and
+     * wrong for an item the operator explicitly clicked — and it only fires while this tab is
+     * composed, which it may not be by the time a cold-start Bible load finishes.
+     */
+    LaunchedEffect(selectedVerseItem, selectedVerseItemVersion) {
         selectedVerseItem?.let { item ->
-            if (!viewModel.isFullyLoadedFlow.value) {
-                viewModel.isFullyLoadedFlow.first { it }
+            val verses = viewModel.resolveVerseSelection(
+                bookName = item.bookName,
+                chapter = item.chapter,
+                verseNumber = item.verseNumber,
+                verseRange = item.verseRange,
+                bookId = item.bookId,
+            )
+            if (verses.isEmpty()) {
+                CrashReporter.breadcrumb(
+                    "Bible schedule item did not resolve to a verse",
+                    category = "schedule",
+                )
+                return@LaunchedEffect
             }
-            val found = viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber, item.verseRange, bookId = item.bookId)
-            if (found) {
-                focusRequester.requestFocus()
-            }
+            onVerseSelected(verses)
+            focusRequester.requestFocus()
         }
     }
 

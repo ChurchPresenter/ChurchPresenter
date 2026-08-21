@@ -118,6 +118,16 @@ internal fun scheduleChipColors(paletteIndex: Int): Pair<Color, Color> {
 
 internal const val SCHEDULE_ROW_CARD_TAG = "schedule_row_card"
 
+/** The coloured bar down the left edge of a row — a label's colour, or the selection. */
+internal const val SCHEDULE_ROW_ACCENT_TAG = "schedule_row_accent"
+
+/** Where the accent bar sits: [ACCENT_START] in from the card's left edge, [ACCENT_WIDTH] wide. */
+private val ACCENT_START = 3.dp
+private val ACCENT_WIDTH = 3.dp
+
+/** Its inset from the card's top and bottom, keeping it clear of the border's rounded corners. */
+private val ACCENT_INSET = 4.dp
+
 internal const val SCHEDULE_ROW_ACTIONS_TAG = "schedule_row_actions"
 
 /** The legacy layout's action line — its own tag so a test can tell the two layouts apart. */
@@ -261,42 +271,35 @@ internal fun ScheduleItemRow(
         else -> Color.Transparent
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag(SCHEDULE_ROW_CARD_TAG)
-            .hoverable(interactionSource)
-            .clip(CARD_SHAPE)
-            .background(cardBg, CARD_SHAPE)
-            .border(1.dp, cardBorder, CARD_SHAPE)
-    ) {
-        Row(
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    start = 3.dp,
-                    end = 6.dp,
-
-                    top = if (isSection) SECTION_ROW_PADDING else density.rowPadding(),
-                    bottom = if (isSection) SECTION_ROW_PADDING else density.rowPadding()
-                )
-                .heightIn(min = if (isSection) 0.dp else density.rowMinHeight())
-
-                .height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .testTag(SCHEDULE_ROW_CARD_TAG)
+                .hoverable(interactionSource)
+                .clip(CARD_SHAPE)
+                .background(cardBg, CARD_SHAPE)
+                .border(1.dp, cardBorder, CARD_SHAPE)
         ) {
-
             Row(
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        // Where the accent used to stand, plus the gap after it: the bar is drawn
+                        // over the card now, and this keeps the drag handle where it always was.
+                        start = ACCENT_START + ACCENT_WIDTH + 5.dp,
+                        end = 6.dp,
+
+                        top = if (isSection) SECTION_ROW_PADDING else density.rowPadding(),
+                        bottom = if (isSection) SECTION_ROW_PADDING else density.rowPadding()
+                    )
+                    .heightIn(min = if (isSection) 0.dp else density.rowMinHeight())
+
+                    .height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .width(3.dp)
-                        .height(24.dp)
-                        .background(leftAccent, RoundedCornerShape(2.dp))
-                )
+
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -328,195 +331,217 @@ internal fun ScheduleItemRow(
                         }
                     }
                 }
-            }
 
-            Box(modifier = Modifier.weight(1f)) {
+                Box(modifier = Modifier.weight(1f)) {
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-
-                        .initialPassCombinedClickable(
-                            onClick = { onSelect() },
-                            onDoubleClick = if (!isSection) { { onPresent() } } else null
-                        ),
-
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    if (isSection) {
-                        Text(
-                            text = item.displayText,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp,
-                            color = sectionText,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    } else {
-                        ScheduleItemContent(item = item, density = density, isSelected = isSelected)
-                    }
-
-                }
-
-                if (!legacyRowActions) {
-                    Row(
+                    Column(
                         modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .testTag(SCHEDULE_ROW_ACTIONS_TAG)
+                            .fillMaxSize()
 
-                            .fillMaxHeight()
-                            .alpha(actionsAlpha)
-                            .background(
-                                Brush.horizontalGradient(
-                                    0f to Color.Transparent,
-                                    GRADIENT_MIDPOINT to cardBg.copy(alpha = 0.82f),
-                                    1f to cardBg.copy(alpha = 0.82f)
-                                )
-                            )
-                            .padding(start = 20.dp)
-                            .finalPassCombinedClickable(
+                            .initialPassCombinedClickable(
                                 onClick = { onSelect() },
                                 onDoubleClick = if (!isSection) { { onPresent() } } else null
                             ),
-                        horizontalArrangement = Arrangement.spacedBy(1.dp),
-                        verticalAlignment = Alignment.CenterVertically
+
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        ScheduleRowActionButtons(
-                            isSection = isSection,
-                            note = note,
-                            noteExpanded = noteExpanded,
-                            removeFirst = false,
-                            onMoveUp = onMoveUp,
-                            onMoveDown = onMoveDown,
-                            onToggleNote = { noteExpanded = !noteExpanded },
-                            onRemove = onRemove,
-                            onPresent = onPresent,
-                            onEditLabel = onEditLabel
-                        )
+                        if (isSection) {
+                            Text(
+                                text = item.displayText,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp,
+                                color = sectionText,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        } else {
+                            ScheduleItemContent(item = item, density = density, isSelected = isSelected)
+                        }
+
                     }
+
+                    if (!legacyRowActions) {
+                        Row(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .testTag(SCHEDULE_ROW_ACTIONS_TAG)
+
+                                .fillMaxHeight()
+                                .alpha(actionsAlpha)
+                                .background(
+                                    Brush.horizontalGradient(
+                                        0f to Color.Transparent,
+                                        GRADIENT_MIDPOINT to cardBg.copy(alpha = 0.82f),
+                                        1f to cardBg.copy(alpha = 0.82f)
+                                    )
+                                )
+                                .padding(start = 20.dp)
+                                .finalPassCombinedClickable(
+                                    onClick = { onSelect() },
+                                    onDoubleClick = if (!isSection) { { onPresent() } } else null
+                                ),
+                            horizontalArrangement = Arrangement.spacedBy(1.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            ScheduleRowActionButtons(
+                                isSection = isSection,
+                                note = note,
+                                noteExpanded = noteExpanded,
+                                removeFirst = false,
+                                onMoveUp = onMoveUp,
+                                onMoveDown = onMoveDown,
+                                onToggleNote = { noteExpanded = !noteExpanded },
+                                onRemove = onRemove,
+                                onPresent = onPresent,
+                                onEditLabel = onEditLabel
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (legacyRowActions) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(SCHEDULE_ROW_LEGACY_ACTIONS_TAG)
+                        .padding(start = 12.dp, end = 6.dp, bottom = 2.dp)
+                        .finalPassCombinedClickable(
+                            onClick = { onSelect() },
+                            onDoubleClick = if (!isSection) { { onPresent() } } else null
+                        ),
+                    horizontalArrangement = Arrangement.spacedBy(1.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ScheduleRowActionButtons(
+                        isSection = isSection,
+                        note = note,
+                        noteExpanded = noteExpanded,
+                        removeFirst = true,
+                        onMoveUp = onMoveUp,
+                        onMoveDown = onMoveDown,
+                        onToggleNote = { noteExpanded = !noteExpanded },
+                        onRemove = onRemove,
+                        onPresent = onPresent,
+                        onEditLabel = onEditLabel
+                    )
+                }
+            }
+
+            if (note.isNotEmpty() && !noteExpanded) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
+                        .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
+                        .padding(start = 8.dp, end = 2.dp, top = 4.dp, bottom = 4.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Text(
+                        text = note,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.weight(1f).padding(top = 2.dp, bottom = 2.dp)
+                    )
+                    ScheduleRowActionButton(
+                        painter = painterResource(Res.drawable.ic_edit),
+                        text = stringResource(Res.string.tooltip_note),
+                        onClick = { noteExpanded = true },
+                        iconSize = 11.dp,
+                        iconTint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+                    )
+                }
+            }
+
+            AnimatedVisibility(visible = noteExpanded) {
+                val noteInteractionSource = remember { MutableInteractionSource() }
+                val noteFieldFocused by noteInteractionSource.collectIsFocusedAsState()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(7.dp))
+                        .border(
+                            width = 1.dp,
+                            color = if (noteFieldFocused) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.outlineVariant,
+                            shape = RoundedCornerShape(7.dp)
+                        ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    BasicTextField(
+                        value = noteText,
+                        onValueChange = { noteText = it },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                        textStyle = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        maxLines = 3,
+                        interactionSource = noteInteractionSource,
+                        decorationBox = { innerTextField ->
+                            Box {
+                                if (noteText.isEmpty()) {
+                                    Text(
+                                        stringResource(Res.string.schedule_note_placeholder),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
+                    )
+                    TooltipIconButton(
+                        painter = painterResource(Res.drawable.ic_check),
+                        text = stringResource(Res.string.tooltip_note_done),
+                        onClick = {
+                            onNoteChanged(noteText)
+                            noteExpanded = false
+                        },
+                        buttonSize = 32.dp,
+                        iconSize = 15.dp,
+                        iconTint = MaterialTheme.colorScheme.primary
+                    )
+                    TooltipIconButton(
+                        painter = painterResource(Res.drawable.ic_close),
+                        text = stringResource(Res.string.tooltip_note_clear),
+                        onClick = {
+                            noteText = ""
+                            onNoteChanged("")
+                        },
+                        modifier = Modifier.padding(end = 4.dp),
+                        buttonSize = 32.dp,
+                        iconSize = 15.dp,
+                        iconTint = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }
 
-        if (legacyRowActions) {
-            Row(
+        // The accent marks the whole item, so it is sized from the card rather than from the
+        // title line it used to sit in: the legacy action line, the note preview and the note
+        // editor are all siblings of that line, and each one left it a short stub floating at the
+        // top of a taller card. matchParentSize takes the card's real measured height every frame
+        // -- so it follows the note editor open instead of jumping -- while adding no constraint
+        // of its own, and it is declared last because the card paints an opaque background that an
+        // accent underneath would be hidden by. An inert Box registers no pointer input, so hover
+        // and click still reach the row.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .padding(start = ACCENT_START, top = ACCENT_INSET, bottom = ACCENT_INSET)
+        ) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(SCHEDULE_ROW_LEGACY_ACTIONS_TAG)
-                    .padding(start = 12.dp, end = 6.dp, bottom = 2.dp)
-                    .finalPassCombinedClickable(
-                        onClick = { onSelect() },
-                        onDoubleClick = if (!isSection) { { onPresent() } } else null
-                    ),
-                horizontalArrangement = Arrangement.spacedBy(1.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ScheduleRowActionButtons(
-                    isSection = isSection,
-                    note = note,
-                    noteExpanded = noteExpanded,
-                    removeFirst = true,
-                    onMoveUp = onMoveUp,
-                    onMoveDown = onMoveDown,
-                    onToggleNote = { noteExpanded = !noteExpanded },
-                    onRemove = onRemove,
-                    onPresent = onPresent,
-                    onEditLabel = onEditLabel
-                )
-            }
-        }
-
-        if (note.isNotEmpty() && !noteExpanded) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
-                    .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
-                    .padding(start = 8.dp, end = 2.dp, top = 4.dp, bottom = 4.dp),
-                verticalAlignment = Alignment.Top
-            ) {
-                Text(
-                    text = note,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                    modifier = Modifier.weight(1f).padding(top = 2.dp, bottom = 2.dp)
-                )
-                ScheduleRowActionButton(
-                    painter = painterResource(Res.drawable.ic_edit),
-                    text = stringResource(Res.string.tooltip_note),
-                    onClick = { noteExpanded = true },
-                    iconSize = 11.dp,
-                    iconTint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
-                )
-            }
-        }
-
-        AnimatedVisibility(visible = noteExpanded) {
-            val noteInteractionSource = remember { MutableInteractionSource() }
-            val noteFieldFocused by noteInteractionSource.collectIsFocusedAsState()
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(7.dp))
-                    .border(
-                        width = 1.dp,
-                        color = if (noteFieldFocused) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.outlineVariant,
-                        shape = RoundedCornerShape(7.dp)
-                    ),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                BasicTextField(
-                    value = noteText,
-                    onValueChange = { noteText = it },
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
-                    textStyle = MaterialTheme.typography.bodySmall.copy(
-                        color = MaterialTheme.colorScheme.onSurface
-                    ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    maxLines = 3,
-                    interactionSource = noteInteractionSource,
-                    decorationBox = { innerTextField ->
-                        Box {
-                            if (noteText.isEmpty()) {
-                                Text(
-                                    stringResource(Res.string.schedule_note_placeholder),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                                )
-                            }
-                            innerTextField()
-                        }
-                    }
-                )
-                TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_check),
-                    text = stringResource(Res.string.tooltip_note_done),
-                    onClick = {
-                        onNoteChanged(noteText)
-                        noteExpanded = false
-                    },
-                    buttonSize = 32.dp,
-                    iconSize = 15.dp,
-                    iconTint = MaterialTheme.colorScheme.primary
-                )
-                TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_close),
-                    text = stringResource(Res.string.tooltip_note_clear),
-                    onClick = {
-                        noteText = ""
-                        onNoteChanged("")
-                    },
-                    modifier = Modifier.padding(end = 4.dp),
-                    buttonSize = 32.dp,
-                    iconSize = 15.dp,
-                    iconTint = MaterialTheme.colorScheme.error
-                )
-            }
+                    .width(ACCENT_WIDTH)
+                    .fillMaxHeight()
+                    .testTag(SCHEDULE_ROW_ACCENT_TAG)
+                    .background(leftAccent, RoundedCornerShape(2.dp))
+            )
         }
     }
 }

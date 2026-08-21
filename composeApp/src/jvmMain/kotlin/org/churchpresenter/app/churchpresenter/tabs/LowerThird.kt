@@ -184,6 +184,12 @@ fun LowerThirdTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     selectedLowerThirdItem: ScheduleItem.LowerThirdItem? = null,
+    /**
+     * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
+     * effect below. Keyed on the item alone, an unchanged item is an unchanged key and the second
+     * click does nothing.
+     */
+    selectedLowerThirdItemVersion: Int = 0,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
     onGoLive: (jsonContent: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long, presetName: String) -> Unit = { _, _, _, _, _ -> },
@@ -344,7 +350,7 @@ fun LowerThirdTab(
     }
 
     // When a schedule item is clicked, find the matching file by name
-    LaunchedEffect(selectedLowerThirdItem) {
+    LaunchedEffect(selectedLowerThirdItem, selectedLowerThirdItemVersion) {
         val item = selectedLowerThirdItem ?: return@LaunchedEffect
         val file = lottieFiles.find { it.nameWithoutExtension == item.presetLabel || it.name == item.presetLabel }
             ?: lottieFiles.find { it.nameWithoutExtension == item.presetId }
