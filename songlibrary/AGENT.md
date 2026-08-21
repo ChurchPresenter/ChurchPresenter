@@ -9,7 +9,7 @@ Help menu beside the converter. A real Gradle module of this build — `include(
 `implementation(projects.songlibrary)`.
 
 It **owns no model**. The song, the `.song` format and the library that loads a folder of them are
-`:core-models`' (`core.models.songs`), so what this window writes is what the app reads on its next
+`:core-models`' (`…churchpresenter.models.songs`), so what this window writes is what the app reads on its next
 scan. It takes `:core-models` and `:theme` and nothing else of the app's.
 
 ## Rules

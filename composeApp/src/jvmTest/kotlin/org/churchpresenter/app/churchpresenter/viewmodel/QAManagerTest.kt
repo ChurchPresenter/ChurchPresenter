@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.app.churchpresenter.models.QuestionStatus
+import org.churchpresenter.app.churchpresenter.models.qa.QuestionStatus
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

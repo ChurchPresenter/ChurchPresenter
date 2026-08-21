@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import core.models.songs.CachedSong
-import core.models.songs.SongFileParser
-import core.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.models.songs.CachedSong
+import org.churchpresenter.app.churchpresenter.models.songs.SongFileParser
+import org.churchpresenter.app.churchpresenter.models.songs.SongItem
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

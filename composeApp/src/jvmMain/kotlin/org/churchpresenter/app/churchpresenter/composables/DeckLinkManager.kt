@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import org.churchpresenter.app.churchpresenter.models.Scene
-import org.churchpresenter.app.churchpresenter.models.SceneSource
+import org.churchpresenter.app.churchpresenter.models.scene.Scene
+import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 

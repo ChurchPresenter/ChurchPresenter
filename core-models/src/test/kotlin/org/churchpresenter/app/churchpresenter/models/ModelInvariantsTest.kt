@@ -15,6 +15,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
+import org.churchpresenter.app.churchpresenter.models.shortcuts.KeyChord
 
 /**
  * Every model in this module, checked for the properties a data class is relied on to have.
@@ -277,7 +279,16 @@ class ModelInvariantsTest {
     }
 
     private companion object {
-        /** The package the models live in, as a class-file path. */
-        val PACKAGE_PATH: String = KeyChord::class.java.packageName.replace('.', '/')
+        /**
+         * The models root, as a class-file path — the walk below is recursive, so every
+         * subpackage (`schedule/`, `songs/`, `scene/`, …) is covered by it.
+         *
+         * Anchored on THIS class rather than on a model: this test sits at the models root by
+         * design, while any given model belongs to a feature subpackage and can be moved between
+         * them. It used to read `KeyChord::class.java.packageName`, which silently became
+         * `…models.shortcuts` the day the models were grouped — the walk then started one level
+         * too deep and found exactly one class. `every model is discovered` is what caught it.
+         */
+        val PACKAGE_PATH: String = ModelInvariantsTest::class.java.packageName.replace('.', '/')
     }
 }

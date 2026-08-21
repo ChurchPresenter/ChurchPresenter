@@ -18,7 +18,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
-import core.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
 import org.churchpresenter.app.churchpresenter.data.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.PlanningCenterImportViewModel

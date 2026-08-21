@@ -4,14 +4,14 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import core.models.songs.GridView
-import core.models.songs.SaveOutcome
-import core.models.songs.SongEdits
-import core.models.songs.SongField
-import core.models.songs.SongGrid
-import core.models.songs.SongItem
-import core.models.songs.SongLibrary
-import core.models.songs.SortColumn
+import org.churchpresenter.app.churchpresenter.models.songs.GridView
+import org.churchpresenter.app.churchpresenter.models.songs.SaveOutcome
+import org.churchpresenter.app.churchpresenter.models.songs.SongEdits
+import org.churchpresenter.app.churchpresenter.models.songs.SongField
+import org.churchpresenter.app.churchpresenter.models.songs.SongGrid
+import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.models.songs.SongLibrary
+import org.churchpresenter.app.churchpresenter.models.songs.SortColumn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,7 +31,7 @@ val OPTIONAL_COLUMNS: List<SongField> = listOf(
 /**
  * What the window is showing and what has been typed into it.
  *
- * The decisions live in `core.models.songs` — this holds the answers where Compose can see them,
+ * The decisions live in `models.songs` (`:core-models`) — this holds the answers where Compose can see them,
  * and is the one place that touches the disk: everything else asks it to.
  *
  * **Everything a library-sized list makes expensive is handled here, not at the call site.** A

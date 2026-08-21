@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.server
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import core.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import java.io.File

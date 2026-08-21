@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
-import org.churchpresenter.app.churchpresenter.models.PresentationLoadError
+import org.churchpresenter.app.churchpresenter.models.presentation.PresentationLoadError
 import presentation.engine.LoadResult
 import presentation.engine.model.DeckLoadError
 import java.io.File

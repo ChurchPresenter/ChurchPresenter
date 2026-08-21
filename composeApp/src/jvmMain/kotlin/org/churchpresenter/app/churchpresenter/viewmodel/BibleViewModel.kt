@@ -21,7 +21,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.BibleLoadError
 import org.churchpresenter.app.churchpresenter.data.BibleSearch
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.models.bible.SelectedVerse
 import androidx.compose.runtime.derivedStateOf
 import java.io.File
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode

@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import core.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.models.songs.SongItem
 
 /**
  * Which of the tab's dialogs is being asked for, and about which song.

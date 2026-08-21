@@ -22,7 +22,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.BackgroundConfig
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.awt.image.BufferedImage
 import java.io.File

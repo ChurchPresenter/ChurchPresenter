@@ -15,7 +15,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.models.SceneSource
+import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -313,7 +313,7 @@ class SceneSourceRendererTest {
                     SceneSource.ShapeSource(
                         id = "s3", name = "S", shapeType = "freehand",
                         strokeColor = "#FFFFFF",
-                        points = listOf(org.churchpresenter.app.churchpresenter.models.PathPoint(
+                        points = listOf(org.churchpresenter.app.churchpresenter.models.scene.PathPoint(
                             0.5f,
                             0.5f,
                         )),
@@ -329,8 +329,8 @@ class SceneSourceRendererTest {
     @Test
     fun `line, arrow and freehand shapes with enough points render without error`() = runComposeUiTest {
         val points = listOf(
-            org.churchpresenter.app.churchpresenter.models.PathPoint(0.1f, 0.1f),
-            org.churchpresenter.app.churchpresenter.models.PathPoint(0.9f, 0.9f),
+            org.churchpresenter.app.churchpresenter.models.scene.PathPoint(0.1f, 0.1f),
+            org.churchpresenter.app.churchpresenter.models.scene.PathPoint(0.9f, 0.9f),
         )
         for (type in listOf("line", "arrow", "freehand")) {
             setContent {

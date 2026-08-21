@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.models.LyricSection
-import org.churchpresenter.app.churchpresenter.models.SongTuning
+import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.models.songs.LyricSection
+import org.churchpresenter.app.churchpresenter.models.songs.SongTuning
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.churchpresenter.app.churchpresenter.models.SceneSource
+import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 
 private const val MAX_NULL_FRAMES_BEFORE_CLEAR = 30

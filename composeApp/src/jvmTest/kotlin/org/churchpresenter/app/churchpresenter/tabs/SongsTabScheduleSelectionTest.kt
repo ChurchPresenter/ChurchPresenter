@@ -2,9 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
-import core.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.models.songs.SongItem
 import androidx.compose.runtime.mutableStateOf
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

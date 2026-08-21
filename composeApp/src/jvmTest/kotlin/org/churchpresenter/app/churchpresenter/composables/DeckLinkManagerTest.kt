@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.models.Scene
-import org.churchpresenter.app.churchpresenter.models.SceneSource
-import org.churchpresenter.app.churchpresenter.models.SourceTransform
+import org.churchpresenter.app.churchpresenter.models.scene.Scene
+import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
+import org.churchpresenter.app.churchpresenter.models.scene.SourceTransform
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

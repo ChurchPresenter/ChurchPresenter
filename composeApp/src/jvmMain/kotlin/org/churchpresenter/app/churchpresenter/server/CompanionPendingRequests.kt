@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
 
 /**
  * Wraps an incoming remote request with a [CompletableDeferred] that the UI

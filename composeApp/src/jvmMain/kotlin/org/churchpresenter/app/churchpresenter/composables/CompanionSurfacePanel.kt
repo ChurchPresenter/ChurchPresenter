@@ -41,8 +41,8 @@ import companionsatellite.CompanionConnectionStatus
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState
-import org.churchpresenter.app.churchpresenter.models.CompanionSurfacePlacement
-import org.churchpresenter.app.churchpresenter.models.CompanionSurfaceSlot
+import org.churchpresenter.app.churchpresenter.models.companion.CompanionSurfacePlacement
+import org.churchpresenter.app.churchpresenter.models.companion.CompanionSurfaceSlot
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.ui.theme.semantic

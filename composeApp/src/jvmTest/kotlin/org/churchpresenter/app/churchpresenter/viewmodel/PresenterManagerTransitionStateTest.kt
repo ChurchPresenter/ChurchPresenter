@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.ui.graphics.ImageBitmap
-import org.churchpresenter.app.churchpresenter.models.AnimationType
-import org.churchpresenter.app.churchpresenter.models.LyricSection
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.models.presentation.AnimationType
+import org.churchpresenter.app.churchpresenter.models.songs.LyricSection
+import org.churchpresenter.app.churchpresenter.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals

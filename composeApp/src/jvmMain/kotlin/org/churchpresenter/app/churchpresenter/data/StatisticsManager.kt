@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import core.models.songs.SongFileParser
+import org.churchpresenter.app.churchpresenter.models.songs.SongFileParser
 import java.io.File
 import java.text.SimpleDateFormat
 import java.time.Instant

@@ -10,10 +10,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.models.AnimationType
-import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.presentation.AnimationType
+import org.churchpresenter.app.churchpresenter.models.songs.LyricSection
 import org.cef.browser.CefBrowser
-import org.churchpresenter.app.churchpresenter.models.Scene
+import org.churchpresenter.app.churchpresenter.models.scene.Scene
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import androidx.compose.runtime.withFrameNanos
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
@@ -23,8 +23,8 @@ import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
 import presentation.engine.model.Deck
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
-import org.churchpresenter.app.churchpresenter.models.Question
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.models.qa.Question
+import org.churchpresenter.app.churchpresenter.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.app.churchpresenter.utils.Constants

@@ -8,8 +8,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.SceneSource
-import org.churchpresenter.app.churchpresenter.models.SourceTransform
+import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
+import org.churchpresenter.app.churchpresenter.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.tabs.CanvasLabel
 import org.churchpresenter.app.churchpresenter.tabs.canvasButton
 import org.churchpresenter.app.churchpresenter.tabs.canvasButtonAt

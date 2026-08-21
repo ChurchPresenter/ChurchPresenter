@@ -41,7 +41,7 @@ import churchpresenter.composeapp.generated.resources.canvas_video_no_selection
 import churchpresenter.composeapp.generated.resources.canvas_video_file_not_found
 import churchpresenter.composeapp.generated.resources.canvas_video_loading
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_screen_capture
-import org.churchpresenter.app.churchpresenter.models.SceneSource
+import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
 import org.churchpresenter.app.churchpresenter.utils.X11WindowCapture

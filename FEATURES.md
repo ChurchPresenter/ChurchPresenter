@@ -29,7 +29,7 @@
 - `core-models/src/main/kotlin/.../models/LyricSection.kt` (the `:core-models` module)
 - `converter/` (the `:converter` Gradle module, at the repo root) — format converter tool
 - `songlibrary/` (the `:songlibrary` Gradle module) — the Song Library Manager grid
-- `core-models/` (the `:core-models` Gradle module) — `core.models.songs`: the song, the `.song` file format and the library folder, shared by the app and the library window
+- `core-models/` (the `:core-models` Gradle module) — `models.songs`: the song, the `.song` file format and the library folder, shared by the app and the library window
 
 ## Bible & Scripture
 - **Instant verse display** — browse any of the 66 books and put a verse on screen in seconds.

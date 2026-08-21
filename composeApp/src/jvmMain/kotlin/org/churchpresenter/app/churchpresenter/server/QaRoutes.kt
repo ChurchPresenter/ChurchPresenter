@@ -13,10 +13,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.models.QuestionDto
-import org.churchpresenter.app.churchpresenter.models.QuestionStatus
-import org.churchpresenter.app.churchpresenter.models.SubmitQuestionRequest
-import org.churchpresenter.app.churchpresenter.models.VoteRequest
+import org.churchpresenter.app.churchpresenter.models.qa.QuestionDto
+import org.churchpresenter.app.churchpresenter.models.qa.QuestionStatus
+import org.churchpresenter.app.churchpresenter.models.qa.SubmitQuestionRequest
+import org.churchpresenter.app.churchpresenter.models.qa.VoteRequest
 import org.churchpresenter.app.churchpresenter.models.toDto
 import org.churchpresenter.app.churchpresenter.utils.Constants
 

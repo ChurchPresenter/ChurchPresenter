@@ -2,7 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

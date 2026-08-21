@@ -23,7 +23,7 @@ import churchpresenter.composeapp.generated.resources.key_name_page_up
 import churchpresenter.composeapp.generated.resources.key_name_space
 import churchpresenter.composeapp.generated.resources.key_name_tab
 import churchpresenter.composeapp.generated.resources.shortcut_unbound
-import org.churchpresenter.app.churchpresenter.models.KeyChord
+import org.churchpresenter.app.churchpresenter.models.shortcuts.KeyChord
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.jetbrains.compose.resources.stringResource
 

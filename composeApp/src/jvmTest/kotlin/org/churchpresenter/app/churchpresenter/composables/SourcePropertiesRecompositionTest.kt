@@ -9,8 +9,8 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.SceneSource
-import org.churchpresenter.app.churchpresenter.models.SourceTransform
+import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
+import org.churchpresenter.app.churchpresenter.models.scene.SourceTransform
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

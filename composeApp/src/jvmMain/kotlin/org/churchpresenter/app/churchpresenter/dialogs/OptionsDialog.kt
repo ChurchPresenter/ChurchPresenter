@@ -34,7 +34,7 @@ import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.dialogSizeWithin
 import org.churchpresenter.app.churchpresenter.primaryScreenSizeDp
-import org.churchpresenter.app.churchpresenter.models.Scene
+import org.churchpresenter.app.churchpresenter.models.scene.Scene
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.appearance
 import churchpresenter.composeapp.generated.resources.background

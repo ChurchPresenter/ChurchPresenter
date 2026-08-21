@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

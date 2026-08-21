@@ -12,8 +12,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.AnimationType
-import org.churchpresenter.app.churchpresenter.models.PresentationLoadError
+import org.churchpresenter.app.churchpresenter.models.presentation.AnimationType
+import org.churchpresenter.app.churchpresenter.models.presentation.PresentationLoadError
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import presentation.engine.DeckRasterizer

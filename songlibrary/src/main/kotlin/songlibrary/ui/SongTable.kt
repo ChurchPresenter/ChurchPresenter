@@ -42,9 +42,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import core.models.songs.SongField
-import core.models.songs.SongItem
-import core.models.songs.SortColumn
+import org.churchpresenter.app.churchpresenter.models.songs.SongField
+import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.models.songs.SortColumn
 import org.jetbrains.compose.resources.stringResource
 import songlibrary.SongLibraryState
 import songlibrary.generated.resources.Res

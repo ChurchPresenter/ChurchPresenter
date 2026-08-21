@@ -1,6 +1,6 @@
 package songlibrary.ui
 
-import core.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.models.songs.SongItem
 
 /**
  * One song asked to be edited, and everything an editor needs to do it.

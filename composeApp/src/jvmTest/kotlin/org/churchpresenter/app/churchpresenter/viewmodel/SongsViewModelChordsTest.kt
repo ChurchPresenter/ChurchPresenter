@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import kotlinx.coroutines.Dispatchers
-import core.models.songs.SongFileParser
-import core.models.songs.SongItem
+import org.churchpresenter.app.churchpresenter.models.songs.SongFileParser
+import org.churchpresenter.app.churchpresenter.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
 import java.io.File
@@ -40,7 +40,7 @@ class SongsViewModelChordsTest {
         dir.deleteRecursively()
     }
 
-    private fun sectionsOf(lyrics: List<String>): List<org.churchpresenter.app.churchpresenter.models.LyricSection> {
+    private fun sectionsOf(lyrics: List<String>): List<org.churchpresenter.app.churchpresenter.models.songs.LyricSection> {
         val target = File(File(dir, "Hymnal"), "0001 - Test.song")
         SongFileParser().writeSongFile(
             SongItem(number = "0001", title = "Test", songbook = "Hymnal", lyrics = lyrics),

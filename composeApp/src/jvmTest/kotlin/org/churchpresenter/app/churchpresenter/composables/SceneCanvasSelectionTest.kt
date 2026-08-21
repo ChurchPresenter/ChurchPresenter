@@ -13,9 +13,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.models.Scene
-import org.churchpresenter.app.churchpresenter.models.SceneSource
-import org.churchpresenter.app.churchpresenter.models.SourceTransform
+import org.churchpresenter.app.churchpresenter.models.scene.Scene
+import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
+import org.churchpresenter.app.churchpresenter.models.scene.SourceTransform
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
