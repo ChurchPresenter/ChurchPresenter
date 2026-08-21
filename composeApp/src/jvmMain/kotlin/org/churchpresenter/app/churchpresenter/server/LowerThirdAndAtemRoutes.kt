@@ -15,7 +15,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 
 private const val KEY_SETTLE_MS = 800L
 private const val MILLIS_PER_SECOND = 1000L

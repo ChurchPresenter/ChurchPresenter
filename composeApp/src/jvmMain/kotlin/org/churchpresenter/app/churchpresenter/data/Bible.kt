@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Paths
