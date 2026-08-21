@@ -799,8 +799,6 @@ class BibleSettingsTabTest {
 
 
 
-    /** Types a new size into target [index]'s font-size field. */
-    /** Picks a different font in target [index]'s dropdown. */
     /** Opens target [index]'s colour swatch, types a hex and accepts it. */
     private fun ComposeUiTest.assertColourPicker(index: Int) {
         val harness = showBibleTab(distinctColours())
@@ -857,10 +855,10 @@ class BibleSettingsTabTest {
             .assertExists("a missing secondary bible reads back as its file name")
     }
 
-    /** Every style flag on, so Auto measures bold, italic and underlined text rather than plain. */
     /** A starting size no fit will land on by chance, so "Auto did nothing" cannot pass. */
     private val unfittedSize = 9
 
+    /** Every style flag on, so Auto measures bold, italic and underlined text rather than plain. */
     private fun fullyStyled() = twoBibles().copy(
         primaryBibleFontSize = unfittedSize,
         primaryBibleLowerThirdFontSize = unfittedSize,

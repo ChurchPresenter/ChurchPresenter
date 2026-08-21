@@ -172,14 +172,6 @@ class ProjectionSettingsTest {
 }
 
 /**
- * Swapping the two Bibles.
- *
- * The swap button exchanges primary and secondary — and with them every piece of styling that
- * belongs to each, some thirty paired fields written out by hand. A field missed from one direction
- * leaves the swapped Bible wearing the other's font, colour or alignment, which looks like a
- * rendering bug rather than a settings one.
- */
-/**
  * Swapping the first two translations.
  *
  * Swap used to exchange some ninety primary/secondary styling fields; with the ordered stack it is a

@@ -283,12 +283,9 @@ fun MainDesktop(
     instanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
     /** Controller mode instant Bible verse display — non-null only when connected AND controlling. */
     instanceLinkSendVerse: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit)? = null,
-    /** Controller mode instant picture display — non-null only when connected AND controlling. */
     /** Controller mode instant song-section navigation (within an already-live song) — non-null only
      *  when connected AND controlling. */
     instanceLinkSendSongSection: ((number: String, section: Int, lineIndex: Int) -> Unit)? = null,
-    /** Controller mode instant slide navigation (within an already-live presentation) — non-null only
-     *  when connected AND controlling. */
     /** Controller mode instant clear — non-null only when connected AND controlling. */
     instanceLinkSendClear: (() -> Unit)? = null,
     /** Controller mode instant Bible Hold toggle — non-null only when connected AND controlling. */
