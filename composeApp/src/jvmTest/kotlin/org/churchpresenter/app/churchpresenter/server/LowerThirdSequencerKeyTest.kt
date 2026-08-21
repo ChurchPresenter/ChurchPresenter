@@ -7,6 +7,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.atem.AtemConnectionManager
+import org.churchpresenter.atem.FakeAtemSwitcher
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

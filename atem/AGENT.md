@@ -8,9 +8,19 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 reliable delivery, state dump, keyer cuts and media-pool upload. A real Gradle module of this
 build: `include(":atem")`, `implementation(projects.atem)`.
 
-It keeps the package it always had — `…churchpresenter.server` — so **no import in the app changed
-when it moved**, the same way `:core-models`, `:settings` and `:diagnostics` kept theirs. Two
-modules sharing a package name is fine on a plain classpath; do not "tidy" it into a new package.
+**The package is `org.churchpresenter.atem`**, across all three source sets — `main`, `test` and
+the `testFixtures` that ship `FakeAtemSwitcher` to `:composeApp`'s suites.
+
+It held `…churchpresenter.server`, which `:composeApp` still owns (32 files: `CompanionServer`, the
+routes, the tunnel, `AtemBridge` itself). Sharing that name cost nothing at extraction time and one
+thing afterwards: `AtemBridge` and the ATEM routes resolved `AtemClient` with no import at all, so
+nothing in those files said they depended on this module. They say it now.
+
+**Never rewrite `…churchpresenter.server.*` by prefix** — key on the ten types this module declares
+(`AtemClient`, `AtemConnectionManager`, `AtemFrameEncoder`, `AtemKey`, `AtemMediaSlot`,
+`AtemProtocolException`, `AtemState`, `AtemUploadStatus`, `EncodedFrame`, `FakeAtemSwitcher`), and
+match on a word boundary: `AtemKey` is a prefix of nothing here today, but `Constants` matching
+inside `ConstantsKt` is exactly how a sibling rename silently rewrote a `mockkStatic` string.
 
 ## What lives here
 

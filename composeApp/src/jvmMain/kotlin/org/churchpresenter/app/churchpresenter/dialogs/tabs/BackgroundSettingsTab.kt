@@ -101,9 +101,9 @@ import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundConfig
 import org.churchpresenter.app.churchpresenter.dialogs.LocalLibraryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.StockMediaBrowserDialog
-import org.churchpresenter.app.churchpresenter.server.AtemClient
-import org.churchpresenter.app.churchpresenter.server.AtemFrameEncoder
-import org.churchpresenter.app.churchpresenter.server.AtemUploadStatus
+import org.churchpresenter.atem.AtemClient
+import org.churchpresenter.atem.AtemFrameEncoder
+import org.churchpresenter.atem.AtemUploadStatus
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.BackgroundSettingsViewModel
 import org.jetbrains.compose.resources.painterResource

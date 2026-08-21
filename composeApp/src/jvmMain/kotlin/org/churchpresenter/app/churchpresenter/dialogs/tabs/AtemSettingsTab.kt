@@ -77,7 +77,7 @@ import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutt
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
-import org.churchpresenter.app.churchpresenter.server.AtemClient
+import org.churchpresenter.atem.AtemClient
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.ui.theme.semantic

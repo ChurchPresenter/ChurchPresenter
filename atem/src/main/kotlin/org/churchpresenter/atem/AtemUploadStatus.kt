@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.server
+package org.churchpresenter.atem
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

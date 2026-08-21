@@ -7,9 +7,9 @@ import androidx.compose.ui.test.performClick
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
-import org.churchpresenter.app.churchpresenter.server.AtemMediaSlot
-import org.churchpresenter.app.churchpresenter.server.AtemState
-import org.churchpresenter.app.churchpresenter.server.FakeAtemSwitcher
+import org.churchpresenter.atem.AtemMediaSlot
+import org.churchpresenter.atem.AtemState
+import org.churchpresenter.atem.FakeAtemSwitcher
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import java.io.File
 import java.nio.file.Files
