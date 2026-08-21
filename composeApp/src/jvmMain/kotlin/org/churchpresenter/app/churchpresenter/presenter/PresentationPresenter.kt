@@ -15,10 +15,10 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import org.churchpresenter.core.models.presentation.AnimationType
+import org.churchpresenter.presentationengine.model.Direction
+import org.churchpresenter.presentationengine.model.LayerState
+import org.churchpresenter.presentationengine.model.TransitionType
 import org.churchpresenter.settings.utils.Constants
-import presentation.engine.model.Direction
-import presentation.engine.model.LayerState
-import presentation.engine.model.TransitionType
 
 private const val REVEAL_RIGHT = 2
 private const val REVEAL_BOTTOM = 3

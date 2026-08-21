@@ -7,10 +7,10 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import presentation.engine.LoadResult
-import presentation.engine.PresentationLoader
-import presentation.engine.model.Deck
-import presentation.engine.model.Slide
+import org.churchpresenter.presentationengine.LoadResult
+import org.churchpresenter.presentationengine.PresentationLoader
+import org.churchpresenter.presentationengine.model.Deck
+import org.churchpresenter.presentationengine.model.Slide
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

@@ -5,8 +5,8 @@ import io.mockk.mockk
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.PresentationSettings
 import org.churchpresenter.core.models.presentation.AnimationType
-import presentation.engine.model.Deck
-import presentation.engine.model.DeckFormat
+import org.churchpresenter.presentationengine.model.Deck
+import org.churchpresenter.presentationengine.model.DeckFormat
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

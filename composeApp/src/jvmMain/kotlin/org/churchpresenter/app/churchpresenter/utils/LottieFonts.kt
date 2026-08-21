@@ -6,7 +6,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
 import io.github.alexzhirkevich.compottie.assets.LottieFontManager
 import io.github.alexzhirkevich.compottie.assets.LottieFontSpec
-import presentation.engine.fonts.SlideFontRegistry
+import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 
 /**
  * Resolves the fonts named by lower-third lottie files (declared in the JSON by family name

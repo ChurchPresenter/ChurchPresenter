@@ -43,7 +43,7 @@ import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.app.churchpresenter.utils.SystemFonts
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
-import presentation.engine.fonts.SlideFontRegistry
+import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name

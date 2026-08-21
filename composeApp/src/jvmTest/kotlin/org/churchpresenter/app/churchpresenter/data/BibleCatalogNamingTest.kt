@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import converter.bible.BibleCatalogNaming
-import converter.bible.XmlToSpbConverter
+import org.churchpresenter.converter.bible.BibleCatalogNaming
+import org.churchpresenter.converter.bible.XmlToSpbConverter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

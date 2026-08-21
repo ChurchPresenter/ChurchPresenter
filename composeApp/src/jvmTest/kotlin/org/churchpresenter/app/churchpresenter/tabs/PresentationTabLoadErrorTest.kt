@@ -4,8 +4,8 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.ComposeUiTest
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
-import presentation.engine.LoadResult
-import presentation.engine.model.DeckLoadError
+import org.churchpresenter.presentationengine.LoadResult
+import org.churchpresenter.presentationengine.model.DeckLoadError
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

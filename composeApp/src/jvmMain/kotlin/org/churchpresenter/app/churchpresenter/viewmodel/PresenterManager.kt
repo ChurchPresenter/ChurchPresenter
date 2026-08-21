@@ -20,7 +20,7 @@ import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
 import org.churchpresenter.app.churchpresenter.presenter.PresentationFrame
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
-import presentation.engine.model.Deck
+import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.core.models.qa.Question

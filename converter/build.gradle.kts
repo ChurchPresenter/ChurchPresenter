@@ -10,7 +10,10 @@ plugins {
 
 group = "org.churchpresenter"
 
-extra["coverageExcludes"] = listOf("ui/**", "MainKt*", "ComposableSingletons*")
+// `**/`-prefixed, like every other module: the classes moved from the root package into
+// org/churchpresenter/converter/, and the unanchored form stopped matching them — which
+// silently pulled the whole UI back into the measured set. Same scope as before, not wider.
+extra["coverageExcludes"] = listOf("**/ui/**", "**/MainKt*", "**/ComposableSingletons*")
 
 extra["coverageFloors"] = mapOf(
     "BRANCH" to "0.80",
@@ -60,7 +63,7 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 // packages it), separately from the copy the main app opens from its Help menu.
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "org.churchpresenter.converter.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
