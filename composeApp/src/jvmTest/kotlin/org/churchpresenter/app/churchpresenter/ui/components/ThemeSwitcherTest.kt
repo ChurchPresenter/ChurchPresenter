@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.ui.components
 
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ThemeMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

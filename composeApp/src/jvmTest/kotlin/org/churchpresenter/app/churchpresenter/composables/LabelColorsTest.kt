@@ -7,8 +7,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ThemeMode
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

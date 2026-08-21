@@ -19,7 +19,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.DictionarySettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

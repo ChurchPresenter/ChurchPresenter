@@ -111,7 +111,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.ContinuationSpeed
 import org.churchpresenter.app.churchpresenter.viewmodel.DetectionSource
 import org.churchpresenter.app.churchpresenter.viewmodel.DetectionTrack
 import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
