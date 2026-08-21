@@ -21,7 +21,7 @@ A real Gradle module of this build: `include(":lottieGenerator")`,
 
 ## What `:composeApp` uses from it
 
-`lottiegen.App` (as `LottieGenApp`) and `lottiegen.editor.StyleEditorApp`, both from
+`org.churchpresenter.lottiegen.App` (as `LottieGenApp`) and `org.churchpresenter.lottiegen.editor.StyleEditorApp`, both from
 `dialogs/AboutDialog.kt`, wrapped in `AppThemeWrapper` so the generator follows the app's theme.
 The app passes `outputDir` and the canvas size and gets an `onFileSaved` callback; with
 `embedded = true` it stays inside the app's window chrome. Keep those entry points public and their

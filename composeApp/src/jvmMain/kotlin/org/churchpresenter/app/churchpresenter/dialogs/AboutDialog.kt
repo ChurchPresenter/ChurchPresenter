@@ -65,8 +65,8 @@ import churchpresenter.composeapp.generated.resources.ic_app_icon
 import org.churchpresenter.songlibrary.ui.SongLibraryApp
 import ui.App as ConverterApp
 import ui.Strings as ConverterStrings
-import lottiegen.App as LottieGenApp
-import lottiegen.editor.StyleEditorApp
+import org.churchpresenter.lottiegen.App as LottieGenApp
+import org.churchpresenter.lottiegen.editor.StyleEditorApp
 import java.awt.Desktop
 import java.awt.Window as AwtWindow
 import java.io.File
