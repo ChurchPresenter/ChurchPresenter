@@ -239,7 +239,7 @@ In addition, **every SPB file's book manifest is scanned at startup** and its bo
 
 ## Tuning
 
-Edit `src/main/kotlin/engine/Config.kt`:
+Edit `src/main/kotlin/org/churchpresenter/bibleengine/Config.kt`:
 
 | Key | Default | Description |
 |---|---|---|
@@ -260,7 +260,7 @@ Most thresholds are also set as a group by the aggressiveness level — see [Agg
 ## Project structure
 
 ```
-src/main/kotlin/engine/
+src/main/kotlin/org/churchpresenter/bibleengine/
 ├── Main.kt                  # Entry point (standalone) — config, Bible path discovery, startup
 ├── EngineServer.kt          # In-process start/stop API (used by ChurchPresenter and Main)
 ├── Config.kt                # Runtime-settable tunables + applyLevel (aggressiveness)

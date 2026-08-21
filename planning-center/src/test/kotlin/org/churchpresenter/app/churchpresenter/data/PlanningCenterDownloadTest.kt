@@ -121,7 +121,7 @@ class PlanningCenterDownloadTest {
             engine.start(wait = false)
             // resolvedConnectors() suspends until the bind completes, so the port it reports is the
             // one Netty is actually listening on.
-            port = runBlocking { engine.engine.resolvedConnectors().first().port }
+            port = runBlocking { org.churchpresenter.bibleengine.engine.resolvedConnectors().first().port }
         }
 
         fun stop() = engine.stop(0, 0)
