@@ -10,8 +10,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.data.Bible
-import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
-import org.churchpresenter.app.churchpresenter.data.PlanningCenterLyricsFormatter
+import org.churchpresenter.planningcenter.PlanningCenterClient
+import org.churchpresenter.planningcenter.PlanningCenterLyricsFormatter
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterScriptureDetector
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.core.models.songs.SongFileParser

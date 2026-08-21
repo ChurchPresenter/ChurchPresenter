@@ -6,6 +6,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
+import org.churchpresenter.atem.AtemConnectionManager
+import org.churchpresenter.atem.FakeAtemSwitcher
 import org.churchpresenter.settings.AtemSettings
 import kotlin.test.AfterTest
 import kotlin.test.Test

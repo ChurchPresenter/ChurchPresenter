@@ -2,9 +2,9 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import engine.EngineHandle
-import engine.EngineServer
-import engine.engine.DetectionLogger
+import org.churchpresenter.bibleengine.EngineHandle
+import org.churchpresenter.bibleengine.EngineServer
+import org.churchpresenter.bibleengine.engine.DetectionLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout

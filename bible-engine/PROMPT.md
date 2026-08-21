@@ -32,7 +32,7 @@ folder.
    `translation_ts_ms` shares the `ts_ms` clock.
 2. Generate a local golden (determinism guard runs inside the test):
    ```
-   ./gradlew test --tests "engine.replay.DbReplayTest" \
+   ./gradlew test --tests "org.churchpresenter.bibleengine.replay.DbReplayTest" \
      -Dreplay.db=<path to the .db> -Dreplay.updateGolden=true \
      '-Dreplay.bibles=<primary>.spb,<secondary>.spb' \
      --rerun-tasks

@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
+import org.churchpresenter.planningcenter.PlanningCenterClient
 import org.churchpresenter.core.models.songs.SongItem
 import java.io.File
 import java.nio.file.Files

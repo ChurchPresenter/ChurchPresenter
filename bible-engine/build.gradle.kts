@@ -36,7 +36,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("engine.MainKt")
+    mainClass.set("org.churchpresenter.bibleengine.MainKt")
 }
 
 tasks.test {
@@ -53,14 +53,14 @@ tasks.register<JavaExec>("replayEval") {
     group = "verification"
     description = "Replays a recorded STT service .db through the pipeline and scores it against operator ground truth (see DbReplayTest/ReplayEval)."
     classpath = sourceSets["test"].runtimeClasspath
-    mainClass.set("engine.replay.ReplayEval")
+    mainClass.set("org.churchpresenter.bibleengine.replay.ReplayEval")
 }
 
 tasks.register<JavaExec>("stickyAudit") {
     group = "verification"
     description = "Audits a sticky-log-*.jsonl for unexplained/risky sticky jumps (see TRAINING_PLAN.md)."
     classpath = sourceSets["main"].runtimeClasspath
-    mainClass.set("engine.tools.StickyAuditKt")
+    mainClass.set("org.churchpresenter.bibleengine.tools.StickyAuditKt")
 }
 
 detekt {

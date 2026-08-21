@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
-import companionsatellite.CompanionSatelliteClient
+import org.churchpresenter.companionsatellite.CompanionSatelliteClient
 import io.mockk.every
 import io.mockk.mockkConstructor
 import io.mockk.unmockkConstructor
