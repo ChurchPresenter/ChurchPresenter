@@ -1,4 +1,4 @@
-package org.churchpresenter.cross.ui
+package org.churchpresenter.crossword.ui
 
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -9,14 +9,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.churchpresenter.cross.data.ClueEntry
-import org.churchpresenter.cross.data.CrosswordEngine
-import org.churchpresenter.cross.data.RenderedPuzzle
-import org.churchpresenter.cross.data.decode
-import org.churchpresenter.cross.data.encode
-import org.churchpresenter.cross.data.fromPlaintext
-import org.churchpresenter.cross.data.fromPlaintextSimple
-import org.churchpresenter.cross.data.toPlaintext
+import org.churchpresenter.crossword.data.ClueEntry
+import org.churchpresenter.crossword.data.CrosswordEngine
+import org.churchpresenter.crossword.data.RenderedPuzzle
+import org.churchpresenter.crossword.data.decode
+import org.churchpresenter.crossword.data.encode
+import org.churchpresenter.crossword.data.fromPlaintext
+import org.churchpresenter.crossword.data.fromPlaintextSimple
+import org.churchpresenter.crossword.data.toPlaintext
 
 // What the admin window is showing, and everything it can do to the puzzle folder.
 
