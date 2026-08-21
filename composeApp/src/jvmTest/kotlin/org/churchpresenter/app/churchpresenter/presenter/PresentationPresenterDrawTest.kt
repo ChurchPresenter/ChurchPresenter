@@ -13,8 +13,8 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import presentation.engine.model.RevealClip
-import presentation.engine.model.LayerState
+import org.churchpresenter.presentationengine.model.RevealClip
+import org.churchpresenter.presentationengine.model.LayerState
 import kotlin.test.Test
 
 class PresentationPresenterDrawTest {

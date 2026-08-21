@@ -16,8 +16,8 @@ import org.churchpresenter.app.churchpresenter.data.PlanningCenterScriptureDetec
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
-import presentation.engine.LoadResult
-import presentation.engine.PresentationLoader
+import org.churchpresenter.presentationengine.LoadResult
+import org.churchpresenter.presentationengine.PresentationLoader
 import java.io.File
 
 private const val TOKEN_REFRESH_MARGIN_MS = 60_000

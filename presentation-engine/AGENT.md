@@ -81,6 +81,17 @@ hand:
 - `libs.aircompressor` — pure-Java snappy for the Keynote IWA reader.
 - All POI/PDFBox access is **typed, no reflection**.
 
+## Package
+
+**`org.churchpresenter.presentationengine`** (subpackages `pptx`, `keynote`, `pdf`, `model`,
+`timeline`, `fonts`, `cache`, `tools` unchanged). It was `presentation.engine`, and the Gradle
+`group` said the same.
+
+**Rewrite on the two-segment prefix, never on `presentation.`** — `:composeApp` has a `presentation`
+*variable* all over its schedule and dialog code (`presentation.slideCount`, `presentation.filePath`,
+`presentation.typeIcon`, …). Matching the single segment retargets those at a package and the
+failure surfaces as dozens of unrelated unresolved references.
+
 ## Commands
 
 From the repo root, on the root wrapper:

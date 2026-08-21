@@ -6,7 +6,7 @@ plugins {
     jacoco
 }
 
-group = "presentation.engine"
+group = "org.churchpresenter"
 
 // Only branch and complexity still fall short of the root build's 85% default — a parser and a
 // rasterizer are dense with per-format special cases, and the last of those need real documents to
@@ -53,7 +53,7 @@ tasks.register<JavaExec>("makeSampleDeck") {
     group = "verification"
     description = "Writes a sample animated .pptx (builds + transitions) for hands-on testing: ./gradlew :presentation-engine:makeSampleDeck -Pout=/path/sample.pptx"
     classpath = sourceSets["test"].runtimeClasspath
-    mainClass.set("presentation.engine.tools.MakeSampleDeck")
+    mainClass.set("org.churchpresenter.presentationengine.tools.MakeSampleDeck")
     systemProperty("java.awt.headless", "true")
     (project.findProperty("out") as String?)?.let { args(it) }
 }
@@ -62,7 +62,7 @@ tasks.register<JavaExec>("dumpKeynote") {
     group = "verification"
     description = "Dumps the reverse-engineered IWA structure of a .key file: ./gradlew :presentation-engine:dumpKeynote -Pfile=/path/deck.key"
     classpath = sourceSets["main"].runtimeClasspath
-    mainClass.set("presentation.engine.tools.DumpKeynote")
+    mainClass.set("org.churchpresenter.presentationengine.tools.DumpKeynote")
     systemProperty("java.awt.headless", "true")
     (project.findProperty("file") as String?)?.let { args(it) }
 }
@@ -71,7 +71,7 @@ tasks.register<JavaExec>("dumpTiming") {
     group = "verification"
     description = "Dumps layers/timeline/transition parsing + degrade warnings for a deck: ./gradlew :presentation-engine:dumpTiming -Pfile=/path/deck.pptx"
     classpath = sourceSets["main"].runtimeClasspath
-    mainClass.set("presentation.engine.tools.DumpTiming")
+    mainClass.set("org.churchpresenter.presentationengine.tools.DumpTiming")
     systemProperty("java.awt.headless", "true")
     (project.findProperty("file") as String?)?.let { args(it) }
     (project.findProperty("out") as String?)?.let { args(it) }

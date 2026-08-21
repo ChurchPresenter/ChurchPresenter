@@ -13,8 +13,8 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import presentation.engine.model.Direction
-import presentation.engine.model.TransitionType
+import org.churchpresenter.presentationengine.model.Direction
+import org.churchpresenter.presentationengine.model.TransitionType
 import kotlin.test.Test
 
 class PresentationPresenterTransitionTest {

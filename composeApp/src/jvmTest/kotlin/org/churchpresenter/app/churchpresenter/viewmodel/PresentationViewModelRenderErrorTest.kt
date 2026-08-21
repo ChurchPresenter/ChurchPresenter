@@ -3,8 +3,8 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.churchpresenter.core.models.presentation.PresentationLoadError
-import presentation.engine.LoadResult
-import presentation.engine.model.DeckLoadError
+import org.churchpresenter.presentationengine.LoadResult
+import org.churchpresenter.presentationengine.model.DeckLoadError
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

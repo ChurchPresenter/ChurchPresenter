@@ -6,9 +6,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PixelMap
-import presentation.engine.model.LayerSpec
-import presentation.engine.model.LayerState
-import presentation.engine.model.RectPt
+import org.churchpresenter.presentationengine.model.LayerSpec
+import org.churchpresenter.presentationengine.model.LayerState
+import org.churchpresenter.presentationengine.model.RectPt
 import kotlin.math.abs
 import kotlin.test.assertTrue
 

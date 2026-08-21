@@ -16,14 +16,14 @@ import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.presentation.PresentationLoadError
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
-import presentation.engine.DeckRasterizer
-import presentation.engine.LoadResult
-import presentation.engine.PresentationLoader
-import presentation.engine.cache.SlideCacheSupersededException
-import presentation.engine.cache.SlideDiskCache
-import presentation.engine.model.Deck
-import presentation.engine.model.DeckFormat
-import presentation.engine.model.DeckLoadError
+import org.churchpresenter.presentationengine.DeckRasterizer
+import org.churchpresenter.presentationengine.LoadResult
+import org.churchpresenter.presentationengine.PresentationLoader
+import org.churchpresenter.presentationengine.cache.SlideCacheSupersededException
+import org.churchpresenter.presentationengine.cache.SlideDiskCache
+import org.churchpresenter.presentationengine.model.Deck
+import org.churchpresenter.presentationengine.model.DeckFormat
+import org.churchpresenter.presentationengine.model.DeckLoadError
 import java.awt.image.BufferedImage
 import java.io.File
 
