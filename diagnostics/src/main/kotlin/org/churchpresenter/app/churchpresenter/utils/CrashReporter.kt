@@ -170,11 +170,22 @@ object CrashReporter {
     }
 
     /**
-     * Sends a non-fatal WARNING to Sentry (message + optional throwable + tags). Unlike
+     * Sends a non-fatal WARNING to Sentry (message + optional throwable + tags + extras). Unlike
      * [reportException] this writes **no** local crash file — use it to surface genuine
      * silent failures (VLC/ATEM/SSL/server) that today only print to stderr.
+     *
+     * [context] is the event's title and what Sentry groups on, so it must be a **constant**
+     * sentence: interpolating a file name, a count or a device into it splits one recurring problem
+     * into one issue per value. Everything that varies belongs in [tags] (short, searchable,
+     * low-cardinality) or in [extras] (the detail you want to read once the issue is open).
+     * Both are PII-scrubbed on the way out, like the message itself.
      */
-    fun reportWarning(context: String, throwable: Throwable? = null, tags: Map<String, String> = emptyMap()) {
+    fun reportWarning(
+        context: String,
+        throwable: Throwable? = null,
+        tags: Map<String, String> = emptyMap(),
+        extras: Map<String, String> = emptyMap(),
+    ) {
         try {
             if (!Sentry.isEnabled()) return
             breadcrumb(context, category = "warning", level = SentryLevel.WARNING)
@@ -182,6 +193,7 @@ object CrashReporter {
                 level = SentryLevel.WARNING
                 message = Message().apply { message = context }
                 tags.forEach { (k, v) -> setTag(k, v) }
+                extras.forEach { (k, v) -> setExtra(k, v) }
             }
             Sentry.captureEvent(event)
         } catch (_: Exception) {}
@@ -386,7 +398,7 @@ object CrashReporter {
     }
 
     /**
-     * Walks a Sentry event and scrubs PII in place from the message, exception values,
+     * Walks a Sentry event and scrubs PII in place from the message, exception values, extras,
      * breadcrumb messages, and context values (e.g. the `jcef` block's `installDir`).
      * All best-effort — each sub-step is wrapped so telemetry never throws.
      */
@@ -398,6 +410,12 @@ object CrashReporter {
             }
         } catch (_: Exception) {}
         try { event.exceptions?.forEach { it.value = scrubPii(it.value) } } catch (_: Exception) {}
+        try {
+            event.extras?.keys?.toList()?.forEach { key ->
+                val value = event.getExtra(key)
+                if (value is String) event.setExtra(key, scrubPii(value) ?: "")
+            }
+        } catch (_: Exception) {}
         try { event.breadcrumbs?.forEach { it.message = scrubPii(it.message) } } catch (_: Exception) {}
         try {
             val contexts = event.contexts

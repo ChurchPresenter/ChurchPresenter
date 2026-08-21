@@ -50,6 +50,56 @@ object PictureDecoder {
         throw IOException("Failed to decode image ${file.name}: ${skiaError.message}", skiaError)
     }
 
+    /**
+     * A one-line technical description of [file], for the report written when nothing could decode
+     * it.
+     *
+     * Skia fails every unreadable file with the same `Failed to Image::makeFromEncoded` whatever
+     * the reason, so a report carrying only that message says nothing beyond "a picture did not
+     * load" — an empty placeholder still syncing from iCloud, a truncated copy, a CMYK JPEG and a
+     * file that is not an image at all are indistinguishable in it. Size, the leading magic bytes
+     * and whether ImageIO recognises the format at all separate those four without carrying any of
+     * the file's content, and the name is deliberately left out: picture file names are the user's.
+     */
+    fun diagnose(file: File): String = try {
+        val size = file.length()
+        val head = readHead(file)
+        val magic = head.joinToString("") { byte -> "%02X".format(byte) }.ifEmpty { "none" }
+        "ext=${file.extension.lowercase()} size=$size magic=$magic imageio=${imageIoFormat(file) ?: "none"}"
+    } catch (e: IOException) {
+        "diagnostics unavailable: ${e.message}"
+    } catch (e: SecurityException) {
+        "diagnostics unavailable: ${e.message}"
+    }
+
+    /**
+     * The first bytes of [file], short enough to be a format signature and nothing more, or none
+     * when the file has been deleted between the failed decode and this call.
+     */
+    private fun readHead(file: File): ByteArray {
+        if (!file.isFile) return ByteArray(0)
+        return file.inputStream().use { stream ->
+            val buffer = ByteArray(MAGIC_LENGTH)
+            val read = stream.read(buffer)
+            if (read <= 0) ByteArray(0) else buffer.copyOf(read)
+        }
+    }
+
+    /**
+     * The format name of the first ImageIO reader that claims [file], or null when none does.
+     *
+     * "no reader claimed it" and "a reader claimed it and then failed" are different bugs — the
+     * first is a file we do not support, the second is one we should have read.
+     */
+    private fun imageIoFormat(file: File): String? = try {
+        ImageIO.createImageInputStream(file)?.use { stream ->
+            val readers = ImageIO.getImageReaders(stream)
+            if (readers.hasNext()) readers.next().formatName else null
+        }
+    } catch (_: IOException) {
+        null
+    }
+
     /** Decodes [file], or returns null if none of the decoders could read it. */
     fun decodeOrNull(file: File): Image? = try {
         decode(file)
@@ -96,6 +146,9 @@ object PictureDecoder {
     private const val FOUR_CC_LENGTH = 4
     private const val BOX_TYPE_OFFSET = 4
     private const val BRAND_OFFSET = 8
+
+    /** Enough leading bytes to name a format — JPEG needs three, PNG eight. */
+    private const val MAGIC_LENGTH = 8
 
     private val HEIF_EXTENSIONS = setOf("heic", "heif")
 

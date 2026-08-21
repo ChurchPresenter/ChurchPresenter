@@ -100,6 +100,48 @@ class PictureDecoderTest {
         ); File(folder, "p.png").readBytes() }))
     }
 
+    @Test
+    fun `diagnosing a readable file names the format ImageIO claims it with`() {
+        val line = PictureDecoder.diagnose(write("photo.png", "png"))
+
+        assertContains(line, "ext=png")
+        // The PNG signature, so a file renamed to the wrong extension is visible in the report.
+        assertContains(line, "magic=89504E470D0A1A0A")
+        assertContains(line, "imageio=png")
+        assertTrue("size=0" !in line, "a written file has bytes: $line")
+    }
+
+    @Test
+    fun `diagnosing a file no reader claims says so, and never carries the name`() {
+        val broken = File(folder, "holiday snap.jpg").also { it.writeText("this is not a JPEG") }
+
+        val line = PictureDecoder.diagnose(broken)
+
+        assertContains(line, "ext=jpg")
+        assertContains(line, "imageio=none")
+        assertTrue("holiday" !in line, "picture names are the user's and stay local: $line")
+    }
+
+    @Test
+    fun `diagnosing an empty file reports no bytes rather than an unreadable format`() {
+        val placeholder = File(folder, "still-syncing.jpg").also { it.createNewFile() }
+
+        val line = PictureDecoder.diagnose(placeholder)
+
+        assertContains(line, "size=0")
+        assertContains(line, "magic=none")
+        assertContains(line, "imageio=none")
+    }
+
+    @Test
+    fun `diagnosing a file deleted since the decode returns a line instead of throwing`() {
+        // The failed decode and the report are not one step, so the file can be gone by now.
+        val line = PictureDecoder.diagnose(File(folder, "gone.jpg"))
+
+        assertContains(line, "size=0")
+        assertContains(line, "magic=none")
+    }
+
     private fun ftyp(brand: String): ByteArray =
         byteArrayOf(0, 0, 0, 0x18) + "ftyp".toByteArray() + brand.toByteArray() + ByteArray(4)
 }
