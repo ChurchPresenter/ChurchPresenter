@@ -91,7 +91,12 @@ class CrashReporterTest {
         CrashReporter.setConfigTags(mapOf("outputs" to "2", "vlc" to "true"))
         CrashReporter.setContext("jcef", mapOf("installDir" to "/tmp/jcef"))
         CrashReporter.setUser("some-install-id")
-        CrashReporter.reportWarning("a warning", RuntimeException("boom"), mapOf("k" to "v"))
+        CrashReporter.reportWarning(
+            "a warning",
+            RuntimeException("boom"),
+            tags = mapOf("k" to "v"),
+            extras = mapOf("detail" to "the long version"),
+        )
         CrashReporter.sendUserFeedback("it broke", name = "Sam", email = "sam@example.org")
         assertFalse(CrashReporter.sendTestEvent(), "a test event cannot be sent while disabled")
     }
@@ -460,6 +465,20 @@ class CrashReporterTest {
         assertFalse("johndoe" in (ctx["installDir"] as String))
         assertTrue("<user>" in (ctx["installDir"] as String))
         assertEquals(true, ctx["downloaded"], "non-string context values are left untouched")
+    }
+
+    @Test
+    fun `scrubEvent redacts extras, which carry the detail a warning could not fit in a tag`() {
+        val event = SentryEvent()
+        event.setExtra("files", "/Users/johndoe/pictures/a.jpg could not be read")
+        event.setExtra("count", 3)
+
+        CrashReporter.scrubEvent(event)
+
+        val files = event.getExtra("files") as String
+        assertFalse("johndoe" in files, "an extra reaches Sentry like everything else and is scrubbed")
+        assertTrue("<user>" in files)
+        assertEquals(3, event.getExtra("count"), "non-string extras are left untouched")
     }
 
     @Test
