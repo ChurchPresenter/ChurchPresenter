@@ -21,9 +21,9 @@ Package `engine`, unchanged from when it was a separate build, so no import in t
 
 | Symbol | Role |
 |---|---|
-| `engine.EngineServer.start(sttUrl, bibleRoot, port, bibleFiles)` | starts the engine when STT connects |
-| `engine.EngineHandle` | the returned handle — `boundPort`, stop |
-| `engine.engine.DetectionLogger` | the per-session detection log the app also writes to |
+| `org.churchpresenter.bibleengine.EngineServer.start(sttUrl, bibleRoot, port, bibleFiles)` | starts the engine when STT connects |
+| `org.churchpresenter.bibleengine.EngineHandle` | the returned handle — `boundPort`, stop |
+| `org.churchpresenter.bibleengine.engine.DetectionLogger` | the per-session detection log the app also writes to |
 
 The app is then just another WebSocket client of `ws://<host>:<port>/bible-engine`, and pushes the
 aggressiveness chip over that same socket as `set_tuning {level}`. **BLE connects to the STT server
@@ -36,7 +36,18 @@ through the dependency graph. Nothing packages or runs it standalone any more, b
 
 ## Layout
 
-`src/main/kotlin/engine/` — see the README's "Project structure" for the per-file map:
+**The package is `org.churchpresenter.bibleengine`** (subpackages `bible`, `detection`, `engine`,
+`socket`, `tools`, `version` unchanged). It was a bare top-level `engine`.
+
+Renaming it is not a search-and-replace: **`engine` is also a variable name all over this module**
+— `engine.push(...)`, `engine.sessions`, `engine.enabled`, `engine.requestHistory` — and
+`bible-engine.properties` contains the same eight characters. Rewrite only `engine.<known
+subpackage or top-level type>`, outside string literals, or you will quietly retarget member
+calls and a config filename. The runtime config keys `engine.verbose` and `engine.logCandidates`
+are likewise not packages and must not move.
+
+
+`src/main/kotlin/org/churchpresenter/bibleengine/` — see the README's "Project structure" for the per-file map:
 
 | Package | Owns |
 |---|---|
