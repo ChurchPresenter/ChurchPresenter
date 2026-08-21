@@ -57,7 +57,16 @@ helpers that used to share its file stayed behind in `:composeApp`.
   moved between subpackages at all: without it, regrouping the packages silently invalidates every
   saved schedule and scene on every user's machine, and the Companion/instance-link wire format
   with them. **Never delete one, never "tidy" one to a shorter name, and give any new subclass the
-  same treatment.** `ScheduleItemSerializationTest`/`SceneModelsSerializationTest` assert the exact
+  same treatment.**
+
+  The long form names a package that no longer exists, which reads like a mistake and is not one —
+  it is a *stable identifier*, and the only thing that keeps a file readable across versions. It
+  was shortened to `"song"`/`"color"` once, on 2026-08-21, and reverted the same day: the pins are
+  compatible in **both** directions (an older build computes the same default name, so files move
+  freely between versions), and `CompanionServerScheduleMappingTest`'s `a body in the legacy
+  sealed-class format is still accepted` shows the string is on the wire too — an instance-link
+  peer or Companion client on an older version sends it. Shortening costs all of that and buys
+  nothing but a tidier literal. `ScheduleItemSerializationTest`/`SceneModelsSerializationTest` assert the exact
   strings and are what catches a slip.
 - **`ModelInvariantsTest` finds models by walking the package tree from its own package**, so it
   covers every subpackage automatically and a new model is tested without editing it. It is

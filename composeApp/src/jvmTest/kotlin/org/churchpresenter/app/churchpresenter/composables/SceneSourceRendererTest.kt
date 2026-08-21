@@ -3,7 +3,6 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -14,7 +13,10 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.core.models.scene.PathPoint
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -22,8 +24,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.core.models.scene.PathPoint
-import org.churchpresenter.core.models.scene.SceneSource
 
 /**
  * The canvas scene compositor's per-source-type renderer — 11 independent `when` branches, one

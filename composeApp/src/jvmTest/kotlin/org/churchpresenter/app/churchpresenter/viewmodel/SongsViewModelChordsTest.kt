@@ -1,5 +1,11 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import kotlinx.coroutines.Dispatchers
+import org.churchpresenter.core.models.songs.SongFileParser
+import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -8,12 +14,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlinx.coroutines.Dispatchers
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
-import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.core.models.songs.SongFileParser
-import org.churchpresenter.core.models.songs.SongItem
 
 /**
  * What happens to a song's chords on the way to being presented.
