@@ -35,7 +35,7 @@ tasks.test {
 
 compose.desktop {
     application {
-        mainClass = "lottiegen.MainKt"
+        mainClass = "org.churchpresenter.lottiegen.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
