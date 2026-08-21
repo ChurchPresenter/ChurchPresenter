@@ -329,11 +329,6 @@ internal object KeynoteStaticSupport {
         for (i in 0 until children.length) extractTextFromNode(children.item(i), sb)
     }
 
-    /**
-     * Heuristic scan of a Slide iwa payload for the presenter-notes text field
-     * (protobuf field tag bytes 0xB2 0x38 followed by a varint length). Replaced by a real
-     * IWA parse in WS5; kept as the fallback for undecodable documents.
-     */
     /** The presenter-notes field tag, and the varint decoding that follows it. */
     private const val NOTE_TAG_BYTE_0 = 0xB2
     private const val NOTE_TAG_BYTE_1 = 0x38
@@ -343,6 +338,11 @@ internal object KeynoteStaticSupport {
     private const val VARINT_CONTINUATION_BIT = 0x80
     private const val VARINT_PAYLOAD_BITS = 7
 
+    /**
+     * Heuristic scan of a Slide iwa payload for the presenter-notes text field
+     * (protobuf field tag bytes 0xB2 0x38 followed by a varint length). Replaced by a real
+     * IWA parse in WS5; kept as the fallback for undecodable documents.
+     */
     private fun scanIwaForNoteText(bytes: ByteArray): String {
         val sb = StringBuilder()
         var i = 0

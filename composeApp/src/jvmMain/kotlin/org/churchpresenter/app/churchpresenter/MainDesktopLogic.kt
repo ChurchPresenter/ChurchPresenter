@@ -191,6 +191,19 @@ internal suspend fun decodeSlideBitmaps(slideFiles: List<File>, index: Int): Pai
 }
 
 /**
+ * Whether the main window, rather than `BibleTab`, must resolve a clicked schedule verse.
+ *
+ * Same window as [shouldMainHandleAutoFollow] and the same reasoning, minus the live-content
+ * condition: an item the operator clicked is a request to show that verse whatever is on screen
+ * now. [bibleTabIndex] is `-1` when the tab is hidden — and a hidden Bible tab is precisely the
+ * case where `selectTab` declines to switch, so nothing else would ever resolve the item.
+ */
+internal fun shouldMainResolveScheduleVerse(
+    activeTabIndex: Int,
+    bibleTabIndex: Int,
+): Boolean = activeTabIndex != bibleTabIndex
+
+/**
  * Whether the main window, rather than the Bible tab, should apply an auto-follow detection.
  *
  * `BibleTab` sits inside `AnimatedContent` and leaves the composition when the operator switches
@@ -207,19 +220,6 @@ internal suspend fun decodeSlideBitmaps(slideFiles: List<File>, index: Int): Pai
  * [activeTabIndex] — so with the tab hidden the main window always handles it, there being no
  * `BibleTab` in the composition to defer to.
  */
-/**
- * Whether the main window, rather than `BibleTab`, must resolve a clicked schedule verse.
- *
- * Same window as [shouldMainHandleAutoFollow] and the same reasoning, minus the live-content
- * condition: an item the operator clicked is a request to show that verse whatever is on screen
- * now. [bibleTabIndex] is `-1` when the tab is hidden — and a hidden Bible tab is precisely the
- * case where `selectTab` declines to switch, so nothing else would ever resolve the item.
- */
-internal fun shouldMainResolveScheduleVerse(
-    activeTabIndex: Int,
-    bibleTabIndex: Int,
-): Boolean = activeTabIndex != bibleTabIndex
-
 internal fun shouldMainHandleAutoFollow(
     activeTabIndex: Int,
     bibleTabIndex: Int,

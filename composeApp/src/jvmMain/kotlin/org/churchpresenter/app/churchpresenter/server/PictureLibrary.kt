@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
 internal class PictureLibrary {
 
     companion object {
+        /** Stable folder ID used for all device-uploaded photos (accumulates across sessions). */
         const val DEVICE_UPLOADS_FOLDER_ID = "device_uploads"
 
         /** Recognised image extensions — matches PicturesViewModel. */
