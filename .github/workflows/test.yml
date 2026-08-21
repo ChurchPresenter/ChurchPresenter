@@ -137,6 +137,9 @@ jobs:
             planningcenter:
               - *shared
               - 'planning-center/**'
+              - 'settings/**'             # implementation(projects.settings)
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
+              - 'core-models/**'          # via :settings
             bibleformats:
               - *shared
               - 'bible-formats/**'
