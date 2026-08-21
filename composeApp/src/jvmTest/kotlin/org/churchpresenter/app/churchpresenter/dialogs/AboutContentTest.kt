@@ -14,7 +14,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ThemeMode
 import java.awt.Desktop
 import java.io.File
 import java.net.URI

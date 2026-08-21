@@ -7,9 +7,9 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.ui.theme.ProvideThemeManager
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeManager
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ProvideThemeManager
+import org.churchpresenter.theme.ThemeManager
+import org.churchpresenter.theme.ThemeMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

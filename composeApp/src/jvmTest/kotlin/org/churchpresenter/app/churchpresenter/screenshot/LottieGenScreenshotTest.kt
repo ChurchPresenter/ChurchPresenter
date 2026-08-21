@@ -23,7 +23,7 @@ import lottiegen.model.Preset
 import lottiegen.persistence.PresetStorage
 import lottiegen.ui.Strings
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import lottiegen.App as LottieGenApp
 import java.util.Locale
 import kotlin.test.AfterTest

@@ -23,7 +23,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSetting
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZone
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZone
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
