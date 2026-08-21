@@ -7,7 +7,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

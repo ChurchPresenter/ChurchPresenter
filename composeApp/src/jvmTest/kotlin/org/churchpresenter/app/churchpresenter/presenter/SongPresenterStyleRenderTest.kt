@@ -21,7 +21,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundConfig
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
-import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.awt.image.BufferedImage
 import java.io.File

@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import java.io.File
 import java.nio.file.Files

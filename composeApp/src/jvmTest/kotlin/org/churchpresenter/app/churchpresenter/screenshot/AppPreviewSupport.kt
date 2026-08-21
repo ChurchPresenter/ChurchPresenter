@@ -17,8 +17,8 @@ import org.churchpresenter.app.churchpresenter.MainDesktop
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
-import core.models.songs.SongFileParser
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongFileParser
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
@@ -30,11 +30,11 @@ import org.churchpresenter.app.churchpresenter.data.settings.WebBookmark
 import org.churchpresenter.app.churchpresenter.data.settings.WindowLayoutSettings
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.models.QuestionDto
-import org.churchpresenter.app.churchpresenter.models.Scene
-import org.churchpresenter.app.churchpresenter.models.SceneSource
-import org.churchpresenter.app.churchpresenter.models.SourceTransform
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.core.models.qa.QuestionDto
+import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.core.models.scene.SourceTransform
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.RecentMediaFiles
 import org.churchpresenter.app.churchpresenter.tabs.Tabs

@@ -23,7 +23,7 @@ import churchpresenter.composeapp.generated.resources.companion_satellite_no_hos
 import org.churchpresenter.app.churchpresenter.composables.CompanionConnectionChipRow
 import org.churchpresenter.app.churchpresenter.composables.CompanionSurfacePanel
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.CompanionSurfacePlacement
+import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.jetbrains.compose.resources.stringResource
 

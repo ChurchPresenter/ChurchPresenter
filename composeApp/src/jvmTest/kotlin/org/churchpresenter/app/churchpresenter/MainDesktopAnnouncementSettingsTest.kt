@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.reflect.full.memberProperties
 import kotlin.test.Test
 import kotlin.test.assertEquals

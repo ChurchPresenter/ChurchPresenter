@@ -2,7 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.Dp
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import java.io.File

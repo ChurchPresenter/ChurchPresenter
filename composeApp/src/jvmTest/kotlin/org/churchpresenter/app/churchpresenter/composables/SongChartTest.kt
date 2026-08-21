@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.app.churchpresenter.utils.ChordSegment
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.server
 
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.models.LyricSection
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.bible.SelectedVerse
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

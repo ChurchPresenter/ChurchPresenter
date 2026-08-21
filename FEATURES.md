@@ -26,10 +26,10 @@
 - `data/settings/SongSettings.kt`
 - `presenter/SongPresenter.kt`
 - `dialogs/EditSongDialog.kt`, `dialogs/tabs/SongSettingsTab.kt`
-- `core-models/src/main/kotlin/.../models/LyricSection.kt` (the `:core-models` module)
+- `core-models/src/main/kotlin/.../models/songs/LyricSection.kt` (the `:core-models` module)
 - `converter/` (the `:converter` Gradle module, at the repo root) — format converter tool
 - `songlibrary/` (the `:songlibrary` Gradle module) — the Song Library Manager grid
-- `core-models/` (the `:core-models` Gradle module) — `core.models.songs`: the song, the `.song` file format and the library folder, shared by the app and the library window
+- `core-models/` (the `:core-models` Gradle module) — `models.songs`: the song, the `.song` file format and the library folder, shared by the app and the library window
 
 ## Bible & Scripture
 - **Instant verse display** — browse any of the 66 books and put a verse on screen in seconds.
@@ -57,7 +57,7 @@
 - `data/settings/BibleSettings.kt`, `data/settings/BibleEngineSettings.kt`
 - `presenter/BiblePresenter.kt`
 - `dialogs/tabs/BibleSettingsTab.kt`
-- `core-models/src/main/kotlin/.../models/SelectedVerse.kt` (the `:core-models` module)
+- `core-models/src/main/kotlin/.../models/bible/SelectedVerse.kt` (the `:core-models` module)
 - `bible-engine/` (the `:bible-engine` Gradle module, at the repo root) — Bible Lookup Engine (speech-to-reference detection)
 
 ## Slides & Presentations
@@ -123,7 +123,7 @@
 - `tabs/WebTab.kt` — web browser UI
 - `tabs/CanvasTab.kt` — scene compositor UI
 - `viewmodel/SceneViewModel.kt`
-- `core-models/src/main/kotlin/.../models/SceneModels.kt` (the `:core-models` module)
+- `core-models/src/main/kotlin/.../models/scene/SceneModels.kt` (the `:core-models` module)
 - `composables/SceneCanvas.kt`, `composables/SceneSourceRenderer.kt`, `composables/SourcePropertiesPanel.kt`
 - `composables/SharedBrowserFrameCache.kt`, `composables/SharedCameraFrameCache.kt`
 - `presenter/ScenePresenter.kt`, `presenter/WebsitePresenter.kt`
@@ -150,7 +150,7 @@
 - `viewmodel/QAManager.kt`
 - `data/settings/QASettings.kt`
 - `presenter/QAPresenter.kt`
-- `core-models/src/main/kotlin/.../models/Question.kt` (the `:core-models` module)
+- `core-models/src/main/kotlin/.../models/qa/Question.kt` (the `:core-models` module)
 
 ## Service Planning
 - **Drag-and-drop schedules** — build your whole service from songs, scripture, slides, media, lower thirds, announcements and websites.
@@ -160,7 +160,7 @@
 **Source locations:**
 - `tabs/ScheduleTab.kt` — main UI
 - `viewmodel/ScheduleViewModel.kt`
-- `core-models/src/main/kotlin/.../models/ScheduleItem.kt` (the `:core-models` module)
+- `core-models/src/main/kotlin/.../models/schedule/ScheduleItem.kt` (the `:core-models` module)
 - `viewmodel/FileManager.kt`
 - `dialogs/AddLabelDialog.kt`
 

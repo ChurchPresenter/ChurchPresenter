@@ -5,9 +5,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.models.Scene
-import org.churchpresenter.app.churchpresenter.models.SceneSource
-import org.churchpresenter.app.churchpresenter.models.SourceTransform
+import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import java.io.File
 import java.util.UUID

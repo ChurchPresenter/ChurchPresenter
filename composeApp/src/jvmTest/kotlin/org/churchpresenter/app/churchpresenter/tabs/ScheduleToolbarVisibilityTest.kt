@@ -3,7 +3,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

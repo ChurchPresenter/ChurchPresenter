@@ -4,8 +4,8 @@ package songlibrary.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest
-import core.models.songs.SongField
-import core.models.songs.SongLibrary
+import org.churchpresenter.core.models.songs.SongField
+import org.churchpresenter.core.models.songs.SongLibrary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import songlibrary.SongLibraryState
