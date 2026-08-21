@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.churchpresenter.atem.AtemConnectionManager
+import org.churchpresenter.atem.AtemKey
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AtemSettings
 

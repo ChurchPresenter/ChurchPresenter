@@ -18,6 +18,8 @@ import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
+import org.churchpresenter.atem.AtemFrameEncoder
+import org.churchpresenter.atem.EncodedFrame
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import java.io.BufferedOutputStream

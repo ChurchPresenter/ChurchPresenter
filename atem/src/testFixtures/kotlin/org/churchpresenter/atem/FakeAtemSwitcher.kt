@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.server
+package org.churchpresenter.atem
 
 import java.net.DatagramPacket
 import java.net.DatagramSocket

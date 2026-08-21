@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.server
+package org.churchpresenter.atem
 
 import org.churchpresenter.diagnostics.CrashReporter
 import kotlinx.coroutines.CoroutineScope
