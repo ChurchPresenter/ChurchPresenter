@@ -613,7 +613,11 @@ object PlanningCenterClient {
             } catch (e: UnresolvedAddressException) {
                 reported("Planning Center attachment open failed", e, AttachmentUrlOutcome.Failure)
             } catch (e: IllegalArgumentException) {
-                reported("Planning Center attachment open response could not be parsed", e, AttachmentUrlOutcome.Failure)
+                reported(
+                    "Planning Center attachment open response could not be parsed",
+                    e,
+                    AttachmentUrlOutcome.Failure,
+                )
             }
         }
 

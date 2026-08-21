@@ -33,7 +33,7 @@ cd "$ROOT"
 
 MAIN_SRC="composeApp/src/jvmMain/kotlin composeApp/src/commonMain/kotlin"
 # The other modules of this build, by directory — each maps to a `:<dir>:test` task.
-MODULE_DIRS="converter|companion-satellite|theme|core-models|bible-engine|lottieGenerator|crossword|presentation-engine|settings|diagnostics"
+MODULE_DIRS="converter|companion-satellite|theme|core-models|bible-engine|lottieGenerator|crossword|presentation-engine|settings|diagnostics|planning-center"
 TEST_SRC="composeApp/src/jvmTest/kotlin"
 MAX_PATTERNS=120          # past this a full run is cheaper than a vast --tests filter
 BASE_REF="${BASE_REF:-origin/main}"

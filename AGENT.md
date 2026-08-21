@@ -47,7 +47,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `tabs/`          | UI only — one file per tab, no logic                                |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
 | `presenter/`     | Output window rendering (what the audience sees)                    |
-| `server/`        | Ktor REST/WebSocket server, ATEM client, tunnel, SSL                |
+| `server/`        | Ktor REST/WebSocket server, ATEM client, tunnel, SSL — the PCO OAuth callback listener is the `:planning-center` module |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
 | `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
 | `models/`        | Only what needs the app: ShortcutAction, the two Companion UI states |
@@ -85,6 +85,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `songlibrary/`         | `:songlibrary`         | The Song Library Manager window, opened from the Help menu                        | [AGENT.md](songlibrary/AGENT.md)         |
 | `settings/`            | `:settings`            | Everything the app persists: the settings classes, `SettingsManager`, `Constants` | [AGENT.md](settings/AGENT.md)            |
 | `diagnostics/`         | `:diagnostics`         | Crash reporting: the crash log on disk and the Sentry bridge behind it            | [AGENT.md](diagnostics/AGENT.md)         |
+| `planning-center/`     | `:planning-center`     | The Planning Center Online client — OAuth, the Services REST calls, the callback  | [AGENT.md](planning-center/AGENT.md)     |
 
 **Every one of them is a real Gradle module of this build** — `include(":theme")`,
 `implementation(projects.companionSatellite)`, tested with `./gradlew :<module>:test` on the root
@@ -115,8 +116,8 @@ they must be set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults, so name only the
   counters that need a different number (usually the one or two that cannot reach 85%), never all
   six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
-  each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword`, `:songlibrary` and `:settings` name
-  none.
+  each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`,
+  `:diagnostics` and `:planning-center` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**

@@ -776,11 +776,6 @@
     <ID>MaxLineLength:PicturesTab.kt$val recentOrdered = RecentPictureFolders.pinned + RecentPictureFolders.folders.filter { it !in RecentPictureFolders.pinned }</ID>
     <ID>MaxLineLength:PicturesViewModel.kt$PicturesViewModel$send(ScheduleItem.PictureItem(id = java.util.UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))</ID>
     <ID>MaxLineLength:PicturesViewModel.kt$PicturesViewModel$val cacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/picture-folders/$folderId")</ID>
-    <ID>MaxLineLength:PlanningCenterClient.kt$PlanningCenterClient$/** Downloads a file's bytes from an already-resolved URL (a pre-signed S3 link — no auth header needed or wanted). */</ID>
-    <ID>MaxLineLength:PlanningCenterClient.kt$PlanningCenterClient$lyrics = pcoLyrics?.takeIf { it.isNotBlank() } ?: PlanningCenterLyricsFormatter.stripChords(chordChart)</ID>
-    <ID>MaxLineLength:PlanningCenterClient.kt$PlanningCenterClient$suspend</ID>
-    <ID>MaxLineLength:PlanningCenterClient.kt$PlanningCenterClient$val basicAuth = java.util.Base64.getEncoder().encodeToString("$clientId:$clientSecret".toByteArray(Charsets.UTF_8))</ID>
-    <ID>MaxLineLength:PlanningCenterClient.kt$PlanningCenterClient$val songAttrs = songId?.let { includedByKey["Song::$it"]?.jsonObject?.get("attributes")?.jsonObject }</ID>
     <ID>MaxLineLength:PlanningCenterImportDialog.kt$.</ID>
     <ID>MaxLineLength:PlanningCenterImportDialog.kt$CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)</ID>
     <ID>MaxLineLength:PlanningCenterImportDialog.kt$PlanItemTypeIcon(Icons.AutoMirrored.Filled.Label, tint = MaterialTheme.semantic.warning)</ID>
@@ -1465,8 +1460,6 @@
     <ID>TooGenericExceptionCaught:PictureDecoder.kt$PictureDecoder$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PicturePresenter.kt$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PicturesViewModel.kt$PicturesViewModel$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PlanningCenterAuthServer.kt$PlanningCenterAuthServer$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PlanningCenterClient.kt$PlanningCenterClient$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PresentationPlayer.kt$PresentationPlayer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PresentationRoutes.kt$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PresentationStore.kt$PresentationStore$e: Exception</ID>
@@ -1527,7 +1520,6 @@
     <ID>TooManyFunctions:MainLogic.kt$org.churchpresenter.app.churchpresenter.MainLogic.kt</ID>
     <ID>TooManyFunctions:MediaViewModel.kt$MediaViewModel</ID>
     <ID>TooManyFunctions:PicturesViewModel.kt$PicturesViewModel</ID>
-    <ID>TooManyFunctions:PlanningCenterClient.kt$PlanningCenterClient</ID>
     <ID>TooManyFunctions:PlanningCenterImportViewModel.kt$PlanningCenterImportViewModel</ID>
     <ID>TooManyFunctions:PresentationPlayer.kt$PresentationPlayer</ID>
     <ID>TooManyFunctions:PresentationViewModel.kt$PresentationViewModel</ID>
