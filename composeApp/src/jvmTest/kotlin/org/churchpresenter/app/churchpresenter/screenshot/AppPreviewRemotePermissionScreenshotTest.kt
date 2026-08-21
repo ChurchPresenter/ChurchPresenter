@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialogContent
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import kotlin.test.Test
 

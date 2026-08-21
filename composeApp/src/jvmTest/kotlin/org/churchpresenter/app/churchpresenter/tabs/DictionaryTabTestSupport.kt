@@ -28,8 +28,8 @@ import io.mockk.unmockkObject
 import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
 import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryFixture
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
 

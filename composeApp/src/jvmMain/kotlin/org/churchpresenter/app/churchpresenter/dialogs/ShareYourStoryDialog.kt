@@ -69,8 +69,8 @@ import churchpresenter.composeapp.generated.resources.story_prompt_share
 import churchpresenter.composeapp.generated.resources.story_prompt_window_title
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.ui.theme.isDarkScheme
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.isDarkScheme
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

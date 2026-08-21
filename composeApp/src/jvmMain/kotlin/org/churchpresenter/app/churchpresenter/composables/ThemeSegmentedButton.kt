@@ -6,7 +6,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.tooltip_theme_dark
 import churchpresenter.composeapp.generated.resources.tooltip_theme_light
 import churchpresenter.composeapp.generated.resources.tooltip_theme_system
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

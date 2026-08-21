@@ -9,7 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import io.mockk.every
 import io.mockk.mockk
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ThemeMode
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
 import javax.swing.SwingUtilities

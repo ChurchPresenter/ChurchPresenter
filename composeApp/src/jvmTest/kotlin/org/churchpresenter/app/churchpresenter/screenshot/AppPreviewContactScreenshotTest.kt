@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialogContent
 import org.churchpresenter.app.churchpresenter.dialogs.SendStatus
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import kotlin.test.Test
 

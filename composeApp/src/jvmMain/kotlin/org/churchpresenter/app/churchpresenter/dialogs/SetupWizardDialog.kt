@@ -166,9 +166,9 @@ import churchpresenter.composeapp.generated.resources.setup_wizard_skip
 import churchpresenter.composeapp.generated.resources.setup_wizard_step
 import churchpresenter.composeapp.generated.resources.setup_wizard_title
 import org.churchpresenter.app.churchpresenter.data.Language
-import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
+import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
