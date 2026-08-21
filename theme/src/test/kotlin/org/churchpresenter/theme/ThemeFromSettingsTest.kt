@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.ui.theme
+package org.churchpresenter.theme
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

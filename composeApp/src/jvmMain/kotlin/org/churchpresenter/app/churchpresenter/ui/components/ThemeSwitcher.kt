@@ -32,8 +32,8 @@ import churchpresenter.composeapp.generated.resources.ocean_theme
 import churchpresenter.composeapp.generated.resources.rose_theme
 import churchpresenter.composeapp.generated.resources.system_theme
 import churchpresenter.composeapp.generated.resources.warm_theme
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.ui.theme.rememberThemeManager
+import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.theme.rememberThemeManager
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

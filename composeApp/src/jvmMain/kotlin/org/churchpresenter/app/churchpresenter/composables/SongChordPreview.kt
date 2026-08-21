@@ -51,7 +51,7 @@ import org.churchpresenter.app.churchpresenter.utils.ChordSegment
 import org.churchpresenter.app.churchpresenter.utils.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.SongSectionWordGroup
 import org.churchpresenter.app.churchpresenter.utils.SongSectionWords
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
 private const val CHORD_SPACING_RATIO = 0.42f

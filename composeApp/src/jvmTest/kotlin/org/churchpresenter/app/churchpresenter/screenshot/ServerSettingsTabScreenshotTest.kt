@@ -29,7 +29,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerLabel
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.withIsolatedHome
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import java.io.File

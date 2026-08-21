@@ -80,7 +80,7 @@ import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.server.AtemClient
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 
 @Composable
 fun AtemSettingsTab(

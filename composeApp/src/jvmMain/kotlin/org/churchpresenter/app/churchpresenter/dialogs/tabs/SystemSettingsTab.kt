@@ -108,7 +108,7 @@ import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window
 import javax.swing.JOptionPane

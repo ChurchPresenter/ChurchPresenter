@@ -72,7 +72,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OBSSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
 private const val TRAILING_SPACER_WEIGHT = 3f

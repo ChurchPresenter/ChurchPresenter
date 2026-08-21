@@ -21,7 +21,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.StreamingSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import kotlin.test.Test
 

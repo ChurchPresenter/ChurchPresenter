@@ -29,7 +29,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.ContentLabel
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.MetronomeLabel
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.chooseRouting
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

@@ -21,8 +21,8 @@ import churchpresenter.composeapp.generated.resources.stock_photo_search_placeho
 import org.churchpresenter.app.churchpresenter.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.dialogs.LocalLibraryDialogContent
 import org.churchpresenter.app.churchpresenter.dialogs.StockMediaBrowserDialogContent
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.StockMediaViewModel
 import java.awt.Color
 import java.awt.GradientPaint

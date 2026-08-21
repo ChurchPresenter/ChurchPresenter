@@ -93,7 +93,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
-import org.churchpresenter.app.churchpresenter.ui.theme.themeFromSettings
+import org.churchpresenter.theme.themeFromSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkCommandFailure
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
@@ -111,7 +111,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
-import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
+import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts

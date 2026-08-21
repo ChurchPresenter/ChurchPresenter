@@ -29,7 +29,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.shortcutChipTag
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.models.ShortcutScope
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 
 /**

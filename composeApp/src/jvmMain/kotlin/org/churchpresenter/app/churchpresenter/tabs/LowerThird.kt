@@ -162,7 +162,7 @@ import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.generate_lower_third
 import churchpresenter.composeapp.generated.resources.aspect_ratio_mismatch
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 import java.awt.Window
 import java.io.File
 import javax.swing.SwingUtilities

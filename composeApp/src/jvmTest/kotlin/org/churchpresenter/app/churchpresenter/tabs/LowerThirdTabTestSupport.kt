@@ -28,8 +28,8 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.server.AtemState
 import org.churchpresenter.settings.StreamingSettings
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ThemeMode
 import java.io.File
 import java.nio.file.Files
 

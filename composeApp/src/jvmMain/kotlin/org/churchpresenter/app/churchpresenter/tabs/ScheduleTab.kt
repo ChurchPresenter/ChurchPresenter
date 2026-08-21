@@ -67,7 +67,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialo
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.DragItemGeometry
 import org.churchpresenter.app.churchpresenter.utils.dragDropTarget
 import org.churchpresenter.app.churchpresenter.utils.scheduleCanZoomIn

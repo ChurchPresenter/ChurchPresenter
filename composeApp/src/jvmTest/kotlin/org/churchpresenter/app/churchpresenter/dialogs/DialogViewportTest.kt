@@ -14,7 +14,7 @@ import org.churchpresenter.app.churchpresenter.Viewport
 import org.churchpresenter.app.churchpresenter.ViewportProbe
 import org.churchpresenter.app.churchpresenter.assertFitsDeclaredHeight
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ThemeMode
 import kotlin.test.Test
 
 /**

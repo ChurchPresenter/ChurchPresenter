@@ -20,7 +20,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.settings.utils.Constants
 import java.awt.Color
 import java.awt.GradientPaint

@@ -127,7 +127,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.draggedColumnIndex
 import org.churchpresenter.app.churchpresenter.utils.moveColumn
 import org.churchpresenter.app.churchpresenter.utils.songColumnSortKey
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.layout.RowScope

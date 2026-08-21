@@ -118,7 +118,7 @@ import org.churchpresenter.app.churchpresenter.data.InterlinearWord
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryLanguageFilter
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
