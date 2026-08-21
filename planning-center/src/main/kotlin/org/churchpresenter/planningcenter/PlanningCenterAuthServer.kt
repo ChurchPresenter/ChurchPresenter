@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.server
+package org.churchpresenter.planningcenter
 
 import io.ktor.http.ContentType
 import io.ktor.server.application.call

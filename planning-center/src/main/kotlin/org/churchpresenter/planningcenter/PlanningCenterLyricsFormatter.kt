@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.planningcenter
 
 /**
  * Converts a Planning Center Services "chord chart" (chords inline as bracketed tokens, e.g.

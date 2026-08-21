@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.server
+package org.churchpresenter.planningcenter
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
