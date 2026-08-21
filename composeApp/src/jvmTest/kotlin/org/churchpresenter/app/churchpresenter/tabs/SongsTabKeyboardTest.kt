@@ -238,14 +238,6 @@ class SongsTabKeyboardTest {
     // ── Typing in the search box ────────────────────────────────────────────────
 
     /**
-     * The keys belong to the text while the caret is in the search field.
-     *
-     * The handler is an `onPreviewKeyEvent` on the tab root, so it sees every key before the field
-     * does. Unguarded, it swallowed left and right — the caret could not be moved through a query at
-     * all — and each keystroke navigated the song underneath instead, on a list the same keystrokes
-     * were re-filtering. That is what the reported crash walked off the end of.
-     */
-    /**
      * One song with a verse long enough for a line step to be visible.
      *
      * The shared fixtures give every song a single line, so stepping a line there immediately falls
@@ -261,6 +253,14 @@ class SongsTabKeyboardTest {
     )
 
     @Test
+    /**
+     * The keys belong to the text while the caret is in the search field.
+     *
+     * The handler is an `onPreviewKeyEvent` on the tab root, so it sees every key before the field
+     * does. Unguarded, it swallowed left and right — the caret could not be moved through a query at
+     * all — and each keystroke navigated the song underneath instead, on a list the same keystrokes
+     * were re-filtering. That is what the reported crash walked off the end of.
+     */
     fun `arrow keys in the search box leave the song alone`() {
         songsTab(songs = multiLineSong, songSettings = lineMode()) { vm, _ ->
             selectFirstSong(vm)

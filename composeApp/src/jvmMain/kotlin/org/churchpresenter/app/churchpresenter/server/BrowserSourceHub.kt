@@ -85,6 +85,16 @@ internal class BrowserSourceHub(
         return false
     }
 
+    /**
+     * Packs one [BrowserSourceFrame] into a single WebSocket binary message: a fixed 24-byte
+     * big-endian header (x, y, rectWidth, rectHeight, fullWidth, fullHeight — six Int32s) followed
+     * by the raw image bytes — PNG when the frame carries transparency, JPEG when fully opaque
+     * (the client sniffs the first payload byte: 0x89 = PNG, 0xFF = JPEG). The client reads this
+     * with a matching `DataView`. Using WebSocket
+     * binary messages instead of HTTP multipart/x-mixed-replace means each frame's boundary is
+     * handled natively by the WebSocket protocol — no manual buffer/boundary parsing needed on
+     * either side, and no dependence on a legacy MIME type with inconsistent engine support.
+     */
     internal fun encodeBrowserSourceFrameMessage(frame: BrowserSourceFrame): ByteArray {
         val buf = java.nio.ByteBuffer.allocate(24 + frame.png.size)
         buf.putInt(frame.x)

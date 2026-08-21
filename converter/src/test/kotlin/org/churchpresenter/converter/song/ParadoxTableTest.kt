@@ -55,8 +55,9 @@ class ParadoxTableTest {
      * Memos go into the `.MB` as type-2 blocks — one memo to a block, its body nine bytes in — and
      * the record's memo field holds the block offset and the memo's length as little-endian
      * integers in its last ten bytes.
+     *
+     * Returns the data folder holding the pair.
      */
-    /** Returns the data folder holding the pair. */
     private fun library(songs: List<Triple<String, String, String>>): File {
         val recordSize = columns.sumOf { it.width }
         val memo = ByteArrayBuilder()

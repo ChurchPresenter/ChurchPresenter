@@ -204,6 +204,9 @@ internal object ContentLabel {
 
 // ── Ordinals ────────────────────────────────────────────────────────────────────────────────────
 
+/** The zones offered a chord colour: the two a song's chart can be routed to. */
+internal const val CHORD_COLOUR_ZONES = 2
+
 /**
  * Where each zone's style editor sits among the tab's repeated controls, in composition order.
  *
@@ -211,9 +214,6 @@ internal object ContentLabel {
  * column second — preview, then Bottom-Left, Bottom-Center, Bottom-Right. That is the order, not the
  * on-screen one: Bottom-Left's editor sits beside Full Screen's on screen but composes after it.
  */
-/** The zones offered a chord colour: the two a song's chart can be routed to. */
-internal const val CHORD_COLOUR_ZONES = 2
-
 internal object ZoneOrdinal {
     const val COUNT = 6
 

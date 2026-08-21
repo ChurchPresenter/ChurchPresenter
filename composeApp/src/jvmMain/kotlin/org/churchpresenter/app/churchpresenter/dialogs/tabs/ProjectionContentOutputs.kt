@@ -68,15 +68,6 @@ import org.jetbrains.compose.resources.stringResource
  */
 
 /**
- * The per-output content controls of the Projection settings tab: the toggle grid, the Bible and
- * song language cells, the monitor preview and the "content outputs" dialog.
- *
- * Split out of ProjectionSettingsTab.kt, which was 2,638 lines. These are `internal` rather than
- * file-private only because Kotlin scopes `private` to the file -- they remain implementation
- * detail of the tab and are covered through it, not photographed on their own.
- */
-
-/**
  * Count of enabled content types for the "N of M enabled" summary: Bible and Songs count when their
  * language mode isn't Off, plus every boolean content/background toggle that's on.
  */
@@ -109,12 +100,6 @@ internal fun ContentOutputsSectionHeader(text: String, modifier: Modifier = Modi
         modifier = modifier,
     )
 }
-
-/**
- * A single boolean content toggle rendered as a rounded "chip" — checkbox + label, the whole chip
- * clickable. Wrapped in a tooltip when one is provided; the weight modifier is applied to the
- * outermost node so the two-column grid lines up.
- */
 
 /**
  * Monitor mock summarising what an output actually shows: every enabled content type (and the

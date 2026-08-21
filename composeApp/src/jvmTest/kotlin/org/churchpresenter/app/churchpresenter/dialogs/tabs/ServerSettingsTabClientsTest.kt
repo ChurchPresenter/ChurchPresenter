@@ -184,13 +184,14 @@ class ServerSettingsTabClientsTest {
     // ── Friendly names ──────────────────────────────────────────────────────────────────────────
 
     /**
-     * The pencil opens an inline editor in place of the row's text. What it commits is asserted
-     * against the manager, since that — not the settings object — is where labels live.
-     */
-    /**
      * The host override is filled in by the fixture throughout this section: it is the tab's other
      * blank text field, and the inline name editor starts blank too, so without it the editor cannot
      * be told apart from the host box.
+     */
+
+    /**
+     * The pencil opens an inline editor in place of the row's text. What it commits is asserted
+     * against the manager, since that — not the settings object — is where labels live.
      */
     @Test
     fun `the pencil opens an editor and the typed name is stored`() {
