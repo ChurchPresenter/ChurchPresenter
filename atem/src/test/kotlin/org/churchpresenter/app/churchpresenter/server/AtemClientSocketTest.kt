@@ -6,6 +6,7 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -17,15 +18,13 @@ import kotlin.test.assertTrue
  * This suite is that missing half. See [FakeAtemSwitcher] for why the fake's byte layouts come
  * from a capture of real hardware rather than from [AtemClient] itself.
  *
- * **Not covered here, deliberately:**
- * - `isReachable`'s failure path and `connect`'s no-response path against a *silent* host. Both
- *   end only when a socket timeout expires (2s and 5s respectively), and neither timeout is
- *   injectable, so a test of them would cost its whole timeout — the shape `AGENT.md` rules out.
- *   The success paths are covered below.
- * - The keepalive loop. Its cadence is a hard-coded 1.5s `delay`, so any assertion about it is an
- *   assertion about a duration.
- * - `retransmitFrom`'s throw when the requested packet has already been evicted: it needs
- *   MAX_IN_FLIGHT (2048) packets sent to force eviction, which no upload this size reaches.
+ * **Elsewhere, deliberately:** every path that ends on an expiring deadline — a silent host, an
+ * unacknowledged command, the keepalive dropping a dead session — is in `AtemClientTimeoutTest`,
+ * which drives `AtemClient`'s four timeout constructor parameters in milliseconds. This suite only
+ * covers what a switcher that *answers* does.
+ *
+ * **Not covered anywhere:** the in-flight eviction at MAX_IN_FLIGHT (2048 packets), which no upload
+ * of a testable size reaches. See `AGENT.md` for the rest.
  */
 class AtemClientSocketTest {
 
@@ -90,6 +89,31 @@ class AtemClientSocketTest {
         FakeAtemSwitcher().use { fake ->
             assertTrue(runBlocking { AtemClient.isReachable("127.0.0.1", fake.port, timeoutMs = 1_000) })
         }
+    }
+
+    @Test
+    fun `isReachable uses its default timeout when none is given`() {
+        // The shape every caller in the app actually uses -- LowerThirdTab's reachability poll and
+        // AtemSettingsTab's probe both omit timeoutMs. A switcher that answers returns before the
+        // default deadline matters, so this costs a round trip rather than the 2s default.
+        FakeAtemSwitcher().use { fake ->
+            assertTrue(runBlocking { AtemClient.isReachable("127.0.0.1", fake.port) })
+        }
+    }
+
+    @Test
+    fun `host and port are the ones the client was constructed with`() {
+        FakeAtemSwitcher().use { fake ->
+            val client = AtemClient("127.0.0.1", fake.port)
+            assertEquals("127.0.0.1", client.host)
+            assertEquals(fake.port, client.port)
+        }
+    }
+
+    @Test
+    fun `the default port is the ATEM control port`() {
+        // 9910 is fixed by the protocol; a client built without a port must not invent another.
+        assertEquals(9910, AtemClient("192.0.2.1").port)
     }
 
     // ── Still upload ──────────────────────────────────────────────────────────
@@ -309,6 +333,41 @@ class AtemClientSocketTest {
         }
     }
 
+    @Test
+    fun `a transfer the switcher refuses outright fails without retrying`() {
+        // FTDE code 1 means "busy, try again" and is retried; any other code is a refusal. Retrying
+        // one of those would hammer the switcher for the full 40-retry budget and still fail.
+        FakeAtemSwitcher(ftdeFatalCode = 5).use { fake ->
+            val client = connected(fake)
+            try {
+                val failure = assertFailsWith<AtemProtocolException> {
+                    runBlocking { client.uploadStillEncoded(slot = 0, frame = frame(600), name = "refused") }
+                }
+                assertTrue(failure.message!!.contains("5"), "the code the switcher gave: ${failure.message}")
+            } finally {
+                client.disconnect()
+            }
+            assertEquals(1, fake.commandsNamed("FTSD").size, "the transfer was not attempted a second time")
+        }
+    }
+
+    @Test
+    fun `a clip frame the switcher refuses outright fails without retrying`() {
+        FakeAtemSwitcher(ftdeFatalCode = 3).use { fake ->
+            val client = connected(fake)
+            try {
+                assertFailsWith<AtemProtocolException> {
+                    runBlocking {
+                        client.uploadClipEncoded(0, frameCount = 2, name = "refused", nextFrame = { frame(400) })
+                    }
+                }
+            } finally {
+                client.disconnect()
+            }
+            assertEquals(1, fake.commandsNamed("FTSD").size, "it stopped at the first refused frame")
+        }
+    }
+
     // ── Keyers ────────────────────────────────────────────────────────────────
 
     @Test
@@ -316,7 +375,9 @@ class AtemClientSocketTest {
         FakeAtemSwitcher().use { fake ->
             val client = connected(fake, collectState = false)
             try {
-                runBlocking { client.setKeyOnAir(useDsk = false, mixEffect = 1, keyer = 2, onAir = true) }
+                runBlocking {
+                    client.setKeyOnAir(AtemKey(useDsk = false, mixEffect = 1, keyer = 2), onAir = true)
+                }
             } finally {
                 client.disconnect()
             }
@@ -334,7 +395,9 @@ class AtemClientSocketTest {
         FakeAtemSwitcher().use { fake ->
             val client = connected(fake, collectState = false)
             try {
-                runBlocking { client.setKeyOnAir(useDsk = true, mixEffect = 0, keyer = 1, onAir = false) }
+                runBlocking {
+                    client.setKeyOnAir(AtemKey(useDsk = true, mixEffect = 0, keyer = 1), onAir = false)
+                }
             } finally {
                 client.disconnect()
             }
@@ -347,9 +410,134 @@ class AtemClientSocketTest {
     fun `cutKey connects, sends the keyer command and disconnects on its own`() {
         FakeAtemSwitcher().use { fake ->
             runBlocking {
-                AtemClient.cutKey("127.0.0.1", fake.port, useDsk = false, mixEffect = 0, keyer = 0, onAir = true)
+                AtemClient.cutKey(
+                    "127.0.0.1", fake.port, AtemKey(useDsk = false, mixEffect = 0, keyer = 0), onAir = true,
+                )
             }
             assertTrue(fake.commandsNamed("CKOn").isNotEmpty(), "the keyer command reached the switcher")
+        }
+    }
+
+    @Test
+    fun `cutUpstreamKeyer connects, cuts the upstream keyer and disconnects on its own`() {
+        // The upstream-only sibling of cutKey, still called where the DSK case cannot arise.
+        FakeAtemSwitcher().use { fake ->
+            runBlocking {
+                AtemClient.cutUpstreamKeyer("127.0.0.1", fake.port, mixEffect = 1, keyer = 2, onAir = true)
+            }
+            val cmd = fake.commandsNamed("CKOn").single()
+            assertEquals(1, cmd[0].toInt(), "the M-E index travels in byte 0")
+            assertEquals(2, cmd[1].toInt(), "the keyer index in byte 1")
+            assertEquals(1, cmd[2].toInt(), "and the on-air flag in byte 2")
+        }
+    }
+
+    @Test
+    fun `taking an upstream keyer off air sends a zero on-air byte`() {
+        // The other half of CKOn's on-air flag. A stuck 1 here would leave a lower third on screen
+        // after the operator cut it away, which is the failure this byte exists to prevent.
+        FakeAtemSwitcher().use { fake ->
+            val client = connected(fake)
+            try {
+                runBlocking { client.setKeyOnAir(AtemKey(useDsk = false, mixEffect = 0, keyer = 1), onAir = false) }
+            } finally {
+                client.disconnect()
+            }
+            val cmd = fake.commandsNamed("CKOn").single()
+            assertEquals(0, cmd[2].toInt(), "off air is a zero flag")
+        }
+    }
+
+    @Test
+    fun `putting a downstream keyer on air sends a one on-air byte`() {
+        FakeAtemSwitcher().use { fake ->
+            val client = connected(fake)
+            try {
+                runBlocking { client.setKeyOnAir(AtemKey(useDsk = true, mixEffect = 0, keyer = 1), onAir = true) }
+            } finally {
+                client.disconnect()
+            }
+            val cmd = fake.commandsNamed("CDsL").single()
+            assertEquals(1, cmd[0].toInt(), "the DSK index travels in byte 0")
+            assertEquals(1, cmd[1].toInt(), "on air is a one flag")
+        }
+    }
+
+    // ── Uploading without a state dump ────────────────────────────────────────
+
+    @Test
+    fun `a switcher that reports no still slots is not treated as rejecting the upload`() {
+        // A device whose firmware sends no MPfe at all reads as an empty pool, which is not the same
+        // as "slot 0 does not exist". Refusing here would block every upload to such a switcher;
+        // the device itself rejects a slot it really lacks.
+        FakeAtemSwitcher(stillSlotCount = 0).use { fake ->
+            val payload = frame(1_200)
+            fake.expectedTransferBytes = payload.data.size
+            val client = connected(fake)
+            try {
+                assertTrue(client.lastKnownState!!.stillSlots.isEmpty(), "the precondition: an empty pool")
+                runBlocking { client.uploadStillEncoded(slot = 0, frame = payload, name = "empty-pool") }
+            } finally {
+                client.disconnect()
+            }
+            assertEquals(2, fake.awaitCommandsNamed("LOCK", 2).size, "the transfer ran to its unlock")
+        }
+    }
+
+    @Test
+    fun `a switcher that reports no clip banks is not treated as rejecting the upload`() {
+        FakeAtemSwitcher(clipSlotCount = 0).use { fake ->
+            val payload = frame(900)
+            fake.expectedTransferBytes = payload.data.size
+            val client = connected(fake)
+            try {
+                assertTrue(client.lastKnownState!!.clipSlots.isEmpty(), "the precondition: no clip banks")
+                runBlocking {
+                    client.uploadClipEncoded(slot = 0, frameCount = 1, name = "empty-pool", nextFrame = { payload })
+                }
+            } finally {
+                client.disconnect()
+            }
+            assertTrue(fake.commandsNamed("FTSD").isNotEmpty(), "the transfer was not refused up front")
+        }
+    }
+
+    @Test
+    fun `a still uploads on a connection that never read the media pool`() {
+        // AtemConnectionManager opens stateless connections (needsState = false), so the slot
+        // validation has no pool to check against. It must skip the check rather than refuse the
+        // upload — the switcher itself rejects a bad slot, and refusing here would break every
+        // upload over a reused connection.
+        FakeAtemSwitcher().use { fake ->
+            val payload = frame(2_000)
+            fake.expectedTransferBytes = payload.data.size
+            val client = connected(fake, collectState = false)
+            try {
+                assertNull(client.lastKnownState, "the precondition: no pool was ever read")
+                runBlocking { client.uploadStillEncoded(slot = 5, frame = payload, name = "stateless") }
+            } finally {
+                client.disconnect()
+            }
+            assertEquals(2, fake.awaitCommandsNamed("LOCK", 2).size, "the transfer ran to its unlock")
+        }
+    }
+
+    @Test
+    fun `a clip uploads on a connection that never read the media pool`() {
+        FakeAtemSwitcher().use { fake ->
+            val payload = frame(1_600)
+            fake.expectedTransferBytes = payload.data.size
+            val client = connected(fake, collectState = false)
+            try {
+                runBlocking {
+                    client.uploadClipEncoded(
+                        slot = 1, frameCount = 1, name = "stateless", nextFrame = { payload },
+                    )
+                }
+            } finally {
+                client.disconnect()
+            }
+            assertTrue(fake.commandsNamed("FTSD").isNotEmpty(), "the transfer was not refused up front")
         }
     }
 
@@ -363,7 +551,9 @@ class AtemClientSocketTest {
                 // setKeyOnAir waits for its own ack (sendCommandAndWait with no expected
                 // response), so its return IS the positive signal that the ack landed — no
                 // polling, and nothing here depends on a timeout.
-                runBlocking { client.setKeyOnAir(useDsk = false, mixEffect = 0, keyer = 0, onAir = true) }
+                runBlocking {
+                    client.setKeyOnAir(AtemKey(useDsk = false, mixEffect = 0, keyer = 0), onAir = true)
+                }
                 assertEquals(0, client.inFlightCount(), "an acked packet is no longer awaiting delivery")
             } finally {
                 client.disconnect()
@@ -404,7 +594,9 @@ class AtemClientSocketTest {
 
             val started = System.currentTimeMillis()
             val error = assertFailsWith<IllegalStateException> {
-                runBlocking { client.setKeyOnAir(useDsk = false, mixEffect = 0, keyer = 0, onAir = true) }
+                runBlocking {
+                    client.setKeyOnAir(AtemKey(useDsk = false, mixEffect = 0, keyer = 0), onAir = true)
+                }
             }
             val elapsed = System.currentTimeMillis() - started
 
@@ -432,7 +624,7 @@ class AtemClientSocketTest {
         FakeAtemSwitcher().use { fake ->
             val client = connected(fake, collectState = false)
             try {
-                runBlocking { client.setKeyOnAir(false, 0, 0, true) }
+                runBlocking { client.setKeyOnAir(AtemKey(false, 0, 0), true) }
                 // Every command must carry the switcher's real session id, not the client's
                 // 0x53AB placeholder — a real ATEM silently ignores commands that don't.
                 assertContentEquals(

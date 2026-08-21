@@ -324,6 +324,9 @@ kotlin {
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.
             implementation(projects.companionSatellite)
+            // The ATEM protocol client: the UDP conversation with the switcher — connect, state
+            // dump, key control and media-pool upload. AtemBridge is the app-side wiring.
+            implementation(projects.atem)
             implementation(projects.theme)
             implementation(projects.coreModels)
             implementation(projects.lottieGenerator)
@@ -439,6 +442,10 @@ dependencies {
     // pdfDeck(): Deck's constructor is internal to :presentation-engine, so tests that need a
     // synthetic deck build it through the module's own fixtures.
     add("jvmTestImplementation", testFixtures(projects.presentationEngine))
+    // FakeAtemSwitcher: the loopback switcher the ATEM suites drive. It stays with the client it
+    // was captured against, and the app's own ATEM tests (bridge, upload routes, lower third) borrow
+    // it from there rather than keeping a second copy.
+    add("jvmTestImplementation", testFixtures(projects.atem))
 }
 
 compose.desktop {
@@ -837,10 +844,15 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
 // been the wrong fix twice over: it hides a race rather than removing it, and the number being
 // widened would be a claim about a busy machine rather than about the protocol.
 //
-// ~72s for the six of them. Named individually rather than by a `*Atem*` glob so that adding a suite
-// to this list is a deliberate act with a reason, not something a class name does by accident.
+// ~72s when this list still held `*AtemClientSocketTest`, which has since moved to `:atem` with the
+// client it drives. Nothing was lost by that: a module's `test` task forks once by default, so that
+// suite is already alone in its JVM there, and CI runs `:atem:test` as its own step after
+// `:composeApp:jvmTest` rather than beside it. The suites below still reach FakeAtemSwitcher --
+// through `testFixtures(projects.atem)` -- so they still belong here.
+//
+// Named individually rather than by a `*Atem*` glob so that adding a suite to this list is a
+// deliberate act with a reason, not something a class name does by accident.
 val serialTestClasses = listOf(
-    "*AtemClientSocketTest",
     "*AtemUploadTracedTest",
     "*CompanionServerAtemKeyTest",
     "*CompanionServerAtemUploadTest",
