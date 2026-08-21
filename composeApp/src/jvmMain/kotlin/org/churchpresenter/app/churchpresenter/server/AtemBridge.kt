@@ -10,7 +10,7 @@ import io.ktor.server.response.respondText
 import io.ktor.websocket.readText
 import java.io.File
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 
 /**

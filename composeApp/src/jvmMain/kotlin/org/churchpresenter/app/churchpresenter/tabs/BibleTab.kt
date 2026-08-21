@@ -67,9 +67,9 @@ import org.churchpresenter.app.churchpresenter.data.formatCrossRefLabel
 import org.churchpresenter.app.churchpresenter.data.sharedCrossReferences
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.moveBibleTranslation
-import org.churchpresenter.app.churchpresenter.data.settings.swapBibleTranslations
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.moveBibleTranslation
+import org.churchpresenter.settings.swapBibleTranslations
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

@@ -17,14 +17,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.BibleLoadError
 import org.churchpresenter.app.churchpresenter.data.BibleSearch
 import org.churchpresenter.core.models.bible.SelectedVerse
 import androidx.compose.runtime.derivedStateOf
 import java.io.File
-import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
+import org.churchpresenter.settings.BibleSyncMode
 
 private const val MAX_HISTORY_ENTRIES = 50
 private const val ASCII_LIMIT = 128

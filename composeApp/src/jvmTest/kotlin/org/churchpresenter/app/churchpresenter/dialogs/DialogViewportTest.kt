@@ -13,7 +13,7 @@ import org.churchpresenter.app.churchpresenter.TEXT_GROWTH_SCALE
 import org.churchpresenter.app.churchpresenter.Viewport
 import org.churchpresenter.app.churchpresenter.ViewportProbe
 import org.churchpresenter.app.churchpresenter.assertFitsDeclaredHeight
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.theme.ThemeMode
 import kotlin.test.Test
 

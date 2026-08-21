@@ -13,9 +13,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.junit.Assume
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ProjectionSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -206,7 +207,7 @@ class ProjectionSettingsTabAudioAndLabelsTest {
         onAllNodes(isToggleable())[0].performScrollTo().performClick()
         waitForIdle()
         assertEquals(
-            org.churchpresenter.app.churchpresenter.utils.Constants.SONG_LANG_OFF,
+            Constants.SONG_LANG_OFF,
             get().projectionSettings.screenAssignments[0].bibleMode,
             "unticking Bible must switch the output off",
         )

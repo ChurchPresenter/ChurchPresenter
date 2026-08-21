@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongTuning
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 
 /**
  * How a song reaches the presenter — the title-slide it builds and the section/line a live edit

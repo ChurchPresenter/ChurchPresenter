@@ -77,14 +77,14 @@ import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.toAlignment
-import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.MetronomePosition
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContentType
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSettings
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZone
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZone
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZoneStyle
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.MetronomePosition
+import org.churchpresenter.settings.StageMonitorContentType
+import org.churchpresenter.settings.StageMonitorSettings
+import org.churchpresenter.settings.StageMonitorStyleZone
+import org.churchpresenter.settings.StageMonitorZone
+import org.churchpresenter.settings.StageMonitorZoneStyle
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.jetbrains.compose.resources.stringResource
 

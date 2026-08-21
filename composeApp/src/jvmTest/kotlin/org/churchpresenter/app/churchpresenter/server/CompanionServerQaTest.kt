@@ -28,7 +28,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import java.io.File
 import org.junit.AfterClass
 import org.junit.BeforeClass
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

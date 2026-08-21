@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.settings.AtemSettings
 
 /**
  * Orchestrates the Bitfocus Companion lower-third sequence so one HTTP call does

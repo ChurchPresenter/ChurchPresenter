@@ -13,9 +13,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.CrashReportSweep
 import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.app.churchpresenter.tabs.BibleLabel
 import org.churchpresenter.app.churchpresenter.tabs.actionButton
 import org.churchpresenter.app.churchpresenter.tabs.bibleSearch

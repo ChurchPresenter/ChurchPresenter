@@ -7,7 +7,8 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ScreenAssignment
 import kotlin.test.Test
 
 /**
@@ -219,8 +220,8 @@ class ProjectionSettingsTabStructureTest {
             it.copy(
                 projectionSettings = it.projectionSettings.copy(
                     screenAssignments = listOf(
-                        org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment(targetDisplay = -2),
-                        org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment(targetDisplay = -2),
+                        ScreenAssignment(targetDisplay = -2),
+                        ScreenAssignment(targetDisplay = -2),
                     ),
                 ),
             )

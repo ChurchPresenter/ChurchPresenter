@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.server
 
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.settings.AtemSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

@@ -10,8 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.settings.utils.Constants
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import me.friwi.jcefmaven.CefAppBuilder

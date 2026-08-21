@@ -97,9 +97,9 @@ import churchpresenter.composeapp.generated.resources.tooltip_directory_writable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.withInstalledBible
-import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.withInstalledBible
+import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.churchpresenter.app.churchpresenter.dialogs.BibleCatalogBrowserDialog
