@@ -6,7 +6,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.PresentationSettings
-import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File
 import java.nio.file.Files

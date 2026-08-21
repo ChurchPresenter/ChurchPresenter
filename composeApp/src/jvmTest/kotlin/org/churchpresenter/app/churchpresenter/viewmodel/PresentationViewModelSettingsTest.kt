@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.PresentationSettings
-import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.core.models.presentation.AnimationType
 import presentation.engine.model.Deck
 import presentation.engine.model.DeckFormat
 import kotlin.test.Test

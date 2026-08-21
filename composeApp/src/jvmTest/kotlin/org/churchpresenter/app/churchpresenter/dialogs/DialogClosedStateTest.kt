@@ -7,10 +7,10 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.printToString
 import androidx.compose.ui.test.runComposeUiTest
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.models.SongTuning
-import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.core.models.songs.SongTuning
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import kotlin.test.Test
 import kotlin.test.assertFalse
 

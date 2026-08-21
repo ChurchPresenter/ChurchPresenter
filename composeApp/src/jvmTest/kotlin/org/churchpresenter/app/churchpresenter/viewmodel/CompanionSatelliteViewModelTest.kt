@@ -12,8 +12,8 @@ import io.mockk.unmockkObject
 import io.mockk.verify
 import io.sentry.SentryLevel
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
-import org.churchpresenter.app.churchpresenter.models.CompanionSurfacePlacement
-import org.churchpresenter.app.churchpresenter.models.CompanionSurfaceSlot
+import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
+import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest

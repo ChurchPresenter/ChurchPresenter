@@ -1,8 +1,8 @@
 package songlibrary
 
-import core.models.songs.SaveOutcome
-import core.models.songs.SongField
-import core.models.songs.SortColumn
+import org.churchpresenter.core.models.songs.SaveOutcome
+import org.churchpresenter.core.models.songs.SongField
+import org.churchpresenter.core.models.songs.SortColumn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking

@@ -26,7 +26,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.SHORTCUT_PRESS_MODE_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.SHORTCUT_PRESS_PANEL_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.shortcutCategoryTag
 import org.churchpresenter.app.churchpresenter.dialogs.shortcutChipTag
-import org.churchpresenter.app.churchpresenter.models.KeyChord
+import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.models.ShortcutScope
 import org.churchpresenter.theme.ChurchPresenterTheme

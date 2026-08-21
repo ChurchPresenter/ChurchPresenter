@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.utils
 
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 
 /**

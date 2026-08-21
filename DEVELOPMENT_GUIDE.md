@@ -127,7 +127,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.save
 
 // Group 5: App Classes
-import org.churchpresenter.app.churchpresenter.models.*
+import org.churchpresenter.core.models.schedule.*
 import org.churchpresenter.app.churchpresenter.viewmodel.*
 ```
 

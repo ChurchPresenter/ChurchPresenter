@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
@@ -90,8 +90,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.Scene
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.theme.themeFromSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel

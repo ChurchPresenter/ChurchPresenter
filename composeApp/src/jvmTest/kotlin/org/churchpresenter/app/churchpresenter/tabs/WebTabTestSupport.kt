@@ -16,9 +16,9 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
-import org.churchpresenter.theme.ChurchPresenterTheme
-import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 internal class WebReports {

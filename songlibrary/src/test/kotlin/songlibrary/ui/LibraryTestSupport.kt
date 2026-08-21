@@ -17,8 +17,8 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.runComposeUiTest
-import core.models.songs.SongItem
-import core.models.songs.SongLibrary
+import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongLibrary
 import kotlinx.coroutines.Dispatchers
 import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.theme.ThemeMode

@@ -3,8 +3,8 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import org.churchpresenter.app.churchpresenter.models.SceneSource
-import org.churchpresenter.app.churchpresenter.models.SourceTransform
+import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import java.awt.Rectangle
 import java.io.File
