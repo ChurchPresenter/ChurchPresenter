@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">ເບິ່ງລ່ວງໜ້າ</string>
     <string name="projection_content_song_la_tooltip">ເບິ່ງເນື້ອເພງລ່ວງໜ້າ</string>
+    <string name="projection_content_chords_tooltip">ສະແດງເພງທີ່ມີຄອດເປັນຕາຕະລາງຄອດ ໂດຍວາງຄອດຢູ່ເທິງຄຳຮ້ອງ</string>
     <string name="projection_content_stt_tooltip">ຄຳເວົ້າເປັນຂໍ້ຄວາມ — ຄຳບັນຍາຍ ແລະ ຄຳແປສົດ</string>
     <string name="projection_content_web">ເວັບ</string>
     <string name="projection_content_background">ພື້ນຫຼັງ</string>

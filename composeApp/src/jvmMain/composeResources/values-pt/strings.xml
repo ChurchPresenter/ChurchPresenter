@@ -2002,6 +2002,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA cântico</string>
     <string name="projection_content_song_la_tooltip">Visualização antecipada do cântico</string>
+    <string name="projection_content_chords_tooltip">Mostrar uma música com acordes como cifra, com os acordes acima da letra</string>
     <string name="swap_bibles_hint">Trocar Bíblias primária e secundária</string>
     <string name="screen_lang_tooltip_off">Não mostrar nesta tela</string>
     <string name="screen_lang_tooltip_primary">Mostrar apenas o idioma principal</string>

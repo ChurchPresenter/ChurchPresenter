@@ -1990,6 +1990,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA písně</string>
     <string name="projection_content_song_la_tooltip">Náhled písně</string>
+    <string name="projection_content_chords_tooltip">Zobrazit píseň s akordy jako akordový zápis, akordy nad textem</string>
     <string name="swap_bibles_hint">Prohodit primární a sekundární Bibli</string>
     <string name="screen_lang_tooltip_off">Nezobrazovat na této obrazovce</string>
     <string name="screen_lang_tooltip_primary">Zobrazovat pouze primární jazyk</string>

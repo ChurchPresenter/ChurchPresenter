@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Sång LA</string>
     <string name="projection_content_song_la_tooltip">Sångförhandsvisning</string>
+    <string name="projection_content_chords_tooltip">Visa en sång med ackord som ackordblad, ackorden ovanför texten</string>
     <string name="projection_content_stt_tooltip">Tal till text – live undertexter och översättning</string>
     <string name="projection_content_web">Webb</string>
     <string name="projection_content_background">Bakgrund</string>

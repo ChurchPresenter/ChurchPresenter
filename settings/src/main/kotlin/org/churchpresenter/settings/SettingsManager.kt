@@ -375,21 +375,15 @@ class SettingsManager {
         return newRoot.toString()
     }
 
-    /** Schema version 7. Moves the one global `stageMonitorSettings.showChords` switch onto every
-     * output, where it now lives so two stage monitors can differ — one carrying the chart, the
-     * next only the lyrics. Only an operator who had switched it *off* has anything to carry: the
-     * new per-output field defaults to on, which is what the old global defaulted to. The old key
-     * is left in the document on purpose, so a downgrade still finds its switch.
-     *
-     * `showChords` is written to every output, not just the stage monitors: an output's display
-     * mode changes at any time, and only `StageMonitorScreen` reads the field, so carrying it
-     * everywhere means switching an output to stage-monitor mode later still honours the choice. */
+    /** Schema version 7. Moves the global `stageMonitorSettings.showChords` switch onto every
+     * output, where it now lives. Only an operator who had switched it off has anything to carry —
+     * the per-output field defaults to on, as the old global did. The old key is left in place so a
+     * downgrade still finds its switch. */
     private fun migrateStageMonitorChords(raw: String): String {
         val root = parseSettingsRoot(raw) ?: return raw
         val showChords = root["stageMonitorSettings"]?.jsonObject
             ?.get("showChords")
             ?.let { (it as? JsonPrimitive)?.content?.toBooleanStrictOrNull() }
-        // Absent or on: the new per-output field already defaults to on, so there is nothing to say.
         val proj = if (showChords == false) root["projectionSettings"]?.jsonObject else null
         if (proj == null) return raw
 

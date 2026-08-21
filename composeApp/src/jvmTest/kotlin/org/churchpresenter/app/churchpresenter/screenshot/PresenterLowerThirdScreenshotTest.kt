@@ -68,12 +68,7 @@ class PresenterLowerThirdScreenshotTest {
     @Test
     fun `a lyric band`() = shootSong("song", song())
 
-    /**
-     * The band drawn as a chord chart, which is what an output with Show Chords on gets.
-     *
-     * The band is short and a chart needs two rows per line, so this is also the shot that says
-     * how far auto-fit has to step the type down to fit one there.
-     */
+    /** The band drawn as a chord chart, and how far auto-fit steps the type down to fit one. */
     @Test
     fun `a chord chart in the band`() =
         shootSong("song_chords", song(chords = CHORD_LINES), showChords = true)

@@ -2013,6 +2013,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA песни</string>
     <string name="projection_content_song_la_tooltip">Следующий раздел песни</string>
+    <string name="projection_content_chords_tooltip">Показывать песню с аккордами как аккордовую схему, аккорды над словами</string>
     <string name="swap_bibles_hint">Поменять местами основную и вторичную Библии</string>
     <string name="screen_lang_tooltip_off">Не показывать на этом экране</string>
     <string name="screen_lang_tooltip_primary">Показывать только основной язык</string>

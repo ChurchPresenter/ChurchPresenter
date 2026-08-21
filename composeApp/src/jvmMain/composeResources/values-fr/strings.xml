@@ -2002,6 +2002,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA chant</string>
     <string name="projection_content_song_la_tooltip">Aperçu du chant</string>
+    <string name="projection_content_chords_tooltip">Afficher un chant avec accords sous forme de grille, accords au-dessus des paroles</string>
     <string name="swap_bibles_hint">Échanger les Bibles primaire et secondaire</string>
     <string name="screen_lang_tooltip_off">Ne pas afficher sur cet écran</string>
     <string name="screen_lang_tooltip_primary">Afficher la langue principale uniquement</string>

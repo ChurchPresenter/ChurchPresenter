@@ -1980,6 +1980,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA piosenki</string>
     <string name="projection_content_song_la_tooltip">Podgląd piosenki</string>
+    <string name="projection_content_chords_tooltip">Pokaż pieśń z akordami jako zapis akordowy, akordy nad tekstem</string>
     <string name="swap_bibles_hint">Zamień miejscami główną i poboczną Biblię</string>
     <string name="screen_lang_tooltip_off">Nie pokazuj na tym ekranie</string>
     <string name="screen_lang_tooltip_primary">Pokazuj tylko język główny</string>

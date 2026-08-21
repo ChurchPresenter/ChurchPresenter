@@ -53,6 +53,7 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import org.churchpresenter.app.churchpresenter.composables.ChordChart
+import org.churchpresenter.app.churchpresenter.utils.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections
 import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
@@ -81,8 +82,6 @@ fun SongPresenter(
     showBackground: Boolean = true,
     crossfadeEnabled: Boolean = false,
     languageOverride: String = "",
-    // Whether a song that carries chords is drawn as a chart instead of the words alone —
-    // `ScreenAssignment.showChords`, per output. A section with no chords is unaffected.
     showChords: Boolean = false,
 ) {
     // When languageOverride is set by the per-screen songMode, use it instead of the global setting.
@@ -123,8 +122,6 @@ fun SongPresenter(
             parseHexColor(if (isLowerThird) ss.lyricsLowerThirdColor else ss.lyricsColor)
         }
     }
-    // Chords carry their own color so they read apart from the words they sit over; key mode
-    // forces white for a clean key signal, exactly as the lyrics themselves do.
     val chordColor = remember(ss.lyricsChordColor, ss.lyricsLowerThirdChordColor, isLowerThird, isKey) {
         if (isKey) Color.White
         else parseHexColor(if (isLowerThird) ss.lyricsLowerThirdChordColor else ss.lyricsChordColor)
@@ -197,8 +194,6 @@ fun SongPresenter(
         textDecoration = if (effectiveLyricsUnderline) TextDecoration.Underline else TextDecoration.None,
         shadow = if (effectiveLyricsShadow) lyricsBaseShadow else null
     )
-    // A chart is a grid, so it is placed as one block rather than per line — but it still lands
-    // where the lyrics are configured to land, or it would sit hard left under centred words.
     val chartHorizontalAlignment = when (
         if (isLowerThird) ss.lyricsLowerThirdHorizontalAlignment else ss.lyricsHorizontalAlignment
     ) {
@@ -562,10 +557,7 @@ fun SongPresenter(
                 ) {
 
                     val allDisplayLines = section.lines
-                    // The chart is the section as it was written, chords and all. It is empty
-                    // unless this output asks for chords AND the song actually carries them, so
-                    // every other song is drawn exactly as before.
-                    val chartLines = if (showChords) section.chordLines else emptyList()
+                    val hasChart = showChords && section.chordLines.isNotEmpty()
                     // Resolve per-mode settings based on fullscreen vs lower third
                     // When lookAheadEnabled, the entire screen uses lookahead's own display mode
                     val displayMode = if (lookAheadEnabled) {
@@ -618,6 +610,28 @@ fun SongPresenter(
                         if (laIsLineMode) listOf(allDisplayLines[effectiveLineIndex + 1]) else emptyList()
                     } else {
                         emptyList()
+                    }
+
+                    // Sliced the way the words are: one row in line mode, the section in verse
+                    // mode, the look-ahead's own row after it.
+                    val mainChartRows: List<String> = when {
+                        !hasChart -> emptyList()
+                        // The section as written, including a chord-only intro folded onto it.
+                        !isLineMode -> section.chordLines
+                        else -> listOfNotNull(chartRowFor(section, effectiveLineIndex.coerceAtLeast(0)))
+                    }
+                    // The next line of this section, when line mode has one left to show.
+                    val nextLineHere = if (lookAheadEnabled && isLineMode && laIsLineMode) {
+                        effectiveLineIndex.takeIf { it in 0 until allDisplayLines.size - 1 }?.plus(1)
+                    } else {
+                        null
+                    }
+                    val laChartRows: List<String> = when {
+                        !hasChart -> emptyList()
+                        nextLineHere != null -> listOfNotNull(chartRowFor(section, nextLineHere))
+                        nextSection == null -> emptyList()
+                        laIsLineMode -> listOfNotNull(chartRowFor(nextSection, 0))
+                        else -> nextSection.chordLines.ifEmpty { nextSection.lines }
                     }
 
                     // Combine main + look-ahead
@@ -789,6 +803,41 @@ fun SongPresenter(
                         }
                     }
 
+                    /** The chart when this output draws one, the plain lines otherwise. */
+                    @Composable
+                    fun PrimaryLines() {
+                        if (mainChartRows.isEmpty()) {
+                            combinedPrimaryLines.forEachIndexed { idx, line ->
+                                LookAheadSpacer(idx, primaryLaStart)
+                                LyricLine(idx, line, primaryLaStart)
+                            }
+                            return
+                        }
+                        SectionChordChart(
+                            lines = mainChartRows,
+                            color = lyricsColor,
+                            chordColor = chordColor,
+                            horizontalAlignment = chartHorizontalAlignment,
+                            maxFontSize = effectiveLyricsFontSize,
+                            scaleFactor = scaleFactor,
+                            fontFamily = lyricsFontFamily,
+                            textStyle = lyricsTextStyleScaled,
+                        )
+                        if (laChartRows.isNotEmpty()) {
+                            if (!laIsLineMode) Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                            SectionChordChart(
+                                lines = laChartRows,
+                                color = laColor,
+                                chordColor = chordColor,
+                                horizontalAlignment = chartHorizontalAlignment,
+                                maxFontSize = effectiveLaFontSize,
+                                scaleFactor = scaleFactor,
+                                fontFamily = laFontFamily,
+                                textStyle = lookAheadTextStyle,
+                            )
+                        }
+                    }
+
                     // Renders title and/or song number for a given position (ABOVE_VERSE or BELOW_VERSE)
                     val samePosition = effectiveTitlePosition == effectiveSongNumberPosition
                     val sameHorizontal = (if (isLowerThird) ss.songNumberLowerThirdHorizontalAlignment else ss.songNumberHorizontalAlignment) ==
@@ -877,38 +926,14 @@ fun SongPresenter(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
                             ) {
-                                if (chartLines.isNotEmpty()) {
-                                    // A chart replaces the words rather than sitting beside them:
-                                    // its rows already ARE the lyrics, with the chords stacked over
-                                    // them. Bilingual and line-at-a-time have nothing to say about
-                                    // it — `chordLines` is the section as the band reads it, whole.
-                                    Column(
-                                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                                        verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
-                                    ) {
-                                        SectionChordChart(
-                                            lines = chartLines,
-                                            color = lyricsColor,
-                                            chordColor = chordColor,
-                                            horizontalAlignment = chartHorizontalAlignment,
-                                            maxFontSize = effectiveLyricsFontSize,
-                                            scaleFactor = scaleFactor,
-                                            fontFamily = lyricsFontFamily,
-                                            textStyle = lyricsTextStyleScaled,
-                                        )
-                                        EndOfSongIndicator()
-                                    }
-                                } else if (hasBilingual) {
+                                if (hasBilingual) {
                                     if (useSideBySide) {
                                         Row(
                                             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                                             horizontalArrangement = Arrangement.SpaceEvenly
                                         ) {
                                             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
-                                                combinedPrimaryLines.forEachIndexed { idx, line ->
-                                                    LookAheadSpacer(idx, primaryLaStart)
-                                                    LyricLine(idx, line, primaryLaStart)
-                                                }
+                                                PrimaryLines()
                                                 EndOfSongIndicator()
                                                 LookAheadPlaceholder()
                                             }
@@ -926,10 +951,7 @@ fun SongPresenter(
                                         if (isLowerThird) {
                                             // Lower third: compact layout, no height splitting
                                             Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                combinedPrimaryLines.forEachIndexed { idx, line ->
-                                                    LookAheadSpacer(idx, primaryLaStart)
-                                                    LyricLine(idx, line, primaryLaStart)
-                                                }
+                                                PrimaryLines()
                                                 EndOfSongIndicator()
                                                 LookAheadPlaceholder()
                                                 Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
@@ -946,10 +968,7 @@ fun SongPresenter(
                                             Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                                                 Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
                                                     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                        combinedPrimaryLines.forEachIndexed { idx, line ->
-                                                            LookAheadSpacer(idx, primaryLaStart)
-                                                            LyricLine(idx, line, primaryLaStart)
-                                                        }
+                                                        PrimaryLines()
                                                         EndOfSongIndicator()
                                                         LookAheadPlaceholder()
                                                     }
@@ -974,10 +993,7 @@ fun SongPresenter(
                                         modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                                         verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
                                     ) {
-                                        combinedPrimaryLines.forEachIndexed { idx, line ->
-                                            LookAheadSpacer(idx, primaryLaStart)
-                                            LyricLine(idx, line, primaryLaStart)
-                                        }
+                                        PrimaryLines()
                                         EndOfSongIndicator()
                                         LookAheadPlaceholder()
                                     }
@@ -1055,15 +1071,24 @@ fun SongPresenter(
 }
 
 /**
- * A section drawn as a chord chart, stepped down to whatever size fits the space it is given.
+ * The chart row carrying the words of [lineIndex], or null when there is none.
  *
- * The words keep the output's own lyric font, color, shadow and size ceiling; only the chord tokens
- * above them are monospace, which is what keeps a chord over the syllable it is played on, and they
- * take their own configured color — `lyricsChordColor` full-screen, `lyricsLowerThirdChordColor` in
- * the band — so the two rows read apart. A key output forces both to white, as everything else does.
+ * Rows map to lyric lines by position among the rows that have words: a header, or a row of chords
+ * with nothing under it, puts a row in the chart but no line on the slide, so the two lists are not
+ * index-for-index. A section with no chords falls back to its plain words.
+ */
+internal fun chartRowFor(section: LyricSection, lineIndex: Int): String? {
+    if (section.chordLines.isEmpty()) return section.lines.getOrNull(lineIndex)
+    return section.chordLines
+        .filter { !ChordTransposer.isSectionHeader(it) && ChordTransposer.stripChords(it).isNotBlank() }
+        .getOrNull(lineIndex)
+}
+
+/**
+ * Rows drawn as a chord chart, stepped down to whatever size fits the space given.
  *
- * The size ceiling is the output's configured lyric size, exactly as the plain words use it: a
- * chart wider than the screen steps down from there, and a short one does not grow past it.
+ * The words keep the output's lyric font, color, shadow and size ceiling; only the chord tokens are
+ * monospace, and they take their own configured color so the two rows read apart.
  */
 @Composable
 private fun SectionChordChart(

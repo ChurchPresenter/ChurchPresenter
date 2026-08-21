@@ -276,7 +276,6 @@ internal fun RightColumn(
             color = settings.songSettings.lyricsColor,
             onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsColor = it)) } }
         )
-        // Only reaches the screen for a song that carries chords, on an output with Show Chords on.
         ColorPickerField(
             label = stringResource(Res.string.song_chord_color),
             modifier = Modifier.width(120.dp),

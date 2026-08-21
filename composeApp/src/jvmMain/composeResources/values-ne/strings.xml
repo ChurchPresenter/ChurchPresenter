@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">गीत पूर्वदृश्य</string>
     <string name="projection_content_song_la_tooltip">गीतको अर्को भाग पहिल्यै हेर्ने</string>
+    <string name="projection_content_chords_tooltip">कर्ड भएको गीतलाई कर्ड चार्टका रूपमा देखाउनुहोस्, शब्दहरूमाथि कर्ड</string>
     <string name="projection_content_stt_tooltip">बोलीबाट पाठ — प्रत्यक्ष क्याप्सन र अनुवाद</string>
     <string name="projection_content_web">वेब</string>
     <string name="projection_content_background">पृष्ठभूमि</string>

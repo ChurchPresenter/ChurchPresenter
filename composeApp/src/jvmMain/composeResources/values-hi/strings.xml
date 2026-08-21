@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">गीत LA</string>
     <string name="projection_content_song_la_tooltip">गीत की आगे की झलक</string>
+    <string name="projection_content_chords_tooltip">कॉर्ड वाले गीत को कॉर्ड चार्ट के रूप में दिखाएँ, शब्दों के ऊपर कॉर्ड</string>
     <string name="projection_content_stt_tooltip">स्पीच टू टेक्स्ट — लाइव कैप्शन और अनुवाद</string>
     <string name="projection_content_web">वेब</string>
     <string name="projection_content_background">बैकग्राउंड</string>

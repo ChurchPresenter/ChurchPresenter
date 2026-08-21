@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Dz. priekšsk.</string>
     <string name="projection_content_song_la_tooltip">Dziesmas nākamās daļas priekšskatījums</string>
+    <string name="projection_content_chords_tooltip">Rādīt dziesmu ar akordiem kā akordu pierakstu, akordi virs vārdiem</string>
     <string name="projection_content_stt_tooltip">Runas pārveide tekstā — subtitri un tulkojums tiešraidē</string>
     <string name="projection_content_web">Tīmeklis</string>
     <string name="projection_content_background">Fons</string>

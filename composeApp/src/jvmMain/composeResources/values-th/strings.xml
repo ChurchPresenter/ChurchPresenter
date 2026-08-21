@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">ดูล่วงหน้า</string>
     <string name="projection_content_song_la_tooltip">ดูเนื้อเพลงล่วงหน้า</string>
+    <string name="projection_content_chords_tooltip">แสดงเพลงที่มีคอร์ดเป็นแผงคอร์ด โดยวางคอร์ดไว้เหนือเนื้อร้อง</string>
     <string name="projection_content_stt_tooltip">เสียงเป็นข้อความ — คำบรรยายและคำแปลสด</string>
     <string name="projection_content_web">เว็บ</string>
     <string name="projection_content_background">พื้นหลัง</string>

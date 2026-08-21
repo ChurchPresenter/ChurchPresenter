@@ -36,13 +36,7 @@ data class ScreenAssignment(
     val showWebsite: Boolean = true,
     val displayMode: String = "fullscreen", // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
     val songLookAhead: Boolean = false, // enable look-ahead for songs on this output
-    /**
-     * Whether a song that carries chords is drawn as a chart on this output. Off, the zone shows
-     * the words alone, which is what a speaker or a vocalist reading lyrics wants from the same
-     * screen — so it is per-output: one stage monitor can carry the chart while the next carries
-     * only the lyrics. Chords are drawn by `StageMonitorScreen` alone, so this has no effect on an
-     * output that is not in stage-monitor mode.
-     */
+    // Whether a chorded song is drawn as a chart on this output, rather than the words alone.
     val showChords: Boolean = true,
     val showQA: Boolean = true,
     val showSTT: Boolean = true,

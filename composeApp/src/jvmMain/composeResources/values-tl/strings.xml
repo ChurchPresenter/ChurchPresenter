@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Song LA</string>
     <string name="projection_content_song_la_tooltip">Look Ahead ng Awit</string>
+    <string name="projection_content_chords_tooltip">Ipakita ang awit na may chord bilang chord chart, mga chord sa ibabaw ng liriko</string>
     <string name="projection_content_stt_tooltip">Speech to Text — live na caption at pagsasalin</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Background</string>

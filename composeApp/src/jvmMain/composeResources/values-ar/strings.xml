@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">استباق الترنيمة</string>
     <string name="projection_content_song_la_tooltip">استباق كلمات الترنيمة</string>
+    <string name="projection_content_chords_tooltip">عرض الأغنية التي تحتوي على كوردات كمخطط، مع الكوردات فوق الكلمات</string>
     <string name="projection_content_stt_tooltip">تحويل الكلام إلى نص — التسميات والترجمة المباشرة</string>
     <string name="projection_content_web">الويب</string>
     <string name="projection_content_background">الخلفية</string>
