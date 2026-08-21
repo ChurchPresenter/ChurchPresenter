@@ -11,13 +11,14 @@ import io.ktor.server.routing.routing
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeoutOrNull
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import java.io.IOException
 
 /**
  * One-shot local HTTP listener that catches the OAuth redirect from Planning Center's consent
  * screen. Bound to a fixed loopback port ([Constants.PLANNING_CENTER_OAUTH_PORT]) since PCO OAuth
- * apps require an exact pre-registered redirect URI, unlike [CompanionServer]'s auto-selected
- * ports. Started fresh for each connect attempt and torn down once the callback lands (or times
- * out), rather than kept running.
+ * apps require an exact pre-registered redirect URI, unlike the app's own Companion server, which
+ * picks its port. Started fresh for each connect attempt and torn down once the callback lands (or
+ * times out), rather than kept running.
  */
 object PlanningCenterAuthServer {
 
@@ -54,7 +55,11 @@ object PlanningCenterAuthServer {
                     }
                 }
             }.also { it.start(wait = false) }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
+            // Binding 127.0.0.1:47850 is the only thing here that can fail, and it fails as an
+            // IOException — a BindException when a stale listener (or a second ChurchPresenter)
+            // still holds the port. Reported as an Error so the dialog can say so; anything else
+            // is left to propagate rather than silently becoming "could not connect".
             return CallbackResult.Error(e.message ?: "Failed to start local callback server")
         }
 
