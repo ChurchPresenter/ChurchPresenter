@@ -76,7 +76,7 @@ import org.churchpresenter.app.churchpresenter.models.CompanionSurfaceSlot
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 
 private const val MIN_RECONNECT_DELAY_MS = 500
 

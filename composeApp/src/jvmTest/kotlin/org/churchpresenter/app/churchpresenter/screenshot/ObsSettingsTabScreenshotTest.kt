@@ -26,8 +26,9 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.OBSSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.OBSSettingsTab
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
+import org.churchpresenter.theme.ThemeMode
 import kotlin.test.AfterTest
 import kotlin.test.Test
 
@@ -149,7 +150,7 @@ class ObsSettingsTabScreenshotTest {
     }
 
     private fun render(
-        mode: org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode,
+        mode: ThemeMode,
         file: java.io.File,
         settings: AppSettings,
         manager: OBSWebSocketManager,

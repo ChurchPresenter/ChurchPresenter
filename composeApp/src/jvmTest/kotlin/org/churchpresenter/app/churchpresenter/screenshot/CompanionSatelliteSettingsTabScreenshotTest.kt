@@ -21,8 +21,8 @@ import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteS
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CompanionSatelliteSettingsTab
 import org.churchpresenter.app.churchpresenter.models.CompanionSurfacePlacement
 import org.churchpresenter.app.churchpresenter.models.CompanionSurfaceSlot
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import java.io.File
 import java.net.ServerSocket

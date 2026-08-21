@@ -121,8 +121,8 @@ import org.churchpresenter.app.churchpresenter.composables.sectionKindOf
 import org.churchpresenter.app.churchpresenter.composables.songStatsOf
 import core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.models.SongTuning
-import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.ChordSheetImporter
 import org.churchpresenter.app.churchpresenter.utils.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.Constants

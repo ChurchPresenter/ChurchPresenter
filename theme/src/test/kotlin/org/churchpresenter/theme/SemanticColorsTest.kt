@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.ui.theme
+package org.churchpresenter.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable

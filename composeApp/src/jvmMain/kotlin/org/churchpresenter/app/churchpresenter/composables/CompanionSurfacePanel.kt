@@ -45,7 +45,7 @@ import org.churchpresenter.app.churchpresenter.models.CompanionSurfacePlacement
 import org.churchpresenter.app.churchpresenter.models.CompanionSurfaceSlot
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
-import org.churchpresenter.app.churchpresenter.ui.theme.semantic
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
 /**

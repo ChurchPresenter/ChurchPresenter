@@ -7,8 +7,19 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 
 The app's look: the **nine color schemes**, the semantic color roles, the typography and shape
 scales, and the theme-mode plumbing. A real Gradle module of this build —
-`include(":theme")`, `implementation(projects.theme)` — holding the package it always had
-(`org.churchpresenter.app.churchpresenter.ui.theme`), so no import in the app changed when it moved.
+`include(":theme")`, `implementation(projects.theme)` — in the package
+`org.churchpresenter.theme`.
+
+It held `org.churchpresenter.app.churchpresenter.ui.theme` until that was renamed. That package is
+**still there in `:composeApp`** and holds `LanguageProvider`/`LocalLanguage` — so a rewrite that
+moves `…ui.theme.*` by prefix breaks them. Key on the types this module owns: `ThemeMode`,
+`ChurchPresenterTheme`, `AppThemeWrapper`, `ThemeManager`, `SemanticColors`, the
+`MaterialTheme.semantic` extension and friends.
+
+**Two tests reach into `Theme.kt` by reflection** — `Class.forName("org.churchpresenter.theme.ThemeKt")`
+in `ThemeRenderTest` and `ThemeTest`, to read the private schemes by name. The compiler cannot see
+that string, so a future package move has to update it by hand; both tests fail loudly with
+`ClassNotFoundException` if it is missed.
 
 ## The one rule that matters
 
@@ -27,7 +38,7 @@ Corollaries:
 
 ## Layout
 
-`src/main/kotlin/org/churchpresenter/app/churchpresenter/ui/theme/`
+`src/main/kotlin/org/churchpresenter/theme/`
 
 | File | Owns |
 |---|---|

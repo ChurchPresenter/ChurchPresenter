@@ -15,7 +15,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.resolveRemoteEventPresent
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.server.batchEventSummary
 import org.churchpresenter.app.churchpresenter.server.remoteEventLabel
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 
 /**
