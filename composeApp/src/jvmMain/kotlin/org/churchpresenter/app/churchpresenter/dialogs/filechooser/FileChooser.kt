@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.filechooser
 
+import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.nio.file.Path
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path

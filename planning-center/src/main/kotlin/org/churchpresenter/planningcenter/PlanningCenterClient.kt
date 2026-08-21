@@ -24,8 +24,8 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.io.File
 import java.io.IOException
 import java.nio.channels.UnresolvedAddressException

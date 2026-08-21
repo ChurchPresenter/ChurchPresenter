@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.diagnostics
 
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
