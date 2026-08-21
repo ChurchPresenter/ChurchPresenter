@@ -98,6 +98,9 @@ class SongSettingsTabLabelsTest {
         "First Page" to 4,
         "Arial" to 8,   // the default family, shown in all eight font dropdowns
         "#FFFFFF" to 6,
+        // The chord colour a chart's chords take, one per lyric block.
+        "CHORD COLOR" to 2,
+        "#4FD3E8" to 2,
         "#888888" to 2,
         "500ms" to 1,
     )

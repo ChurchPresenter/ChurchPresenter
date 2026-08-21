@@ -11,6 +11,7 @@ import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
@@ -74,6 +75,7 @@ class SettingsManager {
         2 to ::migrateProjectionSettings,
         3 to ::migrateCompanionSatelliteStartPage,
         4 to ::migrateCompanionSatelliteRowColumnRangeBackToCount,
+        7 to ::migrateStageMonitorChords,
     )
 
     fun loadSettings(): AppSettings {
@@ -369,6 +371,55 @@ class SettingsManager {
         if (!changed) return raw
         val newRoot = buildJsonObject {
             root.forEach { (k, v) -> if (k == "companionSatelliteConnections") put(k, newConnections) else put(k, v) }
+        }
+        return newRoot.toString()
+    }
+
+    /** Schema version 7. Moves the one global `stageMonitorSettings.showChords` switch onto every
+     * output, where it now lives so two stage monitors can differ — one carrying the chart, the
+     * next only the lyrics. Only an operator who had switched it *off* has anything to carry: the
+     * new per-output field defaults to on, which is what the old global defaulted to. The old key
+     * is left in the document on purpose, so a downgrade still finds its switch.
+     *
+     * `showChords` is written to every output, not just the stage monitors: an output's display
+     * mode changes at any time, and only `StageMonitorScreen` reads the field, so carrying it
+     * everywhere means switching an output to stage-monitor mode later still honours the choice. */
+    private fun migrateStageMonitorChords(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val showChords = root["stageMonitorSettings"]?.jsonObject
+            ?.get("showChords")
+            ?.let { (it as? JsonPrimitive)?.content?.toBooleanStrictOrNull() }
+        // Absent or on: the new per-output field already defaults to on, so there is nothing to say.
+        val proj = if (showChords == false) root["projectionSettings"]?.jsonObject else null
+        if (proj == null) return raw
+
+        fun withChordsOff(key: String): JsonArray? {
+            val outputs = proj[key]?.jsonArray ?: return null
+            return buildJsonArray {
+                for (element in outputs) {
+                    val obj = element.jsonObject
+                    if ("showChords" in obj) add(element) else add(buildJsonObject {
+                        obj.forEach { (k, v) -> put(k, v) }
+                        put("showChords", JsonPrimitive(false))
+                    })
+                }
+            }
+        }
+        val newAssignments = withChordsOff("screenAssignments")
+        val newBrowserSources = withChordsOff("browserSourceOutputs")
+        if (newAssignments == null && newBrowserSources == null) return raw
+
+        val newProj = buildJsonObject {
+            proj.forEach { (k, v) ->
+                when (k) {
+                    "screenAssignments" -> put(k, newAssignments ?: v)
+                    "browserSourceOutputs" -> put(k, newBrowserSources ?: v)
+                    else -> put(k, v)
+                }
+            }
+        }
+        val newRoot = buildJsonObject {
+            root.forEach { (k, v) -> if (k == "projectionSettings") put(k, newProj) else put(k, v) }
         }
         return newRoot.toString()
     }

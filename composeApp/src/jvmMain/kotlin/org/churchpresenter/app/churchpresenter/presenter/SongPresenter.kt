@@ -36,6 +36,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,7 +52,9 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
+import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitForAllSections
+import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import java.io.File
@@ -78,6 +81,9 @@ fun SongPresenter(
     showBackground: Boolean = true,
     crossfadeEnabled: Boolean = false,
     languageOverride: String = "",
+    // Whether a song that carries chords is drawn as a chart instead of the words alone —
+    // `ScreenAssignment.showChords`, per output. A section with no chords is unaffected.
+    showChords: Boolean = false,
 ) {
     // When languageOverride is set by the per-screen songMode, use it instead of the global setting.
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
@@ -116,6 +122,12 @@ fun SongPresenter(
         } else {
             parseHexColor(if (isLowerThird) ss.lyricsLowerThirdColor else ss.lyricsColor)
         }
+    }
+    // Chords carry their own color so they read apart from the words they sit over; key mode
+    // forces white for a clean key signal, exactly as the lyrics themselves do.
+    val chordColor = remember(ss.lyricsChordColor, ss.lyricsLowerThirdChordColor, isLowerThird, isKey) {
+        if (isKey) Color.White
+        else parseHexColor(if (isLowerThird) ss.lyricsLowerThirdChordColor else ss.lyricsChordColor)
     }
     // Look-ahead next section preview font settings (resolved per fullscreen / lower third)
     val laColor = remember(ss.lookAheadNextColor, ss.lowerThirdLookAheadNextColor, isLowerThird, isKey) {
@@ -185,6 +197,15 @@ fun SongPresenter(
         textDecoration = if (effectiveLyricsUnderline) TextDecoration.Underline else TextDecoration.None,
         shadow = if (effectiveLyricsShadow) lyricsBaseShadow else null
     )
+    // A chart is a grid, so it is placed as one block rather than per line — but it still lands
+    // where the lyrics are configured to land, or it would sit hard left under centred words.
+    val chartHorizontalAlignment = when (
+        if (isLowerThird) ss.lyricsLowerThirdHorizontalAlignment else ss.lyricsHorizontalAlignment
+    ) {
+        Constants.LEFT -> Alignment.Start
+        Constants.RIGHT -> Alignment.End
+        else -> Alignment.CenterHorizontally
+    }
     val contentAlignment = when (appSettings.songSettings.lyricsAlignment) {
         Constants.TOP -> Alignment.TopCenter
         Constants.BOTTOM -> Alignment.BottomCenter
@@ -541,6 +562,10 @@ fun SongPresenter(
                 ) {
 
                     val allDisplayLines = section.lines
+                    // The chart is the section as it was written, chords and all. It is empty
+                    // unless this output asks for chords AND the song actually carries them, so
+                    // every other song is drawn exactly as before.
+                    val chartLines = if (showChords) section.chordLines else emptyList()
                     // Resolve per-mode settings based on fullscreen vs lower third
                     // When lookAheadEnabled, the entire screen uses lookahead's own display mode
                     val displayMode = if (lookAheadEnabled) {
@@ -852,7 +877,28 @@ fun SongPresenter(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
                             ) {
-                                if (hasBilingual) {
+                                if (chartLines.isNotEmpty()) {
+                                    // A chart replaces the words rather than sitting beside them:
+                                    // its rows already ARE the lyrics, with the chords stacked over
+                                    // them. Bilingual and line-at-a-time have nothing to say about
+                                    // it — `chordLines` is the section as the band reads it, whole.
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                                        verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
+                                    ) {
+                                        SectionChordChart(
+                                            lines = chartLines,
+                                            color = lyricsColor,
+                                            chordColor = chordColor,
+                                            horizontalAlignment = chartHorizontalAlignment,
+                                            maxFontSize = effectiveLyricsFontSize,
+                                            scaleFactor = scaleFactor,
+                                            fontFamily = lyricsFontFamily,
+                                            textStyle = lyricsTextStyleScaled,
+                                        )
+                                        EndOfSongIndicator()
+                                    }
+                                } else if (hasBilingual) {
                                     if (useSideBySide) {
                                         Row(
                                             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
@@ -1004,6 +1050,53 @@ fun SongPresenter(
                     TextContent(lyricSection)
                 }
             }
+        }
+    }
+}
+
+/**
+ * A section drawn as a chord chart, stepped down to whatever size fits the space it is given.
+ *
+ * The words keep the output's own lyric font, color, shadow and size ceiling; only the chord tokens
+ * above them are monospace, which is what keeps a chord over the syllable it is played on, and they
+ * take their own configured color — `lyricsChordColor` full-screen, `lyricsLowerThirdChordColor` in
+ * the band — so the two rows read apart. A key output forces both to white, as everything else does.
+ *
+ * The size ceiling is the output's configured lyric size, exactly as the plain words use it: a
+ * chart wider than the screen steps down from there, and a short one does not grow past it.
+ */
+@Composable
+private fun SectionChordChart(
+    lines: List<String>,
+    color: Color,
+    chordColor: Color,
+    horizontalAlignment: Alignment.Horizontal,
+    maxFontSize: Int,
+    scaleFactor: Float,
+    fontFamily: FontFamily?,
+    textStyle: TextStyle,
+) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val measurer = rememberTextMeasurer()
+        val baseStyle = textStyle.copy(fontFamily = fontFamily, color = color)
+        val fitted = remember(lines, maxFontSize, scaleFactor, maxWidth, maxHeight) {
+            calculateChordChartFontSize(
+                textMeasurer = measurer,
+                lines = lines,
+                baseStyle = baseStyle,
+                availableWidth = (maxWidth.value / scaleFactor).toInt(),
+                availableHeight = (maxHeight.value / scaleFactor).toInt(),
+                maxFontSize = maxFontSize,
+            )
+        }
+        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = horizontalAlignment) {
+            ChordChart(
+                lines = lines,
+                textColor = color,
+                chordColor = chordColor,
+                fontSize = (fitted * scaleFactor).sp,
+                textStyle = baseStyle,
+            )
         }
     }
 }

@@ -202,6 +202,6 @@ class SongSettingsTabRecompositionTest {
         onNodeWithText("Song Title Slide").assertExists("the left column must survive the re-render")
         onNodeWithText("Look Ahead (Lower Third)").assertExists("and so must the look-ahead column")
         numberFields().assertCountEquals(15)
-        colorFields().assertCountEquals(8)
+        colorFields().assertCountEquals(10)
     }
 }

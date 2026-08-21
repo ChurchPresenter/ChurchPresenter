@@ -120,10 +120,6 @@ class StageMonitorSettingsTabScreenshotTest {
         freezeClock = true,
     )
 
-    /** Chords off, which is the one switch on this tab. */
-    @Test
-    fun `chords switched off`() = shoot("chords_off", settings = stageMonitor { copy(showChords = false) })
-
     // ── The style blocks, below the fold ────────────────────────────────────────────────────────
     // Scrolled by the "Shadow" row each block carries — one per block, in composition order, and the
     // only handle that is not also a zone name used by a dropdown value somewhere else on the tab.

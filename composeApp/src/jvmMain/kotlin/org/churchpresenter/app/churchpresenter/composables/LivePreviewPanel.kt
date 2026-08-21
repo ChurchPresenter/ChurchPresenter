@@ -317,6 +317,7 @@ private fun SingleDisplayPreview(
                 StageMonitorScreen(
                     sm = appSettings.stageMonitorSettings,
                     presentingMode = presentingMode,
+                    showChords = screenAssignment.showChords,
                     announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
                     currentLyricSection = displayedLyricSection,
                     allLyricSections = allLyricSections,
@@ -374,7 +375,8 @@ private fun SingleDisplayPreview(
                                     allLyricSections = allLyricSections,
                                     displaySectionIndex = songDisplaySectionIndex,
                                     crossfadeEnabled = appSettings.songSettings.crossfade,
-                                    languageOverride = screenAssignment.songMode
+                                    languageOverride = screenAssignment.songMode,
+                    showChords = screenAssignment.showChords,
                                 )
                             Presenting.PICTURES ->
                                 PicturePresenter(
