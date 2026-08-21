@@ -175,7 +175,7 @@ object ZefaniaSource : BibleSource {
             onProgress(InstallProgress(InstallPhase.EXTRACTING, BibleInstallSupport.EXTRACT_END))
 
             val parsed = parseModule(xmlFile, module) ?: return@withContext BibleInstallOutcome.ConversionFailed
-            if (parsed.books.isEmpty() || parsed.books.sumOf { b -> b.chapters.sumOf { it.verses.size } } == 0) {
+            if (!parsed.hasVerses) {
                 return@withContext BibleInstallOutcome.ConversionFailed
             }
 

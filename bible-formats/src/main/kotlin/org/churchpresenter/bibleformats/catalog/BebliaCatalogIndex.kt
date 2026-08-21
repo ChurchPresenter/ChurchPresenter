@@ -3,6 +3,7 @@ package org.churchpresenter.bibleformats.catalog
 import org.churchpresenter.bibleformats.BibleCatalogNaming
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.get
@@ -179,36 +180,7 @@ object BebliaCatalogIndex {
                 header("User-Agent", "ChurchPresenter")
                 if (cached != null && cached.etag.isNotBlank()) header("If-None-Match", cached.etag)
             }
-
-            if (response.status == HttpStatusCode.NotModified && cached != null) {
-                BibleInstallSupport.BibleIndexCache.writeMeta(cacheFile, nowMillis, cached.etag)
-                memoryCache = nowMillis to cached
-                return@withContext IndexOutcome.Success(cached)
-            }
-
-            if (response.status.value !in 200..299) {
-                CrashReporter.reportWarning(
-                    "Holy Bible XML catalogue fetch returned HTTP ${response.status.value}",
-                    tags = mapOf("subsystem" to "beblia_catalog")
-                )
-                return@withContext cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.Failure
-            }
-
-            val body = response.body<String>()
-            val etag = response.headers["ETag"].orEmpty()
-            when (val parsed = parseCatalog(body, etag)) {
-                is IndexOutcome.Success -> {
-                    memoryCache = nowMillis to parsed.index
-                    runCatching {
-                        cacheFile.parentFile?.mkdirs()
-                        cacheFile.writeText(body)
-                        BibleInstallSupport.BibleIndexCache.writeMeta(cacheFile, nowMillis, etag)
-                    }
-                    parsed
-                }
-                // A manifest that arrived but did not parse is not written over a good cached copy.
-                else -> cached?.let { IndexOutcome.Success(it, stale = true) } ?: parsed
-            }
+            handleNetworkResponse(response, cached, cacheFile, nowMillis)
             // An offline hall still sees the list it saw last time; the failure then surfaces on the
             // install, which is far more useful than an empty dialog.
         } catch (e: IOException) {
@@ -225,6 +197,43 @@ object BebliaCatalogIndex {
                 mapOf("subsystem" to "beblia_catalog"),
                 cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
             )
+        }
+    }
+
+    private suspend fun handleNetworkResponse(
+        response: HttpResponse,
+        cached: Index?,
+        cacheFile: File,
+        nowMillis: Long,
+    ): IndexOutcome {
+        if (response.status == HttpStatusCode.NotModified && cached != null) {
+            BibleInstallSupport.BibleIndexCache.writeMeta(cacheFile, nowMillis, cached.etag)
+            memoryCache = nowMillis to cached
+            return IndexOutcome.Success(cached)
+        }
+
+        if (response.status.value !in 200..299) {
+            CrashReporter.reportWarning(
+                "Holy Bible XML catalogue fetch returned HTTP ${response.status.value}",
+                tags = mapOf("subsystem" to "beblia_catalog")
+            )
+            return cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.Failure
+        }
+
+        val body = response.body<String>()
+        val etag = response.headers["ETag"].orEmpty()
+        return when (val parsed = parseCatalog(body, etag)) {
+            is IndexOutcome.Success -> {
+                memoryCache = nowMillis to parsed.index
+                runCatching {
+                    cacheFile.parentFile?.mkdirs()
+                    cacheFile.writeText(body)
+                    BibleInstallSupport.BibleIndexCache.writeMeta(cacheFile, nowMillis, etag)
+                }
+                parsed
+            }
+            // A manifest that arrived but did not parse is not written over a good cached copy.
+            else -> cached?.let { IndexOutcome.Success(it, stale = true) } ?: parsed
         }
     }
 

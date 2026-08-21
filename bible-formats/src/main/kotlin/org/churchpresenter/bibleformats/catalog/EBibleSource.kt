@@ -332,7 +332,7 @@ object EBibleSource : BibleSource {
                     BibleInstallOutcome.ConversionFailed,
                 )
             }
-            if (parsed.books.isEmpty() || parsed.books.sumOf { b -> b.chapters.sumOf { it.verses.size } } == 0) {
+            if (!parsed.hasVerses) {
                 return@withContext BibleInstallOutcome.ConversionFailed
             }
 

@@ -30,7 +30,10 @@ data class ParsedBible(
     val identifier: String = "",
     val rights: String = "",
     val source: String = ""
-)
+) {
+    val hasVerses: Boolean
+        get() = books.isNotEmpty() && books.sumOf { b -> b.chapters.sumOf { it.verses.size } } > 0
+}
 
 // Split into one small function per step, which is what keeps the readers below within the
 // complexity and nesting limits. Splitting the object itself would scatter one file format across
