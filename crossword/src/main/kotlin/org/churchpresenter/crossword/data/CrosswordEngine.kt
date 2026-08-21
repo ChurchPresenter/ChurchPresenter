@@ -1,4 +1,4 @@
-package org.churchpresenter.cross.data
+package org.churchpresenter.crossword.data
 
 /**
  * Lays a list of clues out as an interlocking grid.
