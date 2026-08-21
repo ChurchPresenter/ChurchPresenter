@@ -1,4 +1,4 @@
-package org.churchpresenter.cross.ui
+package org.churchpresenter.crossword.ui
 
 internal object Strings {
     const val navPrev = "←"

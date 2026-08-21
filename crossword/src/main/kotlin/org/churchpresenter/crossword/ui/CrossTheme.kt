@@ -1,4 +1,4 @@
-package org.churchpresenter.cross.ui
+package org.churchpresenter.crossword.ui
 
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.ScrollbarStyle
