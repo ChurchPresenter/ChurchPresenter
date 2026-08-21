@@ -274,16 +274,6 @@ class CompanionServer {
 
 
     /**
-     * Packs one [BrowserSourceFrame] into a single WebSocket binary message: a fixed 24-byte
-     * big-endian header (x, y, rectWidth, rectHeight, fullWidth, fullHeight — six Int32s) followed
-     * by the raw image bytes — PNG when the frame carries transparency, JPEG when fully opaque
-     * (the client sniffs the first payload byte: 0x89 = PNG, 0xFF = JPEG). The client reads this
-     * with a matching `DataView`. Using WebSocket
-     * binary messages instead of HTTP multipart/x-mixed-replace means each frame's boundary is
-     * handled natively by the WebSocket protocol — no manual buffer/boundary parsing needed on
-     * either side, and no dependence on a legacy MIME type with inconsistent engine support.
-     */
-    /**
      * The Browser Source overlay page for [index]. The page itself is
      * [browserSourceOverlayPage] in BrowserSourcePage.kt; this reads the API-key state it
      * needs so callers do not have to.
@@ -351,7 +341,6 @@ class CompanionServer {
 
 
 
-    /** Stable folder ID used for all device-uploaded photos (accumulates across sessions). */
 
 
     /** Everything the API can serve as a picture — see [PictureLibrary]. */
@@ -458,7 +447,6 @@ class CompanionServer {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
-    /** Emitted when a remote client calls POST /api/clear or sends WS "clear". Clears the display instantly. */
     /** Emitted when a remote client requests a QA admin operation (add/edit/delete). */
     data class PendingQAAdminRequest(
         val action: String,
@@ -485,6 +473,7 @@ class CompanionServer {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /** Emitted when a remote client calls POST /api/clear or sends WS "clear". Clears the display instantly. */
     val onClear = MutableSharedFlow<Unit>(
         extraBufferCapacity = 4,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
@@ -1229,8 +1218,9 @@ class CompanionServer {
      * exactly like the presentation remote's initial connection handshake.
      * Only called from the initial /api/qa/auth handshake — not on every subsequent action —
      * so an approved or session-approved device is never re-prompted mid-session.
+     *
+     * `internal` rather than private so the extracted [qaRoutes] group can call it.
      */
-    /** `internal` rather than private so the extracted [qaRoutes] group can call it. */
     internal suspend fun checkQaAdminConnect(call: ApplicationCall): Boolean {
         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
         val pending = PendingConnectionRequest(clientId)
