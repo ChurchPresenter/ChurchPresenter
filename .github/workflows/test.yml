@@ -66,17 +66,32 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           filters: |
-            # A module's own directory is NOT enough to decide it is untouched. These files
-            # configure every module -- the version catalogue it resolves from, the root build that
-            # owns its JaCoCo floors, the detekt rules it is judged by -- so a change to any of them
-            # has to run everything. Without this, a catalog bump silently skips the module it broke.
+            # These three configure every module at once — the version catalogue each one resolves
+            # from, the root build that owns their JaCoCo floors and `useJUnitPlatform()`, and the
+            # wrapper that decides which Gradle runs them. A change to any of them runs everything.
             shared: &shared
               - 'build.gradle.kts'
-              - 'settings.gradle.kts'
               - 'gradle/libs.versions.toml'
               - 'gradle/wrapper/**'
-              - 'config/detekt/**'
-              - '.github/workflows/test.yml'
+            # Beyond that, one rule: a module's suite runs when its OWN directory changes, or when a
+            # module it consumes does — transitively, so :settings watches :core-models and anything
+            # depending on :settings watches both. The `projects.*` lines in each module's
+            # build.gradle.kts are the source of truth for these edges; add the edge in the same
+            # commit that adds the dependency.
+            #
+            # Three files are deliberately NOT in *shared, each for its own reason. They were, and
+            # the cost was that every module-extraction PR ran all thirteen suites: an extraction has
+            # to touch all three at once — the `include(...)`, the CI steps for the new module, and
+            # the baseline entries for the code that moved — so the fan-out fired on exactly the
+            # change least able to break another module.
+            #  - `settings.gradle.kts`: in practice it changes to `include(...)` a new module, which
+            #    cannot affect the modules already there. A `pluginManagement`/`repositories` edit
+            #    could, and `:composeApp` — which runs unconditionally, with no filter — is what
+            #    would surface that.
+            #  - `config/detekt/**`: `baseline.xml` is `:composeApp`'s alone (no other module has
+            #    one), and no detekt config can change a test result. The Detekt step below is
+            #    unfiltered anyway, so nothing stops gating.
+            #  - this workflow: a step added for one module cannot change another module's result.
             converter:
               - *shared
               - 'converter/**'
@@ -101,23 +116,30 @@ jobs:
             songlibrary:
               - *shared
               - 'songlibrary/**'
+              - 'core-models/**'          # implementation(projects.coreModels)
+              - 'theme/**'                # implementation(projects.theme)
             ble:
               - *shared
               - 'bible-engine/**'
             # `settings/**` is the module directory. `settings.gradle.kts` is a different thing
-            # entirely and is already in *shared above, which is why a change to it runs everything.
+            # entirely, and — unlike before — a change to it no longer runs this suite; see above.
             settingsmodule:
               - *shared
               - 'settings/**'
+              - 'core-models/**'          # implementation(projects.coreModels)
             diagnostics:
               - *shared
               - 'diagnostics/**'
             atem:
               - *shared
               - 'atem/**'
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
             planningcenter:
               - *shared
               - 'planning-center/**'
+              - 'settings/**'             # implementation(projects.settings)
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
+              - 'core-models/**'          # via :settings
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
