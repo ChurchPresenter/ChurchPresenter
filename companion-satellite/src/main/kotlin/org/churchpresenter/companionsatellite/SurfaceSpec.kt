@@ -1,4 +1,4 @@
-package companionsatellite
+package org.churchpresenter.companionsatellite
 
 /**
  * The surface a client registers with Companion: how many buttons it has, how big their bitmaps
