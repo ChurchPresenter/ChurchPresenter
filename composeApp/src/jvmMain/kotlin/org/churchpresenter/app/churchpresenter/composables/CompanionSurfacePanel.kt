@@ -37,14 +37,14 @@ import churchpresenter.composeapp.generated.resources.companion_satellite_no_hos
 import churchpresenter.composeapp.generated.resources.companion_satellite_status_connecting
 import churchpresenter.composeapp.generated.resources.companion_satellite_status_disconnected
 import churchpresenter.composeapp.generated.resources.companion_satellite_status_error
-import companionsatellite.CompanionConnectionStatus
-import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState
-import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
-import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
+import org.churchpresenter.companionsatellite.CompanionConnectionStatus
+import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
+import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
+import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 

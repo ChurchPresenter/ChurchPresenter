@@ -120,8 +120,8 @@ import org.churchpresenter.app.churchpresenter.utils.isSongLineMode
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
-import org.churchpresenter.app.churchpresenter.utils.BuildIdentity
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.BuildIdentity
+import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter

@@ -16,7 +16,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import org.churchpresenter.atem.AtemFrameEncoder
 import org.churchpresenter.atem.EncodedFrame

@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 
 private const val DEFAULT_ATEM_PORT = 9910
 

@@ -5,7 +5,7 @@ import java.io.File
 /**
  * Removes the crash reports a test caused, and nothing else.
  *
- * [org.churchpresenter.app.churchpresenter.utils.CrashReporter] resolves its report directory from
+ * [org.churchpresenter.diagnostics.CrashReporter] resolves its report directory from
  * `user.home` once per JVM, when the object is first touched, so a test cannot redirect it by
  * swapping the property afterwards — a test that reports an exception really does write into the
  * developer's own `~/.churchpresenter/crash-reports/`. Any test that exercises a path which reports

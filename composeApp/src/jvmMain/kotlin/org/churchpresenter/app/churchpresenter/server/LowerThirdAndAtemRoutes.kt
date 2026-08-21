@@ -14,11 +14,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import org.churchpresenter.settings.AtemSettings
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.atem.AtemConnectionManager
 import org.churchpresenter.atem.AtemKey
 import org.churchpresenter.atem.AtemUploadStatus
+import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.settings.AtemSettings
 
 private const val KEY_SETTLE_MS = 800L
 private const val MILLIS_PER_SECOND = 1000L

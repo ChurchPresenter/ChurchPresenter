@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import companionsatellite.CompanionButtonUpdate
-import companionsatellite.CompanionConnectionStatus
-import companionsatellite.CompanionSatelliteClient
-import companionsatellite.SurfaceSpec
+import org.churchpresenter.companionsatellite.CompanionButtonUpdate
+import org.churchpresenter.companionsatellite.CompanionConnectionStatus
+import org.churchpresenter.companionsatellite.CompanionSatelliteClient
+import org.churchpresenter.companionsatellite.SurfaceSpec
 import io.mockk.every
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
@@ -14,7 +14,7 @@ import io.sentry.SentryLevel
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

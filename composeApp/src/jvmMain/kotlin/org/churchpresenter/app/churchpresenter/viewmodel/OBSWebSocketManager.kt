@@ -24,7 +24,7 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import java.security.MessageDigest
 import java.util.Base64
 import java.util.UUID

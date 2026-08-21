@@ -1,4 +1,4 @@
-package companionsatellite
+package org.churchpresenter.companionsatellite
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope

@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
