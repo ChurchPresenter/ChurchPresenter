@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import org.churchpresenter.app.churchpresenter.models.SceneSource
+import org.churchpresenter.core.models.scene.SceneSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

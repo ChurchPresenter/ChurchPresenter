@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
@@ -24,7 +24,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.junit.AfterClass
 import org.junit.BeforeClass

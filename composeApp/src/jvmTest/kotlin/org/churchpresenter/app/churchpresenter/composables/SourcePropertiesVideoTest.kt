@@ -11,7 +11,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.models.SceneSource
+import org.churchpresenter.core.models.scene.SceneSource
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.swing.filechooser.FileNameExtensionFilter

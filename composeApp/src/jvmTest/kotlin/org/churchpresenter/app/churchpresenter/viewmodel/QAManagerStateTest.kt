@@ -8,7 +8,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.churchpresenter.app.churchpresenter.models.QuestionStatus
+import org.churchpresenter.core.models.qa.QuestionStatus
 import java.io.File
 import java.nio.file.Files
 import javax.swing.SwingUtilities

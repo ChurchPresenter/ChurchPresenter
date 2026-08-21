@@ -43,7 +43,7 @@ import churchpresenter.composeapp.generated.resources.canvas_decklink_io_warning
 import churchpresenter.composeapp.generated.resources.canvas_decklink_device
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.models.SceneSource
+import org.churchpresenter.core.models.scene.SceneSource
 
 private const val MIN_CAPTURE_INTERVAL_MS = 33f
 private const val MAX_CAPTURE_INTERVAL_MS = 1000f

@@ -60,6 +60,7 @@ import churchpresenter.composeapp.generated.resources.shortcut_description_save_
 import churchpresenter.composeapp.generated.resources.shortcut_description_settings
 import churchpresenter.composeapp.generated.resources.shortcut_description_undo
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.jetbrains.compose.resources.StringResource
 
 /**

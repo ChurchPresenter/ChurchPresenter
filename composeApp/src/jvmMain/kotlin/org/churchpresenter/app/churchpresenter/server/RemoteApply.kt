@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.input.key.type
 import java.io.File
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -13,12 +13,12 @@ import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
 import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
-import org.churchpresenter.app.churchpresenter.models.LyricSection
-import org.churchpresenter.app.churchpresenter.models.Question
-import org.churchpresenter.app.churchpresenter.models.QuestionStatus
-import org.churchpresenter.app.churchpresenter.models.Scene
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.qa.Question
+import org.churchpresenter.core.models.qa.QuestionStatus
+import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide

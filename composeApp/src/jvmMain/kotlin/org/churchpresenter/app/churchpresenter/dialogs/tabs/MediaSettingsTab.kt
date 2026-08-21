@@ -42,7 +42,7 @@ import churchpresenter.composeapp.generated.resources.transition_settings
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 

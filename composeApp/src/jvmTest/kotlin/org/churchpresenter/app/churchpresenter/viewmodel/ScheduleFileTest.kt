@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -10,7 +10,7 @@ import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
 import java.nio.file.Files
 import java.time.LocalDate
