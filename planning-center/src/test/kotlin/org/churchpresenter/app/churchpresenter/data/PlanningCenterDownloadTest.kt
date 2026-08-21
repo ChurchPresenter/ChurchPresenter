@@ -12,7 +12,6 @@ import kotlinx.coroutines.runBlocking
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
-import java.net.ServerSocket
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -39,7 +38,6 @@ import kotlin.test.assertTrue
 class PlanningCenterDownloadTest {
 
     private lateinit var dir: File
-    private lateinit var server: FakeAttachmentHost
 
     /**
      * A stand-in for the attachment host: a few fixed routes covering the outcomes that matter.
@@ -49,6 +47,61 @@ class PlanningCenterDownloadTest {
      * in the suite that starts a server can take the port, and this one then dies with
      * `BindException: Address already in use`.
      */
+    private companion object {
+        /** Every byte value, so a text-mode or encoding slip cannot pass unnoticed. */
+        val HOST_PAYLOAD = ByteArray(512) { (it % 256).toByte() }
+
+        /**
+         * One host for the whole class, started on first use.
+         *
+         * It used to be one per test — eighteen Netty start/stops in a few seconds, each stopped
+         * with a zero grace period while the next one bound. Roughly one run in six, a host then
+         * never reached the point of serving [awaitRouting]'s probe inside its deadline and the
+         * test that happened to be next failed for a reason that had nothing to do with it.
+         * Nothing here mutates the host — the routes are fixed and each test downloads into its
+         * own temp dir — so there is nothing for the tests to isolate from each other.
+         */
+        val host: FakeAttachmentHost by lazy {
+            FakeAttachmentHost(HOST_PAYLOAD).also { started ->
+                started.start()
+                awaitRouting(started.port)
+                Runtime.getRuntime().addShutdownHook(Thread { runCatching { started.stop() } })
+            }
+        }
+
+        /**
+         * Waits until the host actually *serves a route*, not merely until its port accepts.
+         *
+         * `engine.start(wait = false)` returns before Netty has bound, so the first request could
+         * beat the server up and come back as a NetworkError. Waiting on a TCP connect fixed that
+         * much — but binding the socket and installing the routing table are two different moments,
+         * and a request landing between them is answered **404 by a server with no routes yet**.
+         * That is not a NetworkError, it is a `Failure`, which is what `an attachment is written
+         * where it was asked for` intermittently saw in a full suite: the outcome the test asserts
+         * against is a plain "the server said no", indistinguishable from a real one.
+         *
+         * So the signal is the route replying 200 — the same thing the tests go on to rely on. The
+         * deadline exists to fail loudly if the host never comes up, never as the success path.
+         */
+        fun awaitRouting(port: Int) {
+            val deadline = System.currentTimeMillis() + 5000
+            while (System.currentTimeMillis() < deadline) {
+                val code = runCatching {
+                    (java.net.URI("http://127.0.0.1:$port/attachment.pdf").toURL().openConnection()
+                        as java.net.HttpURLConnection).run {
+                        connectTimeout = 200
+                        readTimeout = 200
+                        requestMethod = "GET"
+                        try { responseCode } finally { disconnect() }
+                    }
+                }.getOrNull()
+                if (code == 200) return
+                Thread.sleep(10)
+            }
+            error("fake attachment host never served its routes on port $port")
+        }
+    }
+
     private class FakeAttachmentHost(val payload: ByteArray) {
         /** Valid only after [start]; port 0 means "whatever the OS gives us". */
         var port: Int = 0
@@ -76,52 +129,17 @@ class PlanningCenterDownloadTest {
     }
 
     /** Every byte value, so a text-mode or encoding slip cannot pass unnoticed. */
-    private val payload = ByteArray(512) { (it % 256).toByte() }
+    private val payload = HOST_PAYLOAD
+
+    private val server: FakeAttachmentHost get() = host
 
     @BeforeTest
-    fun startHost() {
+    fun makeDir() {
         dir = Files.createTempDirectory("cp-pco-download-test").toFile()
-        server = FakeAttachmentHost(payload)
-        server.start()
-        awaitRouting(server.port)
-    }
-
-    /**
-     * Waits until the host actually *serves a route*, not merely until its port accepts.
-     *
-     * `engine.start(wait = false)` returns before Netty has bound, so the first request could beat
-     * the server up and come back as a NetworkError. Waiting on a TCP connect fixed that much —
-     * but binding the socket and installing the routing table are two different moments, and a
-     * request landing between them is answered **404 by a server with no routes yet**. That is not
-     * a NetworkError, it is a `Failure`, which is what `an attachment is written where it was asked
-     * for` intermittently saw in a full suite: the outcome the test asserts against is a plain
-     * "the server said no", indistinguishable from a real one.
-     *
-     * So the signal is the route replying 200 — the same thing the tests go on to rely on. Under a
-     * loaded machine the bind-to-routing gap widens, which is why this only ever bit in a full run.
-     * The deadline exists to fail loudly if the host never comes up, never as the success path.
-     */
-    private fun awaitRouting(port: Int) {
-        val deadline = System.currentTimeMillis() + 5000
-        while (System.currentTimeMillis() < deadline) {
-            val code = runCatching {
-                (java.net.URI("http://127.0.0.1:$port/attachment.pdf").toURL().openConnection()
-                    as java.net.HttpURLConnection).run {
-                    connectTimeout = 200
-                    readTimeout = 200
-                    requestMethod = "GET"
-                    try { responseCode } finally { disconnect() }
-                }
-            }.getOrNull()
-            if (code == 200) return
-            Thread.sleep(10)
-        }
-        error("fake attachment host never served its routes on port $port")
     }
 
     @AfterTest
-    fun stopHost() {
-        runCatching { server.stop() }
+    fun removeDir() {
         dir.deleteRecursively()
     }
 
@@ -279,10 +297,14 @@ class PlanningCenterDownloadTest {
     @Test
     fun `a host that cannot be reached is a network problem`() {
         val target = File(dir, "plan.pdf")
-        val deadPort = ServerSocket(0).use { it.localPort } // closed again immediately
 
         val outcome = runBlocking {
-            PlanningCenterClient.downloadFile("http://127.0.0.1:$deadPort/attachment.pdf", target)
+            // Port 1, for the reason the sibling test above gives. A port from `ServerSocket(0)`
+            // closed again immediately goes straight back into the ephemeral pool, and the next
+            // test's host binds port 0 and can be handed the same number: this download came back
+            // answered 404 by a server whose routes were already gone, and next door the fixture
+            // timed out waiting for routes on a port this test had just finished with.
+            PlanningCenterClient.downloadFile("http://127.0.0.1:1/attachment.pdf", target)
         }
 
         assertEquals(
@@ -321,9 +343,8 @@ class PlanningCenterDownloadTest {
 
     @Test
     fun `a thumbnail from a host that is not there comes back as nothing`() {
-        val deadPort = ServerSocket(0).use { it.localPort }
-
-        assertNull(runBlocking { PlanningCenterClient.fetchThumbnailBytes("http://127.0.0.1:$deadPort/thumb.png") })
+        // Port 1 again, and for the same reason: a recycled ephemeral port gets answered, not refused.
+        assertNull(runBlocking { PlanningCenterClient.fetchThumbnailBytes("http://127.0.0.1:1/thumb.png") })
     }
 
     @Test

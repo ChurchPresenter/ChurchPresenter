@@ -63,3 +63,7 @@ include(":settings")
 // Crash reporting and diagnostics: the crash log on disk and the Sentry forwarding behind it.
 // Depended on by :composeApp and by every module that needs to report a fault.
 include(":diagnostics")
+// The Planning Center Online client: the OAuth conversation, the Services REST calls and the
+// loopback listener that catches the consent redirect. Depended on by :composeApp, which wraps it
+// in PlanningCenterImportViewModel.
+include(":planning-center")
