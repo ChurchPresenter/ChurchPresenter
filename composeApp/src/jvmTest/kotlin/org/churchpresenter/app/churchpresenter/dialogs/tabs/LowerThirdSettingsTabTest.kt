@@ -12,8 +12,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.StreamingSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.StreamingSettings
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -16,12 +16,12 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BackgroundConfig
-import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BackgroundConfig
+import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import java.awt.Color
 import java.awt.GradientPaint
 import java.awt.image.BufferedImage

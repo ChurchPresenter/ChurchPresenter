@@ -6,7 +6,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.data.settings.STTSettings
+import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.app.churchpresenter.tabs.STTLabel
 import org.churchpresenter.app.churchpresenter.tabs.highlight
 import org.churchpresenter.app.churchpresenter.tabs.live

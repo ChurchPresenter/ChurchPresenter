@@ -17,9 +17,9 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ProjectionSettings
-import org.churchpresenter.app.churchpresenter.data.settings.StreamingSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.StreamingSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
 import java.io.File

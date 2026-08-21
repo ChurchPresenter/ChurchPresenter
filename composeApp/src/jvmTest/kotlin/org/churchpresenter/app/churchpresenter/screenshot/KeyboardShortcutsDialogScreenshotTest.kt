@@ -18,8 +18,8 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.KeyboardShortcutSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.KeyboardShortcutSettings
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialogContent
 import org.churchpresenter.app.churchpresenter.dialogs.SHORTCUT_CONFLICTS_FILTER_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.SHORTCUT_PRESS_MODE_TAG

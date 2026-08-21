@@ -10,7 +10,7 @@ import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.Frame
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -62,7 +62,7 @@ import churchpresenter.composeapp.generated.resources.schedule_drop_hint
 import churchpresenter.composeapp.generated.resources.schedule_drop_to_remove
 import kotlin.math.abs
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.data.settings.PlanningCenterSettings
+import org.churchpresenter.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem

@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.settings.AtemSettings
 import java.io.File
 import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 import kotlin.test.Test

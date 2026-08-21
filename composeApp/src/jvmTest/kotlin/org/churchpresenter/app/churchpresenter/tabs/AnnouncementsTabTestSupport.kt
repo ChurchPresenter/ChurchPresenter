@@ -21,9 +21,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ProjectionSettings
+import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

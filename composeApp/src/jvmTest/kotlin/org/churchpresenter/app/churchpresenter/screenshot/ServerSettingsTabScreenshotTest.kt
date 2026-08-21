@@ -20,10 +20,10 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ServerSettings
-import org.churchpresenter.app.churchpresenter.data.settings.StreamingSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.AtemSettings
+import org.churchpresenter.settings.ServerSettings
+import org.churchpresenter.settings.StreamingSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ConnectionQrDialogContent
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerLabel
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab

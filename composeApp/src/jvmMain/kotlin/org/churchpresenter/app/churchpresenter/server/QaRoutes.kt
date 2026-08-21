@@ -18,7 +18,7 @@ import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.core.models.qa.SubmitQuestionRequest
 import org.churchpresenter.core.models.qa.VoteRequest
 import org.churchpresenter.core.models.qa.toDto
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 
 /**
  * Routes for the Q&A submission, voting and moderation endpoints.

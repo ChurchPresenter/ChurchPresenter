@@ -8,7 +8,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContentType
+import org.churchpresenter.settings.StageMonitorContentType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

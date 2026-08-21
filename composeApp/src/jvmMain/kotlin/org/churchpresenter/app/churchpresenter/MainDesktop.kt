@@ -95,10 +95,10 @@ import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
-import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
-import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleSyncMode
+import org.churchpresenter.settings.CompanionSatelliteSettings
+import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
@@ -143,7 +143,7 @@ import org.churchpresenter.app.churchpresenter.tabs.getStringName
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.models.ShortcutScope
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel

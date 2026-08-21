@@ -17,7 +17,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.tabs.CrosswordTab
 import org.churchpresenter.app.churchpresenter.tabs.showsExactly
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme

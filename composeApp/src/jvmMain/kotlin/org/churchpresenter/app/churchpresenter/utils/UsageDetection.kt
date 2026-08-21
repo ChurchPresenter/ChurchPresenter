@@ -1,7 +1,8 @@
 package org.churchpresenter.app.churchpresenter.utils
 
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.utils.Constants
 
 /**
  * Whether what is going live right now is genuinely a *multi-language* presentation.

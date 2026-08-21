@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.utils
 
 import io.mockk.every
 import io.mockk.mockk
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.settings.ScreenAssignment
 import java.awt.GraphicsConfiguration
 import java.awt.GraphicsDevice
 import java.awt.Rectangle

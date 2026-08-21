@@ -17,9 +17,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ProjectionSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DetectedScreen
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.Grid
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
@@ -32,7 +32,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.threeTranslations
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.twoExternalScreens
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 
 /**
