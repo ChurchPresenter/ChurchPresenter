@@ -17,6 +17,8 @@ import org.churchpresenter.settings.utils.Constants
 import io.ktor.client.statement.HttpResponse
 import java.io.File
 import java.net.URLEncoder
+import java.io.IOException
+import java.nio.channels.UnresolvedAddressException
 
 private val HTTP_OK_RANGE = 200..299
 private const val REGEX_GROUP_IDENTIFIER = 3
@@ -31,8 +33,9 @@ private const val REGEX_GROUP_DISPLAY_NAME = 4
  * translation**. There is deliberately no manifest to maintain: the repository's own tree is the
  * source of truth, which is what keeps this from drifting the way a hand-curated index would.
  */
-@Suppress("TooManyFunctions", "TooGenericExceptionCaught") // one index: fetch, parse, filter, cache, look up
+@Suppress("TooManyFunctions") // one index: fetch, parse, filter, cache, look up
 object ZefaniaRepositoryIndex {
+
 
     const val OWNER = "ChurchPresenter"
     const val REPO = "Zefania-XML-Preservation"
@@ -188,15 +191,22 @@ object ZefaniaRepositoryIndex {
                 }
                 else -> parsed
             }
-        } catch (e: Exception) {
-            CrashReporter.reportWarning(
-                "Zefania index fetch failed",
-                throwable = e,
-                tags = mapOf("subsystem" to "zefania_index")
-            )
             // An offline hall still sees the list it saw last time; the failure then surfaces on the
             // install, which is far more useful than an empty dialog.
-            cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError
+        } catch (e: IOException) {
+            BibleInstallSupport.reported(
+                "Zefania index fetch failed",
+                e,
+                mapOf("subsystem" to "zefania_index"),
+                cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
+            )
+        } catch (e: UnresolvedAddressException) {
+            BibleInstallSupport.reported(
+                "Zefania index fetch failed",
+                e,
+                mapOf("subsystem" to "zefania_index"),
+                cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
+            )
         }
     }
 
@@ -242,13 +252,13 @@ object ZefaniaRepositoryIndex {
         } else {
             IndexOutcome.Success(Index(parseTree(response.tree), etag))
         }
-    } catch (e: Exception) {
-        CrashReporter.reportWarning(
+    } catch (e: IllegalArgumentException) {
+        BibleInstallSupport.reported(
             "Zefania index could not be parsed",
-            throwable = e,
-            tags = mapOf("subsystem" to "zefania_index")
+            e,
+            mapOf("subsystem" to "zefania_index"),
+            IndexOutcome.Failure,
         )
-        IndexOutcome.Failure
     }
 
     /**

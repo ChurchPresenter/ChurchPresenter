@@ -7,6 +7,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.diagnostics.CrashReporter
 import java.io.File
+import java.io.IOException
+import org.xml.sax.SAXException
+import java.nio.channels.UnresolvedAddressException
+import org.churchpresenter.bibleformats.ParsedBible
 
 /**
  * The Zefania XML archive: a preservation mirror of the SourceForge Zefania project.
@@ -16,10 +20,33 @@ import java.io.File
  * copyright is only visible once that file has been parsed — which is why it is reported after the
  * install rather than in the list.
  */
-// A catalogue fetch spans HTTP, zip extraction and JSON parsing: the throwable set is open,
-// and every part of it has to become an outcome rather than take the download browser down.
-@Suppress("TooGenericExceptionCaught")
 object ZefaniaSource : BibleSource {
+
+    /**
+     * The conversion step's failure mapping, kept out of the pipeline above so its clauses are not
+     * counted against a function that is already one long sequence. Null means "reported and
+     * handled": the caller turns it into [BibleInstallOutcome.ConversionFailed].
+     */
+    private fun parseModule(xmlFile: File, module: BibleModule): ParsedBible? = try {
+        XmlToSpbConverter.parse(xmlFile)
+    } catch (e: IOException) {
+        BibleInstallSupport.reported(
+            "Zefania module could not be parsed (${module.fileStem})", e, installTags(module), null,
+        )
+    } catch (e: SAXException) {
+        BibleInstallSupport.reported(
+            "Zefania module could not be parsed (${module.fileStem})", e, installTags(module), null,
+        )
+    } catch (e: IllegalArgumentException) {
+        BibleInstallSupport.reported(
+            "Zefania module could not be parsed (${module.fileStem})", e, installTags(module), null,
+        )
+    }
+
+    /** Every install warning from this source carries the same two tags. */
+    private fun installTags(module: BibleModule) =
+        mapOf("subsystem" to "bible_install", "module" to module.fileStem)
+
 
     override val sourceId = BibleSourceId.ZEFANIA
 
@@ -105,13 +132,20 @@ object ZefaniaSource : BibleSource {
                     )
                 )
                 return@withContext BibleInstallOutcome.DownloadStalled
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
+            } catch (e: IOException) {
+                return@withContext BibleInstallSupport.reported(
                     "Zefania download failed (${module.fileStem})",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.NetworkError,
                 )
-                return@withContext BibleInstallOutcome.NetworkError
+            } catch (e: UnresolvedAddressException) {
+                return@withContext BibleInstallSupport.reported(
+                    "Zefania download failed (${module.fileStem})",
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.NetworkError,
+                )
             }
 
             if (result.status !in 200..299) {
@@ -140,16 +174,7 @@ object ZefaniaSource : BibleSource {
                 ?: return@withContext BibleInstallOutcome.CorruptArchive
             onProgress(InstallProgress(InstallPhase.EXTRACTING, BibleInstallSupport.EXTRACT_END))
 
-            val parsed = try {
-                XmlToSpbConverter.parse(xmlFile)
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
-                    "Zefania module could not be parsed (${module.fileStem})",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
-                )
-                return@withContext BibleInstallOutcome.ConversionFailed
-            }
+            val parsed = parseModule(xmlFile, module) ?: return@withContext BibleInstallOutcome.ConversionFailed
             if (parsed.books.isEmpty() || parsed.books.sumOf { b -> b.chapters.sumOf { it.verses.size } } == 0) {
                 return@withContext BibleInstallOutcome.ConversionFailed
             }
@@ -169,13 +194,20 @@ object ZefaniaSource : BibleSource {
             val destination = File(targetDir, module.fileName)
             try {
                 BibleInstallSupport.moveIntoPlace(spbPart, destination)
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
+            } catch (e: IOException) {
+                return@withContext BibleInstallSupport.reported(
                     "Could not write Bible into place (${module.fileStem})",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.WriteFailed,
                 )
-                return@withContext BibleInstallOutcome.WriteFailed
+            } catch (e: SecurityException) {
+                return@withContext BibleInstallSupport.reported(
+                    "Could not write Bible into place (${module.fileStem})",
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.WriteFailed,
+                )
             }
             onProgress(InstallProgress(InstallPhase.INSTALLING, 1f))
             return@withContext BibleInstallOutcome.Success(

@@ -12,6 +12,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.diagnostics.CrashReporter
 import java.io.File
+import java.io.IOException
+import org.xml.sax.SAXException
+import java.nio.channels.UnresolvedAddressException
 
 /**
  * eBible.org — the primary archive: around 1,300 translations across a thousand languages.
@@ -24,10 +27,8 @@ import java.io.File
  *
  * Downloads are USFX; see [UsfxToSpbConverter].
  */
-// A catalogue fetch spans HTTP, zip extraction and JSON parsing: the throwable set is open,
-// and every part of it has to become an outcome rather than take the download browser down.
-@Suppress("TooGenericExceptionCaught")
 object EBibleSource : BibleSource {
+
 
     override val sourceId = BibleSourceId.EBIBLE
 
@@ -118,13 +119,20 @@ object EBibleSource : BibleSource {
                 File(cacheFile.parentFile, cacheFile.name + ".meta").writeText(nowMillis.toString())
             }
             BibleCatalogOutcome.Success(modules)
-        } catch (e: Exception) {
-            CrashReporter.reportWarning(
+        } catch (e: IOException) {
+            BibleInstallSupport.reported(
                 "eBible catalogue fetch failed",
-                throwable = e,
-                tags = mapOf("subsystem" to "ebible_catalog")
+                e,
+                mapOf("subsystem" to "ebible_catalog"),
+                cached?.let { BibleCatalogOutcome.Success(it, stale = true) } ?: BibleCatalogOutcome.NetworkError,
             )
-            cached?.let { BibleCatalogOutcome.Success(it, stale = true) } ?: BibleCatalogOutcome.NetworkError
+        } catch (e: UnresolvedAddressException) {
+            BibleInstallSupport.reported(
+                "eBible catalogue fetch failed",
+                e,
+                mapOf("subsystem" to "ebible_catalog"),
+                cached?.let { BibleCatalogOutcome.Success(it, stale = true) } ?: BibleCatalogOutcome.NetworkError,
+            )
         }
     }
 
@@ -259,13 +267,20 @@ object EBibleSource : BibleSource {
                     )
                 )
                 return@withContext BibleInstallOutcome.DownloadStalled
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
+            } catch (e: IOException) {
+                return@withContext BibleInstallSupport.reported(
                     "eBible download failed (${module.fileStem})",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.NetworkError,
                 )
-                return@withContext BibleInstallOutcome.NetworkError
+            } catch (e: UnresolvedAddressException) {
+                return@withContext BibleInstallSupport.reported(
+                    "eBible download failed (${module.fileStem})",
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.NetworkError,
+                )
             }
 
             if (result.status !in 200..299) {
@@ -295,13 +310,27 @@ object EBibleSource : BibleSource {
                     rights = module.copyright,
                     source = downloadUrlFor(module.downloadKey)
                 )
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
+            } catch (e: IOException) {
+                return@withContext BibleInstallSupport.reported(
                     "eBible module could not be parsed (${module.fileStem})",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.ConversionFailed,
                 )
-                return@withContext BibleInstallOutcome.ConversionFailed
+            } catch (e: SAXException) {
+                return@withContext BibleInstallSupport.reported(
+                    "eBible module could not be parsed (${module.fileStem})",
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.ConversionFailed,
+                )
+            } catch (e: IllegalArgumentException) {
+                return@withContext BibleInstallSupport.reported(
+                    "eBible module could not be parsed (${module.fileStem})",
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.ConversionFailed,
+                )
             }
             if (parsed.books.isEmpty() || parsed.books.sumOf { b -> b.chapters.sumOf { it.verses.size } } == 0) {
                 return@withContext BibleInstallOutcome.ConversionFailed
@@ -322,13 +351,20 @@ object EBibleSource : BibleSource {
             val destination = File(targetDir, module.fileName)
             try {
                 BibleInstallSupport.moveIntoPlace(spbPart, destination)
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
+            } catch (e: IOException) {
+                return@withContext BibleInstallSupport.reported(
                     "Could not write Bible into place (${module.fileStem})",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.WriteFailed,
                 )
-                return@withContext BibleInstallOutcome.WriteFailed
+            } catch (e: SecurityException) {
+                return@withContext BibleInstallSupport.reported(
+                    "Could not write Bible into place (${module.fileStem})",
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.WriteFailed,
+                )
             }
             onProgress(InstallProgress(InstallPhase.INSTALLING, 1f))
             BibleInstallOutcome.Success(destination, parsed.name, parsed.books.size, parsed.rights)

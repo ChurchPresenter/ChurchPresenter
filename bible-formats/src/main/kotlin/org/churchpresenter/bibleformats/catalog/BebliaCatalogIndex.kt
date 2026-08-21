@@ -16,6 +16,8 @@ import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.net.URLEncoder
+import java.io.IOException
+import java.nio.channels.UnresolvedAddressException
 
 /**
  * Lists the Bible modules available in the Holy Bible XML archive.
@@ -37,10 +39,8 @@ import java.net.URLEncoder
  * mismatch — reported as "the download was incomplete" — until someone regenerated the manifest.
  * Pinned, a lagging manifest simply serves the older file it actually describes.
  */
-// A catalogue fetch spans HTTP, zip extraction and JSON parsing: the throwable set is open,
-// and every part of it has to become an outcome rather than take the download browser down.
-@Suppress("TooGenericExceptionCaught")
 object BebliaCatalogIndex {
+
 
     const val OWNER = "ChurchPresenter"
     const val REPO = "Holy-Bible-XML-Format"
@@ -209,15 +209,22 @@ object BebliaCatalogIndex {
                 // A manifest that arrived but did not parse is not written over a good cached copy.
                 else -> cached?.let { IndexOutcome.Success(it, stale = true) } ?: parsed
             }
-        } catch (e: Exception) {
-            CrashReporter.reportWarning(
-                "Holy Bible XML catalogue fetch failed",
-                throwable = e,
-                tags = mapOf("subsystem" to "beblia_catalog")
-            )
             // An offline hall still sees the list it saw last time; the failure then surfaces on the
             // install, which is far more useful than an empty dialog.
-            cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError
+        } catch (e: IOException) {
+            BibleInstallSupport.reported(
+                "Holy Bible XML catalogue fetch failed",
+                e,
+                mapOf("subsystem" to "beblia_catalog"),
+                cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
+            )
+        } catch (e: UnresolvedAddressException) {
+            BibleInstallSupport.reported(
+                "Holy Bible XML catalogue fetch failed",
+                e,
+                mapOf("subsystem" to "beblia_catalog"),
+                cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
+            )
         }
     }
 
@@ -254,13 +261,13 @@ object BebliaCatalogIndex {
             }
             else -> IndexOutcome.Success(Index(catalog.commit, toModules(entries), etag))
         }
-    } catch (e: Exception) {
-        CrashReporter.reportWarning(
+    } catch (e: IllegalArgumentException) {
+        BibleInstallSupport.reported(
             "Holy Bible XML catalogue could not be parsed",
-            throwable = e,
-            tags = mapOf("subsystem" to "beblia_catalog")
+            e,
+            mapOf("subsystem" to "beblia_catalog"),
+            IndexOutcome.Failure,
         )
-        IndexOutcome.Failure
     }
 
     internal fun toModules(entries: List<Entry>): List<Module> {

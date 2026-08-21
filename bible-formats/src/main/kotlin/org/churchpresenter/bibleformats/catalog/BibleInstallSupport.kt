@@ -26,6 +26,7 @@ import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
 import java.util.zip.ZipFile
 import kotlin.random.Random
+import org.churchpresenter.diagnostics.CrashReporter
 
 private const val JITTER_MIN = 0.8
 private const val JITTER_MAX = 1.2
@@ -44,6 +45,16 @@ private const val MAX_CAUSE_DEPTH = 4
  */
 @Suppress("TooManyFunctions") // one installer facade: fetch, verify, convert, write, report
 object BibleInstallSupport {
+
+    /**
+     * Reports [e] under [tags] and hands back [outcome], so a catch clause stays one line and the
+     * set of things a pipeline catches reads as the mapping it is. Shared by all four sources —
+     * every one of them reports and returns in exactly this shape.
+     */
+    internal fun <T> reported(message: String, e: Throwable, tags: Map<String, String>, outcome: T): T {
+        CrashReporter.reportWarning(message, throwable = e, tags = tags)
+        return outcome
+    }
 
     const val COPY_BUFFER_BYTES = 64 * 1024
     private const val MAX_ARCHIVE_ENTRIES = 64

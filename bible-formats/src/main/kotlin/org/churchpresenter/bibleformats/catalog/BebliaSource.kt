@@ -9,6 +9,9 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.diagnostics.CrashReporter
 import java.io.File
 import javax.xml.stream.XMLStreamException
+import java.io.IOException
+import org.xml.sax.SAXException
+import java.nio.channels.UnresolvedAddressException
 
 /**
  * The Holy Bible XML archive: 1048 translations across more than 200 languages, many of which
@@ -23,10 +26,8 @@ import javax.xml.stream.XMLStreamException
  * See [BebliaCatalogIndex] for where the catalogue comes from, and `converter.BebliaParser` for the
  * format and for why book names come out in English for most of these languages.
  */
-// A catalogue fetch spans HTTP, zip extraction and JSON parsing: the throwable set is open,
-// and every part of it has to become an outcome rather than take the download browser down.
-@Suppress("TooGenericExceptionCaught")
 object BebliaSource : BibleSource {
+
 
     override val sourceId = BibleSourceId.BEBLIA
 
@@ -137,13 +138,20 @@ object BebliaSource : BibleSource {
                     )
                 )
                 return@withContext BibleInstallOutcome.DownloadStalled
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
+            } catch (e: IOException) {
+                return@withContext BibleInstallSupport.reported(
                     "Holy Bible XML download failed (${module.fileStem})",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.NetworkError,
                 )
-                return@withContext BibleInstallOutcome.NetworkError
+            } catch (e: UnresolvedAddressException) {
+                return@withContext BibleInstallSupport.reported(
+                    "Holy Bible XML download failed (${module.fileStem})",
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.NetworkError,
+                )
             }
 
             if (result.status !in 200..299) {
@@ -191,13 +199,27 @@ object BebliaSource : BibleSource {
                     tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
                 )
                 return@withContext BibleInstallOutcome.CorruptArchive
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
+            } catch (e: IOException) {
+                return@withContext BibleInstallSupport.reported(
                     "Holy Bible XML module could not be parsed (${module.fileStem})",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.ConversionFailed,
                 )
-                return@withContext BibleInstallOutcome.ConversionFailed
+            } catch (e: SAXException) {
+                return@withContext BibleInstallSupport.reported(
+                    "Holy Bible XML module could not be parsed (${module.fileStem})",
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.ConversionFailed,
+                )
+            } catch (e: IllegalArgumentException) {
+                return@withContext BibleInstallSupport.reported(
+                    "Holy Bible XML module could not be parsed (${module.fileStem})",
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.ConversionFailed,
+                )
             }
             if (parsed.books.isEmpty() || parsed.books.sumOf { b -> b.chapters.sumOf { it.verses.size } } == 0) {
                 return@withContext BibleInstallOutcome.ConversionFailed
@@ -218,13 +240,20 @@ object BebliaSource : BibleSource {
             val destination = File(targetDir, module.fileName)
             try {
                 BibleInstallSupport.moveIntoPlace(spbPart, destination)
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
+            } catch (e: IOException) {
+                return@withContext BibleInstallSupport.reported(
                     "Could not write Bible into place (${module.fileStem})",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "bible_install", "module" to module.fileStem)
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.WriteFailed,
                 )
-                return@withContext BibleInstallOutcome.WriteFailed
+            } catch (e: SecurityException) {
+                return@withContext BibleInstallSupport.reported(
+                    "Could not write Bible into place (${module.fileStem})",
+                    e,
+                    mapOf("subsystem" to "bible_install", "module" to module.fileStem),
+                    BibleInstallOutcome.WriteFailed,
+                )
             }
             onProgress(InstallProgress(InstallPhase.INSTALLING, 1f))
             BibleInstallOutcome.Success(destination, parsed.name, parsed.books.size, parsed.rights)
