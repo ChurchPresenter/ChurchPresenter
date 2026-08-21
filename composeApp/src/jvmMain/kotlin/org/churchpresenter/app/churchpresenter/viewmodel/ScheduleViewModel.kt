@@ -10,11 +10,13 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.websiteDisplayText
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import java.io.File
 import java.security.SecureRandom
+import java.time.LocalDate
 import java.util.Base64
 import java.util.Calendar
 import java.util.UUID
@@ -325,6 +327,14 @@ class ScheduleViewModel(
         }
     }
 
+    /**
+     * The name a new schedule is offered under: the date first, so a folder of services sorts into
+     * the order they were held. [today] is a parameter only so a test does not have to move the
+     * clock.
+     */
+    internal fun suggestedScheduleFileName(today: LocalDate = LocalDate.now()): String =
+        "$today-schedule.${Constants.EXTENSION_CPS}"
+
     /** Always opens a save-file dialog and serializes the schedule to a .cps file. */
     suspend fun saveScheduleAs(
         dialogTitle: String = "Save Schedule As",
@@ -332,8 +342,8 @@ class ScheduleViewModel(
     ) {
         val file = FileChooser.platformInstance.save(
             location = null,
-            suggestedName = "schedule.cps",
-            filters = listOf(FileNameExtensionFilter(fileFilterDescription, "cps")),
+            suggestedName = suggestedScheduleFileName(),
+            filters = listOf(FileNameExtensionFilter(fileFilterDescription, Constants.EXTENSION_CPS)),
             title = dialogTitle
         )
         if (file != null) {
@@ -354,7 +364,7 @@ class ScheduleViewModel(
         if (_isFollowingRemote.value) return
         val file = FileChooser.platformInstance.chooseSingle(
             path = null,
-            filters = listOf(FileNameExtensionFilter(fileFilterDescription, "cps")),
+            filters = listOf(FileNameExtensionFilter(fileFilterDescription, Constants.EXTENSION_CPS)),
             title = dialogTitle,
             selectDirectory = false
         )

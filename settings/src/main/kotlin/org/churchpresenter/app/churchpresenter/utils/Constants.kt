@@ -90,6 +90,9 @@ object Constants {
     const val EXTENSION_SPB = "spb"
     const val EXTENSION_SONG = "song"
 
+    /** The service schedule the app saves and reopens — "Church Presenter Schedule". */
+    const val EXTENSION_CPS = "cps"
+
     // Song Display Modes
     const val SONG_DISPLAY_MODE_VERSE = "verse"
     const val SONG_DISPLAY_MODE_LINE = "line"
