@@ -2,8 +2,8 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkCommandFailure
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel

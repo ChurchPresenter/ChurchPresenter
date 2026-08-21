@@ -104,11 +104,11 @@ import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailabilit
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.data.Bible
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment

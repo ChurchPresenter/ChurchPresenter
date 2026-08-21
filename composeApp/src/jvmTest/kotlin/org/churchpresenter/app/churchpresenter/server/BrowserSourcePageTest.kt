@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertFalse

@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.server
 import org.churchpresenter.core.models.songs.SongItem
 import kotlinx.serialization.json.Json
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

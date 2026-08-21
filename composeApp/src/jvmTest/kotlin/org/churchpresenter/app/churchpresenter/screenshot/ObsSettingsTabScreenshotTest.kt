@@ -22,8 +22,8 @@ import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.OBSSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OBSSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.OBSSettingsTab
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.theme.ChurchPresenterTheme

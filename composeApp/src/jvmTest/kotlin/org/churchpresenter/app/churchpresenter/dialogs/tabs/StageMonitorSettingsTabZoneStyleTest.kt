@@ -8,8 +8,10 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZone
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.StageMonitorStyleZone
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.StageMonitorSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -34,9 +36,9 @@ class StageMonitorSettingsTabZoneStyleTest {
 
     /** Asserts every zone but [zone] still holds the style it started with. */
     private fun assertOtherZonesUntouched(
-        get: () -> org.churchpresenter.app.churchpresenter.data.settings.AppSettings,
+        get: () -> AppSettings,
     ) {
-        val defaults = org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSettings.defaultZoneStyles()
+        val defaults = StageMonitorSettings.defaultZoneStyles()
         for (other in StageMonitorStyleZone.entries.filter { it != zone }) {
             assertEquals(defaults.getValue(other), get().styleOf(other), "$other must be untouched")
         }

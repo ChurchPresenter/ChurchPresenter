@@ -16,12 +16,12 @@ import androidx.compose.ui.test.runComposeUiTest
 import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import org.churchpresenter.planningcenter.PlanningCenterClient
-import org.churchpresenter.app.churchpresenter.data.SettingsManager
-import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
-import org.churchpresenter.app.churchpresenter.data.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.PlanningCenterImportViewModel
+import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.planningcenter.PlanningCenterClient
+import org.churchpresenter.settings.PlanningCenterSettings
+import org.churchpresenter.settings.SettingsManager
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.File

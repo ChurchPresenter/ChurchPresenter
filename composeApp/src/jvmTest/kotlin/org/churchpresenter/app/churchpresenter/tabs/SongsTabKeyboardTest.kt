@@ -9,10 +9,10 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
-import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.utils.Constants
 import androidx.compose.ui.test.onNodeWithText
-import org.churchpresenter.app.churchpresenter.data.settings.KeyboardShortcutSettings
+import org.churchpresenter.settings.KeyboardShortcutSettings
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction

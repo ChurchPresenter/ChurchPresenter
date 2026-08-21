@@ -6,7 +6,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.server.AtemMediaSlot
 import org.churchpresenter.app.churchpresenter.server.AtemState
 import org.churchpresenter.app.churchpresenter.server.FakeAtemSwitcher

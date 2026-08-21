@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.server
 
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException

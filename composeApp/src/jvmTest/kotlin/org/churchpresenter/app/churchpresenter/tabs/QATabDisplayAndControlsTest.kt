@@ -7,8 +7,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.QASettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.QASettings
 import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test

@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ServerSettings
+import org.churchpresenter.settings.AtemSettings
+import org.churchpresenter.settings.ServerSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

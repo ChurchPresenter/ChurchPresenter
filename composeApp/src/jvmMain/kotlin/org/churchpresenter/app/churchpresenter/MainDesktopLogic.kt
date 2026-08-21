@@ -8,11 +8,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
-import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
-import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.settings.CompanionSatelliteSettings
+import org.churchpresenter.settings.InstanceLinkRole
+import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse
@@ -21,7 +21,7 @@ import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarButton
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import java.io.File
 
 private const val MILLIS_PER_SECOND = 1000

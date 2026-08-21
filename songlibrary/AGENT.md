@@ -12,6 +12,17 @@ It **owns no model**. The song, the `.song` format and the library that loads a 
 `:core-models`' (`org.churchpresenter.core.models.songs`), so what this window writes is what the app reads on its next
 scan. It takes `:core-models` and `:theme` and nothing else of the app's.
 
+## Package
+
+**`org.churchpresenter.songlibrary`** (`.ui` for the screens). It was a bare top-level
+`songlibrary`, with the Compose Resources class generated into `songlibrary.generated.resources`
+to match.
+
+That generated package is the part worth knowing about: it is set by `packageOfResClass` in
+`build.gradle.kts`, **not** by any source file, and 70 imports depend on the two agreeing. Move one
+without the other and the module stops compiling with unresolved `Res` references that no source
+file explains.
+
 ## Rules
 
 - **It has no palette of its own.** `ui/Theme.kt` holds the window's metrics and *roles*, resolved

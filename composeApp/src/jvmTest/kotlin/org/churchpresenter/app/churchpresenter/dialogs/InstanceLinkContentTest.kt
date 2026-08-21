@@ -18,9 +18,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.settings.BibleSyncMode
-import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
-import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkSettings
+import org.churchpresenter.settings.BibleSyncMode
+import org.churchpresenter.settings.InstanceLinkRole
+import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.LiveStateDto
 import kotlin.test.Test

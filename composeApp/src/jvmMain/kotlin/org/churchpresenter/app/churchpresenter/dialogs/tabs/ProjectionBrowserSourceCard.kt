@@ -73,9 +73,9 @@ import churchpresenter.composeapp.generated.resources.projection_web_decklink_to
 import churchpresenter.composeapp.generated.resources.remove
 import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 private const val DISABLED_ALPHA = 0.5f

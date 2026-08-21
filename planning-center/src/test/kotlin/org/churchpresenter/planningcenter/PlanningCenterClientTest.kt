@@ -1,6 +1,6 @@
 package org.churchpresenter.planningcenter
 
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import java.net.URLDecoder
 import kotlin.test.Test
 import kotlin.test.assertEquals

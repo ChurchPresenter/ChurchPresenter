@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.server
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
