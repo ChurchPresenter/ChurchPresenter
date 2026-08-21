@@ -45,8 +45,8 @@ import churchpresenter.composeapp.generated.resources.memory_monitor_non_heap
 import churchpresenter.composeapp.generated.resources.memory_monitor_used
 import churchpresenter.composeapp.generated.resources.memory_monitor_window_title
 import kotlinx.coroutines.delay
-import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.AppThemeWrapper
+import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.lang.management.GarbageCollectorMXBean

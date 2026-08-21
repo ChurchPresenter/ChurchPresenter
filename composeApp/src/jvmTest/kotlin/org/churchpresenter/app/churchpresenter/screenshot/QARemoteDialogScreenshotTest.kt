@@ -16,7 +16,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.QASettings
 import org.churchpresenter.app.churchpresenter.dialogs.QARemoteContent
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 
 /**
