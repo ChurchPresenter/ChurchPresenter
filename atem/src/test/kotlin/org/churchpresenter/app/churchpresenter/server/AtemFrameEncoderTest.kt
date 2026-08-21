@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.server
 import java.nio.ByteBuffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
@@ -120,6 +121,41 @@ class AtemFrameEncoderTest {
         assertEquals(block, out.longAt(0))
         assertEquals(block, out.longAt(8))
         assertEquals(block, out.longAt(16))
+    }
+
+    @Test
+    fun `a short run in the middle of the data is emitted as literal blocks`() {
+        // The mirror of `a run of exactly three identical blocks`, but mid-stream rather than at
+        // the end: a two-block run followed by something different takes the "emit the repeats
+        // verbatim" path, not the header path. Below the threshold the output is the input.
+        val a = 0x0101010101010101L
+        val b = 0x0202020202020202L
+        val input = ByteBuffer.allocate(3 * 8).apply { putLong(a); putLong(a); putLong(b) }.array()
+        val out = AtemFrameEncoder.encodeRLE(input)
+        assertTrue(out.contentEquals(input), "a run too short to compress must survive unchanged")
+        assertNotEquals(AtemFrameEncoder.RLE_HEADER, out.longAt(0), "no header may be emitted for it")
+    }
+
+    @Test
+    fun `a short run mid-stream still lets a later long run compress`() {
+        // Both halves of the branch in one frame, which is what a real lower third looks like: a
+        // couple of repeated edge blocks, then a long transparent stretch.
+        val a = 0x0303030303030303L
+        val b = 0x0404040404040404L
+        val c = 0x0505050505050505L
+        val input = ByteBuffer.allocate(8 * 8).apply {
+            putLong(a); putLong(a)                                     // short run -> literals
+            putLong(b)                                                 // breaks it
+            putLong(c); putLong(c); putLong(c); putLong(c); putLong(c)  // long run -> header
+        }.array()
+        val out = AtemFrameEncoder.encodeRLE(input)
+        assertEquals(a, out.longAt(0), "the short run is written out verbatim")
+        assertEquals(a, out.longAt(8))
+        assertEquals(b, out.longAt(16))
+        assertEquals(AtemFrameEncoder.RLE_HEADER, out.longAt(24), "the long run still gets a header")
+        assertEquals(5L, out.longAt(32))
+        assertEquals(c, out.longAt(40))
+        assertEquals(48, out.size)
     }
 
     @Test

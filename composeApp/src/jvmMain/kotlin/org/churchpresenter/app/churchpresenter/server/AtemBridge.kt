@@ -146,9 +146,9 @@ internal class AtemBridge(private val json: Json) {
         }
         try {
             val ran = AtemConnectionManager.tryRun(atem.host, atem.port) { client ->
-                client.setKeyOnAir(useDsk, mixEffect, keyer, onAir)
+                client.setKeyOnAir(AtemKey(useDsk, mixEffect, keyer), onAir)
             }
-            if (!ran) AtemClient.cutKey(atem.host, atem.port, useDsk, mixEffect, keyer, onAir)
+            if (!ran) AtemClient.cutKey(atem.host, atem.port, AtemKey(useDsk, mixEffect, keyer), onAir)
             val target = if (useDsk) """"dsk":${keyer + 1}""" else """"me":${mixEffect + 1},"key":${keyer + 1}"""
             call.respondText(
                 """{"status":"${if (onAir) "on" else "off"}",$target}""",

@@ -29,8 +29,12 @@ import kotlin.concurrent.thread
  * **Nothing here waits on a clock.** Every response is emitted in reaction to a packet that
  * arrived, and a transfer completes the moment [expectedTransferBytes] have been received, so
  * tests end on a positive signal rather than by outlasting a timeout.
+ *
+ * Public rather than `internal` because it is a test *fixture* of `:atem`: `:composeApp`'s ATEM
+ * suites — the bridge, the upload routes, the lower third — drive the same fake through
+ * `testFixtures(projects.atem)`, and `internal` does not cross a module boundary.
  */
-internal class FakeAtemSwitcher(
+class FakeAtemSwitcher(
     private val videoMode: Int = VIDEO_MODE_1080P5994,
     private val mixEffects: Int = 4,
     private val downstreamKeyers: Int = 2,
@@ -43,8 +47,20 @@ internal class FakeAtemSwitcher(
     private val chunksPerGrant: Int = 320,
     /** Emit FTDE(code 1, "busy — retry") this many times before letting a transfer through. */
     private val ftdeRetriesBeforeSuccess: Int = 0,
+    /**
+     * When set, every transfer is refused with FTDE carrying this code instead of being granted.
+     * Same four-byte FTDE the captures show and [ftdeRetriesBeforeSuccess] already emits — only the
+     * code byte differs, and anything other than 1 is a refusal the client must not retry.
+     */
+    private val ftdeFatalCode: Int? = null,
     /** When false the hello is ignored, so a connect attempt fails as if nothing is listening. */
     private val answerHello: Boolean = true,
+    /**
+     * When false, commands are received and recorded but never ACKed — a switcher that has gone
+     * deaf mid-session. Withholding a reply, like [answerHello]; nothing here invents a layout the
+     * captures did not show.
+     */
+    private val ackCommands: Boolean = true,
 ) : AutoCloseable {
 
     companion object {
@@ -108,7 +124,7 @@ internal class FakeAtemSwitcher(
         }
         if (flags and FLAG_ACK_REQUEST == 0) return
 
-        ack(u16(pkt, 10))
+        if (ackCommands) ack(u16(pkt, 10))
         val commands = parseCommands(pkt)
         if (commands.isNotEmpty()) lastCommandSession = byteArrayOf(pkt[2], pkt[3])
         for ((name, payload) in commands) {
@@ -131,7 +147,10 @@ internal class FakeAtemSwitcher(
                 bytesThisTransfer = 0
                 chunksSinceGrant = 0
                 val transferId = u16(payload, 0)
-                if (ftdeSent < ftdeRetriesBeforeSuccess) {
+                val fatal = ftdeFatalCode
+                if (fatal != null) {
+                    emit("FTDE", ByteArray(4).also { writeU16(it, 0, transferId); it[2] = fatal.toByte() })
+                } else if (ftdeSent < ftdeRetriesBeforeSuccess) {
                     ftdeSent++
                     // code 1 = "busy, retry the whole transfer"
                     emit("FTDE", ByteArray(4).also { writeU16(it, 0, transferId); it[2] = 1 })

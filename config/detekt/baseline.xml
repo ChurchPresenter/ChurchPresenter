@@ -228,7 +228,6 @@
     <ID>MaxLineLength:AnnouncementsViewModel.kt$AnnouncementsViewModel$if (curMin &gt;= MAX_MINUTE) { _timerMinutes.value = 0; _timerHours.value += 1 } else { _timerMinutes.value = curMin + 1 }</ID>
     <ID>MaxLineLength:AnnouncementsViewModel.kt$AnnouncementsViewModel$presenterManager.startAnnouncementSpecificTime(_targetHour.value, _targetMinute.value, _targetSecond.value)</ID>
     <ID>MaxLineLength:AnnouncementsViewModel.kt$AnnouncementsViewModel$val targetSec = _targetHour.value * SECONDS_PER_HOUR + _targetMinute.value * SECONDS_PER_MINUTE + _targetSecond.value</ID>
-    <ID>MaxLineLength:AtemClient.kt$AtemClient$"Still slot ${slot + 1} does not exist on this ATEM (available: 1–${knownStills.maxOf { it.index } + 1})"</ID>
     <ID>MaxLineLength:AtemSettingsTab.kt$label = if (atem.detectedDownstreamKeyers &gt; 0) "DSK (1–${atem.detectedDownstreamKeyers})" else "DSK"</ID>
     <ID>MaxLineLength:AtemSettingsTab.kt$stringResource(Res.string.atem_capacity_mixed, banks.size, distinct.joinToString(" / "), fpsLabel)</ID>
     <ID>MaxLineLength:AtemSettingsTab.kt$stringResource(Res.string.atem_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)</ID>
@@ -1431,8 +1430,6 @@
     <ID>MaxLineLength:XdgFileChooser.kt$XdgFileChooser$openFileChooser(location, filters, title, suggestedName, selectDirectory = false, multiple = false, DBusFileChooser::SaveFile)</ID>
     <ID>MaxLineLength:ZefaniaRepositoryIndex.kt$ZefaniaRepositoryIndex$.</ID>
     <ID>TooGenericExceptionCaught:AtemBridge.kt$AtemBridge$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:AtemClient.kt$AtemClient$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:AtemConnectionManager.kt$AtemConnectionManager$e: Exception</ID>
     <ID>TooGenericExceptionCaught:AtemSettingsTab.kt$e: Exception</ID>
     <ID>TooGenericExceptionCaught:AutoStartManager.kt$AutoStartManager$e: Exception</ID>
     <ID>TooGenericExceptionCaught:BackgroundSettingsTab.kt$e: Exception</ID>
@@ -1490,7 +1487,6 @@
     <ID>TooGenericExceptionCaught:ZefaniaSource.kt$ZefaniaSource$e: Exception</ID>
     <ID>TooGenericExceptionCaught:main.kt$e: Exception</ID>
     <ID>TooManyFunctions:AnnouncementsViewModel.kt$AnnouncementsViewModel</ID>
-    <ID>TooManyFunctions:AtemClient.kt$AtemClient</ID>
     <ID>TooManyFunctions:AutoStartManager.kt$AutoStartManager</ID>
     <ID>TooManyFunctions:BackgroundSettingsTab.kt$org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab.kt</ID>
     <ID>TooManyFunctions:Bible.kt$Bible</ID>
@@ -1546,8 +1542,6 @@
     <ID>TooManyFunctions:WindowsWindowCapture.kt$WindowsWindowCapture</ID>
     <ID>TooManyFunctions:XdgFileChooser.kt$XdgFileChooser : FileChooser</ID>
     <ID>TooManyFunctions:ZefaniaRepositoryIndex.kt$ZefaniaRepositoryIndex</ID>
-    <ID>LongParameterList:AtemClient.kt$AtemClient$( payload: ByteArray, transferId: Int, data: ByteArray, dataBuf: java.nio.ByteBuffer, alreadySent: Int, onProgress: (Float) -&gt; Unit, )</ID>
-    <ID>LongParameterList:AtemClient.kt$AtemClient.Companion$(host: String, port: Int, useDsk: Boolean, mixEffect: Int, keyer: Int, onAir: Boolean)</ID>
     <ID>LongParameterList:AutoFitUtils.kt$( textMeasurer: TextMeasurer, lines: List&lt;String&gt;, baseStyle: TextStyle, availableWidth: Int, availableHeight: Int, maxFontSize: Int, hasInfoLine: Boolean = false, )</ID>
     <ID>LongParameterList:AutoFitUtils.kt$( textMeasurer: TextMeasurer, sections: List&lt;LyricSection&gt;, baseStyle: TextStyle, availableWidth: Int, availableHeight: Int, reservedHeight: Int = 0, includeEndIndicator: Boolean = false, )</ID>
     <ID>LongParameterList:Bible.kt$Bible$(state: SpbParseState, code: String, book: Int, chapter: Int, verse: Int, text: String)</ID>

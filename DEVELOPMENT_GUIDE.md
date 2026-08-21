@@ -464,7 +464,7 @@ execution order, so it can appear on one machine and not another.
 ### The modules of this build
 
 `converter/`, `companion-satellite/`, `theme/`, `core-models/`, `bible-engine/`,
-`lottieGenerator/`, `crossword/`, `presentation-engine/`, `settings/`, `diagnostics/` and
+`lottieGenerator/`, `crossword/`, `presentation-engine/`, `settings/`, `diagnostics/`, `atem/` and
 `planning-center/` are all part of this build, so none of them needs a wrapper of its own:
 
 ```bash
@@ -480,6 +480,7 @@ execution order, so it can appear on one machine and not another.
 ./gradlew :presentation-engine:test    # the PPTX/Keynote/PDF engine's suite
 ./gradlew :settings:test               # the persisted-settings module's suite
 ./gradlew :diagnostics:test            # the crash-reporting module's suite
+./gradlew :atem:test                   # the ATEM protocol client's suite
 ./gradlew :planning-center:test        # the Planning Center client's suite
 ```
 

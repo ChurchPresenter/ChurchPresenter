@@ -112,6 +112,9 @@ jobs:
             diagnostics:
               - *shared
               - 'diagnostics/**'
+            atem:
+              - *shared
+              - 'atem/**'
             planningcenter:
               - *shared
               - 'planning-center/**'
@@ -144,7 +147,7 @@ jobs:
         run: >-
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
-          :diagnostics:detekt :planning-center:detekt
+          :diagnostics:detekt :atem:detekt :planning-center:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -339,6 +342,17 @@ jobs:
         if: always() && steps.modules.outputs.diagnostics == 'true'
         run: ./gradlew :diagnostics:jacocoTestCoverageVerification -x test
 
+      # The ATEM protocol client. Its suite is loopback UDP against FakeAtemSwitcher -- no
+      # hardware, no display -- so it runs here like any other module. Its BRANCH/COMPLEXITY floors
+      # are below the 85% default for the reason given in its build file.
+      - name: ATEM client tests
+        if: always() && steps.modules.outputs.atem == 'true'
+        run: ./gradlew :atem:test
+
+      - name: ATEM client coverage floor
+        if: always() && steps.modules.outputs.atem == 'true'
+        run: ./gradlew :atem:jacocoTestCoverageVerification -x test
+
       - name: Planning Center tests
         if: always() && steps.modules.outputs.planningcenter == 'true'
         run: ./gradlew :planning-center:test
@@ -375,6 +389,7 @@ jobs:
             bible-engine/build/test-results/**/TEST-*.xml
             settings/build/test-results/**/TEST-*.xml
             diagnostics/build/test-results/**/TEST-*.xml
+            atem/build/test-results/**/TEST-*.xml
             planning-center/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
@@ -393,6 +408,7 @@ jobs:
             Bible Lookup Engine
             Settings
             Diagnostics
+            ATEM client
             Planning Center
           detailed_summary: true
           include_passed: false
@@ -532,5 +548,7 @@ jobs:
             settings/build/test-results/
             diagnostics/build/reports/tests/
             diagnostics/build/test-results/
+            atem/build/reports/tests/
+            atem/build/test-results/
             planning-center/build/reports/tests/
             planning-center/build/test-results/

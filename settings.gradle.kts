@@ -63,6 +63,10 @@ include(":settings")
 // Crash reporting and diagnostics: the crash log on disk and the Sentry forwarding behind it.
 // Depended on by :composeApp and by every module that needs to report a fault.
 include(":diagnostics")
+// The Blackmagic ATEM protocol client: a plain Kotlin library speaking the switcher's UDP protocol
+// — connect, state dump, upstream/downstream key, media-pool upload. Depended on by :composeApp,
+// which wires it to settings and the lower third in AtemBridge.
+include(":atem")
 // The Planning Center Online client: the OAuth conversation, the Services REST calls and the
 // loopback listener that catches the consent redirect. Depended on by :composeApp, which wraps it
 // in PlanningCenterImportViewModel.
