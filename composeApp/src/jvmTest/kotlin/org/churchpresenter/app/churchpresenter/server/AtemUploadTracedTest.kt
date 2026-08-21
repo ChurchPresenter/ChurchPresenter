@@ -23,6 +23,10 @@ class AtemUploadTracedTest {
             options.isEnableUncaughtExceptionHandler = false
             options.isEnableAutoSessionTracking = false
             options.tracesSampleRate = 1.0
+            // Sentry.close() blocks for this long draining its queue, and the default is 2000ms —
+            // paid by every test in this class, which is the whole of its runtime. There is nothing
+            // to drain: the transport above is NoOp, so the wait is pure teardown cost.
+            options.shutdownTimeoutMillis = 0
         }
     }
 
