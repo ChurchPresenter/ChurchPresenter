@@ -12,18 +12,20 @@ No credentials ship with it. Each church registers its own free PCO Developer ap
 supplies its own client id and secret, the same bring-your-own-key shape as the Pexels/Pixabay
 stock media client. **One-way pull only** — nothing is ever written back to Planning Center.
 
-It keeps the packages it always had — `…churchpresenter.data` and `…churchpresenter.server` — so
-**no import in the app changed when it moved**, the same way `:core-models`, `:settings` and
-`:diagnostics` kept theirs. Two modules sharing a package name is fine on a plain classpath; do not
-"tidy" it into a new package.
+**The package is `org.churchpresenter.planningcenter`** — one package, flat. It held two of the
+app's own (`…churchpresenter.data` for the client and formatter, `…churchpresenter.server` for the
+callback listener), which `:composeApp` still owns and fills with 34 and 32 files respectively.
+Splitting this module's three files across two shared package names bought nothing: they are one
+integration, and the `data`/`server` divide was an artifact of where they happened to sit in the
+app.
 
 ## What lives here
 
 | Path | Owns |
 |---|---|
-| `data/PlanningCenterClient.kt` | `object PlanningCenterClient` — OAuth token exchange and refresh, `/people/v2/me`, service types, plans, plan items, arrangement lyrics, attachment metadata, attachment download |
-| `data/PlanningCenterLyricsFormatter.kt` | Chord-chart → plain lyrics, and PCO's `html_details` rich text → plain text |
-| `server/PlanningCenterAuthServer.kt` | The loopback listener on the registered redirect port, started per connect attempt and torn down when the callback lands |
+| `PlanningCenterClient.kt` | `object PlanningCenterClient` — OAuth token exchange and refresh, `/people/v2/me`, service types, plans, plan items, arrangement lyrics, attachment metadata, attachment download |
+| `PlanningCenterLyricsFormatter.kt` | Chord-chart → plain lyrics, and PCO's `html_details` rich text → plain text |
+| `PlanningCenterAuthServer.kt` | The loopback listener on the registered redirect port, started per connect attempt and torn down when the callback lands |
 
 ## What deliberately stayed in `:composeApp`
 

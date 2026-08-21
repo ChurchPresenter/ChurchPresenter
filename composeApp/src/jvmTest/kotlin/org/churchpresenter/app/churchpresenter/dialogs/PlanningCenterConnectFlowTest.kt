@@ -4,8 +4,8 @@ import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
-import org.churchpresenter.app.churchpresenter.server.PlanningCenterAuthServer
+import org.churchpresenter.planningcenter.PlanningCenterClient
+import org.churchpresenter.planningcenter.PlanningCenterAuthServer
 import java.net.URI
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest

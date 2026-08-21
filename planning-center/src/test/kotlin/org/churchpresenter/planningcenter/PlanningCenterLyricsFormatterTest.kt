@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.planningcenter
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

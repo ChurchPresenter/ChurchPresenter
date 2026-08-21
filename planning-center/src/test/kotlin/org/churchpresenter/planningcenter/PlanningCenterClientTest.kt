@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.planningcenter
 
 import org.churchpresenter.settings.utils.Constants
 import java.net.URLDecoder

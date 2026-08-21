@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.planningcenter
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
