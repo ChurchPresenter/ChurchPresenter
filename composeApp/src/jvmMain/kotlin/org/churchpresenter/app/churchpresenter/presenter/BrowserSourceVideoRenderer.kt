@@ -57,6 +57,24 @@ private const val MIN_CROSSFADE_MS = 100
 private const val NANOS_PER_MILLI = 1_000_000L
 
 /**
+ * One emitted delta: a PNG-encoded sub-rectangle of the full [fullWidth]x[fullHeight] frame,
+ * positioned at ([x],[y]). A full-frame delta has x=0, y=0, rectWidth=fullWidth,
+ * rectHeight=fullHeight — sent for the very first tick and whenever a new HTTP subscriber
+ * attaches, since a brand-new client's compositing canvas has nothing to apply a partial rect
+ * onto yet. Note: default `equals()`/`hashCode()` on [png] is reference-based, not content-based
+ * — harmless since nothing ever compares instances, only passes them through.
+ */
+data class BrowserSourceFrame(
+    val x: Int,
+    val y: Int,
+    val rectWidth: Int,
+    val rectHeight: Int,
+    val fullWidth: Int,
+    val fullHeight: Int,
+    val png: ByteArray,
+)
+
+/**
  * Renders a Browser Source output's live content off-screen (no window, no JCEF — same
  * [ImageComposeScene] technique as [LowerThirdOffscreenRenderer]) and encodes changed frames
  * as PNG, so a remote OBS/vMix Browser Source gets a pixel-identical stream of the same
@@ -86,24 +104,6 @@ private const val NANOS_PER_MILLI = 1_000_000L
  * whether content changed, to bound how long a client can stay desynced from a dropped
  * dirty-rect delta (see [frames]'s KDoc for why that can happen).
  */
-/**
- * One emitted delta: a PNG-encoded sub-rectangle of the full [fullWidth]x[fullHeight] frame,
- * positioned at ([x],[y]). A full-frame delta has x=0, y=0, rectWidth=fullWidth,
- * rectHeight=fullHeight — sent for the very first tick and whenever a new HTTP subscriber
- * attaches, since a brand-new client's compositing canvas has nothing to apply a partial rect
- * onto yet. Note: default `equals()`/`hashCode()` on [png] is reference-based, not content-based
- * — harmless since nothing ever compares instances, only passes them through.
- */
-data class BrowserSourceFrame(
-    val x: Int,
-    val y: Int,
-    val rectWidth: Int,
-    val rectHeight: Int,
-    val fullWidth: Int,
-    val fullHeight: Int,
-    val png: ByteArray,
-)
-
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class)
 class BrowserSourceVideoRenderer(
     private val presenterManager: PresenterManager,
@@ -189,15 +189,6 @@ class BrowserSourceVideoRenderer(
             return TickDecision(rect, forceFullFrame, contentChanged)
         }
 
-        /**
-         * Tight bounding box of pixels that differ between [current] and [previous] (both row-major
-         * width*height IntArrays). Only called when the buffers are already known to differ, so a
-         * diff always exists. Two-phase for cheapness: first shrink top/bottom via whole-row
-         * comparisons to skip unchanged rows cheaply (the common case — a small moving region, e.g.
-         * a blinking cursor or a Lottie lower-third, against an otherwise static frame), then scan
-         * columns only within the surviving row band. A full-screen crossfade (nearly every pixel
-         * changes) degrades to close to the full frame — expected, not a regression.
-         */
         /** First and last column of one row that differ; (width, -1) when the row is unchanged. */
         private fun changedColumns(
             current: IntArray,
@@ -216,6 +207,15 @@ class BrowserSourceVideoRenderer(
             return first to last
         }
 
+        /**
+         * Tight bounding box of pixels that differ between [current] and [previous] (both row-major
+         * width*height IntArrays). Only called when the buffers are already known to differ, so a
+         * diff always exists. Two-phase for cheapness: first shrink top/bottom via whole-row
+         * comparisons to skip unchanged rows cheaply (the common case — a small moving region, e.g.
+         * a blinking cursor or a Lottie lower-third, against an otherwise static frame), then scan
+         * columns only within the surviving row band. A full-screen crossfade (nearly every pixel
+         * changes) degrades to close to the full frame — expected, not a regression.
+         */
         internal fun computeDirtyRect(current: IntArray, previous: IntArray, width: Int, height: Int): DirtyRect {
             var minRow = 0
             while (minRow < height && rowsEqual(current, previous, minRow, width)) minRow++
