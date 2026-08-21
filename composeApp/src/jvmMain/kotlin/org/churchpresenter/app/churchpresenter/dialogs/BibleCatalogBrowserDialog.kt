@@ -60,11 +60,11 @@ import churchpresenter.composeapp.generated.resources.bible_catalog_source_bebli
 import churchpresenter.composeapp.generated.resources.ok
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.data.BebliaSource
-import org.churchpresenter.app.churchpresenter.data.BibleModule
-import org.churchpresenter.app.churchpresenter.data.BibleSource
-import org.churchpresenter.app.churchpresenter.data.EBibleSource
-import org.churchpresenter.app.churchpresenter.data.ZefaniaSource
+import org.churchpresenter.bibleformats.catalog.BebliaSource
+import org.churchpresenter.bibleformats.catalog.BibleModule
+import org.churchpresenter.bibleformats.catalog.BibleSource
+import org.churchpresenter.bibleformats.catalog.EBibleSource
+import org.churchpresenter.bibleformats.catalog.ZefaniaSource
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogViewModel
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource

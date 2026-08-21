@@ -71,3 +71,7 @@ include(":atem")
 // loopback listener that catches the consent redirect. Depended on by :composeApp, which wraps it
 // in PlanningCenterImportViewModel.
 include(":planning-center")
+// Bible formats: the .spb converters (USFX, Zefania XML, Beblia) and the catalogues the app
+// downloads modules from. Depended on by :composeApp for the in-app browser and by :converter,
+// which offers the same conversions from its own window.
+include(":bible-formats")

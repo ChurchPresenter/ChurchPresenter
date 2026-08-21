@@ -35,6 +35,10 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > catches the consent redirect. Each church brings its own free PCO Developer credentials; nothing
 > is written back. `./gradlew :planning-center:test`.
 >
+> **[`bible-formats/`](./bible-formats)** — getting a Bible onto disk: the eBible, Zefania and
+> Beblia catalogues the download browser lists, and the converters that turn USFX and Zefania XML
+> into the `.spb` format the app reads. `./gradlew :bible-formats:test`.
+>
 > **[`songlibrary/`](./songlibrary)** — the Song Library Manager: every song in the library folder in one editable grid, opened from the Help menu. It reads and writes through **[`core-models/`](./core-models)**, which holds the song model and the `.song` file format the app itself uses.
 >
 > **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop,
