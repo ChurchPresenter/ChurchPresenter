@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.songchords
 
 /**
  * Turns a chords-over-lyrics sheet — the layout every chord site publishes, where a line of chords
@@ -34,6 +34,16 @@ object ChordSheetImporter {
         if (tokens.isEmpty() || !tokens.all { ChordTransposer.isChord(it) }) return false
         return tokens.size >= 2 || tokens.first().length >= 2 || line.first().isWhitespace()
     }
+
+    /**
+     * `Bb Bb/D Eb` as `[Bb] [Bb/D] [Eb]`.
+     *
+     * Bare markers rather than a merge into the line beneath: merging puts each chord on the column
+     * it was written over, which is only right when the source positioned them there. Song packs
+     * mostly list a section's chords instead, and merging those by column lands them mid-word.
+     */
+    fun bracket(line: String): String =
+        Regex("\\S+").findAll(line).joinToString(" ") { "[${it.value}]" }
 
     /**
      * The marker a section heading becomes, or null when the line is not a heading.

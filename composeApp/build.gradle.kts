@@ -327,6 +327,7 @@ kotlin {
             implementation(projects.bibleFormats)
             // The song library: the grid of every song in the library, opened from the Help menu.
             implementation(projects.songlibrary)
+            implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.
             implementation(projects.companionSatellite)

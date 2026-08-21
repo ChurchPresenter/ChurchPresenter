@@ -28,6 +28,8 @@ dependencies {
     // The .spb converters and Bible catalogues this window offers — extracted so the app can
     // use them without depending on this Compose application module.
     implementation(projects.bibleFormats)
+    // The chord grammar songs are written in, shared with the app rather than repeated here.
+    implementation(projects.songChords)
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)

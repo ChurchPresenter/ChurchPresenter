@@ -47,10 +47,10 @@ import churchpresenter.composeapp.generated.resources.song_transpose_down
 import churchpresenter.composeapp.generated.resources.song_transpose_reset
 import churchpresenter.composeapp.generated.resources.song_transpose_up
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.app.churchpresenter.utils.ChordSegment
-import org.churchpresenter.app.churchpresenter.utils.ChordTransposer
-import org.churchpresenter.app.churchpresenter.utils.SongSectionWordGroup
-import org.churchpresenter.app.churchpresenter.utils.SongSectionWords
+import org.churchpresenter.songchords.ChordSegment
+import org.churchpresenter.songchords.ChordTransposer
+import org.churchpresenter.songchords.SongSectionWordGroup
+import org.churchpresenter.songchords.SongSectionWords
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 

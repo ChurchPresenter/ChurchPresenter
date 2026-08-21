@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.songchords
 
 /** The kind of section a header word names, before it is narrowed to a colour or a bracket. */
 enum class SongSectionWordGroup { PRE_CHORUS, CHORUS, BRIDGE, TAG, INTRO, INSTRUMENTAL, VERSE }

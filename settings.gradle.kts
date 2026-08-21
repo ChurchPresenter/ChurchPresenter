@@ -75,3 +75,8 @@ include(":planning-center")
 // downloads modules from. Depended on by :composeApp for the in-app browser and by :converter,
 // which offers the same conversions from its own window.
 include(":bible-formats")
+
+// Song chords: the grammar a song's `[G]lyric` markup is written in — what counts as a chord, what
+// counts as a section heading, transposition, and the chord-sheet import that produces the markup.
+// Depended on by :composeApp and by :converter, which needs the same rule to write songs out.
+include(":song-chords")

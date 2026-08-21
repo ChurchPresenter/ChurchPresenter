@@ -429,7 +429,6 @@
     <ID>MaxLineLength:CanvasTab.kt$val</ID>
     <ID>MaxLineLength:CanvasTab.kt$val displayAr0 = if (presentationBounds0.height &gt; 0) presentationBounds0.width.toFloat() / presentationBounds0.height else 0f</ID>
     <ID>MaxLineLength:CanvasTab.kt$val sceneAr = if (currentScene.canvasHeight &gt; 0) currentScene.canvasWidth.toFloat() / currentScene.canvasHeight else 0f</ID>
-    <ID>MaxLineLength:ChordTransposer.kt$ChordTransposer$fun</ID>
     <ID>MaxLineLength:ColorPickerDialog.kt$.</ID>
     <ID>MaxLineLength:ColorPickerDialog.kt$TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }</ID>
     <ID>MaxLineLength:ColorPickerDialog.kt$drawCircle(Color.Black.copy(alpha = 0.4f), radius = 9.dp.toPx(), center = Offset(cx, cy), style = Stroke(1.dp.toPx()))</ID>
@@ -1497,7 +1496,6 @@
     <ID>TooManyFunctions:BibleViewModelSmartSearch.kt$org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModelSmartSearch.kt</ID>
     <ID>TooManyFunctions:CCLIReportDialog.kt$org.churchpresenter.app.churchpresenter.dialogs.CCLIReportDialog.kt</ID>
     <ID>TooManyFunctions:CameraEnumeration.kt$org.churchpresenter.app.churchpresenter.composables.CameraEnumeration.kt</ID>
-    <ID>TooManyFunctions:ChordTransposer.kt$ChordTransposer</ID>
     <ID>TooManyFunctions:CompanionSatelliteViewModel.kt$CompanionSatelliteViewModel</ID>
     <ID>TooManyFunctions:CompanionServer.kt$CompanionServer</ID>
     <ID>TooManyFunctions:Constants.kt$org.churchpresenter.app.churchpresenter.utils.Constants.kt</ID>

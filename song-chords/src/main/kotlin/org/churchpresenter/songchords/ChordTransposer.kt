@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.songchords
 
 /**
  * One run of lyric text and the chord that lands on its first syllable.
@@ -19,7 +19,13 @@ data class ChordSegment(val chord: String, val text: String)
  * Chords share `[...]` with section headers, which songs have always used. The two never collide in
  * practice — a header occupies a whole line by itself, a chord never does — so [isHeaderLine]
  * resolves the ambiguity positionally, and no existing song file has to change.
+ *
+ * Over the function threshold on purpose. These are one grammar, not a grab-bag: recognising a
+ * chord, moving it and spelling the result are the same rule read three ways, and each is called
+ * from production code. Splitting them would put the pitch tables on the far side of an import from
+ * the regex that finds what to look up in them.
  */
+@Suppress("TooManyFunctions")
 object ChordTransposer {
 
     private const val SEMITONES = 12
@@ -133,7 +139,12 @@ object ChordTransposer {
      * With [showChords] off the whole line comes back as one chord-free segment, so the same
      * renderer draws the plain-lyrics view without a second code path.
      */
-    fun parseLine(line: String, steps: Int = 0, flats: Boolean = false, showChords: Boolean = true): List<ChordSegment> {
+    fun parseLine(
+        line: String,
+        steps: Int = 0,
+        flats: Boolean = false,
+        showChords: Boolean = true,
+    ): List<ChordSegment> {
         if (!showChords || !hasChords(line)) {
             return listOf(ChordSegment("", if (showChords) line else stripChords(line)))
         }

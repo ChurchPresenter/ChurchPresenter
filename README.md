@@ -39,6 +39,11 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > Beblia catalogues the download browser lists, and the converters that turn USFX and Zefania XML
 > into the `.spb` format the app reads. `./gradlew :bible-formats:test`.
 >
+> **[`song-chords/`](./song-chords)** — the grammar songs are written in: what counts as a chord,
+> what counts as a section heading, transposition, and turning a pasted chord sheet into the inline
+> `[G]lyric` markup. Depends on nothing, so the app and the converter share one rule instead of two.
+> `./gradlew :song-chords:test`.
+>
 > **[`songlibrary/`](./songlibrary)** — the Song Library Manager: every song in the library folder in one editable grid, opened from the Help menu. It reads and writes through **[`core-models/`](./core-models)**, which holds the song model and the `.song` file format the app itself uses.
 >
 > **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop,

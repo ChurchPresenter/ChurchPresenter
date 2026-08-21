@@ -95,6 +95,8 @@ jobs:
             converter:
               - *shared
               - 'converter/**'
+              - 'bible-formats/**'        # implementation(projects.bibleFormats)
+              - 'song-chords/**'          # implementation(projects.songChords)
             satellite:
               - *shared
               - 'companion-satellite/**'
@@ -146,6 +148,9 @@ jobs:
               - 'settings/**'             # implementation(projects.settings)
               - 'diagnostics/**'          # implementation(projects.diagnostics)
               - 'core-models/**'          # via :settings
+            songchords:
+              - *shared
+              - 'song-chords/**'          # depends on nothing else: the grammar is pure text
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -176,6 +181,7 @@ jobs:
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :planning-center:detekt
+          :song-chords:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -397,6 +403,14 @@ jobs:
         if: always() && steps.modules.outputs.bibleformats == 'true'
         run: ./gradlew :bible-formats:jacocoTestCoverageVerification -x test
 
+      - name: Song chords tests
+        if: always() && steps.modules.outputs.songchords == 'true'
+        run: ./gradlew :song-chords:test
+
+      - name: Song chords coverage floor
+        if: always() && steps.modules.outputs.songchords == 'true'
+        run: ./gradlew :song-chords:jacocoTestCoverageVerification -x test
+
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -428,6 +442,7 @@ jobs:
             atem/build/test-results/**/TEST-*.xml
             planning-center/build/test-results/**/TEST-*.xml
             bible-formats/build/test-results/**/TEST-*.xml
+            song-chords/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -592,3 +607,5 @@ jobs:
             planning-center/build/test-results/
             bible-formats/build/reports/tests/
             bible-formats/build/test-results/
+            song-chords/build/reports/tests/
+            song-chords/build/test-results/
