@@ -137,6 +137,9 @@ jobs:
             planningcenter:
               - *shared
               - 'planning-center/**'
+            bibleformats:
+              - *shared
+              - 'bible-formats/**'
               - 'settings/**'             # implementation(projects.settings)
               - 'diagnostics/**'          # implementation(projects.diagnostics)
               - 'core-models/**'          # via :settings
@@ -169,7 +172,7 @@ jobs:
         run: >-
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
-          :diagnostics:detekt :atem:detekt :planning-center:detekt
+          :diagnostics:detekt :bible-formats:detekt :atem:detekt :planning-center:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -383,6 +386,14 @@ jobs:
         if: always() && steps.modules.outputs.planningcenter == 'true'
         run: ./gradlew :planning-center:jacocoTestCoverageVerification -x test
 
+      - name: Bible formats tests
+        if: always() && steps.modules.outputs.bibleformats == 'true'
+        run: ./gradlew :bible-formats:test
+
+      - name: Bible formats coverage floor
+        if: always() && steps.modules.outputs.bibleformats == 'true'
+        run: ./gradlew :bible-formats:jacocoTestCoverageVerification -x test
+
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -413,6 +424,7 @@ jobs:
             diagnostics/build/test-results/**/TEST-*.xml
             atem/build/test-results/**/TEST-*.xml
             planning-center/build/test-results/**/TEST-*.xml
+            bible-formats/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -432,6 +444,7 @@ jobs:
             Diagnostics
             ATEM client
             Planning Center
+            Bible formats
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -574,3 +587,5 @@ jobs:
             atem/build/test-results/
             planning-center/build/reports/tests/
             planning-center/build/test-results/
+            bible-formats/build/reports/tests/
+            bible-formats/build/test-results/

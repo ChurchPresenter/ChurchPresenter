@@ -322,6 +322,8 @@ kotlin {
             // The Planning Center client: OAuth, the Services REST calls and the loopback
             // listener for the consent redirect, wrapped by PlanningCenterImportViewModel.
             implementation(projects.planningCenter)
+            // Bible module formats and the download catalogues behind the in-app browser.
+            implementation(projects.bibleFormats)
             // The song library: the grid of every song in the library, opened from the Help menu.
             implementation(projects.songlibrary)
             // The Companion Satellite protocol client: a real module rather than a mounted source
