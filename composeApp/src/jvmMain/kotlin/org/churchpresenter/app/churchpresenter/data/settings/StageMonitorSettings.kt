@@ -81,13 +81,7 @@ data class StageMonitorSettings(
     val zoneStyles: Map<StageMonitorStyleZone, StageMonitorZoneStyle> = defaultZoneStyles(),
 
     // Where the metronome flash dot is anchored; NONE = disabled (default).
-    val metronomePosition: MetronomePosition = MetronomePosition.NONE,
-
-    /**
-     * Whether a song that carries chords is drawn as a chart. Off, the zone shows the words alone,
-     * which is what a speaker or a vocalist reading lyrics wants from the same screen.
-     */
-    val showChords: Boolean = true
+    val metronomePosition: MetronomePosition = MetronomePosition.NONE
 ) {
     /** Safe lookup that falls back to the built-in default zone for content types missing from older saved settings. */
     fun zoneFor(type: StageMonitorContentType): StageMonitorZone =

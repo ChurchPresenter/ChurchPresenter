@@ -66,12 +66,14 @@ import churchpresenter.composeapp.generated.resources.media_vlc_install
 import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
 import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.projection_content_background
+import churchpresenter.composeapp.generated.resources.projection_content_chords_tooltip
 import churchpresenter.composeapp.generated.resources.projection_content_lt_background
 import churchpresenter.composeapp.generated.resources.projection_content_song_la
 import churchpresenter.composeapp.generated.resources.projection_content_web
 import churchpresenter.composeapp.generated.resources.projection_content_song_la_tooltip
 import churchpresenter.composeapp.generated.resources.projection_content_stt_tooltip
 import churchpresenter.composeapp.generated.resources.projection_position_help
+import churchpresenter.composeapp.generated.resources.stage_monitor_show_chords
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.screen
 import churchpresenter.composeapp.generated.resources.screen_lang_language_1
@@ -312,11 +314,14 @@ fun ProjectionSettingsTab(
     val backgroundLayeredTooltip = stringResource(Res.string.content_background_layered_tooltip)
 
     val songLaTooltip = stringResource(Res.string.projection_content_song_la_tooltip)
+    val chordsLabel = stringResource(Res.string.stage_monitor_show_chords)
+    val chordsTooltip = stringResource(Res.string.projection_content_chords_tooltip)
     val contentCols = listOf(
         ContentCol(songLaLabel, { it.songLookAhead }, { a, v ->
             if (v) a.copy(songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode, songLookAhead = true)
             else a.copy(songLookAhead = false)
         }, enabled = { it.songMode != Constants.SONG_LANG_OFF }, tooltip = songLaTooltip),
+        ContentCol(chordsLabel, { it.showChords }, { a, v -> a.copy(showChords = v) }, tooltip = chordsTooltip),
         ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
         ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
         ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),

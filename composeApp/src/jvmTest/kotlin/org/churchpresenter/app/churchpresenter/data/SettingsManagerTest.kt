@@ -522,4 +522,53 @@ class SettingsManagerTest {
             "\"secondary\" names position 1, on a browser source exactly as on a screen",
         )
     }
+
+    // ── Version 7: chords moved from the stage monitor onto each output ─────────────────────────
+
+    @Test
+    fun `chords switched off globally are switched off on every output`() {
+        writeSettings(
+            """{"settingsVersion":6,"stageMonitorSettings":{"showChords":false},
+               "projectionSettings":{
+               "screenAssignments":[{"targetDisplay":0},{"targetDisplay":1}],
+               "browserSourceOutputs":[{"targetDisplay":0}]}}""",
+        )
+
+        val projection = SettingsManager().loadSettings().projectionSettings
+
+        assertTrue(
+            projection.screenAssignments.none { it.showChords },
+            "the one switch the operator turned off has to survive becoming a per-output one",
+        )
+        assertFalse(
+            projection.browserSourceOutputs.single().showChords,
+            "a browser source can be a stage monitor too, so it carries the same field",
+        )
+    }
+
+    @Test
+    fun `chords left on globally leave every output at the default`() {
+        writeSettings(
+            """{"settingsVersion":6,"stageMonitorSettings":{"showChords":true},
+               "projectionSettings":{"screenAssignments":[{"targetDisplay":0}]}}""",
+        )
+
+        assertTrue(SettingsManager().loadSettings().projectionSettings.screenAssignments.single().showChords)
+    }
+
+    @Test
+    fun `an output that already names its own chord setting is left alone`() {
+        // A file written by this build and then hand-edited backwards: the per-output field is the
+        // newer, more specific statement and must not be overwritten by the global it replaced.
+        writeSettings(
+            """{"settingsVersion":6,"stageMonitorSettings":{"showChords":false},
+               "projectionSettings":{"screenAssignments":[
+               {"targetDisplay":0,"showChords":true},{"targetDisplay":1}]}}""",
+        )
+
+        val assignments = SettingsManager().loadSettings().projectionSettings.screenAssignments
+
+        assertTrue(assignments[0].showChords, "an explicit per-output value wins over the old global")
+        assertFalse(assignments[1].showChords)
+    }
 }

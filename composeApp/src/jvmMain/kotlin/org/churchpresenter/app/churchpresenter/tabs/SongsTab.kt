@@ -200,7 +200,7 @@ fun SongsTab(
                     UsageEvents.record(UsageEvent.SONG_DUAL_LANGUAGE)
                 }
                 if (isSplitScreenSong(outputs)) UsageEvents.record(UsageEvent.SONG_SPLIT_SCREEN)
-                if (isChordChartPresentation(song, appSettings.stageMonitorSettings.showChords, outputs)) {
+                if (isChordChartPresentation(song, outputs)) {
                     UsageEvents.record(UsageEvent.SONG_CHORD_CHART)
                 }
             }

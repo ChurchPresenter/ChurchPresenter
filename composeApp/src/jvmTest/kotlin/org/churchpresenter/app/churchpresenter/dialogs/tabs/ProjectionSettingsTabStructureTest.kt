@@ -102,7 +102,7 @@ class ProjectionSettingsTabStructureTest {
             )
             gridButton(Grid.keyOutput(row)).assertTextEquals("None")
             gridButton(Grid.displayMode(row)).assertTextEquals("Full Screen")
-            gridButton(Grid.contentOutputs(row)).assertTextEquals("15 of 16 enabled")
+            gridButton(Grid.contentOutputs(row)).assertTextEquals("16 of 17 enabled")
         }
     }
 
@@ -113,7 +113,7 @@ class ProjectionSettingsTabStructureTest {
             gridButton(Grid.targetDisplay(row = 0)).assertTextEquals("None")
             gridButton(Grid.keyOutput(row = 0)).assertTextEquals("None")
             gridButton(Grid.displayMode(row = 0)).assertTextEquals("Full Screen")
-            gridButton(Grid.contentOutputs(row = 0)).assertTextEquals("15 of 16 enabled")
+            gridButton(Grid.contentOutputs(row = 0)).assertTextEquals("16 of 17 enabled")
         }
     }
 

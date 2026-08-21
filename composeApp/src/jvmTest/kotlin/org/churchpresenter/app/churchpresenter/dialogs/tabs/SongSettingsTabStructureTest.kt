@@ -66,9 +66,10 @@ class SongSettingsTabStructureTest {
         fontFields().assertCountEquals(8)
     }
 
+    /** One per styled text block, plus the chord colour the two lyric blocks each carry. */
     @Test
     fun `the tab renders one colour field per styled text block`() = songTab { _ ->
-        colorFields().assertCountEquals(8)
+        colorFields().assertCountEquals(10)
     }
 
     @Test
@@ -165,8 +166,9 @@ class SongSettingsTabStructureTest {
         songTab(initial = allShadows) { _ ->
             onAllNodesWithText("SIZE (%)").assertCountEquals(StyleGroup.COUNT)
             onAllNodesWithText("INTENSITY (%)").assertCountEquals(StyleGroup.COUNT)
-            // Each row adds a colour field and two stepper fields to the tab.
-            colorFields().assertCountEquals(StyleGroup.COUNT * 2)
+            // Each row adds a colour field and two stepper fields to the tab. The two extra are the
+            // full-screen and lower-third chord colours, which no shadow row accounts for.
+            colorFields().assertCountEquals(StyleGroup.COUNT * 2 + 2)
             numberFields().assertCountEquals(15 + StyleGroup.COUNT * 2)
             // Every shadow defaults to black, and each row shows that value in its own colour field.
             onAllNodesWithText("#000000").assertCountEquals(StyleGroup.COUNT)

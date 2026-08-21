@@ -16,7 +16,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,7 +41,6 @@ import churchpresenter.composeapp.generated.resources.stage_monitor_position_cen
 import churchpresenter.composeapp.generated.resources.stage_monitor_position_middle_left
 import churchpresenter.composeapp.generated.resources.stage_monitor_position_middle_right
 import churchpresenter.composeapp.generated.resources.stage_monitor_position_top_center
-import churchpresenter.composeapp.generated.resources.stage_monitor_show_chords
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_clock
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_next
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_notes
@@ -281,12 +279,6 @@ private fun StageMonitorContentSection(
             },
             modifier = Modifier.padding(vertical = 4.dp)
         )
-        SettingRow(label = stringResource(Res.string.stage_monitor_show_chords)) {
-            Switch(
-                checked = sm.showChords,
-                onCheckedChange = { on -> update { copy(showChords = on) } }
-            )
-        }
     }
 }
 

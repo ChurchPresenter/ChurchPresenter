@@ -58,7 +58,7 @@ class ProjectionSettingsTabContentOutputsTest {
         onAllNodesWithText("Content Outputs — Screen 1").assertCountEquals(0)
         openContentOutputs(row = 0)
         onNodeWithText("Content Outputs — Screen 1").assertExists("the dialog must name the screen it edits")
-        onNodeWithText("15 of 16 content types enabled on this screen").assertExists()
+        onNodeWithText("16 of 17 content types enabled on this screen").assertExists()
     }
 
     @Test
@@ -96,7 +96,7 @@ class ProjectionSettingsTabContentOutputsTest {
 
         assertEquals(false, row0(get).showMedia, "the toggle must store the change")
         assertShownInPreview("Media", shown = false)
-        onNodeWithText("14 of 16 content types enabled on this screen").assertExists()
+        onNodeWithText("15 of 17 content types enabled on this screen").assertExists()
     }
 
     @Test
@@ -109,7 +109,7 @@ class ProjectionSettingsTabContentOutputsTest {
         toggleContent("Canvas")
         assertEquals(true, row0(get).showCanvas, "second click turns it back on")
         assertShownInPreview("Canvas", shown = true)
-        onNodeWithText("15 of 16 content types enabled on this screen").assertExists()
+        onNodeWithText("16 of 17 content types enabled on this screen").assertExists()
     }
 
     @Test
@@ -132,7 +132,7 @@ class ProjectionSettingsTabContentOutputsTest {
             assertEquals(false, read(row0(get)), "clicking $label must clear its own flag")
             assertShownInPreview(label, shown = false)
         }
-        onNodeWithText("6 of 16 content types enabled on this screen").assertExists()
+        onNodeWithText("7 of 17 content types enabled on this screen").assertExists()
     }
 
     @Test
@@ -149,7 +149,7 @@ class ProjectionSettingsTabContentOutputsTest {
             toggleContent(label)
             assertEquals(false, read(row0(get)), "clicking $label must clear its own flag")
         }
-        onNodeWithText("11 of 16 content types enabled on this screen").assertExists()
+        onNodeWithText("12 of 17 content types enabled on this screen").assertExists()
     }
 
     /** Song look-ahead is the one toggle that starts off, and it is gated on Songs being on. */
@@ -162,7 +162,7 @@ class ProjectionSettingsTabContentOutputsTest {
         toggleContent("Song LA")
 
         assertEquals(true, row0(get).songLookAhead, "the toggle must store the change")
-        onNodeWithText("16 of 16 content types enabled on this screen").assertExists()
+        onNodeWithText("17 of 17 content types enabled on this screen").assertExists()
     }
 
     // ── Quick select ────────────────────────────────────────────────────────────────────────────
@@ -179,7 +179,7 @@ class ProjectionSettingsTabContentOutputsTest {
         assertEquals(false, assignment.showMedia)
         assertEquals(false, assignment.showCanvas)
         assertEquals(false, assignment.showFullscreenBackground)
-        onNodeWithText("0 of 16 content types enabled on this screen").assertExists()
+        onNodeWithText("0 of 17 content types enabled on this screen").assertExists()
     }
 
     @Test
@@ -187,7 +187,7 @@ class ProjectionSettingsTabContentOutputsTest {
         openContentOutputs()
         onNodeWithText("Clear All").performClick()
         waitForIdle()
-        onNodeWithText("0 of 16 content types enabled on this screen").assertExists()
+        onNodeWithText("0 of 17 content types enabled on this screen").assertExists()
 
         onNodeWithText("Select All").performClick()
         waitForIdle()
@@ -196,7 +196,7 @@ class ProjectionSettingsTabContentOutputsTest {
         assertEquals(true, assignment.showMedia)
         assertEquals(true, assignment.showSongsBackground)
         assertEquals(true, assignment.songLookAhead, "Select All includes the look-ahead")
-        onNodeWithText("16 of 16 content types enabled on this screen").assertExists()
+        onNodeWithText("17 of 17 content types enabled on this screen").assertExists()
     }
 
     // ── Bible and Songs language modes ──────────────────────────────────────────────────────────
@@ -241,7 +241,7 @@ class ProjectionSettingsTabContentOutputsTest {
         waitForIdle()
 
         assertEquals(Constants.SONG_LANG_OFF, row0(get).bibleMode, "unticking must be stored")
-        onNodeWithText("14 of 16 content types enabled on this screen").assertExists()
+        onNodeWithText("15 of 17 content types enabled on this screen").assertExists()
         // The preview chip is gone (Bible is off), leaving the trigger's own label plus the master
         // row's label inside the still-open dropdown -- toggling it does not dismiss the menu, so
         // more can be picked without reopening it.
@@ -252,7 +252,7 @@ class ProjectionSettingsTabContentOutputsTest {
 
     @Test
     fun `the row's summary button follows what the dialog changed`() = projectionTab { get ->
-        gridButton(Grid.contentOutputs(row = 0)).assertTextEquals("15 of 16 enabled")
+        gridButton(Grid.contentOutputs(row = 0)).assertTextEquals("16 of 17 enabled")
 
         openContentOutputs(row = 0)
         toggleContent("Media")
@@ -261,8 +261,8 @@ class ProjectionSettingsTabContentOutputsTest {
         waitForIdle()
 
         assertEquals(false, row0(get).showMedia)
-        gridButton(Grid.contentOutputs(row = 0)).assertTextEquals("13 of 16 enabled")
-        gridButton(Grid.contentOutputs(row = 1)).assertTextEquals("15 of 16 enabled")
+        gridButton(Grid.contentOutputs(row = 0)).assertTextEquals("14 of 17 enabled")
+        gridButton(Grid.contentOutputs(row = 1)).assertTextEquals("16 of 17 enabled")
     }
 
     @Test
@@ -275,7 +275,7 @@ class ProjectionSettingsTabContentOutputsTest {
 
         assertEquals(false, get().projectionSettings.screenAssignments[1].showMedia, "screen 2 was cleared")
         assertEquals(true, get().projectionSettings.screenAssignments[0].showMedia, "screen 1 must be untouched")
-        gridButton(Grid.contentOutputs(row = 0)).assertTextEquals("15 of 16 enabled")
-        gridButton(Grid.contentOutputs(row = 1)).assertTextEquals("0 of 16 enabled")
+        gridButton(Grid.contentOutputs(row = 0)).assertTextEquals("16 of 17 enabled")
+        gridButton(Grid.contentOutputs(row = 1)).assertTextEquals("0 of 17 enabled")
     }
 }

@@ -83,6 +83,12 @@ internal fun contentOutputsEnabledCount(
     return n
 }
 
+/** Denominator for the same summary: Bible and Songs plus every toggle. */
+internal fun contentOutputsTotalCount(
+    contentGroup: List<ContentCol>,
+    backgroundGroup: List<ContentCol>
+): Int = 2 + contentGroup.size + backgroundGroup.size
+
 @Composable
 internal fun ContentOutputsSectionHeader(text: String, modifier: Modifier = Modifier) {
     Text(
@@ -264,7 +270,7 @@ internal fun ContentOutputsDialog(
     onApply: (ScreenAssignment) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val total = 2 + contentGroup.size + backgroundGroup.size
+    val total = contentOutputsTotalCount(contentGroup, backgroundGroup)
     val enabled = contentOutputsEnabledCount(assignment, contentGroup, backgroundGroup)
 
     AlertDialog(

@@ -136,6 +136,69 @@ class PresenterFullScreenScreenshotTest {
         SongPresenter(lyricSection = song(), appSettings = AppSettings(), lookAheadEnabled = true)
     }
 
+    // ── Songs: chord charts ─────────────────────────────────────────────────────────────────────
+    // Drawn when the output has Show Chords on AND the song carries chords. The chart replaces the
+    // words: its own rows are the lyrics, with the chords stacked over the syllables they land on.
+
+    @Test
+    fun `a verse as a chord chart`() = shoot("song_chords") {
+        SongPresenter(
+            lyricSection = song(chords = CHORD_LINES),
+            appSettings = AppSettings(),
+            showChords = true,
+        )
+    }
+
+    /** The chords take their own configured colour; the words keep the lyric colour. */
+    @Test
+    fun `chords in their own colour`() = shoot("song_chords_coloured") {
+        SongPresenter(
+            lyricSection = song(chords = CHORD_LINES),
+            appSettings = songSettings(lyricsColor = "#FFFFFF", lyricsChordColor = "#FFD54F"),
+            showChords = true,
+        )
+    }
+
+    /**
+     * The same song with the output's switch off: the words alone, and no `[G]` anywhere — the
+     * markup is stripped where the song is parsed, so the chart is the only thing that ever shows it.
+     */
+    @Test
+    fun `a chorded song with chords switched off`() = shoot("song_chords_off") {
+        SongPresenter(
+            lyricSection = song(chords = CHORD_LINES),
+            appSettings = AppSettings(),
+            showChords = false,
+        )
+    }
+
+    /** Aligned left, to show the chart lands where the lyrics are configured to land. */
+    @Test
+    fun `a chord chart aligned left`() = shoot("song_chords_align_left") {
+        SongPresenter(
+            lyricSection = song(chords = CHORD_LINES),
+            appSettings = songSettings(lyricsHorizontalAlignment = Constants.LEFT),
+            showChords = true,
+        )
+    }
+
+    /**
+     * Line-at-a-time meets a chart: the whole section is drawn regardless.
+     *
+     * `chordLines` is the section as it was written and is not row-for-row with `lines` — a
+     * chord-only intro row has no lyric line of its own — so there is no line to single out. Shot
+     * so the behaviour is looked at rather than discovered live.
+     */
+    @Test
+    fun `a chord chart ignores line-at-a-time`() = shoot("song_chords_line_mode") {
+        SongPresenter(
+            lyricSection = song(chords = CHORD_LINES),
+            appSettings = songSettings(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_LINE),
+            displayLineIndex = 1,
+            showChords = true,
+        )
+    }
+
     // ── Songs: two languages ────────────────────────────────────────────────────────────────────
 
     @Test
@@ -828,6 +891,7 @@ class PresenterFullScreenScreenshotTest {
         type: String = Constants.SECTION_TYPE_VERSE,
         lines: List<String> = VERSE_LINES,
         secondary: List<String> = emptyList(),
+        chords: List<String> = emptyList(),
     ) = LyricSection(
         header = header,
         title = "Amazing Grace",
@@ -835,6 +899,7 @@ class PresenterFullScreenScreenshotTest {
         type = type,
         lines = lines,
         secondaryLines = secondary,
+        chordLines = chords,
     )
 
     private fun songSettings(
@@ -844,6 +909,7 @@ class PresenterFullScreenScreenshotTest {
         fullscreenLanguageDisplay: String = SongSettings().fullscreenLanguageDisplay,
         bilingualLayout: String = SongSettings().bilingualLayout,
         lyricsColor: String = SongSettings().lyricsColor,
+        lyricsChordColor: String = SongSettings().lyricsChordColor,
         lyricsBold: Boolean = false,
         lyricsItalic: Boolean = false,
         lyricsUnderline: Boolean = false,
@@ -880,6 +946,7 @@ class PresenterFullScreenScreenshotTest {
             fullscreenLanguageDisplay = fullscreenLanguageDisplay,
             bilingualLayout = bilingualLayout,
             lyricsColor = lyricsColor,
+            lyricsChordColor = lyricsChordColor,
             lyricsBold = lyricsBold,
             lyricsItalic = lyricsItalic,
             lyricsUnderline = lyricsUnderline,
@@ -1113,6 +1180,12 @@ class PresenterFullScreenScreenshotTest {
         val VERSE_LINES = listOf(
             "Amazing grace how sweet the sound",
             "That saved a wretch like me",
+        )
+
+        /** [VERSE_LINES] as the band reads them, chords inline before the syllable they land on. */
+        val CHORD_LINES = listOf(
+            "[G]Amazing [C]grace how [G]sweet the sound",
+            "That [D]saved a [G]wretch like me",
         )
 
         val SECONDARY_LINES = listOf(

@@ -59,6 +59,7 @@ class StageMonitorScreenshotTest {
     private fun shoot(
         name: String,
         settings: StageMonitorSettings = stageSettings(),
+        showChords: Boolean = true,
         presenting: Presenting = Presenting.LYRICS,
         announcementActive: Boolean = false,
         section: LyricSection = songSection(),
@@ -80,6 +81,7 @@ class StageMonitorScreenshotTest {
                 Box(screen) {
                     StageMonitorScreen(
                         sm = settings,
+                        showChords = showChords,
                         presentingMode = presenting,
                         announcementActive = announcementActive,
                         currentLyricSection = section,
@@ -149,7 +151,7 @@ class StageMonitorScreenshotTest {
     @Test
     fun `a song with its chords`() = shoot(
         "song_chords",
-        settings = stageSettings(showChords = true),
+        showChords = true,
         section = chordSection(),
         sections = listOf(chordSection()),
     )
@@ -158,7 +160,7 @@ class StageMonitorScreenshotTest {
     @Test
     fun `the same song with chords turned off`() = shoot(
         "song_chords_hidden",
-        settings = stageSettings(showChords = false),
+        showChords = false,
         section = chordSection(),
         sections = listOf(chordSection()),
     )
@@ -545,8 +547,8 @@ class StageMonitorScreenshotTest {
     @Test
     fun `chords in the zone's colour`() = shoot(
         "chord_colour",
+        showChords = true,
         settings = stageSettings(
-            showChords = true,
             styles = mapOf(
                 StageMonitorStyleZone.TOP_LEFT to StageMonitorZoneStyle(
                     fontSize = 40, color = "#FFFFFF", bgColor = "#000000", chordColor = "#FFD54F",
@@ -583,13 +585,11 @@ class StageMonitorScreenshotTest {
     private fun stageSettings(
         zones: Map<StageMonitorContentType, StageMonitorZone> = emptyMap(),
         styles: Map<StageMonitorStyleZone, StageMonitorZoneStyle> = emptyMap(),
-        showChords: Boolean = true,
         metronomePosition: MetronomePosition = MetronomePosition.NONE,
     ) = StageMonitorSettings(
         contentZones = StageMonitorSettings.defaultContentZones() +
             mapOf(StageMonitorContentType.CLOCK to StageMonitorZone.NONE) + zones,
         zoneStyles = StageMonitorSettings.defaultZoneStyles() + styles,
-        showChords = showChords,
         metronomePosition = metronomePosition,
     )
 

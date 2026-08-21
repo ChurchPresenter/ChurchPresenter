@@ -91,6 +91,7 @@ internal fun PresenterOutputContent(
                 StageMonitorScreen(
                     sm = appSettings.stageMonitorSettings,
                     presentingMode = presentingMode,
+                    showChords = screenAssignment.showChords,
                     announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
                     currentLyricSection = displayedLyricSection,
                     allLyricSections = allLyricSections,
