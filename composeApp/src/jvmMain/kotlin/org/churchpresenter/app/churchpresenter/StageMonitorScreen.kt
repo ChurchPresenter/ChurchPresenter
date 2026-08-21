@@ -470,7 +470,10 @@ private fun ZoneContent(
     mediaViewModel: MediaViewModel?
 ) {
     when (content) {
-        StageMonitorContentType.BIBLE -> ZoneTextTransition(sm, data.currentText) { TextContent(style, it) }
+        // Fitted, like the song beside it: a zone's configured size is a ceiling, and a verse long
+        // enough to overflow it is stepped down rather than clipped at the frame edge.
+        StageMonitorContentType.BIBLE ->
+            ZoneTextTransition(sm, data.currentText) { FittedTextContent(style, it) }
         // A song with chords is shown as its chart; without them it is the words alone, exactly as
         // before. The Next zone follows the same rule for the section coming up.
         StageMonitorContentType.SONGS ->
@@ -498,7 +501,7 @@ private fun ZoneContent(
         StageMonitorContentType.DICTIONARY -> DictionaryPresenter(entry = data.displayedDictionaryEntry, dictionarySettings = data.dictionarySettings)
         StageMonitorContentType.NEXT ->
             ZoneTextTransition(sm, data.nextText) {
-                if (data.nextChordLines.isEmpty()) TextContent(style, it)
+                if (data.nextChordLines.isEmpty()) FittedTextContent(style, it)
                 else ZoneChordChart(style, data.nextChordLines)
             }
         // No live data is plumbed through to the stage monitor for these yet.
