@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
-import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkClient
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.LiveStateDto

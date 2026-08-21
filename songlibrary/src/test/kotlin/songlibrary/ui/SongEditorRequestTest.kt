@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 
 /**
  * The request a row's Edit button hands to whoever is hosting the window.

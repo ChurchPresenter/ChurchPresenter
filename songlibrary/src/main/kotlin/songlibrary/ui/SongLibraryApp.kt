@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import java.io.File
 import songlibrary.SongLibraryState
 import songlibrary.generated.resources.delete

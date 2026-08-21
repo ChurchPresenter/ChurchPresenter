@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data.settings
 
 import kotlinx.serialization.Serializable
-import org.churchpresenter.app.churchpresenter.models.companion.CompanionSurfacePlacement
+import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import java.util.UUID
 
 /** One configured connection to a Bitfocus Companion instance. Multiple can be configured. */

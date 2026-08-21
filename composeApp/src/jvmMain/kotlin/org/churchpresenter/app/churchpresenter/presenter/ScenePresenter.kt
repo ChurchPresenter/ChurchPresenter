@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
-import org.churchpresenter.app.churchpresenter.models.scene.Scene
+import org.churchpresenter.core.models.scene.Scene
 
 @Composable
 fun ScenePresenter(

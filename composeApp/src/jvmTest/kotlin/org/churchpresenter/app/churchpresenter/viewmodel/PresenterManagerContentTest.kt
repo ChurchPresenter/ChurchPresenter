@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.app.churchpresenter.models.songs.LyricSection
-import org.churchpresenter.app.churchpresenter.models.scene.Scene
+import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals

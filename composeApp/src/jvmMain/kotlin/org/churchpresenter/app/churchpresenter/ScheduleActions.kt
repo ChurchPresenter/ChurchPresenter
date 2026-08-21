@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 
 // Kept for NavigationTopBar / menu — wraps ScheduleTabActions
 data class ScheduleActions(

@@ -1,10 +1,11 @@
 package org.churchpresenter.app.churchpresenter.models
 
 import androidx.compose.ui.input.key.Key
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.shortcuts.KeyChord
+import org.churchpresenter.app.churchpresenter.tabs.Tabs
 
 /**
  * Guards the shipped bindings.

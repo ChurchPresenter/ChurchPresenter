@@ -25,11 +25,11 @@ import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSetting
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZone
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZone
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZoneStyle
-import org.churchpresenter.app.churchpresenter.models.songs.LyricSection
-import org.churchpresenter.app.churchpresenter.models.qa.Question
-import org.churchpresenter.app.churchpresenter.models.scene.Scene
-import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
-import org.churchpresenter.app.churchpresenter.models.bible.SelectedVerse
+import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.qa.Question
+import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel

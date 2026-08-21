@@ -4,7 +4,7 @@ package songlibrary.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.models.songs.SongLibrary
+import org.churchpresenter.core.models.songs.SongLibrary
 import kotlinx.coroutines.CoroutineDispatcher
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode

@@ -38,8 +38,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import org.churchpresenter.app.churchpresenter.models.songs.SongField
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongField
+import org.churchpresenter.core.models.songs.SongItem
 import org.jetbrains.compose.resources.stringResource
 import songlibrary.generated.resources.Res
 import songlibrary.generated.resources.new_song_book_invalid

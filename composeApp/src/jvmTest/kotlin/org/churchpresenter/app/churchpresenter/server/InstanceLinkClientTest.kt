@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
 import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
-import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.nio.file.Files
 import kotlin.test.AfterTest

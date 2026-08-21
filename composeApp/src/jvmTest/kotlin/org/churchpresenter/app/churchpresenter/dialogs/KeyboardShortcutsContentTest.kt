@@ -16,7 +16,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.KeyboardShortcutSettings
-import org.churchpresenter.app.churchpresenter.models.shortcuts.KeyChord
+import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.models.ShortcutScope
 import kotlin.test.Test

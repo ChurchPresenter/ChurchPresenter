@@ -9,7 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.server.AtemMediaSlot
 import org.churchpresenter.app.churchpresenter.server.AtemState
 import org.churchpresenter.app.churchpresenter.server.AtemUploadStatus

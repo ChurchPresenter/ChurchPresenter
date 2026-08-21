@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data.settings
 
-import org.churchpresenter.app.churchpresenter.models.songs.SongTuning
+import org.churchpresenter.core.models.songs.SongTuning
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

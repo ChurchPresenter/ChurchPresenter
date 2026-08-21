@@ -2,7 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
+import org.churchpresenter.core.models.scene.SceneSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

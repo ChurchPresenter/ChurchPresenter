@@ -12,8 +12,8 @@ import io.sentry.SentryLevel
 import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState
-import org.churchpresenter.app.churchpresenter.models.companion.CompanionSurfacePlacement
-import org.churchpresenter.app.churchpresenter.models.companion.CompanionSurfaceSlot
+import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
+import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent

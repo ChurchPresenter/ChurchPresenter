@@ -2,9 +2,9 @@ package org.churchpresenter.app.churchpresenter.server
 
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.models.scene.Scene
-import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
-import org.churchpresenter.app.churchpresenter.models.scene.SourceTransform
+import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

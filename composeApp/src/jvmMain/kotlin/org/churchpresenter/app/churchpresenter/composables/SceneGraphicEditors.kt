@@ -69,7 +69,7 @@ import churchpresenter.composeapp.generated.resources.canvas_qr_default_text
 import churchpresenter.composeapp.generated.resources.timer_start
 import churchpresenter.composeapp.generated.resources.timer_reset
 import churchpresenter.composeapp.generated.resources.pause
-import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
+import org.churchpresenter.core.models.scene.SceneSource
 import androidx.compose.foundation.layout.PaddingValues
 
 private const val MAX_STROKE_WIDTH = 20f

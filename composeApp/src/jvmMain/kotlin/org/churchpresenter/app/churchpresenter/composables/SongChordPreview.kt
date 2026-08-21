@@ -46,7 +46,7 @@ import churchpresenter.composeapp.generated.resources.song_key
 import churchpresenter.composeapp.generated.resources.song_transpose_down
 import churchpresenter.composeapp.generated.resources.song_transpose_reset
 import churchpresenter.composeapp.generated.resources.song_transpose_up
-import org.churchpresenter.app.churchpresenter.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.app.churchpresenter.utils.ChordSegment
 import org.churchpresenter.app.churchpresenter.utils.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.SongSectionWordGroup

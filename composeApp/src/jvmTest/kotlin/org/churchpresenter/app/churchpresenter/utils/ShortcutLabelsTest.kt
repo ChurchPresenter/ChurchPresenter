@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.utils
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.models.shortcuts.KeyChord
+import org.churchpresenter.core.models.shortcuts.KeyChord
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

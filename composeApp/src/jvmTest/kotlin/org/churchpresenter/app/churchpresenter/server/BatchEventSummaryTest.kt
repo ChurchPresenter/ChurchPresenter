@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

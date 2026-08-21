@@ -11,8 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
-import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.bible.SelectedVerse
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import java.io.File
 import java.nio.file.Files

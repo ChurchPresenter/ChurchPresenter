@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.utils
 
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import kotlin.test.Test
 import kotlin.test.assertFalse

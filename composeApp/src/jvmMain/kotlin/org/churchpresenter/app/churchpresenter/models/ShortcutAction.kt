@@ -59,7 +59,7 @@ import churchpresenter.composeapp.generated.resources.shortcut_scope_menus_hint
 import churchpresenter.composeapp.generated.resources.shortcut_scope_pictures_hint
 import churchpresenter.composeapp.generated.resources.shortcut_scope_presentation_hint
 import churchpresenter.composeapp.generated.resources.shortcut_scope_songs_hint
-import org.churchpresenter.app.churchpresenter.models.shortcuts.KeyChord
+import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.jetbrains.compose.resources.StringResource
 

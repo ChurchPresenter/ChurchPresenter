@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
+import org.churchpresenter.core.models.scene.SceneSource
 import java.io.File
 
 internal fun selectedCameraName(devices: List<CameraDevice>, source: SceneSource.CameraSource): String =

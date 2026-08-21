@@ -94,7 +94,7 @@ import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.LabeledCheckbox
 import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.server.PlanningCenterAuthServer
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper

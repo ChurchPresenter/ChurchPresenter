@@ -13,7 +13,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.models.presentation.AnimationType
+import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.awt.image.BufferedImage
 import java.io.File

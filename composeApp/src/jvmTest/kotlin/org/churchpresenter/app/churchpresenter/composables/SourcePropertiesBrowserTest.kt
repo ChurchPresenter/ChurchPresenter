@@ -7,7 +7,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onNodeWithText
-import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
+import org.churchpresenter.core.models.scene.SceneSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

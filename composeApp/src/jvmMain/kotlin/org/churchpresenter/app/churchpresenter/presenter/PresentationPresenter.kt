@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
-import org.churchpresenter.app.churchpresenter.models.presentation.AnimationType
+import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import presentation.engine.model.Direction
 import presentation.engine.model.LayerState

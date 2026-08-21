@@ -2,7 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
@@ -13,8 +13,8 @@ import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.app.churchpresenter.data.settings.KeyboardShortcutSettings
-import org.churchpresenter.app.churchpresenter.models.shortcuts.KeyChord
-import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.shortcuts.KeyChord
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
 import kotlin.test.Test

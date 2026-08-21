@@ -9,7 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.models.songs.SongField
+import org.churchpresenter.core.models.songs.SongField
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

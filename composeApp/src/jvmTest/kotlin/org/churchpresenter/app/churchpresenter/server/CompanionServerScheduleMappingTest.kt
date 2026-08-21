@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
@@ -24,7 +24,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.junit.AfterClass
 import org.junit.BeforeClass
@@ -615,7 +615,7 @@ class CompanionServerScheduleMappingTest {
     fun `a body in the legacy sealed-class format is still accepted`() {
         // Older clients send the discriminated form; they must keep working.
         val (status, item) = addAndApprove(
-            """{"item":{"type":"org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem.LabelItem","id":"legacy-1","text":"Offering","textColor":"#FFFFFF","backgroundColor":"#000000"}}"""
+            """{"item":{"type":"org.churchpresenter.app.churchpresenter.models.ScheduleItem.LabelItem","id":"legacy-1","text":"Offering","textColor":"#FFFFFF","backgroundColor":"#000000"}}"""
         )
 
         assertEquals(HttpStatusCode.OK, status)

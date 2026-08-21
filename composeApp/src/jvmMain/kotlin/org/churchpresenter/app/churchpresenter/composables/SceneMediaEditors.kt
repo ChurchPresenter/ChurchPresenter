@@ -74,7 +74,7 @@ import churchpresenter.composeapp.generated.resources.canvas_transparent_bg
 import churchpresenter.composeapp.generated.resources.ic_folder
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
+import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState

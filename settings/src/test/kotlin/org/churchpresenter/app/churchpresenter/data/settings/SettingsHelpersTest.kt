@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data.settings
 
-import org.churchpresenter.app.churchpresenter.models.companion.CompanionSurfacePlacement
+import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals

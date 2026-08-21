@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.utils
 
 import androidx.compose.ui.input.key.Key
 import org.churchpresenter.app.churchpresenter.data.settings.KeyboardShortcutSettings
-import org.churchpresenter.app.churchpresenter.models.shortcuts.KeyChord
+import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
 import org.churchpresenter.app.churchpresenter.models.ShortcutScope
 import kotlin.test.Test

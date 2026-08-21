@@ -10,12 +10,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.songs.CachedSong
+import org.churchpresenter.core.models.songs.CachedSong
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.models.songs.SongFileParser
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongFileParser
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.Songs
-import org.churchpresenter.app.churchpresenter.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
 import org.churchpresenter.app.churchpresenter.server.SongDetailDto
 import org.churchpresenter.app.churchpresenter.utils.Constants

@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data.settings
 
 import kotlinx.serialization.Serializable
-import org.churchpresenter.app.churchpresenter.models.shortcuts.KeyChord
+import org.churchpresenter.core.models.shortcuts.KeyChord
 
 /**
  * The user's keyboard rebindings.

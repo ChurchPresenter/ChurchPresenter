@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import org.churchpresenter.app.churchpresenter.models.songs.SongFileParser
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongFileParser
+import org.churchpresenter.core.models.songs.SongItem
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

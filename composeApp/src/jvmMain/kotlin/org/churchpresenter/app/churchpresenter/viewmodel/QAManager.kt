@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.models.qa.Question
-import org.churchpresenter.app.churchpresenter.models.qa.QuestionDto
-import org.churchpresenter.app.churchpresenter.models.qa.QuestionStatus
-import org.churchpresenter.app.churchpresenter.models.toDto
+import org.churchpresenter.core.models.qa.Question
+import org.churchpresenter.core.models.qa.QuestionDto
+import org.churchpresenter.core.models.qa.QuestionStatus
+import org.churchpresenter.core.models.qa.toDto
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap

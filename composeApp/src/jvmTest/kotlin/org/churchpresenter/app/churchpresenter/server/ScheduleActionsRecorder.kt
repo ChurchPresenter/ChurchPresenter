@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.server
 
 import org.churchpresenter.app.churchpresenter.ScheduleActions
-import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 
 /**
  * Records what the schedule was asked to do, as a stand-in for the real actions.

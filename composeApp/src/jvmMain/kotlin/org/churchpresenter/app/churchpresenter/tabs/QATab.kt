@@ -132,8 +132,8 @@ import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.QARemoteDialog
-import org.churchpresenter.app.churchpresenter.models.qa.Question
-import org.churchpresenter.app.churchpresenter.models.qa.QuestionStatus
+import org.churchpresenter.core.models.qa.Question
+import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

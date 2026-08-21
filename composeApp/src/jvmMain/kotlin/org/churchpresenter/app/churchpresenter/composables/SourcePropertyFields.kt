@@ -46,8 +46,8 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
-import org.churchpresenter.app.churchpresenter.models.scene.SourceTransform
+import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.core.models.scene.SourceTransform
 import org.jetbrains.compose.resources.painterResource
 
 @Composable

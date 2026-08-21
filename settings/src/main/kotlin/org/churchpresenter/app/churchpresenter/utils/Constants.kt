@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.utils
 
-import org.churchpresenter.app.churchpresenter.models.schedule.TimerModes
+import org.churchpresenter.core.models.schedule.TimerModes
 
 object Constants {
     /** Localhost port used to enforce single-instance via ServerSocket lock. */

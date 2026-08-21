@@ -1,10 +1,5 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import kotlinx.coroutines.Dispatchers
-import org.churchpresenter.app.churchpresenter.models.songs.SongFileParser
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -13,6 +8,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlinx.coroutines.Dispatchers
+import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
+import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SongFileParser
+import org.churchpresenter.core.models.songs.SongItem
 
 /**
  * What happens to a song's chords on the way to being presented.
@@ -40,7 +41,7 @@ class SongsViewModelChordsTest {
         dir.deleteRecursively()
     }
 
-    private fun sectionsOf(lyrics: List<String>): List<org.churchpresenter.app.churchpresenter.models.songs.LyricSection> {
+    private fun sectionsOf(lyrics: List<String>): List<LyricSection> {
         val target = File(File(dir, "Hymnal"), "0001 - Test.song")
         SongFileParser().writeSongFile(
             SongItem(number = "0001", title = "Test", songbook = "Hymnal", lyrics = lyrics),

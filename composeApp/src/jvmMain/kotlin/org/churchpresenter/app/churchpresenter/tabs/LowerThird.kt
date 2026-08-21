@@ -152,7 +152,7 @@ import org.churchpresenter.app.churchpresenter.server.AtemClient
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.app.churchpresenter.server.AtemUploadStatus
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
-import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio

@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.LyricSection
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

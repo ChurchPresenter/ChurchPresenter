@@ -2,7 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
-import org.churchpresenter.app.churchpresenter.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
@@ -12,7 +12,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialogContent
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.resolveRemoteEventPresentation
-import org.churchpresenter.app.churchpresenter.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.server.batchEventSummary
 import org.churchpresenter.app.churchpresenter.server.remoteEventLabel
 import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme

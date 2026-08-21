@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -13,9 +14,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.runComposeUiTest
-import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.models.scene.SceneSource
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -23,6 +22,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.scene.PathPoint
+import org.churchpresenter.core.models.scene.SceneSource
 
 /**
  * The canvas scene compositor's per-source-type renderer — 11 independent `when` branches, one
@@ -313,7 +314,7 @@ class SceneSourceRendererTest {
                     SceneSource.ShapeSource(
                         id = "s3", name = "S", shapeType = "freehand",
                         strokeColor = "#FFFFFF",
-                        points = listOf(org.churchpresenter.app.churchpresenter.models.scene.PathPoint(
+                        points = listOf(PathPoint(
                             0.5f,
                             0.5f,
                         )),
@@ -329,8 +330,8 @@ class SceneSourceRendererTest {
     @Test
     fun `line, arrow and freehand shapes with enough points render without error`() = runComposeUiTest {
         val points = listOf(
-            org.churchpresenter.app.churchpresenter.models.scene.PathPoint(0.1f, 0.1f),
-            org.churchpresenter.app.churchpresenter.models.scene.PathPoint(0.9f, 0.9f),
+            PathPoint(0.1f, 0.1f),
+            PathPoint(0.9f, 0.9f),
         )
         for (type in listOf("line", "arrow", "freehand")) {
             setContent {

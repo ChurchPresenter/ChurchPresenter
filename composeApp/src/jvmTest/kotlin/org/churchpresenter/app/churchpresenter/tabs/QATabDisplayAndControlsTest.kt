@@ -9,7 +9,7 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.QASettings
-import org.churchpresenter.app.churchpresenter.models.qa.QuestionStatus
+import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
