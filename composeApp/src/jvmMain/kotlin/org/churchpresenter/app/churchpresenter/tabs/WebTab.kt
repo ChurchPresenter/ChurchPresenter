@@ -93,8 +93,8 @@ import churchpresenter.composeapp.generated.resources.web_zoom_in
 import churchpresenter.composeapp.generated.resources.web_zoom_out
 import churchpresenter.composeapp.generated.resources.web_snapshot_screen_recording_hint
 import churchpresenter.composeapp.generated.resources.web_snapshot_waiting
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.WebBookmark
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.WebBookmark
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

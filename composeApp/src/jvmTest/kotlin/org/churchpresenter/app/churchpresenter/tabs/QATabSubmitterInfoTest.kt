@@ -5,6 +5,8 @@ package org.churchpresenter.app.churchpresenter.tabs
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.QASettings
 
 class QATabSubmitterInfoTest {
 
@@ -96,8 +98,8 @@ class QATabSubmitterInfoTest {
     @Test
     fun `an upvoted question shows its count on the row`() {
         qaTab(
-            settings = org.churchpresenter.app.churchpresenter.data.settings.AppSettings(
-                qaSettings = org.churchpresenter.app.churchpresenter.data.settings.QASettings(votingEnabled = true),
+            settings = AppSettings(
+                qaSettings = QASettings(votingEnabled = true),
             ),
             seed = {
                 askAll("Voted on")
@@ -113,8 +115,8 @@ class QATabSubmitterInfoTest {
     @Test
     fun `a downvoted question shows its count on the row`() {
         qaTab(
-            settings = org.churchpresenter.app.churchpresenter.data.settings.AppSettings(
-                qaSettings = org.churchpresenter.app.churchpresenter.data.settings.QASettings(votingEnabled = true),
+            settings = AppSettings(
+                qaSettings = QASettings(votingEnabled = true),
             ),
             seed = {
                 askAll("Voted down")

@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.utils.Constants
 
 /**
  * Self-contained HTML page for an OBS/vMix Browser Source input. The actual content is

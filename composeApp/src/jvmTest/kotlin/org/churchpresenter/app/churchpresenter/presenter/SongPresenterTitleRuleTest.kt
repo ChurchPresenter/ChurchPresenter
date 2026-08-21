@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.ui.text.style.TextAlign
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

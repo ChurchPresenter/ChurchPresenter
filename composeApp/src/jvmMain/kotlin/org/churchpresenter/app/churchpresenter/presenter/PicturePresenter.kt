@@ -28,9 +28,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
 import java.io.File
 import org.churchpresenter.core.models.presentation.AnimationType
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 
 /** The white key-output's alpha for [PicturePresenter]/[SlidePresenter] — a slide's own translation
  *  carries the transition, not a fade, so slides always key fully opaque. */

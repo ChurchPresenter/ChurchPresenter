@@ -17,13 +17,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import companionsatellite.CompanionConnectionStatus
-import companionsatellite.CompanionSatelliteClient
+import org.churchpresenter.companionsatellite.CompanionConnectionStatus
+import org.churchpresenter.companionsatellite.CompanionSatelliteClient
 import io.mockk.every
 import io.mockk.mockkConstructor
 import io.mockk.unmockkConstructor
 import io.mockk.verify
-import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
+import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.companion.CompanionSurfaceSlot

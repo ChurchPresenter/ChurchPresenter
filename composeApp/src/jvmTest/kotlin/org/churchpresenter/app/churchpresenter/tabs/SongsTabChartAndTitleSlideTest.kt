@@ -4,7 +4,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
+import org.churchpresenter.settings.SongSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

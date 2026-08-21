@@ -22,10 +22,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ProjectionSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import kotlin.test.assertEquals
 

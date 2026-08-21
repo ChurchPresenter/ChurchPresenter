@@ -4,12 +4,13 @@ import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.vlcUnavailableReason
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import java.awt.GraphicsEnvironment
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import org.churchpresenter.diagnostics.CrashReporter
 
 /**
  * Builds a plain-text snapshot of the machine/app configuration for bug reports — OS, display

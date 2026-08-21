@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 import java.io.File
 import java.time.Instant
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import org.json.JSONObject
 
 private const val JITTER_MIN = 0.8

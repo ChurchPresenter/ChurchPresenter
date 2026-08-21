@@ -15,7 +15,7 @@ kotlin {
 }
 
 compose.resources {
-    packageOfResClass = "songlibrary.generated.resources"
+    packageOfResClass = "org.churchpresenter.songlibrary.generated.resources"
     publicResClass = true
 }
 
@@ -55,7 +55,7 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 
 compose.desktop {
     application {
-        mainClass = "songlibrary.MainKt"
+        mainClass = "org.churchpresenter.songlibrary.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)

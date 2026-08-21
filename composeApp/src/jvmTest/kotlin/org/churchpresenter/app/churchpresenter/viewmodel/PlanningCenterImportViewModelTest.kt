@@ -6,7 +6,7 @@ import io.mockk.unmockkObject
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterClient
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.settings.SettingsManager
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

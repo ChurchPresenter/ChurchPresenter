@@ -17,8 +17,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import org.churchpresenter.app.churchpresenter.data.settings.PresentationRemoteSettings
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.PresentationRemoteSettings
+import org.churchpresenter.settings.utils.Constants
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import kotlin.test.AfterTest

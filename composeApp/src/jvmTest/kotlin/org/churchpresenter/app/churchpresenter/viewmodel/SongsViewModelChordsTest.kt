@@ -4,8 +4,8 @@ import kotlinx.coroutines.Dispatchers
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.SongSettings
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

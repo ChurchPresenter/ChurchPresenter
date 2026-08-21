@@ -5,9 +5,9 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleEngineSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleEngineSettings
+import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 import java.io.File
 import java.nio.file.Files

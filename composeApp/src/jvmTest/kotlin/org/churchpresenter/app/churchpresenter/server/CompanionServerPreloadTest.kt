@@ -11,7 +11,7 @@ import io.ktor.http.contentLength
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.churchpresenter.app.churchpresenter.data.SpbFixture
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import java.io.File

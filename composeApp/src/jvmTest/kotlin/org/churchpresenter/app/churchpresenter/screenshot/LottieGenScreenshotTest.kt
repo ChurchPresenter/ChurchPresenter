@@ -18,13 +18,13 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import lottiegen.model.LottieGenConfig
-import lottiegen.model.Preset
-import lottiegen.persistence.PresetStorage
-import lottiegen.ui.Strings
+import org.churchpresenter.lottiegen.model.LottieGenConfig
+import org.churchpresenter.lottiegen.model.Preset
+import org.churchpresenter.lottiegen.persistence.PresetStorage
+import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.theme.ChurchPresenterTheme
-import lottiegen.App as LottieGenApp
+import org.churchpresenter.lottiegen.App as LottieGenApp
 import java.util.Locale
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -32,7 +32,7 @@ import kotlin.test.Test
 /**
  * The bundled Lottie lower-third generator, reached from the Help menu and from the Lower Third tab.
  *
- * It draws its own chrome from `lottiegen.ui.Tokens` rather than from Material, so **both halves of
+ * It draws its own chrome from `org.churchpresenter.lottiegen.ui.Tokens` rather than from Material, so **both halves of
  * each stacked image are load-bearing here**: the tool follows the host app's theme, and the light
  * half is the only thing that shows it still does. It is mounted with `embedded = true`, which is
  * how ChurchPresenter mounts it — standalone it owns the theme and is dark either way, so a

@@ -4,9 +4,11 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSettings
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZone
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.StageMonitorSettings
+import org.churchpresenter.settings.StageMonitorStyleZone
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.StageMonitorZoneStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -30,9 +32,9 @@ class StageMonitorSettingsTabZoneIsolationTest {
 
     private fun assertOnly(
         changed: StageMonitorStyleZone,
-        get: () -> org.churchpresenter.app.churchpresenter.data.settings.AppSettings,
+        get: () -> AppSettings,
         what: String,
-        check: (org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZoneStyle) -> Unit,
+        check: (StageMonitorZoneStyle) -> Unit,
     ) {
         check(get().styleOf(changed))
         for (other in StageMonitorStyleZone.entries.filter { it != changed }) {

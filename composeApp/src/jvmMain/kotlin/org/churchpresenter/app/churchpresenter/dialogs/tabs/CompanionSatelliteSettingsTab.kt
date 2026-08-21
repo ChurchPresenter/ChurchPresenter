@@ -62,14 +62,14 @@ import churchpresenter.composeapp.generated.resources.companion_satellite_show_i
 import churchpresenter.composeapp.generated.resources.companion_satellite_status_connecting
 import churchpresenter.composeapp.generated.resources.companion_satellite_status_disconnected
 import churchpresenter.composeapp.generated.resources.companion_satellite_status_error
-import companionsatellite.CompanionConnectionStatus
+import org.churchpresenter.companionsatellite.CompanionConnectionStatus
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.companion.CompanionSurfaceSlot

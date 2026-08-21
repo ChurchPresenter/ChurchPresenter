@@ -17,17 +17,24 @@ point.
 
 ## What `:composeApp` uses from it
 
-`companionsatellite.CompanionSatelliteClient` and `companionsatellite.CompanionConnectionStatus`,
+`org.churchpresenter.companionsatellite.CompanionSatelliteClient` and its
+`CompanionConnectionStatus`,
 from `viewmodel/CompanionSatelliteViewModel.kt`, `composables/CompanionSurfacePanel.kt`,
 `models/CompanionConnectionUiState.kt` and `dialogs/tabs/CompanionSatelliteSettingsTab.kt`.
 
 ## Layout
 
+**The package is `org.churchpresenter.companionsatellite`.** It was a bare top-level
+`companionsatellite`, with the Gradle `group` to match — the one root in this build with no
+reverse-domain prefix at all, which is the shape most likely to collide with a dependency's own
+package. Both now read `org.churchpresenter`.
+
+
 The whole module is one file plus its test:
 
-- `src/main/kotlin/companionsatellite/CompanionSatelliteClient.kt` — `CompanionConnectionStatus`,
+- `src/main/kotlin/org/churchpresenter/companionsatellite/CompanionSatelliteClient.kt` — `CompanionConnectionStatus`,
   `CompanionButtonUpdate` (raw RGB bytes, text, colors, pressed flag, page) and the client itself.
-- `src/test/kotlin/companionsatellite/FakeCompanion.kt` — an in-process fake Companion server the
+- `src/test/kotlin/org/churchpresenter/companionsatellite/FakeCompanion.kt` — an in-process fake Companion server the
   suite drives the client against. Prefer extending it over mocking the socket.
 
 ## Rules

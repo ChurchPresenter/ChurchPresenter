@@ -5,9 +5,9 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextReplacement
-import org.churchpresenter.app.churchpresenter.data.settings.AnnouncementsSettings
-import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.isSystemUsing24HourFormat
+import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

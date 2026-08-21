@@ -20,6 +20,9 @@ kotlin {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)
+    // The app's colour schemes, typography and semantic colours — this tool no longer
+    // builds its own Material layer, only its hand-drawn panel palette.
+    implementation(projects.theme)
     implementation(libs.compose.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.swing)
@@ -35,7 +38,7 @@ tasks.test {
 
 compose.desktop {
     application {
-        mainClass = "lottiegen.MainKt"
+        mainClass = "org.churchpresenter.lottiegen.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)

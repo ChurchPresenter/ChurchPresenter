@@ -11,7 +11,7 @@ import org.churchpresenter.app.churchpresenter.tabs.MediaLabel
 import org.churchpresenter.app.churchpresenter.tabs.RecentMediaFiles
 import org.churchpresenter.app.churchpresenter.tabs.mediaButton
 import org.churchpresenter.app.churchpresenter.tabs.mediaTab
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.AfterTest

@@ -18,14 +18,14 @@ import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.data.settings.DictionarySettings
-import org.churchpresenter.app.churchpresenter.data.settings.MetronomePosition
-import org.churchpresenter.app.churchpresenter.data.settings.QASettings
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorContentType
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorSettings
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZone
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZone
-import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZoneStyle
+import org.churchpresenter.settings.DictionarySettings
+import org.churchpresenter.settings.MetronomePosition
+import org.churchpresenter.settings.QASettings
+import org.churchpresenter.settings.StageMonitorContentType
+import org.churchpresenter.settings.StageMonitorSettings
+import org.churchpresenter.settings.StageMonitorStyleZone
+import org.churchpresenter.settings.StageMonitorZone
+import org.churchpresenter.settings.StageMonitorZoneStyle
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -34,7 +34,7 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 
 /**

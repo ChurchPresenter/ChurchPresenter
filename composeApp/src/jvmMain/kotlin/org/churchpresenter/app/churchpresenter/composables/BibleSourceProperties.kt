@@ -50,8 +50,8 @@ import churchpresenter.composeapp.generated.resources.canvas_verse_style
 import churchpresenter.composeapp.generated.resources.canvas_reference_style
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BibleTranslationSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
