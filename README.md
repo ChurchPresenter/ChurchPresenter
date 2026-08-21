@@ -30,6 +30,11 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > `~/.churchpresenter/crash-reports/` and the Sentry forwarding behind it, including the PII
 > scrubbing every outgoing event passes through. `./gradlew :diagnostics:test`.
 >
+> **[`planning-center/`](./planning-center)** — the Planning Center Online client: the OAuth
+> conversation, the Services API calls that read a service plan, and the loopback listener that
+> catches the consent redirect. Each church brings its own free PCO Developer credentials; nothing
+> is written back. `./gradlew :planning-center:test`.
+>
 > **[`songlibrary/`](./songlibrary)** — the Song Library Manager: every song in the library folder in one editable grid, opened from the Help menu. It reads and writes through **[`core-models/`](./core-models)**, which holds the song model and the `.song` file format the app itself uses.
 >
 > **[`converter/`](./converter)** — a song/bible format converter built with Compose Desktop,
@@ -37,6 +42,11 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 >
 > **[`companion-satellite/`](./companion-satellite)** — a pure-Kotlin Bitfocus Companion Satellite
 > protocol client. `./gradlew :companion-satellite:test`.
+>
+> **[`atem/`](./atem)** — the Blackmagic ATEM protocol client: the UDP conversation with the
+> switcher, from the handshake to a media-pool upload. Its suite runs against a loopback fake
+> switcher built from a capture of real hardware, so no device is needed.
+> `./gradlew :atem:test`.
 >
 > **[`theme/`](./theme)** — the app's look: the nine color schemes, the semantic color roles, the
 > typography and shape scales. `./gradlew :theme:test`.

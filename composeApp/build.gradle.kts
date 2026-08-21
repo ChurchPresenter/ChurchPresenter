@@ -319,11 +319,17 @@ kotlin {
             // Crash reporting: the crash log on disk and the Sentry forwarding behind it. It
             // exposes SentryLevel through CrashReporter.breadcrumb, hence `api` on its side.
             implementation(projects.diagnostics)
+            // The Planning Center client: OAuth, the Services REST calls and the loopback
+            // listener for the consent redirect, wrapped by PlanningCenterImportViewModel.
+            implementation(projects.planningCenter)
             // The song library: the grid of every song in the library, opened from the Help menu.
             implementation(projects.songlibrary)
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.
             implementation(projects.companionSatellite)
+            // The ATEM protocol client: the UDP conversation with the switcher — connect, state
+            // dump, key control and media-pool upload. AtemBridge is the app-side wiring.
+            implementation(projects.atem)
             implementation(projects.theme)
             implementation(projects.coreModels)
             implementation(projects.lottieGenerator)
@@ -439,6 +445,10 @@ dependencies {
     // pdfDeck(): Deck's constructor is internal to :presentation-engine, so tests that need a
     // synthetic deck build it through the module's own fixtures.
     add("jvmTestImplementation", testFixtures(projects.presentationEngine))
+    // FakeAtemSwitcher: the loopback switcher the ATEM suites drive. It stays with the client it
+    // was captured against, and the app's own ATEM tests (bridge, upload routes, lower third) borrow
+    // it from there rather than keeping a second copy.
+    add("jvmTestImplementation", testFixtures(projects.atem))
 }
 
 compose.desktop {
@@ -837,10 +847,15 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
 // been the wrong fix twice over: it hides a race rather than removing it, and the number being
 // widened would be a claim about a busy machine rather than about the protocol.
 //
-// ~72s for the six of them. Named individually rather than by a `*Atem*` glob so that adding a suite
-// to this list is a deliberate act with a reason, not something a class name does by accident.
+// ~72s when this list still held `*AtemClientSocketTest`, which has since moved to `:atem` with the
+// client it drives. Nothing was lost by that: a module's `test` task forks once by default, so that
+// suite is already alone in its JVM there, and CI runs `:atem:test` as its own step after
+// `:composeApp:jvmTest` rather than beside it. The suites below still reach FakeAtemSwitcher --
+// through `testFixtures(projects.atem)` -- so they still belong here.
+//
+// Named individually rather than by a `*Atem*` glob so that adding a suite to this list is a
+// deliberate act with a reason, not something a class name does by accident.
 val serialTestClasses = listOf(
-    "*AtemClientSocketTest",
     "*AtemUploadTracedTest",
     "*CompanionServerAtemKeyTest",
     "*CompanionServerAtemUploadTest",
@@ -856,11 +871,6 @@ val serialTestClasses = listOf(
     "*LowerThirdAtemDialogTest",
     "*LowerThirdAtemDialogExtraTest",
     "*LowerThirdTabScreenshotTest",
-    // Binds Constants.PLANNING_CENTER_OAUTH_PORT, and that one genuinely cannot move: it is the
-    // redirect port registered with Planning Center, so testPort() would point the callback at a
-    // port the provider will never redirect to. Two forks reaching for it is a bind race, which is
-    // how this failed on CI with "the server prematurely closed the connection".
-    "*PlanningCenterAuthServerTest",
     // Here for a different reason: it binds a fixed port AND draws that port into the image (the
     // Server URL row, the connection QR). Shifting the port per fork would rewrite every one of its
     // committed screenshots on every run, so it keeps the literal and runs where nothing competes
