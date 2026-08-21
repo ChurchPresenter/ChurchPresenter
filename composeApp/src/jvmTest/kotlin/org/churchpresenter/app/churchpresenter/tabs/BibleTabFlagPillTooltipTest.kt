@@ -5,7 +5,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performMouseInput
-import org.churchpresenter.app.churchpresenter.data.settings.BibleEngineSettings
+import org.churchpresenter.settings.BibleEngineSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager

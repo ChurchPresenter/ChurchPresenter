@@ -20,10 +20,10 @@ import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.Dispatchers
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.data.settings.SongSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

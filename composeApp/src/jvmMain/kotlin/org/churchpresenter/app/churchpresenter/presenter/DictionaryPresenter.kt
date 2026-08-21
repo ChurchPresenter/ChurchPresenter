@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.data.settings.DictionarySettings
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.DictionarySettings
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 

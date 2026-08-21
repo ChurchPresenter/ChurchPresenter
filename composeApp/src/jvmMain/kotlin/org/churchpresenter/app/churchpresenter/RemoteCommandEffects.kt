@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.Flow
 
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem

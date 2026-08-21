@@ -16,10 +16,11 @@ import org.churchpresenter.app.churchpresenter.data.BibleInstallOutcome
 import org.churchpresenter.app.churchpresenter.data.BibleModule
 import org.churchpresenter.app.churchpresenter.data.BibleSource
 import org.churchpresenter.app.churchpresenter.data.InstallPhase
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEventStore
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.settings.BibleSettings
 
 enum class BibleCatalogError { NETWORK_ERROR, RATE_LIMITED, FAILURE }
 
@@ -209,7 +210,7 @@ class BibleCatalogViewModel(
 
     /**
      * Downloads and converts [module], handing the installed file name — the same value
-     * [org.churchpresenter.app.churchpresenter.data.settings.BibleSettings.primaryBible] stores —
+     * [BibleSettings.primaryBible] stores —
      * to [onInstalled].
      */
     fun install(module: BibleModule, onInstalled: (fileName: String) -> Unit) {

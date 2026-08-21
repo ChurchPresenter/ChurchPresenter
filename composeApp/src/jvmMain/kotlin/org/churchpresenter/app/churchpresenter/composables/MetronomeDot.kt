@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import org.churchpresenter.app.churchpresenter.data.settings.MetronomePosition
+import org.churchpresenter.settings.MetronomePosition
 
 /** Maps a free 3x3 grid position to a screen [Alignment]; NONE means the metronome is disabled. */
 fun MetronomePosition.toAlignment(): Alignment? = when (this) {

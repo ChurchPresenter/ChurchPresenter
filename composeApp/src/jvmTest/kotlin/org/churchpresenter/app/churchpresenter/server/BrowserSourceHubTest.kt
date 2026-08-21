@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
 import java.nio.ByteBuffer
 import kotlin.test.Test

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import presentation.engine.DeckRasterizer
 import presentation.engine.LoadResult

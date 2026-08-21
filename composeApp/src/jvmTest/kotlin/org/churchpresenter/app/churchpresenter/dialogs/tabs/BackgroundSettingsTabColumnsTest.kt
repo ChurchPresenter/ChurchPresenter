@@ -8,10 +8,10 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.BackgroundConfig
-import org.churchpresenter.app.churchpresenter.data.settings.BackgroundSettings
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BackgroundConfig
+import org.churchpresenter.settings.BackgroundSettings
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

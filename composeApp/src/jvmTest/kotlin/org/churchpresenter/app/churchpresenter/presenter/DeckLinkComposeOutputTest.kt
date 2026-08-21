@@ -3,8 +3,8 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import kotlin.test.Test
 import kotlin.test.assertEquals

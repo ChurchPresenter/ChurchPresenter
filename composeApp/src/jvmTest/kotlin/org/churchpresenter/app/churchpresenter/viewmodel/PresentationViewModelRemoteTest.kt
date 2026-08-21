@@ -2,10 +2,10 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.PresentationSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ProjectionSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.PresentationSettings
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.io.File
 import java.nio.file.Files

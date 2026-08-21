@@ -1,10 +1,10 @@
 package org.churchpresenter.app.churchpresenter.utils
 
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
-import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkSettings
-import org.churchpresenter.app.churchpresenter.data.settings.OBSSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ServerSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.AtemSettings
+import org.churchpresenter.settings.InstanceLinkSettings
+import org.churchpresenter.settings.OBSSettings
+import org.churchpresenter.settings.ServerSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

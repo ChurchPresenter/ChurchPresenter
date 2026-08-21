@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.InstanceLinkRole
+import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

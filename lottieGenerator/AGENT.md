@@ -21,7 +21,7 @@ A real Gradle module of this build: `include(":lottieGenerator")`,
 
 ## What `:composeApp` uses from it
 
-`lottiegen.App` (as `LottieGenApp`) and `lottiegen.editor.StyleEditorApp`, both from
+`org.churchpresenter.lottiegen.App` (as `LottieGenApp`) and `org.churchpresenter.lottiegen.editor.StyleEditorApp`, both from
 `dialogs/AboutDialog.kt`, wrapped in `AppThemeWrapper` so the generator follows the app's theme.
 The app passes `outputDir` and the canvas size and gets an `onFileSaved` callback; with
 `embedded = true` it stays inside the app's window chrome. Keep those entry points public and their
@@ -52,6 +52,22 @@ style is authored in the editor and needs **no code edit** at all. `ADDING_ANIMA
 between them and lists the registration checklist and verification steps — follow it rather than
 inventing a third path.
 
+## Theme
+
+**The Material layer is `:theme`'s.** `LottieGenTheme` wraps `ChurchPresenterTheme`, so the
+standalone window gets the same colour schemes, typography, shapes and semantic colours as every
+other ChurchPresenter screen. It used to build its own `ColorScheme` from the palette plus a
+`Typography` that restated Material's defaults — both duplicates, and the colour one let the tool's
+dialogs and dropdown menus drift from the app's whenever a theme changed on one side only.
+
+**`LottieGenPalette` and `Tokens` stay.** Those 51 roles are the hand-drawn panel chrome — canvas
+checkerboard, transport track, live dot, badge and logo chips — which Material has no equivalent
+for. They are not duplication, and they are what `ProvideLottieGenPalette` supplies on the embedded
+path, where the host already owns the MaterialTheme.
+
+The scrollbar style is deliberately provided *inside* the shared theme, overriding it: these
+scrollbars sit on panel chrome rather than on Material surfaces.
+
 ## Commands
 
 ```bash
@@ -78,3 +94,6 @@ Both CI steps are gated on this directory or the shared build files changing.
 `compose.desktop.currentOs`, Material 3, the extended icon set, `kotlinx-serialization-json`,
 `kotlinx-coroutines-swing`, and `compottie` + `compottie-dot` for previewing the Lottie it writes.
 All from `gradle/libs.versions.toml`.
+
+Plus **`projects.theme`** — the shared Material layer (see **Theme** above). It is the only module
+dependency here, and it brings nothing but Compose.

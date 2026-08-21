@@ -29,7 +29,7 @@ import churchpresenter.composeapp.generated.resources.canvas_transform_y
 import churchpresenter.composeapp.generated.resources.canvas_transform_w
 import churchpresenter.composeapp.generated.resources.canvas_transform_h
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.scene.SceneSource
 
 private const val MIN_SOURCE_SIZE = 0.01f

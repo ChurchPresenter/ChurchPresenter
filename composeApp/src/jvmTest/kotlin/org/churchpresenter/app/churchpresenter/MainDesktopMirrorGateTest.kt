@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.data.settings.InstanceLinkRole
+import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import kotlin.test.Test
 import kotlin.test.assertFalse

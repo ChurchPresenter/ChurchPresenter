@@ -8,7 +8,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.settings.AtemSettings
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import kotlin.test.AfterTest

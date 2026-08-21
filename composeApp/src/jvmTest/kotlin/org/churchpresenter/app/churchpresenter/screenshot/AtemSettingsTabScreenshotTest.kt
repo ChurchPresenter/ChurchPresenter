@@ -13,8 +13,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.AtemSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test

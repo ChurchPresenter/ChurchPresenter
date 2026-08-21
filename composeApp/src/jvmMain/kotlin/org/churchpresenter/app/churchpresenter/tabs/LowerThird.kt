@@ -146,7 +146,7 @@ import kotlinx.coroutines.withContext
 import java.nio.file.FileSystems
 import java.nio.file.StandardWatchEventKinds
 import javax.swing.JOptionPane
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.formatAtemFps
 import org.churchpresenter.atem.AtemClient
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache

@@ -11,9 +11,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.hasNoPrimaryTarget
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.utils.UpdateCheckInterval
 import java.awt.GraphicsEnvironment
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes

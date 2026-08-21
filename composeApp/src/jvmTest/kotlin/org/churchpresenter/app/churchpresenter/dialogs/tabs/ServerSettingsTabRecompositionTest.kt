@@ -20,8 +20,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ServerSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ServerSettings
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import kotlin.test.Test
 import kotlin.test.assertEquals

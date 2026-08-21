@@ -21,12 +21,12 @@ import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.text.input.ImeAction
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.QASettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.QASettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.confirmColorDialogWith
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.openColorField
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
