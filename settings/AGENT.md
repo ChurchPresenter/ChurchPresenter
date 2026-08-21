@@ -8,11 +8,27 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 migrates and saves `settings.json`, and the `Constants` those defaults are spelled with. A real
 Gradle module of this build: `include(":settings")`, `implementation(projects.settings)`.
 
-It keeps the packages it always had — `…churchpresenter.data.settings`, `…churchpresenter.data`
-and `…churchpresenter.utils` — so **no import in the app changed when it moved**, the same way
-`:core-models` kept `…churchpresenter.models`. Two modules sharing a package name is fine on a
-plain classpath; do not "tidy" this into a new package, because that is 700 import lines of churn
-for no gain.
+**The packages are `org.churchpresenter.settings` and `org.churchpresenter.settings.utils`.** The
+module held three of the app's own packages — `…churchpresenter.data.settings`,
+`…churchpresenter.data` and `…churchpresenter.utils` — which cost nothing at extraction time and
+one real thing afterwards: all three are **still live in `:composeApp`**, so a settings class
+resolved with no import in any app file that happened to share its package, and the dependency was
+invisible there.
+
+`settings/` holds the persisted classes and `SettingsManager`; `settings/utils/` holds `Constants`,
+`AppDataDir`, `ClockFormat` and `UpdateCheckInterval` — the constants and helpers those defaults
+are spelled with, which are not themselves settings.
+
+**Never rewrite by package prefix.** `:composeApp` owns 34 files in `…utils`, 34 in `…data` and
+`ObsSceneSelection` in `…data.settings`; a prefix rewrite drags all of them along. Key on the
+symbols this module declares. In particular `:composeApp` has **its own `utils/Constants.kt`**
+holding top-level functions like `presenterScreenBounds()` — three `SceneViewModel` suites stub its
+file class by name, `mockkStatic("org.churchpresenter.app.churchpresenter.utils.ConstantsKt")`, and
+that string is not this module's and must not be re-pointed at it.
+
+**`settings.json` is unaffected by any of this.** Nothing here is a sealed `@Serializable`, so no
+class name is ever written to disk — the file is keyed on property names and enum constant names,
+and stays readable across the rename in both directions.
 
 ## Backward compatibility — the whole point of the package rule
 

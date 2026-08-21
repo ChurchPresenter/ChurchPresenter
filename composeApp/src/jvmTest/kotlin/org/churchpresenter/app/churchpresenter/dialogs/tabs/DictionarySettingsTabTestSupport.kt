@@ -24,9 +24,9 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Utils
-import org.churchpresenter.app.churchpresenter.data.settings.DictionarySettings
+import org.churchpresenter.settings.DictionarySettings
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

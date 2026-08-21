@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.utils
 
 import androidx.compose.ui.window.WindowPlacement
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.withWindowGeometry
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.withWindowGeometry
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

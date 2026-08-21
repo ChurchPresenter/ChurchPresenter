@@ -38,7 +38,7 @@ import churchpresenter.composeapp.generated.resources.companion_satellite_status
 import churchpresenter.composeapp.generated.resources.companion_satellite_status_disconnected
 import churchpresenter.composeapp.generated.resources.companion_satellite_status_error
 import companionsatellite.CompanionConnectionStatus
-import org.churchpresenter.app.churchpresenter.data.settings.CompanionSatelliteSettings
+import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.app.churchpresenter.models.CompanionButtonState
 import org.churchpresenter.app.churchpresenter.models.CompanionConnectionUiState
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement

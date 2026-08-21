@@ -8,6 +8,7 @@ import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -294,7 +295,7 @@ class ApplyRemoteLiveStateTest {
         val presenter = apply(
             LiveStateDto(
                 contentType = "MEDIA",
-                mediaType = org.churchpresenter.app.churchpresenter.utils.Constants.MEDIA_TYPE_URL,
+                mediaType = Constants.MEDIA_TYPE_URL,
                 mediaUrl = "https://example.org/clip.mp4",
             ),
             onPlayRemoteMedia = { url, type -> played += url to type },
@@ -370,7 +371,7 @@ class ApplyRemoteLiveStateTest {
         val presenter = apply(
             LiveStateDto(
                 contentType = "MEDIA",
-                mediaType = org.churchpresenter.app.churchpresenter.utils.Constants.MEDIA_TYPE_URL,
+                mediaType = Constants.MEDIA_TYPE_URL,
                 mediaUrl = "https://example.org/clip.mp4",
             ),
             onPlayRemoteMedia = null,
@@ -387,7 +388,7 @@ class ApplyRemoteLiveStateTest {
         apply(
             LiveStateDto(
                 contentType = "MEDIA",
-                mediaType = org.churchpresenter.app.churchpresenter.utils.Constants.MEDIA_TYPE_URL,
+                mediaType = Constants.MEDIA_TYPE_URL,
             ),
             onPlayRemoteMedia = { url, type -> played += url to type },
         )

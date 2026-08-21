@@ -24,8 +24,8 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.QASettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.QASettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.retypeNumberField
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus

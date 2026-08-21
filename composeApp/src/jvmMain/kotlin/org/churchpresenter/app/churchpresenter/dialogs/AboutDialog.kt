@@ -53,7 +53,7 @@ import churchpresenter.composeapp.generated.resources.save_diagnostic_info
 import churchpresenter.composeapp.generated.resources.style_editor_window_title
 import churchpresenter.composeapp.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.LocalLanguage

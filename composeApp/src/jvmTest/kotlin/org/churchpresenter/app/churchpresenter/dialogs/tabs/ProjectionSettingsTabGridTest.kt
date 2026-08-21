@@ -16,10 +16,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.ProjectionSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.ScreenAssignment
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -62,7 +63,7 @@ class ProjectionSettingsTabGridTest {
         val keyed = settingsWith {
             copy(
                 screenAssignments = listOf(
-                    org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment(
+                    ScreenAssignment(
                         targetDisplay = 1, targetBoundsX = 1920, targetBoundsW = 1280, targetBoundsH = 720,
                         keyTargetDisplay = 1, keyTargetBoundsX = 1920, keyTargetBoundsW = 1280, keyTargetBoundsH = 720,
                     ),

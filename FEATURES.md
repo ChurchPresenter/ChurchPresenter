@@ -5,8 +5,8 @@
 > Source paths below are relative to `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/`
 >
 > Except `data/settings/…` and `data/SettingsManager.kt`, which live in the `:settings` module
-> under `settings/src/main/kotlin/org/churchpresenter/app/churchpresenter/` — it kept the packages
-> the app already used, so the paths below are unchanged from the same package root.
+> under `settings/src/main/kotlin/org/churchpresenter/settings/` — the paths below keep the old
+> shape for readability; the package there is `org.churchpresenter.settings`.
 
 ## Songs & Lyrics
 - **Unlimited song library** — organize thousands of songs across as many songbooks as you like, indexed straight from a folder.

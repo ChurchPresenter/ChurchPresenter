@@ -6,8 +6,8 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.settings.QASettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.QASettings
 import org.churchpresenter.app.churchpresenter.tabs.QALabel
 import org.churchpresenter.app.churchpresenter.tabs.clickQaLabel
 import org.churchpresenter.app.churchpresenter.tabs.qaButton
