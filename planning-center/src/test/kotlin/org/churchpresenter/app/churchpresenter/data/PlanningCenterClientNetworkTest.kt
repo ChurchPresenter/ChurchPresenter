@@ -11,6 +11,7 @@ import io.ktor.http.content.OutgoingContent
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
 import java.net.URLEncoder
+import java.nio.channels.UnresolvedAddressException
 import java.util.Base64
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -48,6 +49,18 @@ class PlanningCenterClientNetworkTest {
     private fun failToConnect() {
         http = HttpClient(
             MockEngine { throw java.io.IOException("no route to host") },
+        )
+    }
+
+    /**
+     * What being offline actually looks like: the name never resolves. Worth its own helper because
+     * `UnresolvedAddressException` is an [IllegalArgumentException], so it reaches the same clause a
+     * malformed body would unless the client catches it first — and telling an operator with no
+     * network that their plan is unreadable sends them looking in the wrong place.
+     */
+    private fun failToResolve() {
+        http = HttpClient(
+            MockEngine { throw UnresolvedAddressException() },
         )
     }
 
@@ -842,6 +855,131 @@ class PlanningCenterClientNetworkTest {
                     http = http,
                 ) },
             ).attachments.isEmpty(),
+        )
+    }
+
+    // ── The body was not what the API documents ─────────────────────────────────
+
+    /**
+     * A 200 carrying something that is not JSON at all — a captive portal's login page, an HTML
+     * error page from a proxy — is a plain failure on every endpoint, not a network error: the
+     * request did arrive, and retrying it returns the same page.
+     */
+    @Test
+    fun `a body that is not json is a plain failure on every endpoint`() {
+        fun notJson(): Unit = respondWith("<html><body>Sign in to continue</body></html>")
+
+        notJson()
+        assertEquals(
+            PlanningCenterClient.TokenOutcome.Failure,
+            runBlocking { PlanningCenterClient.exchangeCodeForToken("id", "secret", "code", http) },
+        )
+        notJson()
+        assertEquals(
+            PlanningCenterClient.PersonOutcome.Failure,
+            runBlocking { PlanningCenterClient.getCurrentPerson("tok", http = http) },
+        )
+        notJson()
+        assertEquals(
+            PlanningCenterClient.ServiceTypesOutcome.Failure,
+            runBlocking { PlanningCenterClient.listServiceTypes("tok", http = http) },
+        )
+        notJson()
+        assertEquals(
+            PlanningCenterClient.PlansOutcome.Failure,
+            runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
+        )
+        notJson()
+        assertEquals(
+            PlanningCenterClient.PlanItemsOutcome.Failure,
+            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+        )
+        notJson()
+        assertEquals(
+            PlanningCenterClient.ArrangementOutcome.Failure,
+            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+        )
+        notJson()
+        assertEquals(
+            PlanningCenterClient.AttachmentsOutcome.Failure,
+            runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+        )
+        notJson()
+        assertEquals(
+            PlanningCenterClient.AttachmentUrlOutcome.Failure,
+            runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) },
+        )
+    }
+
+    /**
+     * JSON of the wrong shape, which is what a rewriting proxy returns: parseable, but `data` is a
+     * string where an object is documented, so the `jsonObject` accessor throws. Same answer as
+     * above — the endpoint answered, it just did not answer with a plan.
+     */
+    @Test
+    fun `json of the wrong shape is a plain failure rather than a crash`() {
+        respondWith("""{"data":"not an object"}""")
+        assertEquals(
+            PlanningCenterClient.ArrangementOutcome.Failure,
+            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+        )
+
+        respondWith("""{"data":"not an object"}""")
+        assertEquals(
+            PlanningCenterClient.AttachmentUrlOutcome.Failure,
+            runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) },
+        )
+    }
+
+    // ── Offline ─────────────────────────────────────────────────────────────────
+
+    /**
+     * The offline case, kept apart from [`a body that is not json is a plain failure on every
+     * endpoint`] on purpose: both arrive as an [IllegalArgumentException] subclass, and only the
+     * order of the client's catch clauses tells them apart. Attachment open has no NetworkError of
+     * its own, so Failure is the whole of its vocabulary here.
+     */
+    @Test
+    fun `a host that cannot be resolved is a network error on every endpoint`() {
+        failToResolve()
+        assertEquals(
+            PlanningCenterClient.TokenOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.exchangeCodeForToken("id", "secret", "code", http) },
+        )
+        failToResolve()
+        assertEquals(
+            PlanningCenterClient.PersonOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.getCurrentPerson("tok", http = http) },
+        )
+        failToResolve()
+        assertEquals(
+            PlanningCenterClient.ServiceTypesOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.listServiceTypes("tok", http = http) },
+        )
+        failToResolve()
+        assertEquals(
+            PlanningCenterClient.PlansOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
+        )
+        failToResolve()
+        assertEquals(
+            PlanningCenterClient.PlanItemsOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+        )
+        failToResolve()
+        assertEquals(
+            PlanningCenterClient.ArrangementOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+        )
+        failToResolve()
+        assertEquals(
+            PlanningCenterClient.AttachmentsOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+        )
+        failToResolve()
+        assertEquals(
+            PlanningCenterClient.AttachmentUrlOutcome.Failure,
+            runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) },
         )
     }
 }

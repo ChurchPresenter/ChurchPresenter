@@ -27,14 +27,30 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import java.io.File
+import java.io.IOException
+import java.nio.channels.UnresolvedAddressException
 
 /**
  * OAuth2 + REST client for Planning Center Online's Services/People APIs. Each church registers
  * its own free PCO Developer OAuth application and supplies its own client id/secret (Settings ->
- * Planning Center) — no credentials ship with the app, matching the existing Pexels/Pixabay
- * bring-your-own-key pattern in [StockMediaClient]. One-way pull only; nothing is written back to
+ * Planning Center) — no credentials ship with the app, matching the app's existing Pexels/Pixabay
+ * bring-your-own-key pattern in `StockMediaClient`. One-way pull only; nothing is written back to
  * Planning Center.
+ *
+ * Every request function turns a failure into a value rather than throwing, and each catches the
+ * three things that actually happen, in this order:
+ *  - [IOException] — refused, reset or timed out. A retry is worth offering: `NetworkError`.
+ *  - [UnresolvedAddressException] — no DNS answer, which is what being offline looks like. It is
+ *    an [IllegalArgumentException] subclass, so it MUST be caught before the clause below or an
+ *    offline operator is told their plan is malformed.
+ *  - [IllegalArgumentException] — the body was not what the API documents. `SerializationException`
+ *    (not valid JSON at all) and the `jsonObject`/`jsonPrimitive` accessors (valid JSON of the
+ *    wrong shape) both land here, and both mean `Failure`: retrying changes nothing.
+ *
+ * Anything else is left to propagate, `CancellationException` included — a cancelled import must
+ * cancel, not come back as a network error.
  */
+@Suppress("TooManyFunctions") // 14 request functions, one per PCO endpoint this integration uses.
 object PlanningCenterClient {
 
     private const val AUTHORIZE_URL = "https://api.planningcenteronline.com/oauth/authorize"
@@ -75,6 +91,18 @@ object PlanningCenterClient {
                 connectTimeoutMillis = 8_000
             }
         }
+    }
+
+    /** Every warning from this client carries the same tag, so Sentry groups the integration. */
+    private val PCO_TAGS = mapOf("subsystem" to "planning_center")
+
+    /**
+     * Reports [e] and hands back [outcome], so a catch clause stays one line and the three-clause
+     * shape above reads as the mapping it is rather than as thirty lines of reporting.
+     */
+    private fun <T> reported(message: String, e: Throwable, outcome: T): T {
+        CrashReporter.reportWarning(message, throwable = e, tags = PCO_TAGS)
+        return outcome
     }
 
     fun redirectUri(): String = "http://127.0.0.1:${Constants.PLANNING_CENTER_OAUTH_PORT}/callback"
@@ -141,7 +169,8 @@ object PlanningCenterClient {
         try {
             val bodyParams = formParams + mapOf("client_id" to clientId, "client_secret" to clientSecret)
             val body = bodyParams.entries.joinToString("&") { (k, v) -> "$k=${v.encodeURLParameter()}" }
-            val basicAuth = java.util.Base64.getEncoder().encodeToString("$clientId:$clientSecret".toByteArray(Charsets.UTF_8))
+            val credentials = "$clientId:$clientSecret".toByteArray(Charsets.UTF_8)
+            val basicAuth = java.util.Base64.getEncoder().encodeToString(credentials)
             val response = http.post(TOKEN_URL) {
                 header("Authorization", "Basic $basicAuth")
                 contentType(ContentType.Application.FormUrlEncoded)
@@ -166,13 +195,12 @@ object PlanningCenterClient {
                     expiresAtEpochMs = System.currentTimeMillis() + parsed.expiresIn * 1000
                 )
             )
-        } catch (e: Exception) {
-            CrashReporter.reportWarning(
-                "Planning Center token request failed",
-                throwable = e,
-                tags = mapOf("subsystem" to "planning_center")
-            )
-            TokenOutcome.NetworkError
+        } catch (e: IOException) {
+            reported("Planning Center token request failed", e, TokenOutcome.NetworkError)
+        } catch (e: UnresolvedAddressException) {
+            reported("Planning Center token request failed", e, TokenOutcome.NetworkError)
+        } catch (e: IllegalArgumentException) {
+            reported("Planning Center token response could not be parsed", e, TokenOutcome.Failure)
         }
     }
 
@@ -189,7 +217,10 @@ object PlanningCenterClient {
     @Serializable
     internal data class PersonResponse(val data: PersonData = PersonData())
 
-    suspend fun getCurrentPerson(accessToken: String, http: HttpClient = defaultHttp): PersonOutcome = withContext(Dispatchers.IO) {
+    suspend fun getCurrentPerson(
+        accessToken: String,
+        http: HttpClient = defaultHttp,
+    ): PersonOutcome = withContext(Dispatchers.IO) {
         try {
             val response = http.get(ME_URL) {
                 header("Authorization", "Bearer $accessToken")
@@ -209,13 +240,12 @@ object PlanningCenterClient {
             val name = attrs.name
                 ?: listOfNotNull(attrs.firstName, attrs.lastName).joinToString(" ").ifBlank { "Connected" }
             PersonOutcome.Success(ConnectedPerson(displayName = name))
-        } catch (e: Exception) {
-            CrashReporter.reportWarning(
-                "Planning Center /people/v2/me failed",
-                throwable = e,
-                tags = mapOf("subsystem" to "planning_center")
-            )
-            PersonOutcome.NetworkError
+        } catch (e: IOException) {
+            reported("Planning Center /people/v2/me failed", e, PersonOutcome.NetworkError)
+        } catch (e: UnresolvedAddressException) {
+            reported("Planning Center /people/v2/me failed", e, PersonOutcome.NetworkError)
+        } catch (e: IllegalArgumentException) {
+            reported("Planning Center /people/v2/me response could not be parsed", e, PersonOutcome.Failure)
         }
     }
 
@@ -276,7 +306,10 @@ object PlanningCenterClient {
         data object Failure : ArrangementOutcome
     }
 
-    suspend fun listServiceTypes(accessToken: String, http: HttpClient = defaultHttp): ServiceTypesOutcome = withContext(Dispatchers.IO) {
+    suspend fun listServiceTypes(
+        accessToken: String,
+        http: HttpClient = defaultHttp,
+    ): ServiceTypesOutcome = withContext(Dispatchers.IO) {
         try {
             val response = http.get("$SERVICES_BASE_URL/service_types") {
                 header("Authorization", "Bearer $accessToken")
@@ -301,13 +334,12 @@ object PlanningCenterClient {
                 )
             }
             ServiceTypesOutcome.Success(serviceTypes)
-        } catch (e: Exception) {
-            CrashReporter.reportWarning(
-                "Planning Center service_types request failed",
-                throwable = e,
-                tags = mapOf("subsystem" to "planning_center")
-            )
-            ServiceTypesOutcome.NetworkError
+        } catch (e: IOException) {
+            reported("Planning Center service_types request failed", e, ServiceTypesOutcome.NetworkError)
+        } catch (e: UnresolvedAddressException) {
+            reported("Planning Center service_types request failed", e, ServiceTypesOutcome.NetworkError)
+        } catch (e: IllegalArgumentException) {
+            reported("Planning Center service_types response could not be parsed", e, ServiceTypesOutcome.Failure)
         }
     }
 
@@ -347,13 +379,12 @@ object PlanningCenterClient {
                 )
             }
             PlansOutcome.Success(plans)
-        } catch (e: Exception) {
-            CrashReporter.reportWarning(
-                "Planning Center plans request failed",
-                throwable = e,
-                tags = mapOf("subsystem" to "planning_center")
-            )
-            PlansOutcome.NetworkError
+        } catch (e: IOException) {
+            reported("Planning Center plans request failed", e, PlansOutcome.NetworkError)
+        } catch (e: UnresolvedAddressException) {
+            reported("Planning Center plans request failed", e, PlansOutcome.NetworkError)
+        } catch (e: IllegalArgumentException) {
+            reported("Planning Center plans response could not be parsed", e, PlansOutcome.Failure)
         }
     }
 
@@ -397,7 +428,9 @@ object PlanningCenterClient {
                     val arrangementRef = rel?.get("arrangement")?.jsonObject?.get("data")
                         ?.let { it as? JsonObject }
                     val songId = songRef?.get("id")?.jsonPrimitive?.contentOrNull
-                    val songAttrs = songId?.let { includedByKey["Song::$it"]?.jsonObject?.get("attributes")?.jsonObject }
+                    val songAttrs = songId?.let {
+                        includedByKey["Song::$it"]?.jsonObject?.get("attributes")?.jsonObject
+                    }
 
                     PlanItem(
                         id = obj["id"]?.jsonPrimitive?.contentOrNull ?: "",
@@ -415,13 +448,12 @@ object PlanningCenterClient {
                 }.sortedBy { it.sequence }
 
                 PlanItemsOutcome.Success(items)
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
-                    "Planning Center plan items request failed",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "planning_center")
-                )
-                PlanItemsOutcome.NetworkError
+            } catch (e: IOException) {
+                reported("Planning Center plan items request failed", e, PlanItemsOutcome.NetworkError)
+            } catch (e: UnresolvedAddressException) {
+                reported("Planning Center plan items request failed", e, PlanItemsOutcome.NetworkError)
+            } catch (e: IllegalArgumentException) {
+                reported("Planning Center plan items response could not be parsed", e, PlanItemsOutcome.Failure)
             }
         }
 
@@ -455,16 +487,16 @@ object PlanningCenterClient {
                 ArrangementOutcome.Success(
                     ArrangementDetail(
                         chordChart = chordChart,
-                        lyrics = pcoLyrics?.takeIf { it.isNotBlank() } ?: PlanningCenterLyricsFormatter.stripChords(chordChart)
+                        lyrics = pcoLyrics?.takeIf { it.isNotBlank() }
+                            ?: PlanningCenterLyricsFormatter.stripChords(chordChart)
                     )
                 )
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
-                    "Planning Center arrangement request failed",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "planning_center")
-                )
-                ArrangementOutcome.NetworkError
+            } catch (e: IOException) {
+                reported("Planning Center arrangement request failed", e, ArrangementOutcome.NetworkError)
+            } catch (e: UnresolvedAddressException) {
+                reported("Planning Center arrangement request failed", e, ArrangementOutcome.NetworkError)
+            } catch (e: IllegalArgumentException) {
+                reported("Planning Center arrangement response could not be parsed", e, ArrangementOutcome.Failure)
             }
         }
 
@@ -534,13 +566,12 @@ object PlanningCenterClient {
                 PlanAttachment(id = id, filename = filename, thumbnailUrl = thumbnailUrl)
             }
             AttachmentsOutcome.Success(attachments)
-        } catch (e: Exception) {
-            CrashReporter.reportWarning(
-                "Planning Center item attachments request failed",
-                throwable = e,
-                tags = mapOf("subsystem" to "planning_center")
-            )
-            AttachmentsOutcome.NetworkError
+        } catch (e: IOException) {
+            reported("Planning Center item attachments request failed", e, AttachmentsOutcome.NetworkError)
+        } catch (e: UnresolvedAddressException) {
+            reported("Planning Center item attachments request failed", e, AttachmentsOutcome.NetworkError)
+        } catch (e: IllegalArgumentException) {
+            reported("Planning Center item attachments response could not be parsed", e, AttachmentsOutcome.Failure)
         }
     }
 
@@ -577,17 +608,38 @@ object PlanningCenterClient {
                     ?.get("attachment_url")?.jsonPrimitive?.contentOrNull
                     ?: return@withContext AttachmentUrlOutcome.Failure
                 AttachmentUrlOutcome.Success(url)
-            } catch (e: Exception) {
-                CrashReporter.reportWarning(
-                    "Planning Center attachment open failed",
-                    throwable = e,
-                    tags = mapOf("subsystem" to "planning_center")
+            } catch (e: IOException) {
+                reported("Planning Center attachment open failed", e, AttachmentUrlOutcome.Failure)
+            } catch (e: UnresolvedAddressException) {
+                reported("Planning Center attachment open failed", e, AttachmentUrlOutcome.Failure)
+            } catch (e: IllegalArgumentException) {
+                reported(
+                    "Planning Center attachment open response could not be parsed",
+                    e,
+                    AttachmentUrlOutcome.Failure,
                 )
-                AttachmentUrlOutcome.Failure
             }
         }
 
-    /** Downloads a file's bytes from an already-resolved URL (a pre-signed S3 link — no auth header needed or wanted). */
+    /**
+     * Downloads a file's bytes from an already-resolved URL (a pre-signed S3 link — no auth
+     * header needed or wanted).
+     */
+    /**
+     * Also on stderr, the same way BibleEngineClient reports a failed connect. The Sentry warning
+     * carries the exception, but `reportWarning` returns immediately when Sentry is not enabled —
+     * which is every test run, and every operator who has not opted in. Without the stderr line the
+     * only surviving evidence is the word `NetworkError`, which says neither what failed nor why: a
+     * refused connection, a timeout and a closed client are indistinguishable, and each wants a
+     * different answer.
+     */
+    private fun downloadFailed(url: String, e: Throwable): FileDownloadOutcome {
+        System.err.println(
+            "planning-center: download of $url failed — ${e.javaClass.simpleName}: ${e.message}"
+        )
+        return reported("Planning Center attachment download failed", e, FileDownloadOutcome.NetworkError)
+    }
+
     suspend fun downloadFile(
         url: String,
         destination: File,
@@ -606,29 +658,29 @@ object PlanningCenterClient {
             destination.parentFile?.mkdirs()
             destination.writeBytes(bytes)
             FileDownloadOutcome.Success(destination)
-        } catch (e: Exception) {
-            // Also on stderr, the same way BibleEngineClient reports a failed connect. The Sentry
-            // warning below carries the exception, but `reportWarning` returns immediately when
-            // Sentry is not enabled — which is every test run, and every operator who has not opted
-            // in. Without this line the only surviving evidence is the word `NetworkError`, which
-            // says neither what failed nor why: a refused connection, a timeout and a closed client
-            // are indistinguishable, and each wants a different answer.
-            System.err.println("planning-center: download of $url failed — ${e.javaClass.simpleName}: ${e.message}")
-            CrashReporter.reportWarning(
-                "Planning Center attachment download failed",
-                throwable = e,
-                tags = mapOf("subsystem" to "planning_center")
-            )
-            FileDownloadOutcome.NetworkError
+        } catch (e: IOException) {
+            downloadFailed(url, e)
+        } catch (e: IllegalArgumentException) {
+            // No JSON is parsed here, so this is not a malformed body: it is a URL ktor could not
+            // use — an unparseable one, or a host with no DNS answer (UnresolvedAddressException is
+            // an IllegalArgumentException). Both are still "the file did not arrive".
+            downloadFailed(url, e)
         }
     }
 
     /** Fetches raw bytes for an attachment thumbnail preview (public S3 URL, no auth); null on any failure. */
-    suspend fun fetchThumbnailBytes(url: String, http: HttpClient = defaultHttp): ByteArray? = withContext(Dispatchers.IO) {
+    suspend fun fetchThumbnailBytes(
+        url: String,
+        http: HttpClient = defaultHttp,
+    ): ByteArray? = withContext(Dispatchers.IO) {
         try {
             val response = http.get(url)
             if (response.status.value in 200..299) response.body() else null
-        } catch (_: Exception) {
+        } catch (_: IOException) {
+            null
+        } catch (_: IllegalArgumentException) {
+            // Unreachable, unresolvable or not a URL at all. A missing preview is not worth
+            // reporting — the row simply draws without a thumbnail.
             null
         }
     }

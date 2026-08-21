@@ -319,6 +319,9 @@ kotlin {
             // Crash reporting: the crash log on disk and the Sentry forwarding behind it. It
             // exposes SentryLevel through CrashReporter.breadcrumb, hence `api` on its side.
             implementation(projects.diagnostics)
+            // The Planning Center client: OAuth, the Services REST calls and the loopback
+            // listener for the consent redirect, wrapped by PlanningCenterImportViewModel.
+            implementation(projects.planningCenter)
             // The song library: the grid of every song in the library, opened from the Help menu.
             implementation(projects.songlibrary)
             // The Companion Satellite protocol client: a real module rather than a mounted source
@@ -868,11 +871,6 @@ val serialTestClasses = listOf(
     "*LowerThirdAtemDialogTest",
     "*LowerThirdAtemDialogExtraTest",
     "*LowerThirdTabScreenshotTest",
-    // Binds Constants.PLANNING_CENTER_OAUTH_PORT, and that one genuinely cannot move: it is the
-    // redirect port registered with Planning Center, so testPort() would point the callback at a
-    // port the provider will never redirect to. Two forks reaching for it is a bind race, which is
-    // how this failed on CI with "the server prematurely closed the connection".
-    "*PlanningCenterAuthServerTest",
     // Here for a different reason: it binds a fixed port AND draws that port into the image (the
     // Server URL row, the connection QR). Shifting the port per fork would rewrite every one of its
     // committed screenshots on every run, so it keeps the literal and runs where nothing competes
