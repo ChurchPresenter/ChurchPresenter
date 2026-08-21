@@ -49,9 +49,9 @@ import churchpresenter.composeapp.generated.resources.bible_catalog_size_mb
 import churchpresenter.composeapp.generated.resources.bible_catalog_testament_full
 import churchpresenter.composeapp.generated.resources.bible_catalog_testament_new
 import churchpresenter.composeapp.generated.resources.bible_catalog_testament_old
-import org.churchpresenter.app.churchpresenter.data.BibleModule
-import org.churchpresenter.app.churchpresenter.data.InstallPhase
-import org.churchpresenter.app.churchpresenter.data.Testament
+import org.churchpresenter.bibleformats.catalog.BibleModule
+import org.churchpresenter.bibleformats.catalog.InstallPhase
+import org.churchpresenter.bibleformats.catalog.Testament
 import org.jetbrains.compose.resources.stringResource
 
 private const val BADGE_CHARS = 3

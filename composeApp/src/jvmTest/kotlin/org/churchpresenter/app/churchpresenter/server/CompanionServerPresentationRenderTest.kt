@@ -54,7 +54,16 @@ class CompanionServerPresentationRenderTest {
         private lateinit var tempHome: File
         private lateinit var deckDir: File
         private var realHome: String? = null
-        private val PORT = testPort(39_890)
+        /**
+         * The port the server ASKED for. Never build a URL from it — `CompanionServer.start` runs it
+         * through `findFreePort`, which walks upward when the port is taken (a previous suite's
+         * socket still in TIME_WAIT is enough), so the server can end up listening one port along.
+         * [boundPort] is where it actually is; every sibling suite reads it back the same way.
+         */
+        private val REQUESTED_PORT = testPort(39_890)
+
+        /** The port the server is really listening on, read back from its own URL after it starts. */
+        private var boundPort: Int = 0
 
         @JvmStatic
         @BeforeClass
@@ -68,13 +77,13 @@ class CompanionServerPresentationRenderTest {
             deckDir = Files.createTempDirectory("cp-presentation-render-decks").toFile()
 
             server = CompanionServer()
-            server.start(port = PORT)
-            runBlocking {
+            server.start(port = REQUESTED_PORT)
+            boundPort = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {
                         kotlinx.coroutines.delay(25)
                     }
-                    true
+                    server.serverUrl.value.substringAfterLast(':').toInt()
                 }
             } ?: error("companion server did not start")
 
@@ -170,7 +179,7 @@ class CompanionServerPresentationRenderTest {
      */
     private fun deck(scheduleItemId: String): Pair<HttpStatusCode, String> = runBlocking {
         val response = http().get(
-            "http://127.0.0.1:$PORT${Constants.ENDPOINT_PRESENTATIONS}/$scheduleItemId"
+            "http://127.0.0.1:$boundPort${Constants.ENDPOINT_PRESENTATIONS}/$scheduleItemId"
         )
         response.status to response.bodyAsText()
     }
@@ -209,7 +218,7 @@ class CompanionServerPresentationRenderTest {
         val id = file.absolutePath.hashCode().toUInt().toString(16)
         val response = runBlocking {
             http().get(
-                "http://127.0.0.1:$PORT${Constants.ENDPOINT_PRESENTATIONS}/$id/slides/0",
+                "http://127.0.0.1:$boundPort${Constants.ENDPOINT_PRESENTATIONS}/$id/slides/0",
             )
         }
 

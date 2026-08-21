@@ -24,8 +24,8 @@ import churchpresenter.composeapp.generated.resources.bible_catalog_source_ebibl
 import churchpresenter.composeapp.generated.resources.bible_catalog_source_zefania
 import churchpresenter.composeapp.generated.resources.bible_catalog_license_source_beblia
 import churchpresenter.composeapp.generated.resources.bible_catalog_source_beblia
-import org.churchpresenter.app.churchpresenter.data.BibleSourceId
-import org.churchpresenter.app.churchpresenter.data.InstallPhase
+import org.churchpresenter.bibleformats.catalog.BibleSourceId
+import org.churchpresenter.bibleformats.catalog.InstallPhase
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogError
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleDownloadError
 import org.jetbrains.compose.resources.StringResource

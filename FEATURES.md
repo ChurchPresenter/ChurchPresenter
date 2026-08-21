@@ -50,10 +50,10 @@
 - `viewmodel/BibleViewModel.kt`, `viewmodel/BibleSettingsViewModel.kt`, `viewmodel/DictionaryViewModel.kt`
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `data/Bible.kt`, `data/BibleBook.kt`, `data/BibleBookNames.kt`, `data/BibleSearch.kt`, `data/BibleVerse.kt`, `data/StrongsEntry.kt`
-- `data/BibleSource.kt`, `data/BibleInstallSupport.kt` — download sources: shared model and install machinery
-- `data/EBibleSource.kt` — eBible.org catalogue (USFX), `data/ZefaniaSource.kt` + `data/ZefaniaRepositoryIndex.kt` — Zefania archive
+- `bible-formats/` (the `:bible-formats` Gradle module) — the download catalogues and the `.spb` converters behind them
+- `bible-formats/src/main/kotlin/.../catalog/` — `EBibleSource` (eBible.org, USFX), `ZefaniaSource` + `ZefaniaRepositoryIndex`, `BebliaSource` + `BebliaCatalogIndex`
 - `viewmodel/BibleCatalogViewModel.kt`, `dialogs/BibleCatalogBrowserDialog.kt` — download browser UI
-- `converter/src/main/kotlin/converter/bible/UsfxToSpbConverter.kt` — USFX conversion
+- `bible-formats/src/main/kotlin/.../UsfxToSpbConverter.kt`, `XmlToSpbConverter.kt` — the conversions
 - `data/settings/BibleSettings.kt`, `data/settings/BibleEngineSettings.kt`
 - `presenter/BiblePresenter.kt`
 - `dialogs/tabs/BibleSettingsTab.kt`

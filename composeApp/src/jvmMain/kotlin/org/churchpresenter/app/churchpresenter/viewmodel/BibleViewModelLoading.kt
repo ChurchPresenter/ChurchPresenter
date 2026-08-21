@@ -12,7 +12,7 @@ import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleSyncMode
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
-import org.churchpresenter.app.churchpresenter.data.BibleInstallSupport
+import org.churchpresenter.bibleformats.catalog.BibleInstallSupport
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
