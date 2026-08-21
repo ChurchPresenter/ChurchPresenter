@@ -1,10 +1,10 @@
-package org.churchpresenter.cross
+package org.churchpresenter.crossword
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import org.churchpresenter.cross.ui.AdminApp
+import org.churchpresenter.crossword.ui.AdminApp
 
 fun main() = application {
     Window(

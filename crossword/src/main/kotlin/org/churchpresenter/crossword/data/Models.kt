@@ -1,4 +1,4 @@
-package org.churchpresenter.cross.data
+package org.churchpresenter.crossword.data
 
 enum class Direction { ACROSS, DOWN }
 

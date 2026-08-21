@@ -1,4 +1,4 @@
-package org.churchpresenter.cross.data
+package org.churchpresenter.crossword.data
 
 import java.util.Base64
 

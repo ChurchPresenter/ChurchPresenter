@@ -39,11 +39,11 @@ by `tabs/CrosswordTab.kt`.
 
 ## Layout
 
-`src/main/kotlin/org/churchpresenter/cross/`
+`src/main/kotlin/org/churchpresenter/crossword/`
 
 | File | Owns |
 |---|---|
-| `Main.kt` | `mainClass = "org.churchpresenter.cross.MainKt"` — the editor window |
+| `Main.kt` | `mainClass = "org.churchpresenter.crossword.MainKt"` — the editor window |
 | `data/Models.kt` | `Direction`, `ClueEntry`, `GridCell`, `RenderedPuzzle` |
 | `data/CrosswordEngine.kt` | `build(clues)` — places answers on a grid, longest first, every later word intersecting an earlier one; returns null when the clues cannot form a valid crossword |
 | `data/Encoder.kt` | `encode`/`decode` (Base64 + XOR), `toPlaintext`, `fromPlaintext`, `fromPlaintextSimple` |

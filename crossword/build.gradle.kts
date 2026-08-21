@@ -33,7 +33,7 @@ tasks.test {
 
 compose.desktop {
     application {
-        mainClass = "org.churchpresenter.cross.MainKt"
+        mainClass = "org.churchpresenter.crossword.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
