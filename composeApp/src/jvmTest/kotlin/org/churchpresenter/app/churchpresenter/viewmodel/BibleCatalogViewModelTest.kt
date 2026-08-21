@@ -1,15 +1,15 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import kotlinx.coroutines.CompletableDeferred
-import org.churchpresenter.app.churchpresenter.data.BibleCatalogOutcome
-import org.churchpresenter.app.churchpresenter.data.BibleInstallOutcome
+import org.churchpresenter.bibleformats.catalog.BibleCatalogOutcome
+import org.churchpresenter.bibleformats.catalog.BibleInstallOutcome
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEventStore
-import org.churchpresenter.app.churchpresenter.data.BibleModule
-import org.churchpresenter.app.churchpresenter.data.BibleSource
-import org.churchpresenter.app.churchpresenter.data.BibleSourceId
-import org.churchpresenter.app.churchpresenter.data.InstallPhase
-import org.churchpresenter.app.churchpresenter.data.InstallProgress
+import org.churchpresenter.bibleformats.catalog.BibleModule
+import org.churchpresenter.bibleformats.catalog.BibleSource
+import org.churchpresenter.bibleformats.catalog.BibleSourceId
+import org.churchpresenter.bibleformats.catalog.InstallPhase
+import org.churchpresenter.bibleformats.catalog.InstallProgress
 import java.io.File
 import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicInteger

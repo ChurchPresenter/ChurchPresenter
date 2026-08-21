@@ -102,8 +102,8 @@ import org.churchpresenter.converter.song.SongFormatConverter
 import org.churchpresenter.converter.song.SongFormatConverters
 import org.churchpresenter.converter.song.SongPreviewInfo
 import org.churchpresenter.converter.song.SpsToSongConverter
-import org.churchpresenter.converter.bible.SpbVersePatcher
-import org.churchpresenter.converter.bible.XmlToSpbConverter
+import org.churchpresenter.bibleformats.SpbVersePatcher
+import org.churchpresenter.bibleformats.XmlToSpbConverter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
