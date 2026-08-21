@@ -1,3 +1,4 @@
+import java.time.Duration
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import java.io.File
@@ -774,20 +775,42 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
         if (project.hasProperty("decklinkHardware")) project.property("decklinkHardware").toString() else "false"
     )
 
+    // A watchdog on the harness, NOT a wait inside a test: no assertion depends on it, and nothing
+    // about which tests pass changes. It exists because a hung suite otherwise runs until the CI
+    // *step* gives up at 40 minutes, and a killed step uploads no XML -- so the run costs three
+    // quarters of an hour and produces nothing to diagnose. Failing here leaves the log and the
+    // START line above naming the class.
+    //
+    // 30, against a measured green `App unit tests` step of 18m45s and 19m24s (2026-08-21). The
+    // step's own comment still says "11-14 minutes"; that band is stale and the suite has grown
+    // into it, which is exactly the trap to avoid here -- a 20-minute cap was tried first and would
+    // have failed both of those healthy runs. Re-measure before tightening this, and raise it when
+    // the suite grows rather than leaving it to bite a green run.
+    timeout.set(Duration.ofMinutes(30))
+
     testLogging {
         events("failed")
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
 
-    // Name every test class as it finishes, with its duration. Gradle prints nothing while a suite
-    // runs, so when the screenshots job hit its 20-minute step timeout twice there was no way to say
+    // Name every test class as it starts, and again as it finishes with its duration. Gradle prints
+    // nothing while a suite runs, so when the screenshots job hit its 20-minute step timeout twice
+    // there was no way to say
     // WHICH class was on screen when the clock ran out -- the log simply stopped after
     // "> Task :composeApp:jvmTest" and a killed step uploads no XML to read afterwards. One line per
     // class (772 in the screenshot run, ~2500 for the whole suite) is a cheap price for the next
     // occurrence naming itself. `-Pquiet` turns it off.
     if (!project.hasProperty("quietTests")) {
         addTestListener(object : TestListener {
-            override fun beforeSuite(suite: TestDescriptor) = Unit
+            // Named on the way IN as well as out, because a class that never finishes never
+            // reaches afterSuite: two 40-minute step timeouts (PR #344's screenshots job, PR #359's
+            // test job) both stopped after the last completed class, so which class was actually
+            // running had to be inferred from the execution order rather than read.
+            override fun beforeSuite(suite: TestDescriptor) {
+                if (suite.parent != null && suite.className != null) {
+                    logger.lifecycle("         START %s".format(suite.displayName))
+                }
+            }
             override fun beforeTest(testDescriptor: TestDescriptor) = Unit
             override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) = Unit
             override fun afterSuite(suite: TestDescriptor, result: TestResult) {
