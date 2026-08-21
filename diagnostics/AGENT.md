@@ -7,15 +7,22 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 **Crash reporting**: the crash log written to disk, and the Sentry forwarding behind it. A real
 Gradle module of this build: `include(":diagnostics")`, `implementation(projects.diagnostics)`.
 
-It keeps the package it always had — `…churchpresenter.utils` — so **no import in the app changed
-when it moved**, the same way `:core-models` and `:settings` kept theirs. Two modules sharing a
-package name is fine on a plain classpath; do not "tidy" it into a new package.
+**The package is `org.churchpresenter.diagnostics`.** It held
+`org.churchpresenter.app.churchpresenter.utils` — the app's own utils package, shared with
+`:composeApp` and `:settings` — which cost nothing at extraction time (no import changed) but left
+three modules writing into one package name, so `CrashReporter` resolved in `:composeApp`'s utils
+files with no import at all and the dependency was invisible there. It now has a package of its
+own, and those files say what they depend on.
+
+Nothing here is imported by prefix: a rewrite that touches `…churchpresenter.utils.*` wholesale
+will drag `:composeApp`'s and `:settings`' own classes with it. Key on the two types this module
+owns — [CrashReporter] and [BuildIdentity].
 
 ## What lives here
 
 | Path | Owns |
 |---|---|
-| `utils/CrashReporter.kt` | `object CrashReporter` — the local crash log, the Sentry bridge, PII scrubbing, the crash-escalation counter, and `BuildIdentity` |
+| `CrashReporter.kt` | `object CrashReporter` — the local crash log, the Sentry bridge, PII scrubbing, the crash-escalation counter, and `BuildIdentity` |
 
 47 files across `:composeApp` call it, which is why it is its own module rather than part of
 `:settings`: everything that can fail wants to report, and nothing should have to depend on the

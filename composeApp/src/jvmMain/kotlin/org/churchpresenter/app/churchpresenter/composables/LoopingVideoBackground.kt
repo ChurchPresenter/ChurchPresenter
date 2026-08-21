@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.Image
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect

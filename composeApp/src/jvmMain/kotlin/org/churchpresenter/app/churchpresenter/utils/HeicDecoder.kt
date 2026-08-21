@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.Files
 import javax.imageio.ImageIO
+import org.churchpresenter.diagnostics.CrashReporter
 
 /**
  * Decodes HEIC/HEIF image files into JPEG bytes.

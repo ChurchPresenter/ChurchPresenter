@@ -434,7 +434,7 @@ class FileChooserTest {
  * does not list a file the user can see in their file manager.
  *
  * The builder is a private top-level function, so it is reached by reflection on its file class —
- * the same approach [org.churchpresenter.app.churchpresenter.utils.CrashReporterTest] uses.
+ * the same approach [org.churchpresenter.diagnostics.CrashReporterTest] uses.
  */
 class XdgFilterPatternTest {
 

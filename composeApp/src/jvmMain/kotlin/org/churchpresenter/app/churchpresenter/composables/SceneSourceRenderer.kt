@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
