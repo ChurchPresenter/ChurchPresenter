@@ -162,6 +162,12 @@ fun MediaTab(
     appSettings: AppSettings = AppSettings(),
     onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
     selectedMediaItem: ScheduleItem.MediaItem? = null,
+    /**
+     * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
+     * effect below. Keyed on the item alone, an unchanged item is an unchanged key and the second
+     * click does nothing.
+     */
+    selectedMediaItemVersion: Int = 0,
     presenterManager: PresenterManager? = null,
     /** Non-null while connected via Instance Link — builds the primary's /api/media/stream URL for
      *  a given schedule item id, used in place of a schedule item's local file path since that path
@@ -226,7 +232,7 @@ fun MediaTab(
     val selectFileLabel = stringResource(Res.string.media_select_file)
     val mediaFilesLabel = stringResource(Res.string.media_files_filter)
 
-    LaunchedEffect(selectedMediaItem) {
+    LaunchedEffect(selectedMediaItem, selectedMediaItemVersion) {
         selectedMediaItem?.let {
             if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
             when (it.mediaType) {

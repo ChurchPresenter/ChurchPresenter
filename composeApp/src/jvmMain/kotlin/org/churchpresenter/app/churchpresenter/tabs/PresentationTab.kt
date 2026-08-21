@@ -232,6 +232,12 @@ fun PresentationTab(
      *  on this machine (e.g. a network drive mounted differently, or not mounted at all, here). */
     instanceLinkFetchPresentationSlideBytes: (suspend (id: String, index: Int) -> ByteArray?)? = null,
     selectedPresentationItem: ScheduleItem.PresentationItem? = null,
+    /**
+     * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
+     * effect below. Keyed on the item alone, an unchanged item is an unchanged key and the second
+     * click does nothing.
+     */
+    selectedPresentationItemVersion: Int = 0,
     presenterManager: PresenterManager? = null,
     onSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slideFiles: List<File>, slideNotes: List<String>) -> Unit)? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
@@ -280,7 +286,7 @@ fun PresentationTab(
     )
     val shortcuts = LocalShortcuts.current
 
-    LaunchedEffect(selectedPresentationItem) {
+    LaunchedEffect(selectedPresentationItem, selectedPresentationItemVersion) {
         selectedPresentationItem?.let { item ->
             val file = File(item.filePath)
             if (file.exists()) {

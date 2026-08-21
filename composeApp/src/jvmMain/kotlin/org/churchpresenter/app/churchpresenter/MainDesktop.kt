@@ -340,15 +340,23 @@ fun MainDesktop(
     // below doesn't capture a stale instance across recompositions.
     val currentOnScheduleActionsReady by rememberUpdatedState(onScheduleActionsReady)
     var selectedBibleVerseItem by remember { mutableStateOf<ScheduleItem.BibleVerseItem?>(null) }
+    // Bumped on every click, like selectedSongItemVersion below: keyed on the item alone, clicking
+    // the same verse twice never re-runs the effect that resolves it.
+    var selectedBibleVerseItemVersion by remember { mutableStateOf(0) }
     var selectedSongItem by remember { mutableStateOf<ScheduleItem.SongItem?>(null) }
     // Incremented every time a song is selected — used as LaunchedEffect key so
     // clicking the same song twice (or API→click) always re-triggers navigation.
     var selectedSongItemVersion by remember { mutableStateOf(0) }
     var selectedPictureItem by remember { mutableStateOf<ScheduleItem.PictureItem?>(null) }
+    var selectedPictureItemVersion by remember { mutableStateOf(0) }
     var selectedPresentationItem by remember { mutableStateOf<ScheduleItem.PresentationItem?>(null) }
+    var selectedPresentationItemVersion by remember { mutableStateOf(0) }
     var selectedMediaItem by remember { mutableStateOf<ScheduleItem.MediaItem?>(null) }
+    var selectedMediaItemVersion by remember { mutableStateOf(0) }
     var selectedLowerThirdItem by remember { mutableStateOf<ScheduleItem.LowerThirdItem?>(null) }
+    var selectedLowerThirdItemVersion by remember { mutableStateOf(0) }
     var selectedWebsiteItem by remember { mutableStateOf<ScheduleItem.WebsiteItem?>(null) }
+    var selectedWebsiteItemVersion by remember { mutableStateOf(0) }
     val timerExpiredDefaultLabel = stringResource(Res.string.timer_expired)
 
     var showCrosswordTab by remember { mutableStateOf(false) }
@@ -651,6 +659,37 @@ fun MainDesktop(
         }
     }
 
+    // The same stand-in as above, for a schedule verse clicked while BibleTab is not composed —
+    // the Bible tab hidden in settings (selectTab then declines to switch, so the tab never
+    // appears), or disposed by the visibleTabs clamp. Without this the item is silently dropped
+    // while the presenter has already been switched to BIBLE, which is the blank output that was
+    // reported.
+    val scheduleVerseGate = rememberTokenGate(selectedBibleVerseItemVersion)
+    LaunchedEffect(selectedBibleVerseItemVersion) {
+        if (!scheduleVerseGate.consume()) return@LaunchedEffect
+        val item = selectedBibleVerseItem ?: return@LaunchedEffect
+        if (!shouldMainResolveScheduleVerse(
+                activeTabIndex = effectiveTabIndex,
+                bibleTabIndex = visibleTabs.indexOf(Tabs.BIBLE),
+            )
+        ) return@LaunchedEffect
+        val verses = bibleViewModel.resolveVerseSelection(
+            bookName = item.bookName,
+            chapter = item.chapter,
+            verseNumber = item.verseNumber,
+            verseRange = item.verseRange,
+            bookId = item.bookId,
+        )
+        if (verses.isEmpty()) {
+            CrashReporter.breadcrumb(
+                "Bible schedule item did not resolve to a verse",
+                category = "schedule",
+            )
+            return@LaunchedEffect
+        }
+        onVerseSelected(verses)
+    }
+
     val mainFocusRequester = remember { FocusRequester() }
 
     val konamiSequence = remember {
@@ -752,8 +791,8 @@ fun MainDesktop(
         resolveImageFile = resolveImageFile,
         onSettingsChange = onSettingsChange,
         onSongItemSelected = { selectedSongItem = it },
-        onPictureItemSelected = { selectedPictureItem = it },
-        onPresentationItemSelected = { selectedPresentationItem = it },
+        onPictureItemSelected = { selectedPictureItem = it; selectedPictureItemVersion++ },
+        onPresentationItemSelected = { selectedPresentationItem = it; selectedPresentationItemVersion++ },
         onSelectTab = ::selectTab,
         pushCurrentSlideIfLive = ::pushCurrentSlideIfLive,
         remotePresentationPlayPauseFlow = remotePresentationPlayPauseFlow,
@@ -1063,6 +1102,7 @@ fun MainDesktop(
                         onPresentBible = { item ->
                             selectTab(Tabs.BIBLE)
                             selectedBibleVerseItem = item
+                            selectedBibleVerseItemVersion++
                             presenting(Presenting.BIBLE)
                         },
                         onPresentSong = { item ->
@@ -1088,16 +1128,19 @@ fun MainDesktop(
                         onPresentPresentation = { item ->
                             selectTab(Tabs.PRESENTATION)
                             selectedPresentationItem = item
+                            selectedPresentationItemVersion++
                             presenting(Presenting.PRESENTATION)
                         },
                         onPresentPictures = { item ->
                             selectedPictureItem = item
+                            selectedPictureItemVersion++
                             selectTab(Tabs.PICTURES)
                             presenting(Presenting.PICTURES)
                         },
                         onPresentMedia = { item ->
                             selectTab(Tabs.MEDIA)
                             selectedMediaItem = item
+                            selectedMediaItemVersion++
                             presenting(Presenting.MEDIA)
                         },
                         onPresentAnnouncement = { item ->
@@ -1133,6 +1176,7 @@ fun MainDesktop(
                         },
                         onPresentWebsite = { item ->
                             selectedWebsiteItem = item
+                            selectedWebsiteItemVersion++
                             selectTab(Tabs.WEB)
                             presenterManager.setWebsiteUrl(item.url)
                             presenting(Presenting.WEBSITE)
@@ -1159,6 +1203,7 @@ fun MainDesktop(
 
                                 is ScheduleItem.BibleVerseItem -> {
                                     selectedBibleVerseItem = item
+                                    selectedBibleVerseItemVersion++
                                 }
 
                                 is ScheduleItem.LabelItem -> {
@@ -1168,18 +1213,22 @@ fun MainDesktop(
 
                                 is ScheduleItem.PictureItem -> {
                                     selectedPictureItem = item
+                                    selectedPictureItemVersion++
                                 }
 
                                 is ScheduleItem.PresentationItem -> {
                                     selectedPresentationItem = item
+                                    selectedPresentationItemVersion++
                                 }
 
                                 is ScheduleItem.MediaItem -> {
                                     selectedMediaItem = item
+                                    selectedMediaItemVersion++
                                 }
 
                                 is ScheduleItem.LowerThirdItem -> {
                                     selectedLowerThirdItem = item
+                                    selectedLowerThirdItemVersion++
                                 }
 
                                 is ScheduleItem.AnnouncementItem -> {
@@ -1188,6 +1237,7 @@ fun MainDesktop(
 
                                 is ScheduleItem.WebsiteItem -> {
                                     selectedWebsiteItem = item
+                                    selectedWebsiteItemVersion++
                                 }
 
                                 is ScheduleItem.SceneItem -> {
@@ -1418,6 +1468,7 @@ fun MainDesktop(
                                     currentScheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId)
                                 },
                                 selectedVerseItem = selectedBibleVerseItem,
+                                selectedVerseItemVersion = selectedBibleVerseItemVersion,
                                 onVerseSelected = onVerseSelected,
                                 onInstanceLinkSendVerse = instanceLinkSendVerse,
                                 onInstanceLinkSendBibleHold = instanceLinkSendBibleHold,
@@ -1467,6 +1518,7 @@ fun MainDesktop(
                                 onInstanceLinkSendPreviousPicture = instanceLinkSendPreviousPicture,
                                 instanceLinkFetchPictureImageBytes = instanceLinkFetchPictureImageBytes,
                                 selectedPictureItem = selectedPictureItem,
+                                selectedPictureItemVersion = selectedPictureItemVersion,
                                 presenterManager = presenterManager,
                                 onSettingsChange = onSettingsChange,
                                 viewModel = picturesViewModel
@@ -1484,6 +1536,7 @@ fun MainDesktop(
                                 onInstanceLinkSendPreviousSlide = instanceLinkSendPreviousSlide,
                                 instanceLinkFetchPresentationSlideBytes = instanceLinkFetchPresentationSlideBytes,
                                 selectedPresentationItem = selectedPresentationItem,
+                                selectedPresentationItemVersion = selectedPresentationItemVersion,
                                 presenterManager = presenterManager,
                                 onSlidesLoaded = onPresentationSlidesLoaded,
                                 onSettingsChange = onSettingsChange,
@@ -1507,6 +1560,7 @@ fun MainDesktop(
                                     currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
                                 },
                                 selectedMediaItem = selectedMediaItem,
+                                selectedMediaItemVersion = selectedMediaItemVersion,
                                 presenterManager = presenterManager,
                                 instanceLinkMediaStreamUrl = instanceLinkMediaStreamUrl,
                                 onInstanceLinkSendProject = instanceLinkSendProject
@@ -1516,6 +1570,7 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 selectedLowerThirdItem = selectedLowerThirdItem,
+                                selectedLowerThirdItemVersion = selectedLowerThirdItemVersion,
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
                                     scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
@@ -1573,6 +1628,7 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 presenterManager = presenterManager,
                                 selectedWebsiteItem = selectedWebsiteItem,
+                                selectedWebsiteItemVersion = selectedWebsiteItemVersion,
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { url, title ->
