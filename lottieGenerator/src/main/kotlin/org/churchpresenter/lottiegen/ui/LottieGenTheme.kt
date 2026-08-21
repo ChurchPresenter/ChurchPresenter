@@ -3,97 +3,33 @@ package org.churchpresenter.lottiegen.ui
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Shapes
-import androidx.compose.material3.Typography
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-
-// Derived from the palette so the Material surfaces (dialogs, dropdown menus, the colour picker)
-// sit in the same colours as the hand-built panel chrome. Without this the two disagree in exactly
-// the way the light theme used to: hand-drawn panels in one palette, menus and dialogs in another.
-private fun colorSchemeFor(palette: LottieGenPalette, dark: Boolean): ColorScheme {
-    val base = if (dark) darkColorScheme() else lightColorScheme()
-    return base.copy(
-        primary = palette.accent,
-        onPrimary = palette.onAccent,
-        primaryContainer = palette.logoChipBg,
-        onPrimaryContainer = palette.logoIcon,
-        secondary = palette.fillEnd,
-        onSecondary = palette.onAccent,
-        secondaryContainer = palette.logoChipBg,
-        onSecondaryContainer = palette.logoIcon,
-        tertiary = palette.tick,
-        onTertiary = palette.onAccent,
-        error = if (dark) Color(0xFFF2555A) else Color(0xFFB3261E),
-        onError = Color.White,
-        errorContainer = if (dark) Color(0xFF7A1F23) else Color(0xFFF9DEDC),
-        onErrorContainer = if (dark) Color.White else Color(0xFF410E0B),
-        background = palette.appBg,
-        onBackground = palette.primaryText,
-        surface = palette.cardBg,
-        onSurface = palette.primaryText,
-        surfaceVariant = palette.fieldBg,
-        onSurfaceVariant = palette.labelText,
-        surfaceContainer = palette.panelBg,
-        surfaceContainerHigh = palette.fieldBg,
-        surfaceContainerHighest = palette.subtleBg,
-        outline = palette.borderHover,
-        outlineVariant = palette.cardBorder,
-        inverseSurface = palette.primaryText,
-        inverseOnSurface = palette.appBg,
-    )
-}
-
-private val LottieGenTypography = Typography(
-    displayLarge = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 57.sp, lineHeight = 64.sp, letterSpacing = (-0.25).sp),
-    displayMedium = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 45.sp, lineHeight = 52.sp, letterSpacing = 0.sp),
-    displaySmall = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 36.sp, lineHeight = 44.sp, letterSpacing = 0.sp),
-    headlineLarge = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 32.sp, lineHeight = 40.sp, letterSpacing = 0.sp),
-    headlineMedium = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 28.sp, lineHeight = 36.sp, letterSpacing = 0.sp),
-    headlineSmall = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 24.sp, lineHeight = 32.sp, letterSpacing = 0.sp),
-    titleLarge = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium, fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = 0.sp),
-    titleMedium = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium, fontSize = 16.sp, lineHeight = 24.sp, letterSpacing = 0.15.sp),
-    titleSmall = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.1.sp),
-    labelLarge = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.1.sp),
-    labelMedium = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.5.sp),
-    labelSmall = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 16.sp, letterSpacing = 0.5.sp),
-    bodyLarge = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 24.sp, letterSpacing = 0.5.sp),
-    bodyMedium = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.25.sp),
-    bodySmall = TextStyle(fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.4.sp),
-)
+import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ThemeMode
 
 /**
- * The tool's own theme, for the standalone window: Material surfaces, typography and the palette.
+ * The tool's theme for the standalone window.
  *
- * [dark] picks the palette; standalone stays dark, which is what the generator has always looked
- * like. Embedded in a host app it is [ProvideLottieGenPalette] that runs instead — the host owns
- * the MaterialTheme there and only the palette has to be supplied.
+ * The Material layer — colour scheme, typography, shapes, semantic colours — is
+ * [ChurchPresenterTheme]'s, the same one every ChurchPresenter screen uses. This module used to
+ * build its own: a `ColorScheme` derived from [LottieGenPalette] and a full `Typography` that
+ * restated Material's defaults. Both were duplicates, and the colour one meant the tool's dialogs
+ * and dropdown menus drifted from the app's whenever a theme changed on one side only.
+ *
+ * What stays the tool's own is the hand-drawn panel chrome: [LottieGenPalette] and the [Tokens]
+ * that read it. Those are 51 roles — canvas checkerboard, transport track, live dot, badge and
+ * logo chips — that Material has no equivalent for, so they are not duplication.
+ *
+ * [dark] picks the palette and the theme mode together; standalone stays dark, which is what the
+ * generator has always looked like. Embedded in a host app it is [ProvideLottieGenPalette] that
+ * runs instead — the host owns the MaterialTheme there and only the palette has to be supplied.
  */
 @Composable
 fun LottieGenTheme(dark: Boolean = true, content: @Composable () -> Unit) {
-    val palette = if (dark) DarkPalette else LightPalette
-    MaterialTheme(
-        colorScheme = colorSchemeFor(palette, dark),
-        typography = LottieGenTypography,
-        shapes = Shapes(
-            extraSmall = RoundedCornerShape(4.dp),
-            small = RoundedCornerShape(6.dp),
-            medium = RoundedCornerShape(8.dp),
-            large = RoundedCornerShape(10.dp),
-            extraLarge = RoundedCornerShape(12.dp)
-        )
-    ) {
-        ProvideLottieGenPalette(palette, content)
+    ChurchPresenterTheme(if (dark) ThemeMode.DARK else ThemeMode.LIGHT) {
+        ProvideLottieGenPalette(if (dark) DarkPalette else LightPalette, content)
     }
 }
 
@@ -103,7 +39,9 @@ fun LottieGenTheme(dark: Boolean = true, content: @Composable () -> Unit) {
  *
  * This is the embedded path: ChurchPresenter has already applied its own theme around the
  * generator, so replacing it would be wrong, but the hand-drawn chrome still has to be told which
- * way it is being rendered.
+ * way it is being rendered. It also runs inside [LottieGenTheme], where its scrollbar deliberately
+ * overrides the shared theme's: this tool's scrollbars sit on panel chrome, not on Material
+ * surfaces.
  */
 @Composable
 fun ProvideLottieGenPalette(palette: LottieGenPalette, content: @Composable () -> Unit) {
