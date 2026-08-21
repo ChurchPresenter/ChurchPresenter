@@ -22,7 +22,7 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongLibrary
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ChurchPresenterTheme
 import songlibrary.ui.SongLibraryApp
 import java.nio.file.Files
 import kotlin.coroutines.CoroutineContext

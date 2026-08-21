@@ -24,8 +24,8 @@ import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseDisplayEntry
 import org.churchpresenter.app.churchpresenter.data.VersePlayEvent
 import org.churchpresenter.app.churchpresenter.dialogs.CCLIReportContent
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ThemeMode
 import java.io.File
 import java.time.LocalDate
 import java.time.ZoneId

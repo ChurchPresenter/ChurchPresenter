@@ -23,8 +23,8 @@ import org.churchpresenter.app.churchpresenter.data.BibleSourceId
 import org.churchpresenter.app.churchpresenter.data.InstallPhase
 import org.churchpresenter.app.churchpresenter.data.InstallProgress
 import org.churchpresenter.app.churchpresenter.dialogs.BibleCatalogBrowserDialogContent
-import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogViewModel
 import java.io.File
 import javax.swing.SwingUtilities
