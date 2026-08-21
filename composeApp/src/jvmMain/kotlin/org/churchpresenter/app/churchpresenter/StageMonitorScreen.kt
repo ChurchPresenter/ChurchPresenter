@@ -1,6 +1,14 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.foundation.Image
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -53,6 +61,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorStyleZo
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZone
 import org.churchpresenter.app.churchpresenter.data.settings.StageMonitorZoneStyle
 import org.churchpresenter.app.churchpresenter.data.settings.toStyleZone
+import org.churchpresenter.app.churchpresenter.data.settings.toZone
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.Question
 import org.churchpresenter.app.churchpresenter.models.Scene
@@ -87,7 +96,6 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 private const val CLOCK_TICK_MS = 1000L
-private const val BOTTOM_MIDDLE_WEIGHT = 0.8f
 private const val SHADOW_OFFSET_DIVISOR = 10f
 
 /** "Book chapter:verse" over the verse itself — the form both the live and the next zone show. */
@@ -265,26 +273,23 @@ fun StageMonitorScreen(
                 modifier = Modifier.fillMaxSize().background(parseHexColor(style.bgColor)).padding(12.dp),
                 contentAlignment = zoneContentAlignment(style)
             ) {
-                ZoneContent(fullScreenContent, style, renderData, mediaViewModel)
+                ZoneContent(sm, fullScreenContent, style, renderData, mediaViewModel)
             }
         } else {
+            // The grid the chosen layout describes: rows down the screen, cells across each row,
+            // both weighted. The classic arrangement is one entry in that catalog, not a special case.
             Column(modifier = Modifier.fillMaxSize()) {
-                // ── TOP ROW (fixed 2:1 against bottom = 67%; left/right split evenly 50/50) ──
-                Row(modifier = Modifier.fillMaxWidth().weight(2f)) {
-                    StageZoneBox(sm, StageMonitorZone.TOP_LEFT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
-                    VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-                    StageZoneBox(sm, StageMonitorZone.TOP_RIGHT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
-                }
-
-                HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
-
-                // ── BOTTOM ROW (fixed at 33% of total height, regardless of content) ──
-                Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                    StageZoneBox(sm, StageMonitorZone.BOTTOM_LEFT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
-                    VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-                    StageZoneBox(sm, StageMonitorZone.BOTTOM_MIDDLE, renderData, mediaViewModel, ::contentFor, Modifier.weight(BOTTOM_MIDDLE_WEIGHT))
-                    VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
-                    StageZoneBox(sm, StageMonitorZone.BOTTOM_RIGHT, renderData, mediaViewModel, ::contentFor, Modifier.weight(1f))
+                sm.layout.rows.forEachIndexed { rowIndex, layoutRow ->
+                    if (rowIndex > 0) HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
+                    Row(modifier = Modifier.fillMaxWidth().weight(layoutRow.weight)) {
+                        layoutRow.cells.forEachIndexed { cellIndex, cell ->
+                            if (cellIndex > 0) VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
+                            StageZoneBox(
+                                sm, cell.slot.toZone(), renderData, mediaViewModel, ::contentFor,
+                                Modifier.weight(cell.weight)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -322,7 +327,7 @@ private fun StageZoneBox(
         contentAlignment = zoneContentAlignment(style)
     ) {
         if (content != null) {
-            ZoneContent(content, style, data, mediaViewModel)
+            ZoneContent(sm, content, style, data, mediaViewModel)
         }
     }
 }
@@ -458,20 +463,24 @@ private fun zoneContentAlignment(style: StageMonitorZoneStyle): Alignment {
 
 @Composable
 private fun ZoneContent(
+    sm: StageMonitorSettings,
     content: StageMonitorContentType,
     style: StageMonitorZoneStyle,
     data: ZoneRenderData,
     mediaViewModel: MediaViewModel?
 ) {
     when (content) {
-        StageMonitorContentType.BIBLE -> TextContent(style, data.currentText)
+        StageMonitorContentType.BIBLE -> ZoneTextTransition(sm, data.currentText) { TextContent(style, it) }
         // A song with chords is shown as its chart; without them it is the words alone, exactly as
         // before. The Next zone follows the same rule for the section coming up.
         StageMonitorContentType.SONGS ->
-            if (data.chordLines.isEmpty()) FittedTextContent(style, data.currentText)
-            else ZoneChordChart(style, data.chordLines, data.songInfo)
+            ZoneTextTransition(sm, data.currentText) {
+                if (data.chordLines.isEmpty()) FittedTextContent(style, it)
+                else ZoneChordChart(style, data.chordLines, data.songInfo)
+            }
         StageMonitorContentType.PRESENTATION -> SlideContent(data.displayedSlide)
-        StageMonitorContentType.PRESENTATION_NOTES -> ScrollingTextContent(style, data.presenterNotes)
+        StageMonitorContentType.PRESENTATION_NOTES ->
+            ZoneTextTransition(sm, data.presenterNotes) { ScrollingTextContent(style, it) }
         StageMonitorContentType.PICTURES -> SlideContent(data.currentImageBitmap)
         StageMonitorContentType.MEDIA -> {
             if (mediaViewModel != null && mediaViewModel.isLoaded && !mediaViewModel.isAudioFile) {
@@ -488,13 +497,48 @@ private fun ZoneContent(
         StageMonitorContentType.QA -> QAPresenter(question = data.displayedQuestion, qaSettings = data.qaSettings)
         StageMonitorContentType.DICTIONARY -> DictionaryPresenter(entry = data.displayedDictionaryEntry, dictionarySettings = data.dictionarySettings)
         StageMonitorContentType.NEXT ->
-            if (data.nextChordLines.isEmpty()) TextContent(style, data.nextText)
-            else ZoneChordChart(style, data.nextChordLines)
+            ZoneTextTransition(sm, data.nextText) {
+                if (data.nextChordLines.isEmpty()) TextContent(style, it)
+                else ZoneChordChart(style, data.nextChordLines)
+            }
         // No live data is plumbed through to the stage monitor for these yet.
         StageMonitorContentType.LOWER_THIRD,
         StageMonitorContentType.WEB,
         StageMonitorContentType.STT -> {}
     }
+}
+
+/**
+ * Fades a zone's text as it changes, on the monitor's own transition settings.
+ *
+ * Only the zones whose text is content — scripture, lyrics, the look-ahead, presenter notes. The
+ * clock and the timer are deliberately left cutting: both retick every second, and a half-second
+ * fade on each would never settle.
+ */
+@Composable
+private fun ZoneTextTransition(
+    sm: StageMonitorSettings,
+    text: String,
+    draw: @Composable (String) -> Unit,
+) {
+    val duration = sm.transitionDuration.toInt()
+    if (sm.crossfade) {
+        Crossfade(targetState = text, animationSpec = tween(duration)) { draw(it) }
+        return
+    }
+    if (!sm.fadeIn && !sm.fadeOut) {
+        draw(text)
+        return
+    }
+    AnimatedContent(
+        targetState = text,
+        transitionSpec = {
+            val enter = if (sm.fadeIn) fadeIn(tween(duration)) else EnterTransition.None
+            val exit = if (sm.fadeOut) fadeOut(tween(duration)) else ExitTransition.None
+            enter togetherWith exit
+        },
+        label = "stage_zone_text",
+    ) { draw(it) }
 }
 
 @Composable
