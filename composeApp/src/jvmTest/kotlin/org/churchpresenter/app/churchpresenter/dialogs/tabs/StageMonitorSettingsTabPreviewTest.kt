@@ -73,7 +73,7 @@ class StageMonitorSettingsTabPreviewTest {
     fun `routing a content type moves its name into the new zone's cell`() = stageMonitorTab { _ ->
         assertTrue("Bible, Songs" in previewTexts(), "Bible and Songs start together")
 
-        chooseRouting(ContentLabel.of(StageMonitorContentType.SONGS), ZoneLabel.BOTTOM_RIGHT)
+        chooseRouting(ContentLabel.of(StageMonitorContentType.SONGS), ZoneLabel.ZONE_5)
 
         val texts = previewTexts()
         assertTrue("Bible" in texts, "Top-Left must be left with Bible alone, was $texts")
@@ -114,7 +114,7 @@ class StageMonitorSettingsTabPreviewTest {
         assertTrue("Next" in before, "Next starts alone in Top-Right")
         assertTrue("Bible, Songs" in before, "and Top-Left starts with the other two")
 
-        chooseRouting(ContentLabel.of(StageMonitorContentType.NEXT), ZoneLabel.TOP_LEFT)
+        chooseRouting(ContentLabel.of(StageMonitorContentType.NEXT), ZoneLabel.ZONE_1)
 
         val after = previewTexts()
         assertTrue("Bible, Songs, Next" in after, "Next must join Top-Left, was $after")
@@ -134,7 +134,7 @@ class StageMonitorSettingsTabPreviewTest {
             copy(
                 contentZones = contentZones + StageMonitorContentType.entries
                     .filter { zoneFor(it) == StageMonitorZone.FULL_SCREEN }
-                    .associateWith { StageMonitorZone.BOTTOM_RIGHT },
+                    .associateWith { StageMonitorZone.E },
             )
         }
         stageMonitorTab(initial = nothingFullScreen) { get ->
@@ -157,25 +157,28 @@ class StageMonitorSettingsTabPreviewTest {
     // ── Metronome ───────────────────────────────────────────────────────────────────────────────
 
     /**
-     * The preview restates the metronome anchor in words. The dot it also draws is a bare `Box` with
-     * no semantics and a flashing alpha, so this row is the only part of the metronome preview that
-     * can be asserted without asserting on timing.
+     * The anchor is stored and shown by its dropdown alone.
+     *
+     * The preview used to restate it in a summary row; that row went with the redesign, and the dot
+     * the preview draws is a bare `Box` with no semantics and a flashing alpha, so there is nothing
+     * on the preview left to assert. What the setting holds is what can be checked.
      */
     @Test
-    fun `the preview names the metronome anchor`() {
-        stageMonitorTab(initial = stageSettings { copy(metronomePosition = MetronomePosition.MIDDLE_RIGHT) }) { _ ->
-            // Twice: once as the dropdown's value, once as the preview row's.
-            onAllNodes(hasText(MetronomeLabel.MIDDLE_RIGHT)).assertCountEquals(2)
-            onAllNodes(hasText(MetronomeLabel.MIDDLE_RIGHT) and !hasClickAction()).assertCountEquals(1)
-        }
-    }
-
-    @Test
-    fun `choosing a metronome anchor updates the preview row`() = stageMonitorTab { _ ->
-        assertEquals(2, previewTexts().count { it == MetronomeLabel.NONE }, "the row and its caption both read None")
+    fun `choosing a metronome anchor stores it without touching the zones`() = stageMonitorTab { get ->
+        val zonesBefore = get().stageMonitorSettings.contentZones
 
         chooseRouting(ContentLabel.METRONOME, MetronomeLabel.CENTER)
 
-        assertTrue(MetronomeLabel.CENTER in previewTexts(), "the preview row must follow the pick")
+        assertEquals(MetronomePosition.CENTER, get().stageMonitorSettings.metronomePosition)
+        assertEquals(zonesBefore, get().stageMonitorSettings.contentZones, "routing must be untouched")
+    }
+
+    /** The anchor's own name is positional and no longer collides with any zone name. */
+    @Test
+    fun `the metronome dropdown shows the stored anchor`() {
+        stageMonitorTab(initial = stageSettings { copy(metronomePosition = MetronomePosition.MIDDLE_RIGHT) }) { _ ->
+            assertRoutingShows(ContentLabel.METRONOME, MetronomeLabel.MIDDLE_RIGHT)
+            onAllNodes(hasText(MetronomeLabel.MIDDLE_RIGHT)).assertCountEquals(1)
+        }
     }
 }

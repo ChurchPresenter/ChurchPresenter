@@ -29,7 +29,7 @@ import kotlin.test.assertTrue
  */
 class StageMonitorSettingsTabZoneStyleTest {
 
-    private val zone = StageMonitorStyleZone.TOP_LEFT
+    private val zone = StageMonitorStyleZone.A
     private val ordinal = ZoneOrdinal.of(zone)
 
     /** Asserts every zone but [zone] still holds the style it started with. */

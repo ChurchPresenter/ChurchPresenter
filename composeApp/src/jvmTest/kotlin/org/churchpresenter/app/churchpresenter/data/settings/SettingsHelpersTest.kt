@@ -508,18 +508,18 @@ class StageMonitorSettingsTest {
         val settings = StageMonitorSettings(zoneStyles = emptyMap())
 
         assertEquals(
-            StageMonitorSettings.defaultZoneStyles().getValue(StageMonitorStyleZone.TOP_LEFT),
-            settings.styleFor(StageMonitorStyleZone.TOP_LEFT),
+            StageMonitorSettings.defaultZoneStyles().getValue(StageMonitorStyleZone.A),
+            settings.styleFor(StageMonitorStyleZone.A),
         )
     }
 
     @Test
     fun `a configured zone wins over the default`() {
         val settings = StageMonitorSettings(
-            contentZones = mapOf(StageMonitorContentType.BIBLE to StageMonitorZone.BOTTOM_RIGHT)
+            contentZones = mapOf(StageMonitorContentType.BIBLE to StageMonitorZone.E)
         )
 
-        assertEquals(StageMonitorZone.BOTTOM_RIGHT, settings.zoneFor(StageMonitorContentType.BIBLE))
+        assertEquals(StageMonitorZone.E, settings.zoneFor(StageMonitorContentType.BIBLE))
         assertEquals(
             StageMonitorSettings.defaultContentZones().getValue(StageMonitorContentType.CLOCK),
             settings.zoneFor(StageMonitorContentType.CLOCK),
@@ -531,23 +531,23 @@ class StageMonitorSettingsTest {
     fun `the defaults put the reading and what is next side by side`() {
         val defaults = StageMonitorSettings.defaultContentZones()
 
-        assertEquals(StageMonitorZone.TOP_LEFT, defaults.getValue(StageMonitorContentType.BIBLE))
-        assertEquals(StageMonitorZone.TOP_LEFT, defaults.getValue(StageMonitorContentType.SONGS))
+        assertEquals(StageMonitorZone.A, defaults.getValue(StageMonitorContentType.BIBLE))
+        assertEquals(StageMonitorZone.A, defaults.getValue(StageMonitorContentType.SONGS))
         assertEquals(
-            StageMonitorZone.TOP_RIGHT,
+            StageMonitorZone.B,
             defaults.getValue(StageMonitorContentType.NEXT),
             "what is coming next sits beside what is live — that is the point of the screen",
         )
-        assertEquals(StageMonitorZone.BOTTOM_MIDDLE, defaults.getValue(StageMonitorContentType.CLOCK))
+        assertEquals(StageMonitorZone.D, defaults.getValue(StageMonitorContentType.CLOCK))
     }
 
     @Test
     fun `each drawable zone maps to its matching style zone`() {
-        assertEquals(StageMonitorStyleZone.TOP_LEFT, StageMonitorZone.TOP_LEFT.toStyleZone())
-        assertEquals(StageMonitorStyleZone.TOP_RIGHT, StageMonitorZone.TOP_RIGHT.toStyleZone())
-        assertEquals(StageMonitorStyleZone.BOTTOM_LEFT, StageMonitorZone.BOTTOM_LEFT.toStyleZone())
-        assertEquals(StageMonitorStyleZone.BOTTOM_MIDDLE, StageMonitorZone.BOTTOM_MIDDLE.toStyleZone())
-        assertEquals(StageMonitorStyleZone.BOTTOM_RIGHT, StageMonitorZone.BOTTOM_RIGHT.toStyleZone())
+        assertEquals(StageMonitorStyleZone.A, StageMonitorZone.A.toStyleZone())
+        assertEquals(StageMonitorStyleZone.B, StageMonitorZone.B.toStyleZone())
+        assertEquals(StageMonitorStyleZone.C, StageMonitorZone.C.toStyleZone())
+        assertEquals(StageMonitorStyleZone.D, StageMonitorZone.D.toStyleZone())
+        assertEquals(StageMonitorStyleZone.E, StageMonitorZone.E.toStyleZone())
         assertEquals(StageMonitorStyleZone.FULL_SCREEN, StageMonitorZone.FULL_SCREEN.toStyleZone())
     }
 

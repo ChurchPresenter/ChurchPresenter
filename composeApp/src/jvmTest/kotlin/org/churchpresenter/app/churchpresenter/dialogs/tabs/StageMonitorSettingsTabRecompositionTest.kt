@@ -78,9 +78,9 @@ class StageMonitorSettingsTabRecompositionTest {
     fun `a stored routing change reaches its dropdown without any interaction`() = rerenderable { set ->
         assertRoutingShows(ContentLabel.of(StageMonitorContentType.MEDIA), ZoneLabel.FULL_SCREEN)
 
-        set { copy(contentZones = contentZones + (StageMonitorContentType.MEDIA to StageMonitorZone.TOP_RIGHT)) }
+        set { copy(contentZones = contentZones + (StageMonitorContentType.MEDIA to StageMonitorZone.B)) }
 
-        assertRoutingShows(ContentLabel.of(StageMonitorContentType.MEDIA), ZoneLabel.TOP_RIGHT)
+        assertRoutingShows(ContentLabel.of(StageMonitorContentType.MEDIA), ZoneLabel.ZONE_2)
         assertRoutingShows(ContentLabel.of(StageMonitorContentType.WEB), ZoneLabel.FULL_SCREEN)
     }
 
@@ -88,7 +88,7 @@ class StageMonitorSettingsTabRecompositionTest {
     fun `a stored routing change reaches the preview without any interaction`() = rerenderable { set ->
         onAllNodesWithText("Bible, Songs").assertCountEquals(1)
 
-        set { copy(contentZones = contentZones + (StageMonitorContentType.SONGS to StageMonitorZone.BOTTOM_RIGHT)) }
+        set { copy(contentZones = contentZones + (StageMonitorContentType.SONGS to StageMonitorZone.E)) }
 
         onAllNodesWithText("Bible, Songs").assertCountEquals(0)
         onAllNodesWithText("Bible").assertCountEquals(1)
@@ -99,9 +99,9 @@ class StageMonitorSettingsTabRecompositionTest {
     fun `a stored metronome change reaches both its dropdown and the preview`() = rerenderable { set ->
         set { copy(metronomePosition = MetronomePosition.BOTTOM_CENTER) }
 
-        assertRoutingShows(ContentLabel.METRONOME, ZoneLabel.BOTTOM_CENTER)
-        // The editor title, the Clock routing, the preview row and the dropdown's own value.
-        onAllNodesWithText(ZoneLabel.BOTTOM_CENTER).assertCountEquals(4)
+        // The anchor's name is positional and shares nothing with the zone names any more.
+        assertRoutingShows(ContentLabel.METRONOME, MetronomeLabel.BOTTOM_CENTER)
+        onAllNodesWithText(MetronomeLabel.BOTTOM_CENTER).assertCountEquals(1)
     }
 
     @Test
@@ -109,8 +109,8 @@ class StageMonitorSettingsTabRecompositionTest {
         assertNumberFieldShows(35, "Top-Left's font size out of the box")
 
         set {
-            copy(zoneStyles = zoneStyles + (StageMonitorStyleZone.TOP_LEFT to
-                styleFor(StageMonitorStyleZone.TOP_LEFT).copy(fontSize = 177, color = "#ABCDEF")))
+            copy(zoneStyles = zoneStyles + (StageMonitorStyleZone.A to
+                styleFor(StageMonitorStyleZone.A).copy(fontSize = 177, color = "#ABCDEF")))
         }
 
         assertNumberFieldShows(177, "Top-Left's font size after the settings changed")
@@ -138,7 +138,7 @@ class StageMonitorSettingsTabRecompositionTest {
         set {
             copy(
                 contentZones = contentZones +
-                    (StageMonitorContentType.BIBLE to StageMonitorZone.BOTTOM_RIGHT) +
+                    (StageMonitorContentType.BIBLE to StageMonitorZone.E) +
                     (StageMonitorContentType.CLOCK to StageMonitorZone.NONE),
                 metronomePosition = MetronomePosition.TOP_CENTER,
                 zoneStyles = ZoneOrdinal.inOrder.withIndex().associate { (index, zone) ->
@@ -147,7 +147,7 @@ class StageMonitorSettingsTabRecompositionTest {
             )
         }
 
-        assertRoutingShows(ContentLabel.of(StageMonitorContentType.BIBLE), ZoneLabel.BOTTOM_RIGHT)
+        assertRoutingShows(ContentLabel.of(StageMonitorContentType.BIBLE), ZoneLabel.ZONE_5)
         assertRoutingShows(ContentLabel.of(StageMonitorContentType.CLOCK), ZoneLabel.NONE)
         assertRoutingShows(ContentLabel.METRONOME, MetronomeLabel.TOP_CENTER)
         for (index in ZoneOrdinal.inOrder.indices) {
@@ -214,17 +214,17 @@ class StageMonitorSettingsTabRecompositionTest {
         settings = settings.copy(
             stageMonitorSettings = settings.stageMonitorSettings.copy(
                 contentZones = settings.stageMonitorSettings.contentZones +
-                    (StageMonitorContentType.PICTURES to StageMonitorZone.BOTTOM_LEFT),
+                    (StageMonitorContentType.PICTURES to StageMonitorZone.C),
             ),
         )
         waitForIdle()
-        assertRoutingShows(ContentLabel.of(StageMonitorContentType.PICTURES), ZoneLabel.BOTTOM_LEFT)
+        assertRoutingShows(ContentLabel.of(StageMonitorContentType.PICTURES), ZoneLabel.ZONE_3)
 
-        styleButton(ZoneOrdinal.of(StageMonitorStyleZone.BOTTOM_RIGHT), "U").performScrollTo().performClick()
+        styleButton(ZoneOrdinal.of(StageMonitorStyleZone.E), "U").performScrollTo().performClick()
         waitForIdle()
         assertEquals(
             true,
-            settings.styleOf(StageMonitorStyleZone.BOTTOM_RIGHT).underline,
+            settings.styleOf(StageMonitorStyleZone.E).underline,
             "a click must reach the parent's callback",
         )
     }
