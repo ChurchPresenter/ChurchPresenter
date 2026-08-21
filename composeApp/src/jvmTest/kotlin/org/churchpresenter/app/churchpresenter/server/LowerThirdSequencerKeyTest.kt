@@ -28,6 +28,28 @@ class LowerThirdSequencerKeyTest {
         keyPostRollMs = 0,
     )
 
+    /**
+     * A fake switcher for one test, torn down in the order the sequencer requires: stopped while
+     * the switcher is still answering, and only then closed.
+     *
+     * [LowerThirdSequencer.stop] drives a key-off at the switcher and awaits its ack, deliberately
+     * — preemption is only deterministic if the previous key is off before the next goes on. A
+     * switcher that has already been closed acks nothing, so that wait runs out the client's full
+     * `CMD_TIMEOUT_MS` (8s) and `releaseKeyLocked` swallows the resulting failure. Closing the fake
+     * first therefore cost 8 seconds per test that left a sequence running — three of them here,
+     * 24 of this suite's 24 seconds — and bought a teardown that exercised the timeout path rather
+     * than the key-off it is meant to perform.
+     */
+    private fun withSwitcher(block: (FakeAtemSwitcher) -> Unit) {
+        FakeAtemSwitcher().use { fake ->
+            try {
+                block(fake)
+            } finally {
+                runBlocking { LowerThirdSequencer.stop() }
+            }
+        }
+    }
+
     private fun dskCommands(fake: FakeAtemSwitcher) =
         fake.commandsNamed("CDsL") + fake.commandsNamed("DDsA")
 
@@ -67,7 +89,7 @@ class LowerThirdSequencerKeyTest {
 
     @Test
     fun `going live cuts the upstream key on air`() {
-        FakeAtemSwitcher().use { fake ->
+        withSwitcher { fake ->
             val keyError = runAndAwaitShow(fake, mixEffect = 1, keyer = 2)
 
             assertNull(keyError, "the switcher answered, so there is nothing to report")
@@ -80,7 +102,7 @@ class LowerThirdSequencerKeyTest {
 
     @Test
     fun `stopping cuts the same key back off`() {
-        FakeAtemSwitcher().use { fake ->
+        withSwitcher { fake ->
             runAndAwaitShow(fake, mixEffect = 1, keyer = 2)
             fake.awaitCommandsNamed("CKOn", 1)
 
@@ -95,7 +117,7 @@ class LowerThirdSequencerKeyTest {
 
     @Test
     fun `a downstream key is driven as a DSK rather than an upstream keyer`() {
-        FakeAtemSwitcher().use { fake ->
+        withSwitcher { fake ->
             runAndAwaitShow(fake, mixEffect = 0, keyer = 1, useDownstreamKey = true)
 
             assertEquals(1, awaitDsk(fake).first()[0].toInt(), "byte 0 is the DSK index")
@@ -105,7 +127,7 @@ class LowerThirdSequencerKeyTest {
 
     @Test
     fun `a downstream key is taken off the same way`() {
-        FakeAtemSwitcher().use { fake ->
+        withSwitcher { fake ->
             runAndAwaitShow(fake, mixEffect = 0, keyer = 1, useDownstreamKey = true)
             awaitDsk(fake)
 
@@ -118,7 +140,7 @@ class LowerThirdSequencerKeyTest {
 
     @Test
     fun `a sequence with no keyer configured never opens a connection`() {
-        FakeAtemSwitcher().use { fake ->
+        withSwitcher { fake ->
             val keyError = runAndAwaitShow(fake, mixEffect = null, keyer = null)
 
             assertNull(keyError)
@@ -128,7 +150,7 @@ class LowerThirdSequencerKeyTest {
 
     @Test
     fun `a keyer with no mix effect is not driven either`() {
-        FakeAtemSwitcher().use { fake ->
+        withSwitcher { fake ->
             val keyError = runAndAwaitShow(fake, mixEffect = null, keyer = 2)
 
             assertNull(keyError)
@@ -138,7 +160,7 @@ class LowerThirdSequencerKeyTest {
 
     @Test
     fun `a preempting sequence takes the previous key off before its own goes on`() {
-        FakeAtemSwitcher().use { fake ->
+        withSwitcher { fake ->
             runAndAwaitShow(fake, mixEffect = 1, keyer = 2)
             fake.awaitCommandsNamed("CKOn", 1)
 
@@ -154,7 +176,7 @@ class LowerThirdSequencerKeyTest {
 
     @Test
     fun `a sequence that ends on its own takes the key off with it`() {
-        FakeAtemSwitcher().use { fake ->
+        withSwitcher { fake ->
             val cleared = Channel<Unit>(capacity = 1)
             runBlocking {
                 val collector = launch { LowerThirdSequencer.onClear.collect { cleared.trySend(Unit) } }
