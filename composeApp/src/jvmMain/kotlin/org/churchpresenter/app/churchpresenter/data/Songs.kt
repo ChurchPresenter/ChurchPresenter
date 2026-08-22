@@ -4,7 +4,7 @@ import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.runtime.mutableStateListOf
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.SongSectionWords
+import org.churchpresenter.songchords.SongSectionWords
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import org.churchpresenter.songchords.ChordTransposer
+
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants

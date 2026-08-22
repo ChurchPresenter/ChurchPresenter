@@ -88,6 +88,7 @@ file before changing it, and **put module-specific notes there, not here.**
 | `atem/`                | `:atem`                | The Blackmagic ATEM protocol client — UDP, state, keyers, media-pool upload       | [AGENT.md](atem/AGENT.md)                |
 | `planning-center/`     | `:planning-center`     | The Planning Center Online client — OAuth, the Services REST calls, the callback  | [AGENT.md](planning-center/AGENT.md)     |
 | `bible-formats/`       | `:bible-formats`       | The `.spb` converters and the Bible download catalogues (eBible, Zefania, Beblia)  | [AGENT.md](bible-formats/AGENT.md)       |
+| `song-chords/`         | `:song-chords`         | The chord grammar songs are written in — parsing, transposition, chord-sheet import | [AGENT.md](song-chords/AGENT.md)         |
 
 **Every one of them is a real Gradle module of this build** — `include(":theme")`,
 `implementation(projects.companionSatellite)`, tested with `./gradlew :<module>:test` on the root
@@ -119,7 +120,7 @@ they must be set **above everything else** in the file:
   counters that need a different number (usually the one or two that cannot reach 85%), never all
   six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
   each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`,
-  `:diagnostics`, `:atem`, `:planning-center` and `:bible-formats` name none.
+  `:diagnostics`, `:atem`, `:planning-center`, `:bible-formats` and `:song-chords` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**

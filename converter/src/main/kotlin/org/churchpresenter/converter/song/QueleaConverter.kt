@@ -1,5 +1,7 @@
 package org.churchpresenter.converter.song
 
+import org.churchpresenter.songchords.ChordSheetImporter
+
 import org.w3c.dom.Element
 import java.io.File
 import java.util.zip.ZipFile
@@ -118,5 +120,5 @@ object QueleaConverter {
 
     /** Chords are written above the words with nothing marking them as chords, so they are read. */
     private fun lyricLine(line: String): String =
-        if (ChordLines.isChordLine(line)) ChordLines.bracket(line) else line.trim()
+        if (ChordSheetImporter.isChordLine(line)) ChordSheetImporter.bracket(line) else line.trim()
 }

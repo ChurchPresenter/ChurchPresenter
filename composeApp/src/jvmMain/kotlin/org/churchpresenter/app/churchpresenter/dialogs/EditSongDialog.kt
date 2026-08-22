@@ -123,8 +123,8 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.theme.AppThemeWrapper
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.utils.ChordSheetImporter
-import org.churchpresenter.app.churchpresenter.utils.ChordTransposer
+import org.churchpresenter.songchords.ChordSheetImporter
+import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
