@@ -182,17 +182,17 @@ jobs:
       # governs every module at once, so "this PR didn't touch that folder" does not mean that
       # folder still passes.
       #
-      # :lottieGenerator is the one module still absent. It went from 382 findings to 1 with no
-      # baseline; the last is LongParameterList on LottieGenPalette's 51-role constructor, which
-      # needs a decision rather than a refactor (see lottieGenerator/AGENT.md). Add it here the
-      # moment that is settled -- one finding would fail every PR.
+      # Every module of the build is now listed. :lottieGenerator was the last to join: it went
+      # from 382 findings to 1 with no baseline, and that last one -- LongParameterList on
+      # LottieGenPalette's 51-role constructor -- is now @Suppress'd at the declaration with its
+      # reasoning, so the other 381 fixes are protected from regression rather than merely done.
       - name: Detekt
         run: >-
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :dictionary:detekt
+          :dictionary:detekt :lottieGenerator:detekt
 
       - name: App unit tests
         id: unit_tests
