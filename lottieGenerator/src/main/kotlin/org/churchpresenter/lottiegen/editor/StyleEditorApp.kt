@@ -44,6 +44,11 @@ import org.churchpresenter.lottiegen.ui.LottieGenTheme
 import org.churchpresenter.lottiegen.ui.Strings
 import java.awt.Cursor
 
+/** How far the spec/timeline splitter may be dragged, in dp. */
+private const val MIN_LEFT_PANE_DP = 300f
+private const val MAX_LEFT_PANE_DP = 700f
+
+
 /**
  * Root composable of the developer-only Animation Style Editor. Opened from the main
  * app's Developer menu (embedded — inherits the host theme) or standalone via
@@ -85,7 +90,7 @@ private fun EditorContent(state: EditorState) {
                         .pointerInput(Unit) {
                             detectDragGestures { _, dragAmount ->
                                 val deltaDp = with(density) { dragAmount.x.toDp().value }
-                                leftPaneWidth = (leftPaneWidth + deltaDp).coerceIn(300f, 700f)
+                                leftPaneWidth = (leftPaneWidth + deltaDp).coerceIn(MIN_LEFT_PANE_DP, MAX_LEFT_PANE_DP)
                             }
                         }
                 )

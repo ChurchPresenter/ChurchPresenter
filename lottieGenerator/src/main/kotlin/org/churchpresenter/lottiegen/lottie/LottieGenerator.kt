@@ -57,7 +57,11 @@ object LottieGenerator {
         for (entry in registry) {
             try {
                 merged[entry.id] = SpecStyleGenerator.fromResource(entry.resource)
-            } catch (e: Exception) {
+            } catch (e: IllegalStateException) {
+                // fromResource: the bundled resource is missing.
+                System.err.println("Skipping registry style ${entry.id} (${entry.resource}): ${e.message}")
+            } catch (e: IllegalArgumentException) {
+                // SpecJson.decode: present, but not a spec this build understands.
                 System.err.println("Skipping registry style ${entry.id} (${entry.resource}): ${e.message}")
             }
         }

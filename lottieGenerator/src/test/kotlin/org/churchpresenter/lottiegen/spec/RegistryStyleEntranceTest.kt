@@ -24,6 +24,7 @@ class RegistryStyleEntranceTest {
     /** A mask-slide must clear the text plus the mask's padding to actually hide it. */
     private val minMaskClearance = 1.15
 
+    @Suppress("ReturnCount") // One early return per "not an entrance" shape; a single exit is worse.
     private fun ElementSpec.startsFromNothing(): Boolean {
         for (t in tracks) {
             val first = t.keyframes.minByOrNull { it.pct } ?: continue

@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.persistence
 
+import java.io.IOException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.churchpresenter.lottiegen.model.ColorTheme
@@ -25,7 +26,7 @@ object ColorThemeStorage {
         return try {
             val themes = json.decodeFromString<List<ColorTheme>>(file.readText())
             if (themes.isEmpty()) defaultColorThemes() else themes
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             defaultColorThemes()
         }
     }
@@ -33,7 +34,7 @@ object ColorThemeStorage {
     fun save(themes: List<ColorTheme>) {
         try {
             themesFile().writeText(json.encodeToString(themes))
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             System.err.println("Failed to save color themes: ${e.message}")
         }
     }

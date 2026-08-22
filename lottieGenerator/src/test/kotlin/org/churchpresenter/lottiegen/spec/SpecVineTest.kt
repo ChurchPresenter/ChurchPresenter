@@ -78,7 +78,9 @@ class SpecVineTest {
         // Staggering: each leaf's scale departs from zero at a different keyframe time.
         val departTimes = leaves.map { leaf ->
             val kfs = leaf["ks"]!!.jsonObject["s"]!!.jsonObject["k"]!!.jsonArray.map { it.jsonObject }
-            kfs.first { (it["s"]!!.jsonArray[0] as JsonPrimitive).double == 0.0 && it["t"]!!.jsonPrimitive.int > 0 }["t"]!!.jsonPrimitive.int
+            kfs.first {
+                (it["s"]!!.jsonArray[0] as JsonPrimitive).double == 0.0 && it["t"]!!.jsonPrimitive.int > 0
+            }["t"]!!.jsonPrimitive.int
         }
         assertEquals(departTimes.distinct().size, departTimes.size, "leaves must be staggered")
     }

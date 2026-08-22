@@ -1,17 +1,36 @@
 package org.churchpresenter.lottiegen.lottie
 
+/** Where each channel starts in a `RRGGBB` string, and how wide it is. */
+private const val HEX_RADIX = 16
+private const val CHANNEL_WIDTH = 2
+private const val RED_AT = 0
+private const val GREEN_AT = 2
+private const val BLUE_AT = 4
+
+/** The largest value one channel can hold, as a divisor onto Lottie's 0..1 range. */
+private const val CHANNEL_MAX = 255.0
+
+/**
+ * Lottie colours are written with four decimal places; anything finer only bloats the JSON, and
+ * rounding here keeps a re-export byte-identical to the file it came from.
+ */
+private const val COLOR_PRECISION = 10_000
+
+private fun String.channelAt(offset: Int): Int =
+    substring(offset, offset + CHANNEL_WIDTH).toInt(HEX_RADIX)
+
+private fun Int.toLottieChannel(): Double =
+    (this / CHANNEL_MAX * COLOR_PRECISION).toLong() / COLOR_PRECISION.toDouble()
+
 /**
  * Convert hex color string (#RRGGBB) to Lottie RGB (0-1 range).
  */
 fun hexToLottie(hex: String): List<Double> {
     val clean = hex.removePrefix("#")
-    val r = clean.substring(0, 2).toInt(16)
-    val g = clean.substring(2, 4).toInt(16)
-    val b = clean.substring(4, 6).toInt(16)
     return listOf(
-        (r / 255.0 * 10000).toLong() / 10000.0,
-        (g / 255.0 * 10000).toLong() / 10000.0,
-        (b / 255.0 * 10000).toLong() / 10000.0
+        clean.channelAt(RED_AT).toLottieChannel(),
+        clean.channelAt(GREEN_AT).toLottieChannel(),
+        clean.channelAt(BLUE_AT).toLottieChannel(),
     )
 }
 
@@ -21,9 +40,9 @@ fun hexToLottie(hex: String): List<Double> {
 fun hexToRgb(hex: String): Triple<Int, Int, Int> {
     val clean = hex.removePrefix("#")
     return Triple(
-        clean.substring(0, 2).toInt(16),
-        clean.substring(2, 4).toInt(16),
-        clean.substring(4, 6).toInt(16)
+        clean.channelAt(RED_AT),
+        clean.channelAt(GREEN_AT),
+        clean.channelAt(BLUE_AT),
     )
 }
 

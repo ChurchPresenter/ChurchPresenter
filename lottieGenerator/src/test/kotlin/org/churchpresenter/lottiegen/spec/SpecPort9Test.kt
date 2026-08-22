@@ -193,6 +193,7 @@ class SpecPort9Test {
      * extent of the text layer it mattes: fully clear of it (accent wipe masks) or
      * fully covering it (reveal masks).
      */
+    @Suppress("LongParameterList") // One assertion per mask property; naming them beats a holder.
     private fun assertMaskRestState(
         mask: JsonObject,
         textLayer: JsonObject,

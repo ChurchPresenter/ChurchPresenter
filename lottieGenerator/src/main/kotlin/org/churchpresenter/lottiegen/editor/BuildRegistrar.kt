@@ -7,6 +7,14 @@ import org.churchpresenter.lottiegen.spec.StyleRegistry
 import org.churchpresenter.lottiegen.spec.StyleSpec
 import java.io.File
 
+/**
+ * How far up from the working directory to look for the styles directory. Four covers every way
+ * the editor is launched -- module dir, composeApp/, repo root, and one spare -- without walking
+ * out of the checkout.
+ */
+private const val ANCESTOR_SEARCH_DEPTH = 4
+
+
 /** Result of a Register-into-build write: the two files the dev must commit. */
 data class RegisterResult(val specFile: File, val registryFile: File)
 
@@ -31,7 +39,7 @@ object BuildRegistrar {
      */
     fun locateStylesDir(): File? {
         var dir: File? = File(System.getProperty("user.dir"))
-        repeat(4) {
+        repeat(ANCESTOR_SEARCH_DEPTH) {
             val base = dir ?: return null
             for (relative in listOf(MODULE_STYLES, REPO_ROOT_STYLES)) {
                 val candidate = File(base, relative)

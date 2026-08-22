@@ -88,9 +88,10 @@ jobs:
             #    cannot affect the modules already there. A `pluginManagement`/`repositories` edit
             #    could, and `:composeApp` — which runs unconditionally, with no filter — is what
             #    would surface that.
-            #  - `config/detekt/**`: `baseline.xml` is `:composeApp`'s alone (no other module has
-            #    one), and no detekt config can change a test result. The Detekt step below is
-            #    unfiltered anyway, so nothing stops gating.
+            #  - `config/detekt/**`: that baseline is `:composeApp`'s (bible-engine/ and
+            #    presentation-engine/ keep their own, under their own directories), and no detekt
+            #    config can change a test result. The Detekt step below is unfiltered anyway, so
+            #    nothing stops gating.
             #  - this workflow: a step added for one module cannot change another module's result.
             converter:
               - *shared
@@ -165,18 +166,19 @@ jobs:
         run: chmod +x gradlew
 
       # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
-      # Pre-existing findings are in config/detekt/baseline.xml; this gates only new ones, and only
-      # for :composeApp -- no other module has a baseline, so what is listed here has to be clean.
+      # Pre-existing findings are baselined per module -- config/detekt/baseline.xml for
+      # :composeApp, and bible-engine/ and presentation-engine/ carry their own. Everything else
+      # listed here has no baseline at all and has to be clean.
       #
       # NOT paths-filtered, deliberately. A module's detekt task costs seconds, and the gate is
       # worth nothing if a change that breaks it can skip it: the shared config/detekt/detekt.yml
       # governs every module at once, so "this PR didn't touch that folder" does not mean that
       # folder still passes.
       #
-      # :lottieGenerator is the one module deliberately absent -- it has the plugin applied and
-      # currently fails (409 findings). Add it here the moment it comes clean; until then listing
-      # it would make every PR red. :bible-engine and :presentation-engine were in that same
-      # sentence until they joined the list below, each behind its own baseline.
+      # :lottieGenerator is the one module still absent. It went from 382 findings to 1 with no
+      # baseline; the last is LongParameterList on LottieGenPalette's 51-role constructor, which
+      # needs a decision rather than a refactor (see lottieGenerator/AGENT.md). Add it here the
+      # moment that is settled -- one finding would fail every PR.
       - name: Detekt
         run: >-
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt

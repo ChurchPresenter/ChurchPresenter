@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.viewmodel
 
+import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -23,6 +24,14 @@ import org.churchpresenter.lottiegen.persistence.PresetStorage
 import java.io.File
 import java.time.Instant
 
+/**
+ * How long to wait before regenerating. A dragged slider or a held key settles quickly, so those
+ * paths pass the shorter window; the default covers a control whose value arrives in one step.
+ */
+private const val SETTLE_DEBOUNCE_MS = 300L
+private const val TYPING_DEBOUNCE_MS = 100L
+
+
 class LottieGenViewModel(
     private val scope: CoroutineScope,
     private val outputDir: File? = null,
@@ -32,7 +41,9 @@ class LottieGenViewModel(
 ) : LottieGenState {
     /** True when launched inside ChurchPresenter with a configured output folder */
     override val hasOutputDir: Boolean get() = outputDir != null
-    override var config by mutableStateOf(LottieGenConfig(canvasW = canvasWidth ?: 1920, canvasH = canvasHeight ?: 1080))
+    override var config by mutableStateOf(
+        LottieGenConfig(canvasW = canvasWidth ?: 1920, canvasH = canvasHeight ?: 1080),
+    )
         private set
 
     var generatedJson by mutableStateOf<String?>(null)
@@ -65,7 +76,7 @@ class LottieGenViewModel(
         scheduleGenerate()
     }
 
-    private fun scheduleGenerate(delayMs: Long = 300) {
+    private fun scheduleGenerate(delayMs: Long = SETTLE_DEBOUNCE_MS) {
         generateJob?.cancel()
         generateJob = scope.launch {
             delay(delayMs)
@@ -78,7 +89,13 @@ class LottieGenViewModel(
                 }
                 generatedJson = jsonString
                 statusText = ""
-            } catch (e: Exception) {
+            } catch (e: CancellationException) {
+                // A generic `catch (e: Exception)` here also swallowed cancellation, which is how a
+                // superseded regeneration went on to overwrite the status of the one that replaced it.
+                throw e
+            } catch (e: IllegalStateException) {
+                statusText = "Error: ${e.message}"
+            } catch (e: IllegalArgumentException) {
                 statusText = "Error: ${e.message}"
             }
         }
@@ -96,7 +113,13 @@ class LottieGenViewModel(
                 }
                 generatedJson = jsonString
                 statusText = ""
-            } catch (e: Exception) {
+            } catch (e: CancellationException) {
+                // A generic `catch (e: Exception)` here also swallowed cancellation, which is how a
+                // superseded regeneration went on to overwrite the status of the one that replaced it.
+                throw e
+            } catch (e: IllegalStateException) {
+                statusText = "Error: ${e.message}"
+            } catch (e: IllegalArgumentException) {
                 statusText = "Error: ${e.message}"
             }
         }
@@ -165,7 +188,7 @@ class LottieGenViewModel(
             logoW = config.logoW,
             logoH = config.logoH
         )
-        scheduleGenerate(100)
+        scheduleGenerate(TYPING_DEBOUNCE_MS)
     }
 
     override fun deletePreset(index: Int) {
@@ -202,7 +225,10 @@ class LottieGenViewModel(
                     val safeInfo = preset.config.infoText.trim().replace(Regex("[\\\\/:*?\"<>|]"), "_")
                     val baseName = buildString {
                         if (safeName.isNotEmpty()) append(safeName)
-                        if (safeInfo.isNotEmpty()) { if (isNotEmpty()) append(" - "); append(safeInfo) }
+                        if (safeInfo.isNotEmpty()) {
+                            if (isNotEmpty()) append(" - ")
+                            append(safeInfo)
+                        }
                     }.ifEmpty { "lower-third" }
                     var num = 1
                     var file: File
@@ -245,7 +271,7 @@ class LottieGenViewModel(
             accentColorAlpha = theme.colors.accentColorAlpha, bgColorAlpha = theme.colors.bgColorAlpha,
             borderColorAlpha = theme.colors.borderColorAlpha
         )
-        scheduleGenerate(100)
+        scheduleGenerate(TYPING_DEBOUNCE_MS)
     }
 
     override fun deleteColorTheme(index: Int) {
@@ -264,7 +290,7 @@ class LottieGenViewModel(
             logoH = data.height,
             logoSelect = file.name
         )
-        scheduleGenerate(100)
+        scheduleGenerate(TYPING_DEBOUNCE_MS)
     }
 
     override fun importAndLoadLogo(sourceFile: File) {
@@ -275,7 +301,7 @@ class LottieGenViewModel(
 
     override fun clearLogo() {
         config = config.copy(logoEnabled = false, logoData = null, logoW = 0, logoH = 0, logoSelect = "")
-        scheduleGenerate(100)
+        scheduleGenerate(TYPING_DEBOUNCE_MS)
     }
 
     override fun selectLogo(name: String) {

@@ -7,8 +7,26 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import java.awt.Font
 import java.awt.font.FontRenderContext
-import java.awt.geom.PathIterator
 import kotlin.math.roundToInt
+
+/** Lottie's layer-type discriminator for a text layer. */
+private const val TEXT_LAYER_TYPE = "5"
+
+/** Lottie glyph outlines are authored on a 100-unit em box, so every coordinate is a percentage. */
+private const val GLYPH_EM_SIZE = 100
+
+/**
+ * A quadratic segment becomes a cubic by pulling each control point two thirds of the way from its
+ * endpoint towards the quadratic's single control point. Exact, not an approximation.
+ */
+
+/** Offsets into PathIterator's cubic `coords`: two control points, then the endpoint. */
+
+/** Two points closer than this are the same point: fonts curve back to the start before closing. */
+
+/** Outline coordinates are emitted to two decimal places; more only inflates the JSON. */
+private const val ROUND_2DP = 100.0
+
 
 /**
  * Embeds vector glyph outlines ("chars") for the characters the animation's text layers
@@ -40,18 +58,10 @@ object GlyphExtractor {
 
         // (family, style) -> characters used, in first-seen order
         val used = LinkedHashMap<Pair<String, String>, LinkedHashSet<Char>>()
-        for (layer in layers) {
-            if ((layer["ty"] as? JsonPrimitive)?.content != "5") continue
-            val doc = layer["t"] as? JsonObject ?: continue
-            val keyframes = (doc["d"] as? JsonObject)?.get("k") as? JsonArray ?: continue
-            for (kf in keyframes) {
-                val style = ((kf as? JsonObject)?.get("s") as? JsonObject) ?: continue
-                val fName = (style["f"] as? JsonPrimitive)?.content ?: continue
-                val text = (style["t"] as? JsonPrimitive)?.content ?: continue
-                val familyStyle = familyStyleByName[fName] ?: continue
-                val chars = used.getOrPut(familyStyle) { LinkedHashSet() }
-                for (ch in text) if (!ch.isISOControl()) chars.add(ch)
-            }
+        for ((fName, text) in layers.textRuns()) {
+            val familyStyle = familyStyleByName[fName] ?: continue
+            val chars = used.getOrPut(familyStyle) { LinkedHashSet() }
+            for (ch in text) if (!ch.isISOControl()) chars.add(ch)
         }
         if (used.isEmpty()) return null
 
@@ -73,7 +83,7 @@ object GlyphExtractor {
         return buildJsonObject {
             put("ch", JsonPrimitive(ch.toString()))
             put("fFamily", JsonPrimitive(family))
-            put("size", JsonPrimitive(100))
+            put("size", JsonPrimitive(GLYPH_EM_SIZE))
             put("style", JsonPrimitive(style))
             put("w", JsonPrimitive(round2(advance)))
             put("data", buildJsonObject {
@@ -83,72 +93,25 @@ object GlyphExtractor {
     }
 
     /** One glyph contour as lottie bezier data: vertices plus relative in/out tangents. */
-    private class Contour {
-        val v = ArrayList<DoubleArray>()
-        val inTan = ArrayList<DoubleArray>()
-        val outTan = ArrayList<DoubleArray>()
-    }
 
-    private fun outlineToContours(path: PathIterator): List<Contour> {
-        val contours = ArrayList<Contour>()
-        var current: Contour? = null
-        val coords = DoubleArray(6)
-        while (!path.isDone) {
-            when (path.currentSegment(coords)) {
-                PathIterator.SEG_MOVETO -> {
-                    current = Contour().also { contours.add(it) }
-                    addVertex(current, coords[0], coords[1])
-                }
-                PathIterator.SEG_LINETO -> current?.let { addVertex(it, coords[0], coords[1]) }
-                PathIterator.SEG_QUADTO -> current?.let {
-                    // Promote the quadratic to a cubic: c = p + 2/3 (q − p) at both ends
-                    val last = it.v.last()
-                    val qx = coords[0]; val qy = coords[1]
-                    val px = coords[2]; val py = coords[3]
-                    it.outTan[it.outTan.size - 1] = doubleArrayOf(
-                        (qx - last[0]) * 2.0 / 3.0, (qy - last[1]) * 2.0 / 3.0
-                    )
-                    addVertex(it, px, py)
-                    it.inTan[it.inTan.size - 1] = doubleArrayOf(
-                        (qx - px) * 2.0 / 3.0, (qy - py) * 2.0 / 3.0
-                    )
-                }
-                PathIterator.SEG_CUBICTO -> current?.let {
-                    val last = it.v.last()
-                    it.outTan[it.outTan.size - 1] = doubleArrayOf(
-                        coords[0] - last[0], coords[1] - last[1]
-                    )
-                    addVertex(it, coords[4], coords[5])
-                    it.inTan[it.inTan.size - 1] = doubleArrayOf(
-                        coords[2] - coords[4], coords[3] - coords[5]
-                    )
-                }
-                PathIterator.SEG_CLOSE -> current?.let {
-                    // Fonts usually curve back to the start point before closing — merge the
-                    // duplicated vertex so the closing edge keeps its tangents.
-                    if (it.v.size > 1) {
-                        val first = it.v.first()
-                        val last = it.v.last()
-                        if (kotlin.math.abs(first[0] - last[0]) < 0.01 && kotlin.math.abs(first[1] - last[1]) < 0.01) {
-                            it.inTan[0] = it.inTan.last()
-                            it.v.removeAt(it.v.size - 1)
-                            it.inTan.removeAt(it.inTan.size - 1)
-                            it.outTan.removeAt(it.outTan.size - 1)
-                        }
-                    }
-                    current = null
-                }
+    /**
+     * Every (font name, text) pair the text layers carry, skipping anything that is not a text
+     * layer or does not hold a document keyframe. Each `?: return@…` here was a `continue` in one
+     * of two nested loops, which said nothing about which shape was being skipped or why.
+     */
+    private fun List<JsonObject>.textRuns(): List<Pair<String, String>> =
+        asSequence()
+            .filter { (it["ty"] as? JsonPrimitive)?.content == TEXT_LAYER_TYPE }
+            .mapNotNull { it["t"] as? JsonObject }
+            .mapNotNull { (it["d"] as? JsonObject)?.get("k") as? JsonArray }
+            .flatten()
+            .mapNotNull { (it as? JsonObject)?.get("s") as? JsonObject }
+            .mapNotNull { style ->
+                val fName = (style["f"] as? JsonPrimitive)?.content ?: return@mapNotNull null
+                val text = (style["t"] as? JsonPrimitive)?.content ?: return@mapNotNull null
+                fName to text
             }
-            path.next()
-        }
-        return contours.filter { it.v.isNotEmpty() }
-    }
-
-    private fun addVertex(c: Contour, x: Double, y: Double) {
-        c.v.add(doubleArrayOf(x, y))
-        c.inTan.add(doubleArrayOf(0.0, 0.0))
-        c.outTan.add(doubleArrayOf(0.0, 0.0))
-    }
+            .toList()
 
     /** Mirrors bodymovin's char data: one group of "sh" paths closed by a merge-paths. */
     private fun charShapes(contours: List<Contour>, ch: Char): JsonArray = buildJsonArray {
@@ -198,5 +161,5 @@ object GlyphExtractor {
         }
     }
 
-    private fun round2(x: Double): Double = (x * 100.0).roundToInt() / 100.0
+    private fun round2(x: Double): Double = (x * ROUND_2DP).roundToInt() / ROUND_2DP
 }

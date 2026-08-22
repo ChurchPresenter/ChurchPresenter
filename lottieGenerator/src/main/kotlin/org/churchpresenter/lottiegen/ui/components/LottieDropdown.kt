@@ -29,6 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.ui.Tokens
 
+/** The chevron points down when closed and is turned over, not spun, when open. */
+private const val CHEVRON_FLIPPED_DEGREES = 180f
+
+
 /**
  * A dropdown anchor styled as a field card: a tiny uppercase label above the current value,
  * with a caret that flips when the menu is open.
@@ -80,7 +84,7 @@ fun LottieDropdown(
         Icon(
             imageVector = Icons.Default.KeyboardArrowDown,
             contentDescription = null,
-            modifier = Modifier.size(13.dp).rotate(if (expanded) 180f else 0f),
+            modifier = Modifier.size(13.dp).rotate(if (expanded) CHEVRON_FLIPPED_DEGREES else 0f),
             tint = Tokens.FieldLabel
         )
     }

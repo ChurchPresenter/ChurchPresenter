@@ -112,7 +112,7 @@ class SpecLayoutContextTest {
         val c = ctx()
 
         WidthBasis.entries.forEach {
-            assertTrue(c.basisWidthPx(it) > 0.0, "$it measured ${c.basisWidthPx(it)}")
+            assertTrue(c.fit.basisWidthPx(it) > 0.0, "$it measured ${c.fit.basisWidthPx(it)}")
         }
     }
 
@@ -120,19 +120,19 @@ class SpecLayoutContextTest {
     fun `the text block basis is at least as wide as either field`() {
         val c = ctx()
 
-        assertTrue(c.basisWidthPx(WidthBasis.TEXT_BLOCK) >= c.basisWidthPx(WidthBasis.NAME))
-        assertTrue(c.basisWidthPx(WidthBasis.TEXT_BLOCK) >= c.basisWidthPx(WidthBasis.INFO))
+        assertTrue(c.fit.basisWidthPx(WidthBasis.TEXT_BLOCK) >= c.fit.basisWidthPx(WidthBasis.NAME))
+        assertTrue(c.fit.basisWidthPx(WidthBasis.TEXT_BLOCK) >= c.fit.basisWidthPx(WidthBasis.INFO))
     }
 
     @Test
     fun `no requested fit leaves the shape unscaled`() {
-        assertEquals(1.0, ctx().fitFactor(null, naturalWidthPx = 50.0))
+        assertEquals(1.0, ctx().fit.fitFactor(null, naturalWidthPx = 50.0))
     }
 
     @Test
     fun `a zero-width shape cannot be fitted and stays unscaled`() {
-        assertEquals(1.0, ctx().fitFactor(WidthBasis.NAME, naturalWidthPx = 0.0))
-        assertEquals(1.0, ctx().fitFactor(WidthBasis.NAME, naturalWidthPx = -4.0))
+        assertEquals(1.0, ctx().fit.fitFactor(WidthBasis.NAME, naturalWidthPx = 0.0))
+        assertEquals(1.0, ctx().fit.fitFactor(WidthBasis.NAME, naturalWidthPx = -4.0))
     }
 
     @Test
@@ -140,6 +140,6 @@ class SpecLayoutContextTest {
         val c = ctx()
         val natural = 20.0
 
-        assertEquals(c.basisWidthPx(WidthBasis.NAME) / natural, c.fitFactor(WidthBasis.NAME, natural))
+        assertEquals(c.fit.basisWidthPx(WidthBasis.NAME) / natural, c.fit.fitFactor(WidthBasis.NAME, natural))
     }
 }

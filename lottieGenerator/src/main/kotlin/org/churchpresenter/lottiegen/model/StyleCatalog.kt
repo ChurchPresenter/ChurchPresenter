@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.model
 
+import org.churchpresenter.lottiegen.ui.EditorStrings
 import org.churchpresenter.lottiegen.spec.RegistryEntry
 import org.churchpresenter.lottiegen.spec.StyleRegistry
 import org.churchpresenter.lottiegen.ui.Strings
@@ -41,6 +42,6 @@ object StyleCatalog {
     private fun registryLabel(entry: RegistryEntry): String = try {
         Strings.styleLabel(entry.id)
     } catch (_: MissingResourceException) {
-        Strings.editorStyleLabelFormat(entry.id, entry.name)
+        EditorStrings.styleLabelFormat(entry.id, entry.name)
     }
 }

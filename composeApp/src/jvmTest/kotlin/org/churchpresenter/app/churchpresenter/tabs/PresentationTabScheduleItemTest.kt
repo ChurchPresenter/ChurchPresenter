@@ -42,28 +42,32 @@ class PresentationTabScheduleItemTest {
     }
 
     /**
-     * Waits for [slides] slides to be loaded — the count the caller is about to assert on, not
-     * merely "some".
+     * Waits for the load to *finish*, then leaves the caller to assert what it produced.
      *
-     * Both load paths append one slide at a time, so `slideFiles.isNotEmpty()` is true from the
-     * first one onwards. Returning on that let a caller assert the total against a load still in
-     * progress, which is what made this class fail on a loaded runner and pass everywhere else.
-     * `isLoading` does not close the gap either: it goes false in the loader's `finally`, which also
-     * runs when a slide was skipped, so the pair could settle on a short list and stay there.
+     * Every load path — cached, freshly rendered and remote — bumps `loadGeneration` once, on the
+     * main thread, after its whole slide loop has run, and sets `loadError` when it produced
+     * nothing. Either one is a positive signal that the loader is done; the earlier waiter instead
+     * watched `!isLoading && slideFiles.size == n`, a pair that is also true before the loader has
+     * started and that its own comment admitted could settle on a short list and stay there.
+     *
+     * A load that finished having produced nothing fails here immediately, naming the error,
+     * rather than as an ambiguous timeout five seconds later.
      *
      * The timeout only fails the test — it is never the success path.
      */
     private fun ComposeUiTest.awaitLoaded(vm: PresentationViewModel, slides: Int, timeoutMs: Long = 5_000) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
-            if (!vm.isLoading && vm.slideFiles.size == slides) {
+            vm.loadError?.let { throw AssertionError("load failed before producing $slides slides: $it") }
+            if (vm.loadGeneration > 0) {
                 waitForIdle()
                 return
             }
             Thread.sleep(20)
         }
         throw AssertionError(
-            "timed out waiting for $slides slides: loaded ${vm.slideFiles.size}, isLoading=${vm.isLoading}"
+            "timed out waiting for the load to finish: loaded ${vm.slideFiles.size}, " +
+                "isLoading=${vm.isLoading}, loadError=${vm.loadError}"
         )
     }
 
