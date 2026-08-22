@@ -54,7 +54,7 @@ class LottieBuilder(
                 put("fName", JsonPrimitive(fName))
                 put("fFamily", JsonPrimitive(family))
                 put("fStyle", JsonPrimitive(style))
-                put("ascent", JsonPrimitive(72.6))
+                put("ascent", JsonPrimitive(SYNTHETIC_FONT_ASCENT))
             })
         }
         return fName
@@ -195,11 +195,11 @@ class LottieBuilder(
             anchor: JsonObject? = null,
             scale: JsonObject? = null
         ): JsonObject = buildJsonObject {
-            put("o", opacity ?: staticProp(100))
+            put("o", opacity ?: staticProp(FULL_PERCENT))
             put("r", rotation ?: staticProp(0))
             put("p", position ?: staticPropArray(0.0, 0.0, 0.0))
             put("a", anchor ?: staticPropArray(0.0, 0.0, 0.0))
-            put("s", scale ?: staticPropArray(100.0, 100.0, 100.0))
+            put("s", scale ?: staticPropArray(FULL_PERCENT_D, FULL_PERCENT_D, FULL_PERCENT_D))
         }
     }
 }

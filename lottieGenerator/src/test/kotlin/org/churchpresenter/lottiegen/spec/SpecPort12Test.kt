@@ -188,20 +188,27 @@ class SpecPort12Test {
         val flowSign = if (cfg.align == "right") -1.0 else 1.0
         if (layerName == "Info Mask") {
             val justifyHalf = if (cfg.align == "center") 0.0
-            else flowSign * measuredWidth(cfg.infoText, cfg, cfg.infoSize, cfg.infoWeight, cfg.infoTransform, scaledBase) / 2.0
+            else flowSign * measuredWidth(
+                cfg.infoText, cfg, cfg.infoSize, cfg.infoWeight, cfg.infoTransform, scaledBase,
+            ) / 2.0
             return justifyHalf - flowSign * 37.0 * scaledBase
         }
         if (cfg.align == "center") return 0.0
         val sign = flowSign
         return when (layerName) {
             // Port: justify 0/1 + (−0.5 element widths) rest offset; compiled: justify 2.
-            "Name" -> -sign * measuredWidth(cfg.nameText, cfg, cfg.nameSize, cfg.nameWeight, cfg.nameTransform, scaledBase) / 2.0
+            "Name" -> -sign * measuredWidth(
+                cfg.nameText, cfg, cfg.nameSize, cfg.nameWeight, cfg.nameTransform, scaledBase,
+            ) / 2.0
             // Port mask: anchored to the text extent center; compiled: band-anchored.
-            "Name Mask" -> sign * measuredWidth(cfg.nameText, cfg, cfg.nameSize, cfg.nameWeight, cfg.nameTransform, scaledBase) / 2.0
+            "Name Mask" -> sign * measuredWidth(
+                cfg.nameText, cfg, cfg.nameSize, cfg.nameWeight, cfg.nameTransform, scaledBase,
+            ) / 2.0
             else -> 0.0
         }
     }
 
+    @Suppress("LongParameterList") // Mirrors the compiled style's own signature, field for field.
     private fun measuredWidth(
         text: String,
         cfg: LottieGenConfig,

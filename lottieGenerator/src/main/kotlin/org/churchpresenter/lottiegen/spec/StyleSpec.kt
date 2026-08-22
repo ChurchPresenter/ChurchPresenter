@@ -3,6 +3,14 @@ package org.churchpresenter.lottiegen.spec
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/** Defaults for the spec fields below, in the same em units the spec itself is written in. */
+private const val DEFAULT_STROKE_EM = 0.15
+private const val DEFAULT_Y_OFFSET_FACTOR = -0.15
+private const val DEFAULT_BADGE_EM_W = 3.0
+private const val DEFAULT_BADGE_EM_H = 2.0
+private const val DEFAULT_CORNER_FACTOR = 1.1
+
+
 /**
  * Declarative description of a lower-third animation style, editable in the developer
  * Style Editor and rendered by [SpecStyleGenerator] through the exact same
@@ -461,7 +469,7 @@ data class PathElement(
     val closed: Boolean = false,
     val paint: PaintSpec = PaintSpec(
         fill = null,
-        stroke = StrokeSpec(ColorRole.ACCENT, StrokeWidthSpec.Em(0.15))
+        stroke = StrokeSpec(ColorRole.ACCENT, StrokeWidthSpec.Em(DEFAULT_STROKE_EM))
     ),
     val repeat: RepeatSpec? = null,
     /** See [PolygonElement.fitWidthTo] — scales vertex AND tangent x-coordinates. */
@@ -521,7 +529,7 @@ data class MaskRevealSpec(
     /** When set, the horizontal pad is padEm (em-scaled) instead of the raw [padPx]. */
     val padEm: Double? = null,
     val heightFactor: Double = 1.5,
-    val yOffsetFactor: Double = -0.15,
+    val yOffsetFactor: Double = DEFAULT_Y_OFFSET_FACTOR,
     val widthEm: Double? = null,
     val heightEm: Double? = null,
     val offsetXEm: Double = 0.0,
@@ -591,7 +599,7 @@ data class ImageElement(
     /** Natural pixel dimensions of the embedded image. */
     val naturalW: Int = 0,
     val naturalH: Int = 0,
-    val size: SizeSpec = SizeSpec.Em(3.0, 2.0),
+    val size: SizeSpec = SizeSpec.Em(DEFAULT_BADGE_EM_W, DEFAULT_BADGE_EM_H),
     val scaleMode: ImageScaleMode = ImageScaleMode.FIT,
     /** Rounded-rect clip (td/tt matte); COVER always mattes, even with None. */
     val corner: CornerSpec = CornerSpec.None,
@@ -609,7 +617,7 @@ data class BackgroundElement(
     override val tracks: List<AnimTrack> = emptyList(),
     val size: SizeSpec = SizeSpec.ContentDerived(),
     val paint: PaintSpec = PaintSpec(fill = FillSpec(ColorRole.BG)),
-    val corner: CornerSpec = CornerSpec.FromConfig(1.1),
+    val corner: CornerSpec = CornerSpec.FromConfig(DEFAULT_CORNER_FACTOR),
     /** Adds a BORDER-role stroke only when cfg.borderThickness > 0 (classic behavior). */
     val borderFromConfig: Boolean = true,
     val growFrom: GrowOrigin = GrowOrigin.ALIGN_EDGE

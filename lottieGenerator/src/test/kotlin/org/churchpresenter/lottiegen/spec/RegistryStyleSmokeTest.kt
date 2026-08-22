@@ -108,6 +108,7 @@ class RegistryStyleSmokeTest {
     }
 
     @Test
+    @Suppress("NestedBlockDepth") // Every style x every config axis; the nesting is the matrix.
     fun everyRegisteredStyleGeneratesCleanlyAcrossTheConfigMatrix() {
         for (entry in registry) {
             val stream = assertNotNull(

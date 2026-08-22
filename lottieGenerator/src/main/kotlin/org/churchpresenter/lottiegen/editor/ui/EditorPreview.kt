@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.editor.ui
 
+import org.churchpresenter.lottiegen.lottie.PERCENT_SCALE
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,6 +37,14 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.lottiegen.ui.Strings
 
+/**
+ * The preview's own chrome. Deliberately fixed rather than themed: this is the neutral ground a
+ * generated lower third is judged against, and it must not change with the editor's theme.
+ */
+private val PREVIEW_BORDER = Color(0xFF2A2D35)
+private val PREVIEW_BACKDROP = Color(0xFF10131A)
+
+
 private val ButtonShape = RoundedCornerShape(6.dp)
 
 /**
@@ -67,8 +76,8 @@ fun EditorPreview(
                     .aspectRatio(aspectRatio)
                     .fillMaxSize()
                     .clip(RoundedCornerShape(4.dp))
-                    .border(1.dp, Color(0xFF2A2D35), RoundedCornerShape(4.dp))
-                    .background(Color(0xFF10131A)),
+                    .border(1.dp, PREVIEW_BORDER, RoundedCornerShape(4.dp))
+                    .background(PREVIEW_BACKDROP),
                 contentAlignment = Alignment.Center
             ) {
                 if (jsonString != null) {
@@ -130,7 +139,7 @@ fun EditorPreview(
             )
 
             Text(
-                "%.0f%%".format(seek * 100),
+                "%.0f%%".format(seek * PERCENT_SCALE),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

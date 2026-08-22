@@ -14,27 +14,29 @@ enum class ExportIssue { BAD_ID, NO_ELEMENTS, BAD_KEYFRAMES }
  * State seam between the Style Editor's UI and its ViewModel — editor composables
  * take this interface, never the ViewModel class (matches the LottieGenState pattern).
  */
-interface EditorState {
+/** The document being edited and the sample config it is previewed against. */
+interface SpecEditingState {
     /** The spec document being edited. */
     val spec: StyleSpec
 
     /** The sample operator config the draft is previewed against. */
     val testConfig: LottieGenConfig
 
+    /** Currently selected element id, or null when the layout section is shown. */
+    val selectedElementId: String?
+
+    fun updateSpec(transform: (StyleSpec) -> StyleSpec)
+    fun updateTestConfig(transform: (LottieGenConfig) -> LottieGenConfig)
+    fun selectElement(id: String?)
+}
+
+/** What the right-hand pane is showing, and what it has rendered. */
+interface EditorPreviewState {
     /** Latest interpreted Lottie JSON for the preview, or null while none generated. */
     val generatedJson: String?
 
     /** Errors/warnings from the last generation (empty = clean). */
     val statusText: String
-
-    /** Currently selected element id, or null when the layout section is shown. */
-    val selectedElementId: String?
-
-    /** Unsaved-changes flag. */
-    val dirty: Boolean
-
-    /** Current project name (file-backed projects) or the spec name for drafts. */
-    val projectName: String
 
     /** Frames in the animate-in phase at the current test config (60 fps). */
     val inFrames: Int
@@ -48,13 +50,19 @@ interface EditorState {
     /** Rendered matrix cells (empty until matrix mode has generated them). */
     val matrixCells: List<MatrixCell>
 
+    fun setMatrixModeEnabled(enabled: Boolean)
+}
+
+/** Opening, saving and shipping the project. */
+interface EditorProjectState {
+    /** Unsaved-changes flag. */
+    val dirty: Boolean
+
+    /** Current project name (file-backed projects) or the spec name for drafts. */
+    val projectName: String
+
     /** The file the current project was loaded from / saved to, or null for drafts. */
     val currentProjectFile: File?
-
-    fun updateSpec(transform: (StyleSpec) -> StyleSpec)
-    fun updateTestConfig(transform: (LottieGenConfig) -> LottieGenConfig)
-    fun selectElement(id: String?)
-    fun setMatrixModeEnabled(enabled: Boolean)
 
     /** Starts a new project from a bundled template resource path, or blank when null. */
     fun newProject(templateResource: String?)
@@ -74,3 +82,12 @@ interface EditorState {
      */
     fun registerIntoBuild(): RegisterResult?
 }
+
+/**
+ * State seam between the Style Editor's UI and its ViewModel — editor composables
+ * take this interface, never the ViewModel class (matches the LottieGenState pattern).
+ *
+ * Composed from three smaller interfaces: the document being edited, what the preview pane is
+ * showing, and the project on disk.
+ */
+interface EditorState : SpecEditingState, EditorPreviewState, EditorProjectState

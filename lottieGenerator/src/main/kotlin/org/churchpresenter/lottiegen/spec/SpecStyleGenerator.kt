@@ -1,38 +1,42 @@
 package org.churchpresenter.lottiegen.spec
 
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
+import org.churchpresenter.lottiegen.lottie.TextRun
 import kotlinx.serialization.json.buildJsonArray
-import org.churchpresenter.lottiegen.lottie.Easing
-import org.churchpresenter.lottiegen.lottie.KeyframeInput
 import org.churchpresenter.lottiegen.lottie.LottieBuilder
-import org.churchpresenter.lottiegen.lottie.buildKeyframes
+import org.churchpresenter.lottiegen.lottie.PERCENT_SCALE
 import org.churchpresenter.lottiegen.lottie.jsonArrayOf
-import org.churchpresenter.lottiegen.lottie.makeAnimatedRect
-import org.churchpresenter.lottiegen.lottie.makeAnimatedStroke
-import org.churchpresenter.lottiegen.lottie.makeCurvedPath
-import org.churchpresenter.lottiegen.lottie.makeEllipse
 import org.churchpresenter.lottiegen.lottie.makeFill
-import org.churchpresenter.lottiegen.lottie.makeGradientFill
 import org.churchpresenter.lottiegen.lottie.makeGroup
 import org.churchpresenter.lottiegen.lottie.makePath
 import org.churchpresenter.lottiegen.lottie.makeRandomFadeAnimator
 import org.churchpresenter.lottiegen.lottie.makeRect
-import org.churchpresenter.lottiegen.lottie.makeRepeater
-import org.churchpresenter.lottiegen.lottie.makeStroke
 import org.churchpresenter.lottiegen.lottie.makeTextData
 import org.churchpresenter.lottiegen.lottie.makeTextDataWithAnimators
 import org.churchpresenter.lottiegen.lottie.makeTextRevealAnimator
-import org.churchpresenter.lottiegen.lottie.makeTrimPath
 import org.churchpresenter.lottiegen.lottie.styles.StyleGenerator
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import kotlin.math.max
 import kotlin.math.min
 
 /**
+ * Whether this element is drawn at all for the current config: hidden by a visibility rule, or
+ * hidden by an override for the alignment in use.
+ */
+private fun ElementSpec.isDrawn(layout: SpecLayoutContext, cfg: LottieGenConfig): Boolean =
+    layout.visible(visibleWhen) && placement.alignOverrides[cfg.align]?.hidden != true
+
+/** A text run's resting place and the measurements its mask is cut from. */
+internal class PlacedText(
+    val rest: SpecPoint,
+    val textW: Double,
+    val sizePx: Double,
+    val justify: Int,
+)
+
+/**
  * Renders a [StyleSpec] through the exact same LottieBuilder/buildKeyframes pipeline
  * the hand-written styles use. One instance serves both the developer Style Editor's
- * live preview and — for shipped spec-based styles — the user-facing generator.
+ * live preview and -- for shipped spec-based styles -- the user-facing generator.
  */
 class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
 
@@ -41,39 +45,68 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
         private set
 
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
-        val layout = SpecLayoutContext(spec, cfg)
-        for (element in spec.elements) {
-            if (!layout.visible(element.visibleWhen)) continue
-            if (element.placement.alignOverrides[cfg.align]?.hidden == true) continue
-            when (element) {
-                is LogoElement -> buildLogo(builder, cfg, layout, element)
-                is ImageElement -> buildImage(builder, cfg, layout, element)
-                is TextElement -> buildText(builder, cfg, layout, element)
-                is RectElement -> buildShape(
-                    builder, cfg, layout, element,
-                    element.size, element.paint, element.corner, element.growFrom, element.repeat
-                )
-                is BackgroundElement -> buildShape(
-                    builder, cfg, layout, element,
-                    element.size, backgroundPaint(layout, element), element.corner, element.growFrom, null
-                )
-                is EllipseElement -> buildShape(
-                    builder, cfg, layout, element,
-                    element.size, element.paint, CornerSpec.None, GrowOrigin.CENTER, element.repeat
-                )
-                is PolygonElement -> buildPolygon(builder, cfg, layout, element)
-                is PathElement -> buildPath(builder, cfg, layout, element)
-            }
-        }
-        lastWarnings = layout.warnings.toList()
+        SpecBuild(spec, builder, cfg).run()
+            .also { lastWarnings = it }
     }
 
-    // ------------------------------------------------------------------ logo
+    companion object {
+        /**
+         * Loads a spec bundled as a classpath resource (shipped spec-based styles).
+         * Fails fast with a clear message -- a broken bundled spec must never silently
+         * render an empty composition.
+         */
+        fun fromResource(path: String): SpecStyleGenerator {
+            val stream = SpecStyleGenerator::class.java.getResourceAsStream(path)
+                ?: error("Bundled style spec not found: $path")
+            val text = stream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+            return SpecStyleGenerator(SpecJson.decode(text))
+        }
+    }
+}
+
+/**
+ * One render of one spec. Holds the three values every builder needs -- the Lottie builder, the
+ * config and the resolved layout -- so they stop being the first three arguments of everything.
+ */
+internal class SpecBuild(
+    private val spec: StyleSpec,
+    private val builder: LottieBuilder,
+    private val cfg: LottieGenConfig,
+) {
+    private val layout = SpecLayoutContext(spec, cfg)
+    private val tracks = SpecTracks(builder, cfg, layout)
+    private val shapes = SpecShapes(builder, layout, tracks)
+
+    /** Draws every visible element and returns the layout's warnings. */
+    fun run(): List<String> {
+        for (element in spec.elements.filter { it.isDrawn(layout, cfg) }) {
+            when (element) {
+                is LogoElement -> buildLogo(element)
+                is ImageElement -> buildImage(element)
+                is TextElement -> buildText(element)
+                is RectElement -> shapes.buildShape(
+                    element,
+                    ShapeAttrs(element.size, element.corner, element.growFrom, element.repeat),
+                    element.paint,
+                )
+                is BackgroundElement -> shapes.buildShape(
+                    element,
+                    ShapeAttrs(element.size, element.corner, element.growFrom, null),
+                    backgroundPaint(element),
+                )
+                is EllipseElement -> shapes.buildShape(
+                    element,
+                    ShapeAttrs(element.size, CornerSpec.None, GrowOrigin.CENTER, element.repeat),
+                    element.paint,
+                )
+                is PolygonElement -> shapes.buildPolygon(element)
+                is PathElement -> shapes.buildPath(element)
+            }
+        }
+        return layout.warnings.toList()
+    }
 
     private fun buildLogo(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        layout: SpecLayoutContext,
         element: LogoElement
     ) {
         val logoData = cfg.logoData ?: return
@@ -89,11 +122,11 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
         builder.addImageLayer(
             element.name, assetId,
             LottieBuilder.defaultTransform(
-                opacity = opacityProp(builder, cfg, element, restOpacity = 100.0),
-                rotation = rotationProp(builder, cfg, element),
-                position = positionProp(builder, cfg, layout, element, rest, w, h),
+                opacity = tracks.opacityProp(element, restOpacity = 100.0),
+                rotation = tracks.rotationProp(element),
+                position = tracks.positionProp(element, rest, w, h),
                 anchor = LottieBuilder.staticPropArray(cfg.logoW / 2.0, cfg.logoH / 2.0, 0.0),
-                scale = scaleProp(builder, cfg, element, baseScale)
+                scale = tracks.scaleProp(element, baseScale)
             )
         )
     }
@@ -106,10 +139,8 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
      * corners clip via the same td/tt matte pattern as [buildTextMask]; the matte
      * shares the image's position/rotation props so an animated image stays clipped.
      */
+
     private fun buildImage(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        layout: SpecLayoutContext,
         element: ImageElement
     ) {
         if (element.dataUri.isEmpty() || element.naturalW <= 0 || element.naturalH <= 0) return
@@ -134,15 +165,15 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
                     add(
                         makeGroup(
                             listOf(
-                                makeRect(w, h, layout.cornerPx(element.corner)),
+                                makeRect(w, h, layout.paint.cornerPx(element.corner)),
                                 makeFill(listOf(1.0, 1.0, 1.0))
                             )
                         )
                     )
                 },
                 LottieBuilder.defaultTransform(
-                    rotation = rotationProp(builder, cfg, element),
-                    position = positionProp(builder, cfg, layout, element, rest, w, h)
+                    rotation = tracks.rotationProp(element),
+                    position = tracks.positionProp(element, rest, w, h)
                 ),
                 td = 1
             )
@@ -150,11 +181,11 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
         builder.addImageLayer(
             element.name, assetId,
             LottieBuilder.defaultTransform(
-                opacity = opacityProp(builder, cfg, element, restOpacity = 100.0 * element.alphaFactor),
-                rotation = rotationProp(builder, cfg, element),
-                position = positionProp(builder, cfg, layout, element, rest, w, h),
+                opacity = tracks.opacityProp(element, restOpacity = 100.0 * element.alphaFactor),
+                rotation = tracks.rotationProp(element),
+                position = tracks.positionProp(element, rest, w, h),
                 anchor = LottieBuilder.staticPropArray(element.naturalW / 2.0, element.naturalH / 2.0, 0.0),
-                scale = scalePropXY(builder, cfg, element, baseX * 100.0, baseY * 100.0)
+                scale = tracks.scalePropXY(element, baseX * PERCENT_SCALE, baseY * PERCENT_SCALE)
             ),
             tt = if (matted) 1 else null
         )
@@ -162,10 +193,8 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
 
     // ------------------------------------------------------------------ text
 
+
     private fun buildText(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        layout: SpecLayoutContext,
         element: TextElement
     ) {
         val text: String
@@ -190,26 +219,25 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
         }
         val paintRole = element.colorRole
             ?: if (element.field == TextFieldRef.NAME) ColorRole.NAME else ColorRole.INFO
-        alpha = layout.roleAlpha(paintRole)
-        color = layout.roleColor(paintRole)
+        alpha = layout.paint.roleAlpha(paintRole)
+        color = layout.paint.roleColor(paintRole)
         val (w, h) = layout.resolveSize(element)
         val justify = layout.justify()
         val rest = layout.resolve(element.placement)
 
         val mask = element.maskReveal
         if (mask != null) {
-            buildTextMask(builder, cfg, layout, element, mask, rest, w, sizePx, justify)
+            buildTextMask(element, mask, PlacedText(rest, w, sizePx, justify))
         }
 
         builder.addFont(cfg.fontFamily, weight)
         val animator = element.animator
         val textData = if (animator == null) {
-            makeTextData(text, cfg.fontFamily, sizePx, weight, color, caseTransform, justify)
+            makeTextData(TextRun(text, cfg.fontFamily, sizePx, weight, color, caseTransform, justify))
         } else {
             val animatorJson = when (animator.kind) {
                 TextAnimatorKind.SEQUENTIAL_REVEAL -> makeTextRevealAnimator(
-                    animator.startPct, animator.endPct, layout.em(animator.posOffsetEm),
-                    builder.inFrames, builder.holdFrames, builder.outFrames
+                    animator.startPct, animator.endPct, layout.em(animator.posOffsetEm), builder
                 )
                 TextAnimatorKind.RANDOM_FADE -> makeRandomFadeAnimator(
                     animator.startPct, animator.endPct,
@@ -217,17 +245,17 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
                 )
             }
             makeTextDataWithAnimators(
-                text, cfg.fontFamily, sizePx, weight, color, caseTransform, justify,
-                listOf(animatorJson)
+                TextRun(text, cfg.fontFamily, sizePx, weight, color, caseTransform, justify),
+                listOf(animatorJson),
             )
         }
 
         builder.addTextLayer(
             element.name, textData,
             LottieBuilder.defaultTransform(
-                opacity = opacityProp(builder, cfg, element, restOpacity = alpha),
-                rotation = rotationProp(builder, cfg, element),
-                position = positionProp(builder, cfg, layout, element, rest, w, h)
+                opacity = tracks.opacityProp(element, restOpacity = alpha),
+                rotation = tracks.rotationProp(element),
+                position = tracks.positionProp(element, rest, w, h)
             ),
             tt = if (mask != null) 1 else null
         )
@@ -238,17 +266,12 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
      * optional parallelogram skew, optional POSITION_OFFSET tracks on the mask itself
      * (the wipe pattern — mask sweeps, text stays).
      */
-    private fun buildTextMask(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        layout: SpecLayoutContext,
-        element: TextElement,
-        mask: MaskRevealSpec,
-        rest: SpecPoint,
-        textW: Double,
-        sizePx: Double,
-        justify: Int
-    ) {
+
+    private fun buildTextMask(element: TextElement, mask: MaskRevealSpec, placed: PlacedText) {
+        val rest = placed.rest
+        val textW = placed.textW
+        val sizePx = placed.sizePx
+        val justify = placed.justify
         val extentCenterX = when (justify) {
             1 -> rest.x - textW / 2
             2 -> rest.x
@@ -280,9 +303,9 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
         val position = if (positionTrack == null) {
             LottieBuilder.staticPropArray(maskRest.x, maskRest.y, 0.0)
         } else {
-            val kfs = compileTrack(builder, cfg, positionTrack) { values ->
-                val dx = offsetToPx(values.getOrElse(0) { 0.0 }, positionTrack.offsetUnit, layout, maskW, maskH)
-                val dy = offsetToPx(values.getOrElse(1) { 0.0 }, positionTrack.offsetUnit, layout, maskW, maskH)
+            val kfs = tracks.compileTrack(positionTrack) { values ->
+                val dx = tracks.offsetToPx(values.getOrElse(0) { 0.0 }, positionTrack.offsetUnit, maskW, maskH)
+                val dy = tracks.offsetToPx(values.getOrElse(1) { 0.0 }, positionTrack.offsetUnit, maskW, maskH)
                 jsonArrayOf(maskRest.x + flow * dx, maskRest.y + dy, 0.0)
             }
             LottieBuilder.animatedProp(kfs)
@@ -300,7 +323,8 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
 
     // ---------------------------------------------------------------- shapes
 
-    private fun backgroundPaint(layout: SpecLayoutContext, element: BackgroundElement): PaintSpec {
+
+    private fun backgroundPaint(element: BackgroundElement): PaintSpec {
         if (element.paint.stroke != null) return element.paint
         if (element.borderFromConfig && layout.borderPx > 0) {
             return element.paint.copy(stroke = StrokeSpec(ColorRole.BORDER, StrokeWidthSpec.FromConfig))
@@ -308,347 +332,4 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
         return element.paint
     }
 
-    private fun buildShape(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        layout: SpecLayoutContext,
-        element: ElementSpec,
-        size: SizeSpec,
-        paint: PaintSpec,
-        corner: CornerSpec,
-        growFrom: GrowOrigin,
-        repeat: RepeatSpec?
-    ) {
-        val (w, h) = layout.sizeOf(size)
-        val rest = layout.resolve(element.placement).let { point ->
-            // Full-canvas bands are always horizontally centered on the canvas.
-            if (size is SizeSpec.CanvasWidth) SpecPoint(layout.canvasW / 2, point.y) else point
-        }
-        val cornerPx = layout.cornerPx(corner)
-        val sizeTrack = trackFor(element, AnimProperty.RECT_SIZE)
-
-        val shapeItem = if (element is EllipseElement) {
-            makeEllipse(w, h)
-        } else if (sizeTrack != null) {
-            val sizeKFs = compileTrack(builder, cfg, sizeTrack) { values ->
-                jsonArrayOf(values.getOrElse(0) { 1.0 } * w, values.getOrElse(1) { 1.0 } * h)
-            }
-            makeAnimatedRect(sizeKFs, cornerPx)
-        } else {
-            makeRect(w, h, cornerPx)
-        }
-
-        val items = mutableListOf(shapeItem)
-        items.addAll(paintItems(builder, cfg, layout, element, paint))
-        trimItem(builder, cfg, element)?.let { items.add(it) }
-        repeat?.let { items.add(repeaterItem(layout, element, it)) }
-
-        val edgeGrow = sizeTrack != null && growFrom == GrowOrigin.ALIGN_EDGE && !layout.isCenter &&
-            trackFor(element, AnimProperty.POSITION_OFFSET) == null
-        val transform = if (edgeGrow) {
-            // Keep the alignment-side edge fixed while the rect grows inward: synthesize
-            // position keyframes matching the size track's timing (pivot not applicable).
-            val inward = layout.flowSign(element.placement)
-            val edgeX = rest.x - inward * w / 2
-            val posKFs = compileTrack(builder, cfg, sizeTrack) { values ->
-                val wNow = values.getOrElse(0) { 1.0 } * w
-                jsonArrayOf(edgeX + inward * wNow / 2, rest.y, 0.0)
-            }
-            LottieBuilder.defaultTransform(
-                opacity = opacityProp(builder, cfg, element, restOpacity = 100.0),
-                rotation = rotationProp(builder, cfg, element),
-                position = LottieBuilder.animatedProp(posKFs),
-                scale = scaleProp(builder, cfg, element, baseScale = 100.0)
-            )
-        } else {
-            shapeTransform(builder, cfg, layout, element, rest, w, h)
-        }
-
-        builder.addShapeLayer(element.name, buildJsonArray { add(makeGroup(items)) }, transform)
-    }
-
-    private fun buildPolygon(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        layout: SpecLayoutContext,
-        element: PolygonElement
-    ) {
-        val flow = layout.flowSign(element.placement)
-        val naturalXs = element.verticesEm.map { layout.em(it.getOrElse(0) { 0.0 }) }
-        val naturalW = if (naturalXs.isEmpty()) 0.0 else naturalXs.max() - naturalXs.min()
-        val fit = layout.fitFactor(element.fitWidthTo, naturalW)
-        val vertices = element.verticesEm.map { v ->
-            listOf(layout.em(v.getOrElse(0) { 0.0 }) * flow * fit, layout.em(v.getOrElse(1) { 0.0 }))
-        }
-        val (w, h) = layout.resolveSize(element)
-        val rest = layout.resolve(element.placement)
-
-        val items = mutableListOf(makePath(vertices, element.closed))
-        items.addAll(paintItems(builder, cfg, layout, element, element.paint))
-        trimItem(builder, cfg, element)?.let { items.add(it) }
-        element.repeat?.let { items.add(repeaterItem(layout, element, it)) }
-
-        builder.addShapeLayer(
-            element.name,
-            buildJsonArray { add(makeGroup(items)) },
-            shapeTransform(builder, cfg, layout, element, rest, w, h)
-        )
-    }
-
-    private fun buildPath(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        layout: SpecLayoutContext,
-        element: PathElement
-    ) {
-        // The flow sign flips vertex AND tangent x-components, so a curve keeps its
-        // handedness mirrored on right alignment; the fit factor stretches both so a
-        // fitted curve keeps its shape proportions.
-        val naturalXs = element.verticesEm.map { layout.em(it.x) }
-        val naturalW = if (naturalXs.isEmpty()) 0.0 else naturalXs.max() - naturalXs.min()
-        val fx = layout.flowSign(element.placement) * layout.fitFactor(element.fitWidthTo, naturalW)
-        val vertices = element.verticesEm.map { listOf(layout.em(it.x) * fx, layout.em(it.y)) }
-        val inTangents = element.verticesEm.map { listOf(layout.em(it.inX) * fx, layout.em(it.inY)) }
-        val outTangents = element.verticesEm.map { listOf(layout.em(it.outX) * fx, layout.em(it.outY)) }
-        val (w, h) = layout.resolveSize(element)
-        val rest = layout.resolve(element.placement)
-
-        val items = mutableListOf(makeCurvedPath(vertices, inTangents, outTangents, element.closed))
-        items.addAll(paintItems(builder, cfg, layout, element, element.paint))
-        trimItem(builder, cfg, element)?.let { items.add(it) }
-        element.repeat?.let { items.add(repeaterItem(layout, element, it)) }
-
-        builder.addShapeLayer(
-            element.name,
-            buildJsonArray { add(makeGroup(items)) },
-            shapeTransform(builder, cfg, layout, element, rest, w, h)
-        )
-    }
-
-    /**
-     * Common shape-layer transform. A non-zero pivot moves the layer anchor (and shifts
-     * the position identically, so the rest pose is unchanged) — rotation and scale
-     * tracks then orbit the pivot instead of the element center.
-     */
-    private fun shapeTransform(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        layout: SpecLayoutContext,
-        element: ElementSpec,
-        rest: SpecPoint,
-        w: Double,
-        h: Double
-    ): JsonObject {
-        val flow = layout.flowSign(element.placement)
-        val pivotX = layout.em(element.placement.pivotXEm) * flow
-        val pivotY = layout.em(element.placement.pivotYEm)
-        val hasPivot = pivotX != 0.0 || pivotY != 0.0
-        val shiftedRest = if (hasPivot) SpecPoint(rest.x + pivotX, rest.y + pivotY) else rest
-        return LottieBuilder.defaultTransform(
-            opacity = opacityProp(builder, cfg, element, restOpacity = 100.0),
-            rotation = rotationProp(builder, cfg, element),
-            position = positionProp(builder, cfg, layout, element, shiftedRest, w, h),
-            anchor = if (hasPivot) LottieBuilder.staticPropArray(pivotX, pivotY, 0.0) else null,
-            scale = scaleProp(builder, cfg, element, baseScale = 100.0)
-        )
-    }
-
-    /** Compiles a TRIM track into a Trim Paths shape item (null when the element has none). */
-    private fun trimItem(builder: LottieBuilder, cfg: LottieGenConfig, element: ElementSpec): JsonObject? {
-        val track = trackFor(element, AnimProperty.TRIM) ?: return null
-        val startKFs = compileTrack(builder, cfg, track) { values ->
-            jsonArrayOf(values.getOrElse(0) { 0.0 } * 100.0)
-        }
-        val endKFs = compileTrack(builder, cfg, track) { values ->
-            jsonArrayOf(values.getOrElse(1) { 1.0 } * 100.0)
-        }
-        return makeTrimPath(startKFs = startKFs, endKFs = endKFs)
-    }
-
-    private fun repeaterItem(layout: SpecLayoutContext, element: ElementSpec, repeat: RepeatSpec): JsonObject {
-        val flow = layout.flowSign(element.placement)
-        val basis = repeat.fitWidthTo
-        val offsetXPx = if (basis != null && repeat.copies > 1) {
-            val sign = if (repeat.offsetXEm < 0) -1.0 else 1.0
-            sign * layout.basisWidthPx(basis) / (repeat.copies - 1)
-        } else {
-            layout.em(repeat.offsetXEm)
-        }
-        return makeRepeater(
-            copies = repeat.copies,
-            offsetPx = listOf(offsetXPx * flow, layout.em(repeat.offsetYEm)),
-            rotationDeg = repeat.rotationDeg,
-            scalePct = repeat.scalePct,
-            endOpacity = if (repeat.fadeOut) 0.0 else 100.0
-        )
-    }
-
-    private fun paintItems(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        layout: SpecLayoutContext,
-        element: ElementSpec,
-        paint: PaintSpec
-    ): List<JsonObject> {
-        val items = mutableListOf<JsonObject>()
-        val fill = paint.fill
-        if (fill != null) {
-            val color = layout.roleColor(fill.role)
-            val alpha = layout.roleAlpha(fill.role) * fill.alphaFactor
-            val gradient = fill.gradient
-            items.add(
-                if (gradient == null) {
-                    makeFill(color, alpha)
-                } else {
-                    val flow = layout.flowSign(element.placement)
-                    makeGradientFill(
-                        color, alpha,
-                        listOf(layout.em(gradient.startXEm) * flow, layout.em(gradient.startYEm)),
-                        listOf(layout.em(gradient.endXEm) * flow, layout.em(gradient.endYEm))
-                    )
-                }
-            )
-        }
-        val stroke = paint.stroke
-        if (stroke != null) {
-            val widthPx = layout.strokeWidthPx(stroke.width)
-            if (widthPx > 0) {
-                val color = layout.roleColor(stroke.role)
-                val alpha = layout.roleAlpha(stroke.role) * stroke.alphaFactor
-                val dashPx = layout.em(stroke.dashEm)
-                val widthTrack = trackFor(element, AnimProperty.STROKE_WIDTH)
-                if (widthTrack != null) {
-                    val widthKFs = compileTrack(builder, cfg, widthTrack) { values ->
-                        jsonArrayOf(values.getOrElse(0) { 1.0 } * widthPx)
-                    }
-                    items.add(makeAnimatedStroke(color, widthKFs, alpha, dashPx))
-                } else {
-                    makeStroke(color, widthPx, alpha, dashPx)?.let { items.add(it) }
-                }
-            }
-        }
-        return items
-    }
-
-    // ------------------------------------------------------- track compilation
-
-    private fun trackFor(element: ElementSpec, property: AnimProperty): AnimTrack? =
-        element.tracks.firstOrNull { it.property == property }
-
-    private fun easingOf(kind: EasingKind): JsonObject = when (kind) {
-        EasingKind.DEFAULT -> Easing.DEFAULT
-        EasingKind.LINEAR -> Easing.LINEAR
-    }
-
-    /** Compiles a track's keyframes (align override applied) via the shared builder. */
-    private fun compileTrack(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        track: AnimTrack,
-        toValue: (List<Double>) -> JsonArray
-    ): JsonArray {
-        val keyframes = track.alignOverrides[cfg.align] ?: track.keyframes
-        val inputs = keyframes.map { KeyframeInput(it.pct, toValue(it.values)) }
-        return buildKeyframes(
-            inputs, builder.inFrames, builder.holdFrames, builder.outFrames, easingOf(track.easing)
-        )
-    }
-
-    private fun positionProp(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        layout: SpecLayoutContext,
-        element: ElementSpec,
-        rest: SpecPoint,
-        elementW: Double,
-        elementH: Double
-    ): JsonObject {
-        val track = trackFor(element, AnimProperty.POSITION_OFFSET)
-            ?: return LottieBuilder.staticPropArray(rest.x, rest.y, 0.0)
-        val flow = layout.flowSign(element.placement)
-        val kfs = compileTrack(builder, cfg, track) { values ->
-            val dx = offsetToPx(values.getOrElse(0) { 0.0 }, track.offsetUnit, layout, elementW, elementH)
-            val dy = offsetToPx(values.getOrElse(1) { 0.0 }, track.offsetUnit, layout, elementW, elementH)
-            jsonArrayOf(rest.x + flow * dx, rest.y + dy, 0.0)
-        }
-        return LottieBuilder.animatedProp(kfs)
-    }
-
-    private fun offsetToPx(
-        value: Double,
-        unit: OffsetUnit,
-        layout: SpecLayoutContext,
-        elementW: Double,
-        elementH: Double
-    ): Double = when (unit) {
-        OffsetUnit.EM -> layout.em(value)
-        OffsetUnit.ELEMENT_WIDTH -> value * elementW
-        OffsetUnit.ELEMENT_HEIGHT -> value * elementH
-    }
-
-    /**
-     * Layer opacity. Shapes rest at 100 (their fill already carries the role alpha);
-     * text/logo rest at the field's alpha, and track values scale against it so a
-     * keyframe value of 100 means "fully at the configured alpha".
-     */
-    private fun opacityProp(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        element: ElementSpec,
-        restOpacity: Double
-    ): JsonObject {
-        val track = trackFor(element, AnimProperty.OPACITY)
-            ?: return LottieBuilder.staticProp(restOpacity)
-        val kfs = compileTrack(builder, cfg, track) { values ->
-            jsonArrayOf(values.getOrElse(0) { 100.0 } * restOpacity / 100.0)
-        }
-        return LottieBuilder.animatedProp(kfs)
-    }
-
-    private fun rotationProp(builder: LottieBuilder, cfg: LottieGenConfig, element: ElementSpec): JsonObject? {
-        val track = trackFor(element, AnimProperty.ROTATION) ?: return null
-        val kfs = compileTrack(builder, cfg, track) { values ->
-            jsonArrayOf(values.getOrElse(0) { 0.0 })
-        }
-        return LottieBuilder.animatedProp(kfs)
-    }
-
-    private fun scaleProp(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        element: ElementSpec,
-        baseScale: Double
-    ): JsonObject = scalePropXY(builder, cfg, element, baseScale, baseScale)
-
-    /** Like [scaleProp] but with a per-axis base (image STRETCH sizing). */
-    private fun scalePropXY(
-        builder: LottieBuilder,
-        cfg: LottieGenConfig,
-        element: ElementSpec,
-        baseScaleX: Double,
-        baseScaleY: Double
-    ): JsonObject {
-        val track = trackFor(element, AnimProperty.SCALE)
-            ?: return LottieBuilder.staticPropArray(baseScaleX, baseScaleY, 100.0)
-        val kfs = compileTrack(builder, cfg, track) { values ->
-            val sx = values.getOrElse(0) { 100.0 } * baseScaleX / 100.0
-            val sy = values.getOrElse(1) { values.getOrElse(0) { 100.0 } } * baseScaleY / 100.0
-            jsonArrayOf(sx, sy, 100.0)
-        }
-        return LottieBuilder.animatedProp(kfs)
-    }
-
-    companion object {
-        /**
-         * Loads a spec bundled as a classpath resource (shipped spec-based styles).
-         * Fails fast with a clear message — a broken bundled spec must never silently
-         * render an empty composition.
-         */
-        fun fromResource(path: String): SpecStyleGenerator {
-            val stream = SpecStyleGenerator::class.java.getResourceAsStream(path)
-                ?: throw IllegalStateException("Bundled style spec not found: $path")
-            val text = stream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-            return SpecStyleGenerator(SpecJson.decode(text))
-        }
-    }
 }

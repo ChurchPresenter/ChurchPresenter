@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.persistence
 
+import java.io.IOException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.churchpresenter.lottiegen.model.Preset
@@ -20,7 +21,7 @@ object PresetStorage {
         if (!file.exists()) return emptyList()
         return try {
             json.decodeFromString<List<Preset>>(file.readText())
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
     }
@@ -28,7 +29,7 @@ object PresetStorage {
     fun save(presets: List<Preset>) {
         try {
             presetsFile().writeText(json.encodeToString(presets))
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             System.err.println("Failed to save presets: ${e.message}")
         }
     }

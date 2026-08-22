@@ -85,7 +85,13 @@ Both CI steps are gated on this directory or the shared build files changing.
   `coverageFloors`. `extra["coverageExcludes"]` drops `**/ui/**` and `**/MainKt*`, which need a
   display. The `spec/` and `lottie/` packages are where the coverage lives, and the `SpecPort*Test`
   suites exist so a spec style stays byte-comparable with the code style it replaced.
-- There is no detekt task on this module.
+- **Detekt**: `./gradlew :lottieGenerator:detekt`. The module has the plugin and **no baseline**,
+  and is at **one finding**, down from 382 -- every rule is clean except `LongParameterList` on
+  `LottieGenPalette`'s 51-role constructor (see **Theme** above for why those 51 exist).
+  `constructorThreshold` is 7, and satisfying it would need three levels of nesting, so that one
+  is open for a decision rather than fixed. **Do not add a baseline file, and do not add a
+  `@Suppress` without asking.** Until it is resolved the module is not in `test.yml`'s Detekt
+  step, because one finding there would fail every PR.
 - Tests run with `java.awt.headless=true`; `TextMeasurer` and `FontRegistry` use AWT and must keep
   working headless.
 

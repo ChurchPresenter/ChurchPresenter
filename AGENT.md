@@ -117,9 +117,9 @@ A module's build file carries only what differs, and both are read when the task
 they must be set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults, so name only the
   counters that need a different number (usually the one or two that cannot reach 85%), never all
-  six. `:converter`, `:companion-satellite`, `:bible-engine`, `:presentation-engine` and `:atem`
-  name two each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword`, `:songlibrary`,
-  `:settings`, `:diagnostics`, `:planning-center` and `:bible-formats` name none.
+  six. `:converter`, `:companion-satellite`, `:bible-engine` and `:presentation-engine` name two
+  each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword`, `:songlibrary`, `:settings`,
+  `:diagnostics`, `:atem`, `:planning-center` and `:bible-formats` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
@@ -171,7 +171,7 @@ bash test-changed.sh --dry-run         # print the selection and the gradle comm
 
 # Screenshots → composeApp/screenshots/<section>/ (COMMITTED; one folder per test class)
 ./gradlew :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
-./gradlew :composeApp:verifyRoborazziJvm --tests '*ScreenshotTest*'   # gate: fails past 0.5% of pixels
+./gradlew :composeApp:verifyRoborazziJvm --tests '*ScreenshotTest*'   # gate: fails past 0.1% of pixels
 ```
 
 **Run `./gradlew :composeApp:detekt` as the last step of any change that touched Kotlin**, before
@@ -185,13 +185,14 @@ result and every finding it prints is yours to fix.
 written the day they joined the detekt step above. They had 205 findings between them and had never
 been gated: 44 were fixed outright (dead code, a swallowed exception, 26 over-long lines, and two
 parameters a public function ignored), the 7 in test sources carry `@Suppress` at the declaration,
-and the remaining 161 -- all `src/main`, and mostly `MagicNumber`, `NestedBlockDepth` and
-`ReturnCount` against byte-format parsers -- are baselined so the rules gate new code. Those numbers
+and the remaining 141 -- 86 in `:bible-engine` and 55 in `:presentation-engine`, all `src/main`,
+and mostly `MagicNumber`, `NestedBlockDepth` and `ReturnCount` against byte-format parsers -- are
+baselined so the rules gate new code. Those numbers
 are debt, not absolution: the modules are parsers, but a parser is not exempt from a named constant.
 
 `config/detekt/baseline.xml` holds pre-existing findings from the day the size/length rules
 (`LongMethod`, `LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`,
-`TooGenericExceptionCaught`) were switched on — 1,623 of them, suppressed so those rules gate new
+`TooGenericExceptionCaught`) were switched on — 1,590 of them, suppressed so those rules gate new
 code only. **Every entry is `jvmMain` code; `jvmTest` has none and must keep none.** The test suite
 was brought to zero findings instead: 616 lines were wrapped, and the 27 that cannot be wrapped
 carry `@Suppress` at the declaration — one-line raw-string JSON fixtures (wrapping changes the
@@ -214,8 +215,9 @@ delete the entry.
 
 **Verify before you commit a UI change, and re-record what it moved.** `verifyRoborazziJvm` compares
 the committed images against a fresh render and fails past `ScreenshotSupport.CHANGE_THRESHOLD`
-(0.5% of an image's pixels — measured: one switch flipping costs 0.19%, a status line 0.66%, a row
-appearing 32.6%, so anything looser hides real regressions). A failure writes a reference|diff|new
+(0.1% of an image's pixels — measured: one switch flipping costs 0.19%, a status line 0.66%, a row
+appearing 32.6%, so anything looser hides real regressions. It was 0.5%; the churn that needed that
+much slack was fixed at source instead, and `ScreenshotSupport` names each cause). A failure writes a reference|diff|new
 image to `composeApp/build/outputs/roborazzi/<name>_compare.png` and names it in the message.
 
 **It runs locally, not in CI.** The committed set is a macOS recording and CI renders on Linux, where
@@ -235,10 +237,24 @@ images from the workflow *artifact* attached to the merge-base commit's run, so 
 branch can affect whether a comparison works. Nothing under `composeApp/screenshots/` is affected
 either; those are the images reviewers approve.
 
-Known red, both pre-existing and neither a regression: `previewApp/about_*` draws
-`BuildConfig.VERSION_DISPLAY`, which carries the git hash and so changes on every commit, and
-`previewApp/dictionary_light` renders a 14,197-row list whose row heights are not stable between
-runs. Both need their suite fixed, not the threshold widened.
+`previewApp/about_*` (the git hash in `BuildConfig.VERSION_DISPLAY`) and
+`previewApp/dictionary_light` (a count read mid-load) were both fixed in their suites rather than by
+widening the threshold, along with `colour_picker`, `settings_companion_satellite_*` and a stale
+`canvas_*`; `ScreenshotSupport` records what each one was.
+
+**Two churn sources are NOT fixed, and they fail 24 of the 914 images on a clean `main`** — measured
+2026-08-22 on macOS, `main` and a feature branch producing byte-identical failure sets:
+
+| suite | images | why it changes every run |
+|---|---|---|
+| `StageMonitorScreenshotTest` | 22 | The stage monitor draws a **live wall clock**. The diff is literally `06:47:19 PM` against `01:56:04 AM`. |
+| `AppPreviewSettingsScreenshotTest` → `settings_stage_monitor_*` | 1 | Same clock, inside the settings preview. |
+| `CanvasTabScreenshotTest` → `source_camera` | 1 | Enumerates the host's **real capture devices**. Committed as "MacBook Pro Camera"; a machine without one renders "Capture screen 0". |
+
+Both are the same shape as the `about_*` git-hash case that *was* fixed — a value from outside the
+composition leaking into the picture — and both want the same remedy: take the value as a parameter
+and let the test pin it. Until then `verifyRoborazziJvm` cannot be read as pass/fail; check the
+failing names against this table first, and treat **anything else** as a real difference.
 
 Every state is shot in **both themes and stacked into one image**, light above dark — go through
 `stackedThemes` (or `captureComponent`, which wraps it) and a state is written once, not twice. One
@@ -358,6 +374,24 @@ produces a failure that only appears under load and only sometimes:
   that deliberately use the shared fake home rather than swapping in a temp dir — and there are a
   couple of dozen, several of which *delete* a directory in `@BeforeTest` — are isolated by that and
   by nothing else.
+- **Some classes cannot run beside anything, and do not.** `jvmTestSerial` is a second `Test` task
+  over the same classes and classpath with `maxParallelForks = 1`, holding the classes listed in
+  `serialTestClasses` (`composeApp/build.gradle.kts`): the loopback-UDP suites, the one screenshot
+  test that binds a literal port, and the `AppPreview*ScreenshotTest` family, which all seed one
+  fixed directory that cannot move per fork without rewriting every image. `jvmTest` excludes them
+  and is `finalizedBy` it, so a plain `check` runs both. **Passing `--tests` stands that exclusion
+  down** and drops `jvmTest` itself to one fork — so `--tests '*SomeSerialClass*'` runs in `jvmTest`,
+  not in `jvmTestSerial`. That is deliberate (a named class must keep working), but it does mean the
+  serial task is not the one that ran.
+- **A fork that stops making progress is killed with a diagnosis.** `HungTestReporter`, a
+  `TestExecutionListener`, watches whichever test is running and, once one has been running past its
+  threshold (five minutes by default — minutes past anything this suite legitimately does), dumps
+  every thread in the fork and `halt`s it with exit code 93. The dump goes to stderr *and* to
+  `build/test-results/<task>/hung-test-dump.txt`, which is inside what the workflow already uploads
+  as `test-reports`, so it survives the halt losing Gradle's buffered output. Chasing a hang, tighten
+  it with `./gradlew :composeApp:jvmTest -PhangThresholdMs=30000`. It exists because the suite has
+  hung outright with no failing assertion, and a class name alone was not a cause — the recorded
+  stack is one thread waiting on another, which only a full dump shows.
 
 The tests themselves are still **JUnit 4**, running on junit-vintage under the JUnit Platform
 launcher. `useJUnitPlatform()` is there for `PerForkTestHome`, not for JUnit 5 syntax: keep writing

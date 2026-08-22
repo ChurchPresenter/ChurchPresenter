@@ -32,6 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.ui.Tokens
 
+/** Alpha arrives from the UI as a percentage; Compose wants one 0..255 channel. */
+private const val FULLY_OPAQUE_PERCENT = 100
+private const val CHANNEL_MAX = 255
+
+
 /**
  * One colour channel: a name, a chip showing the swatch and hex (click to open the picker),
  * an inline opacity slider, and the numeric alpha.
@@ -96,7 +101,7 @@ fun ColorPickerRow(
                 modifier = Modifier
                     .size(14.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(parseHexColor(color, 100))
+                    .background(parseHexColor(color, FULLY_OPAQUE_PERCENT))
                     .border(1.dp, Tokens.BorderHover, RoundedCornerShape(4.dp))
             )
             Text(
@@ -133,7 +138,7 @@ private fun parseHexColor(hex: String, alpha: Int): Color {
         val r = clean.substring(0, 2).toInt(16)
         val g = clean.substring(2, 4).toInt(16)
         val b = clean.substring(4, 6).toInt(16)
-        Color(r, g, b, (alpha * 255 / 100))
+        Color(r, g, b, (alpha * CHANNEL_MAX / FULLY_OPAQUE_PERCENT))
     } catch (_: Exception) {
         Color.White
     }

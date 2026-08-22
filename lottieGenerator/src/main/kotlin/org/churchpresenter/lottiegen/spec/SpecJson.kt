@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.spec
 
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 /**
@@ -26,7 +27,7 @@ object SpecJson {
     fun decode(text: String): StyleSpec {
         val spec = try {
             json.decodeFromString(StyleSpec.serializer(), text)
-        } catch (e: Exception) {
+        } catch (e: SerializationException) {
             throw IllegalArgumentException("Invalid style spec: ${e.message}", e)
         }
         require(spec.formatVersion <= StyleSpec.CURRENT_FORMAT_VERSION) {

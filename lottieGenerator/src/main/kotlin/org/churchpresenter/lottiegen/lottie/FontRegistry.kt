@@ -1,5 +1,7 @@
 package org.churchpresenter.lottiegen.lottie
 
+import java.awt.FontFormatException
+import java.io.IOException
 import java.awt.Font
 import java.awt.GraphicsEnvironment
 
@@ -31,19 +33,23 @@ object FontRegistry {
 
         for ((family, files) in fontFiles) {
             for ((fileName, style) in files) {
-                try {
-                    val stream = FontRegistry::class.java.getResourceAsStream("/fonts/$fileName")
-                    if (stream != null) {
-                        val font = Font.createFont(Font.TRUETYPE_FONT, stream)
-                        ge.registerFont(font)
-                        val key = "$family-$style"
-                        loadedFonts[key] = font
-                        stream.close()
-                    }
-                } catch (e: Exception) {
-                    System.err.println("Failed to load font $fileName: ${e.message}")
-                }
+                register(ge, family, fileName, style)
             }
+        }
+    }
+
+    /** Loads one bundled font file and registers it; a font that will not load is skipped. */
+    private fun register(ge: GraphicsEnvironment, family: String, fileName: String, style: Int) {
+        val stream = FontRegistry::class.java.getResourceAsStream("/fonts/$fileName") ?: return
+        try {
+            val font = Font.createFont(Font.TRUETYPE_FONT, stream)
+            ge.registerFont(font)
+            loadedFonts["$family-$style"] = font
+            stream.close()
+        } catch (e: FontFormatException) {
+            System.err.println("Failed to load font $fileName: ${e.message}")
+        } catch (e: IOException) {
+            System.err.println("Failed to load font $fileName: ${e.message}")
         }
     }
 
