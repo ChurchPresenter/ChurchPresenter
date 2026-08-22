@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
+import org.churchpresenter.lottiegen.lottie.TextRun
 import kotlinx.serialization.json.buildJsonArray
 import org.churchpresenter.lottiegen.lottie.Easing
 import org.churchpresenter.lottiegen.lottie.FULL_PERCENT_D
@@ -205,8 +206,15 @@ private fun LottieBuilder.addMaskedLine(g: BannerGeometry, line: BannerLine) {
     addTextLayer(
         line.layerName,
         makeTextData(
-            line.text, g.cfg.fontFamily, line.sizePx, line.weight, line.color,
-            line.transform, g.justify,
+            TextRun(
+                line.text,
+                g.cfg.fontFamily,
+                line.sizePx,
+                line.weight,
+                line.color,
+                line.transform,
+                g.justify,
+            ),
         ),
         LottieBuilder.defaultTransform(
             opacity = LottieBuilder.staticProp(line.alpha),

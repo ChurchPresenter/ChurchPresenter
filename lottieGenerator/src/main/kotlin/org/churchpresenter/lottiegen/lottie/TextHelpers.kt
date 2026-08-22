@@ -5,18 +5,12 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 
-fun makeTextData(
-    text: String,
-    fontFamily: String,
-    fontSizePx: Double,
-    fontWeight: Int,
-    color: List<Double>,
-    transform: String,
-    justify: Int = 0
-): JsonObject {
-    val displayText = if (transform == "uppercase") text.uppercase() else text
-    val style = if (fontWeight >= 700) "Bold" else "Regular"
-    val fName = "$fontFamily-$style"
+fun makeTextData(run: TextRun): JsonObject {
+    val displayText = run.displayText
+    val fName = run.fontName
+    val fontSizePx = run.fontSizePx
+    val color = run.color
+    val justify = run.justify
     return buildJsonObject {
         put("d", buildJsonObject {
             put("k", buildJsonArray {
@@ -52,19 +46,12 @@ fun makeTextData(
  * Same as makeTextData but with text animators (reveal, random fade, etc.) included.
  * In JS this is done by mutating textData.a.push(...), but in Kotlin we build it immutably.
  */
-fun makeTextDataWithAnimators(
-    text: String,
-    fontFamily: String,
-    fontSizePx: Double,
-    fontWeight: Int,
-    color: List<Double>,
-    transform: String,
-    justify: Int = 0,
-    animators: List<JsonObject>
-): JsonObject {
-    val displayText = if (transform == "uppercase") text.uppercase() else text
-    val style = if (fontWeight >= 700) "Bold" else "Regular"
-    val fName = "$fontFamily-$style"
+fun makeTextDataWithAnimators(run: TextRun, animators: List<JsonObject>): JsonObject {
+    val displayText = run.displayText
+    val fName = run.fontName
+    val fontSizePx = run.fontSizePx
+    val color = run.color
+    val justify = run.justify
     return buildJsonObject {
         put("d", buildJsonObject {
             put("k", buildJsonArray {
@@ -104,10 +91,11 @@ fun makeTextRevealAnimator(
     startPct: Double,
     endPct: Double,
     posOffset: Double,
-    inFrames: Int,
-    holdFrames: Int,
-    outFrames: Int
+    builder: LottieBuilder,
 ): JsonObject {
+    val inFrames = builder.inFrames
+    val holdFrames = builder.holdFrames
+    val outFrames = builder.outFrames
     val totalOut = inFrames + holdFrames
     val e = Easing.DEFAULT
 

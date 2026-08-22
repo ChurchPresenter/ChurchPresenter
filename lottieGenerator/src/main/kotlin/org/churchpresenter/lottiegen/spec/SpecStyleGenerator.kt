@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.spec
 
+import org.churchpresenter.lottiegen.lottie.TextRun
 import kotlinx.serialization.json.buildJsonArray
 import org.churchpresenter.lottiegen.lottie.LottieBuilder
 import org.churchpresenter.lottiegen.lottie.PERCENT_SCALE
@@ -232,12 +233,11 @@ internal class SpecBuild(
         builder.addFont(cfg.fontFamily, weight)
         val animator = element.animator
         val textData = if (animator == null) {
-            makeTextData(text, cfg.fontFamily, sizePx, weight, color, caseTransform, justify)
+            makeTextData(TextRun(text, cfg.fontFamily, sizePx, weight, color, caseTransform, justify))
         } else {
             val animatorJson = when (animator.kind) {
                 TextAnimatorKind.SEQUENTIAL_REVEAL -> makeTextRevealAnimator(
-                    animator.startPct, animator.endPct, layout.em(animator.posOffsetEm),
-                    builder.inFrames, builder.holdFrames, builder.outFrames
+                    animator.startPct, animator.endPct, layout.em(animator.posOffsetEm), builder
                 )
                 TextAnimatorKind.RANDOM_FADE -> makeRandomFadeAnimator(
                     animator.startPct, animator.endPct,
@@ -245,8 +245,8 @@ internal class SpecBuild(
                 )
             }
             makeTextDataWithAnimators(
-                text, cfg.fontFamily, sizePx, weight, color, caseTransform, justify,
-                listOf(animatorJson)
+                TextRun(text, cfg.fontFamily, sizePx, weight, color, caseTransform, justify),
+                listOf(animatorJson),
             )
         }
 

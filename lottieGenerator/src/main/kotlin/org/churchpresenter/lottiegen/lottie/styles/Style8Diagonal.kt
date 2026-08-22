@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
+import org.churchpresenter.lottiegen.lottie.TextRun
 import kotlinx.serialization.json.buildJsonArray
 import org.churchpresenter.lottiegen.lottie.Easing
 import org.churchpresenter.lottiegen.lottie.KeyframeInput
@@ -190,11 +191,11 @@ class Style8Diagonal : StyleGenerator {
 /** A line whose letters rise into view as the bar arrives under them. */
 private fun LottieBuilder.addRevealedLine(g: DiagonalGeometry, line: DiagonalLine) {
     val animator = makeTextRevealAnimator(
-        line.revealFrom, line.revealTo, -line.sizePx * REVEAL_RISE_FACTOR, g.inF, g.holdF, g.outF,
+        line.revealFrom, line.revealTo, -line.sizePx * REVEAL_RISE_FACTOR, this,
     )
     val data = makeTextDataWithAnimators(
-        line.text, g.cfg.fontFamily, line.sizePx, line.weight,
-        line.color, line.transform, g.justify, listOf(animator),
+        TextRun(line.text, g.cfg.fontFamily, line.sizePx, line.weight, line.color, line.transform, g.justify),
+        listOf(animator),
     )
     addFont(g.cfg.fontFamily, line.weight)
     addTextLayer(

@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
+import org.churchpresenter.lottiegen.lottie.TextRun
 import org.churchpresenter.lottiegen.lottie.Easing
 import org.churchpresenter.lottiegen.lottie.FULL_PERCENT_D
 import org.churchpresenter.lottiegen.lottie.KeyframeInput
@@ -129,8 +130,8 @@ class Style7RandomFade : StyleGenerator {
 private fun LottieBuilder.addFadingLine(g: FadeGeometry, line: FadeLine) {
     val animator = makeRandomFadeAnimator(line.fadeFrom, line.fadeTo, g.inF, g.holdF, g.outF)
     val data = makeTextDataWithAnimators(
-        line.text, g.cfg.fontFamily, line.sizePx, line.weight,
-        line.color, line.transform, g.justify, listOf(animator),
+        TextRun(line.text, g.cfg.fontFamily, line.sizePx, line.weight, line.color, line.transform, g.justify),
+        listOf(animator),
     )
     addFont(g.cfg.fontFamily, line.weight)
     addTextLayer(

@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
+import org.churchpresenter.lottiegen.lottie.TextRun
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
@@ -287,8 +288,15 @@ private fun LottieBuilder.addHeadline(g: BadgeGeometry) {
     addTextLayer(
         "Name",
         makeTextData(
-            g.cfg.nameText, g.cfg.fontFamily, g.nameSizePx, g.cfg.nameWeight,
-            g.nameCLottie, g.cfg.nameTransform, g.justify,
+            TextRun(
+                g.cfg.nameText,
+                g.cfg.fontFamily,
+                g.nameSizePx,
+                g.cfg.nameWeight,
+                g.nameCLottie,
+                g.cfg.nameTransform,
+                g.justify,
+            ),
         ),
         LottieBuilder.defaultTransform(
             opacity = LottieBuilder.staticProp(g.cfg.nameColorAlpha),
@@ -320,8 +328,15 @@ private fun LottieBuilder.addTickerText(g: BadgeGeometry) {
     addTextLayer(
         "Info",
         makeTextData(
-            g.cfg.infoText, g.cfg.fontFamily, g.infoSizePx, g.cfg.infoWeight,
-            g.infoCLottie, g.cfg.infoTransform, g.infoJustify,
+            TextRun(
+                g.cfg.infoText,
+                g.cfg.fontFamily,
+                g.infoSizePx,
+                g.cfg.infoWeight,
+                g.infoCLottie,
+                g.cfg.infoTransform,
+                g.infoJustify,
+            ),
         ),
         LottieBuilder.defaultTransform(
             opacity = LottieBuilder.staticProp(g.cfg.infoColorAlpha),

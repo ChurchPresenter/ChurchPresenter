@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
+import org.churchpresenter.lottiegen.lottie.TextRun
 import kotlinx.serialization.json.buildJsonArray
 import org.churchpresenter.lottiegen.lottie.Easing
 import org.churchpresenter.lottiegen.lottie.FULL_PERCENT_D
@@ -154,11 +155,11 @@ class Style6LineSplit : StyleGenerator {
 /** A line whose letters pop out of the rule, one at a time. */
 private fun LottieBuilder.addPoppingLine(g: SplitGeometry, line: SplitLine) {
     val animator = makeTextRevealAnimator(
-        line.revealFrom, line.revealTo, line.popFrom, g.inF, g.holdF, g.outF,
+        line.revealFrom, line.revealTo, line.popFrom, this,
     )
     val data = makeTextDataWithAnimators(
-        line.text, g.cfg.fontFamily, line.sizePx, line.weight,
-        line.color, line.transform, g.justify, listOf(animator),
+        TextRun(line.text, g.cfg.fontFamily, line.sizePx, line.weight, line.color, line.transform, g.justify),
+        listOf(animator),
     )
     addFont(g.cfg.fontFamily, line.weight)
     addTextLayer(

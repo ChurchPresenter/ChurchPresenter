@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
+import org.churchpresenter.lottiegen.lottie.TextRun
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
@@ -294,8 +295,15 @@ private fun LottieBuilder.addMaskedLine(g: GradientGeometry, line: GradientLine)
     addTextLayer(
         line.layerName,
         makeTextData(
-            line.text, g.cfg.fontFamily, line.sizePx, line.weight, line.color,
-            line.transform, g.justify,
+            TextRun(
+                line.text,
+                g.cfg.fontFamily,
+                line.sizePx,
+                line.weight,
+                line.color,
+                line.transform,
+                g.justify,
+            ),
         ),
         LottieBuilder.defaultTransform(
             opacity = LottieBuilder.staticProp(line.alpha),
