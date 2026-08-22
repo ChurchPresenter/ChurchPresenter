@@ -225,7 +225,10 @@ class LottieGenViewModel(
                     val safeInfo = preset.config.infoText.trim().replace(Regex("[\\\\/:*?\"<>|]"), "_")
                     val baseName = buildString {
                         if (safeName.isNotEmpty()) append(safeName)
-                        if (safeInfo.isNotEmpty()) { if (isNotEmpty()) append(" - "); append(safeInfo) }
+                        if (safeInfo.isNotEmpty()) {
+                            if (isNotEmpty()) append(" - ")
+                            append(safeInfo)
+                        }
                     }.ifEmpty { "lower-third" }
                     var num = 1
                     var file: File

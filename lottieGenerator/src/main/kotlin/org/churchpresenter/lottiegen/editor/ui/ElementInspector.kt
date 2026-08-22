@@ -89,6 +89,15 @@ private const val NARROW_FIELD_WEIGHT = 0.8f
 
 private val ALIGN_KEYS = listOf("left", "center", "right")
 
+/**
+ * Whether this element has a pivot to edit. The shape elements do -- they are drawn around one --
+ * and text and image elements do not.
+ */
+private val ElementSpec.hasPivot: Boolean
+    get() = this is RectElement || this is EllipseElement ||
+        this is PolygonElement || this is PathElement
+
+
 /** Property inspector for the selected element (or a hint + nothing when none). */
 @Composable
 fun ElementInspector(state: EditorState) {
@@ -281,9 +290,7 @@ private fun PlacementEditor(state: EditorState, element: ElementSpec, onChange: 
                 onChange(placement.copy(mirror = if (it) MirrorMode.FLIP_ON_RIGHT else MirrorMode.NONE))
             }
         )
-        if (element is RectElement || element is EllipseElement ||
-            element is PolygonElement || element is PathElement
-        ) {
+        if (element.hasPivot) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 NumberField(
                     Strings.editorPivotX, placement.pivotXEm,
