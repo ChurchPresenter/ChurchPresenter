@@ -646,7 +646,7 @@ class SpecStyleGenerator(private val spec: StyleSpec) : StyleGenerator {
          */
         fun fromResource(path: String): SpecStyleGenerator {
             val stream = SpecStyleGenerator::class.java.getResourceAsStream(path)
-                ?: throw IllegalStateException("Bundled style spec not found: $path")
+                ?: error("Bundled style spec not found: $path")
             val text = stream.bufferedReader(Charsets.UTF_8).use { it.readText() }
             return SpecStyleGenerator(SpecJson.decode(text))
         }

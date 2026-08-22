@@ -28,8 +28,13 @@ class Style4Banner : StyleGenerator {
         val baseSize = cfg.baseSize.toDouble()
         val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
         val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
-        val nameM = TextMeasurer.measure(cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform)
-        val infoM = TextMeasurer.measure(cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform)
+        val nameM = TextMeasurer.measure(
+            cfg.nameText,
+            cfg.fontFamily,
+            nameSizePx.toFloat(),
+            cfg.nameWeight,
+            cfg.nameTransform,
+        )
 
         val paddingX = emToPx(1.0, baseSize)
         val paddingY = emToPx(0.5, baseSize)
@@ -150,7 +155,15 @@ class Style4Banner : StyleGenerator {
 
             builder.addTextLayer(
                 "Name",
-                makeTextData(cfg.nameText, cfg.fontFamily, nameSizePx, cfg.nameWeight, nameCLottie, cfg.nameTransform, justify),
+                makeTextData(
+                    cfg.nameText,
+                    cfg.fontFamily,
+                    nameSizePx,
+                    cfg.nameWeight,
+                    nameCLottie,
+                    cfg.nameTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.nameColorAlpha),
                     position = LottieBuilder.animatedProp(namePosKFs)
@@ -196,7 +209,15 @@ class Style4Banner : StyleGenerator {
 
             builder.addTextLayer(
                 "Info",
-                makeTextData(cfg.infoText, cfg.fontFamily, infoSizePx, cfg.infoWeight, infoCLottie, cfg.infoTransform, justify),
+                makeTextData(
+                    cfg.infoText,
+                    cfg.fontFamily,
+                    infoSizePx,
+                    cfg.infoWeight,
+                    infoCLottie,
+                    cfg.infoTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.infoColorAlpha),
                     position = LottieBuilder.animatedProp(infoPosKFs)
@@ -249,7 +270,11 @@ class Style4Banner : StyleGenerator {
                     )))
                 },
                 LottieBuilder.defaultTransform(
-                    position = LottieBuilder.staticPropArray(accentCX, nameBgCY + (if (borderPx > 0) borderPx * 0.25 else 0.0), 0.0),
+                    position = LottieBuilder.staticPropArray(
+                        accentCX,
+                        nameBgCY + (if (borderPx > 0) borderPx * 0.25 else 0.0),
+                        0.0,
+                    ),
                     scale = LottieBuilder.animatedProp(accentScaleKFs)
                 )
             )

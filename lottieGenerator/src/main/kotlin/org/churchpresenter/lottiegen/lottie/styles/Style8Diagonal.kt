@@ -7,7 +7,6 @@ import kotlinx.serialization.json.JsonObject
 import org.churchpresenter.lottiegen.lottie.Easing
 import org.churchpresenter.lottiegen.lottie.KeyframeInput
 import org.churchpresenter.lottiegen.lottie.LottieBuilder
-import org.churchpresenter.lottiegen.lottie.TextMeasurer
 import org.churchpresenter.lottiegen.lottie.buildKeyframes
 import org.churchpresenter.lottiegen.lottie.emToPx
 import org.churchpresenter.lottiegen.lottie.hexToLottie
@@ -33,7 +32,6 @@ class Style8Diagonal : StyleGenerator {
         val paddingY = emToPx(0.6, baseSize)
         val lineSpacingPx = emToPx(cfg.lineSpacing.toDouble(), baseSize)
         val marginHPx = remToPx(cfg.marginH.toDouble(), baseSize)
-        val marginVPx = remToPx(cfg.marginV.toDouble(), baseSize)
         val borderPx = cfg.borderThickness * baseSize * 0.15
 
         val canvasW = cfg.canvasW.toDouble()
@@ -49,8 +47,6 @@ class Style8Diagonal : StyleGenerator {
         val infoCLottie = hexToLottie(cfg.infoColor)
 
         // Text measurements
-        val nameM = TextMeasurer.measure(cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform)
-        val infoM = TextMeasurer.measure(cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform)
 
         // Bar dimensions
         val overflow = emToPx(2.0, baseSize)

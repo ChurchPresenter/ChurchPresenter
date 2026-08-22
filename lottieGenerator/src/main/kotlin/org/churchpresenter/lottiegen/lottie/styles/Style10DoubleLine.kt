@@ -27,8 +27,20 @@ class Style10DoubleLine : StyleGenerator {
         val baseSize = cfg.baseSize.toDouble()
         val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
         val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
-        val nameM = TextMeasurer.measure(cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform)
-        val infoM = TextMeasurer.measure(cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform)
+        val nameM = TextMeasurer.measure(
+            cfg.nameText,
+            cfg.fontFamily,
+            nameSizePx.toFloat(),
+            cfg.nameWeight,
+            cfg.nameTransform,
+        )
+        val infoM = TextMeasurer.measure(
+            cfg.infoText,
+            cfg.fontFamily,
+            infoSizePx.toFloat(),
+            cfg.infoWeight,
+            cfg.infoTransform,
+        )
 
         val paddingX = emToPx(0.6, baseSize)
         val lineGap = emToPx(0.4, baseSize)
@@ -154,7 +166,15 @@ class Style10DoubleLine : StyleGenerator {
             builder.addFont(cfg.fontFamily, cfg.nameWeight)
             builder.addTextLayer(
                 "Name",
-                makeTextData(cfg.nameText, cfg.fontFamily, nameSizePx, cfg.nameWeight, nameCLottie, cfg.nameTransform, justify),
+                makeTextData(
+                    cfg.nameText,
+                    cfg.fontFamily,
+                    nameSizePx,
+                    cfg.nameWeight,
+                    nameCLottie,
+                    cfg.nameTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.nameColorAlpha),
                     position = LottieBuilder.animatedProp(nameSlideKFs)
@@ -192,7 +212,15 @@ class Style10DoubleLine : StyleGenerator {
             builder.addFont(cfg.fontFamily, cfg.infoWeight)
             builder.addTextLayer(
                 "Info",
-                makeTextData(cfg.infoText, cfg.fontFamily, infoSizePx, cfg.infoWeight, infoCLottie, cfg.infoTransform, justify),
+                makeTextData(
+                    cfg.infoText,
+                    cfg.fontFamily,
+                    infoSizePx,
+                    cfg.infoWeight,
+                    infoCLottie,
+                    cfg.infoTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.infoColorAlpha),
                     position = LottieBuilder.animatedProp(infoSlideKFs)
@@ -237,7 +265,10 @@ class Style10DoubleLine : StyleGenerator {
             val _logoScale = (lH / cfg.logoH.toDouble()) * 100
 
             val logoCX = if (isCenter) {
-                val maxW = max(if (cfg.hideName) 0.0 else nameM.width.toDouble(), if (cfg.hideInfo) 0.0 else infoM.width.toDouble())
+                val maxW = max(
+                    if (cfg.hideName) 0.0 else nameM.width.toDouble(),
+                    if (cfg.hideInfo) 0.0 else infoM.width.toDouble(),
+                )
                 canvasW / 2 - maxW / 2 - logoMargin - logoSizePx / 2
             } else if (isRight) {
                 canvasW - marginHPx - logoSizePx / 2

@@ -25,7 +25,7 @@ object ColorThemeStorage {
         return try {
             val themes = json.decodeFromString<List<ColorTheme>>(file.readText())
             if (themes.isEmpty()) defaultColorThemes() else themes
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             defaultColorThemes()
         }
     }

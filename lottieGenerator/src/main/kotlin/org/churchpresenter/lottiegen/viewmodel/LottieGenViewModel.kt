@@ -32,7 +32,9 @@ class LottieGenViewModel(
 ) : LottieGenState {
     /** True when launched inside ChurchPresenter with a configured output folder */
     override val hasOutputDir: Boolean get() = outputDir != null
-    override var config by mutableStateOf(LottieGenConfig(canvasW = canvasWidth ?: 1920, canvasH = canvasHeight ?: 1080))
+    override var config by mutableStateOf(
+        LottieGenConfig(canvasW = canvasWidth ?: 1920, canvasH = canvasHeight ?: 1080),
+    )
         private set
 
     var generatedJson by mutableStateOf<String?>(null)

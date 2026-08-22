@@ -48,7 +48,10 @@ class SpecRoundTripTest {
                             listOf(SpecKeyframe(0.0, listOf(0.0, 1.0)), SpecKeyframe(100.0, listOf(1.0, 1.0))),
                             easing = EasingKind.LINEAR,
                             alignOverrides = mapOf(
-                                "right" to listOf(SpecKeyframe(0.0, listOf(0.5, 1.0)), SpecKeyframe(100.0, listOf(1.0, 1.0)))
+                                "right" to listOf(
+                                    SpecKeyframe(0.0, listOf(0.5, 1.0)),
+                                    SpecKeyframe(100.0, listOf(1.0, 1.0)),
+                                )
                             )
                         )
                     )
@@ -69,7 +72,9 @@ class SpecRoundTripTest {
                         slot = "text",
                         anchorIn = AnchorIn.START,
                         line = LineAnchor.NAME_LINE,
-                        alignOverrides = mapOf("center" to PlacementOverride(anchorIn = AnchorIn.CENTER, offsetXEm = -0.6))
+                        alignOverrides = mapOf(
+                            "center" to PlacementOverride(anchorIn = AnchorIn.CENTER, offsetXEm = -0.6),
+                        )
                     )
                 ),
                 LogoElement(id = "l1"),

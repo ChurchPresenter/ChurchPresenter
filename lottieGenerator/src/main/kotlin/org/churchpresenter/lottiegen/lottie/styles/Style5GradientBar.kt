@@ -28,7 +28,12 @@ class Style5GradientBar : StyleGenerator {
     /**
      * 4-stop gradient fill for center alignment: fades on both edges.
      */
-    private fun makeCenterGradientFill(color: List<Double>, opacity: Double, barW: Double, gradientExtra: Double): JsonObject {
+    private fun makeCenterGradientFill(
+        color: List<Double>,
+        opacity: Double,
+        barW: Double,
+        gradientExtra: Double,
+    ): JsonObject {
         val r = color[0]
         val g = color[1]
         val b = color[2]
@@ -58,8 +63,10 @@ class Style5GradientBar : StyleGenerator {
                     put("k", buildJsonArray {
                         // Color stops
                         add(JsonPrimitive(0.0)); add(JsonPrimitive(r)); add(JsonPrimitive(g)); add(JsonPrimitive(b))
-                        add(JsonPrimitive(fadeRatio)); add(JsonPrimitive(r)); add(JsonPrimitive(g)); add(JsonPrimitive(b))
-                        add(JsonPrimitive(1 - fadeRatio)); add(JsonPrimitive(r)); add(JsonPrimitive(g)); add(JsonPrimitive(b))
+                        add(JsonPrimitive(fadeRatio))
+                        add(JsonPrimitive(r)); add(JsonPrimitive(g)); add(JsonPrimitive(b))
+                        add(JsonPrimitive(1 - fadeRatio))
+                        add(JsonPrimitive(r)); add(JsonPrimitive(g)); add(JsonPrimitive(b))
                         add(JsonPrimitive(1.0)); add(JsonPrimitive(r)); add(JsonPrimitive(g)); add(JsonPrimitive(b))
                         // Opacity stops
                         add(JsonPrimitive(0.0)); add(JsonPrimitive(0.0))
@@ -75,7 +82,14 @@ class Style5GradientBar : StyleGenerator {
     /**
      * Produces gradient fill appropriate for the current alignment.
      */
-    private fun makeBarGradient(color: List<Double>, opacity: Double, barW: Double, isCenter: Boolean, isRight: Boolean, gradientExtra: Double): JsonObject {
+    private fun makeBarGradient(
+        color: List<Double>,
+        opacity: Double,
+        barW: Double,
+        isCenter: Boolean,
+        isRight: Boolean,
+        gradientExtra: Double,
+    ): JsonObject {
         return if (isCenter) {
             makeCenterGradientFill(color, opacity, barW, gradientExtra)
         } else if (isRight) {
@@ -93,8 +107,20 @@ class Style5GradientBar : StyleGenerator {
         val baseSize = cfg.baseSize.toDouble()
         val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
         val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
-        val nameM = TextMeasurer.measure(cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform)
-        val infoM = TextMeasurer.measure(cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform)
+        val nameM = TextMeasurer.measure(
+            cfg.nameText,
+            cfg.fontFamily,
+            nameSizePx.toFloat(),
+            cfg.nameWeight,
+            cfg.nameTransform,
+        )
+        val infoM = TextMeasurer.measure(
+            cfg.infoText,
+            cfg.fontFamily,
+            infoSizePx.toFloat(),
+            cfg.infoWeight,
+            cfg.infoTransform,
+        )
 
         val paddingX = emToPx(1.0, baseSize)
         val paddingY = emToPx(0.5, baseSize)
@@ -226,7 +252,15 @@ class Style5GradientBar : StyleGenerator {
 
             builder.addTextLayer(
                 "Name",
-                makeTextData(cfg.nameText, cfg.fontFamily, nameSizePx, cfg.nameWeight, nameCLottie, cfg.nameTransform, justify),
+                makeTextData(
+                    cfg.nameText,
+                    cfg.fontFamily,
+                    nameSizePx,
+                    cfg.nameWeight,
+                    nameCLottie,
+                    cfg.nameTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.nameColorAlpha),
                     position = LottieBuilder.animatedProp(namePosKFs)
@@ -287,7 +321,15 @@ class Style5GradientBar : StyleGenerator {
 
             builder.addTextLayer(
                 "Info",
-                makeTextData(cfg.infoText, cfg.fontFamily, infoSizePx, cfg.infoWeight, infoCLottie, cfg.infoTransform, justify),
+                makeTextData(
+                    cfg.infoText,
+                    cfg.fontFamily,
+                    infoSizePx,
+                    cfg.infoWeight,
+                    infoCLottie,
+                    cfg.infoTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.infoColorAlpha),
                     position = LottieBuilder.animatedProp(infoPosKFs)
@@ -298,9 +340,7 @@ class Style5GradientBar : StyleGenerator {
 
         // --- Logo (optional) ---
         if (hasLogo) {
-            val logoAspect = if (cfg.logoW > 0 && cfg.logoH > 0) cfg.logoW.toDouble() / cfg.logoH else 1.0
             val lH = logoSizePx
-            val lW = lH * logoAspect
             val _logoScale = (lH / cfg.logoH) * 100
 
             val logoCX: Double = if (isCenter) {

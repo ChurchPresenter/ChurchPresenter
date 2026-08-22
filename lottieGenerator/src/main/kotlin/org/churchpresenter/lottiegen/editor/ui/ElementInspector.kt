@@ -160,7 +160,8 @@ fun ElementInspector(state: EditorState) {
             CollapsibleSection(Strings.editorSectionSize, initiallyExpanded = true) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     PathVerticesEditor(element) { new -> update { new } }
-                    FitWidthDropdown(element.fitWidthTo) { new -> update { (it as PathElement).copy(fitWidthTo = new) } }
+                    FitWidthDropdown(element.fitWidthTo) { new -> update { (it as PathElement)
+                        .copy(fitWidthTo = new) } }
                     RepeatEditor(element.repeat) { new -> update { (it as PathElement).copy(repeat = new) } }
                 }
             }
@@ -178,7 +179,8 @@ fun ElementInspector(state: EditorState) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     SizeEditor(element.size) { new -> update { (it as BackgroundElement).copy(size = new) } }
                     CornerEditor(element.corner) { new -> update { (it as BackgroundElement).copy(corner = new) } }
-                    GrowFromEditor(element.growFrom) { new -> update { (it as BackgroundElement).copy(growFrom = new) } }
+                    GrowFromEditor(element.growFrom) { new -> update { (it as BackgroundElement)
+                        .copy(growFrom = new) } }
                     CheckboxRow(
                         label = Strings.editorBorderFromConfig,
                         checked = element.borderFromConfig,
@@ -979,7 +981,9 @@ private fun TrackEditor(track: AnimTrack, onChange: (AnimTrack) -> Unit, onRemov
                 display = { EditorLabels.property(it) },
                 onSelect = { new ->
                     if (new != track.property) {
-                        onChange(track.copy(property = new, keyframes = defaultKeyframes(new), alignOverrides = emptyMap()))
+                        onChange(
+                            track.copy(property = new, keyframes = defaultKeyframes(new), alignOverrides = emptyMap()),
+                        )
                     }
                 },
                 modifier = Modifier.weight(1f)

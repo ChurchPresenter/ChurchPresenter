@@ -32,8 +32,20 @@ class Style9DiagonalWipe : StyleGenerator {
         val baseSize = cfg.baseSize.toDouble()
         val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
         val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
-        val nameM = TextMeasurer.measure(cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform)
-        val infoM = TextMeasurer.measure(cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform)
+        val nameM = TextMeasurer.measure(
+            cfg.nameText,
+            cfg.fontFamily,
+            nameSizePx.toFloat(),
+            cfg.nameWeight,
+            cfg.nameTransform,
+        )
+        val infoM = TextMeasurer.measure(
+            cfg.infoText,
+            cfg.fontFamily,
+            infoSizePx.toFloat(),
+            cfg.infoWeight,
+            cfg.infoTransform,
+        )
 
         val lineSpacingPx = emToPx(cfg.lineSpacing.toDouble(), baseSize)
         val marginHPx = remToPx(cfg.marginH.toDouble(), baseSize)
@@ -92,7 +104,10 @@ class Style9DiagonalWipe : StyleGenerator {
         val lineThickness = max(2.0, baseSize * 0.08)
 
         // Text bounds
-        val maxTextW = max(if (cfg.hideName) 0.0 else nameM.width.toDouble(), if (cfg.hideInfo) 0.0 else infoM.width.toDouble())
+        val maxTextW = max(
+            if (cfg.hideName) 0.0 else nameM.width.toDouble(),
+            if (cfg.hideInfo) 0.0 else infoM.width.toDouble(),
+        )
         val textLeftX: Double
         val textRightX: Double
         if (isCenter) {
@@ -115,7 +130,6 @@ class Style9DiagonalWipe : StyleGenerator {
         val halfMH = maskH / 2
 
         // For right alignment: mirror the slant and wipe direction
-        val dir = if (isRight) -1.0 else 1.0
 
         // Mask polygon vertices
         val maskVertices: List<List<Double>> = if (isRight) listOf(
@@ -187,7 +201,8 @@ class Style9DiagonalWipe : StyleGenerator {
             add(kf(inF, jsonArrayOf(offStart + lineEdgeOffset, maskCY, 0.0), e))
             add(kf(totalOut, jsonArrayOf(offStart + lineEdgeOffset, maskCY, 0.0), e))
             add(kf((totalOut + outF * 0.5).roundToInt(), jsonArrayOf(offEnd + lineEdgeOffset, maskCY, 0.0), L))
-            add(kf((totalOut + outF * (1 - fadeIn)).roundToInt(), jsonArrayOf(offStart + lineEdgeOffset, maskCY, 0.0), e))
+            add(kf((totalOut + outF * (1 - fadeIn))
+                .roundToInt(), jsonArrayOf(offStart + lineEdgeOffset, maskCY, 0.0), e))
             add(kf(totalOut + outF, jsonArrayOf(offStart + lineEdgeOffset, maskCY, 0.0)))
         }
 
@@ -241,7 +256,15 @@ class Style9DiagonalWipe : StyleGenerator {
             builder.addFont(cfg.fontFamily, cfg.nameWeight)
             builder.addTextLayer(
                 "Accent Name",
-                makeTextData(cfg.nameText, cfg.fontFamily, nameSizePx, cfg.nameWeight, accentLottie, cfg.nameTransform, justify),
+                makeTextData(
+                    cfg.nameText,
+                    cfg.fontFamily,
+                    nameSizePx,
+                    cfg.nameWeight,
+                    accentLottie,
+                    cfg.nameTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.accentColorAlpha),
                     position = LottieBuilder.staticPropArray(nameTextX, nameTextY, 0.0)
@@ -266,7 +289,15 @@ class Style9DiagonalWipe : StyleGenerator {
             builder.addFont(cfg.fontFamily, cfg.infoWeight)
             builder.addTextLayer(
                 "Accent Info",
-                makeTextData(cfg.infoText, cfg.fontFamily, infoSizePx, cfg.infoWeight, accentLottie, cfg.infoTransform, justify),
+                makeTextData(
+                    cfg.infoText,
+                    cfg.fontFamily,
+                    infoSizePx,
+                    cfg.infoWeight,
+                    accentLottie,
+                    cfg.infoTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.infoColorAlpha),
                     position = LottieBuilder.staticPropArray(infoTextX, infoTextY, 0.0)
@@ -291,7 +322,15 @@ class Style9DiagonalWipe : StyleGenerator {
             builder.addFont(cfg.fontFamily, cfg.nameWeight)
             builder.addTextLayer(
                 "Name",
-                makeTextData(cfg.nameText, cfg.fontFamily, nameSizePx, cfg.nameWeight, nameCLottie, cfg.nameTransform, justify),
+                makeTextData(
+                    cfg.nameText,
+                    cfg.fontFamily,
+                    nameSizePx,
+                    cfg.nameWeight,
+                    nameCLottie,
+                    cfg.nameTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.nameColorAlpha),
                     position = LottieBuilder.staticPropArray(nameTextX, nameTextY, 0.0)
@@ -316,7 +355,15 @@ class Style9DiagonalWipe : StyleGenerator {
             builder.addFont(cfg.fontFamily, cfg.infoWeight)
             builder.addTextLayer(
                 "Info",
-                makeTextData(cfg.infoText, cfg.fontFamily, infoSizePx, cfg.infoWeight, infoCLottie, cfg.infoTransform, justify),
+                makeTextData(
+                    cfg.infoText,
+                    cfg.fontFamily,
+                    infoSizePx,
+                    cfg.infoWeight,
+                    infoCLottie,
+                    cfg.infoTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.infoColorAlpha),
                     position = LottieBuilder.staticPropArray(infoTextX, infoTextY, 0.0)
@@ -331,7 +378,10 @@ class Style9DiagonalWipe : StyleGenerator {
             val _logoScale = (lH / cfg.logoH.toDouble()) * 100
 
             val logoCX = if (isCenter) {
-                val maxW = max(if (cfg.hideName) 0.0 else nameM.width.toDouble(), if (cfg.hideInfo) 0.0 else infoM.width.toDouble())
+                val maxW = max(
+                    if (cfg.hideName) 0.0 else nameM.width.toDouble(),
+                    if (cfg.hideInfo) 0.0 else infoM.width.toDouble(),
+                )
                 canvasW / 2 - maxW / 2 - logoMargin - logoSizePx / 2
             } else if (isRight) {
                 canvasW - marginHPx - logoSizePx / 2

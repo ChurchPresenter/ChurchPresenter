@@ -95,6 +95,7 @@ class BannerStyleTest {
     private fun restFrame(json: JsonObject): Double = json["op"]!!.jsonPrimitive.double / 2
 
     /** Vertical span of every full-canvas-width rect at rest, as (top, bottom) pixel pairs. */
+    @Suppress("NestedBlockDepth", "LoopWithTooManyJumpStatements") // Walks the Lottie shape tree.
     private fun bandSpans(json: JsonObject): List<Pair<Double, Double>> {
         val rest = restFrame(json)
         val canvasW = json["w"]!!.jsonPrimitive.double
@@ -123,6 +124,7 @@ class BannerStyleTest {
      * (Ghost Layer) or hang a second tier off it (Deck Banner) form one visual mass, and
      * the text has to be judged against that, not against a single rect.
      */
+    @Suppress("NestedBlockDepth") // Scans spans against a scanline; flattening it hides the intent.
     private fun bannerMass(spans: List<Pair<Double, Double>>, y: Double): Pair<Double, Double>? {
         var mass = spans.firstOrNull { y >= it.first && y <= it.second } ?: return null
         var grew = true

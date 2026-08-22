@@ -45,7 +45,7 @@ object LogoStorage {
             val h = img?.height ?: 100
 
             LogoData(dataUrl, w, h)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }

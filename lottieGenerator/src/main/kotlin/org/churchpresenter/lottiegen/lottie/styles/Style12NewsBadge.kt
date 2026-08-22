@@ -191,7 +191,15 @@ class Style12NewsBadge : StyleGenerator {
 
             builder.addTextLayer(
                 "Name",
-                makeTextData(cfg.nameText, cfg.fontFamily, nameSizePx, cfg.nameWeight, nameCLottie, cfg.nameTransform, justify),
+                makeTextData(
+                    cfg.nameText,
+                    cfg.fontFamily,
+                    nameSizePx,
+                    cfg.nameWeight,
+                    nameCLottie,
+                    cfg.nameTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.nameColorAlpha),
                     position = LottieBuilder.animatedProp(namePosKFs)
@@ -227,7 +235,15 @@ class Style12NewsBadge : StyleGenerator {
 
             builder.addTextLayer(
                 "Info",
-                makeTextData(cfg.infoText, cfg.fontFamily, infoSizePx, cfg.infoWeight, infoCLottie, cfg.infoTransform, infoJustify),
+                makeTextData(
+                    cfg.infoText,
+                    cfg.fontFamily,
+                    infoSizePx,
+                    cfg.infoWeight,
+                    infoCLottie,
+                    cfg.infoTransform,
+                    infoJustify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.infoColorAlpha),
                     position = LottieBuilder.animatedProp(infoPosKFs)
@@ -276,7 +292,11 @@ class Style12NewsBadge : StyleGenerator {
             builder.addShapeLayer(
                 "Badge BG",
                 buildJsonArray {
-                    add(makeGroup(listOf(makePath(badgeVerts), makeFill(accentLottie, cfg.accentColorAlpha.toDouble()))))
+                    add(
+                        makeGroup(
+                            listOf(makePath(badgeVerts), makeFill(accentLottie, cfg.accentColorAlpha.toDouble())),
+                        ),
+                    )
                 },
                 LottieBuilder.defaultTransform(
                     position = LottieBuilder.animatedProp(bandPosKFs)

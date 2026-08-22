@@ -20,7 +20,7 @@ object PresetStorage {
         if (!file.exists()) return emptyList()
         return try {
             json.decodeFromString<List<Preset>>(file.readText())
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
     }

@@ -154,13 +154,21 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                 FieldRow {
                     LottieTextField(
                         value = cfg.canvasW.toString(),
-                        onValueChange = { v -> v.toIntOrNull()?.let { viewModel.updateConfig { c -> c.copy(canvasW = it.coerceIn(100, 7680)) } } },
+                        onValueChange = { v ->
+                            v.toIntOrNull()?.let {
+                                viewModel.updateConfig { c -> c.copy(canvasW = it.coerceIn(100, 7680)) }
+                            }
+                        },
                         label = Strings.width,
                         modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
                     )
                     LottieTextField(
                         value = cfg.canvasH.toString(),
-                        onValueChange = { v -> v.toIntOrNull()?.let { viewModel.updateConfig { c -> c.copy(canvasH = it.coerceIn(100, 4320)) } } },
+                        onValueChange = { v ->
+                            v.toIntOrNull()?.let {
+                                viewModel.updateConfig { c -> c.copy(canvasH = it.coerceIn(100, 4320)) }
+                            }
+                        },
                         label = Strings.height,
                         modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
                     )
@@ -181,13 +189,17 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                             label = Strings.style,
                             value = StyleCatalog.labelFor(cfg.style),
                             expanded = styleExpanded,
-                            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            modifier = Modifier.fillMaxWidth()
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         )
                         ExposedDropdownMenu(styleExpanded, { styleExpanded = false }) {
                             StyleCatalog.entries.forEach { style ->
                                 DropdownMenuItem(
                                     text = { Text(style.label) },
-                                    onClick = { viewModel.updateConfig { it.copy(style = style.id) }; styleExpanded = false }
+                                    onClick = {
+                                        viewModel.updateConfig { it.copy(style = style.id) }
+                                        styleExpanded = false
+                                    }
                                 )
                             }
                         }
@@ -203,7 +215,8 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                             label = Strings.alignment,
                             value = alignmentLabels[cfg.align] ?: cfg.align,
                             expanded = alignExpanded,
-                            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            modifier = Modifier.fillMaxWidth()
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         )
                         ExposedDropdownMenu(alignExpanded, { alignExpanded = false }) {
                             alignmentLabels.forEach { (id, label) ->
@@ -242,20 +255,28 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                             label = Strings.font,
                             value = cfg.fontFamily,
                             expanded = fontExpanded,
-                            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            modifier = Modifier.fillMaxWidth()
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         )
                         ExposedDropdownMenu(fontExpanded, { fontExpanded = false }) {
                             LottieFont.entries.forEach { font ->
                                 DropdownMenuItem(
                                     text = { Text(font.familyName) },
-                                    onClick = { viewModel.updateConfig { it.copy(fontFamily = font.familyName) }; fontExpanded = false }
+                                    onClick = {
+                                        viewModel.updateConfig { it.copy(fontFamily = font.familyName) }
+                                        fontExpanded = false
+                                    }
                                 )
                             }
                         }
                     }
                     LottieTextField(
                         value = cfg.baseSize.toString(),
-                        onValueChange = { v -> v.toIntOrNull()?.let { viewModel.updateConfig { c -> c.copy(baseSize = it.coerceIn(10, 80)) } } },
+                        onValueChange = { v ->
+                            v.toIntOrNull()?.let {
+                                viewModel.updateConfig { c -> c.copy(baseSize = it.coerceIn(10, 80)) }
+                            }
+                        },
                         label = Strings.baseSize,
                         modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
                     )
@@ -263,12 +284,20 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                 FieldRow {
                     LottieTextField(
                         value = cfg.nameSize.toString(),
-                        onValueChange = { v -> v.toFloatOrNull()?.let { viewModel.updateConfig { c -> c.copy(nameSize = it.coerceIn(0.5f, 4f)) } } },
+                        onValueChange = { v ->
+                            v.toFloatOrNull()?.let {
+                                viewModel.updateConfig { c -> c.copy(nameSize = it.coerceIn(0.5f, 4f)) }
+                            }
+                        },
                         label = Strings.nameSize, modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
                     )
                     LottieTextField(
                         value = cfg.infoSize.toString(),
-                        onValueChange = { v -> v.toFloatOrNull()?.let { viewModel.updateConfig { c -> c.copy(infoSize = it.coerceIn(0.5f, 4f)) } } },
+                        onValueChange = { v ->
+                            v.toFloatOrNull()?.let {
+                                viewModel.updateConfig { c -> c.copy(infoSize = it.coerceIn(0.5f, 4f)) }
+                            }
+                        },
                         label = Strings.infoSize, modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
                     )
                 }
@@ -279,11 +308,18 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                             label = Strings.nameWeight,
                             value = if (cfg.nameWeight >= 700) Strings.bold else Strings.normal,
                             expanded = nwExpanded,
-                            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            modifier = Modifier.fillMaxWidth()
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         )
                         ExposedDropdownMenu(nwExpanded, { nwExpanded = false }) {
-                            DropdownMenuItem({ Text(Strings.bold) }, { viewModel.updateConfig { it.copy(nameWeight = 700) }; nwExpanded = false })
-                            DropdownMenuItem({ Text(Strings.normal) }, { viewModel.updateConfig { it.copy(nameWeight = 400) }; nwExpanded = false })
+                            DropdownMenuItem(
+                                { Text(Strings.bold) },
+                                { viewModel.updateConfig { it.copy(nameWeight = 700) }; nwExpanded = false },
+                            )
+                            DropdownMenuItem(
+                                { Text(Strings.normal) },
+                                { viewModel.updateConfig { it.copy(nameWeight = 400) }; nwExpanded = false },
+                            )
                         }
                     }
                     var iwExpanded by remember { mutableStateOf(false) }
@@ -292,11 +328,18 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                             label = Strings.infoWeight,
                             value = if (cfg.infoWeight >= 700) Strings.bold else Strings.normal,
                             expanded = iwExpanded,
-                            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            modifier = Modifier.fillMaxWidth()
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         )
                         ExposedDropdownMenu(iwExpanded, { iwExpanded = false }) {
-                            DropdownMenuItem({ Text(Strings.normal) }, { viewModel.updateConfig { it.copy(infoWeight = 400) }; iwExpanded = false })
-                            DropdownMenuItem({ Text(Strings.bold) }, { viewModel.updateConfig { it.copy(infoWeight = 700) }; iwExpanded = false })
+                            DropdownMenuItem(
+                                { Text(Strings.normal) },
+                                { viewModel.updateConfig { it.copy(infoWeight = 400) }; iwExpanded = false },
+                            )
+                            DropdownMenuItem(
+                                { Text(Strings.bold) },
+                                { viewModel.updateConfig { it.copy(infoWeight = 700) }; iwExpanded = false },
+                            )
                         }
                     }
                 }
@@ -307,11 +350,18 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                             label = Strings.nameTransform,
                             value = if (cfg.nameTransform == "uppercase") Strings.uppercase else Strings.none,
                             expanded = ntExpanded,
-                            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            modifier = Modifier.fillMaxWidth()
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         )
                         ExposedDropdownMenu(ntExpanded, { ntExpanded = false }) {
-                            DropdownMenuItem({ Text(Strings.uppercase) }, { viewModel.updateConfig { it.copy(nameTransform = "uppercase") }; ntExpanded = false })
-                            DropdownMenuItem({ Text(Strings.none) }, { viewModel.updateConfig { it.copy(nameTransform = "none") }; ntExpanded = false })
+                            DropdownMenuItem(
+                                { Text(Strings.uppercase) },
+                                { viewModel.updateConfig { it.copy(nameTransform = "uppercase") }; ntExpanded = false },
+                            )
+                            DropdownMenuItem(
+                                { Text(Strings.none) },
+                                { viewModel.updateConfig { it.copy(nameTransform = "none") }; ntExpanded = false },
+                            )
                         }
                     }
                     var itExpanded by remember { mutableStateOf(false) }
@@ -320,11 +370,18 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                             label = Strings.infoTransform,
                             value = if (cfg.infoTransform == "uppercase") Strings.uppercase else Strings.none,
                             expanded = itExpanded,
-                            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            modifier = Modifier.fillMaxWidth()
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         )
                         ExposedDropdownMenu(itExpanded, { itExpanded = false }) {
-                            DropdownMenuItem({ Text(Strings.none) }, { viewModel.updateConfig { it.copy(infoTransform = "none") }; itExpanded = false })
-                            DropdownMenuItem({ Text(Strings.uppercase) }, { viewModel.updateConfig { it.copy(infoTransform = "uppercase") }; itExpanded = false })
+                            DropdownMenuItem(
+                                { Text(Strings.none) },
+                                { viewModel.updateConfig { it.copy(infoTransform = "none") }; itExpanded = false },
+                            )
+                            DropdownMenuItem(
+                                { Text(Strings.uppercase) },
+                                { viewModel.updateConfig { it.copy(infoTransform = "uppercase") }; itExpanded = false },
+                            )
                         }
                     }
                 }
@@ -358,7 +415,13 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(theme.name, modifier = Modifier.weight(1f), fontSize = 12.sp, color = Tokens.LabelText, maxLines = 1)
+                        Text(
+                            theme.name,
+                            modifier = Modifier.weight(1f),
+                            fontSize = 12.sp,
+                            color = Tokens.LabelText,
+                            maxLines = 1,
+                        )
                         DeleteIconButton({ viewModel.deleteColorTheme(i) })
                     }
                 }
@@ -417,7 +480,14 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                             logoExpanded = false
                             SwingUtilities.invokeLater {
                                 val chooser = JFileChooser()
-                                chooser.fileFilter = FileNameExtensionFilter("Images", "png", "jpg", "jpeg", "svg", "webp")
+                                chooser.fileFilter = FileNameExtensionFilter(
+                                    "Images",
+                                    "png",
+                                    "jpg",
+                                    "jpeg",
+                                    "svg",
+                                    "webp",
+                                )
                                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                                     viewModel.importAndLoadLogo(chooser.selectedFile)
                                 }
@@ -452,13 +522,23 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                 FieldRow {
                     LottieTextField(
                         value = cfg.animDuration.toString(),
-                        onValueChange = { v -> v.toFloatOrNull()?.let { viewModel.updateConfig { c -> c.copy(animDuration = it.coerceIn(0.5f, 20f)) } } },
-                        label = Strings.animDuration, modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
+                        onValueChange = { v ->
+                            v.toFloatOrNull()?.let {
+                                viewModel.updateConfig { c -> c.copy(animDuration = it.coerceIn(0.5f, 20f)) }
+                            }
+                        },
+                        label = Strings.animDuration, modifier = Modifier.weight(1f),
+                        fillWidth = true, singleLine = true
                     )
                     LottieTextField(
                         value = cfg.holdDuration.toString(),
-                        onValueChange = { v -> v.toFloatOrNull()?.let { viewModel.updateConfig { c -> c.copy(holdDuration = it.coerceIn(0f, 30f)) } } },
-                        label = Strings.holdDuration, modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
+                        onValueChange = { v ->
+                            v.toFloatOrNull()?.let {
+                                viewModel.updateConfig { c -> c.copy(holdDuration = it.coerceIn(0f, 30f)) }
+                            }
+                        },
+                        label = Strings.holdDuration, modifier = Modifier.weight(1f),
+                        fillWidth = true, singleLine = true
                     )
                 }
             }
@@ -518,7 +598,11 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         SubtleButton(Strings.applyStyleToAll, { viewModel.applyStyleToAll() }, compact = true)
                         if (viewModel.hasOutputDir) {
-                            SubtleButton(Strings.saveAllLowerThirds, { viewModel.batchDownloadAll(null) }, compact = true)
+                            SubtleButton(
+                                Strings.saveAllLowerThirds,
+                                { viewModel.batchDownloadAll(null) },
+                                compact = true,
+                            )
                         } else {
                             SubtleButton(Strings.saveAllLowerThirds, {
                                 SwingUtilities.invokeLater {
@@ -547,7 +631,8 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(preset.name, fontSize = 12.sp, color = Tokens.PrimaryText, maxLines = 1)
                                 Text(
-                                    "${preset.config.canvasW}×${preset.config.canvasH} · ${StyleCatalog.labelFor(preset.config.style)}",
+                                    "${preset.config.canvasW}×${preset.config.canvasH} · " +
+                                        StyleCatalog.labelFor(preset.config.style),
                                     fontSize = 10.sp,
                                     color = Tokens.UnitText,
                                     maxLines = 1
@@ -565,7 +650,12 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
         AlertDialog(
             onDismissRequest = { showBatchImport = false; batchImportText = "" },
             containerColor = Tokens.CardBg,
-            title = { Text(Strings.batchImportTitle, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Tokens.TitleText) },
+            title = { Text(
+                Strings.batchImportTitle,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = Tokens.TitleText,
+            ) },
             text = {
                 Column {
                     Text(Strings.batchImportHint, fontSize = 12.sp, color = Tokens.LabelText)

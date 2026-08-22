@@ -29,8 +29,20 @@ class Style3Circular : StyleGenerator {
         val baseSize = cfg.baseSize.toDouble()
         val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
         val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
-        val nameM = TextMeasurer.measure(cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform)
-        val infoM = TextMeasurer.measure(cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform)
+        val nameM = TextMeasurer.measure(
+            cfg.nameText,
+            cfg.fontFamily,
+            nameSizePx.toFloat(),
+            cfg.nameWeight,
+            cfg.nameTransform,
+        )
+        val infoM = TextMeasurer.measure(
+            cfg.infoText,
+            cfg.fontFamily,
+            infoSizePx.toFloat(),
+            cfg.infoWeight,
+            cfg.infoTransform,
+        )
 
         val circleSize = emToPx(5.5, baseSize)
         val lineSpacingPx = emToPx(cfg.lineSpacing.toDouble(), baseSize)
@@ -38,7 +50,6 @@ class Style3Circular : StyleGenerator {
         val marginVPx = remToPx(cfg.marginV.toDouble(), baseSize)
         val cornerPx = emToPx(cfg.corners.toDouble(), baseSize)
         val borderPx = cfg.borderThickness * baseSize * 0.1
-        val logoSizePx = emToPx(cfg.logoSize.toDouble(), baseSize)
 
         val accentLottie = hexToLottie(cfg.accentColor)
         val bgLottie = hexToLottie(cfg.bgColor)
@@ -131,7 +142,11 @@ class Style3Circular : StyleGenerator {
                     )))
                 },
                 LottieBuilder.defaultTransform(
-                    position = LottieBuilder.staticPropArray(textBaseX + nameMaskOffsetX, nameY - nameSizePx * 0.15, 0.0)
+                    position = LottieBuilder.staticPropArray(
+                        textBaseX + nameMaskOffsetX,
+                        nameY - nameSizePx * 0.15,
+                        0.0,
+                    )
                 ),
                 td = 1
             )
@@ -147,7 +162,15 @@ class Style3Circular : StyleGenerator {
 
             builder.addTextLayer(
                 "Name",
-                makeTextData(cfg.nameText, cfg.fontFamily, nameSizePx, cfg.nameWeight, nameCLottie, cfg.nameTransform, justify),
+                makeTextData(
+                    cfg.nameText,
+                    cfg.fontFamily,
+                    nameSizePx,
+                    cfg.nameWeight,
+                    nameCLottie,
+                    cfg.nameTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.nameColorAlpha),
                     position = LottieBuilder.animatedProp(namePosKFs)
@@ -168,7 +191,11 @@ class Style3Circular : StyleGenerator {
                     )))
                 },
                 LottieBuilder.defaultTransform(
-                    position = LottieBuilder.staticPropArray(textBaseX + infoMaskOffsetX, infoY - infoSizePx * 0.15, 0.0)
+                    position = LottieBuilder.staticPropArray(
+                        textBaseX + infoMaskOffsetX,
+                        infoY - infoSizePx * 0.15,
+                        0.0,
+                    )
                 ),
                 td = 1
             )
@@ -184,7 +211,15 @@ class Style3Circular : StyleGenerator {
 
             builder.addTextLayer(
                 "Info",
-                makeTextData(cfg.infoText, cfg.fontFamily, infoSizePx, cfg.infoWeight, infoCLottie, cfg.infoTransform, justify),
+                makeTextData(
+                    cfg.infoText,
+                    cfg.fontFamily,
+                    infoSizePx,
+                    cfg.infoWeight,
+                    infoCLottie,
+                    cfg.infoTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.infoColorAlpha),
                     position = LottieBuilder.animatedProp(infoPosKFs)

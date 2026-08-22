@@ -125,6 +125,7 @@ class SpecPort6Test {
     }
 
     @Test
+    @Suppress("NestedBlockDepth") // Compares two nested shape trees position by position.
     fun portMatchesCompiledStyle6AtRest() {
         for (cfg in configs()) {
             val expected = LottieGenerator.generate(cfg, Style6LineSplit())

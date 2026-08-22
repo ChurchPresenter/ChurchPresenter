@@ -15,7 +15,6 @@ import org.churchpresenter.lottiegen.lottie.jsonArrayOf
 import org.churchpresenter.lottiegen.lottie.makeAnimatedRect
 import org.churchpresenter.lottiegen.lottie.makeFill
 import org.churchpresenter.lottiegen.lottie.makeGroup
-import org.churchpresenter.lottiegen.lottie.makeTextData
 import org.churchpresenter.lottiegen.lottie.makeTextRevealAnimator
 import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
@@ -30,8 +29,20 @@ class Style6LineSplit : StyleGenerator {
         val baseSize = cfg.baseSize.toDouble()
         val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
         val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
-        val nameM = TextMeasurer.measure(cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform)
-        val infoM = TextMeasurer.measure(cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform)
+        val nameM = TextMeasurer.measure(
+            cfg.nameText,
+            cfg.fontFamily,
+            nameSizePx.toFloat(),
+            cfg.nameWeight,
+            cfg.nameTransform,
+        )
+        val infoM = TextMeasurer.measure(
+            cfg.infoText,
+            cfg.fontFamily,
+            infoSizePx.toFloat(),
+            cfg.infoWeight,
+            cfg.infoTransform,
+        )
 
         val paddingX = emToPx(0.6, baseSize)
         val lineGap = emToPx(0.6, baseSize)

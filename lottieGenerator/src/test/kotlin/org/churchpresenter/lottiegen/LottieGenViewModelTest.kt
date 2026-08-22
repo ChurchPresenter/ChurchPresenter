@@ -150,7 +150,14 @@ class LottieGenViewModelTest {
     fun `a preset does not carry the logo image data`() {
         // Logo bytes are large and belong to the session, not the preset.
         val vm = viewModel()
-        vm.updateConfig { it.copy(nameText = "With Logo", logoData = "data:image/png;base64,AAAA", logoW = 10, logoH = 10) }
+        vm.updateConfig {
+            it.copy(
+                nameText = "With Logo",
+                logoData = "data:image/png;base64,AAAA",
+                logoW = 10,
+                logoH = 10,
+            )
+        }
         vm.savePreset()
 
         val saved = vm.presets.single().config
@@ -195,7 +202,13 @@ class LottieGenViewModelTest {
         val vm = viewModel()
         vm.updateConfig { it.copy(nameText = "Saved One", nameColor = "#123456") }
         vm.savePreset()
-        vm.updateConfig { it.copy(nameText = "Since Changed", nameColor = "#FFFFFF", logoData = "data:image/png;base64,BBBB") }
+        vm.updateConfig {
+            it.copy(
+                nameText = "Since Changed",
+                nameColor = "#FFFFFF",
+                logoData = "data:image/png;base64,BBBB",
+            )
+        }
 
         vm.loadPreset(0)
 

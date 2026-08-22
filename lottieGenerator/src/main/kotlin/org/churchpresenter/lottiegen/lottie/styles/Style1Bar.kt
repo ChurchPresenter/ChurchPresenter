@@ -28,8 +28,20 @@ class Style1Bar : StyleGenerator {
         val baseSize = cfg.baseSize.toDouble()
         val nameSizePx = emToPx(cfg.nameSize.toDouble(), baseSize)
         val infoSizePx = emToPx(cfg.infoSize.toDouble(), baseSize)
-        val nameM = TextMeasurer.measure(cfg.nameText, cfg.fontFamily, nameSizePx.toFloat(), cfg.nameWeight, cfg.nameTransform)
-        val infoM = TextMeasurer.measure(cfg.infoText, cfg.fontFamily, infoSizePx.toFloat(), cfg.infoWeight, cfg.infoTransform)
+        val nameM = TextMeasurer.measure(
+            cfg.nameText,
+            cfg.fontFamily,
+            nameSizePx.toFloat(),
+            cfg.nameWeight,
+            cfg.nameTransform,
+        )
+        val infoM = TextMeasurer.measure(
+            cfg.infoText,
+            cfg.fontFamily,
+            infoSizePx.toFloat(),
+            cfg.infoWeight,
+            cfg.infoTransform,
+        )
 
         val barWidth = emToPx(0.3, baseSize)
         val barHeight = emToPx(3.5, baseSize)
@@ -164,7 +176,11 @@ class Style1Bar : StyleGenerator {
             builder.addShapeLayer(
                 "Name Mask", nameMaskShapes,
                 LottieBuilder.defaultTransform(
-                    position = LottieBuilder.staticPropArray(textBaseX + nameMaskOffsetX, nameY - nameSizePx * 0.15, 0.0)
+                    position = LottieBuilder.staticPropArray(
+                        textBaseX + nameMaskOffsetX,
+                        nameY - nameSizePx * 0.15,
+                        0.0,
+                    )
                 ),
                 td = 1
             )
@@ -180,7 +196,15 @@ class Style1Bar : StyleGenerator {
 
             builder.addTextLayer(
                 "Name",
-                makeTextData(cfg.nameText, cfg.fontFamily, nameSizePx, cfg.nameWeight, nameCLottie, cfg.nameTransform, justify),
+                makeTextData(
+                    cfg.nameText,
+                    cfg.fontFamily,
+                    nameSizePx,
+                    cfg.nameWeight,
+                    nameCLottie,
+                    cfg.nameTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.nameColorAlpha),
                     position = LottieBuilder.animatedProp(namePosKFs)
@@ -205,7 +229,11 @@ class Style1Bar : StyleGenerator {
             builder.addShapeLayer(
                 "Info Mask", infoMaskShapes,
                 LottieBuilder.defaultTransform(
-                    position = LottieBuilder.staticPropArray(textBaseX + infoMaskOffsetX, infoY - infoSizePx * 0.15, 0.0)
+                    position = LottieBuilder.staticPropArray(
+                        textBaseX + infoMaskOffsetX,
+                        infoY - infoSizePx * 0.15,
+                        0.0,
+                    )
                 ),
                 td = 1
             )
@@ -221,7 +249,15 @@ class Style1Bar : StyleGenerator {
 
             builder.addTextLayer(
                 "Info",
-                makeTextData(cfg.infoText, cfg.fontFamily, infoSizePx, cfg.infoWeight, infoCLottie, cfg.infoTransform, justify),
+                makeTextData(
+                    cfg.infoText,
+                    cfg.fontFamily,
+                    infoSizePx,
+                    cfg.infoWeight,
+                    infoCLottie,
+                    cfg.infoTransform,
+                    justify,
+                ),
                 LottieBuilder.defaultTransform(
                     opacity = LottieBuilder.staticProp(cfg.infoColorAlpha),
                     position = LottieBuilder.animatedProp(infoPosKFs)
