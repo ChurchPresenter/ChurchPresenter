@@ -13,6 +13,7 @@ import java.io.File
 import java.io.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -187,5 +188,48 @@ class SlideDiskCacheTest {
         cache.cleanupOrphaned(listOf(keep.absolutePath))
         assertNotNull(cache.lookup(keep, 1920))
         assertNull(cache.lookup(drop, 1920))
+    }
+
+    /**
+     * A session-scoped `remote_*` entry is orphaned by definition, so the startup prune deletes it
+     * unconditionally. The instance-link download fills that directory by hand rather than through
+     * a [SlideDiskCache.Writer], so before [SlideDiskCache.claimDir] the prune could delete it
+     * mid-download and every `renameTo` afterwards failed into a vanished parent — the load landed
+     * zero slides and reported RENDER_FAILED.
+     */
+    @Test
+    fun `cleanupOrphaned leaves a claimed download alone and deletes it once released`() {
+        val base = File(tempDir, "cache")
+        val cache = SlideDiskCache(base)
+        val remote = File(base, "remote_item-3").apply { mkdirs() }
+        val slide = File(remote, "slide_0000.jpg").apply { writeText("stub") }
+
+        SlideDiskCache.claimDir(remote)
+        cache.cleanupOrphaned(emptyList())
+        assertTrue(slide.isFile, "a claimed download's slide was deleted underneath it")
+
+        SlideDiskCache.releaseDir(remote)
+        cache.cleanupOrphaned(emptyList())
+        assertFalse(remote.exists(), "a released entry should be pruned")
+    }
+
+    /** Two loads of one schedule item overlap; the first to finish must not unprotect the second. */
+    @Test
+    fun `a claim held twice survives the first release`() {
+        val base = File(tempDir, "cache")
+        val cache = SlideDiskCache(base)
+        val remote = File(base, "remote_item-9").apply { mkdirs() }
+        val slide = File(remote, "slide_0000.jpg").apply { writeText("stub") }
+
+        SlideDiskCache.claimDir(remote)
+        SlideDiskCache.claimDir(remote)
+        SlideDiskCache.releaseDir(remote)
+
+        cache.cleanupOrphaned(emptyList())
+        assertTrue(slide.isFile, "the second holder's directory was pruned")
+
+        SlideDiskCache.releaseDir(remote)
+        cache.cleanupOrphaned(emptyList())
+        assertFalse(remote.exists(), "the last release should unprotect the entry")
     }
 }

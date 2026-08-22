@@ -56,6 +56,34 @@ class SlideDiskCache(
          */
         private val activeWriters = ConcurrentHashMap<String, Writer>()
 
+        /**
+         * Entry directories a producer that is not a [Writer] currently owns, by absolute path,
+         * with the number of producers holding each.
+         *
+         * The instance-link remote load fills its `remote_*` entry by hand — `mkdirs`, write a
+         * temp file, `renameTo` — rather than through a [Writer], so it never appeared in
+         * [activeWriters] and [cleanupOrphaned], which deletes every `remote_*` entry
+         * unconditionally, could delete the directory out from under it mid-download. `renameTo`
+         * into a vanished parent fails, so every slide was skipped and the load landed zero of
+         * them. Counted rather than a plain set because two loads of the same schedule item can
+         * overlap, and the first to finish must not unprotect the second.
+         */
+        private val claimedDirs = ConcurrentHashMap<String, Int>()
+
+        /** Takes ownership of [dir] until the matching [releaseDir]; see [claimedDirs]. */
+        fun claimDir(dir: File) {
+            claimedDirs.merge(dir.absolutePath, 1) { a, b -> a + b }
+        }
+
+        /** Releases one [claimDir] hold on [dir]; the entry is protected until the last is gone. */
+        fun releaseDir(dir: File) {
+            claimedDirs.computeIfPresent(dir.absolutePath) { _, held -> if (held <= 1) null else held - 1 }
+        }
+
+        /** True while some producer holds [dir] — either a [Writer] or a [claimDir] caller. */
+        fun isOwned(dir: File): Boolean =
+            activeWriters.containsKey(dir.absolutePath) || claimedDirs.containsKey(dir.absolutePath)
+
         /** Why a write could not happen, for the exception message. */
         private fun diagnose(dir: File): String =
             "dir exists=${dir.isDirectory}, writable=${dir.canWrite()}, usableBytes=${dir.usableSpace}"
@@ -122,16 +150,16 @@ class SlideDiskCache(
 
     /**
      * Deletes cache entries whose source path is not in [keepPaths]. Session-scoped entries
-     * (`remote_*`, used for instance-link mirrored slides) are always deleted — they are
-     * re-downloaded on demand. An entry a render is currently writing is left alone; it is
-     * cleaned up by the next call once that render has finished.
+     * (`remote_*`, used for instance-link mirrored slides) are deleted regardless of [keepPaths] —
+     * they are re-downloaded on demand. An entry someone is currently filling is left alone,
+     * whether that is a render holding a [Writer] or a download holding a [claimDir]; it is
+     * cleaned up by the next call once that producer has finished.
      */
     fun cleanupOrphaned(keepPaths: Collection<String>) {
         if (!baseDir.exists()) return
         val keepIds = keepPaths.map { idFor(it) }.toSet()
         baseDir.listFiles()?.forEach { dir ->
-            val busy = activeWriters.containsKey(dir.absolutePath)
-            if (dir.isDirectory && dir.name !in keepIds && !busy) dir.deleteRecursively()
+            if (dir.isDirectory && dir.name !in keepIds && !isOwned(dir)) dir.deleteRecursively()
         }
     }
 
