@@ -39,121 +39,83 @@ import java.io.File
  * dirty-state confirmation, project picker, save-as naming, and the export flow that
  * ends with the manual registration checklist.
  */
+/** The seven pieces of dialog state the toolbar drives, held together rather than threaded. */
+private class ProjectDialogState {
+    var confirmDiscardFor by mutableStateOf<PendingAction?>(null)
+    var showNewDialog by mutableStateOf(false)
+    var showOpenDialog by mutableStateOf(false)
+    var showSaveAsDialog by mutableStateOf(false)
+    var showExportDialog by mutableStateOf(false)
+    var exportedFileName by mutableStateOf<String?>(null)
+    var registered by mutableStateOf<RegisterResult?>(null)
+}
+
 @Composable
 fun ProjectToolbarActions(state: EditorState) {
-    var confirmDiscardFor by remember { mutableStateOf<PendingAction?>(null) }
-    var showNewDialog by remember { mutableStateOf(false) }
-    var showOpenDialog by remember { mutableStateOf(false) }
-    var showSaveAsDialog by remember { mutableStateOf(false) }
-    var showExportDialog by remember { mutableStateOf(false) }
-    var exportedFileName by remember { mutableStateOf<String?>(null) }
-    var registered by remember { mutableStateOf<RegisterResult?>(null) }
+    val d = remember { ProjectDialogState() }
+    ToolbarRow(state, d)
+    ProjectDialogHost(state, d)
+}
 
+/** New / Open / Save / Save As / Export. */
+@Composable
+private fun ToolbarRow(state: EditorState, d: ProjectDialogState) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         EditorTooltip(Strings.editorTipNew) {
             TextButton(onClick = {
-                if (state.dirty) confirmDiscardFor = PendingAction.NEW else showNewDialog = true
+                if (state.dirty) d.confirmDiscardFor = PendingAction.NEW else d.showNewDialog = true
             }) { Text(Strings.editorNew) }
         }
         EditorTooltip(Strings.editorTipOpen) {
             TextButton(onClick = {
-                if (state.dirty) confirmDiscardFor = PendingAction.OPEN else showOpenDialog = true
+                if (state.dirty) d.confirmDiscardFor = PendingAction.OPEN else d.showOpenDialog = true
             }) { Text(Strings.editorOpen) }
         }
         EditorTooltip(Strings.editorTipSave) {
             TextButton(onClick = {
-                if (!state.saveProject()) showSaveAsDialog = true
+                if (!state.saveProject()) d.showSaveAsDialog = true
             }) { Text(Strings.editorSave) }
         }
         EditorTooltip(Strings.editorTipSaveAs) {
-            TextButton(onClick = { showSaveAsDialog = true }) { Text(Strings.editorSaveAs) }
+            TextButton(onClick = { d.showSaveAsDialog = true }) { Text(Strings.editorSaveAs) }
         }
         EditorTooltip(Strings.editorTipExport) {
-            TextButton(onClick = { showExportDialog = true }) { Text(Strings.editorExport) }
+            TextButton(onClick = { d.showExportDialog = true }) { Text(Strings.editorExport) }
         }
     }
+}
 
-    confirmDiscardFor?.let { pending ->
-        AlertDialog(
-            onDismissRequest = { confirmDiscardFor = null },
-            title = { Text(Strings.editorUnsavedTitle) },
-            text = { Text(Strings.editorUnsavedMessage) },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirmDiscardFor = null
-                    when (pending) {
-                        PendingAction.NEW -> showNewDialog = true
-                        PendingAction.OPEN -> showOpenDialog = true
-                    }
-                }) { Text(Strings.editorDiscard) }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmDiscardFor = null }) { Text(Strings.cancelBtn) }
-            }
-        )
+/** Every dialog the toolbar can raise, shown only while its own flag is set. */
+@Composable
+private fun ProjectDialogHost(state: EditorState, d: ProjectDialogState) {
+    DiscardConfirmDialog(d)
+    NewProjectDialog(state, d)
+    if (d.showOpenDialog) {
+        OpenProjectDialog(state, onClose = { d.showOpenDialog = false })
     }
 
-    if (showNewDialog) {
-        AlertDialog(
-            onDismissRequest = { showNewDialog = false },
-            title = { Text(Strings.editorNewTitle) },
-            text = {
-                ScrollableDialogColumn {
-                    TextButton(onClick = {
-                        showNewDialog = false
-                        state.newProject(null)
-                    }) { Text(Strings.editorNewBlank) }
-                    val bundled = EditorViewModel.BUNDLED_TEMPLATES.map { template ->
-                        val label = template.styleId?.let { StyleCatalog.labelFor(it) }
-                            ?: template.labelKey?.let { Strings.byKey(it) }
-                            ?: template.resource
-                        label to template.resource
-                    }
-                    // Registry-registered styles are immediately re-editable as templates.
-                    val registered = StyleCatalog.entries
-                        .mapNotNull { info -> info.specResource?.let { info.label to it } }
-                        .filterNot { (_, resource) -> bundled.any { it.second == resource } }
-                    for ((label, resource) in bundled + registered) {
-                        TextButton(onClick = {
-                            showNewDialog = false
-                            state.newProject(resource)
-                        }) { Text(label) }
-                    }
-                }
-            },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = { showNewDialog = false }) { Text(Strings.cancelBtn) }
-            }
-        )
+    if (d.showSaveAsDialog) {
+        SaveAsDialog(state, onClose = { d.showSaveAsDialog = false })
     }
 
-    if (showOpenDialog) {
-        OpenProjectDialog(state, onClose = { showOpenDialog = false })
-    }
-
-    if (showSaveAsDialog) {
-        SaveAsDialog(state, onClose = { showSaveAsDialog = false })
-    }
-
-    if (showExportDialog) {
+    if (d.showExportDialog) {
         ExportDialog(
             state,
-            onClose = { showExportDialog = false },
+            onClose = { d.showExportDialog = false },
             onExported = { fileName ->
-                showExportDialog = false
-                exportedFileName = fileName
+                d.showExportDialog = false
+                d.exportedFileName = fileName
             },
             onRegistered = { result ->
-                showExportDialog = false
-                registered = result
+                d.showExportDialog = false
+                d.registered = result
             }
         )
     }
 
-    registered?.let { result ->
+    d.registered?.let { result ->
         AlertDialog(
-            onDismissRequest = { registered = null },
+            onDismissRequest = { d.registered = null },
             title = { Text(Strings.editorRegisterDoneTitle) },
             text = {
                 Text(
@@ -165,22 +127,87 @@ fun ProjectToolbarActions(state: EditorState) {
                 )
             },
             confirmButton = {
-                TextButton(onClick = { registered = null }) { Text(Strings.ok) }
+                TextButton(onClick = { d.registered = null }) { Text(Strings.ok) }
             }
         )
     }
 
-    exportedFileName?.let { fileName ->
+    d.exportedFileName?.let { fileName ->
         AlertDialog(
-            onDismissRequest = { exportedFileName = null },
+            onDismissRequest = { d.exportedFileName = null },
             title = { Text(Strings.editorExportDoneTitle) },
             text = { Text(Strings.editorExportDoneSteps(state.spec.id, fileName, state.spec.name)) },
             confirmButton = {
-                TextButton(onClick = { exportedFileName = null }) { Text(Strings.ok) }
+                TextButton(onClick = { d.exportedFileName = null }) { Text(Strings.ok) }
             }
         )
     }
 }
+
+/** "You have unsaved changes" -- shown before New or Open when the project is dirty. */
+@Composable
+private fun DiscardConfirmDialog(d: ProjectDialogState) {
+    d.confirmDiscardFor?.let { pending ->
+        AlertDialog(
+            onDismissRequest = { d.confirmDiscardFor = null },
+            title = { Text(Strings.editorUnsavedTitle) },
+            text = { Text(Strings.editorUnsavedMessage) },
+            confirmButton = {
+                TextButton(onClick = {
+                    d.confirmDiscardFor = null
+                    when (pending) {
+                        PendingAction.NEW -> d.showNewDialog = true
+                        PendingAction.OPEN -> d.showOpenDialog = true
+                    }
+                }) { Text(Strings.editorDiscard) }
+            },
+            dismissButton = {
+                TextButton(onClick = { d.confirmDiscardFor = null }) { Text(Strings.cancelBtn) }
+            }
+        )
+    }
+
+}
+
+/** The template picker New opens. */
+@Composable
+private fun NewProjectDialog(state: EditorState, d: ProjectDialogState) {
+    if (!d.showNewDialog) return
+        AlertDialog(
+            onDismissRequest = { d.showNewDialog = false },
+            title = { Text(Strings.editorNewTitle) },
+            text = {
+                ScrollableDialogColumn {
+                    TextButton(onClick = {
+                        d.showNewDialog = false
+                        state.newProject(null)
+                    }) { Text(Strings.editorNewBlank) }
+                    val bundled = EditorViewModel.BUNDLED_TEMPLATES.map { template ->
+                        val label = template.styleId?.let { StyleCatalog.labelFor(it) }
+                            ?: template.labelKey?.let { Strings.byKey(it) }
+                            ?: template.resource
+                        label to template.resource
+                    }
+                    // Registry-registered styles are immediately re-editable as templates.
+                    val fromRegistry = StyleCatalog.entries
+                        .mapNotNull { info -> info.specResource?.let { info.label to it } }
+                        .filterNot { (_, resource) -> bundled.any { it.second == resource } }
+                    for ((label, resource) in bundled + fromRegistry) {
+                        TextButton(onClick = {
+                            d.showNewDialog = false
+                            state.newProject(resource)
+                        }) { Text(label) }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { d.showNewDialog = false }) { Text(Strings.cancelBtn) }
+            }
+        )
+}
+
+
 
 private enum class PendingAction { NEW, OPEN }
 
