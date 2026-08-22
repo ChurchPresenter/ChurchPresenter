@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import org.churchpresenter.bible.Bible
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.settings.SettingsManager
 import java.io.File

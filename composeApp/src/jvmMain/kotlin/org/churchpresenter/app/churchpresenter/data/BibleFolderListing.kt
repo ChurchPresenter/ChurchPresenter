@@ -1,8 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import org.churchpresenter.bible.Bible
 import org.churchpresenter.bible.bibleDisplayNames
-import org.churchpresenter.bible.readTranslationTitle
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 
 /** A Bible folder's installed modules, and the name each one is shown under in a picker. */

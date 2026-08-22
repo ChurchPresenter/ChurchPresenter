@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import org.churchpresenter.bible.Bible
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
