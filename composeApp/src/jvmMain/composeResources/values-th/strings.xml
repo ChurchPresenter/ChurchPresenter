@@ -856,6 +856,7 @@
     <string name="browser_source_outputs_help">ช่องสัญญาณเสมือนที่ให้บริการเป็นหน้าเว็บ — วาง URL ลงใน Browser Source เพื่อซ้อนเนื้อหาสด รองรับพื้นหลังโปร่งใส</string>
     <string name="add_browser_source_output">เพิ่มช่องสัญญาณ</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">ตั้งชื่อให้เอาต์พุตนี้ — ผู้ชม, เวที, นักร้องประสานเสียง, คอร์ด…</string>
     <string name="browser_source_confirm_remove_message">คุณแน่ใจหรือไม่ว่าต้องการนำ %1$s ออก</string>
     <string name="browser_source_require_api_key">ต้องใช้คีย์ API</string>
     <string name="browser_source_uses_server_api_key">ใช้คีย์เดียวกับการตั้งค่าเซิร์ฟเวอร์ กรุณาเปิดใช้ที่นั่นก่อน</string>

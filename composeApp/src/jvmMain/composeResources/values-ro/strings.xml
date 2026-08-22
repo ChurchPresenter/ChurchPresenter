@@ -2102,6 +2102,7 @@
     <string name="browser_source_outputs_help">Ieșiri virtuale livrate ca pagină web — inserați URL-ul într-o Browser Source pentru a suprapune conținut live, fundal transparent acceptat.</string>
     <string name="add_browser_source_output">Adaugă Ieșire</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Denumiți această ieșire — Public, Scenă, Cor, Acorduri…</string>
     <string name="browser_source_confirm_remove_message">Sigur doriți să eliminați %1$s?</string>
     <string name="browser_source_require_api_key">Necesită Cheie API</string>
     <string name="browser_source_uses_server_api_key">Folosește aceeași cheie ca setările Serverului; activați-o mai întâi acolo.</string>

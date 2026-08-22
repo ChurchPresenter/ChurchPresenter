@@ -2072,6 +2072,7 @@
     <string name="browser_source_outputs_help">Веб-бет ретінде берілетін виртуалды шығыстар — тікелей эфир мазмұнын қабаттастыру үшін URL мекенжайын Browser Source көзіне қойыңыз, мөлдір фон қолдау көрсетіледі.</string>
     <string name="add_browser_source_output">Шығысты қосу</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Бұл шығысқа атау беріңіз — Көрермендер, Сахна, Хор, Аккордтар…</string>
     <string name="browser_source_confirm_remove_message">%1$s жойғыңыз келетініне сенімдісіз бе?</string>
     <string name="browser_source_require_api_key">API кілтін талап ету</string>
     <string name="browser_source_uses_server_api_key">Сервер параметрлеріндегі кілтпен бірдей кілт қолданылады; алдымен сол жерде қосыңыз.</string>

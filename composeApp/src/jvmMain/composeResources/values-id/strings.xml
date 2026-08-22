@@ -856,6 +856,7 @@
     <string name="browser_source_outputs_help">Keluaran virtual yang disajikan sebagai halaman web — tempelkan URL-nya ke sebuah Browser Source untuk menumpangkan konten langsung, latar belakang transparan didukung.</string>
     <string name="add_browser_source_output">Tambah Keluaran</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Beri nama output ini — Penonton, Panggung, Paduan Suara, Akor…</string>
     <string name="browser_source_confirm_remove_message">Apakah Anda yakin ingin menghapus %1$s?</string>
     <string name="browser_source_require_api_key">Wajibkan Kunci API</string>
     <string name="browser_source_uses_server_api_key">Memakai kunci yang sama dengan pengaturan Server; aktifkan di sana terlebih dahulu.</string>

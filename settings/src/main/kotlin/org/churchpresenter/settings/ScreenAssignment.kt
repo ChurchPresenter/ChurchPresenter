@@ -47,6 +47,16 @@ data class ScreenAssignment(
     // Both are an additional layer on top of showFullscreenBackground/showLowerThirdBackground.
     val showBibleBackground: Boolean = true,
     val showSongsBackground: Boolean = true,
+    /**
+     * What the operator calls this Browser Source output — "Stage", "Choir", "Chords".
+     *
+     * Blank means it has never been renamed, and every label falls back to the numbered default.
+     * Stored rather than derived because the number is a position: removing the second of three
+     * outputs renumbers the third, and a name the operator chose must survive that.
+     *
+     * Only used by ProjectionSettings.browserSourceOutputs entries.
+     */
+    val browserSourceName: String = "",
     val browserSourceApiKeyRequired: Boolean = false, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceEnabled: Boolean = true, // only used by ProjectionSettings.browserSourceOutputs entries
     val browserSourceWidth: Int = 1920, // only used by ProjectionSettings.browserSourceOutputs entries
@@ -67,4 +77,14 @@ data class ScreenAssignment(
 
     /** Primary window role: "fill" if key output is configured, "normal" otherwise */
     val primaryOutputRole: String get() = if (hasKeyOutput) Constants.OUTPUT_ROLE_FILL else Constants.OUTPUT_ROLE_NORMAL
+
+    /**
+     * This Browser Source output's display name: the operator's own if they gave it one, otherwise
+     * [default] — the numbered "Browser Source N" label, which is localized and so has to be
+     * resolved by the caller.
+     *
+     * Trimmed, so a name of nothing but spaces reads as no name at all rather than as a blank label
+     * on every screen that shows one.
+     */
+    fun browserSourceLabelOr(default: String): String = browserSourceName.trim().ifBlank { default }
 }

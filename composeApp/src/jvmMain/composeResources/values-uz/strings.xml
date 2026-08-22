@@ -856,6 +856,7 @@
     <string name="browser_source_outputs_help">Veb-sahifa sifatida uzatiladigan virtual chiqishlar — jonli tarkibni ustiga qoʻyish uchun URLni Browser Source ga joylashtiring, shaffof fon ham qoʻllanadi.</string>
     <string name="add_browser_source_output">Chiqish qoʻshish</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Bu chiqishga nom bering — Tomoshabinlar, Sahna, Xor, Akkordlar…</string>
     <string name="browser_source_confirm_remove_message">%1$s ni olib tashlashni xohlaysizmi?</string>
     <string name="browser_source_require_api_key">API kalit talab qilinsin</string>
     <string name="browser_source_uses_server_api_key">Server sozlamalaridagi kalitdan foydalanadi; avval uni yoqing.</string>

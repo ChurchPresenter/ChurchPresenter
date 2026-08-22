@@ -856,6 +856,7 @@
     <string name="browser_source_outputs_help">Virtuella utgångar som levereras som en webbsida – klistra in URL:en i en Browser Source för att lägga live-innehåll som överlägg. Genomskinlig bakgrund stöds.</string>
     <string name="add_browser_source_output">Lägg till utgång</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">Ge den här utgången ett namn — Publik, Scen, Kör, Ackord…</string>
     <string name="browser_source_confirm_remove_message">Är du säker på att du vill ta bort %1$s?</string>
     <string name="browser_source_require_api_key">Kräv API-nyckel</string>
     <string name="browser_source_uses_server_api_key">Använder samma nyckel som serverinställningarna; aktivera den där först.</string>

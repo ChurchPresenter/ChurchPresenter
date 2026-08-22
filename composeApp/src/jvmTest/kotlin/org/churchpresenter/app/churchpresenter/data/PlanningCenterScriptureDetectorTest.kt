@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import org.churchpresenter.bible.Bible
+import org.churchpresenter.bible.BibleVerse
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

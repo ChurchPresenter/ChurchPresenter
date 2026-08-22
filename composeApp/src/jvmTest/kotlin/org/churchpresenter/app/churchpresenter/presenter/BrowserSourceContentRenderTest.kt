@@ -115,6 +115,19 @@ class BrowserSourceContentRenderTest {
     }
 
     @Test
+    fun `identify calls a renamed output what the operator calls it`() = render(
+        mode = Presenting.NONE,
+        assignment = ScreenAssignment(browserSourceName = "Chords"),
+        outputIndex = 2,
+        seed = { identifyBrowserSourceOutput(2) },
+    ) {
+        // The operator is matching this against their own list of outputs, which reads "Chords"
+        // once they have named it — the number they never see again would identify nothing.
+        onNodeWithText("Chords").assertExists()
+        onNodeWithText("Browser Source 3").assertDoesNotExist()
+    }
+
+    @Test
     fun `a live verse reaches the screen`() = render(
         mode = Presenting.BIBLE,
         seed = { setDisplayedVerses(listOf(verse("For God so loved the world"))) },

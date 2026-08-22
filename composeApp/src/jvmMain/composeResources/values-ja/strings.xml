@@ -856,6 +856,7 @@
     <string name="browser_source_outputs_help">Web ページとして配信される仮想の出力です。URL をブラウザーソースに貼り付けると、ライブの内容を重ねて表示できます。背景の透過にも対応しています。</string>
     <string name="add_browser_source_output">出力を追加</string>
     <string name="browser_source_output_label">ブラウザーソース %1$d</string>
+    <string name="browser_source_name_tooltip">この出力に名前を付けます — 客席、ステージ、聖歌隊、コード…</string>
     <string name="browser_source_confirm_remove_message">%1$s を削除してもよろしいですか？</string>
     <string name="browser_source_require_api_key">API キーを必須にする</string>
     <string name="browser_source_uses_server_api_key">サーバー設定と同じキーを使います。先にそちらで有効にしてください。</string>

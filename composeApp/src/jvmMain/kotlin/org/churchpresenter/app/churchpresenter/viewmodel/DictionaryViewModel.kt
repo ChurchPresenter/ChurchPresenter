@@ -12,13 +12,13 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
 import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import java.io.File
-import org.churchpresenter.app.churchpresenter.data.readTranslationTitle
+import org.churchpresenter.bible.readTranslationTitle
 
 enum class DictionaryLanguageFilter { ALL, HEBREW, GREEK }
 

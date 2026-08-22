@@ -1,32 +1,31 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.bible
 
 import org.churchpresenter.diagnostics.CrashReporter
-import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
 
-private const val MIN_SHORTENABLE_WORD_LENGTH = 3
-private const val MAX_ACRONYM_WORDS = 4
-private const val SHORT_WORD_MAX_LENGTH = 4
-private const val SHORT_WORD_TRUNCATED_LENGTH = 3
-private const val SHORT_TITLE_MAX_LENGTH = 5
-private const val REGEX_GROUP_THIRD = 3
+internal const val MIN_SHORTENABLE_WORD_LENGTH = 3
+internal const val MAX_ACRONYM_WORDS = 4
+internal const val SHORT_WORD_MAX_LENGTH = 4
+internal const val SHORT_WORD_TRUNCATED_LENGTH = 3
+internal const val SHORT_TITLE_MAX_LENGTH = 5
+internal const val REGEX_GROUP_THIRD = 3
 private const val VERSE_GROUP_NUMBER = 7
 private const val VERSE_GROUP_TEXT = 8
 private const val TITLE_PREFIX_LENGTH = 8
-private const val CHAPTER_KEY_BOOK_SHIFT = 20
+internal const val CHAPTER_KEY_BOOK_SHIFT = 20
 private const val CHAPTER_KEY_CHAPTER_MASK = 0xFFFFFL
 
 data class ChapterResult(val previewIds: List<String>, val verses: List<String>)
 
 /** A parenthesised aside in a module title: "King James Version (KJV)", "… (Public Domain)". */
-private val PARENTHESISED_ASIDE = Regex("\\([^)]*\\)")
+internal val PARENTHESISED_ASIDE = Regex("\\([^)]*\\)")
 
 private val SPB_CODE_REGEX = Regex("^B(\\d{3})C(\\d{3})V(\\d{3})$")
 private val SPB_VERSE_LINE_REGEX =
     Regex("^(B(\\d{3})C(\\d{3})V(\\d{3}))\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(.*)")
-private val SPB_BOOK_HEADER_REGEX = Regex("^(\\d+)\\s+(.+?)\\s+(\\d+)$")
+internal val SPB_BOOK_HEADER_REGEX = Regex("^(\\d+)\\s+(.+?)\\s+(\\d+)$")
 
 /**
  * Why a module could not be read, in whole or in part.
@@ -52,6 +51,20 @@ data class BibleLoadError(
         get() = resourcePath.substringAfterLast('/').substringAfterLast('\\')
 }
 
+/**
+ * One loaded `.spb` module: the books it contains, its verses, and the questions callers ask of it.
+ *
+ * **On [TooManyFunctions]:** this is suppressed rather than fixed, and that is a judgement call
+ * worth overruling if you disagree. What could be moved out without redistributing state has been
+ * -- see `SpbFormat.kt`, which took the six helpers that are pure functions of the file. What is
+ * left is a loader that fills seven mutable fields and a read API over them, and callers
+ * legitimately ask about twenty different questions of a Bible: its books, either numbering, a
+ * chapter, a verse, an abbreviation, a code reference. Splitting that means distributing those
+ * seven fields across classes in the path that decides which verse a congregation sees, and if it
+ * is done by delegation -- the obvious way to keep the API -- every call site stays identical, so
+ * the reader gains nothing the count did not already tell them.
+ */
+@Suppress("TooManyFunctions")
 class Bible {
     private var bibleAbbreviation: String = ""
     private var bibleTitle: String = ""
@@ -99,83 +112,13 @@ class Bible {
         }
     }
 
-    /** One word shortened: kept whole at three characters or fewer, else its first three or four. */
-    private fun shortenWord(word: String): String = when {
-        word.length <= SHORT_WORD_MAX_LENGTH -> word
-        else -> word.take(SHORT_WORD_TRUNCATED_LENGTH)
-    }
-
     /**
-     * Extract Bible version abbreviation from title or filename
-     * Examples: "Russian Synodal Translation" -> "RST"
-     *           "King James Version" -> "KJV"
-     *           "King James Version (KJV)" -> "KJV"
-     *           "ru_RST77.spb" -> "RST77"
-     *
-     * A parenthesised aside is dropped before the initials are taken, and each initial is the
-     * word's first *letter or digit*. Without either step a bracket becomes an initial in its own
-     * right — "King James Version (KJV)" abbreviated to "KJV(", which is what the operator then
-     * saw beside every verse on screen.
+     * A folder of translations is loaded together, so one unreadable module must not take the rest
+     * of the shelf with it: this reports through [loadError] and never throws. That is why the
+     * catch is broad, and why narrowing it would be a behaviour change rather than a tidy-up --
+     * anything it stopped catching would propagate into the caller that loads the next file.
      */
-    private fun extractBibleAbbreviation(title: String?, filename: String): String {
-        // First try to extract from title if available
-        if (!title.isNullOrBlank()) {
-            // A title that is nothing but an aside — "(KJV)" — still has to name itself, so fall
-            // back to the title with its punctuation stripped rather than to the file name.
-            val cleaned = title.replace(PARENTHESISED_ASIDE, " ").trim()
-                .ifEmpty { title.filter { it.isLetterOrDigit() || it.isWhitespace() }.trim() }
-
-            if (cleaned.isNotEmpty()) {
-                val words = cleaned.split(Regex("\\s+"))
-
-                // If title is short (like "RSV" or "KJV"), use it as-is — minus any punctuation
-                // riding along with it, so "KJV." does not label every verse "KJV.".
-                val loneWord = words.singleOrNull()?.filter { it.isLetterOrDigit() }
-                if (loneWord != null && loneWord.isNotEmpty() && loneWord.length <= SHORT_TITLE_MAX_LENGTH) {
-                    return loneWord
-                }
-
-                // Generate abbreviation from title words
-                return words.mapNotNull { word ->
-                    word.firstOrNull { it.isLetterOrDigit() }?.uppercaseChar()
-                }.take(MAX_ACRONYM_WORDS).joinToString("")
-            }
-        }
-
-        // Fallback to filename without extension
-        return filename.substringBeforeLast(".").substringAfterLast("/").substringAfterLast("\\")
-    }
-
-    /**
-     * Fast path: reads ONLY the header section of an SPB file to populate book names.
-     * Stops as soon as the separator line or first verse is encountered.
-     * Call this first to show the book list immediately, then call loadFromSpb() for full data.
-     */
-    private fun openHeaderReader(resourcePath: String): java.io.BufferedReader {
-        val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
-        if (inputStream != null) return inputStream.bufferedReader(StandardCharsets.UTF_8)
-        val path = Paths.get(resourcePath)
-        if (!Files.exists(path)) {
-            throw FileNotFoundException(
-                "loadBooksOnly: module not found on classpath or filesystem: $resourcePath"
-            )
-        }
-        return Files.newBufferedReader(path, StandardCharsets.UTF_8)
-    }
-
-    private fun collectBookHeader(
-        line: String,
-        headerOrder: MutableList<Int>,
-        parsedBookNames: MutableMap<Int, String>,
-        parsedChapterCounts: MutableMap<Int, Int>,
-    ) {
-        val m = SPB_BOOK_HEADER_REGEX.matchEntire(line) ?: return
-        val bookId = m.groupValues[1].toInt()
-        headerOrder.add(bookId)
-        parsedBookNames[bookId] = m.groupValues[2].trim()
-        parsedChapterCounts[bookId] = m.groupValues[REGEX_GROUP_THIRD].toInt()
-    }
-
+    @Suppress("TooGenericExceptionCaught")
     fun loadBooksOnly(resourcePath: String) {
         books.clear()
         loadError = null
@@ -226,6 +169,8 @@ class Bible {
 
     // New: load from a BibleQuote .spb plain text module
     // resourcePath: either a classpath resource name (e.g. "ru_RST77.spb") or an absolute file path
+    /** Reports through [loadError] and never throws, for the reason given on [loadBooksOnly]. */
+    @Suppress("TooGenericExceptionCaught")
     fun loadFromSpb(resourcePath: String, bookNames: List<String> = emptyList()) {
         operatorBible.clear()
         books.clear()
@@ -269,16 +214,6 @@ class Bible {
         var currentCode: String? = null
         val pendingText = StringBuilder()
         var headerParsed = false
-    }
-
-    private fun openSpbReader(resourcePath: String): java.io.BufferedReader {
-        val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
-        if (inputStream != null) return inputStream.bufferedReader(StandardCharsets.UTF_8)
-        val path = Paths.get(resourcePath)
-        require(Files.exists(path)) {
-            "loadFromSpb: resource not found on classpath or filesystem: $resourcePath"
-        }
-        return Files.newBufferedReader(path, StandardCharsets.UTF_8)
     }
 
     private fun parseSpbLine(line: String, state: SpbParseState) {
@@ -327,9 +262,14 @@ class Bible {
         val b = verseMatch.groupValues[5].toInt()
         val ch = verseMatch.groupValues[6].toInt()
         addVerse(
-            state, code, b, ch,
-            verseMatch.groupValues[VERSE_GROUP_NUMBER].toInt(),
-            verseMatch.groupValues[VERSE_GROUP_TEXT].trim(),
+            state,
+            BibleVerse(
+                verseId = code,
+                book = b,
+                chapter = ch,
+                verseNumber = verseMatch.groupValues[VERSE_GROUP_NUMBER].toInt(),
+                verseText = verseMatch.groupValues[VERSE_GROUP_TEXT].trim(),
+            ),
         )
         // Map code reference to display reference for cross-Bible lookups
         codeToDisplayMap[chapterKey(codeBook, codeChapter)] = chapterKey(b, ch)
@@ -354,23 +294,21 @@ class Bible {
         val code = state.currentCode ?: return
         val prev = SPB_CODE_REGEX.matchEntire(code) ?: error("Invalid verse code: $code")
         addVerse(
-            state, code,
-            prev.groupValues[1].toInt(), prev.groupValues[2].toInt(), prev.groupValues[REGEX_GROUP_THIRD].toInt(),
-            state.pendingText.toString().trim(),
+            state,
+            BibleVerse(
+                verseId = code,
+                book = prev.groupValues[1].toInt(),
+                chapter = prev.groupValues[2].toInt(),
+                verseNumber = prev.groupValues[REGEX_GROUP_THIRD].toInt(),
+                verseText = state.pendingText.toString().trim(),
+            ),
         )
     }
 
-    private fun addVerse(state: SpbParseState, code: String, book: Int, chapter: Int, verse: Int, text: String) {
-        operatorBible.add(
-            BibleVerse(
-                verseId = code,
-                book = book,
-                chapter = chapter,
-                verseNumber = verse,
-                verseText = text
-            )
-        )
-        state.bookChapterMap.getOrPut(book) { mutableSetOf() }.add(chapter)
+    /** Records one parsed verse, and notes that its chapter exists. */
+    private fun addVerse(state: SpbParseState, verse: BibleVerse) {
+        operatorBible.add(verse)
+        state.bookChapterMap.getOrPut(verse.book) { mutableSetOf() }.add(verse.chapter)
     }
 
     /** Book list in header order first, then any book seen only in verse data. */
@@ -392,12 +330,6 @@ class Bible {
             ))
         }
     }
-
-    /** Encodes (bookId, chapterNum) as a single Long key for the HashMap. */
-    private fun chapterKey(
-        book: Int,
-        chapter: Int
-    ): Long = book.toLong().shl(CHAPTER_KEY_BOOK_SHIFT) or chapter.toLong()
 
     private fun buildChapterIndex() {
         chapterIndex.clear()

@@ -39,6 +39,11 @@ wrapper of its own — one `./gradlew` at the repo root builds and tests the lot
 > Beblia catalogues the download browser lists, and the converters that turn USFX and Zefania XML
 > into the `.spb` format the app reads. `./gradlew :bible-formats:test`.
 >
+> **[`bible/`](./bible)** — the Bible itself: a loaded `.spb` translation, its books, its two
+> numberings and the search over them. Not to be confused with `:bible-engine` (speech-to-reference
+> detection) or `:bible-formats` (the download catalogues and the converters that *produce* `.spb`).
+> `./gradlew :bible:test`.
+>
 > **[`song-chords/`](./song-chords)** — the grammar songs are written in: what counts as a chord,
 > what counts as a section heading, transposition, and turning a pasted chord sheet into the inline
 > `[G]lyric` markup. Depends on nothing, so the app and the converter share one rule instead of two.

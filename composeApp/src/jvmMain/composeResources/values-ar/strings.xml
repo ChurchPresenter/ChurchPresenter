@@ -856,6 +856,7 @@
     <string name="browser_source_outputs_help">مخارج افتراضية تُقدَّم كصفحة ويب — الصق الرابط في Browser Source لعرض المحتوى المباشر فوق البث، مع دعم الخلفية الشفافة.</string>
     <string name="add_browser_source_output">إضافة خرج</string>
     <string name="browser_source_output_label">Browser Source %1$d</string>
+    <string name="browser_source_name_tooltip">امنح هذا المخرج اسمًا — الجمهور، المنصة، الجوقة، الكوردات…</string>
     <string name="browser_source_confirm_remove_message">هل تريد بالتأكيد إزالة %1$s؟</string>
     <string name="browser_source_require_api_key">طلب مفتاح API</string>
     <string name="browser_source_uses_server_api_key">يستخدم المفتاح نفسه الموجود في إعدادات الخادم؛ مكّنه هناك أولًا.</string>

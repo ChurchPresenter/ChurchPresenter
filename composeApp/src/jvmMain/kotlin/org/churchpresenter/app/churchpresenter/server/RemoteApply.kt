@@ -4,7 +4,7 @@ import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.input.key.type
 import java.io.File
 import kotlinx.coroutines.flow.MutableSharedFlow
-import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.ScheduleActions

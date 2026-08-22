@@ -65,7 +65,7 @@ import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.ic_warning
 import churchpresenter.composeapp.generated.resources.search_clear
-import org.churchpresenter.app.churchpresenter.data.BibleLoadError
+import org.churchpresenter.bible.BibleLoadError
 import org.churchpresenter.app.churchpresenter.viewmodel.indexOfFirstLiveVerse
 import org.churchpresenter.app.churchpresenter.viewmodel.verseNumberOf
 import org.jetbrains.compose.resources.painterResource

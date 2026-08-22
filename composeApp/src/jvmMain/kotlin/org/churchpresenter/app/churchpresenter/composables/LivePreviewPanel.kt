@@ -168,7 +168,8 @@ fun LivePreviewPanel(
                 sttManager = sttManager,
                 locks = presenterManager.browserSourceLocks.value,
                 onToggleLock = { mode -> presenterManager.setBrowserSourceLock(i, mode) },
-                label = stringResource(Res.string.browser_source_output_label, i + 1),
+                label = proj.browserSourceOutputs[i]
+                    .browserSourceLabelOr(stringResource(Res.string.browser_source_output_label, i + 1)),
             )
         }
 

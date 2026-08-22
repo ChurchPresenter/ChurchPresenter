@@ -4,7 +4,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.data.BibleSearch
+import org.churchpresenter.bible.BibleSearch
 
 private const val SCORE_EXACT = 100
 private const val SCORE_PREFIX = 80

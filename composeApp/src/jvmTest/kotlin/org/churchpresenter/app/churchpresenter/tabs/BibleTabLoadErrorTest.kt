@@ -2,10 +2,10 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.diagnostics.CrashReportSweep
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
-import org.churchpresenter.app.churchpresenter.CrashReportSweep
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import kotlin.test.AfterTest
