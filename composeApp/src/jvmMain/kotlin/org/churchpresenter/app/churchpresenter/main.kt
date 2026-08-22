@@ -101,7 +101,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.isJavaFxAvailable
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
-import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer

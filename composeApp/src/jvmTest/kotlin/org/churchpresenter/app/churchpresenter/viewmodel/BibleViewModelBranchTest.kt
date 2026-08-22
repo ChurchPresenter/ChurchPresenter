@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.data.SpbFixture
+import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleEngineSettings
 import org.churchpresenter.settings.BibleSettings

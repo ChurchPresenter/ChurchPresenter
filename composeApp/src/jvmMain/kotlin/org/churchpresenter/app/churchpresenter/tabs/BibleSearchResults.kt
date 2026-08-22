@@ -34,7 +34,7 @@ import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.utils.highlightRanges
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.layout.ColumnScope
-import org.churchpresenter.app.churchpresenter.data.BibleSearch
+import org.churchpresenter.bible.BibleSearch
 
 /**
  * The list a text search produced, with the matched words picked out of each verse.

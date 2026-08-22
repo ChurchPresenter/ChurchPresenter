@@ -1,6 +1,10 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.detekt)
+    // CrashReportSweep is published from here because it exists for CrashReporter's own design:
+    // the report directory is resolved once per JVM, so a test that reports an exception really
+    // writes into the developer's own ~/.churchpresenter/crash-reports and has to put it back.
+    `java-test-fixtures`
     jacoco
 }
 

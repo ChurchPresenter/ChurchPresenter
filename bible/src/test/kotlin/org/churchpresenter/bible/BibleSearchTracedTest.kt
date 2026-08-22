@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.bible
 
 import io.sentry.NoOpTransportFactory
 import io.sentry.Sentry

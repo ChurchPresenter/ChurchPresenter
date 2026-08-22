@@ -105,7 +105,7 @@ import org.churchpresenter.app.churchpresenter.composables.VlcAudioDevice
 import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailability
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.bible.Bible
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser

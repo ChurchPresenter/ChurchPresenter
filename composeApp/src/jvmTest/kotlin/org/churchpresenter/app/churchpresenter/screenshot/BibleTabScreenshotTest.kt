@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import org.churchpresenter.diagnostics.CrashReportSweep
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
@@ -11,7 +12,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.CrashReportSweep
 import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings

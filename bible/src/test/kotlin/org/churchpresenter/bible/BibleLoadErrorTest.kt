@@ -1,6 +1,6 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.bible
 
-import org.churchpresenter.app.churchpresenter.CrashReportSweep
+import org.churchpresenter.diagnostics.CrashReportSweep
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

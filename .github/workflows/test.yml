@@ -152,6 +152,10 @@ jobs:
             songchords:
               - *shared
               - 'song-chords/**'          # depends on nothing else: the grammar is pure text
+            bible:
+              - *shared
+              - 'bible/**'
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -184,7 +188,7 @@ jobs:
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :planning-center:detekt
-          :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt
+          :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -428,6 +432,14 @@ jobs:
       - name: Song chords coverage floor
         if: always() && steps.modules.outputs.songchords == 'true'
         run: ./gradlew :song-chords:jacocoTestCoverageVerification -x test
+
+      - name: Bible tests
+        if: always() && steps.modules.outputs.bible == 'true'
+        run: ./gradlew :bible:test
+
+      - name: Bible coverage floor
+        if: always() && steps.modules.outputs.bible == 'true'
+        run: ./gradlew :bible:jacocoTestCoverageVerification -x test
 
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,

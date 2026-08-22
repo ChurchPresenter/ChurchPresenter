@@ -49,7 +49,11 @@
 - `tabs/DictionaryTab.kt` — Strong's dictionary UI
 - `viewmodel/BibleViewModel.kt`, `viewmodel/BibleSettingsViewModel.kt`, `viewmodel/DictionaryViewModel.kt`
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
-- `data/Bible.kt`, `data/BibleBook.kt`, `data/BibleBookNames.kt`, `data/BibleSearch.kt`, `data/BibleVerse.kt`, `data/StrongsEntry.kt`
+- `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
+  `BibleVerse.kt`, `BibleTranslationNames.kt` and the `.spb` format helpers in `SpbFormat.kt`
+- `data/BibleBookNames.kt`, `data/BibleBookAbbreviations.kt` — these stay in the app: they resolve
+  Compose string resources, which `:bible` deliberately has no access to
+- `data/StrongsEntry.kt`
 - `bible-formats/` (the `:bible-formats` Gradle module) — the download catalogues and the `.spb` converters behind them
 - `bible-formats/src/main/kotlin/.../catalog/` — `EBibleSource` (eBible.org, USFX), `ZefaniaSource` + `ZefaniaRepositoryIndex`, `BebliaSource` + `BebliaCatalogIndex`
 - `viewmodel/BibleCatalogViewModel.kt`, `dialogs/BibleCatalogBrowserDialog.kt` — download browser UI
