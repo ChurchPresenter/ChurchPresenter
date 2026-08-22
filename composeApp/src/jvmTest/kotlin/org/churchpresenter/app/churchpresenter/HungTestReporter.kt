@@ -22,7 +22,16 @@ import java.util.concurrent.atomic.AtomicReference
  * a test that trips it was never going to finish. Halting rather than merely reporting is the point
  * -- the fork stops in five minutes with a diagnosis instead of being killed at thirty with none.
  */
-class HungTestReporter : TestExecutionListener {
+class HungTestReporter internal constructor(
+    private val thresholdMs: Long,
+    private val dumpDir: String?,
+) : TestExecutionListener {
+
+    /** The no-arg constructor the service loader uses; both settings come from system properties. */
+    constructor() : this(
+        System.getProperty(THRESHOLD_PROPERTY)?.toLongOrNull() ?: DEFAULT_THRESHOLD_MS,
+        System.getProperty(DUMP_DIR_PROPERTY),
+    )
 
     private val running = AtomicReference<Pair<String, Long>?>(null)
 
@@ -30,16 +39,11 @@ class HungTestReporter : TestExecutionListener {
         val watchdog = Thread {
             while (true) {
                 try {
-                    Thread.sleep(minOf(POLL_MS, thresholdMs()))
+                    Thread.sleep(minOf(POLL_MS, thresholdMs))
                 } catch (_: InterruptedException) {
                     return@Thread
                 }
-                val (name, startedAt) = running.get() ?: continue
-                val elapsed = System.currentTimeMillis() - startedAt
-                if (elapsed > thresholdMs()) {
-                    dump(name, elapsed)
-                    Runtime.getRuntime().halt(HUNG_EXIT_CODE)
-                }
+                checkOnce { Runtime.getRuntime().halt(it) }
             }
         }
         watchdog.isDaemon = true
@@ -53,6 +57,23 @@ class HungTestReporter : TestExecutionListener {
 
     override fun executionFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult) {
         if (testIdentifier.isTest) running.set(null)
+    }
+
+    /**
+     * One watchdog tick: if the running test has outlived [thresholdMs], writes the dump and calls
+     * [halt]. Returns whether it tripped.
+     *
+     * [halt] is a parameter for one reason -- it is the only step a test cannot execute, since the
+     * real one kills the JVM. Everything before it is real: the real elapsed check, the real
+     * thread dump, the real file. A test passes a stand-in and exercises the rest.
+     */
+    internal fun checkOnce(halt: (Int) -> Unit): Boolean {
+        val (name, startedAt) = running.get() ?: return false
+        val elapsed = System.currentTimeMillis() - startedAt
+        if (elapsed <= thresholdMs) return false
+        dump(name, elapsed)
+        halt(HUNG_EXIT_CODE)
+        return true
     }
 
     private fun dump(name: String, elapsedMs: Long) {
@@ -71,24 +92,24 @@ class HungTestReporter : TestExecutionListener {
         // Also to disk, because halting the JVM can lose whatever Gradle had buffered of its
         // output -- and on CI the console is the only other copy. This directory is what the
         // workflow already uploads as `test-reports`, so the dump travels with the run.
-        System.getProperty(DUMP_DIR_PROPERTY)?.let { dir ->
+        dumpDir?.let { dir ->
             runCatching {
                 val file = java.io.File(dir).apply { mkdirs() }.resolve("hung-test-dump.txt")
                 file.writeText(out.toString())
-                System.err.println("=== the dump above is also at ${'$'}{file.absolutePath}")
+                System.err.println("=== the dump above is also at ${file.absolutePath}")
             }
         }
     }
 
-    private companion object {
+    internal companion object {
         /**
          * Minutes past anything real, so tripping it means stuck rather than slow.
          *
-         * Overridable with `-Dchurchpresenter.test.hangThresholdMs=` so a session chasing a hang can
-         * tighten it, and so this class can be tested without waiting five minutes for it.
+         * Overridable with `-Dchurchpresenter.test.hangThresholdMs=` so a session chasing a hang
+         * can tighten it. A test instead passes the threshold to the internal constructor: setting
+         * the property would retune the live watchdog running over the suite itself.
          */
-        fun thresholdMs(): Long =
-            System.getProperty("churchpresenter.test.hangThresholdMs")?.toLongOrNull() ?: DEFAULT_THRESHOLD_MS
+        const val THRESHOLD_PROPERTY = "churchpresenter.test.hangThresholdMs"
 
         const val DEFAULT_THRESHOLD_MS = 5 * 60 * 1000L
         const val POLL_MS = 10_000L
