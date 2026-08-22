@@ -1,10 +1,6 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
-import org.churchpresenter.lottiegen.lottie.LINE_HEIGHT_FACTOR
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.buildJsonArray
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.JsonObject
+import org.churchpresenter.lottiegen.lottie.makeTextDataWithAnimators
 import org.churchpresenter.lottiegen.lottie.Easing
 import org.churchpresenter.lottiegen.lottie.KeyframeInput
 import org.churchpresenter.lottiegen.lottie.LottieBuilder
@@ -163,48 +159,5 @@ class Style7RandomFade : StyleGenerator {
                 )
             )
         }
-    }
-}
-
-/**
- * Build text data with animators included in the "a" array.
- * Same structure as makeTextData but with animators.
- */
-private fun makeTextDataWithAnimators(
-    text: String, fontFamily: String, fontSizePx: Double, fontWeight: Int,
-    color: List<Double>, transform: String, justify: Int = 0,
-    animators: List<JsonObject>
-): JsonObject {
-    val displayText = if (transform == "uppercase") text.uppercase() else text
-    val style = if (fontWeight >= 700) "Bold" else "Regular"
-    val fName = "$fontFamily-$style"
-    return buildJsonObject {
-        put("d", buildJsonObject {
-            put("k", buildJsonArray {
-                add(buildJsonObject {
-                    put("s", buildJsonObject {
-                        put("s", JsonPrimitive(fontSizePx))
-                        put("f", JsonPrimitive(fName))
-                        put("t", JsonPrimitive(displayText))
-                        put("ca", JsonPrimitive(0))
-                        put("j", JsonPrimitive(justify))
-                        put("tr", JsonPrimitive(0))
-                        put("lh", JsonPrimitive(fontSizePx * LINE_HEIGHT_FACTOR))
-                        put("ls", JsonPrimitive(0))
-                        put("fc", jsonArrayOf(color))
-                    })
-                    put("t", JsonPrimitive(0))
-                })
-            })
-        })
-        put("p", buildJsonObject { })
-        put("m", buildJsonObject {
-            put("g", JsonPrimitive(1))
-            put("a", buildJsonObject {
-                put("a", JsonPrimitive(0))
-                put("k", jsonArrayOf(0.0, 0.0))
-            })
-        })
-        put("a", buildJsonArray { animators.forEach { add(it) } })
     }
 }

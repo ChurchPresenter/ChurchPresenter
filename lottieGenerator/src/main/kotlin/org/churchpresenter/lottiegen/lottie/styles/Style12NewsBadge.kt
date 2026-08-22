@@ -196,7 +196,10 @@ class Style12NewsBadge : StyleGenerator {
                 buildJsonArray {
                     add(
                         makeGroup(
-                            listOf(makeRect(mainW * BAND_MASK_W_FACTOR, bandH * BAND_MASK_H_FACTOR, 0.0), makeFill(WHITE)),
+                            listOf(
+                                makeRect(mainW * BAND_MASK_W_FACTOR, bandH * BAND_MASK_H_FACTOR, 0.0),
+                                makeFill(WHITE),
+                            ),
                         ),
                     )
                 },
