@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Sång LA</string>
     <string name="projection_content_song_la_tooltip">Sångförhandsvisning</string>
+    <string name="projection_content_chords_tooltip">Visa en sång med ackord som ackordblad, ackorden ovanför texten</string>
     <string name="projection_content_stt_tooltip">Tal till text – live undertexter och översättning</string>
     <string name="projection_content_web">Webb</string>
     <string name="projection_content_background">Bakgrund</string>
@@ -1711,6 +1712,18 @@
     <string name="stage_monitor_zone_none">Ingen</string>
     <string name="stage_monitor_notes_from_presentation">Anteckningarna visas automatiskt från den aktiva PowerPoint- eller Keynote-bilden.</string>
     <string name="stage_monitor_content_section">Skärminnehåll</string>
+    <string name="stage_monitor_zone_n">Zon %1$d</string>
+    <string name="stage_monitor_zone_shows">Visar</string>
+    <string name="stage_monitor_zone_count">%1$d zoner</string>
+    <string name="stage_monitor_layout_stranded">Visas inte i den här layouten: %1$s</string>
+    <string name="stage_monitor_layout_classic">Klassisk (2 / 3)</string>
+    <string name="stage_monitor_layout_top_bottom">Topp / botten</string>
+    <string name="stage_monitor_layout_left_right">Vänster / höger</string>
+    <string name="stage_monitor_layout_top_two_below">Topp / 2 under</string>
+    <string name="stage_monitor_layout_three_rows">Tre rader</string>
+    <string name="stage_monitor_layout_quad">Fyra zoner</string>
+    <string name="stage_monitor_layout_top_three_below">Topp / 3 under</string>
+    <string name="stage_monitor_layout_top_four_below">Topp / 4 under</string>
     <string name="stage_monitor_metronome_position">Metronomens placering</string>
     <string name="stage_monitor_position_top_center">Uppe i mitten</string>
     <string name="stage_monitor_position_middle_left">Mitten till vänster</string>

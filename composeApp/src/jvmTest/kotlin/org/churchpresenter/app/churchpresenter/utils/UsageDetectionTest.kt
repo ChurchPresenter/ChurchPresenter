@@ -25,12 +25,14 @@ class UsageDetectionTest {
         bibleTranslations: List<Int> = emptyList(),
         displayMode: String = Constants.DISPLAY_MODE_FULLSCREEN,
         targetDisplay: Int = 0,
+        showChords: Boolean = true,
     ) = ScreenAssignment(
         targetDisplay = targetDisplay,
         songMode = songMode,
         bibleMode = bibleMode,
         bibleTranslations = bibleTranslations,
         displayMode = displayMode,
+        showChords = showChords,
     )
 
     // ── Bilingual songs ─────────────────────────────────────────────────────────
@@ -175,19 +177,60 @@ class UsageDetectionTest {
         assertTrue(
             isChordChartPresentation(
                 song(lyrics = withChords),
-                showChords = true,
                 outputs = listOf(out(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)),
             )
         )
     }
 
     @Test
-    fun `chords switched off means no chord chart, however the song is written`() {
+    fun `chords switched off on every output means no chord chart, however the song is written`() {
         assertFalse(
             isChordChartPresentation(
                 song(lyrics = withChords),
-                showChords = false,
-                outputs = listOf(out(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)),
+                outputs = listOf(
+                    out(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR, showChords = false)
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `one output with chords off and another with them on is still a chord chart`() {
+        assertTrue(
+            isChordChartPresentation(
+                song(lyrics = withChords),
+                outputs = listOf(
+                    out(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR, showChords = false),
+                    out(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR, showChords = true),
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `chords on a full-screen output are a chord chart too`() {
+        assertTrue(
+            isChordChartPresentation(
+                song(lyrics = withChords),
+                outputs = listOf(
+                    out(displayMode = Constants.DISPLAY_MODE_FULLSCREEN, showChords = true)
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `a lower third with chords on is a chord chart`() {
+        assertTrue(
+            isChordChartPresentation(
+                song(lyrics = withChords),
+                outputs = listOf(out(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL, showChords = true)),
+            )
+        )
+        assertTrue(
+            isChordChartPresentation(
+                song(lyrics = withChords),
+                outputs = listOf(out(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL, showChords = true)),
             )
         )
     }
@@ -197,25 +240,16 @@ class UsageDetectionTest {
         assertFalse(
             isChordChartPresentation(
                 song(),
-                showChords = true,
                 outputs = listOf(out(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)),
             )
         )
     }
 
     @Test
-    fun `without a stage monitor there is nowhere for a chord chart to appear`() {
+    fun `an output that is not live has nowhere to draw a chord chart`() {
         assertFalse(
             isChordChartPresentation(
                 song(lyrics = withChords),
-                showChords = true,
-                outputs = listOf(out(displayMode = Constants.DISPLAY_MODE_FULLSCREEN)),
-            )
-        )
-        assertFalse(
-            isChordChartPresentation(
-                song(lyrics = withChords),
-                showChords = true,
                 outputs = listOf(
                     out(
                         displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR,

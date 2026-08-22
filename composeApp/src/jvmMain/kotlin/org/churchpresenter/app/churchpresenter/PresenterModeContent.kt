@@ -114,7 +114,8 @@ internal fun PresenterModeContent(
                     displaySectionIndex = songDisplaySectionIndex,
                     showBackground = showBackgroundOverride ?: (showBg && screenAssignment.showSongsBackground),
                     crossfadeEnabled = appSettings.songSettings.crossfade,
-                    languageOverride = screenAssignment.songMode
+                    languageOverride = screenAssignment.songMode,
+                    showChords = screenAssignment.showChords,
                 )
             }
 

@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">ดูล่วงหน้า</string>
     <string name="projection_content_song_la_tooltip">ดูเนื้อเพลงล่วงหน้า</string>
+    <string name="projection_content_chords_tooltip">แสดงเพลงที่มีคอร์ดเป็นแผงคอร์ด โดยวางคอร์ดไว้เหนือเนื้อร้อง</string>
     <string name="projection_content_stt_tooltip">เสียงเป็นข้อความ — คำบรรยายและคำแปลสด</string>
     <string name="projection_content_web">เว็บ</string>
     <string name="projection_content_background">พื้นหลัง</string>
@@ -1711,6 +1712,18 @@
     <string name="stage_monitor_zone_none">ไม่มี</string>
     <string name="stage_monitor_notes_from_presentation">บันทึกจะแสดงอัตโนมัติจากสไลด์ PowerPoint หรือ Keynote ที่ใช้งานอยู่</string>
     <string name="stage_monitor_content_section">เนื้อหาบนจอ</string>
+    <string name="stage_monitor_zone_n">โซน %1$d</string>
+    <string name="stage_monitor_zone_shows">แสดง</string>
+    <string name="stage_monitor_zone_count">%1$d โซน</string>
+    <string name="stage_monitor_layout_stranded">ไม่แสดงในเลย์เอาต์นี้: %1$s</string>
+    <string name="stage_monitor_layout_classic">คลาสสิก (2 / 3)</string>
+    <string name="stage_monitor_layout_top_bottom">บน / ล่าง</string>
+    <string name="stage_monitor_layout_left_right">ซ้าย / ขวา</string>
+    <string name="stage_monitor_layout_top_two_below">บน / 2 ด้านล่าง</string>
+    <string name="stage_monitor_layout_three_rows">สามแถว</string>
+    <string name="stage_monitor_layout_quad">สี่โซน</string>
+    <string name="stage_monitor_layout_top_three_below">บน / 3 ด้านล่าง</string>
+    <string name="stage_monitor_layout_top_four_below">บน / 4 ด้านล่าง</string>
     <string name="stage_monitor_metronome_position">ตำแหน่งเมโทรนอม</string>
     <string name="stage_monitor_position_top_center">บนกึ่งกลาง</string>
     <string name="stage_monitor_position_middle_left">กลางซ้าย</string>

@@ -1400,6 +1400,18 @@
     <string name="stage_monitor_zone_none">Жоқ</string>
     <string name="stage_monitor_notes_from_presentation">Жазбалар белсенді PowerPoint немесе Keynote слайдынан автоматты түрде көрсетіледі.</string>
     <string name="stage_monitor_content_section">Экран мазмұны</string>
+    <string name="stage_monitor_zone_n">%1$d аймақ</string>
+    <string name="stage_monitor_zone_shows">Көрсетеді</string>
+    <string name="stage_monitor_zone_count">%1$d аймақ</string>
+    <string name="stage_monitor_layout_stranded">Бұл орналасуда көрсетілмейді: %1$s</string>
+    <string name="stage_monitor_layout_classic">Классикалық (2 / 3)</string>
+    <string name="stage_monitor_layout_top_bottom">Жоғары / төмен</string>
+    <string name="stage_monitor_layout_left_right">Сол / оң</string>
+    <string name="stage_monitor_layout_top_two_below">Жоғары / 2 төмен</string>
+    <string name="stage_monitor_layout_three_rows">Үш қатар</string>
+    <string name="stage_monitor_layout_quad">Төрт аймақ</string>
+    <string name="stage_monitor_layout_top_three_below">Жоғары / 3 төмен</string>
+    <string name="stage_monitor_layout_top_four_below">Жоғары / 4 төмен</string>
     <string name="stage_monitor_metronome_position">Метроном орны</string>
     <string name="stage_monitor_position_top_center">Жоғарғы орта</string>
     <string name="stage_monitor_position_middle_left">Ортаңғы сол жақ</string>
@@ -1980,6 +1992,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">Ән LA</string>
     <string name="projection_content_song_la_tooltip">Ән алдын ала қарау</string>
+    <string name="projection_content_chords_tooltip">Аккордтары бар әнді аккорд кестесі ретінде көрсету, аккордтар сөздердің үстінде</string>
     <string name="swap_bibles_hint">Негізгі және қосымша Киелі кітаптарды ауыстыру</string>
     <string name="screen_lang_tooltip_off">Бұл экранда көрсетпеу</string>
     <string name="screen_lang_tooltip_primary">Тек негізгі тілді көрсету</string>

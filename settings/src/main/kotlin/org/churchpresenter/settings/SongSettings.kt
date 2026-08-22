@@ -60,6 +60,8 @@ data class SongSettings(
     val lyricsHorizontalAlignment: String = Constants.CENTER,
     val lyricsLowerThirdHorizontalAlignment: String = Constants.CENTER,
     val lyricsColor: String = "#FFFFFF", // White
+    /** The chords' own color in a chart; everything else about them follows the lyrics. */
+    val lyricsChordColor: String = "#4FD3E8",
     val lyricsBold: Boolean = false,
     val lyricsItalic: Boolean = false,
     val lyricsUnderline: Boolean = false,
@@ -68,6 +70,7 @@ data class SongSettings(
     // Lyrics settings — lower third
     val lyricsLowerThirdFontType: String = "Arial",
     val lyricsLowerThirdColor: String = "#FFFFFF",
+    val lyricsLowerThirdChordColor: String = "#4FD3E8",
     val lyricsLowerThirdBold: Boolean = false,
     val lyricsLowerThirdItalic: Boolean = false,
     val lyricsLowerThirdUnderline: Boolean = false,

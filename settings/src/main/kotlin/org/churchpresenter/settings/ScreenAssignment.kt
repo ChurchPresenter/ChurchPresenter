@@ -36,6 +36,8 @@ data class ScreenAssignment(
     val showWebsite: Boolean = true,
     val displayMode: String = "fullscreen", // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
     val songLookAhead: Boolean = false, // enable look-ahead for songs on this output
+    // Whether a chorded song is drawn as a chart on this output, rather than the words alone.
+    val showChords: Boolean = true,
     val showQA: Boolean = true,
     val showSTT: Boolean = true,
     val showDictionary: Boolean = true,

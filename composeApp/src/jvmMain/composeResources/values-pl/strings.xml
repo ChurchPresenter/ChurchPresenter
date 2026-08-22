@@ -1399,6 +1399,18 @@
     <string name="stage_monitor_zone_none">Brak</string>
     <string name="stage_monitor_notes_from_presentation">Notatki są automatycznie wyświetlane z aktywnego slajdu PowerPoint lub Keynote.</string>
     <string name="stage_monitor_content_section">Zawartość ekranu</string>
+    <string name="stage_monitor_zone_n">Strefa %1$d</string>
+    <string name="stage_monitor_zone_shows">Pokazuje</string>
+    <string name="stage_monitor_zone_count">Stref: %1$d</string>
+    <string name="stage_monitor_layout_stranded">Nie jest wyświetlane w tym układzie: %1$s</string>
+    <string name="stage_monitor_layout_classic">Klasyczny (2 / 3)</string>
+    <string name="stage_monitor_layout_top_bottom">Góra / dół</string>
+    <string name="stage_monitor_layout_left_right">Lewo / prawo</string>
+    <string name="stage_monitor_layout_top_two_below">Góra / 2 na dole</string>
+    <string name="stage_monitor_layout_three_rows">Trzy rzędy</string>
+    <string name="stage_monitor_layout_quad">Cztery strefy</string>
+    <string name="stage_monitor_layout_top_three_below">Góra / 3 na dole</string>
+    <string name="stage_monitor_layout_top_four_below">Góra / 4 na dole</string>
     <string name="stage_monitor_metronome_position">Pozycja metronomu</string>
     <string name="stage_monitor_position_top_center">Góra środek</string>
     <string name="stage_monitor_position_middle_left">Środek lewa</string>
@@ -1980,6 +1992,7 @@
     <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="projection_content_song_la">LA piosenki</string>
     <string name="projection_content_song_la_tooltip">Podgląd piosenki</string>
+    <string name="projection_content_chords_tooltip">Pokaż pieśń z akordami jako zapis akordowy, akordy nad tekstem</string>
     <string name="swap_bibles_hint">Zamień miejscami główną i poboczną Biblię</string>
     <string name="screen_lang_tooltip_off">Nie pokazuj na tym ekranie</string>
     <string name="screen_lang_tooltip_primary">Pokazuj tylko język główny</string>

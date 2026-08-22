@@ -526,6 +526,7 @@ internal fun BrowserSourceContent(
                 StageMonitorScreen(
                     sm = appSettings.stageMonitorSettings,
                     presentingMode = effectiveMode,
+                    showChords = screenAssignment.showChords,
                     currentLyricSection = presenterManager.displayedLyricSection.value,
                     allLyricSections = presenterManager.allLyricSections.value,
                     songDisplaySectionIndex = presenterManager.songDisplaySectionIndex.value,
@@ -592,7 +593,8 @@ internal fun BrowserSourceContent(
                                     displaySectionIndex = presenterManager.songDisplaySectionIndex.value,
                                     showBackground = showBg && screenAssignment.showSongsBackground,
                                     crossfadeEnabled = appSettings.songSettings.crossfade,
-                                    languageOverride = screenAssignment.songMode
+                                    languageOverride = screenAssignment.songMode,
+                    showChords = screenAssignment.showChords,
                                 )
                                 Presenting.PICTURES -> PicturePresenter(
                                     imagePath = presenterManager.displayedImagePath.value,

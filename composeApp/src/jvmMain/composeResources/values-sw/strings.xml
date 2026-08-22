@@ -552,6 +552,7 @@
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Wimbo Mbele</string>
     <string name="projection_content_song_la_tooltip">Kuangalia Mbele kwa Wimbo</string>
+    <string name="projection_content_chords_tooltip">Onyesha wimbo wenye kodi kama chati ya kodi, kodi juu ya maneno</string>
     <string name="projection_content_stt_tooltip">Speech to Text — manukuu ya live na tafsiri</string>
     <string name="projection_content_web">Wavuti</string>
     <string name="projection_content_background">Usuli</string>
@@ -1711,6 +1712,18 @@
     <string name="stage_monitor_zone_none">Hakuna</string>
     <string name="stage_monitor_notes_from_presentation">Maelezo huonyeshwa yenyewe kutoka slaidi hai ya PowerPoint au Keynote.</string>
     <string name="stage_monitor_content_section">Maudhui ya skrini</string>
+    <string name="stage_monitor_zone_n">Eneo %1$d</string>
+    <string name="stage_monitor_zone_shows">Inaonyesha</string>
+    <string name="stage_monitor_zone_count">Maeneo %1$d</string>
+    <string name="stage_monitor_layout_stranded">Haionyeshwi katika mpangilio huu: %1$s</string>
+    <string name="stage_monitor_layout_classic">Klasiki (2 / 3)</string>
+    <string name="stage_monitor_layout_top_bottom">Juu / chini</string>
+    <string name="stage_monitor_layout_left_right">Kushoto / kulia</string>
+    <string name="stage_monitor_layout_top_two_below">Juu / 2 chini</string>
+    <string name="stage_monitor_layout_three_rows">Safu tatu</string>
+    <string name="stage_monitor_layout_quad">Maeneo manne</string>
+    <string name="stage_monitor_layout_top_three_below">Juu / 3 chini</string>
+    <string name="stage_monitor_layout_top_four_below">Juu / 4 chini</string>
     <string name="stage_monitor_metronome_position">Nafasi ya metronomu</string>
     <string name="stage_monitor_position_top_center">Juu katikati</string>
     <string name="stage_monitor_position_middle_left">Katikati kushoto</string>

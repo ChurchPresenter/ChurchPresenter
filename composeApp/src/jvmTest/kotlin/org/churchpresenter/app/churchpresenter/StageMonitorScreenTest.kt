@@ -146,7 +146,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a live verse is shown with its reference above the text`() {
         screen(
-            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
             presentingMode = Presenting.BIBLE,
             displayedVerses = listOf(verse()),
         ) {
@@ -157,7 +157,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a verse range is shown as the range, not as the first verse number`() {
         screen(
-            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
             presentingMode = Presenting.BIBLE,
             displayedVerses = listOf(verse(number = 16, range = "16-18")),
         ) {
@@ -169,8 +169,8 @@ class StageMonitorScreenTest {
     fun `the next verse is a lookahead, not the current one repeated`() {
         screen(
             sm = routing(
-                StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT,
-                StageMonitorContentType.NEXT to StageMonitorZone.TOP_RIGHT,
+                StageMonitorContentType.BIBLE to StageMonitorZone.A,
+                StageMonitorContentType.NEXT to StageMonitorZone.B,
             ),
             presentingMode = Presenting.BIBLE,
             displayedVerses = listOf(verse(number = 16, text = "current verse")),
@@ -184,7 +184,7 @@ class StageMonitorScreenTest {
     @Test
     fun `with no verse selected the bible zone draws nothing`() {
         screen(
-            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
             presentingMode = Presenting.BIBLE,
             displayedVerses = emptyList(),
         ) {
@@ -195,7 +195,7 @@ class StageMonitorScreenTest {
     @Test
     fun `with no next verse the lookahead zone stays empty`() {
         screen(
-            sm = routing(StageMonitorContentType.NEXT to StageMonitorZone.TOP_RIGHT),
+            sm = routing(StageMonitorContentType.NEXT to StageMonitorZone.B),
             presentingMode = Presenting.BIBLE,
             displayedVerses = listOf(verse()),
             nextVerses = emptyList(),
@@ -209,7 +209,7 @@ class StageMonitorScreenTest {
     @Test
     fun `the live section's lines are shown together`() {
         screen(
-            sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A),
             presentingMode = Presenting.LYRICS,
             currentLyricSection = section("first line", "second line"),
         ) {
@@ -221,8 +221,8 @@ class StageMonitorScreenTest {
     fun `the next zone shows the section after the one being sung`() {
         screen(
             sm = routing(
-                StageMonitorContentType.SONGS to StageMonitorZone.TOP_LEFT,
-                StageMonitorContentType.NEXT to StageMonitorZone.TOP_RIGHT,
+                StageMonitorContentType.SONGS to StageMonitorZone.A,
+                StageMonitorContentType.NEXT to StageMonitorZone.B,
             ),
             presentingMode = Presenting.LYRICS,
             currentLyricSection = section("now singing"),
@@ -237,7 +237,7 @@ class StageMonitorScreenTest {
     @Test
     fun `on the last section the next zone is empty rather than wrapping around`() {
         screen(
-            sm = routing(StageMonitorContentType.NEXT to StageMonitorZone.TOP_RIGHT),
+            sm = routing(StageMonitorContentType.NEXT to StageMonitorZone.B),
             presentingMode = Presenting.LYRICS,
             currentLyricSection = section("the last one"),
             allLyricSections = listOf(section("the first one"), section("the last one")),
@@ -252,7 +252,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a zone shows nothing when the type routed to it is not live`() {
         screen(
-            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
             presentingMode = Presenting.LYRICS,
             currentLyricSection = section("a lyric nobody routed"),
             displayedVerses = listOf(verse()),
@@ -278,7 +278,7 @@ class StageMonitorScreenTest {
             sm = routing(
                 StageMonitorContentType.BIBLE to StageMonitorZone.FULL_SCREEN,
                 // Assigned a quadrant, and live — but full screen wins outright.
-                StageMonitorContentType.NEXT to StageMonitorZone.TOP_RIGHT,
+                StageMonitorContentType.NEXT to StageMonitorZone.B,
             ),
             presentingMode = Presenting.BIBLE,
             displayedVerses = listOf(verse(text = "the whole screen")),
@@ -293,8 +293,8 @@ class StageMonitorScreenTest {
     fun `two types in one zone resolve to the live one`() {
         screen(
             sm = routing(
-                StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT,
-                StageMonitorContentType.SONGS to StageMonitorZone.TOP_LEFT,
+                StageMonitorContentType.BIBLE to StageMonitorZone.A,
+                StageMonitorContentType.SONGS to StageMonitorZone.A,
             ),
             presentingMode = Presenting.LYRICS,
             currentLyricSection = section("the live one"),
@@ -309,7 +309,7 @@ class StageMonitorScreenTest {
 
     @Test
     fun `a clock zone shows a clock`() {
-        screen(sm = routing(StageMonitorContentType.CLOCK to StageMonitorZone.BOTTOM_LEFT)) {
+        screen(sm = routing(StageMonitorContentType.CLOCK to StageMonitorZone.C)) {
             assertTrue(
                 renderedText().any { CLOCK_SHAPE.containsMatchIn(it) },
                 "expected a clock, got ${renderedText()}",
@@ -321,8 +321,8 @@ class StageMonitorScreenTest {
     fun `a zone sharing a live type with the clock falls back to the clock when idle`() {
         screen(
             sm = routing(
-                StageMonitorContentType.BIBLE to StageMonitorZone.BOTTOM_LEFT,
-                StageMonitorContentType.CLOCK to StageMonitorZone.BOTTOM_LEFT,
+                StageMonitorContentType.BIBLE to StageMonitorZone.C,
+                StageMonitorContentType.CLOCK to StageMonitorZone.C,
             ),
             presentingMode = Presenting.NONE,
         ) {
@@ -334,8 +334,8 @@ class StageMonitorScreenTest {
     fun `the live type wins over the clock in a shared zone`() {
         screen(
             sm = routing(
-                StageMonitorContentType.BIBLE to StageMonitorZone.BOTTOM_LEFT,
-                StageMonitorContentType.CLOCK to StageMonitorZone.BOTTOM_LEFT,
+                StageMonitorContentType.BIBLE to StageMonitorZone.C,
+                StageMonitorContentType.CLOCK to StageMonitorZone.C,
             ),
             presentingMode = Presenting.BIBLE,
             displayedVerses = listOf(verse(text = "scripture beats the clock")),
@@ -351,8 +351,8 @@ class StageMonitorScreenTest {
     fun `an announcement is shown alongside the verse, not instead of it`() {
         screen(
             sm = routing(
-                StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT,
-                StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.BOTTOM_MIDDLE,
+                StageMonitorContentType.BIBLE to StageMonitorZone.A,
+                StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.D,
             ),
             presentingMode = Presenting.BIBLE,
             announcementActive = true,
@@ -368,7 +368,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a timer zone with nothing to show holds a placeholder`() {
         screen(
-            sm = routing(StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.BOTTOM_MIDDLE),
+            sm = routing(StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.D),
             presentingMode = Presenting.ANNOUNCEMENTS,
             announcementText = "",
         ) {
@@ -379,7 +379,7 @@ class StageMonitorScreenTest {
     @Test
     fun `announcements mode alone does not light up the bible zone`() {
         screen(
-            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
             presentingMode = Presenting.ANNOUNCEMENTS,
             displayedVerses = listOf(verse(text = "not live any more")),
             announcementText = "10:00",
@@ -393,7 +393,7 @@ class StageMonitorScreenTest {
     @Test
     fun `presenter notes are shown while a deck is live`() {
         screen(
-            sm = routing(StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.BOTTOM_RIGHT),
+            sm = routing(StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.E),
             presentingMode = Presenting.PRESENTATION,
             presenterNotes = "remember to mention the offering",
         ) {
@@ -404,7 +404,7 @@ class StageMonitorScreenTest {
     @Test
     fun `presenter notes are not shown when a deck is not live`() {
         screen(
-            sm = routing(StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.BOTTOM_RIGHT),
+            sm = routing(StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.E),
             presentingMode = Presenting.LYRICS,
             currentLyricSection = section("a lyric"),
             presenterNotes = "notes for a deck nobody is showing",
@@ -418,7 +418,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a live slide is drawn`() {
         screen(
-            sm = routing(StageMonitorContentType.PRESENTATION to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.PRESENTATION to StageMonitorZone.A),
             presentingMode = Presenting.PRESENTATION,
             displayedSlide = ImageBitmap(16, 16),
         ) {
@@ -429,7 +429,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a presentation zone with no slide yet draws no image`() {
         screen(
-            sm = routing(StageMonitorContentType.PRESENTATION to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.PRESENTATION to StageMonitorZone.A),
             presentingMode = Presenting.PRESENTATION,
             displayedSlide = null,
         ) {
@@ -445,7 +445,7 @@ class StageMonitorScreenTest {
         try {
             ImageIO.write(BufferedImage(4, 4, BufferedImage.TYPE_INT_ARGB), "png", file)
             screen(
-                sm = routing(StageMonitorContentType.PICTURES to StageMonitorZone.TOP_LEFT),
+                sm = routing(StageMonitorContentType.PICTURES to StageMonitorZone.A),
                 presentingMode = Presenting.PICTURES,
                 displayedImagePath = file.absolutePath,
             ) {
@@ -459,7 +459,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a pictures zone with nothing loaded yet draws no image`() {
         screen(
-            sm = routing(StageMonitorContentType.PICTURES to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.PICTURES to StageMonitorZone.A),
             presentingMode = Presenting.PICTURES,
             displayedImagePath = null,
         ) {
@@ -477,7 +477,7 @@ class StageMonitorScreenTest {
             ),
         )
         screen(
-            sm = routing(StageMonitorContentType.CANVAS to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.CANVAS to StageMonitorZone.A),
             presentingMode = Presenting.CANVAS,
             activeScene = scene,
         ) {
@@ -488,7 +488,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a canvas zone with no active scene draws nothing`() {
         screen(
-            sm = routing(StageMonitorContentType.CANVAS to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.CANVAS to StageMonitorZone.A),
             presentingMode = Presenting.CANVAS,
             activeScene = null,
         ) {
@@ -501,7 +501,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a live question is shown`() {
         screen(
-            sm = routing(StageMonitorContentType.QA to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.QA to StageMonitorZone.A),
             presentingMode = Presenting.QA,
             displayedQuestion = Question(id = "q1", text = "What time is the potluck?", timestamp = 0L),
             qaSettings = QASettings(),
@@ -513,7 +513,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a qa zone with no live question draws nothing`() {
         screen(
-            sm = routing(StageMonitorContentType.QA to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.QA to StageMonitorZone.A),
             presentingMode = Presenting.QA,
             displayedQuestion = null,
         ) {
@@ -526,7 +526,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a live dictionary entry is shown`() {
         screen(
-            sm = routing(StageMonitorContentType.DICTIONARY to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.DICTIONARY to StageMonitorZone.A),
             presentingMode = Presenting.DICTIONARY,
             displayedDictionaryEntry = StrongsEntry(
                 number = "H430",
@@ -544,7 +544,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a dictionary zone with no live entry draws nothing`() {
         screen(
-            sm = routing(StageMonitorContentType.DICTIONARY to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.DICTIONARY to StageMonitorZone.A),
             presentingMode = Presenting.DICTIONARY,
             displayedDictionaryEntry = null,
         ) {
@@ -562,7 +562,7 @@ class StageMonitorScreenTest {
             Presenting.STT to StageMonitorContentType.STT,
         )) {
             screen(
-                sm = routing(contentType to StageMonitorZone.TOP_LEFT),
+                sm = routing(contentType to StageMonitorZone.A),
                 presentingMode = presentingMode,
             ) {
                 assertEquals(emptySet(), renderedText(), "presentingMode=$presentingMode")
@@ -575,7 +575,7 @@ class StageMonitorScreenTest {
     @Test
     fun `a media zone with no view model draws nothing`() {
         screen(
-            sm = routing(StageMonitorContentType.MEDIA to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.MEDIA to StageMonitorZone.A),
             presentingMode = Presenting.MEDIA,
             mediaViewModel = null,
         ) {
@@ -587,7 +587,7 @@ class StageMonitorScreenTest {
     fun `a media zone with an audio file selected draws nothing`() {
         val viewModel = MediaViewModel().apply { loadMedia("file:///tmp/song.mp3", Constants.MEDIA_TYPE_LOCAL) }
         screen(
-            sm = routing(StageMonitorContentType.MEDIA to StageMonitorZone.TOP_LEFT),
+            sm = routing(StageMonitorContentType.MEDIA to StageMonitorZone.A),
             presentingMode = Presenting.MEDIA,
             mediaViewModel = viewModel,
         ) {
@@ -601,11 +601,11 @@ class StageMonitorScreenTest {
     fun `every zone can draw at once`() {
         screen(
             sm = routing(
-                StageMonitorContentType.BIBLE to StageMonitorZone.TOP_LEFT,
-                StageMonitorContentType.NEXT to StageMonitorZone.TOP_RIGHT,
-                StageMonitorContentType.CLOCK to StageMonitorZone.BOTTOM_LEFT,
-                StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.BOTTOM_MIDDLE,
-                StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.BOTTOM_RIGHT,
+                StageMonitorContentType.BIBLE to StageMonitorZone.A,
+                StageMonitorContentType.NEXT to StageMonitorZone.B,
+                StageMonitorContentType.CLOCK to StageMonitorZone.C,
+                StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.D,
+                StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.E,
             ),
             presentingMode = Presenting.BIBLE,
             announcementActive = true,
@@ -632,8 +632,8 @@ class StageMonitorScreenTest {
             underline = true,
         )
         screen(
-            sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.TOP_LEFT).copy(
-                zoneStyles = mapOf(StageMonitorStyleZone.TOP_LEFT to style),
+            sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A).copy(
+                zoneStyles = mapOf(StageMonitorStyleZone.A to style),
             ),
             presentingMode = Presenting.LYRICS,
             currentLyricSection = section("styled lyric"),
@@ -662,7 +662,7 @@ class StageMonitorScreenTest {
 
     @Test
     fun `the metronome only appears for a song with a tempo`() {
-        val sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.TOP_LEFT)
+        val sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A)
             .copy(metronomePosition = MetronomePosition.TOP_CENTER)
 
         screen(sm = sm, presentingMode = Presenting.LYRICS, currentLyricSection = section("a", bpm = 90)) {
@@ -684,7 +684,7 @@ class StageMonitorScreenTest {
     @Test
     fun `no metronome position means no dot at all`() {
         screen(
-            sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.TOP_LEFT)
+            sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A)
                 .copy(metronomePosition = MetronomePosition.NONE),
             presentingMode = Presenting.LYRICS,
             currentLyricSection = section("a", bpm = 120),
