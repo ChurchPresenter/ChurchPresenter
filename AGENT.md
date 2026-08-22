@@ -237,11 +237,24 @@ images from the workflow *artifact* attached to the merge-base commit's run, so 
 branch can affect whether a comparison works. Nothing under `composeApp/screenshots/` is affected
 either; those are the images reviewers approve.
 
-**Nothing is known-red any more.** `previewApp/about_*` (the git hash in
-`BuildConfig.VERSION_DISPLAY`) and `previewApp/dictionary_light` (a count read mid-load) were both
-fixed in their suites rather than by widening the threshold, along with `colour_picker`,
-`settings_companion_satellite_*` and a stale `canvas_*`; `ScreenshotSupport` records what each one
-was. A `verifyRoborazziJvm` failure is now a real difference — read it, do not wave it through.
+`previewApp/about_*` (the git hash in `BuildConfig.VERSION_DISPLAY`) and
+`previewApp/dictionary_light` (a count read mid-load) were both fixed in their suites rather than by
+widening the threshold, along with `colour_picker`, `settings_companion_satellite_*` and a stale
+`canvas_*`; `ScreenshotSupport` records what each one was.
+
+**Two churn sources are NOT fixed, and they fail 24 of the 914 images on a clean `main`** — measured
+2026-08-22 on macOS, `main` and a feature branch producing byte-identical failure sets:
+
+| suite | images | why it changes every run |
+|---|---|---|
+| `StageMonitorScreenshotTest` | 22 | The stage monitor draws a **live wall clock**. The diff is literally `06:47:19 PM` against `01:56:04 AM`. |
+| `AppPreviewSettingsScreenshotTest` → `settings_stage_monitor_*` | 1 | Same clock, inside the settings preview. |
+| `CanvasTabScreenshotTest` → `source_camera` | 1 | Enumerates the host's **real capture devices**. Committed as "MacBook Pro Camera"; a machine without one renders "Capture screen 0". |
+
+Both are the same shape as the `about_*` git-hash case that *was* fixed — a value from outside the
+composition leaking into the picture — and both want the same remedy: take the value as a parameter
+and let the test pin it. Until then `verifyRoborazziJvm` cannot be read as pass/fail; check the
+failing names against this table first, and treat **anything else** as a real difference.
 
 Every state is shot in **both themes and stacked into one image**, light above dark — go through
 `stackedThemes` (or `captureComponent`, which wraps it) and a state is written once, not twice. One
