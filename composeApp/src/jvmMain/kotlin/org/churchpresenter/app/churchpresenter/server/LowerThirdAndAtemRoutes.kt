@@ -10,6 +10,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.websocket.readText
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -177,9 +178,11 @@ private fun Route.atemClipRoutes(
                         )
                         return@post
                     }
-                    scope.launch {
-                        uploadClipFrames(file, atem, slot, key, name, lottieJson, fps, frameCount)
-                    }
+                    server.atem.trackUpload(
+                        scope.launch {
+                            uploadClipFrames(file, atem, slot, key, name, lottieJson, fps, frameCount)
+                        }
+                    )
                     val keyInfoClip = when {
                         !key.on -> ""
                         key.useDsk -> ""","dsk":${key.keyer + 1}"""
@@ -232,7 +235,9 @@ private suspend fun handleAtemStillUpload(
                     call.respond(HttpStatusCode.BadRequest, """{"error":${server.atem.jsonStr(it)}}""")
                     return
                 }
-                scope.launch { uploadStillFrame(file, atem, slot, key, name) }
+                // Tracked, not dropped: the transfer outlives this response, so something has to
+                // be able to stop it -- see AtemBridge.cancelUpload.
+                server.atem.trackUpload(scope.launch { uploadStillFrame(file, atem, slot, key, name) })
                 val keyInfo = when {
                     !key.on -> ""
                     key.useDsk -> ""","dsk":${key.keyer + 1}"""
@@ -272,6 +277,12 @@ private suspend fun uploadStillFrame(
         AtemUploadStatus.complete(uploadId)
         delay(KEY_SETTLE_MS)
         AtemUploadStatus.clear(uploadId)
+    } catch (e: CancellationException) {
+        // Cancelled deliberately -- the ATEM was repointed, or the server is going down. Not a
+        // failure, so leave no error banner behind, and let it propagate: swallowing it here would
+        // report a cancelled upload as a broken one.
+        AtemUploadStatus.clear(uploadId)
+        throw e
     } catch (e: Exception) {
         System.err.println("[CompanionServer] ATEM still upload failed for '$name': ${e.message}")
         CrashReporter.reportWarning(
@@ -338,6 +349,12 @@ private suspend fun uploadClipFrames(
                 client.setKeyOnAir(AtemKey(key.useDsk, key.mixEffect, key.keyer), false)
             }
         }
+    } catch (e: CancellationException) {
+        // Cancelled deliberately -- the ATEM was repointed, or the server is going down. Not a
+        // failure, so leave no error banner behind, and let it propagate: swallowing it here would
+        // report a cancelled upload as a broken one.
+        AtemUploadStatus.clear(uploadId)
+        throw e
     } catch (e: Exception) {
         System.err.println("[CompanionServer] ATEM clip upload failed for '$name': ${e.message}")
         CrashReporter.reportWarning(

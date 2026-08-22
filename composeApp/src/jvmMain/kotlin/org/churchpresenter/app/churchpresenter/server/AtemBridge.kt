@@ -9,6 +9,8 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.websocket.readText
 import java.io.File
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.serialization.json.Json
 import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
@@ -29,10 +31,47 @@ internal class AtemBridge(private val json: Json) {
     @Volatile internal var _atemSettings: AtemSettings? = null
     @Volatile private var _lowerThirdFolder: String = ""
 
+    /**
+     * The coroutine currently uploading to the media pool, or null when nothing is in flight.
+     *
+     * The upload routes answer the HTTP request before doing any ATEM work and then transfer on the
+     * server's own scope, so without a handle here nothing -- not a settings change, not a shutdown,
+     * not a test -- can tell whether an upload is still running, let alone stop it. Written from the
+     * route's thread and read from whoever changes the configuration, hence the lock rather than a
+     * bare field: [cancelUpload] must not race a [trackUpload] into cancelling the wrong job.
+     */
+    private var uploadJob: Job? = null
+    private val uploadLock = Any()
+
+    /** Records the coroutine now performing an upload, replacing any previous one. */
+    internal fun trackUpload(job: Job) {
+        synchronized(uploadLock) { uploadJob = job }
+    }
+
+    /**
+     * Stops the in-flight upload and waits for it to actually be over.
+     *
+     * The join is the point. Cancelling alone only *asks*, and the upload's next act would be
+     * another `AtemConnectionManager.use` -- so a caller that dropped the pooled connection and then
+     * merely cancelled could still have it re-opened and re-cached behind its back. Returning only
+     * once the coroutine has stopped is what makes "the upload is over" something a caller can rely
+     * on. Normally instant: an upload past its transfer is sitting in a cancellable `delay`.
+     */
+    internal suspend fun cancelUpload() {
+        val job = synchronized(uploadLock) { uploadJob.also { uploadJob = null } } ?: return
+        job.cancelAndJoin()
+    }
+
     /** Applies new ATEM settings, dropping the pooled connection when the endpoint moved. */
     fun updateConfig(atem: AtemSettings, lowerThirdFolder: String) {
         val prev = _atemSettings
         if (prev == null || prev.host != atem.host || prev.port != atem.port) {
+            // An upload in flight is aimed at the switcher that is being moved away from. Let it run
+            // and it keeps writing to the old endpoint, and re-caches a connection to it the moment
+            // it reaches its next `use` -- undoing the invalidate below. Not joined here: this is
+            // not a suspending call, and the generation counter in AtemConnectionManager covers the
+            // connect that may be in flight at this instant.
+            synchronized(uploadLock) { uploadJob.also { uploadJob = null } }?.cancel()
             AtemConnectionManager.invalidate()
         }
         _atemSettings = atem
