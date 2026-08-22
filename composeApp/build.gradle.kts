@@ -325,6 +325,8 @@ kotlin {
             implementation(projects.planningCenter)
             // Bible module formats and the download catalogues behind the in-app browser.
             implementation(projects.bibleFormats)
+            // The Bible itself: the loaded translation, its books, verses and search.
+            implementation(projects.bible)
             // The song library: the grid of every song in the library, opened from the Help menu.
             implementation(projects.songlibrary)
             implementation(projects.songChords)
@@ -446,6 +448,13 @@ val resolvedJdk21Home: String? = run {
 // now lives in :core-models.
 dependencies {
     add("jvmTestImplementation", testFixtures(projects.coreModels))
+    // CrashReportSweep: the Bible tab and view-model failure tests exercise paths that really
+    // write a crash report. It lives with :diagnostics because it exists for CrashReporter's own
+    // design -- the report directory is resolved once per JVM and cannot be redirected after.
+    add("jvmTestImplementation", testFixtures(projects.diagnostics))
+    // SpbFixture: the .spb writer the Bible tab, view-model and server suites build fixtures with.
+    // It stays with the module that owns the format.
+    add("jvmTestImplementation", testFixtures(projects.bible))
     // pdfDeck(): Deck's constructor is internal to :presentation-engine, so tests that need a
     // synthetic deck build it through the module's own fixtures.
     add("jvmTestImplementation", testFixtures(projects.presentationEngine))

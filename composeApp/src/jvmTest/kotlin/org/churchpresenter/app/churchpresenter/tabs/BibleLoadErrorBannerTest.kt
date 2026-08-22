@@ -5,7 +5,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.data.BibleLoadError
+import org.churchpresenter.bible.BibleLoadError
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

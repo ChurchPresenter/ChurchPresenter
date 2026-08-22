@@ -4,7 +4,7 @@ import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.data.SpbFixture
+import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.planningcenter.PlanningCenterClient
 import org.churchpresenter.settings.SettingsManager

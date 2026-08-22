@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import org.churchpresenter.bible.BibleBook
+import org.churchpresenter.bible.BibleSearch
 import org.churchpresenter.core.models.songs.CachedSong
 import org.churchpresenter.core.models.songs.SongCache
 import org.churchpresenter.core.models.songs.SongItem

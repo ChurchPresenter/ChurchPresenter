@@ -58,7 +58,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import androidx.compose.runtime.produceState
 import java.io.File
-import org.churchpresenter.app.churchpresenter.data.readTranslationTitle
+import org.churchpresenter.bible.readTranslationTitle
 
 @Composable
 internal fun BibleProperties(

@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import kotlinx.coroutines.flow.first
-import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.bible.Bible
 import org.churchpresenter.core.models.bible.SelectedVerse
 
 /**

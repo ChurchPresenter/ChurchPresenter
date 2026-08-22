@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.bible
 
 import org.churchpresenter.diagnostics.CrashReporter
 import java.io.FileNotFoundException

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.bible
 
 data class BibleVerse(
     val verseId: String = "",

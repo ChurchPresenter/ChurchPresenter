@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.data.SpbFixture
+import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.utils.Constants

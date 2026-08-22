@@ -80,3 +80,6 @@ include(":bible-formats")
 // counts as a section heading, transposition, and the chord-sheet import that produces the markup.
 // Depended on by :composeApp and by :converter, which needs the same rule to write songs out.
 include(":song-chords")
+
+// The Bible itself: the loaded translation, its books, verses and search.
+include(":bible")

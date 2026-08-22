@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.bible.Bible
 import org.churchpresenter.settings.utils.Constants
 
 private const val SUMMARY_PREVIEW_CHARS = 60

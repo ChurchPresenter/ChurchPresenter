@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import org.churchpresenter.bible.Bible
+import org.churchpresenter.bible.SpbFixture
 import io.sentry.NoOpTransportFactory
 import io.sentry.Sentry
 import java.io.File

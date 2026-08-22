@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockkConstructor
 import io.mockk.unmockkConstructor
 import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
-import org.churchpresenter.app.churchpresenter.data.SpbFixture
+import org.churchpresenter.bible.SpbFixture
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
