@@ -24,13 +24,12 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockkConstructor
 import io.mockk.unmockkConstructor
-import io.mockk.unmockkObject
-import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
-import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.dictionary.DictionaryFixture
+import org.churchpresenter.dictionary.InterlinearRepository
+import org.churchpresenter.dictionary.InterlinearVerse
+import org.churchpresenter.dictionary.StrongsEntry
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryFixture
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
 
 /**
@@ -101,7 +100,6 @@ internal fun dictionaryTab(
     themeMode: ThemeMode? = null,
     block: ComposeUiTest.(vm: DictionaryViewModel, reports: DictionaryReports) -> Unit,
 ) {
-    DictionaryFixture.stubResources(extraEntries)
     mockkConstructor(InterlinearRepository::class)
     coEvery { anyConstructed<InterlinearRepository>().ensureGreekLoaded() } returns Unit
     coEvery { anyConstructed<InterlinearRepository>().ensureHebrewLoaded() } returns Unit
@@ -120,7 +118,7 @@ internal fun dictionaryTab(
     every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(any(), any(), any()) } answers {
         strongsForBookChapter[firstArg()] ?: emptySet()
     }
-    val vm = DictionaryViewModel()
+    val vm = DictionaryViewModel(DictionaryFixture.catalog(extraEntries))
     val reports = DictionaryReports()
     try {
         runComposeUiTest {
@@ -154,7 +152,6 @@ internal fun dictionaryTab(
     } finally {
         runCatching { vm.dispose() }
         unmockkConstructor(InterlinearRepository::class)
-        unmockkObject(churchpresenter.composeapp.generated.resources.Res)
     }
 }
 

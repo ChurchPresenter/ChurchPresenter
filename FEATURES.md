@@ -53,7 +53,9 @@
   `BibleVerse.kt`, `BibleTranslationNames.kt` and the `.spb` format helpers in `SpbFormat.kt`
 - `data/BibleBookNames.kt`, `data/BibleBookAbbreviations.kt` — these stay in the app: they resolve
   Compose string resources, which `:bible` deliberately has no access to
-- `data/StrongsEntry.kt`
+- `dictionary/` (the `:dictionary` Gradle module) — the bundled Strong's dictionary and the
+  interlinear index over it: `StrongsEntry`, `InterlinearVerse`, `StrongsCatalog`,
+  `InterlinearRepository` and the `StrongsDictionaryRepository` the REST routes serve
 - `bible-formats/` (the `:bible-formats` Gradle module) — the download catalogues and the `.spb` converters behind them
 - `bible-formats/src/main/kotlin/.../catalog/` — `EBibleSource` (eBible.org, USFX), `ZefaniaSource` + `ZefaniaRepositoryIndex`, `BebliaSource` + `BebliaCatalogIndex`
 - `viewmodel/BibleCatalogViewModel.kt`, `dialogs/BibleCatalogBrowserDialog.kt` — download browser UI

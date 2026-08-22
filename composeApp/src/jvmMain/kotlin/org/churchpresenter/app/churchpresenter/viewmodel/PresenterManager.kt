@@ -25,7 +25,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.dictionary.StrongsEntry
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.settings.utils.Constants
 

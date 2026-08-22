@@ -1,14 +1,13 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import churchpresenter.composeapp.generated.resources.Res
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockkConstructor
 import io.mockk.unmockkConstructor
-import io.mockk.unmockkObject
-import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
-import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
+import org.churchpresenter.dictionary.DictionaryFixture
+import org.churchpresenter.dictionary.InterlinearRepository
+import org.churchpresenter.dictionary.InterlinearVerse
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -37,7 +36,6 @@ class DictionaryViewModelInterlinearTest {
 
     @BeforeTest
     fun stubData() {
-        DictionaryFixture.stubResources()
         mockkConstructor(InterlinearRepository::class)
         coEvery { anyConstructed<InterlinearRepository>().ensureGreekLoaded() } returns Unit
         coEvery { anyConstructed<InterlinearRepository>().ensureHebrewLoaded() } returns Unit
@@ -59,7 +57,6 @@ class DictionaryViewModelInterlinearTest {
         created.forEach { runCatching { it.dispose() } }
         created.clear()
         unmockkConstructor(InterlinearRepository::class)
-        unmockkObject(Res)
     }
 
     private fun awaitUntil(what: String, timeoutMs: Long = 5_000, condition: () -> Boolean) {
@@ -71,7 +68,7 @@ class DictionaryViewModelInterlinearTest {
         throw AssertionError("timed out after ${timeoutMs}ms waiting for $what")
     }
 
-    private fun vm(): DictionaryViewModel = DictionaryViewModel().also { created.add(it) }
+    private fun vm(): DictionaryViewModel = DictionaryViewModel(DictionaryFixture.catalog()).also { created.add(it) }
 
     /** A view model with the fixture dictionary loaded. */
     private fun loaded(): DictionaryViewModel {

@@ -6,7 +6,7 @@ import java.io.File
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.dictionary.StrongsEntry
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundSettings

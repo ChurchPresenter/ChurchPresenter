@@ -6,10 +6,10 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
-import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
-import org.churchpresenter.app.churchpresenter.data.InterlinearWord
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryFixture
+import org.churchpresenter.dictionary.InterlinearVerse
+import org.churchpresenter.dictionary.InterlinearWord
+import org.churchpresenter.dictionary.StrongsEntry
+import org.churchpresenter.dictionary.DictionaryFixture
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

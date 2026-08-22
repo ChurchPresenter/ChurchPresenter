@@ -83,3 +83,8 @@ include(":song-chords")
 
 // The Bible itself: the loaded translation, its books, verses and search.
 include(":bible")
+
+// The bundled study data behind the Dictionary tab: the Strong's dictionary itself and the
+// interlinear index that says where each number appears. Plain files on the classpath and the
+// lookups over them — depended on by :composeApp, which draws the tab and serves the REST routes.
+include(":dictionary")

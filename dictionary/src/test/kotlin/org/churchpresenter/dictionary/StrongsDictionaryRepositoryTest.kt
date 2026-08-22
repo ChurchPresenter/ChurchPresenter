@@ -1,64 +1,30 @@
-package org.churchpresenter.app.churchpresenter.server
+package org.churchpresenter.dictionary
 
-import churchpresenter.composeapp.generated.resources.Res
-import io.mockk.coEvery
-import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryFixture
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
- * The pure lookup/formatting helpers behind the dictionary REST endpoints, plus the suspend loaders
- * ([StrongsDictionaryRepository.all]/[lookup]/[search]/[versesFor]) — driven with
- * [DictionaryFixture]'s stubbed `Res.readBytes` (the same fixture `DictionaryViewModel`'s tests use,
- * since it is the same bundled dictionary) plus a small stubbed interlinear index, rather than the
- * real ~14k-entry files.
+ * Search and lookup over the dictionary, as the REST endpoints ask for them.
  *
- * [StrongsDictionaryRepository] is a singleton with its own load-once [StrongsDictionaryRepository.cache]
- * — cleared before and after every test here so this class can neither read another test's real data
- * nor leave stubbed data behind for one.
+ * Driven with [DictionaryFixture] rather than the real ~14k-entry files: everything asserted here
+ * is filtering, ordering, scoping and capping, and a four-entry corpus makes each of those a
+ * one-line expectation. Each test builds its own repository, so nothing is shared and nothing has
+ * to be reset.
  */
 class StrongsDictionaryRepositoryTest {
 
-    private val repo = StrongsDictionaryRepository
+    private val files = RecordingFiles()
 
-    private val greekInterlinear = """
-        [
-          {"r":"043003016","w":[{"t":"ἀγάπη","s":"G26"},{"t":"θεός","s":"G2316"}]},
-          {"r":"040005003","w":[{"t":"ἀγάπη","s":"G26"}]}
-        ]
-    """.trimIndent()
-
-    private val hebrewInterlinear = """
-        [
-          {"r":"001001001","w":[{"t":"אֱלֹהִים","s":"H430"},{"t":"רֵאשִׁית","s":"H7225"}]},
-          {"r":"019023001","w":[{"t":"אֱלֹהִים","s":"H430"}]}
-        ]
-    """.trimIndent()
-
-    @BeforeTest
-    fun stubDictionary() {
-        repo.cache.clear()
-        repo.interlinear.resetForTest()
-        DictionaryFixture.stubResources()
-        coEvery { Res.readBytes("files/dictionary/interlinear_g.json") } returns greekInterlinear.toByteArray()
-        coEvery { Res.readBytes("files/dictionary/interlinear_h.json") } returns hebrewInterlinear.toByteArray()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        repo.cache.clear()
-        repo.interlinear.resetForTest()
-        unmockkObject(Res)
-    }
+    private val repo = StrongsDictionaryRepository(
+        catalog = DictionaryFixture.catalog(),
+        interlinear = files.repository(),
+    )
 
     // ── all() ──────────────────────────────────────────────────────────────────
 
@@ -72,11 +38,18 @@ class StrongsDictionaryRepositoryTest {
     }
 
     @Test
-    fun `all is cached -- a second call does not re-read resources`() = runBlocking {
-        repo.all("en")
-        unmockkObject(Res) // if a second call re-read, it would now throw instead of returning stale data
-        val entries = repo.all("en")
+    fun `all is cached -- a second call does not re-read the files`() = runBlocking {
+        var reads = 0
+        val counted = StrongsDictionaryRepository(
+            catalog = StrongsCatalog(loader = { name -> reads++; DictionaryFixture.catalogBytes(name) }),
+            interlinear = files.repository(),
+        )
+
+        counted.all("en")
+        val entries = counted.all("en")
+
         assertEquals(4, entries.size)
+        assertEquals(2, reads, "one read per half, however many times the language is asked for")
     }
 
     @Test
@@ -176,12 +149,12 @@ class StrongsDictionaryRepositoryTest {
 
     @Test
     fun `only Russian maps to ru, everything else falls back to en`() {
-        assertEquals("ru", repo.normalizeLang("ru"))
-        assertEquals("ru", repo.normalizeLang("RU"))
-        assertEquals("en", repo.normalizeLang("en"))
-        assertEquals("en", repo.normalizeLang("fr"))
-        assertEquals("en", repo.normalizeLang(null))
-        assertEquals("en", repo.normalizeLang(""))
+        assertEquals("ru", StrongsCatalog.normalizeLanguage("ru"))
+        assertEquals("ru", StrongsCatalog.normalizeLanguage("RU"))
+        assertEquals("en", StrongsCatalog.normalizeLanguage("en"))
+        assertEquals("en", StrongsCatalog.normalizeLanguage("fr"))
+        assertEquals("en", StrongsCatalog.normalizeLanguage(null))
+        assertEquals("en", StrongsCatalog.normalizeLanguage(""))
     }
 
     private fun entry(number: String, definition: String) = StrongsEntry(
@@ -235,16 +208,52 @@ class StrongsDictionaryRepositoryTest {
     fun `StrongsEntryDto round-trips`() {
         val json = Json { encodeDefaults = true }
         val dto = StrongsEntryDto("H430", "elohiym", "el-o-heem'", "el-o-HEEM", "God", "God", 2606, "H433")
-        assertEquals(dto, json.decodeFromString<StrongsEntryDto>(json.encodeToString(dto)))
+
+        val restored = json.decodeFromString<StrongsEntryDto>(json.encodeToString(dto))
+
+        assertEquals(dto, restored)
+        // Field by field as well as whole: every one of these is read by name on the phone, so a
+        // reordering of the constructor would round-trip perfectly while swapping two columns.
+        assertEquals("H430", restored.number)
+        assertEquals("elohiym", restored.word)
+        assertEquals("el-o-heem'", restored.transliteration)
+        assertEquals("el-o-HEEM", restored.pronunciation)
+        assertEquals("God", restored.definition)
+        assertEquals("God", restored.kjvUsage)
+        assertEquals(2606, restored.occurrences)
+        assertEquals("H433", restored.root)
     }
 
     @Test
     fun `DictionaryVerseDto and DictionaryVersesResponse round-trip`() {
         val json = Json { encodeDefaults = true }
         val verse = DictionaryVerseDto("Genesis", 1, 1, "Genesis 1:1", "In the beginning")
-        assertEquals(verse, json.decodeFromString<DictionaryVerseDto>(json.encodeToString(verse)))
+
+        val restoredVerse = json.decodeFromString<DictionaryVerseDto>(json.encodeToString(verse))
+
+        assertEquals(verse, restoredVerse)
+        assertEquals("Genesis", restoredVerse.bookName)
+        assertEquals(1, restoredVerse.chapter)
+        assertEquals(1, restoredVerse.verse)
+        assertEquals("Genesis 1:1", restoredVerse.reference)
+        assertEquals("In the beginning", restoredVerse.text)
 
         val response = DictionaryVersesResponse("H430", total = 2606, verses = listOf(verse))
-        assertEquals(response, json.decodeFromString<DictionaryVersesResponse>(json.encodeToString(response)))
+        val restored = json.decodeFromString<DictionaryVersesResponse>(json.encodeToString(response))
+
+        assertEquals(response, restored)
+        assertEquals("H430", restored.number)
+        assertEquals(2606, restored.total, "the total is the count before the list was capped")
+        assertEquals(listOf(verse), restored.verses)
+    }
+
+    /**
+     * The app holds one instance for the process, because the dictionary is 14k entries and every
+     * connected phone searches the same copy. Nothing here loads it: [StrongsDictionaryRepository]
+     * reads its files on the first request, not on construction.
+     */
+    @Test
+    fun `the app-wide instance is one instance`() {
+        assertSame(StrongsDictionaryRepository.shared, StrongsDictionaryRepository.shared)
     }
 }

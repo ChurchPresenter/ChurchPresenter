@@ -3,7 +3,6 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import churchpresenter.composeapp.generated.resources.Res
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -11,18 +10,21 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import org.churchpresenter.bible.Bible
-import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
-import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.churchpresenter.dictionary.InterlinearRepository
+import org.churchpresenter.dictionary.InterlinearVerse
+import org.churchpresenter.dictionary.StrongsCatalog
+import org.churchpresenter.dictionary.StrongsEntry
 import java.io.File
 import org.churchpresenter.bible.readTranslationTitle
 
 enum class DictionaryLanguageFilter { ALL, HEBREW, GREEK }
 
-class DictionaryViewModel {
+/**
+ * @param strongs the bundled dictionary. Defaulted to the packaged files and replaced in tests with
+ * a fixture catalogue, so a test drives the real loading path over a handful of entries.
+ */
+class DictionaryViewModel(private val strongs: StrongsCatalog = StrongsCatalog()) {
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     var dictLanguage by mutableStateOf("en")
@@ -164,22 +166,14 @@ class DictionaryViewModel {
             }
         }
 
-    @OptIn(ExperimentalResourceApi::class)
     fun load() {
         if (entries.isNotEmpty() || isLoading) return
         isLoading = true
         viewModelScope.launch {
             try {
-                val json = Json { ignoreUnknownKeys = true }
-                val hFile = if (dictLanguage == "ru") "files/dictionary/strongs_h_ru.json"
-                            else "files/dictionary/strongs_h.json"
-                val gFile = if (dictLanguage == "ru") "files/dictionary/strongs_g_ru.json"
-                            else "files/dictionary/strongs_g.json"
-                val hBytes = withContext(Dispatchers.IO) { Res.readBytes(hFile) }
-                val gBytes = withContext(Dispatchers.IO) { Res.readBytes(gFile) }
-                val hEntries = json.decodeFromString<List<StrongsEntry>>(hBytes.decodeToString())
-                val gEntries = json.decodeFromString<List<StrongsEntry>>(gBytes.decodeToString())
-                entries = hEntries.sortedBy { it.numericValue } + gEntries.sortedBy { it.numericValue }
+                val loaded = strongs.load(dictLanguage)
+                entries = loaded.hebrew.sortedBy { it.numericValue } +
+                    loaded.greek.sortedBy { it.numericValue }
                 pendingSelectionNumber?.let { num ->
                     onEntrySelected(entries.find { it.number == num }, addToHistory = false)
                     pendingSelectionNumber = null

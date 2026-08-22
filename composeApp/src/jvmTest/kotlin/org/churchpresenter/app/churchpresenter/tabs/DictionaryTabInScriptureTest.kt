@@ -7,9 +7,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
-import org.churchpresenter.app.churchpresenter.data.InterlinearWord
-import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryFixture
+import org.churchpresenter.dictionary.InterlinearVerse
+import org.churchpresenter.dictionary.InterlinearWord
+import org.churchpresenter.dictionary.DictionaryFixture
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

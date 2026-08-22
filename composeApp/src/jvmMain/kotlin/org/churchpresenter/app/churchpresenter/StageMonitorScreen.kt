@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.dictionary.StrongsEntry
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.settings.StageMonitorContentType
