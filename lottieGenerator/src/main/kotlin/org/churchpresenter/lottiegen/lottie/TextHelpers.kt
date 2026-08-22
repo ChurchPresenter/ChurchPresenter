@@ -28,7 +28,7 @@ fun makeTextData(
                         put("ca", JsonPrimitive(0))
                         put("j", JsonPrimitive(justify))
                         put("tr", JsonPrimitive(0))
-                        put("lh", JsonPrimitive(fontSizePx * 1.2))
+                        put("lh", JsonPrimitive(fontSizePx * LINE_HEIGHT_FACTOR))
                         put("ls", JsonPrimitive(0))
                         put("fc", jsonArrayOf(color))
                     })
@@ -76,7 +76,7 @@ fun makeTextDataWithAnimators(
                         put("ca", JsonPrimitive(0))
                         put("j", JsonPrimitive(justify))
                         put("tr", JsonPrimitive(0))
-                        put("lh", JsonPrimitive(fontSizePx * 1.2))
+                        put("lh", JsonPrimitive(fontSizePx * LINE_HEIGHT_FACTOR))
                         put("ls", JsonPrimitive(0))
                         put("fc", jsonArrayOf(color))
                     })
@@ -123,7 +123,7 @@ fun makeTextRevealAnimator(
         kfs.add(kf(pctToFrame(input.pct, inFrames), input.value, e))
     }
     // Hold at final value
-    kfs.add(kf(totalOut, jsonArrayOf(100.0), e))
+    kfs.add(kf(totalOut, jsonArrayOf(FULL_PERCENT_D), e))
     // Out: reverse (100 → 0, characters re-enter selection and disappear)
     val reversedIn = inKFs.reversed()
     for (i in 1 until reversedIn.size) {
@@ -148,10 +148,10 @@ fun makeTextRevealAnimator(
                 put("a", JsonPrimitive(1))
                 put("k", buildJsonArray { kfs.forEach { add(it) } })
             })
-            put("e", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(100)) })
+            put("e", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(FULL_PERCENT)) })
             put("ne", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(0)) })
             put("xe", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(0)) })
-            put("a", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(100)) })
+            put("a", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(FULL_PERCENT)) })
         })
         put("a", buildJsonObject {
             put("o", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(0)) })
@@ -183,7 +183,7 @@ fun makeRandomFadeAnimator(
     for (input in inKFs) {
         kfs.add(kf(pctToFrame(input.pct, inFrames), input.value, e))
     }
-    kfs.add(kf(totalOut, jsonArrayOf(100.0), e))
+    kfs.add(kf(totalOut, jsonArrayOf(FULL_PERCENT_D), e))
     val reversedIn = inKFs.reversed()
     for (i in 1 until reversedIn.size) {
         val pctFromEnd = 100.0 - reversedIn[i].pct
@@ -208,10 +208,10 @@ fun makeRandomFadeAnimator(
                 put("a", JsonPrimitive(1))
                 put("k", buildJsonArray { kfs.forEach { add(it) } })
             })
-            put("e", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(100)) })
+            put("e", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(FULL_PERCENT)) })
             put("ne", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(0)) })
             put("xe", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(0)) })
-            put("a", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(100)) })
+            put("a", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(FULL_PERCENT)) })
         })
         put("a", buildJsonObject {
             put("o", buildJsonObject { put("a", JsonPrimitive(0)); put("k", JsonPrimitive(0)) })

@@ -36,7 +36,7 @@ object Easing {
 data class KeyframeInput(val pct: Double, val value: JsonElement)
 
 fun pctToFrame(pct: Double, totalFrames: Int): Int =
-    ((pct / 100.0) * totalFrames).roundToInt()
+    ((pct / PERCENT_SCALE) * totalFrames).roundToInt()
 
 /** Create a single keyframe entry */
 fun kf(frame: Int, value: JsonElement, easing: JsonObject? = null): JsonObject = buildJsonObject {

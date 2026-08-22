@@ -7,6 +7,17 @@ import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import kotlin.math.max
 
+/**
+ * Where a text baseline sits relative to the block's centre, as a fraction of that line's own
+ * size. A glyph's visual mass sits above its baseline, so centring on the baseline looks low --
+ * these are the optical corrections, and they differ per line because the two lines are not
+ * centred on the same thing: a lone line is centred on the block, a pair straddles it.
+ */
+private const val LONE_LINE_BASELINE_FACTOR = 0.35
+private const val UPPER_LINE_BASELINE_FACTOR = 0.1
+private const val LOWER_LINE_BASELINE_FACTOR = 0.9
+
+
 /** A resolved point in canvas pixels. */
 data class SpecPoint(val x: Double, val y: Double)
 
@@ -110,11 +121,11 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
         val singleLine = spec.layout.centerSingleLine && nameVisible != infoVisible
         if (singleLine) {
             // Optically center the lone visible line on the block.
-            nameLineY = baseY + nameSizePx * 0.35
-            infoLineY = baseY + infoSizePx * 0.35
+            nameLineY = baseY + nameSizePx * LONE_LINE_BASELINE_FACTOR
+            infoLineY = baseY + infoSizePx * LONE_LINE_BASELINE_FACTOR
         } else {
-            nameLineY = baseY - lineSpacingPx / 2 - nameSizePx * 0.1
-            infoLineY = baseY + lineSpacingPx / 2 + infoSizePx * 0.9
+            nameLineY = baseY - lineSpacingPx / 2 - nameSizePx * UPPER_LINE_BASELINE_FACTOR
+            infoLineY = baseY + lineSpacingPx / 2 + infoSizePx * LOWER_LINE_BASELINE_FACTOR
         }
     }
 

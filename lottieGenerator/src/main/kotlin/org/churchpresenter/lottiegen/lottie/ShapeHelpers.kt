@@ -172,7 +172,7 @@ fun makeRepeater(
             put("a", JsonPrimitive(0)); put("k", JsonPrimitive(rotationDeg))
         })
         put("so", buildJsonObject {
-            put("a", JsonPrimitive(0)); put("k", JsonPrimitive(100))
+            put("a", JsonPrimitive(0)); put("k", JsonPrimitive(FULL_PERCENT))
         })
         put("eo", buildJsonObject {
             put("a", JsonPrimitive(0)); put("k", JsonPrimitive(endOpacity))
@@ -254,7 +254,7 @@ fun makeStroke(color: List<Double>, width: Double, opacity: Double = 100.0, dash
         })
         put("lc", JsonPrimitive(1))
         put("lj", JsonPrimitive(1))
-        put("ml", JsonPrimitive(4))
+        put("ml", JsonPrimitive(MITER_LIMIT))
         put("bm", JsonPrimitive(0))
         if (dashPx > 0) put("d", makeDashArray(dashPx))
     }
@@ -282,7 +282,7 @@ fun makeAnimatedStroke(
         })
         put("lc", JsonPrimitive(1))
         put("lj", JsonPrimitive(1))
-        put("ml", JsonPrimitive(4))
+        put("ml", JsonPrimitive(MITER_LIMIT))
         put("bm", JsonPrimitive(0))
         if (dashPx > 0) put("d", makeDashArray(dashPx))
     }
@@ -320,13 +320,13 @@ fun makeGroup(items: List<JsonObject>, transform: JsonObject? = null): JsonObjec
                     put("a", JsonPrimitive(0)); put("k", jsonArrayOf(0.0, 0.0))
                 })
                 put("s", transform?.get("s") ?: buildJsonObject {
-                    put("a", JsonPrimitive(0)); put("k", jsonArrayOf(100.0, 100.0))
+                    put("a", JsonPrimitive(0)); put("k", jsonArrayOf(FULL_PERCENT_D, FULL_PERCENT_D))
                 })
                 put("r", transform?.get("r") ?: buildJsonObject {
                     put("a", JsonPrimitive(0)); put("k", JsonPrimitive(0))
                 })
                 put("o", transform?.get("o") ?: buildJsonObject {
-                    put("a", JsonPrimitive(0)); put("k", JsonPrimitive(100))
+                    put("a", JsonPrimitive(0)); put("k", JsonPrimitive(FULL_PERCENT))
                 })
                 put("sk", buildJsonObject {
                     put("a", JsonPrimitive(0)); put("k", JsonPrimitive(0))
