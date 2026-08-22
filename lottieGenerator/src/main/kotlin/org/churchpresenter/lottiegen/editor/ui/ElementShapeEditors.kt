@@ -489,7 +489,7 @@ internal fun TextOptionsEditor(element: TextElement, onChange: (TextElement) -> 
                 label = Strings.editorAnimatorKind,
                 options = TextAnimatorKind.entries,
                 selected = animator.kind,
-                display = { EditorLabels.animatorKind(it) },
+                display = { TrackLabels.animatorKind(it) },
                 onSelect = { onChange(element.copy(animator = animator.copy(kind = it))) }
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

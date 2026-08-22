@@ -98,7 +98,7 @@ internal fun TrackEditor(track: AnimTrack, onChange: (AnimTrack) -> Unit, onRemo
                 label = Strings.editorProperty,
                 options = AnimProperty.entries,
                 selected = track.property,
-                display = { EditorLabels.property(it) },
+                display = { TrackLabels.property(it) },
                 onSelect = { new ->
                     if (new != track.property) {
                         onChange(
@@ -115,7 +115,7 @@ internal fun TrackEditor(track: AnimTrack, onChange: (AnimTrack) -> Unit, onRemo
                 label = Strings.editorEasing,
                 options = EasingKind.entries,
                 selected = track.easing,
-                display = { EditorLabels.easing(it) },
+                display = { TrackLabels.easing(it) },
                 onSelect = { onChange(track.copy(easing = it)) },
                 modifier = Modifier.weight(1f)
             )
@@ -124,7 +124,7 @@ internal fun TrackEditor(track: AnimTrack, onChange: (AnimTrack) -> Unit, onRemo
                     label = Strings.editorOffsetUnit,
                     options = OffsetUnit.entries,
                     selected = track.offsetUnit,
-                    display = { EditorLabels.offsetUnit(it) },
+                    display = { TrackLabels.offsetUnit(it) },
                     onSelect = { onChange(track.copy(offsetUnit = it)) },
                     modifier = Modifier.weight(1f)
                 )
