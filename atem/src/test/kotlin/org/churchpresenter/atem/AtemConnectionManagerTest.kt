@@ -212,6 +212,38 @@ class AtemConnectionManagerTest {
     }
 
     @Test
+    fun `a connection invalidated while it was still connecting is not cached`() {
+        // The window this closes: invalidate() cannot take the manager's mutex -- it does not
+        // suspend, and it is called from settings changes and from test teardown -- so it can land
+        // while a connect is in flight. Before the generation check, that connect went on to cache
+        // itself afterwards, leaving the manager holding a client for an endpoint that had already
+        // been abandoned. Nothing later noticed, because AtemClient.isAlive() is `socket != null`,
+        // which for UDP stays true whether or not anything is still listening at the other end.
+        var invalidatedDuringConnect = false
+        FakeAtemSwitcher(
+            onHelloReceived = {
+                // Exactly once, and strictly inside the connect: the client is waiting on this reply.
+                if (!invalidatedDuringConnect) {
+                    invalidatedDuringConnect = true
+                    AtemConnectionManager.invalidate()
+                }
+            },
+        ).use { fake ->
+            runBlocking {
+                val raced = AtemConnectionManager.use(LOOPBACK, fake.port) { it }
+                assertTrue(invalidatedDuringConnect, "the switcher must have raced the connect")
+
+                val next = AtemConnectionManager.use(LOOPBACK, fake.port) { it }
+                assertNotSame(
+                    raced,
+                    next,
+                    "a connection opened across an invalidate must not be handed to the next caller",
+                )
+            }
+        }
+    }
+
+    @Test
     fun `invalidate with nothing cached is a no-op`() {
         AtemConnectionManager.invalidate()
         AtemConnectionManager.invalidate()
