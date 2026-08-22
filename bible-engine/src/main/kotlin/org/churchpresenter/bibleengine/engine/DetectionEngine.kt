@@ -151,7 +151,6 @@ class DetectionEngine(
     private fun isMusic(speechType: String?): Boolean = speechType.equals("Music", ignoreCase = true)
 
     private fun runDetection(state: UtteranceState): List<ScriptureEvent> {
-        val combined = "${state.transcript} ${state.translation}".trim()
         val now = clock()
 
         // 1. Explicit / sticky references (stateful watcher). May yield several per utterance.
@@ -496,8 +495,6 @@ class DetectionEngine(
     private fun observeVersion(state: UtteranceState, event: ScriptureEvent) {
         versionDetector.observe(
             code = event.reference.canonicalCodeStart,
-            bookId = event.reference.bookId,
-            chapter = event.reference.chapter,
             anchorText = event.verseText,
             spoken = state.transcript,
             script = dominantScript(state.transcript),

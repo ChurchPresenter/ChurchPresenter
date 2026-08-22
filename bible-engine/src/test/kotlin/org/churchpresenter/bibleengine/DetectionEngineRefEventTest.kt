@@ -46,7 +46,9 @@ class DetectionEngineRefEventTest {
 
     @Test
     fun `an explicit reference is trusted outright`() {
-        val event: ScriptureEvent = assertNotNull(engine().processTranscription("live", "turn to John chapter 3 verse 16").firstOrNull())
+        val event: ScriptureEvent = assertNotNull(
+            engine().processTranscription("live", "turn to John chapter 3 verse 16").firstOrNull()
+        )
 
         assertEquals(0.95, event.confidence)
         assertEquals("explicit", event.matchType)
@@ -95,14 +97,18 @@ class DetectionEngineRefEventTest {
 
     @Test
     fun `an explicit reference reports the detected event type`() {
-        val event: ScriptureEvent = assertNotNull(engine().processTranscription("live", "turn to John chapter 3 verse 16").firstOrNull())
+        val event: ScriptureEvent = assertNotNull(
+            engine().processTranscription("live", "turn to John chapter 3 verse 16").firstOrNull()
+        )
 
         assertEquals("scripture.detected", event.type)
     }
 
     @Test
     fun `the emitted event carries the verse code and text`() {
-        val event: ScriptureEvent = assertNotNull(engine().processTranscription("live", "turn to John chapter 3 verse 16").firstOrNull())
+        val event: ScriptureEvent = assertNotNull(
+            engine().processTranscription("live", "turn to John chapter 3 verse 16").firstOrNull()
+        )
 
         assertEquals("B043C003V016", event.reference.canonicalCodeStart)
         assertTrue(event.verseText.startsWith("For God so loved"))
@@ -146,7 +152,10 @@ class DetectionEngineRefEventTest {
     fun `reading a verse verbatim finds it without an explicit citation`() {
         Config.applyLevel("aggressive")
 
-        val events = engine().processTranscription("live", "for God so loved the world that he gave his only begotten son")
+        val events = engine(
+            ).processTranscription("live",
+            "for God so loved the world that he gave his only begotten son",
+        )
 
         assertTrue(events.isNotEmpty(), "the reverse lookup should recognise a verbatim reading")
     }

@@ -56,6 +56,15 @@ class FakeAtemSwitcher(
     /** When false the hello is ignored, so a connect attempt fails as if nothing is listening. */
     private val answerHello: Boolean = true,
     /**
+     * Run on the switcher's receive thread when a hello arrives, before the reply goes out.
+     *
+     * A seam for the window a connect is *inside*: the client has sent its hello and is waiting, so
+     * anything this does happens strictly between "connect started" and "connect finished". That is
+     * the only way to test what a concurrent [AtemConnectionManager.invalidate] does to a connection
+     * still being opened, and it needs no sleep to hit it.
+     */
+    private val onHelloReceived: (() -> Unit)? = null,
+    /**
      * When false, commands are received and recorded but never ACKed — a switcher that has gone
      * deaf mid-session. Withholding a reply, like [answerHello]; nothing here invents a layout the
      * captures did not show.
@@ -115,6 +124,7 @@ class FakeAtemSwitcher(
 
         if (flags and FLAG_HELLO != 0) {
             if (!answerHello) return
+            onHelloReceived?.invoke()
             // The hello reply still carries the client's placeholder session id; the real one
             // only appears in the packets that follow. AtemClient depends on exactly this.
             send(header(FLAG_HELLO, TEMP_SESSION_ID, packetId = 0, extra = 8))

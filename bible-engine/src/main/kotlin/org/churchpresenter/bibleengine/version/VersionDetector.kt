@@ -62,7 +62,7 @@ class VersionDetector(
      * but the translation track is machine-translated output — a rendering that belongs to no bible,
      * whose word choices land squarely in the discriminative slots this scoring depends on.
      */
-    fun observe(code: String?, bookId: Int, chapter: Int, anchorText: String, spoken: String, script: Script) {
+    fun observe(code: String?, anchorText: String, spoken: String, script: Script) {
         if (!Config.versionDetectionEnabled) return
         if (code == null || spoken.isBlank()) return
         val now = clock()

@@ -153,7 +153,8 @@ class VersionScorerTest {
 
     @Test fun `a window that does not contain the verse gets no vote`() {
         // Partial windows are the dominant noise source — and where the miss penalty misfires worst.
-        assertTrue(score(listOf(candidate("KJV", KJV_MATT_18_13), candidate("NASB", NASB_MATT_18_13)), "he finds it").isEmpty())
+        val candidates = listOf(candidate("KJV", KJV_MATT_18_13), candidate("NASB", NASB_MATT_18_13))
+        assertTrue(score(candidates, "he finds it").isEmpty())
     }
 
     @Test fun `an unrelated-language version is excluded by content not by filename`() {

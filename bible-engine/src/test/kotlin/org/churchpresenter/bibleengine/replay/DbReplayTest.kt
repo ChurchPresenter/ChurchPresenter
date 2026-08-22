@@ -65,7 +65,11 @@ class DbReplayTest {
         // Determinism guard: two replays must be byte-identical.
         val first = DbReplay.replay(rows, translations, level)
         val second = DbReplay.replay(rows, translations, level)
-        assertEquals(first.lines, second.lines, "replay is not deterministic — a wall-clock or ordering dependence survived")
+        assertEquals(
+            first.lines,
+            second.lines,
+            "replay is not deterministic — a wall-clock or ordering dependence survived",
+        )
 
         val sessionId = File(dbPath).nameWithoutExtension
         val goldenFile = File("src/test/resources/replay/golden-$sessionId.jsonl")
@@ -157,6 +161,9 @@ class DbReplayTest {
         }
     }
 
+    // Three nested `use` blocks: a connection, its statement, and the result set, each of which has
+    // to close in order.
+    @Suppress("NestedBlockDepth")
     @Test fun `translation_ts_ms column is honored when present`() {
         DriverManager.getConnection("jdbc:sqlite::memory:").use { conn ->
             conn.createStatement().use { st ->
@@ -192,17 +199,23 @@ class DbReplayTest {
                                 "translation_ts_ms INTEGER)"
                         )
                         st.executeUpdate(
-                            "INSERT INTO transcriptions (ts_ms, text, translated_text, translation_ts_ms, segment_id) " +
+                            "INSERT INTO transcriptions " +
+                            "(ts_ms, text, translated_text, translation_ts_ms, segment_id) " +
                                 "VALUES (1000, 'привет мир', 'hello world', 3500, 'seg-1')"
                         )
                         st.executeUpdate(
-                            "INSERT INTO transcriptions (ts_ms, text, segment_id) VALUES (2000, 'вторая строка', 'seg-2')"
+                            "INSERT INTO transcriptions (ts_ms, text, segment_id) " +
+                            "VALUES (2000, 'вторая строка', 'seg-2')"
                         )
                     }
                 }
                 val fileRows = DbReplay.readRows(tmp.absolutePath)
                 assertEquals(2, fileRows.size)
-                assertEquals(3500L, fileRows[0].translationTsMs, "translation arrival time must be read when the column exists")
+                assertEquals(
+                    3500L,
+                    fileRows[0].translationTsMs,
+                    "translation arrival time must be read when the column exists",
+                )
                 assertEquals(null, fileRows[1].translationTsMs)
             } finally {
                 tmp.delete()

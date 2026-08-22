@@ -13,7 +13,11 @@ class AgreementScorerTest {
 
     @Test fun `ё and е spellings cross-match`() {
         // Verse text often carries ё where STT writes е — folding makes them equal.
-        val score = AgreementScorer.score("Твёрдого духом Ты хранишь в совершенном мире", "твердого духом ты хранишь в совершенном мире", "")
+        val score = AgreementScorer.score(
+            "Твёрдого духом Ты хранишь в совершенном мире",
+            "твердого духом ты хранишь в совершенном мире",
+            "",
+        )
         assertEquals(1.0, score, "ё/е spellings should fold together, got $score")
     }
 
@@ -27,7 +31,11 @@ class AgreementScorerTest {
     }
 
     @Test fun `coverage measures verse words found in track`() {
-        assertTrue(AgreementScorer.coverage("for god so loved the world", "he said for god so loved the world today") >= 0.9)
+        val covered = AgreementScorer.coverage(
+            "for god so loved the world",
+            "he said for god so loved the world today",
+        )
+        assertTrue(covered >= 0.9)
         assertTrue(AgreementScorer.coverage("for god so loved the world", "completely unrelated speech") <= 0.1)
     }
 }

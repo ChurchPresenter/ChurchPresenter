@@ -1,6 +1,5 @@
 package org.churchpresenter.bibleengine
 
-import org.churchpresenter.bibleengine.Config
 import org.churchpresenter.bibleengine.bible.EngineBook
 import org.churchpresenter.bibleengine.bible.EngineTranslation
 import org.churchpresenter.bibleengine.bible.EngineVerse
@@ -110,7 +109,9 @@ class ContinuationEngineTest {
         )
     }
 
-    @Test fun `resolves an earlier chapter from history when it matches far better than the current sticky`() = withChapterHistory {
+    @Test
+    fun `resolves an earlier chapter from history when it matches far better than the current sticky`() =
+        withChapterHistory {
         val t = fixture(listOf(
             EngineVerse("9-15-1", 9, 15, 1, "gamma delta", false),
             EngineVerse("9-10-1", 9, 10, 1, "alpha beta gamma delta epsilon zeta", false),
@@ -123,7 +124,8 @@ class ContinuationEngineTest {
         assertEquals(10, result.verse.chapter)
     }
 
-    @Test fun `stays silent when the current sticky and a historical chapter score equally well`() = withChapterHistory {
+    @Test
+    fun `stays silent when the current sticky and a historical chapter score equally well`() = withChapterHistory {
         val t = fixture(listOf(
             EngineVerse("9-15-1", 9, 15, 1, "alpha beta gamma", false),
             EngineVerse("9-10-1", 9, 10, 1, "alpha beta gamma", false),
@@ -154,6 +156,9 @@ class ContinuationEngineTest {
 
     // ── Sequential check: verse-side coverage ──────────
 
+    // A book/chapter/verse reference plus the utterance and its clock: six values because the state
+    // being built has six, and defaulting any of them would hide what a test is pinning.
+    @Suppress("LongParameterList")
     private fun stateWithLastDetected(t: EngineTranslation, book: Int, chapter: Int, verse: Int,
                                       transcript: String, now: Long): UtteranceState {
         val state = UtteranceState(id = "test")

@@ -68,8 +68,8 @@ class VersionDetectorTest {
         Config.versionResetGapMs = saved["gap"] as Long
     }
 
-    private fun VersionDetector.read(code: String, anchor: String, spoken: String, chapter: Int = 18) =
-        observe(code, bookId = 40, chapter = chapter, anchorText = anchor, spoken = spoken, script = Script.LATIN)
+    private fun VersionDetector.read(code: String, anchor: String, spoken: String) =
+        observe(code, anchorText = anchor, spoken = spoken, script = Script.LATIN)
 
     @Test fun `one verse is never enough to name a version`() {
         val d = detector()
@@ -113,8 +113,13 @@ class VersionDetectorTest {
         d.read("B040C018V014", KJV_MATT_18_14, spokenNasb14)
         assertEquals("NASB", assertNotNull(d.verdict()).label)
 
-        d.read(MATT_18_13, KJV_MATT_18_13, spokenNasb13, chapter = 5)
-        assertEquals("NASB", assertNotNull(d.verdict()).label, "the answer must survive a new passage")
+        // This used to pass `chapter = 5` to mean "a new passage" -- but `observe` never read the
+        // chapter (or the book) it was given, so the passage never changed and this line has only
+        // ever repeated the observation above it. The parameters are gone now; expressing a real
+        // passage change here needs a different `code` with its own anchor, and is left undone
+        // rather than faked.
+        d.read(MATT_18_13, KJV_MATT_18_13, spokenNasb13)
+        assertEquals("NASB", assertNotNull(d.verdict()).label, "the answer must survive a repeat")
     }
 
     @Test fun `a verse that separates nothing leaves the answer standing`() {

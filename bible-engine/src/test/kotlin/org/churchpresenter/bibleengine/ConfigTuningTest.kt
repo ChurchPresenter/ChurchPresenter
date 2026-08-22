@@ -91,7 +91,10 @@ class ConfigTuningTest {
         Config.applyLevel("turbo")
 
         assertEquals("turbo", Config.level)
-        assertEquals(before, listOf(Config.minConfidenceEmit, Config.reverseMinScoreRatio, Config.stickyTtlMs.toDouble()))
+        assertEquals(
+            before,
+            listOf(Config.minConfidenceEmit, Config.reverseMinScoreRatio, Config.stickyTtlMs.toDouble()),
+        )
     }
 
     @Test

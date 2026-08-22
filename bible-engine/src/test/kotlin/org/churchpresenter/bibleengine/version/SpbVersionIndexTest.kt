@@ -109,13 +109,19 @@ class SpbVersionIndexTest {
         // 120 distinct words, comfortably over MIN_FINGERPRINT_TOKENS.
         val words = ('a'..'l').flatMap { x -> ('a'..'j').map { y -> "lex$x$y" } }
         val rich = (0 until 40).map { i ->
-            Triple("B019C023V%03d".format(i + 1), i + 1, (0..5).joinToString(" ") { words[(i * 6 + it) % words.size] } + ".")
+            Triple(
+                "B019C023V%03d".format(i + 1),
+                i + 1,
+                (0..5).joinToString(" ") { words[(i * 6 + it) % words.size] } + ".",
+            )
         }
         val a = writeSpb("ENG_AAA.spb", "AAA", rich)
         val b = writeSpb("ENG_BBB.spb", "BBB", rich.map { it.copy(third = it.third.replace(".", ",")) })
         val c = writeSpb(
             "ENG_CCC.spb", "CCC",
-            rich.mapIndexed { i, v -> v.copy(third = "текст${i} совсем другими незнакомыми выражениями оборотами лексикой перевода") },
+            rich.mapIndexed { i, v ->
+                v.copy(third = "текст${i} совсем другими незнакомыми выражениями оборотами лексикой перевода")
+            },
         )
         val indexes = listOf(a, b, c).map { assertNotNull(SpbVersionIndex.build(it, mutableMapOf())) }
         val kept = VersionCorpusLoader.collapseDuplicates(indexes).map { it.label }
@@ -129,14 +135,20 @@ class SpbVersionIndexTest {
         // Their shared abbreviation is the reliable signal, and two candidates under one visible
         // label would be incoherent to report anyway.
         writeSpb("RUS_A.spb", "RST", cyrillicVerses)
-        writeSpb("RUS_B.spb", "RST", cyrillicVerses.map { it.copy(third = "(22:1) «${it.third}» иными словами совсем") })
+        writeSpb(
+            "RUS_B.spb", "RST",
+            cyrillicVerses.map { it.copy(third = "(22:1) «${it.third}» иными словами совсем") },
+        )
         Config.bibleRoot = dir.absolutePath
         assertEquals(listOf("RST"), VersionCorpusLoader.load().labels)
     }
 
     @Test fun `the selected bibles are indexed even when the cap would exclude them`() {
         repeat(3) { i ->
-            writeSpb("ENG_A$i.spb", "A$i", cyrillicVerses.map { it.copy(third = "вариант $i уникальный текст стиха здесь") })
+            writeSpb(
+                "ENG_A$i.spb", "A$i",
+                cyrillicVerses.map { it.copy(third = "вариант $i уникальный текст стиха здесь") },
+            )
         }
         writeSpb("ZZZ_LAST.spb", "ZZZ", cyrillicVerses.map { it.copy(third = "совершенно другой перевод стиха") })
         Config.bibleRoot = dir.absolutePath
@@ -204,8 +216,14 @@ class SpbVersionIndexTest {
     }
 
     @Test fun `a corpus that loads cleanly reports no skips at all`() {
-        writeSpb("ENG_AAA.spb", "AAA", cyrillicVerses.map { it.copy(third = "первый перевод уникальными словами здесь") })
-        writeSpb("ENG_BBB.spb", "BBB", cyrillicVerses.map { it.copy(third = "второй совсем другой лексикой оборотами") })
+        writeSpb(
+            "ENG_AAA.spb", "AAA",
+            cyrillicVerses.map { it.copy(third = "первый перевод уникальными словами здесь") },
+        )
+        writeSpb(
+            "ENG_BBB.spb", "BBB",
+            cyrillicVerses.map { it.copy(third = "второй совсем другой лексикой оборотами") },
+        )
         Config.bibleRoot = dir.absolutePath
 
         val skips = mutableListOf<String>()

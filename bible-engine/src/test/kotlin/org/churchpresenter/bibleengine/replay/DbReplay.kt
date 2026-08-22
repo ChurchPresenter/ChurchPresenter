@@ -62,6 +62,9 @@ object DbReplay {
         return if (bibleFiles.isEmpty()) SpbLoader.loadDefaults() else SpbLoader.loadSelected(bibleFiles)
     }
 
+    // Reading a session database whose schema changed over time: the nesting is one column-presence
+    // check inside the row loop, and flattening it would mean querying the schema twice.
+    @Suppress("NestedBlockDepth")
     fun readRows(dbPath: String, includeDenied: Boolean = false): List<Row> {
         val rows = ArrayList<Row>(1024)
         DriverManager.getConnection("jdbc:sqlite:$dbPath").use { conn ->
@@ -112,6 +115,10 @@ object DbReplay {
         return rows
     }
 
+    // The replay loop is a state machine over one ordered feed -- transcript and translation events
+    // interleaved -- and every branch is a case of that order. Splitting it would spread one
+    // sequence across several functions without removing a single decision.
+    @Suppress("NestedBlockDepth", "CyclomaticComplexMethod", "LoopWithTooManyJumpStatements")
     fun replay(rows: List<Row>, translations: List<EngineTranslation>, level: String): ReplayResult {
         Config.applyLevel(level)
         val previousLogPath = DetectionLogger.path

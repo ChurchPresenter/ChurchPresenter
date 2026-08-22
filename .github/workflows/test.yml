@@ -176,6 +176,7 @@ jobs:
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :planning-center:detekt
+          :bible-engine:detekt :presentation-engine:detekt
 
       - name: App unit tests
         id: unit_tests
