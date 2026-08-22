@@ -310,6 +310,15 @@ internal fun RepeatEditor(repeat: RepeatSpec?, onChange: (RepeatSpec?) -> Unit) 
 @Composable
 internal fun PaintEditor(paint: PaintSpec, onChange: (PaintSpec) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        FillEditor(paint, onChange)
+        StrokeEditor(paint, onChange)
+    }
+}
+
+/** The fill: its colour role, and the gradient it optionally carries. */
+@Composable
+private fun FillEditor(paint: PaintSpec, onChange: (PaintSpec) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         val fill = paint.fill
         CheckboxRow(
             label = Strings.editorFill,
@@ -364,7 +373,13 @@ internal fun PaintEditor(paint: PaintSpec, onChange: (PaintSpec) -> Unit) {
                 }
             }
         }
+    }
+}
 
+/** The stroke: its colour role, width and dash. */
+@Composable
+private fun StrokeEditor(paint: PaintSpec, onChange: (PaintSpec) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         val stroke = paint.stroke
         CheckboxRow(
             label = Strings.editorStroke,
@@ -413,6 +428,7 @@ internal fun PaintEditor(paint: PaintSpec, onChange: (PaintSpec) -> Unit) {
         }
     }
 }
+
 
 // ------------------------------------------------------------------ text
 
