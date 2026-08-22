@@ -55,6 +55,21 @@ import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
 
+/** The ranges every numeric field in this panel is clamped to. */
+private const val MIN_CANVAS_PX = 100
+private const val MAX_CANVAS_W_PX = 7680
+private const val MAX_CANVAS_H_PX = 4320
+private const val MIN_BASE_SIZE = 10
+private const val MAX_BASE_SIZE = 80
+private const val MIN_TEXT_EM = 0.5f
+private const val MAX_TEXT_EM = 4f
+private const val MIN_ANIM_SECONDS = 0.5f
+private const val MAX_ANIM_SECONDS = 20f
+private const val MAX_HOLD_SECONDS = 30f
+private const val MIN_NUDGE_EM = -0.5f
+private const val MAX_NUDGE_EM = 1f
+
+
 /** Two equal columns, the layout every field pair in the panel uses. */
 @Composable
 private fun FieldRow(content: @Composable () -> Unit) {
@@ -156,7 +171,7 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         value = cfg.canvasW.toString(),
                         onValueChange = { v ->
                             v.toIntOrNull()?.let {
-                                viewModel.updateConfig { c -> c.copy(canvasW = it.coerceIn(100, 7680)) }
+                                viewModel.updateConfig { c -> c.copy(canvasW = it.coerceIn(MIN_CANVAS_PX, MAX_CANVAS_W_PX)) }
                             }
                         },
                         label = Strings.width,
@@ -166,7 +181,7 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         value = cfg.canvasH.toString(),
                         onValueChange = { v ->
                             v.toIntOrNull()?.let {
-                                viewModel.updateConfig { c -> c.copy(canvasH = it.coerceIn(100, 4320)) }
+                                viewModel.updateConfig { c -> c.copy(canvasH = it.coerceIn(MIN_CANVAS_PX, MAX_CANVAS_H_PX)) }
                             }
                         },
                         label = Strings.height,
@@ -274,7 +289,7 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         value = cfg.baseSize.toString(),
                         onValueChange = { v ->
                             v.toIntOrNull()?.let {
-                                viewModel.updateConfig { c -> c.copy(baseSize = it.coerceIn(10, 80)) }
+                                viewModel.updateConfig { c -> c.copy(baseSize = it.coerceIn(MIN_BASE_SIZE, MAX_BASE_SIZE)) }
                             }
                         },
                         label = Strings.baseSize,
@@ -286,7 +301,7 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         value = cfg.nameSize.toString(),
                         onValueChange = { v ->
                             v.toFloatOrNull()?.let {
-                                viewModel.updateConfig { c -> c.copy(nameSize = it.coerceIn(0.5f, 4f)) }
+                                viewModel.updateConfig { c -> c.copy(nameSize = it.coerceIn(MIN_TEXT_EM, MAX_TEXT_EM)) }
                             }
                         },
                         label = Strings.nameSize, modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
@@ -295,7 +310,7 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         value = cfg.infoSize.toString(),
                         onValueChange = { v ->
                             v.toFloatOrNull()?.let {
-                                viewModel.updateConfig { c -> c.copy(infoSize = it.coerceIn(0.5f, 4f)) }
+                                viewModel.updateConfig { c -> c.copy(infoSize = it.coerceIn(MIN_TEXT_EM, MAX_TEXT_EM)) }
                             }
                         },
                         label = Strings.infoSize, modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
@@ -524,7 +539,7 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         value = cfg.animDuration.toString(),
                         onValueChange = { v ->
                             v.toFloatOrNull()?.let {
-                                viewModel.updateConfig { c -> c.copy(animDuration = it.coerceIn(0.5f, 20f)) }
+                                viewModel.updateConfig { c -> c.copy(animDuration = it.coerceIn(MIN_ANIM_SECONDS, MAX_ANIM_SECONDS)) }
                             }
                         },
                         label = Strings.animDuration, modifier = Modifier.weight(1f),
@@ -534,7 +549,7 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                         value = cfg.holdDuration.toString(),
                         onValueChange = { v ->
                             v.toFloatOrNull()?.let {
-                                viewModel.updateConfig { c -> c.copy(holdDuration = it.coerceIn(0f, 30f)) }
+                                viewModel.updateConfig { c -> c.copy(holdDuration = it.coerceIn(0f, MAX_HOLD_SECONDS)) }
                             }
                         },
                         label = Strings.holdDuration, modifier = Modifier.weight(1f),
@@ -558,7 +573,7 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp) {
                 SliderWithLabel(
                     Strings.lineSpacing, cfg.lineSpacing,
                     { viewModel.updateConfig { c -> c.copy(lineSpacing = it) } },
-                    -0.5f..1f, unit = "em", format = { "%.2f".format(it) }
+                    MIN_NUDGE_EM..MAX_NUDGE_EM, unit = "em", format = { "%.2f".format(it) }
                 )
             }
 

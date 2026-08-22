@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.ui.components
 
+import org.churchpresenter.lottiegen.lottie.hexToRgb
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -44,6 +45,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import kotlin.math.abs
 import org.churchpresenter.lottiegen.ui.Strings
+
+/** The HSV colour wheel, in degrees, and the six 60-degree sextants the conversion switches on. */
+private const val HUE_DEGREES = 360f
+private const val SEXTANT_DEGREES = 60f
+private const val LAST_SEXTANT = 5
+private const val SEXTANT_BLUE_TO_CYAN = 3
+private const val SEXTANT_BLUE_TO_MAGENTA = 4
+
+/** `RRGGBB` -- the only hex form the field accepts. */
+private const val HEX_RGB_LENGTH = 6
+
 
 private val ButtonShape = RoundedCornerShape(6.dp)
 
@@ -317,7 +329,7 @@ private fun HueBar(
             .pointerInput(barWidth) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
-                    fun update(x: Float) = onHueChange((x / barWidth * 360f).coerceIn(0f, 360f))
+                    fun update(x: Float) = onHueChange((x / barWidth * HUE_DEGREES).coerceIn(0f, HUE_DEGREES))
                     update(down.position.x)
                     drag(down.id) { change ->
                         change.consume()
@@ -344,12 +356,12 @@ private fun hsvToColor(h: Float, s: Float, v: Float): Color {
     val c = v * s
     val x = c * (1f - abs((h / 60f) % 2f - 1f))
     val m = v - c
-    val (r, g, b) = when ((h / 60f).toInt().coerceIn(0, 5)) {
+    val (r, g, b) = when ((h / SEXTANT_DEGREES).toInt().coerceIn(0, LAST_SEXTANT)) {
         0 -> Triple(c, x, 0f)
         1 -> Triple(x, c, 0f)
         2 -> Triple(0f, c, x)
-        3 -> Triple(0f, x, c)
-        4 -> Triple(x, 0f, c)
+        SEXTANT_BLUE_TO_CYAN -> Triple(0f, x, c)
+        SEXTANT_BLUE_TO_MAGENTA -> Triple(x, 0f, c)
         else -> Triple(c, 0f, x)
     }
     return Color(red = (r + m).coerceIn(0f, 1f), green = (g + m).coerceIn(0f, 1f), blue = (b + m).coerceIn(0f, 1f))
@@ -381,7 +393,10 @@ private fun colorToHex(color: Color): String {
 private fun tryParseHex(hex: String): Color? = try {
     val clean = hex.trim().removePrefix("#")
     when (clean.length) {
-        6 -> Color(clean.substring(0, 2).toInt(16), clean.substring(2, 4).toInt(16), clean.substring(4, 6).toInt(16))
+        HEX_RGB_LENGTH -> {
+            val (r, g, b) = hexToRgb(clean)
+            Color(r, g, b)
+        }
         else -> null
     }
 } catch (_: Exception) { null }

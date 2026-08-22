@@ -65,6 +65,28 @@ import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.lottiegen.ui.components.LottieTextField
 
+/** A keyframe track runs 0..100% of the animation; the end is where every default lands. */
+private const val TRACK_END_PCT = 100.0
+
+/** Starting values a newly added element or track gets, chosen to read as an obvious default. */
+private const val NEW_CANVAS_WIDTH_PCT = 3.5
+private const val NEW_CORNER_EM = 0.3
+private const val NEW_GRADIENT_SPAN = 5.0
+private const val NEW_STROKE_EM = 0.1
+private const val NEW_REVEAL_SPAN_PCT = 60.0
+private const val NEW_REVEAL_EASE = 0.8
+private const val NEW_SLIDE_FROM_EM = -2.0
+private const val NEW_ROTATE_FROM_DEG = -90.0
+
+/** base64 carries three bytes in every four characters. */
+private const val BASE64_NUM = 3
+private const val BASE64_DEN = 4
+private const val BYTES_PER_KB = 1024
+
+/** The narrower of the two columns in a paired field row. */
+private const val NARROW_FIELD_WEIGHT = 0.8f
+
+
 private val ALIGN_KEYS = listOf("left", "center", "right")
 
 /** Property inspector for the selected element (or a hint + nothing when none). */
@@ -371,7 +393,7 @@ private fun SizeEditor(size: SizeSpec, onChange: (SizeSpec) -> Unit) {
                     when (label) {
                         Strings.editorSizeContent -> SizeSpec.ContentDerived()
                         Strings.editorSizeTextWrap -> SizeSpec.TextWrap(TextFieldRef.NAME)
-                        Strings.editorSizeCanvasWidth -> SizeSpec.CanvasWidth(3.5)
+                        Strings.editorSizeCanvasWidth -> SizeSpec.CanvasWidth(NEW_CANVAS_WIDTH_PCT)
                         else -> SizeSpec.Em(1.0, 1.0)
                     }
                 )
@@ -441,7 +463,7 @@ private fun CornerEditor(corner: CornerSpec, onChange: (CornerSpec) -> Unit) {
                 onChange(
                     when (label) {
                         Strings.editorCornerFromConfig -> CornerSpec.FromConfig()
-                        Strings.editorCornerEm -> CornerSpec.Em(0.3)
+                        Strings.editorCornerEm -> CornerSpec.Em(NEW_CORNER_EM)
                         else -> CornerSpec.None
                     }
                 )
@@ -565,7 +587,7 @@ private fun ImageOptionsEditor(element: ImageElement, onChange: (ImageElement) -
                 // base64 length × 3/4 ≈ decoded bytes; close enough for an info line.
                 Strings.editorImageInfo(
                     element.naturalW, element.naturalH,
-                    element.dataUri.length * 3 / 4 / 1024
+                    element.dataUri.length * BASE64_NUM / BASE64_DEN / BYTES_PER_KB
                 )
             },
             style = MaterialTheme.typography.bodySmall,
@@ -753,7 +775,7 @@ private fun PaintEditor(paint: PaintSpec, onChange: (PaintSpec) -> Unit) {
                 onCheckedChange = {
                     onChange(
                         paint.copy(
-                            fill = fill.copy(gradient = if (it) GradientSpec(0.0, 0.0, 5.0, 0.0) else null)
+                            fill = fill.copy(gradient = if (it) GradientSpec(0.0, 0.0, NEW_GRADIENT_SPAN, 0.0) else null)
                         )
                     )
                 }
@@ -812,7 +834,7 @@ private fun PaintEditor(paint: PaintSpec, onChange: (PaintSpec) -> Unit) {
                     onChange(
                         paint.copy(
                             stroke = stroke.copy(
-                                width = if (label == Strings.editorStrokeEm) StrokeWidthSpec.Em(0.1)
+                                width = if (label == Strings.editorStrokeEm) StrokeWidthSpec.Em(NEW_STROKE_EM)
                                 else StrokeWidthSpec.FromConfig
                             )
                         )
@@ -881,7 +903,7 @@ private fun TextOptionsEditor(element: TextElement, onChange: (TextElement) -> U
             onCheckedChange = {
                 onChange(
                     element.copy(
-                        animator = if (it) TextAnimatorSpec(TextAnimatorKind.SEQUENTIAL_REVEAL, 0.0, 60.0, 0.8)
+                        animator = if (it) TextAnimatorSpec(TextAnimatorKind.SEQUENTIAL_REVEAL, 0.0, NEW_REVEAL_SPAN_PCT, NEW_REVEAL_EASE)
                         else null
                     )
                 )
@@ -925,25 +947,25 @@ private fun valueArity(property: AnimProperty): Int = when (property) {
 
 private fun defaultKeyframes(property: AnimProperty): List<SpecKeyframe> = when (property) {
     AnimProperty.POSITION_OFFSET -> listOf(
-        SpecKeyframe(0.0, listOf(-2.0, 0.0)), SpecKeyframe(100.0, listOf(0.0, 0.0))
+        SpecKeyframe(0.0, listOf(NEW_SLIDE_FROM_EM, 0.0)), SpecKeyframe(TRACK_END_PCT, listOf(0.0, 0.0))
     )
     AnimProperty.OPACITY -> listOf(
-        SpecKeyframe(0.0, listOf(0.0)), SpecKeyframe(100.0, listOf(100.0))
+        SpecKeyframe(0.0, listOf(0.0)), SpecKeyframe(TRACK_END_PCT, listOf(TRACK_END_PCT))
     )
     AnimProperty.SCALE -> listOf(
-        SpecKeyframe(0.0, listOf(0.0, 0.0)), SpecKeyframe(100.0, listOf(100.0, 100.0))
+        SpecKeyframe(0.0, listOf(0.0, 0.0)), SpecKeyframe(TRACK_END_PCT, listOf(TRACK_END_PCT, TRACK_END_PCT))
     )
     AnimProperty.ROTATION -> listOf(
-        SpecKeyframe(0.0, listOf(-90.0)), SpecKeyframe(100.0, listOf(0.0))
+        SpecKeyframe(0.0, listOf(NEW_ROTATE_FROM_DEG)), SpecKeyframe(TRACK_END_PCT, listOf(0.0))
     )
     AnimProperty.RECT_SIZE -> listOf(
-        SpecKeyframe(0.0, listOf(0.0, 1.0)), SpecKeyframe(100.0, listOf(1.0, 1.0))
+        SpecKeyframe(0.0, listOf(0.0, 1.0)), SpecKeyframe(TRACK_END_PCT, listOf(1.0, 1.0))
     )
     AnimProperty.STROKE_WIDTH -> listOf(
-        SpecKeyframe(0.0, listOf(0.0)), SpecKeyframe(100.0, listOf(1.0))
+        SpecKeyframe(0.0, listOf(0.0)), SpecKeyframe(TRACK_END_PCT, listOf(1.0))
     )
     AnimProperty.TRIM -> listOf(
-        SpecKeyframe(0.0, listOf(0.0, 0.0)), SpecKeyframe(100.0, listOf(0.0, 1.0))
+        SpecKeyframe(0.0, listOf(0.0, 0.0)), SpecKeyframe(TRACK_END_PCT, listOf(0.0, 1.0))
     )
 }
 
@@ -1081,7 +1103,7 @@ private fun KeyframeTable(
                                 .sortedBy { it.pct }
                         )
                     },
-                    modifier = Modifier.weight(0.8f)
+                    modifier = Modifier.weight(NARROW_FIELD_WEIGHT)
                 )
                 repeat(arity) { valueIndex ->
                     NumberField(
