@@ -108,7 +108,8 @@ private val PARTS = File("$SCREENSHOT_ROOT/.parts")
  * wrong color, and the gate would stay green.
  *
  * **What sets the floor is churn, not the threshold**, so the churn was fixed rather than the number
- * widened. Nine images used to move on every re-record; each had a cause, and none of them was Skia:
+ * widened. Every image that used to move on a re-record had a cause, and not one of them was Skia —
+ * each was either a value from outside the composition leaking into the picture, or a stale golden:
  *
  * - `colour_picker` (0.87%) — the picker's "Recent" row, JVM-wide state; see [PinnedRecentColors].
  * - `previewApp/about_*` (0.55%) — `BuildConfig.VERSION_DISPLAY` carries the git hash, so it changed
@@ -120,6 +121,20 @@ private val PARTS = File("$SCREENSHOT_ROOT/.parts")
  *   test now re-selects until the count is complete.
  * - `previewApp/canvas_*` (0.07%) — not churn at all: a stale image, never re-recorded after the
  *   canvas source list moved from emoji to real icons.
+ * - the whole `stageMonitor` folder (22 images) — the stage monitor drew the **live wall clock**,
+ *   and picked its 12h/24h pattern from `Locale.getDefault()`, so the images disagreed both with
+ *   every later run
+ *   and with every 24h-locale machine. `StageMonitorScreen` now takes `pinnedClockText` and the test
+ *   pins it. The settings did route CLOCK to `NONE`, but the test's own `filling()` helper passed
+ *   `zones` over the top of that and `zones` wins the merge — the "off" never reached the shot.
+ * - `canvasTab/source_camera` — `CameraProperties` enumerates the host's real capture devices inside
+ *   `remember`, so the golden held whatever hardware recorded it. Now shot inside
+ *   `withOsName(OS_WITHOUT_ENUMERATOR)`, whose empty-list path spawns no process at all.
+ * - `previewApp/settings_stage_monitor_*` and `previewApp/setup_1_language_*` — not churn either:
+ *   stale images, never re-recorded after the stage-monitor layout chooser and the language grid
+ *   changed. Both surfaced only as `_light`, because `stackedThemes` loops the themes inside one
+ *   test and the light capture throws before dark is compared — **a failing `_light` means
+ *   re-recording the pair.**
  *
  * With those gone the set is byte-stable across consecutive recordings, so **0.1% is slack for
  * anti-aliasing and nothing else — it sits under every real change measured above.** 0 is the
