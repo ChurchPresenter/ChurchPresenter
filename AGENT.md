@@ -119,7 +119,7 @@ they must be set **above everything else** in the file:
   counters that need a different number (usually the one or two that cannot reach 85%), never all
   six. `:converter`, `:companion-satellite`, `:bible-engine`, `:presentation-engine` and `:atem`
   name two each; `:theme`, `:core-models`, `:lottieGenerator`, `:crossword`, `:songlibrary`,
-  `:settings`, `:diagnostics` and `:planning-center` name none.
+  `:settings`, `:diagnostics`, `:planning-center` and `:bible-formats` name none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
