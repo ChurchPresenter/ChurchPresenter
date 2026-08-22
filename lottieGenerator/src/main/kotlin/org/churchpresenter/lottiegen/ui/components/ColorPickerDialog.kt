@@ -46,6 +46,10 @@ import androidx.compose.ui.window.Dialog
 import kotlin.math.abs
 import org.churchpresenter.lottiegen.ui.Strings
 
+/** The outline around a swatch is a hint, not a frame. */
+private const val SWATCH_BORDER_ALPHA = 0.5f
+private const val RECENT_BORDER_ALPHA = 0.4f
+
 /** The HSV colour wheel, in degrees, and the six 60-degree sextants the conversion switches on. */
 private const val HUE_DEGREES = 360f
 private const val SEXTANT_DEGREES = 60f
@@ -110,6 +114,14 @@ fun ColorPickerDialog(
     var hexText by remember { mutableStateOf(colorToHex(initialColor)) }
     var hexError by remember { mutableStateOf(false) }
 
+    /** Adopts a colour picked by any means other than typing, and re-writes the hex field. */
+    fun adopt(color: Color) {
+        val (h, s, v) = colorToHsv(color)
+        hue = h; saturation = s; brightness = v
+        hexText = colorToHex(color)
+        hexError = false
+    }
+
     fun syncHex() {
         hexText = colorToHex(hsvToColor(hue, saturation, brightness))
         hexError = false
@@ -134,7 +146,6 @@ fun ColorPickerDialog(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                // Saturation / Brightness square
                 SvPanel(
                     hue = hue,
                     saturation = saturation,
@@ -150,7 +161,6 @@ fun ColorPickerDialog(
                         .clip(RoundedCornerShape(8.dp)),
                 )
 
-                // Hue rainbow bar
                 HueBar(
                     hue = hue,
                     onHueChange = { h ->
@@ -163,95 +173,114 @@ fun ColorPickerDialog(
                         .clip(RoundedCornerShape(12.dp)),
                 )
 
-                // Preview swatch + hex text field
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(currentColor)
-                            .border(
-                                1.dp,
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                                RoundedCornerShape(8.dp),
-                            ),
-                    )
-                    LottieTextField(
-                        value = hexText,
-                        onValueChange = { text ->
-                            hexText = text
-                            val parsed = tryParseHex(text)
-                            if (parsed != null) {
-                                val (h, s, v) = colorToHsv(parsed)
-                                hue = h; saturation = s; brightness = v
-                                hexError = false
-                            } else {
-                                hexError = text.isNotEmpty() && text != "#"
-                            }
-                        },
-                        label = Strings.hex,
-                        isError = hexError,
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        fillWidth = true,
-                    )
-                }
-
-                // Recent colors
-                if (RecentColors.colors.isNotEmpty()) {
-                    Text(
-                        Strings.recent,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        RecentColors.colors.forEach { recentHex ->
-                            val recentColor = tryParseHex(recentHex) ?: Color.White
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .background(recentColor, RoundedCornerShape(4.dp))
-                                    .border(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-                                        RoundedCornerShape(4.dp),
-                                    )
-                                    .clickable {
-                                        val (h, s, v) = colorToHsv(recentColor)
-                                        hue = h; saturation = s; brightness = v
-                                        syncHex()
-                                    }
-                            )
+                HexRow(
+                    currentColor = currentColor,
+                    hexText = hexText,
+                    hexError = hexError,
+                    onHexChange = { text ->
+                        hexText = text
+                        val parsed = tryParseHex(text)
+                        if (parsed != null) {
+                            val (h, s, v) = colorToHsv(parsed)
+                            hue = h; saturation = s; brightness = v
+                            hexError = false
+                        } else {
+                            hexError = text.isNotEmpty() && text != "#"
                         }
-                    }
-                }
+                    },
+                )
 
-                // Buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TextButton(onClick = onDismiss, shape = ButtonShape) { Text(Strings.cancelBtn) }
-                    Spacer(Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            val hex = colorToHex(currentColor)
-                            RecentColors.add(hex)
-                            onColorSelected(hex)
-                            onDismiss()
-                        },
-                        enabled = !hexError && tryParseHex(hexText) != null,
-                        shape = ButtonShape,
-                    ) { Text(Strings.ok) }
-                }
+                RecentColorsRow(onPick = ::adopt)
+
+                DialogButtons(
+                    confirmEnabled = !hexError && tryParseHex(hexText) != null,
+                    onDismiss = onDismiss,
+                    onConfirm = {
+                        val hex = colorToHex(currentColor)
+                        RecentColors.add(hex)
+                        onColorSelected(hex)
+                        onDismiss()
+                    },
+                )
             }
+        }
+    }
+}
+
+/** The current colour as a swatch, beside the hex field that also edits it. */
+@Composable
+private fun HexRow(
+    currentColor: Color,
+    hexText: String,
+    hexError: Boolean,
+    onHexChange: (String) -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(currentColor)
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.outline.copy(alpha = SWATCH_BORDER_ALPHA),
+                    RoundedCornerShape(8.dp),
+                ),
+        )
+        LottieTextField(
+            value = hexText,
+            onValueChange = onHexChange,
+            label = Strings.hex,
+            isError = hexError,
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+            fillWidth = true,
+        )
+    }
+}
+
+/** The colours chosen recently, in this session. Absent until there is one. */
+@Composable
+private fun RecentColorsRow(onPick: (Color) -> Unit) {
+    if (RecentColors.colors.isEmpty()) return
+    Text(
+        Strings.recent,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        RecentColors.colors.forEach { recentHex ->
+            val recentColor = tryParseHex(recentHex) ?: Color.White
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .background(recentColor, RoundedCornerShape(4.dp))
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline.copy(alpha = RECENT_BORDER_ALPHA),
+                        RoundedCornerShape(4.dp),
+                    )
+                    .clickable { onPick(recentColor) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun DialogButtons(confirmEnabled: Boolean, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TextButton(onClick = onDismiss, shape = ButtonShape) { Text(Strings.cancelBtn) }
+        Spacer(Modifier.width(8.dp))
+        Button(onClick = onConfirm, enabled = confirmEnabled, shape = ButtonShape) {
+            Text(Strings.ok)
         }
     }
 }

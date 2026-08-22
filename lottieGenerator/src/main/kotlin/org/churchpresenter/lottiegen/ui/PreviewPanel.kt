@@ -122,99 +122,17 @@ fun PreviewPanel(
     var isPlaying by remember { mutableStateOf(true) }
     var seekValue by remember { mutableStateOf(0f) }
 
-    Column(
-        modifier = Modifier.fillMaxSize().background(Tokens.PreviewBg)
-    ) {
-        // ── Header ──
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(Tokens.HeaderHeight)
-                .padding(horizontal = 18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                Strings.previewLabel,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.99.sp,
-                color = Tokens.HintText
-            )
-            if (canvasW > 0 && canvasH > 0) {
-                Text("$canvasW × $canvasH", fontSize = 11.5.sp, color = Tokens.DimText, maxLines = 1)
-            }
-            Spacer(Modifier.weight(1f))
-            // Live badge: elapsed / total, driven by the scrub position.
-            if (durationSeconds > 0f) {
-                Row(
-                    modifier = Modifier
-                        .clip(Tokens.ChipShape)
-                        .background(Tokens.BadgeBg)
-                        .border(1.dp, Tokens.BadgeBorder, Tokens.ChipShape)
-                        .padding(horizontal = 9.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Box(Modifier.size(6.dp).clip(CircleShape).background(Tokens.LiveDot))
-                    Text(
-                        "%.1fs / %.1fs".format(seekValue * durationSeconds, durationSeconds),
-                        fontSize = 11.sp,
-                        color = Tokens.ValueText,
-                        maxLines = 1
-                    )
-                }
-            }
-        }
-        Box(Modifier.fillMaxWidth().height(1.dp).background(Tokens.PreviewDivider))
-
-        // ── Canvas ──
-        Box(
+    Column(modifier = Modifier.fillMaxSize().background(Tokens.PreviewBg)) {
+        PreviewHeader(canvasW, canvasH, durationSeconds, seekValue)
+        Divider()
+        PreviewCanvas(
+            jsonString = jsonString,
+            aspectRatio = aspectRatio,
+            isPlaying = isPlaying,
+            seekValue = seekValue,
+            onProgress = { seekValue = it },
             modifier = Modifier.fillMaxWidth().weight(1f).padding(26.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .aspectRatio(aspectRatio)
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, Tokens.CardBorder, RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                CheckerBoard(Modifier.fillMaxSize())
-
-                if (jsonString != null) {
-                    val composition by rememberLottieComposition(key = jsonString) {
-                        LottieCompositionSpec.JsonString(jsonString)
-                    }
-                    val progress by animateLottieCompositionAsState(
-                        composition = composition,
-                        isPlaying = isPlaying,
-                        iterations = Int.MAX_VALUE
-                    )
-
-                    LaunchedEffect(progress) {
-                        if (isPlaying) seekValue = progress
-                    }
-
-                    composition?.let {
-                        Image(
-                            painter = rememberLottiePainter(
-                                composition = it,
-                                progress = { if (isPlaying) progress else seekValue }
-                            ),
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                } else {
-                    Text(Strings.generating, fontSize = 13.sp, color = Tokens.UnitText)
-                }
-            }
-        }
-
-        // ── Status ──
+        )
         if (statusText.isNotEmpty()) {
             Text(
                 statusText,
@@ -225,35 +143,148 @@ fun PreviewPanel(
                 maxLines = 2
             )
         }
+        Divider()
+        TransportBar(
+            isPlaying = isPlaying,
+            seekValue = seekValue,
+            onPlayPause = { isPlaying = !isPlaying },
+            onSeek = { seekValue = it; isPlaying = false },
+        )
+    }
+}
 
-        // ── Transport ──
-        Box(Modifier.fillMaxWidth().height(1.dp).background(Tokens.PreviewDivider))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 18.dp, end = 18.dp, top = 13.dp, bottom = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            PlayButton(isPlaying) { isPlaying = !isPlaying }
-            LottieSlider(
-                value = seekValue,
-                onValueChange = { seekValue = it; isPlaying = false },
-                valueRange = 0f..1f,
-                modifier = Modifier.weight(1f),
-                trackHeight = 6.dp,
-                knobSize = 15.dp,
-                trackColor = Tokens.TransportTrack
-            )
-            Text(
-                "%.0f%%".format(seekValue * PERCENT_SCALE),
-                modifier = Modifier.widthIn(min = 42.dp),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Tokens.HexText,
-                textAlign = TextAlign.End,
-                maxLines = 1
-            )
+@Composable
+private fun Divider() {
+    Box(Modifier.fillMaxWidth().height(1.dp).background(Tokens.PreviewDivider))
+}
+
+/** The caption, the canvas size, and a live elapsed/total badge driven by the scrub position. */
+@Composable
+private fun PreviewHeader(canvasW: Int, canvasH: Int, durationSeconds: Float, seekValue: Float) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(Tokens.HeaderHeight)
+            .padding(horizontal = 18.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text(
+            Strings.previewLabel,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.99.sp,
+            color = Tokens.HintText
+        )
+        if (canvasW > 0 && canvasH > 0) {
+            Text("$canvasW × $canvasH", fontSize = 11.5.sp, color = Tokens.DimText, maxLines = 1)
         }
+        Spacer(Modifier.weight(1f))
+        if (durationSeconds > 0f) {
+            Row(
+                modifier = Modifier
+                    .clip(Tokens.ChipShape)
+                    .background(Tokens.BadgeBg)
+                    .border(1.dp, Tokens.BadgeBorder, Tokens.ChipShape)
+                    .padding(horizontal = 9.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Box(Modifier.size(6.dp).clip(CircleShape).background(Tokens.LiveDot))
+                Text(
+                    "%.1fs / %.1fs".format(seekValue * durationSeconds, durationSeconds),
+                    fontSize = 11.sp,
+                    color = Tokens.ValueText,
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}
+
+/** The checkerboard, and the composition drawn on it once one has been generated. */
+@Composable
+private fun PreviewCanvas(
+    jsonString: String?,
+    aspectRatio: Float,
+    isPlaying: Boolean,
+    seekValue: Float,
+    onProgress: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(aspectRatio)
+                .fillMaxSize()
+                .clip(RoundedCornerShape(12.dp))
+                .border(1.dp, Tokens.CardBorder, RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            CheckerBoard(Modifier.fillMaxSize())
+            if (jsonString == null) {
+                Text(Strings.generating, fontSize = 13.sp, color = Tokens.UnitText)
+                return@Box
+            }
+            val composition by rememberLottieComposition(key = jsonString) {
+                LottieCompositionSpec.JsonString(jsonString)
+            }
+            val progress by animateLottieCompositionAsState(
+                composition = composition,
+                isPlaying = isPlaying,
+                iterations = Int.MAX_VALUE
+            )
+            LaunchedEffect(progress) {
+                if (isPlaying) onProgress(progress)
+            }
+            composition?.let {
+                Image(
+                    painter = rememberLottiePainter(
+                        composition = it,
+                        progress = { if (isPlaying) progress else seekValue }
+                    ),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+}
+
+/** Play/pause, the scrub bar, and the position as a percentage. */
+@Composable
+private fun TransportBar(
+    isPlaying: Boolean,
+    seekValue: Float,
+    onPlayPause: () -> Unit,
+    onSeek: (Float) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 18.dp, end = 18.dp, top = 13.dp, bottom = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        PlayButton(isPlaying, onPlayPause)
+        LottieSlider(
+            value = seekValue,
+            onValueChange = onSeek,
+            valueRange = 0f..1f,
+            modifier = Modifier.weight(1f),
+            trackHeight = 6.dp,
+            knobSize = 15.dp,
+            trackColor = Tokens.TransportTrack
+        )
+        Text(
+            "%.0f%%".format(seekValue * PERCENT_SCALE),
+            modifier = Modifier.widthIn(min = 42.dp),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Tokens.HexText,
+            textAlign = TextAlign.End,
+            maxLines = 1
+        )
     }
 }
