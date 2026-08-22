@@ -173,15 +173,16 @@ jobs:
       # governs every module at once, so "this PR didn't touch that folder" does not mean that
       # folder still passes.
       #
-      # :bible-engine, :lottieGenerator and :presentation-engine are deliberately absent -- they
-      # have the plugin applied and currently fail (151, 409 and 56 findings). Add each one here
-      # the moment it comes clean; until then listing it would make every PR red.
+      # :lottieGenerator is the one module deliberately absent -- it has the plugin applied and
+      # currently fails (409 findings). Add it here the moment it comes clean; until then listing
+      # it would make every PR red. :bible-engine and :presentation-engine were in that same
+      # sentence until they joined the list below, each behind its own baseline.
       - name: Detekt
         run: >-
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :planning-center:detekt
-          :song-chords:detekt
+          :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt
 
       - name: App unit tests
         id: unit_tests

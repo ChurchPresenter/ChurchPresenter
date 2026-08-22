@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:DumpKeynote.kt$DumpKeynote$@JvmStatic fun main(args: Array&lt;String&gt;)</ID>
+    <ID>CyclomaticComplexMethod:KeynoteBuildMapper.kt$KeynoteBuildMapper$fun map(index: ObjectIndex, slide: IwaMessage, drawables: List&lt;KnPlacedDrawable&gt;): Result?</ID>
+    <ID>CyclomaticComplexMethod:KeynoteBuildMapper.kt$KeynoteBuildMapper$private fun mapEffect(build: Build): EffectSpec</ID>
+    <ID>CyclomaticComplexMethod:MotionPathFlattener.kt$MotionPathFlattener$private fun parse(path: String): List&lt;Pair&lt;Double, Double&gt;&gt;?</ID>
+    <ID>CyclomaticComplexMethod:ObjectIndex.kt$ObjectIndex.Companion$fun load(file: File): ObjectIndex?</ID>
+    <ID>CyclomaticComplexMethod:TimelineCompiler.kt$TimelineCompiler$private fun synthesizeSpec( role: EffectSpec.Role, behaviors: List&lt;TimingBehavior&gt;, layerBoundsPt: RectPt, effectNode: TimeNode ): EffectSpec</ID>
+    <ID>LongMethod:DumpKeynote.kt$DumpKeynote$fun dumpNode(nodeId: Long, depth: Int)</ID>
+    <ID>LongParameterList:KeynoteScene.kt$KnSlide$( val index: Int, /** Background fill (slide style, falling back through the master chain). */ val background: KnFill?, /** Flattened draw list, master content first, in z-order. */ val drawables: List&lt;KnPlacedDrawable&gt;, val notes: String, val timeline: Timeline?, /** Ids of drawables that are build targets (they become their own layers). */ val builtDrawableIds: Set&lt;Long&gt;, /** Ids of drawables whose build fanned out into per-paragraph layers (By Paragraph/Bullet). */ val paragraphBuiltDrawableIds: Set&lt;Long&gt;, val transition: SlideTransitionSpec?, /** Non-null → this slide is beyond the whitelist and must render from the static fallback. */ val gateReason: String? )</ID>
+    <ID>LongParameterList:KeynoteSceneRasterizer.kt$KeynoteSceneRasterizer$( graphics: Graphics2D, paragraph: KnParagraph, width: Float, autoSized: Boolean, frc: FontRenderContext, startY: Float, paint: Boolean )</ID>
+    <ID>LoopWithTooManyJumpStatements:IwaChunkReader.kt$IwaChunkReader$while</ID>
+    <ID>LoopWithTooManyJumpStatements:KeynoteBuildMapper.kt$KeynoteBuildMapper$for</ID>
+    <ID>LoopWithTooManyJumpStatements:KeynoteDeckParser.kt$KeynoteDeckParser$while</ID>
+    <ID>LoopWithTooManyJumpStatements:KeynoteSceneRasterizer.kt$KeynoteSceneRasterizer$for</ID>
+    <ID>LoopWithTooManyJumpStatements:KeynoteStaticSupport.kt$KeynoteStaticSupport$for</ID>
+    <ID>LoopWithTooManyJumpStatements:ObjectIndex.kt$ObjectIndex.Companion$for</ID>
+    <ID>NestedBlockDepth:DumpKeynote.kt$DumpKeynote$@JvmStatic fun main(args: Array&lt;String&gt;)</ID>
+    <ID>NestedBlockDepth:IwaMessage.kt$IwaMessage.Companion$fun parse(data: ByteArray, offset: Int = 0, length: Int = data.size - offset): IwaMessage?</ID>
+    <ID>NestedBlockDepth:KeynoteBuildMapper.kt$KeynoteBuildMapper$fun map(index: ObjectIndex, slide: IwaMessage, drawables: List&lt;KnPlacedDrawable&gt;): Result?</ID>
+    <ID>NestedBlockDepth:KeynoteDeckParser.kt$KeynoteDeckParser$private fun resolveCharProps(index: ObjectIndex, styleId: Long?): CharProps?</ID>
+    <ID>NestedBlockDepth:KeynoteDeckParser.kt$KeynoteDeckParser$private fun resolveShapeStyle(index: ObjectIndex, styleId: Long?): ResolvedShapeStyle?</ID>
+    <ID>NestedBlockDepth:KeynoteSceneRasterizer.kt$KeynoteSceneRasterizer$fun rasterizeLayer(slideIndex: Int, spec: LayerSpec, targetWidthPx: Int): RasterLayer</ID>
+    <ID>NestedBlockDepth:KeynoteStaticSupport.kt$KeynoteStaticSupport$fun extractPreviewPdf(file: File, dest: File): Boolean</ID>
+    <ID>NestedBlockDepth:KeynoteStaticSupport.kt$KeynoteStaticSupport$fun readThumbnailBytes(file: File, entryName: String): ByteArray?</ID>
+    <ID>NestedBlockDepth:KeynoteStaticSupport.kt$KeynoteStaticSupport$private fun analyzeZip(file: File): Analysis</ID>
+    <ID>NestedBlockDepth:KeynoteStaticSupport.kt$KeynoteStaticSupport$private fun parseApxlNotes(xml: String): List&lt;String&gt;</ID>
+    <ID>NestedBlockDepth:KeynoteStaticSupport.kt$KeynoteStaticSupport$private fun scanIwaForNoteText(bytes: ByteArray): String</ID>
+    <ID>NestedBlockDepth:MotionPathFlattener.kt$MotionPathFlattener$private fun parse(path: String): List&lt;Pair&lt;Double, Double&gt;&gt;?</ID>
+    <ID>NestedBlockDepth:ObjectIndex.kt$ObjectIndex.Companion$fun load(file: File): ObjectIndex?</ID>
+    <ID>NestedBlockDepth:PowerPointDeckSupport.kt$PowerPointDeckSupport$private fun registerEmbeddedFonts(show: SlideShow&lt;*, *&gt;)</ID>
+    <ID>NestedBlockDepth:PowerPointDeckSupport.kt$PowerPointDeckSupport$private fun slideMeta( slide: Slide&lt;*, *&gt;, slideIndex: Int, pageWidthPt: Double, pageHeightPt: Double, warnings: MutableList&lt;String&gt; ): PowerPointSlideMeta</ID>
+    <ID>NestedBlockDepth:PptxSlideRasterizer.kt$PptxSlideRasterizer$private fun renderBand(slide: XSLFSlide, spec: LayerSpec.Background, scale: Double): BufferedImage</ID>
+    <ID>NestedBlockDepth:PresentationLoader.kt$PresentationLoader$private fun loadKeynoteStatic(file: File, analysis: KeynoteStaticSupport.Analysis): LoadResult</ID>
+    <ID>ReturnCount:DumpKeynote.kt$DumpKeynote$@JvmStatic fun main(args: Array&lt;String&gt;)</ID>
+    <ID>ReturnCount:IwaMessage.kt$IwaMessage.Companion$fun parse(data: ByteArray, offset: Int = 0, length: Int = data.size - offset): IwaMessage?</ID>
+    <ID>ReturnCount:KeynoteDeckParser.kt$KeynoteDeckParser$private fun parseFill(index: ObjectIndex, fill: IwaMessage): KnFill?</ID>
+    <ID>ReturnCount:KeynoteDeckParser.kt$KeynoteDeckParser$private fun parseImage(index: ObjectIndex, message: IwaMessage, gate: Gate): KnDrawable?</ID>
+    <ID>ReturnCount:KeynoteStaticSupport.kt$KeynoteStaticSupport$fun extractPreviewPdf(file: File, dest: File): Boolean</ID>
+    <ID>ReturnCount:MotionPathFlattener.kt$MotionPathFlattener$private fun parse(path: String): List&lt;Pair&lt;Double, Double&gt;&gt;?</ID>
+    <ID>ReturnCount:PowerPointDeckSupport.kt$PowerPointDeckSupport$fun(shapeId: Long, paragraphIndex: Int?): List&lt;TimelineCompiler.LayerIdWithBounds&gt;</ID>
+    <ID>ReturnCount:SlideDiskCache.kt$SlideDiskCache$fun lookup(file: File, renderWidthPx: Int?): CachedSlides?</ID>
+    <ID>ReturnCount:SlideFontRegistry.kt$SlideFontRegistry$fun resolveFamily(requested: String): String</ID>
+    <ID>ReturnCount:TimelineCompiler.kt$TimelineCompiler$private fun translateCurves(behavior: TimingBehavior.AnimateValue, boundsPt: RectPt): PropertyCurve?</ID>
+    <ID>ReturnCount:TimelineEvaluator.kt$TimelineEvaluator$private fun interpolate(curve: PropertyCurve, p: Double): Double?</ID>
+    <ID>ThrowsCount:SlideDiskCache.kt$SlideDiskCache.Writer$fun putSlide( index: Int, image: BufferedImage, note: String, fidelity: Fidelity, hasTimeline: Boolean ): File</ID>
+    <ID>TooGenericExceptionCaught:PdfDeckSupport.kt$PdfDeckSupport$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PowerPointDeckSupport.kt$PowerPointDeckSupport$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PresentationLoader.kt$PresentationLoader$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SlideDiskCache.kt$SlideDiskCache.Writer$e: Throwable</ID>
+    <ID>TooManyFunctions:IwaMessage.kt$IwaMessage</ID>
+    <ID>TooManyFunctions:KeynoteDeckParser.kt$KeynoteDeckParser</ID>
+    <ID>TooManyFunctions:KeynoteSceneRasterizer.kt$KeynoteSceneRasterizer : AutoCloseable</ID>
+    <ID>TooManyFunctions:KeynoteStaticSupport.kt$KeynoteStaticSupport</ID>
+    <ID>TooManyFunctions:TimelineCompiler.kt$TimelineCompiler</ID>
+    <ID>TooManyFunctions:TimelineEvaluator.kt$TimelineEvaluator</ID>
+    <ID>TooManyFunctions:TimingParser.kt$TimingParser</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -49,13 +49,17 @@ object DetectionLogger {
     // shutdown wait for the queue to hit disk.
     private val writeQueue = java.util.concurrent.LinkedBlockingQueue<Pair<File, String>>()
     private val pending = java.util.concurrent.atomic.AtomicInteger(0)
-    private val writerThread = Thread({
-        while (true) {
-            val (file, text) = writeQueue.take()
-            runCatching { file.appendText(text, Charsets.UTF_8) }
-            pending.decrementAndGet()
-        }
-    }, "ble-log-writer").apply { isDaemon = true; start() }
+    // Started, never held: nothing joins or interrupts it, and a `val` nobody reads only looks like
+    // an oversight. It is a daemon, so it dies with the JVM.
+    init {
+        Thread({
+            while (true) {
+                val (file, text) = writeQueue.take()
+                runCatching { file.appendText(text, Charsets.UTF_8) }
+                pending.decrementAndGet()
+            }
+        }, "ble-log-writer").apply { isDaemon = true; start() }
+    }
 
     private fun enqueue(target: File, line: String) {
         pending.incrementAndGet()

@@ -55,7 +55,14 @@ class BibleIndexTest {
         // The runner-up here is the NEXT verse of the same passage (the window covers both) —
         // the ratio gate must pick a different-chapter competitor instead of suppressing.
         val t = fixture(listOf(
-            EngineVerse("40-11-28", 40, 11, 28, "придите ко мне все труждающиеся и обремененные и я успокою вас", false),
+            EngineVerse(
+                "40-11-28",
+                40,
+                11,
+                28,
+                "придите ко мне все труждающиеся и обремененные и я успокою вас",
+                false,
+            ),
             EngineVerse("40-11-29", 40, 11, 29, "возьмите иго мое на себя и научитесь от меня", false),
             EngineVerse("40-5-3", 40, 5, 3, "блаженны нищие духом ибо их есть царство небесное", false),
         ))

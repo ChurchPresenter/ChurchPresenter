@@ -26,6 +26,18 @@ object AtemConnectionManager {
     private var cachedPort: Int = 9910
 
     /**
+     * Bumped by [invalidate]. A connect that was already in flight when the cache was dropped must
+     * not put itself back: [invalidate] does not hold [mutex] -- it cannot, it is not suspending and
+     * is called from settings changes and teardown -- so without this the sequence "upload connects,
+     * settings change invalidates, connect completes" leaves the manager caching a client for the
+     * endpoint the operator just moved away from. It reports [AtemClient.isAlive] as true forever
+     * after, because for UDP that is only `socket != null`, so nothing later notices and every
+     * command goes to a switcher that is no longer listening.
+     */
+    @Volatile
+    private var generation: Int = 0
+
+    /**
      * Acquire the shared client for [host]:[port], ensuring it is connected
      * (with full state if [needsState] is true), then run [block].
      *
@@ -87,6 +99,7 @@ object AtemConnectionManager {
 
     /** Immediately closes the cached connection (e.g. when ATEM settings change). */
     fun invalidate() {
+        generation++
         if (client != null) CrashReporter.breadcrumb("ATEM disconnected", category = "integration")
         client?.disconnect()
         client = null
@@ -111,10 +124,20 @@ object AtemConnectionManager {
     }
 
     private suspend fun openConnection(host: String, port: Int, collectState: Boolean): AtemClient {
+        val openedAt = generation
         val c = AtemClient(host, port)
         // keepAlive = true: hold the session open across calls so reused operations
         // never hit a stale-session timeout.
         withContext(Dispatchers.IO) { c.connect(collectState = collectState, keepAlive = true) }
+        if (openedAt != generation) {
+            // Invalidated while this was connecting: hand the caller its connection, since it asked
+            // for one and is holding the mutex, but do not cache what is already known to be stale.
+            CrashReporter.breadcrumb(
+                "ATEM connection discarded (invalidated while connecting)",
+                category = "integration",
+            )
+            return c
+        }
         client = c
         cachedHost = host
         cachedPort = port

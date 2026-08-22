@@ -15,11 +15,14 @@ import org.junit.BeforeClass
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.churchpresenter.app.churchpresenter.testPort
 import org.churchpresenter.atem.AtemConnectionManager
+import org.churchpresenter.atem.AtemUploadStatus
 import org.churchpresenter.atem.FakeAtemSwitcher
 
 /**
@@ -98,7 +101,15 @@ class CompanionServerAtemUploadTest {
         private var clipFrames: Int = 0
         private var clipFrameBytes: Int = 0
 
-        private val port = testPort(39_880)
+        /**
+         * The port the server is ASKED for. Never build a URL from it: `CompanionServer.start` runs
+         * it through `findFreePort`, which walks upward when the port is taken, so the server can
+         * end up one along. [boundPort] is where it actually is.
+         */
+        private val requestedPort = testPort(39_880)
+
+        /** Where the server really listens, read back from its own URL once it is up. */
+        private var boundPort: Int = 0
 
         @JvmStatic
         @BeforeClass
@@ -138,13 +149,13 @@ class CompanionServerAtemUploadTest {
             }
 
             server = CompanionServer()
-            server.start(port = port)
-            runBlocking {
+            server.start(port = requestedPort)
+            boundPort = runBlocking {
                 withTimeoutOrNull(10_000) {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {
                         kotlinx.coroutines.delay(25)
                     }
-                    true
+                    server.serverUrl.value.substringAfterLast(':').toInt()
                 }
             } ?: error("companion server did not start")
         }
@@ -171,8 +182,16 @@ class CompanionServerAtemUploadTest {
         )
     }
 
+    @BeforeTest
+    fun dropInheritedConnection() {
+        // These suites share one JVM (jvmTestSerial), so the pooled connection is shared too. Every
+        // class here is expected to leave it clean; none of them is trusted to.
+        AtemConnectionManager.invalidate()
+    }
+
     @AfterTest
     fun releaseConnection() {
+        runBlocking { server.atem.cancelUpload() }
         AtemConnectionManager.invalidate()
         if (::client.isInitialized) client.close()
     }
@@ -184,6 +203,44 @@ class CompanionServerAtemUploadTest {
 
     private fun switcher() = FakeAtemSwitcher(mixEffects = 4, downstreamKeyers = 2, keyersPerMe = 4)
         .also { it.expectedTransferBytes = payloadBytes }
+
+    /**
+     * Runs [body] against a fresh switcher, then ends the upload it started and drops the shared
+     * ATEM connection -- both **before** that switcher closes.
+     *
+     * The order is the whole point. `POST /api/atem/still|clip` answers `"uploading"` and does the
+     * transfer on `CompanionServer`'s own scope, so when the body's assertions are satisfied the
+     * coroutine is still running -- typically in the `delay(KEY_SETTLE_MS)` tail, or the
+     * clip-duration wait before the automatic key-off. Left alone it reaches its next
+     * `AtemConnectionManager.use` *after* the test invalidated, opens a connection to the fake this
+     * test is about to close, and caches it.
+     *
+     * What follows is a cascade rather than one bad test. `AtemClient.isAlive()` is `socket != null`,
+     * which for UDP stays true with nothing listening, and the fake binds an **ephemeral** port the
+     * OS can hand out again -- so `ensureConnected` believes it is already connected, skips the
+     * handshake, and the next test's switcher records not one command of any name. Each poisoned
+     * test then burns its 5s deadline while leaving ~8s of stuck work behind, so the backlog grows
+     * faster than the suite drains it. That is the shape five of these tests failed with on CI, and
+     * it survived the first attempt at this helper because the three clip tests did not use it.
+     *
+     * `cancelUpload()` joins, so it returns only once the coroutine has actually stopped and nothing
+     * can touch the connection behind us.
+     */
+    private fun withSwitcher(
+        newSwitcher: () -> FakeAtemSwitcher = { switcher() },
+        configureWith: (FakeAtemSwitcher) -> Unit = { configure(it) },
+        body: (FakeAtemSwitcher) -> Unit,
+    ) {
+        newSwitcher().use { fake ->
+            configureWith(fake)
+            try {
+                body(fake)
+            } finally {
+                runBlocking { server.atem.cancelUpload() }
+                AtemConnectionManager.invalidate()
+            }
+        }
+    }
 
     private fun configure(fake: FakeAtemSwitcher) {
         server.updateAtemConfig(settings("127.0.0.1", fake.port), lowerThirdFolder = lottieFolder.absolutePath)
@@ -200,7 +257,7 @@ class CompanionServerAtemUploadTest {
     }
 
     private fun upload(query: String): HttpResponse =
-        runBlocking { http().post("http://127.0.0.1:$port/api/atem/still/Welcome$query") }
+        runBlocking { http().post("http://127.0.0.1:$boundPort/api/atem/still/Welcome$query") }
 
     // ── The fixture ─────────────────────────────────────────────────────────────
 
@@ -224,8 +281,7 @@ class CompanionServerAtemUploadTest {
 
     @Test
     fun `a still is rendered and every byte of it reaches the switcher`() {
-        switcher().use { fake ->
-            configure(fake)
+        withSwitcher { fake ->
 
             val response = upload("?slot=3")
 
@@ -251,8 +307,7 @@ class CompanionServerAtemUploadTest {
     fun `the slot the operator asked for is the slot that is written`() {
         // The query is 1-based and the protocol is 0-based, and a still landing in the wrong slot
         // overwrites whatever the operator had prepared there.
-        switcher().use { fake ->
-            configure(fake)
+        withSwitcher { fake ->
 
             upload("?slot=5")
 
@@ -263,12 +318,14 @@ class CompanionServerAtemUploadTest {
 
     @Test
     fun `with no slot on the request the configured default is used`() {
-        switcher().use { fake ->
-            server.updateAtemConfig(
-                settings("127.0.0.1", fake.port).copy(defaultStillSlot = 7),
-                lowerThirdFolder = lottieFolder.absolutePath
-            )
-
+        withSwitcher(
+            configureWith = { fake ->
+                server.updateAtemConfig(
+                    settings("127.0.0.1", fake.port).copy(defaultStillSlot = 7),
+                    lowerThirdFolder = lottieFolder.absolutePath
+                )
+            }
+        ) { fake ->
             val body = runBlocking { upload("").bodyAsText() }
 
             assertTrue(body.contains(""""slot":8"""), "the response reports the 1-based slot: $body")
@@ -287,12 +344,11 @@ class CompanionServerAtemUploadTest {
         }
 
     private fun uploadClip(query: String): HttpResponse =
-        runBlocking { http().post("http://127.0.0.1:$port/api/atem/clip/Welcome$query") }
+        runBlocking { http().post("http://127.0.0.1:$boundPort/api/atem/clip/Welcome$query") }
 
     @Test
     fun `a clip is rendered and every frame of it is transferred`() {
-        clipSwitcher().use { fake ->
-            configure(fake)
+        withSwitcher({ clipSwitcher() }) { fake ->
 
             val response = uploadClip("?slot=1")
 
@@ -316,8 +372,7 @@ class CompanionServerAtemUploadTest {
 
     @Test
     fun `the clip lands in the slot the operator asked for`() {
-        clipSwitcher().use { fake ->
-            configure(fake)
+        withSwitcher({ clipSwitcher() }) { fake ->
 
             uploadClip("?slot=2")
 
@@ -331,12 +386,15 @@ class CompanionServerAtemUploadTest {
     fun `a clip too long for its slot is refused before anything is rendered`() {
         // The capacity comes from the last connection to the switcher, so the refusal happens up
         // front and the caller gets a real error rather than a silent half-ingested clip.
-        clipSwitcher().use { fake ->
-            server.updateAtemConfig(
-                settings("127.0.0.1", fake.port).copy(detectedClipMaxFrames = listOf(5, 5)),
-                lowerThirdFolder = lottieFolder.absolutePath
-            )
-
+        withSwitcher(
+            newSwitcher = { clipSwitcher() },
+            configureWith = { fake ->
+                server.updateAtemConfig(
+                    settings("127.0.0.1", fake.port).copy(detectedClipMaxFrames = listOf(5, 5)),
+                    lowerThirdFolder = lottieFolder.absolutePath
+                )
+            }
+        ) { fake ->
             val response = uploadClip("?slot=1")
 
             assertEquals(HttpStatusCode.UnprocessableEntity, response.status)
@@ -352,8 +410,7 @@ class CompanionServerAtemUploadTest {
     fun `asking for a key cuts it on only after the transfer has finished`() {
         // Keying before the still has landed puts the previous graphic on air — the ordering is the
         // whole point of doing both in one request.
-        switcher().use { fake ->
-            configure(fake)
+        withSwitcher { fake ->
 
             val body = runBlocking { upload("?slot=1&key=1&me=1").bodyAsText() }
             assertTrue(body.contains(""""me":1"""), body)
@@ -372,9 +429,42 @@ class CompanionServerAtemUploadTest {
     }
 
     @Test
-    fun `no key is touched when the request does not ask for one`() {
+    fun `an upload does not outlive the switcher it was aimed at`() {
+        // The cascade this closes. The route answers "uploading" and transfers on the server's own
+        // scope, so when a test's assertions are satisfied the coroutine is still running. Let it
+        // run past the switcher's close and its next `AtemConnectionManager.use` dials an endpoint
+        // nothing is listening on -- which holds the manager's mutex for the whole connect timeout
+        // and can leave a client cached for a dead ephemeral port. Either way the NEXT test's
+        // upload never reaches its switcher, and every wait in it times out with "got 0".
+        //
+        // cancelUpload() joins, so it returns only once the coroutine has stopped.
         switcher().use { fake ->
             configure(fake)
+
+            upload("?slot=1")
+            fake.awaitCommandsNamed("LOCK", 2)
+
+            runBlocking { server.atem.cancelUpload() }
+
+            assertNull(
+                AtemUploadStatus.state.value,
+                "a cancelled upload is over and is not a failure — it must leave no status behind"
+            )
+            AtemConnectionManager.invalidate()
+        }
+
+        // With nothing left over, the very next upload reaches its own switcher immediately.
+        withSwitcher { fake ->
+            upload("?slot=1")
+
+            fake.awaitCommandsNamed("LOCK", 2)
+            assertEquals(1, fake.commandsNamed("FTSD").size, "the next upload gets a real connection")
+        }
+    }
+
+    @Test
+    fun `no key is touched when the request does not ask for one`() {
+        withSwitcher { fake ->
 
             upload("?slot=1")
 

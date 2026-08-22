@@ -1,0 +1,92 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:DetectionLogger.kt$DetectionLogger$file.isFile &amp;&amp; n.endsWith(".jsonl") &amp;&amp; (n.startsWith(BASE_PREFIX) || n.startsWith(CANDIDATE_PREFIX) || n.startsWith(STICKY_PREFIX)) &amp;&amp; file.lastModified() &lt; cutoff</ID>
+    <ID>ComplexCondition:DetectionLogger.kt$DetectionLogger$it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '.' || it == '_' || it == '-'</ID>
+    <ID>ComplexCondition:ReferenceWatcher.kt$ReferenceWatcher$len == 1 &amp;&amp; (AMBIGUOUS_BOOK_FORMS[phrase] != null || isShortAlias(phrase, bookNum)) &amp;&amp; !hasAmbiguousBookCorroboration(tokens, i)</ID>
+    <ID>ComplexCondition:ReferenceWatcher.kt$ReferenceWatcher$tok != ":" &amp;&amp; tok != "-" &amp;&amp; !isChapKw(tok) &amp;&amp; !isVerseKw(tok) &amp;&amp; tok !in RANGE_WORDS &amp;&amp; tok !in LIST_WORDS &amp;&amp; !isNumberRatherThanBook(tok)</ID>
+    <ID>ComplexCondition:SpbLoader.kt$SpbLoader$line.startsWith("##") || line.startsWith(" ") || line.startsWith("\t") || line.isBlank()</ID>
+    <ID>ComplexCondition:StickyAudit.kt$row.prevBook != null &amp;&amp; row.prevBook == row.newBook &amp;&amp; row.prevChapter != null &amp;&amp; row.newChapter == null</ID>
+    <ID>CyclomaticComplexMethod:DetectionEngine.kt$DetectionEngine$private fun runDetection(state: UtteranceState): List&lt;ScriptureEvent&gt;</ID>
+    <ID>CyclomaticComplexMethod:ReferenceWatcher.kt$ReferenceWatcher$private fun classify(tokens: List&lt;String&gt;): List&lt;Atom&gt;</ID>
+    <ID>CyclomaticComplexMethod:ReferenceWatcher.kt$ReferenceWatcher$private fun interpret(atoms: List&lt;Atom&gt;, sticky: Sticky, now: Long): List&lt;Ref&gt;</ID>
+    <ID>CyclomaticComplexMethod:SocketHandler.kt$fun Route.bibleEngineSocket( engine: DetectionEngine, broadcaster: Broadcaster, // Single-threaded detection dispatcher (EngineServer) — the engine's shared state // (utterances, Stabilizer, Config tuning) is mutated ONLY on this context, which is what // makes it safe with multiple concurrent WS clients + the STT thread. Defaults to the // caller's context for tests that drive a single connection. detectionContext: CoroutineContext = EmptyCoroutineContext, )</ID>
+    <ID>CyclomaticComplexMethod:SpbLoader.kt$SpbLoader$private fun parseFile(file: File, seenIds: MutableMap&lt;String, Int&gt;): EngineTranslation?</ID>
+    <ID>CyclomaticComplexMethod:SpbVersionIndex.kt$SpbVersionIndex.Companion$fun build(file: File, seenIds: MutableMap&lt;String, Int&gt;): SpbVersionIndex?</ID>
+    <ID>LongMethod:DetectionEngine.kt$DetectionEngine$private fun runDetection(state: UtteranceState): List&lt;ScriptureEvent&gt;</ID>
+    <ID>LongParameterList:DetectionEngine.kt$DetectionEngine$( id: String, verse: EngineVerse, translation: EngineTranslation, confidence: Double, matchType: String, verseEnd: Int?, )</ID>
+    <ID>LongParameterList:DetectionLogger.kt$DetectionLogger$( transcript: String, translation: String, prevBook: Int?, prevChapter: Int?, newBook: Int?, newChapter: Int?, )</ID>
+    <ID>LongParameterList:ReferenceWatcher.kt$ReferenceWatcher$( curBook: Int?, chapter: Int?, verseStart: Int?, verseEnd: Int?, keywordSeen: Boolean, sticky: Sticky, now: Long, out: MutableList&lt;Ref&gt;, )</ID>
+    <ID>LongParameterList:SpbVersionIndex.kt$SpbVersionIndex$( val id: String, val label: String, val script: Script, val fileName: String, private val file: File, private val fileLength: Long, private val lastModified: Long, /** Packed book/chapter/verse keys, ascending — binary-searched by [text]. */ private val codes: IntArray, private val textOffsets: LongArray, private val textLengths: IntArray, )</ID>
+    <ID>LoopWithTooManyJumpStatements:BibleIndex.kt$BibleIndex$for</ID>
+    <ID>LoopWithTooManyJumpStatements:DetectionEngine.kt$DetectionEngine$while</ID>
+    <ID>LoopWithTooManyJumpStatements:NumberWords.kt$NumberWords$while</ID>
+    <ID>LoopWithTooManyJumpStatements:ReferenceWatcher.kt$ReferenceWatcher$for</ID>
+    <ID>LoopWithTooManyJumpStatements:ReferenceWatcher.kt$ReferenceWatcher$while</ID>
+    <ID>LoopWithTooManyJumpStatements:SocketHandler.kt$for</ID>
+    <ID>LoopWithTooManyJumpStatements:SpbLoader.kt$SpbLoader$for</ID>
+    <ID>MagicNumber:AgreementScorer.kt$AgreementScorer$3</ID>
+    <ID>MagicNumber:BibleIndex.kt$BibleIndex$3</ID>
+    <ID>MagicNumber:BibleIndex.kt$BibleIndex$5</ID>
+    <ID>MagicNumber:BibleIndex.kt$BibleIndex$6</ID>
+    <ID>MagicNumber:ContinuationEngine.kt$ContinuationEngine$0.5</ID>
+    <ID>MagicNumber:ContinuationEngine.kt$ContinuationEngine$0.55</ID>
+    <ID>MagicNumber:ContinuationEngine.kt$ContinuationEngine$0.85</ID>
+    <ID>MagicNumber:ContinuationEngine.kt$ContinuationEngine$0.88</ID>
+    <ID>MagicNumber:ContinuationEngine.kt$ContinuationEngine$3</ID>
+    <ID>MagicNumber:DetectionLogger.kt$DetectionLogger$5</ID>
+    <ID>MagicNumber:EngineServer.kt$EngineServer$1000</ID>
+    <ID>MagicNumber:EngineServer.kt$EngineServer$500</ID>
+    <ID>MagicNumber:EngineServer.kt$EngineServer$9</ID>
+    <ID>MagicNumber:ReferenceWatcher.kt$ReferenceWatcher$3</ID>
+    <ID>MagicNumber:ReferenceWatcher.kt$ReferenceWatcher$4</ID>
+    <ID>MagicNumber:ReverseLookup.kt$ReverseLookup$3</ID>
+    <ID>MagicNumber:SpbLoader.kt$SpbLoader$10</ID>
+    <ID>MagicNumber:SpbLoader.kt$SpbLoader$200</ID>
+    <ID>MagicNumber:SpbLoader.kt$SpbLoader$3</ID>
+    <ID>MagicNumber:SpbLoader.kt$SpbLoader$5</ID>
+    <ID>MagicNumber:SpbVersionIndex.kt$SpbVersionIndex.Companion$0xD0</ID>
+    <ID>MagicNumber:SpbVersionIndex.kt$SpbVersionIndex.Companion$0xD1</ID>
+    <ID>MagicNumber:SpbVersionIndex.kt$SpbVersionIndex.Companion$10</ID>
+    <ID>MagicNumber:SpbVersionIndex.kt$SpbVersionIndex.Companion$12</ID>
+    <ID>MagicNumber:SpbVersionIndex.kt$SpbVersionIndex.Companion$1_000</ID>
+    <ID>MagicNumber:SpbVersionIndex.kt$SpbVersionIndex.Companion$1_000_000</ID>
+    <ID>MagicNumber:SpbVersionIndex.kt$SpbVersionIndex.Companion$20_000</ID>
+    <ID>MagicNumber:SpbVersionIndex.kt$SpbVersionIndex.Companion$4</ID>
+    <ID>MagicNumber:Stabilizer.kt$Stabilizer$256</ID>
+    <ID>MagicNumber:StickyAudit.kt$3</ID>
+    <ID>MagicNumber:StickyAudit.kt$6</ID>
+    <ID>MagicNumber:VersionDetector.kt$VersionDetector$1000</ID>
+    <ID>MagicNumber:VersionDetector.kt$VersionDetector$1000.0</ID>
+    <ID>NestedBlockDepth:BibleIndex.kt$BibleIndex$private fun fuzzyExpansions(token: String): List&lt;String&gt;</ID>
+    <ID>NestedBlockDepth:BibleIndex.kt$BibleIndex$private fun withinOneEdit(a: String, b: String): Boolean</ID>
+    <ID>NestedBlockDepth:ReferenceWatcher.kt$ReferenceWatcher$private fun classify(tokens: List&lt;String&gt;): List&lt;Atom&gt;</ID>
+    <ID>NestedBlockDepth:ReferenceWatcher.kt$ReferenceWatcher$private fun interpret(atoms: List&lt;Atom&gt;, sticky: Sticky, now: Long): List&lt;Ref&gt;</ID>
+    <ID>NestedBlockDepth:SpbLoader.kt$SpbLoader$private fun parseFile(file: File, seenIds: MutableMap&lt;String, Int&gt;): EngineTranslation?</ID>
+    <ID>NestedBlockDepth:SpbVersionIndex.kt$SpbVersionIndex.Companion$fun build(file: File, seenIds: MutableMap&lt;String, Int&gt;): SpbVersionIndex?</ID>
+    <ID>ReturnCount:BibleIndex.kt$BibleIndex$fun searchAllTerms(query: String, topK: Int = Config.reverseTopK): List&lt;SearchResult&gt;</ID>
+    <ID>ReturnCount:ContinuationEngine.kt$ContinuationEngine$fun check( state: UtteranceState, translations: List&lt;EngineTranslation&gt;, now: Long = System.currentTimeMillis(), ): ContinuationResult?</ID>
+    <ID>ReturnCount:ContinuationEngine.kt$ContinuationEngine$fun checkChapterScope( state: UtteranceState, translation: EngineTranslation, now: Long = System.currentTimeMillis(), ): ContinuationResult?</ID>
+    <ID>ReturnCount:DetectionEngine.kt$DetectionEngine$private fun runDetection(state: UtteranceState): List&lt;ScriptureEvent&gt;</ID>
+    <ID>ReturnCount:EngineServer.kt$EngineServer$fun start(sttUrl: String, bibleRoot: String, port: Int, bibleFiles: List&lt;String&gt; = emptyList()): EngineHandle?</ID>
+    <ID>ReturnCount:NumberWords.kt$NumberWords$fun matchedStemLength(token: String): Int</ID>
+    <ID>ReturnCount:NumberWords.kt$NumberWords$fun parseToken(token: String): Int?</ID>
+    <ID>ReturnCount:ReferenceWatcher.kt$ReferenceWatcher$private fun hasAmbiguousBookCorroboration(tokens: List&lt;String&gt;, i: Int): Boolean</ID>
+    <ID>ReturnCount:ReferenceWatcher.kt$ReferenceWatcher$private fun resolveNumberedBookAhead(tokens: List&lt;String&gt;, i: Int): Int?</ID>
+    <ID>ReturnCount:ReverseLookup.kt$ReverseLookup$fun search( query: String, index: BibleIndex, translations: List&lt;EngineTranslation&gt;, topK: Int = Config.reverseTopK, ): ReverseResult?</ID>
+    <ID>ReturnCount:SpbVersionCorpus.kt$VersionCorpusLoader$fun load( priorityFiles: List&lt;String&gt; = emptyList(), onSkip: (fileName: String, reason: String) -&gt; Unit = { _, _ -&gt; }, ): VersionCorpus</ID>
+    <ID>ReturnCount:SpbVersionIndex.kt$SpbVersionIndex$fun text(packedCode: Int): String?</ID>
+    <ID>ReturnCount:StickyAudit.kt$internal fun classify(row: StickyRow): Verdict</ID>
+    <ID>ReturnCount:VersionDetector.kt$VersionDetector$private fun evaluate(): Verdict?</ID>
+    <ID>ReturnCount:VersionScorer.kt$VersionScorer$fun deltas( candidates: List&lt;VersionCandidate&gt;, anchorText: String, spoken: String, script: Script, ): List&lt;Delta&gt;</ID>
+    <ID>TooGenericExceptionCaught:EngineServer.kt$EngineServer$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SocketHandler.kt$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SpbLoader.kt$SpbLoader$e: Exception</ID>
+    <ID>TooManyFunctions:BibleIndex.kt$BibleIndex</ID>
+    <ID>TooManyFunctions:DetectionEngine.kt$DetectionEngine</ID>
+    <ID>TooManyFunctions:DetectionLogger.kt$DetectionLogger</ID>
+    <ID>TooManyFunctions:ReferenceWatcher.kt$ReferenceWatcher</ID>
+    <ID>TooManyFunctions:SttPayload.kt$org.churchpresenter.bibleengine.socket.SttPayload.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>

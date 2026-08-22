@@ -1,3 +1,6 @@
+@file:Suppress("MatchingDeclarationName")
+// Fixtures for the version suites: a corpus stand-in and the builder that fills it.
+
 package org.churchpresenter.bibleengine.version
 
 import org.churchpresenter.bibleengine.bible.Script

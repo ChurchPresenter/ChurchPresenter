@@ -12,6 +12,7 @@ import org.churchpresenter.settings.AtemSettings
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -63,7 +64,9 @@ class CompanionServerAtemKeyTest {
                     while (!server.isRunning.value || server.serverUrl.value.isBlank()) {
                         kotlinx.coroutines.delay(25)
                     }
-                    testPort(39_870)
+                    // Read back where it really is: start() runs the port through findFreePort,
+                    // which walks upward when the port is taken.
+                    server.serverUrl.value.substringAfterLast(':').toInt()
                 }
             } ?: error("companion server did not start")
         }
@@ -75,10 +78,18 @@ class CompanionServerAtemKeyTest {
         }
     }
 
+    @BeforeTest
+    fun dropInheritedConnection() {
+        // One JVM runs every suite in jvmTestSerial, so the pooled connection is shared across
+        // classes. Each is expected to leave it clean; none of them is trusted to.
+        AtemConnectionManager.invalidate()
+    }
+
     @AfterTest
     fun releaseConnection() {
         // The manager caches one client process-wide; drop it so no keepalive loop outlives the
         // fake switcher it was talking to.
+        runBlocking { server.atem.cancelUpload() }
         AtemConnectionManager.invalidate()
         if (::client.isInitialized) client.close()
     }
@@ -90,6 +101,28 @@ class CompanionServerAtemKeyTest {
 
     /** A switcher big enough that no test trips validation before reaching it. */
     private fun switcher() = FakeAtemSwitcher(mixEffects = 4, downstreamKeyers = 2, keyersPerMe = 4)
+
+    /**
+     * Runs [body] against a fresh switcher and releases the shared connection **before** the
+     * switcher closes.
+     *
+     * Closing first leaves `AtemConnectionManager` holding a client for a peer that has gone, and
+     * nothing detects that: `AtemClient.isAlive()` is `socket != null`, true for a UDP socket with
+     * nobody listening. The fake binds an ephemeral port the OS may hand out again, so the next
+     * suite in this JVM can be given an endpoint the manager believes it is already connected to,
+     * skip the handshake, and record no commands at all. See `CompanionServerAtemUploadTest`, which
+     * failed exactly that way on CI.
+     */
+    private fun withSwitcher(body: (FakeAtemSwitcher) -> Unit) {
+        switcher().use { fake ->
+            try {
+                body(fake)
+            } finally {
+                runBlocking { server.atem.cancelUpload() }
+                AtemConnectionManager.invalidate()
+            }
+        }
+    }
 
     private fun configure(fake: FakeAtemSwitcher, settings: AtemSettings = AtemSettings()) {
         server.updateAtemConfig(
@@ -110,7 +143,7 @@ class CompanionServerAtemKeyTest {
 
     @Test
     fun `cutting an upstream key on air reaches the switcher and reports the target it drove`() {
-        switcher().use { fake ->
+        withSwitcher { fake ->
             configure(fake)
 
             val response = press("/api/atem/key/on?me=2&key=3")
@@ -130,7 +163,7 @@ class CompanionServerAtemKeyTest {
 
     @Test
     fun `taking an upstream key off air sends the same target with the on-air flag cleared`() {
-        switcher().use { fake ->
+        withSwitcher { fake ->
             configure(fake)
 
             val response = press("/api/atem/key/off?me=1&key=1")
@@ -148,7 +181,7 @@ class CompanionServerAtemKeyTest {
     @Test
     fun `a press that names no target uses the operator's configured defaults`() {
         // This is the ordinary Stream Deck button: no query string, whatever the ATEM settings say.
-        switcher().use { fake ->
+        withSwitcher { fake ->
             configure(fake, AtemSettings(keyMixEffect = 1, keyIndex = 2))
 
             val response = press("/api/atem/key/on")
@@ -167,7 +200,7 @@ class CompanionServerAtemKeyTest {
 
     @Test
     fun `keytype dsk drives a downstream keyer instead of an upstream one`() {
-        switcher().use { fake ->
+        withSwitcher { fake ->
             configure(fake)
 
             val response = press("/api/atem/key/on?keytype=dsk&key=2")
@@ -185,7 +218,7 @@ class CompanionServerAtemKeyTest {
 
     @Test
     fun `the persisted downstream preference applies with no keytype on the request`() {
-        switcher().use { fake ->
+        withSwitcher { fake ->
             configure(fake, AtemSettings(useDownstreamKey = true, dskIndex = 1))
 
             val response = press("/api/atem/key/on")
@@ -198,7 +231,7 @@ class CompanionServerAtemKeyTest {
 
     @Test
     fun `keytype usk overrides a persisted downstream preference`() {
-        switcher().use { fake ->
+        withSwitcher { fake ->
             configure(fake, AtemSettings(useDownstreamKey = true, dskIndex = 1))
 
             val response = press("/api/atem/key/on?keytype=usk&me=1&key=1")
@@ -219,7 +252,7 @@ class CompanionServerAtemKeyTest {
         // The ATEM drops an idle UDP session after a few seconds and the manager caches one client,
         // so the second button press is a different code path from the first: it must not silently
         // land on a stale session.
-        switcher().use { fake ->
+        withSwitcher { fake ->
             configure(fake)
 
             assertEquals(HttpStatusCode.OK, press("/api/atem/key/on?me=1&key=1").status)

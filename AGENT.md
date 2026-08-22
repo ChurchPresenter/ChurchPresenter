@@ -182,6 +182,14 @@ behind by a refactor is a warning to `compileKotlinJvm` and a **build failure** 
 "it compiles" and "the tests pass" are both green while CI is red. A clean run is the expected
 result and every finding it prints is yours to fix.
 
+`:bible-engine` and `:presentation-engine` each carry their own `config/detekt/baseline.xml` too,
+written the day they joined the detekt step above. They had 205 findings between them and had never
+been gated: 44 were fixed outright (dead code, a swallowed exception, 26 over-long lines, and two
+parameters a public function ignored), the 7 in test sources carry `@Suppress` at the declaration,
+and the remaining 161 -- all `src/main`, and mostly `MagicNumber`, `NestedBlockDepth` and
+`ReturnCount` against byte-format parsers -- are baselined so the rules gate new code. Those numbers
+are debt, not absolution: the modules are parsers, but a parser is not exempt from a named constant.
+
 `config/detekt/baseline.xml` holds pre-existing findings from the day the size/length rules
 (`LongMethod`, `LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`,
 `TooGenericExceptionCaught`) were switched on — 1,623 of them, suppressed so those rules gate new
@@ -401,6 +409,20 @@ When writing tests here:
   poll on observable state with a timeout that throws, or a callback/flag the code under test
   sets. Never assert "nothing happened" after an arbitrary pause; wait for a positive signal that
   the operation finished, then assert what did or didn't change.
+- **A route that answers before it finishes leaves a coroutine behind — track it, and join it
+  before tearing anything down.** `POST /api/atem/still|clip` responds `"uploading"` and transfers
+  on `CompanionServer`'s own scope. A test that asserts on the wire and then drops the shared
+  connection is racing that coroutine: its next `AtemConnectionManager.use` dials a switcher the
+  test has just closed, which holds the manager's mutex for the whole connect timeout and can leave
+  a client cached for a dead **ephemeral** port. Nothing detects either, because
+  `AtemClient.isAlive()` is `socket != null` — true for a UDP socket with nobody listening — so the
+  next test's switcher records no command of any name and times out with "got 0". One leak is enough:
+  each poisoned test burns its 5s deadline while leaving more stuck work behind, so the backlog
+  outgrows the suite and never drains. **Five `CompanionServerAtemUploadTest` tests failed exactly
+  this way, and did so again after a first fix that reached only the still tests and not the clip
+  ones.** `AtemBridge.trackUpload`/`cancelUpload` is the handle; `cancelUpload` joins, so it returns
+  only once the coroutine has stopped. Route **every** test in such a suite through the one helper —
+  a suite where some tests take the safe path and some do not is a suite that still fails.
 - **No unit test may cost more than ~1s of wall clock.** The suite is run constantly; a test that
   waits is a tax on every future change. This rules out anything whose cost is a duration rather
   than the work itself: retry/backoff delays, "wait for silence" idle windows, timeouts used as

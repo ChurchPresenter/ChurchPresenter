@@ -54,7 +54,7 @@ class VersionAsyncTest {
 
     /** The anchor must be that verse's own rendering — it is the language reference for the filter. */
     private fun VersionDetector.read(code: String, spoken: String) = observe(
-        code, bookId = 40, chapter = 18,
+        code,
         anchorText = if (code == MATT_18_13) KJV_MATT_18_13 else KJV_MATT_18_14,
         spoken = spoken, script = Script.LATIN,
     )
@@ -102,7 +102,11 @@ class VersionAsyncTest {
         // never on a timeout — so it is fast and cannot flake.
         val done = java.util.concurrent.CountDownLatch(1)
         var scoringThread: String? = null
-        val d = VersionDetector({ corpus }, { 1_000L }, { scoringThread = Thread.currentThread().name; done.countDown() })
+        val d = VersionDetector(
+            { corpus },
+            { 1_000L },
+            { scoringThread = Thread.currentThread().name; done.countDown() },
+        )
         try {
             d.read(MATT_18_13, spoken13)
             d.read("B040C018V014", spoken14)
