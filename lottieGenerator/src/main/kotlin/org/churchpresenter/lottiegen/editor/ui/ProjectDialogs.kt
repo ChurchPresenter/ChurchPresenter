@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.editor.ui
 
+import org.churchpresenter.lottiegen.ui.EditorStrings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -119,7 +120,7 @@ private fun ProjectDialogHost(state: EditorState, d: ProjectDialogState) {
             title = { Text(Strings.editorRegisterDoneTitle) },
             text = {
                 Text(
-                    Strings.editorRegisterDoneBody(
+                    EditorStrings.registerDoneBody(
                         result.specFile.absolutePath,
                         result.registryFile.absolutePath,
                         state.spec.id
@@ -136,7 +137,7 @@ private fun ProjectDialogHost(state: EditorState, d: ProjectDialogState) {
         AlertDialog(
             onDismissRequest = { d.exportedFileName = null },
             title = { Text(Strings.editorExportDoneTitle) },
-            text = { Text(Strings.editorExportDoneSteps(state.spec.id, fileName, state.spec.name)) },
+            text = { Text(EditorStrings.exportDoneSteps(state.spec.id, fileName, state.spec.name)) },
             confirmButton = {
                 TextButton(onClick = { d.exportedFileName = null }) { Text(Strings.ok) }
             }
@@ -319,8 +320,8 @@ private fun ExportDialog(
                 )
                 if (state.spec.id.isNotBlank() && state.spec.name.isNotBlank()) {
                     Text(
-                        Strings.editorExportLabelPreview(
-                            Strings.editorStyleLabelFormat(state.spec.id.trim(), state.spec.name.trim())
+                        EditorStrings.exportLabelPreview(
+                            EditorStrings.styleLabelFormat(state.spec.id.trim(), state.spec.name.trim())
                         ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
@@ -328,7 +329,7 @@ private fun ExportDialog(
                 }
                 StyleCatalog.entries.firstOrNull { it.id == state.spec.id.trim() }?.let { taken ->
                     Text(
-                        Strings.editorExportReplaces(taken.label),
+                        EditorStrings.exportReplaces(taken.label),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.tertiary
                     )

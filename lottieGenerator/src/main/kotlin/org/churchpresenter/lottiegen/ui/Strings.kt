@@ -306,16 +306,12 @@ object Strings {
     val editorExportTitle: String get() = bundle.getString("editor_export_title")
     val editorStyleId: String get() = bundle.getString("editor_style_id")
     val editorStyleName: String get() = bundle.getString("editor_style_name")
-    fun editorStyleLabelFormat(id: String, name: String): String =
-        bundle.getString("editor_style_label_format").format(id, name)
 
     /** Localized `style_<id>` label; throws MissingResourceException when none exists. */
     fun styleLabel(id: String): String = bundle.getString("style_$id")
 
     /** Generic bundle lookup for dynamically-keyed labels (bundled template names). */
     fun byKey(key: String): String = bundle.getString(key)
-    fun editorExportLabelPreview(label: String): String =
-        bundle.getString("editor_export_label_preview").format(label)
     val editorExportErrId: String get() = bundle.getString("editor_export_err_id")
     val editorExportErrNoElements: String get() = bundle.getString("editor_export_err_no_elements")
     val editorExportErrKeyframes: String get() = bundle.getString("editor_export_err_keyframes")
@@ -323,16 +319,8 @@ object Strings {
     val editorExportRegistered: String get() = bundle.getString("editor_export_registered")
     val editorRegisterBuild: String get() = bundle.getString("editor_register_build")
     val editorRegisterDoneTitle: String get() = bundle.getString("editor_register_done_title")
-    fun editorRegisterDoneBody(specPath: String, registryPath: String, id: String): String =
-        bundle.getString("editor_register_done_body").format(specPath, registryPath, id)
     val editorTipRegister: String get() = bundle.getString("editor_tip_register")
-    fun editorExportReplaces(label: String): String =
-        bundle.getString("editor_export_replaces").format(label)
     val editorExportDoneTitle: String get() = bundle.getString("editor_export_done_title")
-    fun editorExportDoneSteps(id: String, fileName: String, styleName: String): String =
-        bundle.getString("editor_export_done_steps").format(id, fileName, styleName)
-    fun editorSavedStatus(name: String): String =
-        bundle.getString("editor_saved_status").format(name)
     val editorModePreview: String get() = bundle.getString("editor_mode_preview")
     val editorModeMatrix: String get() = bundle.getString("editor_mode_matrix")
     val editorTestConfig: String get() = bundle.getString("editor_test_config")
@@ -370,8 +358,6 @@ object Strings {
     val editorSectionImage: String get() = bundle.getString("editor_section_image")
     val editorImageImport: String get() = bundle.getString("editor_image_import")
     val editorImageNone: String get() = bundle.getString("editor_image_none")
-    fun editorImageInfo(w: Int, h: Int, kb: Int): String =
-        bundle.getString("editor_image_info").format(w, h, kb)
     val editorImageScaleMode: String get() = bundle.getString("editor_image_scale_mode")
     val editorImageFit: String get() = bundle.getString("editor_image_fit")
     val editorImageStretch: String get() = bundle.getString("editor_image_stretch")
@@ -380,4 +366,35 @@ object Strings {
     val editorVertexIn: String get() = bundle.getString("editor_vertex_in")
     val editorVertexOut: String get() = bundle.getString("editor_vertex_out")
     val editorNewFromVine: String get() = bundle.getString("editor_new_from_vine")
+}
+
+/**
+ * The editor's formatted strings.
+ *
+ * Split out of [Strings] because they are the Style Editor's alone -- a developer tool that does
+ * not ship to operators -- and because Strings was carrying eleven formatters over five hundred
+ * plain lookups.
+ */
+object EditorStrings {
+
+    fun styleLabelFormat(id: String, name: String): String =
+        Strings.byKey("editor_style_label_format").format(id, name)
+
+    fun exportLabelPreview(label: String): String =
+        Strings.byKey("editor_export_label_preview").format(label)
+
+    fun registerDoneBody(specPath: String, registryPath: String, id: String): String =
+        Strings.byKey("editor_register_done_body").format(specPath, registryPath, id)
+
+    fun exportReplaces(label: String): String =
+        Strings.byKey("editor_export_replaces").format(label)
+
+    fun exportDoneSteps(id: String, fileName: String, styleName: String): String =
+        Strings.byKey("editor_export_done_steps").format(id, fileName, styleName)
+
+    fun savedStatus(name: String): String =
+        Strings.byKey("editor_saved_status").format(name)
+
+    fun imageInfo(w: Int, h: Int, kb: Int): String =
+        Strings.byKey("editor_image_info").format(w, h, kb)
 }

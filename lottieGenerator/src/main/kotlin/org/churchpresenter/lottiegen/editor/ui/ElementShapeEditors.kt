@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.editor.ui
 
+import org.churchpresenter.lottiegen.ui.EditorStrings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -140,7 +141,7 @@ internal fun ImageOptionsEditor(element: ImageElement, onChange: (ImageElement) 
                 Strings.editorImageNone
             } else {
                 // base64 length × 3/4 ≈ decoded bytes; close enough for an info line.
-                Strings.editorImageInfo(
+                EditorStrings.imageInfo(
                     element.naturalW, element.naturalH,
                     element.dataUri.length * BASE64_NUM / BASE64_DEN / BYTES_PER_KB
                 )
