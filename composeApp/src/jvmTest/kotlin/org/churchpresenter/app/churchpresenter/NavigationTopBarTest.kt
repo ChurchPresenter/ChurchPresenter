@@ -380,6 +380,7 @@ class NavigationTopBarTest {
             "Chinese (Simplified)" to Language.CHINESE,
             "Indonesian" to Language.INDONESIAN,
             "Malay" to Language.MALAY,
+            "Tamil" to Language.TAMIL,
             "Tagalog" to Language.TAGALOG,
             "Swahili" to Language.SWAHILI,
         )
