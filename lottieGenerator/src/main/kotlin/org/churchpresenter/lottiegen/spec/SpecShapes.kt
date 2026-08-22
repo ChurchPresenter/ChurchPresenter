@@ -197,48 +197,38 @@ internal class SpecShapes(
     }
 
 
-    fun paintItems(
-        element: ElementSpec,
-        paint: PaintSpec
-    ): List<JsonObject> {
-        val items = mutableListOf<JsonObject>()
-        val fill = paint.fill
-        if (fill != null) {
-            val color = layout.roleColor(fill.role)
-            val alpha = layout.roleAlpha(fill.role) * fill.alphaFactor
-            val gradient = fill.gradient
-            items.add(
-                if (gradient == null) {
-                    makeFill(color, alpha)
-                } else {
-                    val flow = layout.flowSign(element.placement)
-                    makeGradientFill(
-                        color, alpha,
-                        listOf(layout.em(gradient.startXEm) * flow, layout.em(gradient.startYEm)),
-                        listOf(layout.em(gradient.endXEm) * flow, layout.em(gradient.endYEm))
-                    )
-                }
-            )
+    fun paintItems(element: ElementSpec, paint: PaintSpec): List<JsonObject> =
+        listOfNotNull(
+            paint.fill?.let { fillItem(element, it) },
+            paint.stroke?.let { strokeItem(element, it) },
+        )
+
+    /** A flat fill, or a linear gradient when the spec asks for one. */
+    private fun fillItem(element: ElementSpec, fill: FillSpec): JsonObject {
+        val color = layout.roleColor(fill.role)
+        val alpha = layout.roleAlpha(fill.role) * fill.alphaFactor
+        val gradient = fill.gradient ?: return makeFill(color, alpha)
+        val flow = layout.flowSign(element.placement)
+        return makeGradientFill(
+            color, alpha,
+            listOf(layout.em(gradient.startXEm) * flow, layout.em(gradient.startYEm)),
+            listOf(layout.em(gradient.endXEm) * flow, layout.em(gradient.endYEm)),
+        )
+    }
+
+    /** A stroke, animated when the element has a STROKE_WIDTH track. Null when it is hairline. */
+    private fun strokeItem(element: ElementSpec, stroke: StrokeSpec): JsonObject? {
+        val widthPx = layout.strokeWidthPx(stroke.width)
+        if (widthPx <= 0) return null
+        val color = layout.roleColor(stroke.role)
+        val alpha = layout.roleAlpha(stroke.role) * stroke.alphaFactor
+        val dashPx = layout.em(stroke.dashEm)
+        val widthTrack = tracks.trackFor(element, AnimProperty.STROKE_WIDTH)
+            ?: return makeStroke(color, widthPx, alpha, dashPx)
+        val widthKFs = tracks.compileTrack(widthTrack) { values ->
+            jsonArrayOf(values.getOrElse(0) { 1.0 } * widthPx)
         }
-        val stroke = paint.stroke
-        if (stroke != null) {
-            val widthPx = layout.strokeWidthPx(stroke.width)
-            if (widthPx > 0) {
-                val color = layout.roleColor(stroke.role)
-                val alpha = layout.roleAlpha(stroke.role) * stroke.alphaFactor
-                val dashPx = layout.em(stroke.dashEm)
-                val widthTrack = tracks.trackFor(element, AnimProperty.STROKE_WIDTH)
-                if (widthTrack != null) {
-                    val widthKFs = tracks.compileTrack(widthTrack) { values ->
-                        jsonArrayOf(values.getOrElse(0) { 1.0 } * widthPx)
-                    }
-                    items.add(makeAnimatedStroke(color, widthKFs, alpha, dashPx))
-                } else {
-                    makeStroke(color, widthPx, alpha, dashPx)?.let { items.add(it) }
-                }
-            }
-        }
-        return items
+        return makeAnimatedStroke(color, widthKFs, alpha, dashPx)
     }
 
     // ------------------------------------------------------- track compilation
