@@ -75,10 +75,28 @@ fun ElementInspector(state: EditorState) {
         return
     }
 
-    fun update(transform: (ElementSpec) -> ElementSpec) {
+    val update: ((ElementSpec) -> ElementSpec) -> Unit = { transform ->
         state.updateSpec { it.replaceElement(element.id, transform) }
     }
 
+    GeneralSection(element, update)
+
+    CollapsibleSection(Strings.editorSectionPlacement, initiallyExpanded = true) {
+        PlacementEditor(state, element) { newPlacement ->
+            update { it.withCommon(placement = newPlacement) }
+        }
+    }
+
+    ElementKindSections(element, update)
+
+    CollapsibleSection(Strings.editorSectionTracks, initiallyExpanded = true) {
+        TracksEditor(element) { newTracks -> update { it.withCommon(tracks = newTracks) } }
+    }
+}
+
+/** Name and visibility rules -- the two things every element kind has. */
+@Composable
+private fun GeneralSection(element: ElementSpec, update: ((ElementSpec) -> ElementSpec) -> Unit) {
     CollapsibleSection(Strings.editorSectionGeneral, initiallyExpanded = true) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             LottieTextField(
@@ -106,13 +124,14 @@ fun ElementInspector(state: EditorState) {
             }
         }
     }
+}
 
-    CollapsibleSection(Strings.editorSectionPlacement, initiallyExpanded = true) {
-        PlacementEditor(state, element) { newPlacement ->
-            update { it.withCommon(placement = newPlacement) }
-        }
-    }
-
+/** The editors that belong to one element kind and no other. */
+@Composable
+private fun ElementKindSections(
+    element: ElementSpec,
+    update: ((ElementSpec) -> ElementSpec) -> Unit,
+) {
     when (element) {
         is RectElement -> {
             CollapsibleSection(Strings.editorSectionSize) {
@@ -198,11 +217,8 @@ fun ElementInspector(state: EditorState) {
         }
         is LogoElement -> Unit
     }
-
-    CollapsibleSection(Strings.editorSectionTracks, initiallyExpanded = true) {
-        TracksEditor(element) { newTracks -> update { it.withCommon(tracks = newTracks) } }
-    }
 }
+
 
 // ------------------------------------------------------------------ placement
 
@@ -267,67 +283,74 @@ internal fun PlacementEditor(state: EditorState, element: ElementSpec, onChange:
             }
         }
 
-        for (align in ALIGN_KEYS) {
-            val override = placement.alignOverrides[align]
-            if (override == null) {
-                TextButton(onClick = {
-                    onChange(
-                        placement.copy(
-                            alignOverrides = placement.alignOverrides +
-                                (align to PlacementOverride(
-                                    anchorIn = placement.anchorIn,
-                                    line = placement.line,
-                                    offsetXEm = placement.offsetXEm,
-                                    offsetYEm = placement.offsetYEm
-                                ))
-                        )
+        AlignOverrides(placement, onChange)
+    }
+}
+
+
+/** Per-alignment overrides: one card per alignment that has one, plus a button to add it. */
+@Composable
+private fun AlignOverrides(placement: Placement, onChange: (Placement) -> Unit) {
+    for (align in ALIGN_KEYS) {
+        val override = placement.alignOverrides[align]
+        if (override == null) {
+            TextButton(onClick = {
+                onChange(
+                    placement.copy(
+                        alignOverrides = placement.alignOverrides +
+                            (align to PlacementOverride(
+                                anchorIn = placement.anchorIn,
+                                line = placement.line,
+                                offsetXEm = placement.offsetXEm,
+                                offsetYEm = placement.offsetYEm
+                            ))
                     )
-                }) {
-                    Text("${Strings.editorAddOverride}: ${EditorLabels.align(align)}")
+                )
+            }) {
+                Text("${Strings.editorAddOverride}: ${EditorLabels.align(align)}")
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        EditorLabels.align(align),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    TextButton(onClick = {
+                        onChange(placement.copy(alignOverrides = placement.alignOverrides - align))
+                    }) {
+                        Text(Strings.editorRemoveOverride)
+                    }
                 }
-            } else {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            EditorLabels.align(align),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        TextButton(onClick = {
-                            onChange(placement.copy(alignOverrides = placement.alignOverrides - align))
-                        }) {
-                            Text(Strings.editorRemoveOverride)
-                        }
+                OptionDropdown(
+                    label = Strings.editorAnchor,
+                    options = AnchorIn.entries,
+                    selected = override.anchorIn ?: placement.anchorIn,
+                    display = { EditorLabels.anchor(it) },
+                    onSelect = { new ->
+                        onChange(placement.withOverride(align) { it.copy(anchorIn = new) })
                     }
-                    OptionDropdown(
-                        label = Strings.editorAnchor,
-                        options = AnchorIn.entries,
-                        selected = override.anchorIn ?: placement.anchorIn,
-                        display = { EditorLabels.anchor(it) },
-                        onSelect = { new ->
-                            onChange(placement.withOverride(align) { it.copy(anchorIn = new) })
-                        }
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    NumberField(
+                        Strings.editorOffsetX, override.offsetXEm ?: placement.offsetXEm,
+                        onCommit = { new ->
+                            onChange(placement.withOverride(align) { it.copy(offsetXEm = new) })
+                        },
+                        modifier = Modifier.weight(1f)
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NumberField(
-                            Strings.editorOffsetX, override.offsetXEm ?: placement.offsetXEm,
-                            onCommit = { new ->
-                                onChange(placement.withOverride(align) { it.copy(offsetXEm = new) })
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                        NumberField(
-                            Strings.editorOffsetY, override.offsetYEm ?: placement.offsetYEm,
-                            onCommit = { new ->
-                                onChange(placement.withOverride(align) { it.copy(offsetYEm = new) })
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                    NumberField(
+                        Strings.editorOffsetY, override.offsetYEm ?: placement.offsetYEm,
+                        onCommit = { new ->
+                            onChange(placement.withOverride(align) { it.copy(offsetYEm = new) })
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
         }
