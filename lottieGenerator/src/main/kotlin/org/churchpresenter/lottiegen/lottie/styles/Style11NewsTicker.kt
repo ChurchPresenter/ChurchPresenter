@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
+import org.churchpresenter.lottiegen.lottie.FULL_PERCENT_D
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.buildJsonArray
 import org.churchpresenter.lottiegen.lottie.Easing
@@ -19,6 +20,19 @@ import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import kotlin.math.max
 import kotlin.math.roundToInt
+
+/** Where each element's slide-in has settled, as a percentage of the animation. */
+private const val SETTLE_PCT = 42
+private const val BAND_START_PCT = 18.0
+private const val TICKER_START_PCT = 26.0
+
+/** The reveal masks sit just inside their bands so the wipe edge never shows. */
+private const val BAND_MASK_FACTOR = 0.9
+private const val TICKER_MASK_FACTOR = 0.88
+
+/** The ticker's rule is drawn lighter than the configured border weight. */
+private const val TICKER_BORDER_FACTOR = 0.7
+
 
 class Style11NewsTicker : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
@@ -70,14 +84,14 @@ class Style11NewsTicker : StyleGenerator {
                 listOf(
                     KeyframeInput(0.0, jsonArrayOf(cx, slideFromY, 0.0)),
                     KeyframeInput(delayPct, jsonArrayOf(cx, slideFromY, 0.0)),
-                    KeyframeInput(delayPct + 42, jsonArrayOf(cx, finalY, 0.0)),
-                    KeyframeInput(100.0, jsonArrayOf(cx, finalY, 0.0))
+                    KeyframeInput(delayPct + SETTLE_PCT, jsonArrayOf(cx, finalY, 0.0)),
+                    KeyframeInput(FULL_PERCENT_D, jsonArrayOf(cx, finalY, 0.0))
                 ), inF, holdF, outF, Easing.DEFAULT
             )
         }
 
-        val bandPosKFs = makeBandKFs(18.0, bandCX, bandCY)
-        val tickerPosKFs = makeBandKFs(26.0, bandCX, tickerCY)
+        val bandPosKFs = makeBandKFs(BAND_START_PCT, bandCX, bandCY)
+        val tickerPosKFs = makeBandKFs(TICKER_START_PCT, bandCX, tickerCY)
 
         // Badge parallelogram vertices (in local space centred on bandCX, bandCY)
         val badgeVerts: List<List<Double>>? = if (!isCenter) {
@@ -139,10 +153,10 @@ class Style11NewsTicker : StyleGenerator {
             builder.addShapeLayer(
                 "Name Mask",
                 buildJsonArray {
-                    add(makeGroup(listOf(makeRect(maskW, bandH * 0.9, 0.0), makeFill(listOf(1.0, 1.0, 1.0)))))
+                    add(makeGroup(listOf(makeRect(maskW, bandH * BAND_MASK_FACTOR, 0.0), makeFill(listOf(1.0, 1.0, 1.0)))))
                 },
                 LottieBuilder.defaultTransform(
-                    position = LottieBuilder.animatedProp(makeBandKFs(18.0, maskCX, bandCY))
+                    position = LottieBuilder.animatedProp(makeBandKFs(BAND_START_PCT, maskCX, bandCY))
                 ),
                 td = 1
             )
@@ -183,10 +197,10 @@ class Style11NewsTicker : StyleGenerator {
             builder.addShapeLayer(
                 "Info Mask",
                 buildJsonArray {
-                    add(makeGroup(listOf(makeRect(infoMaskW, tickerH * 0.88, 0.0), makeFill(listOf(1.0, 1.0, 1.0)))))
+                    add(makeGroup(listOf(makeRect(infoMaskW, tickerH * TICKER_MASK_FACTOR, 0.0), makeFill(listOf(1.0, 1.0, 1.0)))))
                 },
                 LottieBuilder.defaultTransform(
-                    position = LottieBuilder.animatedProp(makeBandKFs(26.0, bandCX, tickerCY))
+                    position = LottieBuilder.animatedProp(makeBandKFs(TICKER_START_PCT, bandCX, tickerCY))
                 ),
                 td = 1
             )
@@ -235,9 +249,9 @@ class Style11NewsTicker : StyleGenerator {
             builder.addImageLayer(
                 "Logo", "logo",
                 LottieBuilder.defaultTransform(
-                    position = LottieBuilder.animatedProp(makeBandKFs(18.0, logoCX, bandCY)),
+                    position = LottieBuilder.animatedProp(makeBandKFs(BAND_START_PCT, logoCX, bandCY)),
                     anchor = LottieBuilder.staticPropArray(cfg.logoW / 2.0, cfg.logoH / 2.0, 0.0),
-                    scale = LottieBuilder.staticPropArray(_logoScale, _logoScale, 100.0)
+                    scale = LottieBuilder.staticPropArray(_logoScale, _logoScale, FULL_PERCENT_D)
                 )
             )
         }
@@ -313,7 +327,7 @@ class Style11NewsTicker : StyleGenerator {
                 makeRect(bandW, tickerH, cornerPx * 0.2),
                 makeFill(accentLottie, tickerAlpha)
             )
-            makeStroke(borderLottie, borderPx * 0.7, cfg.borderColorAlpha.toDouble())?.let { tickerItems.add(it) }
+            makeStroke(borderLottie, borderPx * TICKER_BORDER_FACTOR, cfg.borderColorAlpha.toDouble())?.let { tickerItems.add(it) }
             builder.addShapeLayer(
                 "Ticker Bar",
                 buildJsonArray { add(makeGroup(tickerItems)) },

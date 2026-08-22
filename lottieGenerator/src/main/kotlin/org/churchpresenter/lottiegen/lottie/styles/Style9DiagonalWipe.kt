@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.lottie.styles
 
+import org.churchpresenter.lottiegen.lottie.FULL_PERCENT_D
 import kotlinx.serialization.json.buildJsonArray
 import org.churchpresenter.lottiegen.lottie.Easing
 import org.churchpresenter.lottiegen.lottie.KeyframeInput
@@ -19,6 +20,18 @@ import org.churchpresenter.lottiegen.lottie.remToPx
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import kotlin.math.max
 import kotlin.math.roundToInt
+
+/** The wipe's mask crosses the text halfway through the in and out phases. */
+private const val WIPE_MIDPOINT = 0.5
+
+/**
+ * Opacity turning points, as fractions of the in and out phases: the text is up almost at once,
+ * holds until just before the end, and leaves the same way.
+ */
+private const val FADE_IN_END = 0.08
+private const val FADE_OUT_START = 0.05
+private const val HOLD_START = 0.95
+
 
 class Style9DiagonalWipe : StyleGenerator {
     override fun generate(builder: LottieBuilder, cfg: LottieGenConfig) {
@@ -175,10 +188,10 @@ class Style9DiagonalWipe : StyleGenerator {
         fun buildWipeMaskKFs() = buildJsonArray {
             add(kf(0, jsonArrayOf(offStart, maskCY, 0.0), e))
             add(kf((inF * fadeIn).roundToInt(), jsonArrayOf(offStart, maskCY, 0.0), L))
-            add(kf((inF * 0.5).roundToInt(), jsonArrayOf(offEnd, maskCY, 0.0), L))
+            add(kf((inF * WIPE_MIDPOINT).roundToInt(), jsonArrayOf(offEnd, maskCY, 0.0), L))
             add(kf(inF, jsonArrayOf(offStart, maskCY, 0.0), e))
             add(kf(totalOut, jsonArrayOf(offStart, maskCY, 0.0), e))
-            add(kf((totalOut + outF * 0.5).roundToInt(), jsonArrayOf(offEnd, maskCY, 0.0), L))
+            add(kf((totalOut + outF * WIPE_MIDPOINT).roundToInt(), jsonArrayOf(offEnd, maskCY, 0.0), L))
             add(kf((totalOut + outF * (1 - fadeIn)).roundToInt(), jsonArrayOf(offStart, maskCY, 0.0), e))
             add(kf(totalOut + outF, jsonArrayOf(offStart, maskCY, 0.0)))
         }
@@ -186,10 +199,10 @@ class Style9DiagonalWipe : StyleGenerator {
         fun buildRevealMaskKFs() = buildJsonArray {
             add(kf(0, jsonArrayOf(offStart, maskCY, 0.0), e))
             add(kf((inF * fadeIn).roundToInt(), jsonArrayOf(offStart, maskCY, 0.0), L))
-            add(kf((inF * 0.5).roundToInt(), jsonArrayOf(offEnd, maskCY, 0.0), e))
+            add(kf((inF * WIPE_MIDPOINT).roundToInt(), jsonArrayOf(offEnd, maskCY, 0.0), e))
             add(kf(inF, jsonArrayOf(offEnd, maskCY, 0.0), e))
             add(kf(totalOut, jsonArrayOf(offEnd, maskCY, 0.0), e))
-            add(kf((totalOut + outF * 0.5).roundToInt(), jsonArrayOf(offEnd, maskCY, 0.0), e))
+            add(kf((totalOut + outF * WIPE_MIDPOINT).roundToInt(), jsonArrayOf(offEnd, maskCY, 0.0), e))
             add(kf((totalOut + outF * (1 - fadeIn)).roundToInt(), jsonArrayOf(offStart, maskCY, 0.0), e))
             add(kf(totalOut + outF, jsonArrayOf(offStart, maskCY, 0.0)))
         }
@@ -197,10 +210,10 @@ class Style9DiagonalWipe : StyleGenerator {
         fun buildLineKFs() = buildJsonArray {
             add(kf(0, jsonArrayOf(offStart + lineEdgeOffset, maskCY, 0.0), e))
             add(kf((inF * fadeIn).roundToInt(), jsonArrayOf(offStart + lineEdgeOffset, maskCY, 0.0), L))
-            add(kf((inF * 0.5).roundToInt(), jsonArrayOf(offEnd + lineEdgeOffset, maskCY, 0.0), L))
+            add(kf((inF * WIPE_MIDPOINT).roundToInt(), jsonArrayOf(offEnd + lineEdgeOffset, maskCY, 0.0), L))
             add(kf(inF, jsonArrayOf(offStart + lineEdgeOffset, maskCY, 0.0), e))
             add(kf(totalOut, jsonArrayOf(offStart + lineEdgeOffset, maskCY, 0.0), e))
-            add(kf((totalOut + outF * 0.5).roundToInt(), jsonArrayOf(offEnd + lineEdgeOffset, maskCY, 0.0), L))
+            add(kf((totalOut + outF * WIPE_MIDPOINT).roundToInt(), jsonArrayOf(offEnd + lineEdgeOffset, maskCY, 0.0), L))
             add(kf((totalOut + outF * (1 - fadeIn))
                 .roundToInt(), jsonArrayOf(offStart + lineEdgeOffset, maskCY, 0.0), e))
             add(kf(totalOut + outF, jsonArrayOf(offStart + lineEdgeOffset, maskCY, 0.0)))
@@ -208,12 +221,12 @@ class Style9DiagonalWipe : StyleGenerator {
 
         fun buildLineOpacityKFs() = buildJsonArray {
             add(kf(0, jsonArrayOf(0.0), e))
-            add(kf((inF * 0.08).roundToInt(), jsonArrayOf(100.0), e))
-            add(kf((inF * 0.95).roundToInt(), jsonArrayOf(100.0), e))
+            add(kf((inF * FADE_IN_END).roundToInt(), jsonArrayOf(FULL_PERCENT_D), e))
+            add(kf((inF * HOLD_START).roundToInt(), jsonArrayOf(FULL_PERCENT_D), e))
             add(kf(inF, jsonArrayOf(0.0), e))
             add(kf(totalOut, jsonArrayOf(0.0), e))
-            add(kf((totalOut + outF * 0.05).roundToInt(), jsonArrayOf(100.0), e))
-            add(kf((totalOut + outF * 0.95).roundToInt(), jsonArrayOf(100.0), e))
+            add(kf((totalOut + outF * FADE_OUT_START).roundToInt(), jsonArrayOf(FULL_PERCENT_D), e))
+            add(kf((totalOut + outF * HOLD_START).roundToInt(), jsonArrayOf(FULL_PERCENT_D), e))
             add(kf(totalOut + outF, jsonArrayOf(0.0)))
         }
 

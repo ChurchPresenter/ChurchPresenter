@@ -10,6 +10,28 @@ import java.awt.font.FontRenderContext
 import java.awt.geom.PathIterator
 import kotlin.math.roundToInt
 
+/** Lottie glyph outlines are authored on a 100-unit em box, so every coordinate is a percentage. */
+private const val GLYPH_EM_SIZE = 100
+
+/**
+ * A quadratic segment becomes a cubic by pulling each control point two thirds of the way from its
+ * endpoint towards the quadratic's single control point. Exact, not an approximation.
+ */
+private const val QUAD_TO_CUBIC = 2.0 / 3.0
+
+/** Offsets into PathIterator's cubic `coords`: two control points, then the endpoint. */
+private const val CUBIC_CTRL2_X = 2
+private const val CUBIC_CTRL2_Y = 3
+private const val CUBIC_END_X = 4
+private const val CUBIC_END_Y = 5
+
+/** Two points closer than this are the same point: fonts curve back to the start before closing. */
+private const val CLOSE_EPSILON = 0.01
+
+/** Outline coordinates are emitted to two decimal places; more only inflates the JSON. */
+private const val ROUND_2DP = 100.0
+
+
 /**
  * Embeds vector glyph outlines ("chars") for the characters the animation's text layers
  * actually use, so exported files render crisp text in any lottie player with no font
@@ -73,7 +95,7 @@ object GlyphExtractor {
         return buildJsonObject {
             put("ch", JsonPrimitive(ch.toString()))
             put("fFamily", JsonPrimitive(family))
-            put("size", JsonPrimitive(100))
+            put("size", JsonPrimitive(GLYPH_EM_SIZE))
             put("style", JsonPrimitive(style))
             put("w", JsonPrimitive(round2(advance)))
             put("data", buildJsonObject {
@@ -106,11 +128,11 @@ object GlyphExtractor {
                     val qx = coords[0]; val qy = coords[1]
                     val px = coords[2]; val py = coords[3]
                     it.outTan[it.outTan.size - 1] = doubleArrayOf(
-                        (qx - last[0]) * 2.0 / 3.0, (qy - last[1]) * 2.0 / 3.0
+                        (qx - last[0]) * QUAD_TO_CUBIC, (qy - last[1]) * QUAD_TO_CUBIC
                     )
                     addVertex(it, px, py)
                     it.inTan[it.inTan.size - 1] = doubleArrayOf(
-                        (qx - px) * 2.0 / 3.0, (qy - py) * 2.0 / 3.0
+                        (qx - px) * QUAD_TO_CUBIC, (qy - py) * QUAD_TO_CUBIC
                     )
                 }
                 PathIterator.SEG_CUBICTO -> current?.let {
@@ -118,9 +140,9 @@ object GlyphExtractor {
                     it.outTan[it.outTan.size - 1] = doubleArrayOf(
                         coords[0] - last[0], coords[1] - last[1]
                     )
-                    addVertex(it, coords[4], coords[5])
+                    addVertex(it, coords[CUBIC_END_X], coords[CUBIC_END_Y])
                     it.inTan[it.inTan.size - 1] = doubleArrayOf(
-                        coords[2] - coords[4], coords[3] - coords[5]
+                        coords[CUBIC_CTRL2_X] - coords[CUBIC_END_X], coords[CUBIC_CTRL2_Y] - coords[CUBIC_END_Y]
                     )
                 }
                 PathIterator.SEG_CLOSE -> current?.let {
@@ -129,7 +151,7 @@ object GlyphExtractor {
                     if (it.v.size > 1) {
                         val first = it.v.first()
                         val last = it.v.last()
-                        if (kotlin.math.abs(first[0] - last[0]) < 0.01 && kotlin.math.abs(first[1] - last[1]) < 0.01) {
+                        if (kotlin.math.abs(first[0] - last[0]) < CLOSE_EPSILON && kotlin.math.abs(first[1] - last[1]) < CLOSE_EPSILON) {
                             it.inTan[0] = it.inTan.last()
                             it.v.removeAt(it.v.size - 1)
                             it.inTan.removeAt(it.inTan.size - 1)
@@ -198,5 +220,5 @@ object GlyphExtractor {
         }
     }
 
-    private fun round2(x: Double): Double = (x * 100.0).roundToInt() / 100.0
+    private fun round2(x: Double): Double = (x * ROUND_2DP).roundToInt() / ROUND_2DP
 }
