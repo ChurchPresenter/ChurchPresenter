@@ -40,7 +40,9 @@ fun Route.bibleEngineSocket(
                 val obj = try {
                     json.parseToJsonElement(raw).jsonObject
                 } catch (e: Exception) {
-                    System.err.println("Invalid JSON from $remoteAddr: $raw")
+                    // The message, not just the payload: "Invalid JSON" over a 4 KB line says the
+                    // parse failed and nothing about where, which is the half worth having.
+                    System.err.println("Invalid JSON from $remoteAddr (${e.message}): $raw")
                     continue
                 }
 

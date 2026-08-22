@@ -181,6 +181,14 @@ behind by a refactor is a warning to `compileKotlinJvm` and a **build failure** 
 "it compiles" and "the tests pass" are both green while CI is red. A clean run is the expected
 result and every finding it prints is yours to fix.
 
+`:bible-engine` and `:presentation-engine` each carry their own `config/detekt/baseline.xml` too,
+written the day they joined the detekt step above. They had 205 findings between them and had never
+been gated: 44 were fixed outright (dead code, a swallowed exception, 26 over-long lines, and two
+parameters a public function ignored), the 7 in test sources carry `@Suppress` at the declaration,
+and the remaining 161 -- all `src/main`, and mostly `MagicNumber`, `NestedBlockDepth` and
+`ReturnCount` against byte-format parsers -- are baselined so the rules gate new code. Those numbers
+are debt, not absolution: the modules are parsers, but a parser is not exempt from a named constant.
+
 `config/detekt/baseline.xml` holds pre-existing findings from the day the size/length rules
 (`LongMethod`, `LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`,
 `TooGenericExceptionCaught`) were switched on — 1,623 of them, suppressed so those rules gate new

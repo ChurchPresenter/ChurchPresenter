@@ -1,3 +1,7 @@
+@file:Suppress("MatchingDeclarationName")
+// The file is the STT payload shapes and the parsers that read them -- SttUpdate plus
+// windowedText/transcriptionUpdate/translationUpdate -- not a home for one class.
+
 package org.churchpresenter.bibleengine.socket
 
 import org.json.JSONObject

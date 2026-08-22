@@ -14,6 +14,8 @@ import kotlin.test.assertTrue
 
 class DetectionEngineTracksTest {
 
+    // The shape of EngineTranslation itself: naming five of its fields is what building one takes.
+    @Suppress("LongParameterList")
     private fun translation(
         id: String, abbrev: String, lang: String, script: Script, bookName: String,
         texts: Map<Int, String>,

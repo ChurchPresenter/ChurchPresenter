@@ -36,13 +36,6 @@ class ReferenceWatcherTest {
         return all
     }
 
-    /**
-     * Bilingual sibling of [run] — each turn is (transcript, translation), the pair the live
-     * pipeline hands to `process`. Without this every two-track test hand-rolls its own sticky.
-     */
-    private fun runBi(vararg turns: Pair<String, String>, now: Long = 1_000L): List<ReferenceWatcher.Ref> =
-        feedBi(TestSticky(), *turns, now = now)
-
     private fun feedBi(
         s: TestSticky,
         vararg turns: Pair<String, String>,
@@ -88,17 +81,6 @@ class ReferenceWatcherTest {
     /** [word] in a minimal explicit citation — the shortest form that corroborates a book name. */
     private fun cited(word: String, chapter: Int = 3, verse: Int = 5): String =
         "$word $chapter глава $verse стих."
-
-    private fun assertResolves(text: String, book: Int, chapter: Int, verse: Int, tier: Int? = null) {
-        val refs = run(text)
-        assertTrue(
-            refs.any { it.triple() == Triple(book, chapter, verse) },
-            "\"$text\" should resolve to $book $chapter:$verse, got $refs"
-        )
-        if (tier != null) {
-            assertEquals(tier, refs.first { it.triple() == Triple(book, chapter, verse) }.tier)
-        }
-    }
 
     /** The dominant shape of every precision gate: the sticky must not move. */
     private fun assertStickyHolds(book: Int, chapter: Int?, vararg utterances: String) {
@@ -365,7 +347,10 @@ class ReferenceWatcherTest {
         assertEquals(9, sticky.watchBook)
 
         val chapterOnly = ReferenceWatcher.process("15 глава.", sticky, now = 1_000L)
-        assertTrue(chapterOnly.isEmpty(), "chapter-only continuation must not emit a fabricated verse, got $chapterOnly")
+        assertTrue(
+            chapterOnly.isEmpty(),
+            "chapter-only continuation must not emit a fabricated verse, got $chapterOnly",
+        )
         assertEquals(15, sticky.watchChapter)
 
         val verseOnly = ReferenceWatcher.process("22 стих.", sticky, now = 1_000L)
@@ -417,7 +402,10 @@ class ReferenceWatcherTest {
             "в книге Бытия, в 12 главе, в 5 стихе." to
                 "in the book of Genesis, in chapter 12, in verse 5.",
         )
-        assertTrue(refs.any { it.triple() == Triple(1, 12, 5) }, "expected Genesis 1 12:5 to have been emitted, got $refs")
+        assertTrue(
+            refs.any { it.triple() == Triple(1, 12, 5) },
+            "expected Genesis 1 12:5 to have been emitted, got $refs",
+        )
         assertEquals(1, sticky.watchBook)
         assertEquals(12, sticky.watchChapter, "EN track's own re-mention of the same book must not wipe chapter 12")
     }
@@ -552,7 +540,11 @@ class ReferenceWatcherTest {
                 val sticky = TestSticky()
                 val refs = ReferenceWatcher.process(sentence, sticky, now = 1_000L)
                 assertTrue(refs.isEmpty(), "book+chapter alone must not emit, got $refs for \"$sentence\"")
-                assertEquals(book, sticky.watchBook, "digit-adjacent \"$word\" should resolve to book $book: \"$sentence\"")
+                assertEquals(
+                    book,
+                    sticky.watchBook,
+                    "digit-adjacent \"$word\" should resolve to book $book: \"$sentence\"",
+                )
             }
         }
     }
@@ -1093,7 +1085,10 @@ class ReferenceWatcherTest {
         // (EN keyword-after-number forms like "Job chapter 3 verse 2" still mis-parse for a
         // pre-existing, unrelated reason — see the keyword-order gap note in TRAINING_PLAN.md.)
         val jobRefs = run("Job 3:2 tells us more.")
-        assertTrue(jobRefs.any { it.bookNum == 18 && it.chapter == 3 && it.verseStart == 2 }, "Job 3:2 should resolve, got $jobRefs")
+        assertTrue(
+            jobRefs.any { it.bookNum == 18 && it.chapter == 3 && it.verseStart == 2 },
+            "Job 3:2 should resolve, got $jobRefs",
+        )
         val revRefs = run("откр 3 глава 12 стих.")
         assertTrue(revRefs.any { it.bookNum == 66 && it.chapter == 3 }, "Rev 3:12 should resolve, got $revRefs")
     }

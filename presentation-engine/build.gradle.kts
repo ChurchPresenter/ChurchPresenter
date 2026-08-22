@@ -80,6 +80,12 @@ tasks.register<JavaExec>("dumpTiming") {
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+    // Pre-existing findings from the day this module was added to CI's detekt step, suppressed so
+    // the rules gate NEW code only -- the same bargain `:composeApp`'s baseline strikes, and struck
+    // here for the same reason. PPTX/Keynote parsing: protobuf offsets, XML shapes and timing trees.
+    // Every entry is `src/main`; the test sources were brought to zero instead, and must keep it.
+    // Hand-edit it: never regenerate, or it absorbs whatever was introduced since.
+    baseline = file("config/detekt/baseline.xml")
     source.setFrom("src/main/kotlin", "src/test/kotlin")
     parallel = true
 }
