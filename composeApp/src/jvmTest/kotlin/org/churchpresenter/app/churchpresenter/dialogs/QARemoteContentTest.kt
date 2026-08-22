@@ -17,13 +17,13 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.text.input.ImeAction
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.confirmColorDialogWith
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.pickFont
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.openColorField
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.settings.utils.Constants
@@ -436,12 +436,8 @@ class QARemoteContentTest {
         initialQaSettings = QASettings(fontType = "Arial"),
         availableFonts = listOf("Arial", "Helvetica", "Courier New"),
     ) { h ->
-        onNode(
-            hasSetTextAction() and hasImeAction(ImeAction.Done) and hasText("Arial"),
-        ).performTextReplacement("Helvetica")
-        waitForIdle()
-        onNode(hasSetTextAction() and hasImeAction(ImeAction.Done) and hasText("Helvetica")).performImeAction()
-        waitForIdle()
+        pickFont(showing = "Arial", to = "Helvetica")
+
         assertEquals("Helvetica", h.settings.fontType)
     }
 
