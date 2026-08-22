@@ -17,8 +17,10 @@ import kotlin.test.assertTrue
  * names in the wrong language — the Swahili and Thai ones both carry German (`Matthäus`, `1 Mose`),
  * and the Afrikaans one carries English — so `bname` is trusted only for English, where it is the
  * module's own wording, and every other language is served from the curated tables or falls back to
- * English. Those are the assertions that would catch someone "fixing" the converter to prefer
- * `bname` and quietly shipping a Thai Bible with German book names.
+ * English. Thai and Swahili both have tables now, so they are served from those; a language with no
+ * table (Vietnamese, Afrikaans) is still the English-fallback case. Those are the assertions that
+ * would catch someone "fixing" the converter to prefer `bname` and quietly shipping a Thai Bible
+ * with German book names.
  *
  * The rest guards the file format itself: header values are tab-separated single lines, so a
  * copyright notice wrapped across several lines in the source XML must not be written through
@@ -87,7 +89,7 @@ class ZefaniaConversionTest {
         val spb = convert(module(language = "THA", bookName = "1 Mose"))
 
         assertFalse(bookNameIn(spb).contains("Mose"), "a Thai Bible must not end up with German book names")
-        assertEquals("Genesis", bookNameIn(spb), "with no Thai table, English is the honest fallback")
+        assertEquals("\u0e1b\u0e10\u0e21\u0e01\u0e32\u0e25", bookNameIn(spb), "the Thai table names it, not the module")
     }
 
     @Test
