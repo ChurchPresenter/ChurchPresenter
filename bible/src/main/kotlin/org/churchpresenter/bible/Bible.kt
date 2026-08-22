@@ -176,6 +176,13 @@ class Bible {
         parsedChapterCounts[bookId] = m.groupValues[REGEX_GROUP_THIRD].toInt()
     }
 
+    /**
+     * A folder of translations is loaded together, so one unreadable module must not take the rest
+     * of the shelf with it: this reports through [loadError] and never throws. That is why the
+     * catch is broad, and why narrowing it would be a behaviour change rather than a tidy-up --
+     * anything it stopped catching would propagate into the caller that loads the next file.
+     */
+    @Suppress("TooGenericExceptionCaught")
     fun loadBooksOnly(resourcePath: String) {
         books.clear()
         loadError = null
@@ -226,6 +233,8 @@ class Bible {
 
     // New: load from a BibleQuote .spb plain text module
     // resourcePath: either a classpath resource name (e.g. "ru_RST77.spb") or an absolute file path
+    /** Reports through [loadError] and never throws, for the reason given on [loadBooksOnly]. */
+    @Suppress("TooGenericExceptionCaught")
     fun loadFromSpb(resourcePath: String, bookNames: List<String> = emptyList()) {
         operatorBible.clear()
         books.clear()
@@ -327,9 +336,14 @@ class Bible {
         val b = verseMatch.groupValues[5].toInt()
         val ch = verseMatch.groupValues[6].toInt()
         addVerse(
-            state, code, b, ch,
-            verseMatch.groupValues[VERSE_GROUP_NUMBER].toInt(),
-            verseMatch.groupValues[VERSE_GROUP_TEXT].trim(),
+            state,
+            BibleVerse(
+                verseId = code,
+                book = b,
+                chapter = ch,
+                verseNumber = verseMatch.groupValues[VERSE_GROUP_NUMBER].toInt(),
+                verseText = verseMatch.groupValues[VERSE_GROUP_TEXT].trim(),
+            ),
         )
         // Map code reference to display reference for cross-Bible lookups
         codeToDisplayMap[chapterKey(codeBook, codeChapter)] = chapterKey(b, ch)
@@ -354,23 +368,21 @@ class Bible {
         val code = state.currentCode ?: return
         val prev = SPB_CODE_REGEX.matchEntire(code) ?: error("Invalid verse code: $code")
         addVerse(
-            state, code,
-            prev.groupValues[1].toInt(), prev.groupValues[2].toInt(), prev.groupValues[REGEX_GROUP_THIRD].toInt(),
-            state.pendingText.toString().trim(),
+            state,
+            BibleVerse(
+                verseId = code,
+                book = prev.groupValues[1].toInt(),
+                chapter = prev.groupValues[2].toInt(),
+                verseNumber = prev.groupValues[REGEX_GROUP_THIRD].toInt(),
+                verseText = state.pendingText.toString().trim(),
+            ),
         )
     }
 
-    private fun addVerse(state: SpbParseState, code: String, book: Int, chapter: Int, verse: Int, text: String) {
-        operatorBible.add(
-            BibleVerse(
-                verseId = code,
-                book = book,
-                chapter = chapter,
-                verseNumber = verse,
-                verseText = text
-            )
-        )
-        state.bookChapterMap.getOrPut(book) { mutableSetOf() }.add(chapter)
+    /** Records one parsed verse, and notes that its chapter exists. */
+    private fun addVerse(state: SpbParseState, verse: BibleVerse) {
+        operatorBible.add(verse)
+        state.bookChapterMap.getOrPut(verse.book) { mutableSetOf() }.add(verse.chapter)
     }
 
     /** Book list in header order first, then any book seen only in verse data. */
